@@ -98,6 +98,7 @@ namespace MyPersonalIndex
 
         Queries SQL;
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
+        private bool CloseAttemped = false;
 
         public frmMain()
         {
@@ -133,11 +134,12 @@ namespace MyPersonalIndex
 
         private void LoadInitial()
         {
+            int LastPortfolio = 0; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the settings with nothing when called
             MPI.Stat.Labels = new List<System.Windows.Forms.Label>();
             MPI.Stat.TextBoxes = new List<TextBox>();
 
-            LoadSettings();
-            LoadPortfolioDropDown();
+            LoadSettings(ref LastPortfolio);
+            LoadPortfolioDropDown(LastPortfolio);
             LoadSortDropDowns();
         }
 
@@ -190,7 +192,7 @@ namespace MyPersonalIndex
             cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
         }
 
-        private void LoadPortfolioDropDown()
+        private void LoadPortfolioDropDown(int LastPortfolio)
         {
             cmbMainPortfolio.SelectedIndexChanged -= cmbMainPortfolio_SelectedIndexChanged;
             
@@ -218,7 +220,7 @@ namespace MyPersonalIndex
                 cmbMainPortfolio.ComboBox.DisplayMember = "Display";
                 cmbMainPortfolio.ComboBox.ValueMember = "Value";
                 cmbMainPortfolio.ComboBox.DataSource = t;
-                cmbMainPortfolio.ComboBox.SelectedValue = MPI.Portfolio.ID;
+                cmbMainPortfolio.ComboBox.SelectedValue = LastPortfolio;
                 
                 if (cmbMainPortfolio.ComboBox.SelectedIndex < 0)
                     if (t.Rows.Count != 0)
@@ -232,7 +234,7 @@ namespace MyPersonalIndex
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
         }
 
-        private void LoadSettings()
+        private void LoadSettings(ref int LastPortfolio)
         {
             SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetSettings());
             try
@@ -248,7 +250,7 @@ namespace MyPersonalIndex
                         this.Size = new Size(rs.GetInt32(rs.GetOrdinal("WindowWidth")), rs.GetInt32(rs.GetOrdinal("WindowHeight")));
                         this.WindowState = (FormWindowState)rs.GetInt32(rs.GetOrdinal("WindowState"));
                     }
-                    MPI.Portfolio.ID = Convert.IsDBNull(rs.GetValue(rs.GetOrdinal("LastPortfolio"))) ? -1 : rs.GetInt32(rs.GetOrdinal("LastPortfolio"));
+                    LastPortfolio = Convert.IsDBNull(rs.GetValue(rs.GetOrdinal("LastPortfolio"))) ? -1 : rs.GetInt32(rs.GetOrdinal("LastPortfolio"));
                 }
             }
             finally
@@ -752,7 +754,9 @@ namespace MyPersonalIndex
 
         private void btnMainUpdate_Click(object sender, EventArgs e)
         {
-            UpdatePrices();
+            DisableTabs(true);
+            stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Marquee;
+            bw.RunWorkerAsync(); 
         }
 
         private void UpdatePrices()
@@ -825,18 +829,7 @@ namespace MyPersonalIndex
             {
                 rs.Close();
 
-                DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetLastDate(), SqlDateTime.MinValue.Value));
-                if (d != SqlDateTime.MinValue.Value)
-                {
-                    MPI.LastDate = d;
-                    ResetCalendars();
-                    stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
-                }
-                LoadPortfolio();
-
-                if (TickersNotUpdated.Count == 0)
-                    MessageBox.Show("Finished");
-                else
+                if (TickersNotUpdated.Count != 0)
                 {
                     string Tickers = TickersNotUpdated[0];
                     for (int i = 1; i < TickersNotUpdated.Count; i++)
@@ -1157,6 +1150,8 @@ namespace MyPersonalIndex
             }
             else
             {
+                bw.ReportProgress(50);
+
                 SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetNAVPortfolios());
 
                 try
@@ -1371,6 +1366,15 @@ namespace MyPersonalIndex
 
         private void frmMain_FormClosing(object sender, FormClosingEventArgs e)
         {
+            if (!tsMain.Enabled)
+            {
+                lblClosing.Visible = true;
+                lblClosing.Location = new Point((this.Width / 2) - (lblClosing.Width / 2), (this.Height / 2) - (lblClosing.Height / 2));
+                CloseAttemped = true;
+                e.Cancel = true;
+                return;
+            }
+
             if (SQL.Connection == ConnectionState.Closed)
                 return;
 
@@ -1795,6 +1799,54 @@ namespace MyPersonalIndex
         private void btnCorrelationHidden_Click(object sender, EventArgs e)
         {
             btnCorrelationHidden.Checked = !btnCorrelationHidden.Checked;
+        }
+
+        private void bw_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
+        {
+            bw.ReportProgress(0);
+            UpdatePrices();   
+        }
+
+        private void bw_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
+        {
+            if (e.ProgressPercentage == 0)
+                stbUpdateStatus.Text = "Status: Updating Prices";
+            else if (e.ProgressPercentage == 50)
+                stbUpdateStatus.Text = "Status: Calculating NAV";
+        }
+
+        private void bw_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
+        {
+            DisableTabs(false);
+
+            if (CloseAttemped)
+            {
+                this.Close();
+                return;
+            }
+            
+            stbUpdateStatus.Text = "Status:";
+            stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Blocks;
+            MessageBox.Show("Finished");
+
+            DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetLastDate(), SqlDateTime.MinValue.Value));
+            if (d != SqlDateTime.MinValue.Value)
+            {
+                MPI.LastDate = d;
+                ResetCalendars();
+                stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+            }
+            LoadPortfolio();
+        }
+
+        private void DisableTabs(bool Disable)
+        {
+            foreach (Control t in tb.Controls)
+                if (t is TabPage)
+                    foreach (Control c in t.Controls)
+                        if (c is ToolStrip)
+                            c.Enabled = !Disable;
+            tsMain.Enabled = !Disable;
         }
     }
 }

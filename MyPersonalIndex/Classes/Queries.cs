@@ -247,7 +247,7 @@ namespace MyPersonalIndex
 
         public static string Main_GetNAVPortfolios()
         {
-            return "SELECT ID, StartDate, Dividends, NAVStartValue FROM Portfolios";
+            return "SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios";
         }
 
         public static string Main_DeleteNAVPrices(int Portfolio, DateTime MinDate)
@@ -361,6 +361,11 @@ namespace MyPersonalIndex
         public static string Common_GetAA(int Portfolio)
         {
             return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
+        }
+
+        public static string Main_GetEarliestTrade(int Portfolio, int Ticker)
+        {
+            return string.Format("SELECT MIN(Date) FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
         }
 
         public static string Ticker_GetAttributes(int Portfolio, int Ticker)

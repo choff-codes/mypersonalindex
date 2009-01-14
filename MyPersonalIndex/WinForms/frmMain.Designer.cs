@@ -30,24 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle29 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle30 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle31 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle32 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle33 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle34 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle35 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -60,6 +42,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle11 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle12 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle13 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle14 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle15 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -81,6 +64,15 @@
             this.btnHoldingsExport = new System.Windows.Forms.ToolStripButton();
             this.dgHoldings = new System.Windows.Forms.DataGridView();
             this.colHoldingsActive = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colHoldingsTicker = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsClosingPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsAvgPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsTotalValueP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsAA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tbStatistics = new System.Windows.Forms.TabPage();
             this.tsStat = new System.Windows.Forms.ToolStrip();
             this.btnEdit = new System.Windows.Forms.ToolStripButton();
@@ -102,6 +94,11 @@
             this.sPerformance1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnPerformanceExport = new System.Windows.Forms.ToolStripButton();
             this.dgPerformance = new System.Windows.Forms.DataGridView();
+            this.colPerformanceDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPerformanceTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPerformanceIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPerformancePChange = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colPerformancePGain = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tbCorrelations = new System.Windows.Forms.TabPage();
             this.tsCorrelation = new System.Windows.Forms.ToolStrip();
             this.btnCorrelationCalc = new System.Windows.Forms.ToolStripButton();
@@ -115,6 +112,12 @@
             this.dgCorrelation = new System.Windows.Forms.DataGridView();
             this.tbAA = new System.Windows.Forms.TabPage();
             this.dgAA = new System.Windows.Forms.DataGridView();
+            this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAATotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAAPofPortfolio = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAATarget = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAAOffset = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAAHoldings = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tsAA = new System.Windows.Forms.ToolStrip();
             this.btnAAEditAA = new System.Windows.Forms.ToolStripButton();
             this.sAA1 = new System.Windows.Forms.ToolStripSeparator();
@@ -159,28 +162,7 @@
             this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
             this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
-            this.bw = new System.ComponentModel.BackgroundWorker();
             this.lblClosing = new System.Windows.Forms.Label();
-            this.colHoldingsTicker = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsClosingPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsAvgPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsTotalValueP = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsAA = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPerformanceDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPerformanceTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPerformanceIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPerformancePChange = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colPerformancePGain = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAATotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAPofPortfolio = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAATarget = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAOffset = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAHoldings = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tb.SuspendLayout();
             this.tbHoldings.SuspendLayout();
             this.tsHoldings.SuspendLayout();
@@ -371,6 +353,106 @@
             this.colHoldingsActive.Name = "colHoldingsActive";
             this.colHoldingsActive.ReadOnly = true;
             this.colHoldingsActive.Width = 52;
+            // 
+            // colHoldingsTicker
+            // 
+            this.colHoldingsTicker.DataPropertyName = "fTicker";
+            this.colHoldingsTicker.HeaderText = "Ticker";
+            this.colHoldingsTicker.Name = "colHoldingsTicker";
+            this.colHoldingsTicker.ReadOnly = true;
+            this.colHoldingsTicker.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsTicker.Width = 50;
+            // 
+            // colHoldingsClosingPrice
+            // 
+            this.colHoldingsClosingPrice.DataPropertyName = "fPrice";
+            dataGridViewCellStyle1.Format = "C2";
+            dataGridViewCellStyle1.NullValue = null;
+            this.colHoldingsClosingPrice.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colHoldingsClosingPrice.HeaderText = "Closing Price";
+            this.colHoldingsClosingPrice.Name = "colHoldingsClosingPrice";
+            this.colHoldingsClosingPrice.ReadOnly = true;
+            this.colHoldingsClosingPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsClosingPrice.Width = 80;
+            // 
+            // colHoldingsShares
+            // 
+            this.colHoldingsShares.DataPropertyName = "fShares";
+            dataGridViewCellStyle2.Format = "N4";
+            dataGridViewCellStyle2.NullValue = null;
+            this.colHoldingsShares.DefaultCellStyle = dataGridViewCellStyle2;
+            this.colHoldingsShares.HeaderText = "Shares";
+            this.colHoldingsShares.Name = "colHoldingsShares";
+            this.colHoldingsShares.ReadOnly = true;
+            this.colHoldingsShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsShares.Width = 85;
+            // 
+            // colHoldingsAvgPrice
+            // 
+            this.colHoldingsAvgPrice.DataPropertyName = "fAverage";
+            dataGridViewCellStyle3.Format = "C2";
+            dataGridViewCellStyle3.NullValue = null;
+            this.colHoldingsAvgPrice.DefaultCellStyle = dataGridViewCellStyle3;
+            this.colHoldingsAvgPrice.HeaderText = "Avg Price Per Share";
+            this.colHoldingsAvgPrice.Name = "colHoldingsAvgPrice";
+            this.colHoldingsAvgPrice.ReadOnly = true;
+            this.colHoldingsAvgPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsAvgPrice.Width = 85;
+            // 
+            // colHoldingsGainLoss
+            // 
+            this.colHoldingsGainLoss.DataPropertyName = "fGain";
+            dataGridViewCellStyle4.Format = "#0.00\'%\'";
+            dataGridViewCellStyle4.NullValue = null;
+            this.colHoldingsGainLoss.DefaultCellStyle = dataGridViewCellStyle4;
+            this.colHoldingsGainLoss.HeaderText = "% Gain/Loss";
+            this.colHoldingsGainLoss.Name = "colHoldingsGainLoss";
+            this.colHoldingsGainLoss.ReadOnly = true;
+            this.colHoldingsGainLoss.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsGainLoss.Width = 80;
+            // 
+            // colHoldingsTotalValue
+            // 
+            this.colHoldingsTotalValue.DataPropertyName = "fTotalValue";
+            dataGridViewCellStyle5.Format = "C2";
+            dataGridViewCellStyle5.NullValue = null;
+            this.colHoldingsTotalValue.DefaultCellStyle = dataGridViewCellStyle5;
+            this.colHoldingsTotalValue.HeaderText = "Total Value";
+            this.colHoldingsTotalValue.Name = "colHoldingsTotalValue";
+            this.colHoldingsTotalValue.ReadOnly = true;
+            this.colHoldingsTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsTotalValue.Width = 95;
+            // 
+            // colHoldingsTotalValueP
+            // 
+            this.colHoldingsTotalValueP.DataPropertyName = "fTotalValueP";
+            dataGridViewCellStyle6.Format = "#0.00\'%\'";
+            this.colHoldingsTotalValueP.DefaultCellStyle = dataGridViewCellStyle6;
+            this.colHoldingsTotalValueP.HeaderText = "Total Value %";
+            this.colHoldingsTotalValueP.Name = "colHoldingsTotalValueP";
+            this.colHoldingsTotalValueP.ReadOnly = true;
+            this.colHoldingsTotalValueP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsTotalValueP.Width = 85;
+            // 
+            // colHoldingsAA
+            // 
+            this.colHoldingsAA.DataPropertyName = "fAA";
+            this.colHoldingsAA.HeaderText = "Asset Allocation";
+            this.colHoldingsAA.Name = "colHoldingsAA";
+            this.colHoldingsAA.ReadOnly = true;
+            this.colHoldingsAA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsAA.Width = 115;
+            // 
+            // colHoldingsID
+            // 
+            this.colHoldingsID.DataPropertyName = "fID";
+            dataGridViewCellStyle7.Format = "N0";
+            dataGridViewCellStyle7.NullValue = null;
+            this.colHoldingsID.DefaultCellStyle = dataGridViewCellStyle7;
+            this.colHoldingsID.HeaderText = "ID";
+            this.colHoldingsID.Name = "colHoldingsID";
+            this.colHoldingsID.ReadOnly = true;
+            this.colHoldingsID.Visible = false;
             // 
             // tbStatistics
             // 
@@ -591,6 +673,66 @@
             this.dgPerformance.Size = new System.Drawing.Size(778, 463);
             this.dgPerformance.TabIndex = 1;
             // 
+            // colPerformanceDate
+            // 
+            this.colPerformanceDate.DataPropertyName = "Date";
+            dataGridViewCellStyle8.Format = "d";
+            dataGridViewCellStyle8.NullValue = null;
+            this.colPerformanceDate.DefaultCellStyle = dataGridViewCellStyle8;
+            this.colPerformanceDate.HeaderText = "Date";
+            this.colPerformanceDate.Name = "colPerformanceDate";
+            this.colPerformanceDate.ReadOnly = true;
+            this.colPerformanceDate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colPerformanceDate.Width = 101;
+            // 
+            // colPerformanceTotalValue
+            // 
+            this.colPerformanceTotalValue.DataPropertyName = "TotalValue";
+            dataGridViewCellStyle9.Format = "C2";
+            dataGridViewCellStyle9.NullValue = null;
+            this.colPerformanceTotalValue.DefaultCellStyle = dataGridViewCellStyle9;
+            this.colPerformanceTotalValue.HeaderText = "Total Value";
+            this.colPerformanceTotalValue.Name = "colPerformanceTotalValue";
+            this.colPerformanceTotalValue.ReadOnly = true;
+            this.colPerformanceTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colPerformanceTotalValue.Width = 101;
+            // 
+            // colPerformanceIndex
+            // 
+            this.colPerformanceIndex.DataPropertyName = "NAV";
+            dataGridViewCellStyle10.Format = "N2";
+            dataGridViewCellStyle10.NullValue = null;
+            this.colPerformanceIndex.DefaultCellStyle = dataGridViewCellStyle10;
+            this.colPerformanceIndex.HeaderText = "Index";
+            this.colPerformanceIndex.Name = "colPerformanceIndex";
+            this.colPerformanceIndex.ReadOnly = true;
+            this.colPerformanceIndex.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colPerformanceIndex.Width = 101;
+            // 
+            // colPerformancePChange
+            // 
+            this.colPerformancePChange.DataPropertyName = "Change";
+            dataGridViewCellStyle11.Format = "#0.0000\'%\'";
+            dataGridViewCellStyle11.NullValue = null;
+            this.colPerformancePChange.DefaultCellStyle = dataGridViewCellStyle11;
+            this.colPerformancePChange.HeaderText = "% Change";
+            this.colPerformancePChange.Name = "colPerformancePChange";
+            this.colPerformancePChange.ReadOnly = true;
+            this.colPerformancePChange.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colPerformancePChange.Width = 101;
+            // 
+            // colPerformancePGain
+            // 
+            this.colPerformancePGain.DataPropertyName = "Gain";
+            dataGridViewCellStyle12.Format = "#0.0000\'%\'";
+            dataGridViewCellStyle12.NullValue = null;
+            this.colPerformancePGain.DefaultCellStyle = dataGridViewCellStyle12;
+            this.colPerformancePGain.HeaderText = "% Gain";
+            this.colPerformancePGain.Name = "colPerformancePGain";
+            this.colPerformancePGain.ReadOnly = true;
+            this.colPerformancePGain.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colPerformancePGain.Width = 101;
+            // 
             // tbCorrelations
             // 
             this.tbCorrelations.Controls.Add(this.tsCorrelation);
@@ -741,6 +883,70 @@
             this.dgAA.Size = new System.Drawing.Size(781, 463);
             this.dgAA.TabIndex = 1;
             this.dgAA.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgAA_CellFormatting);
+            // 
+            // colAAAssetAllocation
+            // 
+            this.colAAAssetAllocation.DataPropertyName = "fAssetAllocation";
+            this.colAAAssetAllocation.HeaderText = "Asset Allocation";
+            this.colAAAssetAllocation.Name = "colAAAssetAllocation";
+            this.colAAAssetAllocation.ReadOnly = true;
+            this.colAAAssetAllocation.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAAAssetAllocation.Width = 150;
+            // 
+            // colAATotalValue
+            // 
+            this.colAATotalValue.DataPropertyName = "fTotalValue";
+            dataGridViewCellStyle14.Format = "C2";
+            dataGridViewCellStyle14.NullValue = null;
+            this.colAATotalValue.DefaultCellStyle = dataGridViewCellStyle14;
+            this.colAATotalValue.HeaderText = "Total Value";
+            this.colAATotalValue.Name = "colAATotalValue";
+            // 
+            // colAAPofPortfolio
+            // 
+            this.colAAPofPortfolio.DataPropertyName = "fPercentage";
+            dataGridViewCellStyle15.Format = "#0.00\'%\'";
+            dataGridViewCellStyle15.NullValue = null;
+            this.colAAPofPortfolio.DefaultCellStyle = dataGridViewCellStyle15;
+            this.colAAPofPortfolio.HeaderText = "% of Portfolio";
+            this.colAAPofPortfolio.Name = "colAAPofPortfolio";
+            this.colAAPofPortfolio.ReadOnly = true;
+            this.colAAPofPortfolio.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAAPofPortfolio.Width = 80;
+            // 
+            // colAATarget
+            // 
+            this.colAATarget.DataPropertyName = "fTarget";
+            dataGridViewCellStyle16.Format = "#0.00\'%\'";
+            dataGridViewCellStyle16.NullValue = null;
+            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle16;
+            this.colAATarget.HeaderText = "Target %";
+            this.colAATarget.Name = "colAATarget";
+            this.colAATarget.ReadOnly = true;
+            this.colAATarget.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAATarget.Width = 85;
+            // 
+            // colAAOffset
+            // 
+            this.colAAOffset.DataPropertyName = "fOffset";
+            dataGridViewCellStyle17.Format = "#0.00\'%\'";
+            dataGridViewCellStyle17.NullValue = null;
+            this.colAAOffset.DefaultCellStyle = dataGridViewCellStyle17;
+            this.colAAOffset.HeaderText = "Offset";
+            this.colAAOffset.Name = "colAAOffset";
+            this.colAAOffset.ReadOnly = true;
+            this.colAAOffset.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAAOffset.Width = 85;
+            // 
+            // colAAHoldings
+            // 
+            this.colAAHoldings.DataPropertyName = "fHoldings";
+            dataGridViewCellStyle18.Format = "N0";
+            dataGridViewCellStyle18.NullValue = null;
+            this.colAAHoldings.DefaultCellStyle = dataGridViewCellStyle18;
+            this.colAAHoldings.HeaderText = "# Holdings";
+            this.colAAHoldings.Name = "colAAHoldings";
+            this.colAAHoldings.ReadOnly = true;
             // 
             // tsAA
             // 
@@ -1099,13 +1305,6 @@
             this.toolStripButton6.Size = new System.Drawing.Size(55, 22);
             this.toolStripButton6.Text = "Export...";
             // 
-            // bw
-            // 
-            this.bw.WorkerReportsProgress = true;
-            this.bw.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bw_DoWork);
-            this.bw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bw_RunWorkerCompleted);
-            this.bw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_ProgressChanged);
-            // 
             // lblClosing
             // 
             this.lblClosing.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1116,230 +1315,6 @@
             this.lblClosing.Text = "Waiting for calculations to complete...";
             this.lblClosing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.lblClosing.Visible = false;
-            // 
-            // colHoldingsTicker
-            // 
-            this.colHoldingsTicker.DataPropertyName = "fTicker";
-            this.colHoldingsTicker.HeaderText = "Ticker";
-            this.colHoldingsTicker.Name = "colHoldingsTicker";
-            this.colHoldingsTicker.ReadOnly = true;
-            this.colHoldingsTicker.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTicker.Width = 50;
-            // 
-            // colHoldingsClosingPrice
-            // 
-            this.colHoldingsClosingPrice.DataPropertyName = "fPrice";
-            dataGridViewCellStyle1.Format = "C2";
-            dataGridViewCellStyle1.NullValue = null;
-            this.colHoldingsClosingPrice.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colHoldingsClosingPrice.HeaderText = "Closing Price";
-            this.colHoldingsClosingPrice.Name = "colHoldingsClosingPrice";
-            this.colHoldingsClosingPrice.ReadOnly = true;
-            this.colHoldingsClosingPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsClosingPrice.Width = 80;
-            // 
-            // colHoldingsShares
-            // 
-            this.colHoldingsShares.DataPropertyName = "fShares";
-            dataGridViewCellStyle2.Format = "N4";
-            dataGridViewCellStyle2.NullValue = null;
-            this.colHoldingsShares.DefaultCellStyle = dataGridViewCellStyle2;
-            this.colHoldingsShares.HeaderText = "Shares";
-            this.colHoldingsShares.Name = "colHoldingsShares";
-            this.colHoldingsShares.ReadOnly = true;
-            this.colHoldingsShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsShares.Width = 85;
-            // 
-            // colHoldingsAvgPrice
-            // 
-            this.colHoldingsAvgPrice.DataPropertyName = "fAverage";
-            dataGridViewCellStyle3.Format = "C2";
-            dataGridViewCellStyle3.NullValue = null;
-            this.colHoldingsAvgPrice.DefaultCellStyle = dataGridViewCellStyle3;
-            this.colHoldingsAvgPrice.HeaderText = "Avg Price Per Share";
-            this.colHoldingsAvgPrice.Name = "colHoldingsAvgPrice";
-            this.colHoldingsAvgPrice.ReadOnly = true;
-            this.colHoldingsAvgPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsAvgPrice.Width = 85;
-            // 
-            // colHoldingsGainLoss
-            // 
-            this.colHoldingsGainLoss.DataPropertyName = "fGain";
-            dataGridViewCellStyle4.Format = "#0.00\'%\'";
-            dataGridViewCellStyle4.NullValue = null;
-            this.colHoldingsGainLoss.DefaultCellStyle = dataGridViewCellStyle4;
-            this.colHoldingsGainLoss.HeaderText = "% Gain/Loss";
-            this.colHoldingsGainLoss.Name = "colHoldingsGainLoss";
-            this.colHoldingsGainLoss.ReadOnly = true;
-            this.colHoldingsGainLoss.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsGainLoss.Width = 80;
-            // 
-            // colHoldingsTotalValue
-            // 
-            this.colHoldingsTotalValue.DataPropertyName = "fTotalValue";
-            dataGridViewCellStyle5.Format = "C2";
-            dataGridViewCellStyle5.NullValue = null;
-            this.colHoldingsTotalValue.DefaultCellStyle = dataGridViewCellStyle5;
-            this.colHoldingsTotalValue.HeaderText = "Total Value";
-            this.colHoldingsTotalValue.Name = "colHoldingsTotalValue";
-            this.colHoldingsTotalValue.ReadOnly = true;
-            this.colHoldingsTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTotalValue.Width = 95;
-            // 
-            // colHoldingsTotalValueP
-            // 
-            this.colHoldingsTotalValueP.DataPropertyName = "fTotalValueP";
-            dataGridViewCellStyle6.Format = "#0.00\'%\'";
-            this.colHoldingsTotalValueP.DefaultCellStyle = dataGridViewCellStyle6;
-            this.colHoldingsTotalValueP.HeaderText = "Total Value %";
-            this.colHoldingsTotalValueP.Name = "colHoldingsTotalValueP";
-            this.colHoldingsTotalValueP.ReadOnly = true;
-            this.colHoldingsTotalValueP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTotalValueP.Width = 85;
-            // 
-            // colHoldingsAA
-            // 
-            this.colHoldingsAA.DataPropertyName = "fAA";
-            this.colHoldingsAA.HeaderText = "Asset Allocation";
-            this.colHoldingsAA.Name = "colHoldingsAA";
-            this.colHoldingsAA.ReadOnly = true;
-            this.colHoldingsAA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsAA.Width = 115;
-            // 
-            // colHoldingsID
-            // 
-            this.colHoldingsID.DataPropertyName = "fID";
-            dataGridViewCellStyle7.Format = "N0";
-            dataGridViewCellStyle7.NullValue = null;
-            this.colHoldingsID.DefaultCellStyle = dataGridViewCellStyle7;
-            this.colHoldingsID.HeaderText = "ID";
-            this.colHoldingsID.Name = "colHoldingsID";
-            this.colHoldingsID.ReadOnly = true;
-            this.colHoldingsID.Visible = false;
-            // 
-            // colPerformanceDate
-            // 
-            this.colPerformanceDate.DataPropertyName = "Date";
-            dataGridViewCellStyle8.Format = "d";
-            dataGridViewCellStyle8.NullValue = null;
-            this.colPerformanceDate.DefaultCellStyle = dataGridViewCellStyle8;
-            this.colPerformanceDate.HeaderText = "Date";
-            this.colPerformanceDate.Name = "colPerformanceDate";
-            this.colPerformanceDate.ReadOnly = true;
-            this.colPerformanceDate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceDate.Width = 101;
-            // 
-            // colPerformanceTotalValue
-            // 
-            this.colPerformanceTotalValue.DataPropertyName = "TotalValue";
-            dataGridViewCellStyle9.Format = "C2";
-            dataGridViewCellStyle9.NullValue = null;
-            this.colPerformanceTotalValue.DefaultCellStyle = dataGridViewCellStyle9;
-            this.colPerformanceTotalValue.HeaderText = "Total Value";
-            this.colPerformanceTotalValue.Name = "colPerformanceTotalValue";
-            this.colPerformanceTotalValue.ReadOnly = true;
-            this.colPerformanceTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceTotalValue.Width = 101;
-            // 
-            // colPerformanceIndex
-            // 
-            this.colPerformanceIndex.DataPropertyName = "NAV";
-            dataGridViewCellStyle10.Format = "N2";
-            dataGridViewCellStyle10.NullValue = null;
-            this.colPerformanceIndex.DefaultCellStyle = dataGridViewCellStyle10;
-            this.colPerformanceIndex.HeaderText = "Index";
-            this.colPerformanceIndex.Name = "colPerformanceIndex";
-            this.colPerformanceIndex.ReadOnly = true;
-            this.colPerformanceIndex.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceIndex.Width = 101;
-            // 
-            // colPerformancePChange
-            // 
-            this.colPerformancePChange.DataPropertyName = "Change";
-            dataGridViewCellStyle11.Format = "#0.0000\'%\'";
-            dataGridViewCellStyle11.NullValue = null;
-            this.colPerformancePChange.DefaultCellStyle = dataGridViewCellStyle11;
-            this.colPerformancePChange.HeaderText = "% Change";
-            this.colPerformancePChange.Name = "colPerformancePChange";
-            this.colPerformancePChange.ReadOnly = true;
-            this.colPerformancePChange.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformancePChange.Width = 101;
-            // 
-            // colPerformancePGain
-            // 
-            this.colPerformancePGain.DataPropertyName = "Gain";
-            dataGridViewCellStyle12.Format = "#0.0000\'%\'";
-            dataGridViewCellStyle12.NullValue = null;
-            this.colPerformancePGain.DefaultCellStyle = dataGridViewCellStyle12;
-            this.colPerformancePGain.HeaderText = "% Gain";
-            this.colPerformancePGain.Name = "colPerformancePGain";
-            this.colPerformancePGain.ReadOnly = true;
-            this.colPerformancePGain.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformancePGain.Width = 101;
-            // 
-            // colAAAssetAllocation
-            // 
-            this.colAAAssetAllocation.DataPropertyName = "fAssetAllocation";
-            this.colAAAssetAllocation.HeaderText = "Asset Allocation";
-            this.colAAAssetAllocation.Name = "colAAAssetAllocation";
-            this.colAAAssetAllocation.ReadOnly = true;
-            this.colAAAssetAllocation.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAAAssetAllocation.Width = 150;
-            // 
-            // colAATotalValue
-            // 
-            this.colAATotalValue.DataPropertyName = "fTotalValue";
-            dataGridViewCellStyle14.Format = "C2";
-            dataGridViewCellStyle14.NullValue = null;
-            this.colAATotalValue.DefaultCellStyle = dataGridViewCellStyle14;
-            this.colAATotalValue.HeaderText = "Total Value";
-            this.colAATotalValue.Name = "colAATotalValue";
-            // 
-            // colAAPofPortfolio
-            // 
-            this.colAAPofPortfolio.DataPropertyName = "fPercentage";
-            dataGridViewCellStyle15.Format = "#0.00\'%\'";
-            dataGridViewCellStyle15.NullValue = null;
-            this.colAAPofPortfolio.DefaultCellStyle = dataGridViewCellStyle15;
-            this.colAAPofPortfolio.HeaderText = "% of Portfolio";
-            this.colAAPofPortfolio.Name = "colAAPofPortfolio";
-            this.colAAPofPortfolio.ReadOnly = true;
-            this.colAAPofPortfolio.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAAPofPortfolio.Width = 80;
-            // 
-            // colAATarget
-            // 
-            this.colAATarget.DataPropertyName = "fTarget";
-            dataGridViewCellStyle16.Format = "#0.00\'%\'";
-            dataGridViewCellStyle16.NullValue = null;
-            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle16;
-            this.colAATarget.HeaderText = "Target %";
-            this.colAATarget.Name = "colAATarget";
-            this.colAATarget.ReadOnly = true;
-            this.colAATarget.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAATarget.Width = 85;
-            // 
-            // colAAOffset
-            // 
-            this.colAAOffset.DataPropertyName = "fOffset";
-            dataGridViewCellStyle17.Format = "#0.00\'%\'";
-            dataGridViewCellStyle17.NullValue = null;
-            this.colAAOffset.DefaultCellStyle = dataGridViewCellStyle17;
-            this.colAAOffset.HeaderText = "Offset";
-            this.colAAOffset.Name = "colAAOffset";
-            this.colAAOffset.ReadOnly = true;
-            this.colAAOffset.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAAOffset.Width = 85;
-            // 
-            // colAAHoldings
-            // 
-            this.colAAHoldings.DataPropertyName = "fHoldings";
-            dataGridViewCellStyle18.Format = "N0";
-            dataGridViewCellStyle18.NullValue = null;
-            this.colAAHoldings.DefaultCellStyle = dataGridViewCellStyle18;
-            this.colAAHoldings.HeaderText = "# Holdings";
-            this.colAAHoldings.Name = "colAAHoldings";
-            this.colAAHoldings.ReadOnly = true;
             // 
             // frmMain
             // 
@@ -1510,7 +1485,6 @@
         private System.Windows.Forms.ToolStripButton btnAAShowBlank;
         private System.Windows.Forms.ToolStripButton btnCorrelationHidden;
         private System.Windows.Forms.ToolStripSeparator sCorrelation3;
-        private System.ComponentModel.BackgroundWorker bw;
         private System.Windows.Forms.Label lblClosing;
     }
 }

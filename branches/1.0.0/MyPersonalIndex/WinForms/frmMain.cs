@@ -98,7 +98,7 @@ namespace MyPersonalIndex
 
         Queries SQL;
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
-        private MPIBackgroundWorker bw1 = new MPIBackgroundWorker { WorkerReportsProgress = true };
+        private MPIBackgroundWorker bw = new MPIBackgroundWorker { WorkerReportsProgress = true };
 
         public frmMain()
         {
@@ -126,9 +126,9 @@ namespace MyPersonalIndex
                 return;
             }
 
-            bw1.DoWork += new System.ComponentModel.DoWorkEventHandler(bw_DoWork);
-            bw1.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(bw_ProgressChanged);
-            bw1.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
+            bw.DoWork += new System.ComponentModel.DoWorkEventHandler(bw_DoWork);
+            bw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(bw_ProgressChanged);
+            bw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
 
             InitializeCalendars();
             LoadInitial();         
@@ -761,7 +761,7 @@ namespace MyPersonalIndex
         {
             DisableTabs(true);
             stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Marquee;
-            bw1.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices); 
+            bw.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices); 
         }
 
         private void UpdatePrices()
@@ -1146,15 +1146,15 @@ namespace MyPersonalIndex
         {
             DisableTabs(true);
             stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Marquee;
-            bw1.RunWorkerAsync(u, d, ID);
+            bw.RunWorkerAsync(u, d, ID);
         }
 
         private void GetNAV(int Portfolio, DateTime MinDate)
         {
             if (Portfolio != -1)
             {
-                bw1.PortfolioName = MPI.Portfolio.Name;
-                bw1.ReportProgress(50);
+                bw.PortfolioName = MPI.Portfolio.Name;
+                bw.ReportProgress(50);
                 if (MinDate <= MPI.Portfolio.StartDate)
                 {
                     MPI.Portfolio.StartDate = CheckPortfolioStartDate(MPI.Portfolio.ID, MPI.Portfolio.StartDate);
@@ -1180,8 +1180,8 @@ namespace MyPersonalIndex
 
                     do
                     {
-                        bw1.PortfolioName = rs.GetString(ordName);
-                        bw1.ReportProgress(50);
+                        bw.PortfolioName = rs.GetString(ordName);
+                        bw.ReportProgress(50);
 
                         int p = rs.GetInt32(ordID);
                         DateTime StartDate = rs.GetDateTime(ordStartDate);
@@ -1811,13 +1811,13 @@ namespace MyPersonalIndex
 
         private void bw_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
         {
-            if (bw1.UpdateType == MPIBackgroundWorker.MPIUpdateType.UpdatePrices)
+            if (bw.UpdateType == MPIBackgroundWorker.MPIUpdateType.UpdatePrices)
             {
-                bw1.ReportProgress(0);
+                bw.ReportProgress(0);
                 UpdatePrices();
             }
             else
-                GetNAV(bw1.PortfolioID, bw1.StartDate);
+                GetNAV(bw.PortfolioID, bw.StartDate);
         }
 
         private void bw_ProgressChanged(object sender, System.ComponentModel.ProgressChangedEventArgs e)
@@ -1825,7 +1825,7 @@ namespace MyPersonalIndex
             if (e.ProgressPercentage == 0)
                 stbUpdateStatus.Text = "Status: Updating Prices";
             else if (e.ProgressPercentage == 50)
-                stbUpdateStatus.Text = "Status: Calculating '" + bw1.PortfolioName + "'";
+                stbUpdateStatus.Text = "Status: Calculating '" + bw.PortfolioName + "'";
         }
 
         private void bw_RunWorkerCompleted(object sender, System.ComponentModel.RunWorkerCompletedEventArgs e)
@@ -1842,7 +1842,7 @@ namespace MyPersonalIndex
             stbUpdateStatus.Text = "Status:";
             stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Blocks;
 
-            if (bw1.UpdateType == MPIBackgroundWorker.MPIUpdateType.UpdatePrices)
+            if (bw.UpdateType == MPIBackgroundWorker.MPIUpdateType.UpdatePrices)
             {
                 //hack to make the button not look pressed
                 btnMainUpdate.Visible = false;
@@ -1861,12 +1861,12 @@ namespace MyPersonalIndex
 
             LoadPortfolio();
 
-            if (bw1.UpdateType == MPIBackgroundWorker.MPIUpdateType.NewTicker)
+            if (bw.UpdateType == MPIBackgroundWorker.MPIUpdateType.NewTicker)
                 if (MessageBox.Show("Would you like to update prices for the new security?", "Update?", MessageBoxButtons.YesNo) == DialogResult.Yes)
                 {
                     DisableTabs(true);
                     stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Marquee;
-                    bw1.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices);
+                    bw.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices);
                 }
         }
 

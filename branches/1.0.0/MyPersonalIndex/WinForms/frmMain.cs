@@ -508,18 +508,10 @@ namespace MyPersonalIndex
             btnCorrelationHidden.Checked = rs.GetSqlBoolean(rs.GetOrdinal("CorrelationShowHidden")).IsTrue;
 
             MPI.Holdings.Sort = rs.GetString(rs.GetOrdinal("HoldingsSort"));
-            cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
-            cmbHoldingsSortBy.ComboBox.SelectedValue = MPI.Holdings.Sort;
-            if (cmbHoldingsSortBy.ComboBox.SelectedValue == null)
-                cmbHoldingsSortBy.ComboBox.SelectedValue = "Custom";
-            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
+            ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
 
             MPI.AA.Sort = rs.GetString(rs.GetOrdinal("AASort"));
-            cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
-            cmbAASortBy.ComboBox.SelectedValue = MPI.AA.Sort;
-            if (cmbAASortBy.ComboBox.SelectedValue == null)
-                cmbAASortBy.ComboBox.SelectedValue = "Custom";
-            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
+            ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
         }
 
         private void DisableItems(bool Disabled)
@@ -1618,12 +1610,22 @@ namespace MyPersonalIndex
                         MPI.Holdings.Sort = f.SortReturnValues.Sort;
                         LoadHoldings(MPI.Holdings.SelDate);
                     }
-
-                    cmbHoldingsSortBy.ComboBox.SelectedValue = MPI.Holdings.Sort;
-                    if (cmbHoldingsSortBy.ComboBox.SelectedValue == null)
-                        cmbHoldingsSortBy.ComboBox.SelectedValue = "Custom";
+                    ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
                 }
             }
+        }
+
+        private void ResetSortDropDown(ToolStripComboBox t, string Sort)
+        {
+            cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
+            cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
+
+            t.ComboBox.SelectedValue = Sort;
+            if ((t.ComboBox.SelectedValue == null || t.ComboBox.SelectedValue.ToString() == "") && Sort != "")
+                t.ComboBox.SelectedValue = "Custom";
+
+            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
+            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
         }
 
         private void cmbAASortBy_SelectedIndexChanged(object sender, EventArgs e)
@@ -1644,10 +1646,7 @@ namespace MyPersonalIndex
                         MPI.AA.Sort = f.SortReturnValues.Sort;
                         LoadAssetAllocation(MPI.AA.SelDate);
                     }
-
-                    cmbAASortBy.ComboBox.SelectedValue = MPI.AA.Sort;
-                    if (cmbAASortBy.ComboBox.SelectedValue == null)
-                        cmbAASortBy.ComboBox.SelectedValue = "Custom";
+                    ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
                 }
             }
         }

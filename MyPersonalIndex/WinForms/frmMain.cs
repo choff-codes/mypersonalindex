@@ -362,26 +362,26 @@ namespace MyPersonalIndex
 
         private void ResetCalendar(MonthCalendar m, ToolStripDropDownButton t, out DateTime d)
         {
-            DateTime Begin = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
+            DateTime End = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
             m.MinDate = MPI.Portfolio.StartDate;
-            m.SetDate(Begin);
-            t.Text = "Date: " + Begin.ToShortDateString();
+            m.SetDate(End);
+            t.Text = "Date: " + End.ToShortDateString();
 
-            d = Begin;
+            d = End;
         }
 
         private void ResetCalendar(MonthCalendar m1, MonthCalendar m2, ToolStripDropDownButton t1, ToolStripDropDownButton t2, out DateTime d1, out DateTime d2)
         {
-            DateTime Begin = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
+            DateTime End = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
             m1.MinDate = MPI.Portfolio.StartDate;
-            m1.SetDate(Begin);
+            m1.SetDate(MPI.Portfolio.StartDate);
             t1.Text = "Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
             m2.MinDate = MPI.Portfolio.StartDate;
-            m2.SetDate(Begin);
-            t2.Text = "End Date: " + Begin.ToShortDateString();
+            m2.SetDate(End);
+            t2.Text = "End Date: " + End.ToShortDateString();
 
             d1 = MPI.Portfolio.StartDate;
-            d2 = Begin;
+            d2 = End;
         }
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)

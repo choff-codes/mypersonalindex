@@ -563,7 +563,7 @@ namespace MyPersonalIndex
                                     "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
                                     "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS b" +
-                " ON a.DATE = b.DATE) Correl",
+                        " ON a.DATE = b.DATE) Correl",
                 SQLCleanString(Ticker1), SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 

@@ -261,11 +261,11 @@ namespace MyPersonalIndex
             return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
-        public static string Main_GetAllNav(int Portfolio, DateTime StartDate, double StartValue, bool Desc)
+        public static string Main_GetAllNav(int Portfolio, double StartValue, bool Desc)
         {
             return string.Format(
-                "SELECT Date, TotalValue, NAV, Change, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date >= '{2}' ORDER BY Date {3}",
-                StartValue, Portfolio, StartDate.ToShortDateString(), (Desc ? " DESC" : ""));
+                "SELECT Date, TotalValue, NAV, Change, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} ORDER BY Date {2}",
+                StartValue, Portfolio, (Desc ? " DESC" : ""));
         }
 
         public static string Main_GetDistinctDates(DateTime MinDate)
@@ -695,6 +695,13 @@ namespace MyPersonalIndex
         public static string Stats_DeleteStatUserStat(int ID)
         {
             return string.Format("DELETE FROM Stats WHERE Statistic = {0}", ID);
+        }
+
+        public static string Adv_GetTickerList()
+        {
+            return "SELECT Name, CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
+                    " UNION ALL " +
+                    " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a";
         }
     }
 }

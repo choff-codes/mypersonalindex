@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Diagnostics;
 
 namespace MyPersonalIndex
 {
@@ -18,10 +15,11 @@ namespace MyPersonalIndex
             get { return _PortfolioName; }
             set
             {
-                if (value.Length > 50)
-                    _PortfolioName = value.Substring(0, 47) + "...";
-                else
-                    _PortfolioName = value;
+                if (!string.IsNullOrEmpty(value))
+                    if (value.Length > 50)
+                        _PortfolioName = value.Substring(0, 47) + "...";
+                    else
+                        _PortfolioName = value;
             }
         }
 

@@ -98,7 +98,6 @@ namespace MyPersonalIndex
 
         Queries SQL;
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
-        private MPIBackgroundWorker bw = new MPIBackgroundWorker { WorkerReportsProgress = true };
 
         public frmMain()
         {
@@ -125,10 +124,6 @@ namespace MyPersonalIndex
                 this.Close();
                 return;
             }
-
-            bw.DoWork += new System.ComponentModel.DoWorkEventHandler(bw_DoWork);
-            bw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(bw_ProgressChanged);
-            bw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(bw_RunWorkerCompleted);
 
             InitializeCalendars();
             LoadInitial();         
@@ -530,7 +525,7 @@ namespace MyPersonalIndex
 
         private void LoadNAV()
         {
-            dgPerformance.DataSource = SQL.ExecuteResultSet(Queries.Main_GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.StartDate, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked)); ;
+            dgPerformance.DataSource = SQL.ExecuteResultSet(Queries.Main_GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked)); ;
         }
 
         private void LoadAssetAllocation(DateTime Date)
@@ -1225,11 +1220,22 @@ namespace MyPersonalIndex
                 rs.ReadFirst();
 
                 DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
-                double YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValueNew(Portfolio, YDay), 0));
                 double YNAV = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetSpecificNav(Portfolio, YDay), 0));
+                double YTotalValue;
 
                 if (rs.GetDateTime(rs_ordDate) == StartDate)
+                {
                     YNAV = NAVStart;
+                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValueNew(Portfolio, YDay), 0));
+                    newRecord.SetInt32(rs2_ordPortfolio, Portfolio);
+                    newRecord.SetDateTime(rs2_ordDate, YDay);
+                    newRecord.SetDecimal(rs2_ordTotalValue, (decimal)YTotalValue);
+                    newRecord.SetDecimal(rs2_ordNAV, (decimal)YNAV);
+                    newRecord.SetDecimal(rs2_ordChange, 0);
+                    rs2.Insert(newRecord);
+                }
+                else
+                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValue(Portfolio, YDay), 0));
 
                 do
                 {
@@ -1877,6 +1883,14 @@ namespace MyPersonalIndex
                         if (c is ToolStrip)
                             c.Enabled = !Disable;
             tsMain.Enabled = !Disable;
+        }
+
+        private void btnMainCompare_Click(object sender, EventArgs e)
+        {
+            using (frmAdvanced f = new frmAdvanced())
+            {
+                f.ShowDialog();
+            }
         }
     }
 }

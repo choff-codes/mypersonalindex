@@ -20,6 +20,7 @@ namespace MyPersonalIndex
         public struct MPISettings
         {
             public DateTime DataStartDate;
+            public bool Splits;
         }
 
         public struct MPIHoldings
@@ -242,6 +243,7 @@ namespace MyPersonalIndex
                     rs.ReadFirst();
                     
                     MPI.Settings.DataStartDate = rs.GetDateTime(rs.GetOrdinal("DataStartDate"));
+                    MPI.Settings.Splits = rs.GetSqlBoolean(rs.GetOrdinal("Splits")).IsTrue;
                     if (!Convert.IsDBNull(rs.GetValue(rs.GetOrdinal("WindowState"))))
                     {
                         this.Location = new Point(rs.GetInt32(rs.GetOrdinal("WindowX")), rs.GetInt32(rs.GetOrdinal("WindowY")));
@@ -379,34 +381,38 @@ namespace MyPersonalIndex
             d2 = End;
         }
 
-        private void LoadGraph(DateTime StartDate, DateTime EndDate)
+        private void LoadGraphSettings(GraphPane g)
         {
-            // get a reference to the GraphPane
-
-            GraphPane myPane = zedChart.GraphPane;
-
-            myPane.CurveList.Clear();
-            myPane.XAxis.Scale.MaxAuto = true;
-            myPane.XAxis.Scale.MinAuto = true;
-            myPane.YAxis.Scale.MaxAuto = true;
-            myPane.YAxis.Scale.MinAuto = true;
+            g.CurveList.Clear();
+            g.XAxis.Scale.MaxAuto = true;
+            g.XAxis.Scale.MinAuto = true;
+            g.YAxis.Scale.MaxAuto = true;
+            g.YAxis.Scale.MinAuto = true;
 
             // Set the Titles
-            myPane.Title.Text = MPI.Portfolio.Name;
-            myPane.XAxis.Title.Text = "Date";
-            myPane.YAxis.MajorGrid.IsVisible = true;
-            myPane.YAxis.Title.Text = "Percent";
-            myPane.XAxis.Type = AxisType.Date;
-            myPane.YAxis.Scale.Format = "0.00'%'";
-            myPane.XAxis.Scale.FontSpec.Size = 9;
-            myPane.YAxis.Scale.FontSpec.Size = 9;
-            myPane.Legend.FontSpec.Size = 14;
-            myPane.XAxis.Title.FontSpec.Size = 12;
-            myPane.YAxis.Title.FontSpec.Size = 12;
-            myPane.Legend.IsVisible = false;
-            myPane.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
+            g.Title.Text = MPI.Portfolio.Name;
+            g.XAxis.Title.Text = "Date";
+            g.YAxis.MajorGrid.IsVisible = true;
+            g.YAxis.Title.Text = "Percent";
+            g.XAxis.Type = AxisType.Date;
+            g.YAxis.Scale.Format = "0.00'%'";
+            g.XAxis.Scale.FontSpec.Size = 9;
+            g.YAxis.Scale.FontSpec.Size = 9;
+            g.Legend.FontSpec.Size = 14;
+            g.XAxis.Title.FontSpec.Size = 12;
+            g.YAxis.Title.FontSpec.Size = 12;
+            g.Legend.IsVisible = false;
+            g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
+        }
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetNAV(MPI.Portfolio.ID, StartDate))), StartDate, EndDate));
+        private void LoadGraph(DateTime StartDate, DateTime EndDate)
+        {
+            GraphPane g = zedChart.GraphPane;
+
+            LoadGraphSettings(g);
+
+            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
 
             try
             {
@@ -416,6 +422,8 @@ namespace MyPersonalIndex
 
                 if (rs.HasRows)
                 {
+                    list.Add(new XDate(YDay), 0);
+
                     rs.ReadFirst();
                     do
                     {
@@ -423,11 +431,11 @@ namespace MyPersonalIndex
                     }
                     while (rs.Read());
 
-                    LineItem line = myPane.AddCurve("", list, Color.Crimson, SymbolType.None);
+                    LineItem line = g.AddCurve("", list, Color.Crimson, SymbolType.None);
                     line.Line.Width = 3;
 
-                    myPane.XAxis.Scale.Min = list[0].X;
-                    myPane.XAxis.Scale.Max = list[list.Count - 1].X;
+                    g.XAxis.Scale.Min = list[0].X;
+                    g.XAxis.Scale.Max = list[list.Count - 1].X;
                 }
 
                 zedChart.AxisChange();
@@ -746,6 +754,12 @@ namespace MyPersonalIndex
 
         private void btnMainUpdate_Click(object sender, EventArgs e)
         {
+            if (!IsInternetConnection())
+            {
+                MessageBox.Show("No Internet connection!", "Connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             DisableTabs(true);
             stbUpdateStatusPB.ProgressBar.Style = ProgressBarStyle.Marquee;
             bw.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices); 
@@ -753,12 +767,6 @@ namespace MyPersonalIndex
 
         private void UpdatePrices()
         {
-            if (!IsInternetConnection())
-            {
-                MessageBox.Show("No Internet connection!", "Connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetUpdateDistinctTickers());
             DateTime MinDate;
             List<string> TickersNotUpdated = new List<string>();
@@ -797,7 +805,8 @@ namespace MyPersonalIndex
                     {
                         string Ticker = rs.GetString(rs_ordTicker);
                         GetDividends(Ticker, Date);
-                        GetSplits(Ticker, Date);
+                        if (MPI.Settings.Splits)
+                            GetSplits(Ticker, Date);
                         GetPrices(Ticker, Date,
                             Convert.IsDBNull(rs.GetValue(rs_ordPrice)) ? 0 : (double)rs.GetDecimal(rs_ordPrice));
 
@@ -1231,7 +1240,6 @@ namespace MyPersonalIndex
                     newRecord.SetDateTime(rs2_ordDate, YDay);
                     newRecord.SetDecimal(rs2_ordTotalValue, (decimal)YTotalValue);
                     newRecord.SetDecimal(rs2_ordNAV, (decimal)YNAV);
-                    newRecord.SetDecimal(rs2_ordChange, 0);
                     rs2.Insert(newRecord);
                 }
                 else
@@ -1734,11 +1742,15 @@ namespace MyPersonalIndex
 
         private void btnMainOptions_Click(object sender, EventArgs e)
         {
-            using (frmOptions f = new frmOptions(MPI.Settings.DataStartDate))
+            using (frmOptions f = new frmOptions(MPI.Settings.DataStartDate, MPI.Settings.Splits))
             {
                 if (f.ShowDialog() != DialogResult.OK)
+                {
+                    MPI.Settings.Splits = f.OptionReturnValues.Splits;
                     return;
+                }
 
+                MPI.Settings.Splits = f.OptionReturnValues.Splits;
                 MPI.Settings.DataStartDate = f.OptionReturnValues.DataStartDate;
                 SQL.ExecuteNonQuery(Queries.Main_UpdatePortfolioStartDates(MPI.Settings.DataStartDate));
                 SQL.ExecuteNonQuery(Queries.Main_DeleteNAV());

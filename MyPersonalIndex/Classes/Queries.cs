@@ -211,18 +211,7 @@ namespace MyPersonalIndex
 
         public static string Main_GetAvgPricesTrades(int Portfolio, DateTime MaxDate)
         {
-            /*return string.Format(
-                "SELECT a.TickerID, a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
-                        " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
-                " FROM Trades a" +
-                " LEFT JOIN Splits b" +
-                   " ON a.Ticker = b.Ticker AND b.Date >= a.Date" +
-                " WHERE a.Portfolio = {0}" +
-                " GROUP BY a.ID, a.TickerID, a.Price, a.Shares, a.Date " +
-                " ORDER BY a.TickerID, a.Date",
-                Portfolio);*/
-
-            return string.Format(
+             return string.Format(
                 "SELECT a.TickerID, a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
                         " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
                 " FROM Trades a" +
@@ -264,7 +253,8 @@ namespace MyPersonalIndex
         public static string Main_GetAllNav(int Portfolio, double StartValue, bool Desc)
         {
             return string.Format(
-                "SELECT Date, TotalValue, NAV, Change, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} ORDER BY Date {2}",
+                "SELECT Date, TotalValue, NAV, Change, (CASE WHEN Change IS NOT NULL THEN 100 * ((NAV / {0}) - 1) END) AS Gain" +
+                " FROM NAV WHERE Portfolio = {1} ORDER BY Date {2}",
                 StartValue, Portfolio, (Desc ? " DESC" : ""));
         }
 
@@ -597,6 +587,11 @@ namespace MyPersonalIndex
         public static string Options_GetPortfoliosMinDate()
         {
             return "SELECT MIN(StartDate) FROM Portfolios";
+        }
+
+        public static string Options_UpdateSplits(bool Splits)
+        {
+            return string.Format("UPDATE Settings SET Splits = {0}", Convert.ToByte(Splits));
         }
 
         public static string Common_UpdateDataStartDate(DateTime Date)

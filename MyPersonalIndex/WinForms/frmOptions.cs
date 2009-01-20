@@ -9,7 +9,8 @@ namespace MyPersonalIndex
     {
         public struct OptionRetValues
         {
-            public DateTime DataStartDate;  
+            public DateTime DataStartDate;
+            public bool Splits;
         }
 
         public OptionRetValues OptionReturnValues { get { return _OptionReturnValues; } }
@@ -18,12 +19,14 @@ namespace MyPersonalIndex
         private OptionRetValues _OptionReturnValues = new OptionRetValues();
         private MonthCalendar DataStartCalendar;
 
-        public frmOptions(DateTime DataStartDate)
+        public frmOptions(DateTime DataStartDate, bool Splits)
         {
             InitializeComponent();
             _OptionReturnValues.DataStartDate = DataStartDate;
+            _OptionReturnValues.Splits = Splits;
             DataStartCalendar = new MonthCalendar { MaxSelectionCount = 1, MaxDate = DateTime.Today, MinDate = SqlDateTime.MinValue.Value, SelectionStart = DataStartDate };
             btnDate.Text = DataStartDate.ToShortDateString();
+            chkSplit.Checked = Splits;
         }
 
         private void frmOptions_Load(object sender, EventArgs e)
@@ -64,6 +67,9 @@ namespace MyPersonalIndex
         {
             DateTime NewDataStartDate = DataStartCalendar.SelectionStart;
 
+            SQL.ExecuteNonQuery(Queries.Options_UpdateSplits(chkSplit.Checked));
+            _OptionReturnValues.Splits = chkSplit.Checked;
+
             if (NewDataStartDate == _OptionReturnValues.DataStartDate)
             {
                 DialogResult = DialogResult.Cancel;
@@ -81,7 +87,7 @@ namespace MyPersonalIndex
                 DialogResult = DialogResult.OK;
             }
             else
-                DialogResult = DialogResult.Cancel;
+                DialogResult = DialogResult.Cancel;   
         }
     }
 }

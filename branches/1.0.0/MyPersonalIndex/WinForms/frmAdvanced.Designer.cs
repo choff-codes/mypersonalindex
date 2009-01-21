@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvanced));
             this.lst = new System.Windows.Forms.CheckedListBox();
             this.cmdSelectAll = new System.Windows.Forms.Button();
@@ -37,6 +38,8 @@
             this.cmdTickers = new System.Windows.Forms.Button();
             this.line = new System.Windows.Forms.Label();
             this.pnl = new System.Windows.Forms.Panel();
+            this.dg = new System.Windows.Forms.DataGridView();
+            this.zed = new ZedGraph.ZedGraphControl();
             this.ts = new System.Windows.Forms.ToolStrip();
             this.lblReport = new System.Windows.Forms.ToolStripLabel();
             this.cmb = new System.Windows.Forms.ToolStripComboBox();
@@ -46,12 +49,10 @@
             this.btnEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
-            this.zed = new ZedGraph.ZedGraphControl();
-            this.dg = new System.Windows.Forms.DataGridView();
             this.cmdOk = new System.Windows.Forms.Button();
             this.pnl.SuspendLayout();
-            this.ts.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).BeginInit();
+            this.ts.SuspendLayout();
             this.SuspendLayout();
             // 
             // lst
@@ -129,6 +130,46 @@
             this.pnl.Name = "pnl";
             this.pnl.Size = new System.Drawing.Size(574, 481);
             this.pnl.TabIndex = 6;
+            // 
+            // dg
+            // 
+            this.dg.AllowUserToAddRows = false;
+            this.dg.AllowUserToDeleteRows = false;
+            this.dg.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dg.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle1.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle1.Format = "#0.00\'%\'";
+            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dg.DefaultCellStyle = dataGridViewCellStyle1;
+            this.dg.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dg.Location = new System.Drawing.Point(0, 25);
+            this.dg.Name = "dg";
+            this.dg.ReadOnly = true;
+            this.dg.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            this.dg.Size = new System.Drawing.Size(574, 456);
+            this.dg.TabIndex = 5;
+            this.dg.Visible = false;
+            // 
+            // zed
+            // 
+            this.zed.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.zed.Location = new System.Drawing.Point(0, 25);
+            this.zed.Name = "zed";
+            this.zed.ScrollGrace = 0;
+            this.zed.ScrollMaxX = 0;
+            this.zed.ScrollMaxY = 0;
+            this.zed.ScrollMaxY2 = 0;
+            this.zed.ScrollMinX = 0;
+            this.zed.ScrollMinY = 0;
+            this.zed.ScrollMinY2 = 0;
+            this.zed.Size = new System.Drawing.Size(574, 456);
+            this.zed.TabIndex = 3;
+            this.zed.Visible = false;
             // 
             // ts
             // 
@@ -210,32 +251,6 @@
             this.btnExport.Size = new System.Drawing.Size(55, 22);
             this.btnExport.Text = "Export...";
             // 
-            // zed
-            // 
-            this.zed.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.zed.Location = new System.Drawing.Point(0, 25);
-            this.zed.Name = "zed";
-            this.zed.ScrollGrace = 0;
-            this.zed.ScrollMaxX = 0;
-            this.zed.ScrollMaxY = 0;
-            this.zed.ScrollMaxY2 = 0;
-            this.zed.ScrollMinX = 0;
-            this.zed.ScrollMinY = 0;
-            this.zed.ScrollMinY2 = 0;
-            this.zed.Size = new System.Drawing.Size(574, 456);
-            this.zed.TabIndex = 3;
-            this.zed.Visible = false;
-            // 
-            // dg
-            // 
-            this.dg.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dg.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dg.Location = new System.Drawing.Point(0, 25);
-            this.dg.Name = "dg";
-            this.dg.Size = new System.Drawing.Size(574, 456);
-            this.dg.TabIndex = 5;
-            this.dg.Visible = false;
-            // 
             // cmdOk
             // 
             this.cmdOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
@@ -269,9 +284,9 @@
             this.Load += new System.EventHandler(this.frmAdvanced_Load);
             this.pnl.ResumeLayout(false);
             this.pnl.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dg)).EndInit();
             this.ts.ResumeLayout(false);
             this.ts.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dg)).EndInit();
             this.ResumeLayout(false);
 
         }

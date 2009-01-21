@@ -16,6 +16,7 @@ namespace MyPersonalIndex
     {
         public enum AvgShareCalc { FIFO, LIFO, AVG };
         public enum OutputFormat { Currency, Percentage, Decimal, Integer, ShortDate, LongDate, None };
+        public const string SignifyPortfolioCorrelation = "~|";
         
         public struct MPISettings
         {
@@ -692,12 +693,14 @@ namespace MyPersonalIndex
             dgCorrelation.Columns.Clear();
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetCorrelationDistinctTickers(MPI.Portfolio.ID, btnCorrelationHidden.Checked));
+            this.Cursor = Cursors.WaitCursor;
+            
             try
             {
                 List<string> CorrelationItems = new List<string>();
                 int ordTicker = rs.GetOrdinal("Ticker");
 
-                CorrelationItems.Add(MPI.Portfolio.ID.ToString());
+                CorrelationItems.Add(SignifyPortfolioCorrelation + MPI.Portfolio.ID.ToString());
 
                 if (rs.HasRows)
                 {
@@ -730,7 +733,7 @@ namespace MyPersonalIndex
                         {
                             try
                             {
-                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
+                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate, SignifyPortfolioCorrelation), 0));
                                 dgCorrelation[x, i].Value = dgCorrelation[i, x].Value;
                             }
                             catch (SqlCeException)
@@ -743,6 +746,7 @@ namespace MyPersonalIndex
             finally
             {
                 rs.Close();
+                this.Cursor = Cursors.Default;
             }
         }
 
@@ -1899,7 +1903,7 @@ namespace MyPersonalIndex
 
         private void btnMainCompare_Click(object sender, EventArgs e)
         {
-            using (frmAdvanced f = new frmAdvanced())
+            using (frmAdvanced f = new frmAdvanced(MPI.Settings.DataStartDate, MPI.LastDate))
             {
                 f.ShowDialog();
             }

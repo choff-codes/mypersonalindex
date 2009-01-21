@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Windows.Forms;
+using System.Collections.Generic;
+using System.Data.SqlServerCe;
 
 namespace MyPersonalIndex
 {
@@ -10,17 +12,20 @@ namespace MyPersonalIndex
         private MonthCalendar StartCalendar;
         private MonthCalendar EndCalendar;
 
-        public frmAdvanced()
+        public frmAdvanced(DateTime DataStartDate, DateTime LastDate)
         {
             InitializeComponent();
+
+            StartCalendar = new MonthCalendar { MaxSelectionCount = 1, MinDate = DataStartDate, SelectionStart = DataStartDate };
+            EndCalendar = new MonthCalendar { MaxSelectionCount = 1, MinDate = DataStartDate, SelectionStart =  LastDate};
+            btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
+            btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
         }
 
         private void frmAdvanced_Load(object sender, EventArgs e)
         {
             cmb.SelectedIndex = 0;
-            StartCalendar = new MonthCalendar { MaxSelectionCount = 1 };
-            EndCalendar = new MonthCalendar { MaxSelectionCount = 1 };
-
+            
             if (SQL.Connection == ConnectionState.Closed)
             {
                 DialogResult = DialogResult.Cancel;
@@ -35,7 +40,7 @@ namespace MyPersonalIndex
             btnEndDate.DropDownItems.Insert(0, host);
             EndCalendar.DateSelected += new DateRangeEventHandler(Date_Change);
 
-            lst.DataSource = SQL.ExecuteDataset(Queries.Adv_GetTickerList());
+            lst.DataSource = SQL.ExecuteDataset(Queries.Adv_GetTickerList(frmMain.SignifyPortfolioCorrelation));
             lst.DisplayMember = "Name";
             lst.ValueMember = "ID";
         }
@@ -44,13 +49,17 @@ namespace MyPersonalIndex
         {
             if (sender == StartCalendar)
             {
+                StartCalendar.SelectionStart =
+                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(StartCalendar.SelectionStart), StartCalendar.MinDate));
                 btnStartDate.HideDropDown();
                 btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             }
             else
             {
+                EndCalendar.SelectionStart =
+                   Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
                 btnEndDate.HideDropDown();
-                btnEndDate.Text = "Start Date: " + EndCalendar.SelectionStart.ToShortDateString();
+                btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
             }
         }
 
@@ -68,9 +77,8 @@ namespace MyPersonalIndex
 
         private void cmdPortfolios_Click(object sender, EventArgs e)
         {
-            int tmp;
             for (int i = 0; i < lst.Items.Count; i++)
-                if (Int32.TryParse(((DataTable)lst.DataSource).Rows[i]["ID"].ToString(), out tmp))
+                if (((DataTable)lst.DataSource).Rows[i]["ID"].ToString().Contains(frmMain.SignifyPortfolioCorrelation)) 
                     lst.SetItemChecked(i, true);
                 else
                     lst.SetItemChecked(i, false);
@@ -78,9 +86,8 @@ namespace MyPersonalIndex
 
         private void cmdTickers_Click(object sender, EventArgs e)
         {
-            int tmp;
             for (int i = 0; i < lst.Items.Count; i++)
-                if (!Int32.TryParse(((DataTable)lst.DataSource).Rows[i]["ID"].ToString(), out tmp))
+                if (!((DataTable)lst.DataSource).Rows[i]["ID"].ToString().Contains(frmMain.SignifyPortfolioCorrelation)) 
                     lst.SetItemChecked(i, true);
                 else
                     lst.SetItemChecked(i, false);
@@ -98,9 +105,63 @@ namespace MyPersonalIndex
                 case 0:
                     break;
                 case 1:
+                    LoadCorrelations(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
                     break;
                 case 2:
                     break;
+            }
+        }
+
+        private void LoadCorrelations(DateTime StartDate, DateTime EndDate)
+        {
+            this.Cursor = Cursors.WaitCursor;
+            try
+            {
+                zed.Visible = false;
+                dg.Visible = true;
+                dg.Rows.Clear();
+                dg.Columns.Clear();
+
+                if (lst.CheckedIndices.Count <= 0)
+                    return;
+
+                List<string> CorrelationItems = new List<string>();
+                DataTable dt = (DataTable)lst.DataSource;
+
+                foreach (int i in lst.CheckedIndices)
+                {
+                    CorrelationItems.Add(dt.Rows[i]["ID"].ToString());
+                    dg.Columns.Add("Col" + i.ToString(), dt.Rows[i]["Name"].ToString());
+                }
+
+                foreach (DataGridViewColumn d in dg.Columns)
+                    d.SortMode = DataGridViewColumnSortMode.NotSortable;
+
+                dg.Rows.Add(CorrelationItems.Count);
+                for (int i = 0; i < CorrelationItems.Count; i++)
+                    dg.Rows[i].HeaderCell.Value = dg.Columns[i].HeaderText;
+
+                for (int i = 0; i < CorrelationItems.Count; i++)
+                    for (int x = i; x < CorrelationItems.Count; x++)
+                        if (x == i)
+                            dg[i, x].Value = 100.0;
+                        else
+                        {
+                            try
+                            {
+                                dg[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate, frmMain.SignifyPortfolioCorrelation), 0));
+                                dg[x, i].Value = dg[i, x].Value;
+                            }
+                            catch (SqlCeException)
+                            {
+                                dg[i, x].Value = 0;
+                                dg[x, i].Value = 0;
+                            }
+                        }
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
     }

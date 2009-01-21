@@ -531,9 +531,15 @@ namespace MyPersonalIndex
                 Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
         }
 
-        public static string Main_GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
+        public static string Common_GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate, string SignifyPortfolio)
         {
-            int tmp;
+            bool Ticker1Portfolio = Ticker1.Contains(SignifyPortfolio);
+            bool Ticker2Portfolio = Ticker2.Contains(SignifyPortfolio);
+            if (Ticker1Portfolio)
+                Ticker1 = Ticker1.Substring(SignifyPortfolio.Length, Ticker1.Length - SignifyPortfolio.Length);
+            if (Ticker2Portfolio)
+                Ticker2 = Ticker2.Substring(SignifyPortfolio.Length, Ticker2.Length - SignifyPortfolio.Length);
+
             return string.Format(
                 "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" + 
                         " Sqrt((Ticker1Square - Power(Ticker1Sum,2) / TotalDays) * (Ticker2Square - Power(Ticker2Sum,2) / TotalDays)) * 100" +
@@ -544,12 +550,12 @@ namespace MyPersonalIndex
                             " SUM(a.Change * b.Change) AS ProductSquare," +
                             " COUNT(*) AS TotalDays" +
                         " FROM " +
-                                (Int32.TryParse(Ticker1, out tmp) ? 
+                                (Ticker1Portfolio ? 
                                     " (SELECT Date, Change FROM NAV WHERE Portfolio = {0}" :
                                     " (SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{0}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS a" +
                         " INNER JOIN " +
-                                (Int32.TryParse(Ticker2, out tmp) ?
+                                (Ticker2Portfolio ? 
                                     "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
                                     "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS b" +
@@ -692,11 +698,13 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Stats WHERE Statistic = {0}", ID);
         }
 
-        public static string Adv_GetTickerList()
+        public static string Adv_GetTickerList(string SignifyPortfolio)
         {
-            return "SELECT Name, CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
-                    " UNION ALL " +
-                    " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a";
+            return string.Format(
+                "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
+                " UNION ALL " +
+                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a",
+                SignifyPortfolio);
         }
     }
 }

@@ -14,9 +14,7 @@ namespace MyPersonalIndex
 {
     public partial class frmMain : Form
     {
-        public enum AvgShareCalc { FIFO, LIFO, AVG };
-        public enum OutputFormat { Currency, Percentage, Decimal, Integer, ShortDate, LongDate, None };
-        public const string SignifyPortfolioCorrelation = "~|";
+        
         
         public struct MPISettings
         {
@@ -64,7 +62,7 @@ namespace MyPersonalIndex
             public int ID;
             public string Name;
             public bool Dividends;
-            public AvgShareCalc CostCalc;
+            public Constants.AvgShareCalc CostCalc;
             public double NAVStart;
             public int AAThreshold;
             public DateTime StartDate;
@@ -392,16 +390,22 @@ namespace MyPersonalIndex
 
             // Set the Titles
             g.Title.Text = MPI.Portfolio.Name;
+            g.Title.FontSpec.Family = "Tahoma";
             g.XAxis.Title.Text = "Date";
+            g.XAxis.Title.FontSpec.Family = "Tahoma";
             g.YAxis.MajorGrid.IsVisible = true;
             g.YAxis.Title.Text = "Percent";
+            g.YAxis.Title.FontSpec.Family = "Tahoma";
             g.XAxis.Type = AxisType.Date;
             g.YAxis.Scale.Format = "0.00'%'";
-            g.XAxis.Scale.FontSpec.Size = 9;
-            g.YAxis.Scale.FontSpec.Size = 9;
+            g.XAxis.Scale.FontSpec.Size = 8;
+            g.XAxis.Scale.FontSpec.Family = "Tahoma";
+            g.YAxis.Scale.FontSpec.Size = 8;
+            g.YAxis.Scale.FontSpec.Family = "Tahoma";
             g.Legend.FontSpec.Size = 14;
-            g.XAxis.Title.FontSpec.Size = 12;
-            g.YAxis.Title.FontSpec.Size = 12;
+            g.XAxis.Title.FontSpec.Size = 11;
+            g.YAxis.Title.FontSpec.Size = 11;
+            g.Title.FontSpec.Size = 13;
             g.Legend.IsVisible = false;
             g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
         }
@@ -503,7 +507,7 @@ namespace MyPersonalIndex
             MPI.Portfolio.StartDate = rs.GetDateTime(rs.GetOrdinal("StartDate"));
             stbIndexStart.Text = "Index Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
             MPI.Portfolio.Dividends = rs.GetSqlBoolean(rs.GetOrdinal("Dividends")).IsTrue;
-            MPI.Portfolio.CostCalc = (AvgShareCalc)rs.GetInt32(rs.GetOrdinal("CostCalc"));
+            MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32(rs.GetOrdinal("CostCalc"));
             MPI.Portfolio.NAVStart = (double)rs.GetDecimal(rs.GetOrdinal("NAVStartValue"));
             MPI.Portfolio.AAThreshold = rs.GetInt32(rs.GetOrdinal("AAThreshold"));
             btnHoldingsHidden.Checked = rs.GetSqlBoolean(rs.GetOrdinal("HoldingsShowHidden")).IsTrue;
@@ -557,23 +561,23 @@ namespace MyPersonalIndex
             return SQL;
         }
 
-        private string FormatStatString(object s, OutputFormat o)
+        private string FormatStatString(object s, Constants.OutputFormat o)
         {
             try
             {
                 switch (o)
                 {
-                    case OutputFormat.Currency:
+                    case Constants.OutputFormat.Currency:
                         return string.Format("{0:C}", Convert.ToDouble(s));
-                    case OutputFormat.Decimal:
+                    case Constants.OutputFormat.Decimal:
                         return string.Format("{0:N2}", Convert.ToDouble(s));
-                    case OutputFormat.Integer:
+                    case Constants.OutputFormat.Integer:
                         return string.Format("{0:0,0}", Convert.ToDouble(s));
-                    case OutputFormat.Percentage:
+                    case Constants.OutputFormat.Percentage:
                         return string.Format("{0:N2}%", Convert.ToDouble(s));
-                    case OutputFormat.LongDate:
+                    case Constants.OutputFormat.LongDate:
                         return string.Format("{0:D}", Convert.ToDateTime(s));
-                    case OutputFormat.ShortDate:
+                    case Constants.OutputFormat.ShortDate:
                         return string.Format("{0:d}", Convert.ToDateTime(s));
                     default:
                         return Convert.ToString(s);
@@ -659,7 +663,7 @@ namespace MyPersonalIndex
                         }
                         try
                         {
-                            MPI.Stat.TextBoxes[x].Text = FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (OutputFormat)rs.GetInt32(ordFormat));
+                            MPI.Stat.TextBoxes[x].Text = FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (Constants.OutputFormat)rs.GetInt32(ordFormat));
                         }
                         catch (SqlCeException)
                         {
@@ -700,7 +704,7 @@ namespace MyPersonalIndex
                 List<string> CorrelationItems = new List<string>();
                 int ordTicker = rs.GetOrdinal("Ticker");
 
-                CorrelationItems.Add(SignifyPortfolioCorrelation + MPI.Portfolio.ID.ToString());
+                CorrelationItems.Add(Constants.SignifyPortfolio + MPI.Portfolio.ID.ToString());
 
                 if (rs.HasRows)
                 {
@@ -733,7 +737,7 @@ namespace MyPersonalIndex
                         {
                             try
                             {
-                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate, SignifyPortfolioCorrelation), 0));
+                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
                                 dgCorrelation[x, i].Value = dgCorrelation[i, x].Value;
                             }
                             catch (SqlCeException)
@@ -1060,12 +1064,12 @@ namespace MyPersonalIndex
                         double TransactionShares = (double)rs.GetDecimal(rs_ordShares);
                         double TransactionPrice = (double)rs.GetDecimal(rs_ordPrice);
 
-                        if (TransactionShares < 0 && MPI.Portfolio.CostCalc != AvgShareCalc.AVG)
+                        if (TransactionShares < 0 && MPI.Portfolio.CostCalc != Constants.AvgShareCalc.AVG)
                         {
                             if (Shares.Count < 1)
                                 continue;
 
-                            int i = MPI.Portfolio.CostCalc == AvgShareCalc.LIFO ? Shares.Count - 1 : 0;
+                            int i = MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO ? Shares.Count - 1 : 0;
 
                             do
                             {
@@ -1087,7 +1091,7 @@ namespace MyPersonalIndex
                                     Prices.RemoveAt(i);
                                 }
 
-                                if (MPI.Portfolio.CostCalc == AvgShareCalc.LIFO)
+                                if (MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO)
                                     i--;
                                 else
                                     i++;
@@ -1508,7 +1512,7 @@ namespace MyPersonalIndex
                     MPI.Portfolio.NAVStart = r.NAVStart;
                     MPI.Portfolio.StartDate = r.StartDate;
                     MPI.Portfolio.AAThreshold = r.AAThreshold;
-                    MPI.Portfolio.CostCalc = (AvgShareCalc)r.CostCalc;
+                    MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)r.CostCalc;
                     StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
                     Reload = true;
                 }
@@ -1534,7 +1538,7 @@ namespace MyPersonalIndex
                     }
                     if (r.CostCalc != (int)MPI.Portfolio.CostCalc)
                     {
-                        MPI.Portfolio.CostCalc = (AvgShareCalc)r.CostCalc;
+                        MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)r.CostCalc;
                         LoadHoldings(MPI.Holdings.SelDate);
                     }
                 }

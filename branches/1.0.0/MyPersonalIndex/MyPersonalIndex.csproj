@@ -70,6 +70,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Constants.cs" />
+    <Compile Include="Classes\Functions.cs" />
     <Compile Include="WinForms\frmAdvanced.cs">
       <SubType>Form</SubType>
     </Compile>

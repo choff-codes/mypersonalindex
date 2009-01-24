@@ -112,6 +112,7 @@ namespace MyPersonalIndex
                     LoadCorrelations(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
                     break;
                 case 2:
+                    LoadStat(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
                     break;
             }
         }
@@ -201,6 +202,8 @@ namespace MyPersonalIndex
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
         {
             dg.Visible = false;
+            dg.Rows.Clear();
+            dg.Columns.Clear();
             zed.Visible = true;
 
             GraphPane g = zed.GraphPane;
@@ -242,7 +245,7 @@ namespace MyPersonalIndex
                             }
                             while (rs.Read());
 
-                            LineItem line = g.AddCurve(((DataTable)lst.DataSource).Rows[i]["Name"].ToString(), list, Functions.GetRandomColor(Seed), SymbolType.None);
+                            LineItem line = g.AddCurve(((DataTable)lst.DataSource).Rows[i]["Name"].ToString(), list, Functions.GetRandomColor(Seed), SymbolType.None);//(SymbolType)(Seed % Enum.GetValues(typeof(SymbolType)).Length));
                             line.Line.Width = 2; 
                         }
                     }
@@ -256,7 +259,7 @@ namespace MyPersonalIndex
                         PointPairList list = GetTickerChart(rs);
                         if (list.Count > 0)
                         {
-                            LineItem line = g.AddCurve(((DataTable)lst.DataSource).Rows[i]["Name"].ToString(), list, Functions.GetRandomColor(Seed), SymbolType.None);
+                            LineItem line = g.AddCurve(((DataTable)lst.DataSource).Rows[i]["Name"].ToString(), list, Functions.GetRandomColor(Seed), SymbolType.None);//(SymbolType)(Seed % Enum.GetValues(typeof(SymbolType)).Length));
                             line.Line.Width = 2; 
                         }
 
@@ -306,5 +309,98 @@ namespace MyPersonalIndex
 
             return list;
         }
+
+        private string CleanStatString(string SQL, string Portfolio, DateTime StartDate, DateTime EndDate)
+        {
+            SQL = SQL.Replace("\n", " ");
+            SQL = SQL.Replace("%Portfolio%", Portfolio);
+            SQL = SQL.Replace("%StartDate%", StartDate.ToShortDateString());
+            SQL = SQL.Replace("%EndDate%", EndDate.ToShortDateString());
+
+            SqlCeResultSet rs = this.SQL.ExecuteResultSet(Queries.Adv_GetPortfolio(Portfolio, EndDate));
+            try
+            {
+                if (!rs.HasRows)
+                    return SQL;
+                rs.ReadFirst();
+
+                SQL = SQL.Replace("%PortfolioName%", rs.GetString(rs.GetOrdinal("Name")));
+                SQL = SQL.Replace("%TotalValue%", rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
+                SQL = SQL.Replace("%NAVStartValue%", rs.GetDecimal(rs.GetOrdinal("NAVStartValue")).ToString());
+            }
+            finally
+            {
+                rs.Close();
+            }
+            return SQL;
+        }
+
+        
+
+        private void LoadStat(DateTime StartDate, DateTime EndDate)
+        {
+            zed.Visible = false;
+            dg.Visible = true;
+            dg.Rows.Clear();
+            dg.Columns.Clear();
+
+            DataTable dt = (DataTable)lst.DataSource;
+
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Adv_GetStats());
+
+            try
+            {
+
+                if (!rs.HasRows)
+                    return;
+
+                int ordDescription = rs.GetOrdinal("Description");
+                int ordSQL = rs.GetOrdinal("SQL");
+                int ordFormat = rs.GetOrdinal("Format");
+
+                rs.ReadFirst();
+                
+                int Col = 0;
+                foreach (int i in lst.CheckedIndices)
+                {
+                    if (!dt.Rows[i]["ID"].ToString().Contains(Constants.SignifyPortfolio))
+                        continue;
+
+                    dg.Columns.Add(Col.ToString(), dt.Rows[i]["Name"].ToString());
+                }
+
+                if (dg.Columns.Count <= 0)
+                    return;
+
+                do
+                {
+                    int Row = dg.Rows.Add();
+                    Col = 0;
+                    dg.Rows[Row].HeaderCell.Value = rs.GetString(ordDescription);
+
+                    foreach (int i in lst.CheckedIndices)
+                    {
+                        if (!dt.Rows[i]["ID"].ToString().Contains(Constants.SignifyPortfolio))
+                            continue;
+
+                        try
+                        {
+                            dg[Col, Row].Value = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL), Functions.StripSignifyPortfolio(dt.Rows[i]["ID"].ToString()), StartDate, EndDate)), (Constants.OutputFormat)rs.GetInt32(ordFormat));
+                        }
+                        catch (SqlCeException)
+                        {
+                            dg[Col, Row].Value = "Error";
+                        }
+                        Col++;
+                    }
+                }
+                while (rs.Read());
+            }
+            finally
+            {
+                rs.Close();
+            }
+        }
+
     }
 }

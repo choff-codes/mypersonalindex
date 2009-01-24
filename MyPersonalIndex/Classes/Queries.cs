@@ -732,5 +732,20 @@ namespace MyPersonalIndex
         {
             return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Ticker);
         }
+
+        public static string Adv_GetPortfolio(string Portfolio, DateTime EndDate)
+        {
+            return string.Format(
+                "SELECT a.Name, a.NAVStartValue, b.TotalValue" +
+                " FROM Portfolios a" +
+                " INNER JOIN NAV b" +
+                " ON b.Date = '{0}' and b.Portfolio = {1}" +
+                " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
+        }
+
+        public static string Adv_GetStats()
+        {
+            return "SELECT SQL, Format, Description FROM UserStatistics";
+        }
     }
 }

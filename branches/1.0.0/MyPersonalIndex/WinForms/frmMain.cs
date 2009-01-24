@@ -561,38 +561,6 @@ namespace MyPersonalIndex
             return SQL;
         }
 
-        private string FormatStatString(object s, Constants.OutputFormat o)
-        {
-            try
-            {
-                switch (o)
-                {
-                    case Constants.OutputFormat.Currency:
-                        return string.Format("{0:C}", Convert.ToDouble(s));
-                    case Constants.OutputFormat.Decimal:
-                        return string.Format("{0:N2}", Convert.ToDouble(s));
-                    case Constants.OutputFormat.Integer:
-                        return string.Format("{0:0,0}", Convert.ToDouble(s));
-                    case Constants.OutputFormat.Percentage:
-                        return string.Format("{0:N2}%", Convert.ToDouble(s));
-                    case Constants.OutputFormat.LongDate:
-                        return string.Format("{0:D}", Convert.ToDateTime(s));
-                    case Constants.OutputFormat.ShortDate:
-                        return string.Format("{0:d}", Convert.ToDateTime(s));
-                    default:
-                        return Convert.ToString(s);
-                }
-            }
-            catch(System.FormatException)
-            {
-                return Convert.ToString(s);
-            }
-            catch (System.InvalidCastException)
-            {
-                return Convert.ToString(s);
-            }
-        }
-
         private double GetTotalValue(DateTime Date)
         {
             return Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValue(MPI.Portfolio.ID, Date), 0));
@@ -663,7 +631,7 @@ namespace MyPersonalIndex
                         }
                         try
                         {
-                            MPI.Stat.TextBoxes[x].Text = FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (Constants.OutputFormat)rs.GetInt32(ordFormat));
+                            MPI.Stat.TextBoxes[x].Text = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (Constants.OutputFormat)rs.GetInt32(ordFormat));
                         }
                         catch (SqlCeException)
                         {

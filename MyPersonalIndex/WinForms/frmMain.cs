@@ -456,6 +456,8 @@ namespace MyPersonalIndex
 
         private void LoadPortfolio()
         {
+            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
+
             if (((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows.Count == 0)
                 DisableItems(true);
             else
@@ -552,7 +554,7 @@ namespace MyPersonalIndex
 
             d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
             d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
-            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
+            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(MPI.Portfolio.ID, MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
             d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
             d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
             d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
@@ -1243,7 +1245,7 @@ namespace MyPersonalIndex
                     else
                         NAV = NewTotalValue / ((YTotalValue + NetPurchases) / YNAV);
 
-                    if (!double.IsNaN(NAV))
+                    if (!double.IsNaN(NAV) && !double.IsInfinity(NAV))
                     {
                         newRecord.SetDecimal(rs2_ordNAV, (decimal)NAV);
                         newRecord.SetDecimal(rs2_ordChange, (decimal)(((NAV / YNAV) - 1) * 100));
@@ -1338,6 +1340,9 @@ namespace MyPersonalIndex
             }
             else
             {
+                if (dgHoldings.RowCount < 1)
+                    return;
+
                 frmTickers.TickerRetValues t;
                 d = ShowTickerForm(Convert.ToInt32(dgHoldings[MPIHoldings.TickerIDColumn, dgHoldings.CurrentCell.RowIndex].Value),
                     (string)dgHoldings[MPIHoldings.TickerStringColumn, dgHoldings.CurrentCell.RowIndex].Value, out t);
@@ -1534,6 +1539,9 @@ namespace MyPersonalIndex
 
         private void btnMainDelete_Click(object sender, EventArgs e)
         {
+            if (cmbMainPortfolio.ComboBox.SelectedValue == null)
+                return;
+
             if (MessageBox.Show("Are you sure you want to delete " + MPI.Portfolio.Name + "?", "Delete?", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return;
             
@@ -1546,8 +1554,7 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedClosingPrices());
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedDividends());
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedSplits());
-            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
-            
+            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();  
         }
 
         private bool IsInternetConnection()

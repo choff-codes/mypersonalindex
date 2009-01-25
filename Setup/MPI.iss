@@ -1,7 +1,7 @@
 [Setup]
 AppId={{5B21E6C6-04C8-4131-8556-08CC6CCE1DE0}
 AppName=MyPersonalIndex
-AppVerName=MyPersonalIndex 1.0.0
+AppVerName=MyPersonalIndex 1.0.1
 AppPublisher=Matthew Wikler
 AppPublisherURL=http://code.google.com/p/mypersonalindex/
 AppSupportURL=http://code.google.com/p/mypersonalindex/
@@ -16,6 +16,7 @@ OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
 MinVersion=0,5.01.2600sp2
+AppMutex=MyPersonalIndex
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl

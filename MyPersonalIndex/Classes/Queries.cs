@@ -758,7 +758,12 @@ namespace MyPersonalIndex
             return string.Format("UPDATE Settings SET TickerDiv = {0}", Convert.ToByte(TickerDiv));
         }
 
-        public static string Adv_GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        public static string Common_GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
+        }
+
+        public static string Common_GetPreviousPortfolioDay(int Portfolio, DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
         }

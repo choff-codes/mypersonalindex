@@ -163,7 +163,7 @@ namespace MyPersonalIndex
             return string.Format("SELECT TotalValue FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
-        public static string Main_GetNAV(int Portfolio, DateTime Date)
+        public static string Common_GetNAV(int Portfolio, DateTime Date)
         {
             return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
@@ -259,17 +259,17 @@ namespace MyPersonalIndex
             return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}'", MinDate.ToShortDateString());
         }
 
-        public static string Main_GetPreviousDay(DateTime Date)
+        public static string Common_GetPreviousDay(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
         }
 
-        public static string Main_GetCurrentDayOrPrevious(DateTime Date)
+        public static string Common_GetCurrentDayOrPrevious(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
         }
 
-        public static string Main_GetCurrentDayOrNext(DateTime Date)
+        public static string Common_GetCurrentDayOrNext(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
         }
@@ -736,7 +736,7 @@ namespace MyPersonalIndex
         public static string Adv_GetPortfolio(string Portfolio, DateTime EndDate)
         {
             return string.Format(
-                "SELECT a.Name, a.NAVStartValue, b.TotalValue" +
+                "SELECT a.Name, a.StartDate, b.TotalValue" +
                 " FROM Portfolios a" +
                 " INNER JOIN NAV b" +
                 " ON b.Date = '{0}' and b.Portfolio = {1}" +
@@ -756,6 +756,11 @@ namespace MyPersonalIndex
         public static string Adv_UpdateIncludeDividends(bool TickerDiv)
         {
             return string.Format("UPDATE Settings SET TickerDiv = {0}", Convert.ToByte(TickerDiv));
+        }
+
+        public static string Adv_GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
         }
     }
 }

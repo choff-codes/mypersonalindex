@@ -44,8 +44,8 @@ namespace MyPersonalIndex
                 case "Total Value":
                     txtSQL.SelectedText = "%TotalValue%";
                     break;
-                case "NAV Start Value":
-                    txtSQL.SelectedText = "%NAVStartValue%";
+                case "Previous Day":
+                    txtSQL.SelectedText = "%PreviousDay%";
                     break;
             }
         }

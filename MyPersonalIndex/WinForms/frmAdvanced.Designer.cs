@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvanced));
             this.lst = new System.Windows.Forms.CheckedListBox();
             this.cmdSelectAll = new System.Windows.Forms.Button();
@@ -43,13 +43,16 @@
             this.ts = new System.Windows.Forms.ToolStrip();
             this.lblReport = new System.Windows.Forms.ToolStripLabel();
             this.cmb = new System.Windows.Forms.ToolStripComboBox();
-            this.btnRefresh = new System.Windows.Forms.ToolStripButton();
+            this.btnRefresh = new System.Windows.Forms.ToolStripSplitButton();
+            this.btnTickerDiv = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnStat = new System.Windows.Forms.ToolStripMenuItem();
             this.s1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.cmdOk = new System.Windows.Forms.Button();
+            this.dSave = new System.Windows.Forms.SaveFileDialog();
             this.pnl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).BeginInit();
             this.ts.SuspendLayout();
@@ -137,15 +140,15 @@
             this.dg.AllowUserToDeleteRows = false;
             this.dg.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dg.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle3.Format = "#0.00\'%\'";
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dg.DefaultCellStyle = dataGridViewCellStyle3;
+            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle5.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle5.Format = "#0.00\'%\'";
+            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dg.DefaultCellStyle = dataGridViewCellStyle5;
             this.dg.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dg.Location = new System.Drawing.Point(0, 25);
             this.dg.Name = "dg";
@@ -201,18 +204,35 @@
             this.cmb.Items.AddRange(new object[] {
             "Chart",
             "Correlation",
-            "Statistics (P)"});
+            "Statistics (P Only)"});
             this.cmb.Name = "cmb";
-            this.cmb.Size = new System.Drawing.Size(100, 25);
+            this.cmb.Size = new System.Drawing.Size(110, 25);
             // 
             // btnRefresh
             // 
+            this.btnRefresh.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnTickerDiv,
+            this.btnStat});
             this.btnRefresh.Image = global::MyPersonalIndex.Properties.Resources.refresh_48;
             this.btnRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(65, 22);
+            this.btnRefresh.Size = new System.Drawing.Size(77, 22);
             this.btnRefresh.Text = "Refresh";
-            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
+            this.btnRefresh.ButtonClick += new System.EventHandler(this.btnRefresh_ButtonClick);
+            // 
+            // btnTickerDiv
+            // 
+            this.btnTickerDiv.Name = "btnTickerDiv";
+            this.btnTickerDiv.Size = new System.Drawing.Size(294, 22);
+            this.btnTickerDiv.Text = "Chart: Include Dividends for Individual Tickers";
+            this.btnTickerDiv.Click += new System.EventHandler(this.btnTickerDiv_Click);
+            // 
+            // btnStat
+            // 
+            this.btnStat.Name = "btnStat";
+            this.btnStat.Size = new System.Drawing.Size(294, 22);
+            this.btnStat.Text = "Statistics: Set Portfolio Statistics...";
+            this.btnStat.Click += new System.EventHandler(this.btnStat_Click);
             // 
             // s1
             // 
@@ -250,6 +270,7 @@
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(55, 22);
             this.btnExport.Text = "Export...";
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
             // 
             // cmdOk
             // 
@@ -261,6 +282,11 @@
             this.cmdOk.Text = "OK";
             this.cmdOk.UseVisualStyleBackColor = true;
             this.cmdOk.Click += new System.EventHandler(this.cmdOk_Click);
+            // 
+            // dSave
+            // 
+            this.dSave.DefaultExt = "txt";
+            this.dSave.Filter = "Tab Delimited File|*.txt|Comma Delimited File|*.csv|Pipe Delimited File|*.txt";
             // 
             // frmAdvanced
             // 
@@ -282,6 +308,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Analysis and Comparisons";
             this.Load += new System.EventHandler(this.frmAdvanced_Load);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmAdvanced_FormClosing);
             this.pnl.ResumeLayout(false);
             this.pnl.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).EndInit();
@@ -302,7 +329,6 @@
         private System.Windows.Forms.Panel pnl;
         private System.Windows.Forms.ToolStrip ts;
         private System.Windows.Forms.ToolStripComboBox cmb;
-        private System.Windows.Forms.ToolStripButton btnRefresh;
         private System.Windows.Forms.ToolStripSeparator s1;
         private System.Windows.Forms.ToolStripDropDownButton btnStartDate;
         private System.Windows.Forms.ToolStripDropDownButton btnEndDate;
@@ -312,6 +338,10 @@
         private ZedGraph.ZedGraphControl zed;
         private System.Windows.Forms.DataGridView dg;
         private System.Windows.Forms.Button cmdOk;
+        private System.Windows.Forms.ToolStripSplitButton btnRefresh;
+        private System.Windows.Forms.ToolStripMenuItem btnTickerDiv;
+        private System.Windows.Forms.ToolStripMenuItem btnStat;
+        private System.Windows.Forms.SaveFileDialog dSave;
 
     }
 }

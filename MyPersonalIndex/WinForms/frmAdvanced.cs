@@ -6,12 +6,14 @@ using System.Data.SqlServerCe;
 using ZedGraph;
 using System.Drawing;
 using System.Data.SqlTypes;
+using System.IO;
 
 namespace MyPersonalIndex
 {
     public partial class frmAdvanced : Form
     {
         private Queries SQL = new Queries();
+        private DateTime LastDate;
         private MonthCalendar StartCalendar;
         private MonthCalendar EndCalendar;
 
@@ -23,6 +25,7 @@ namespace MyPersonalIndex
             EndCalendar = new MonthCalendar { MaxSelectionCount = 1, MinDate = DataStartDate, SelectionStart =  LastDate};
             btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
+            this.LastDate = LastDate;
         }
 
         private void frmAdvanced_Load(object sender, EventArgs e)
@@ -46,6 +49,8 @@ namespace MyPersonalIndex
             lst.DataSource = SQL.ExecuteDataset(Queries.Adv_GetTickerList());
             lst.DisplayMember = "Name";
             lst.ValueMember = "ID";
+
+            btnTickerDiv.Checked = Convert.ToInt32(SQL.ExecuteScalar(Queries.Adv_GetIncludeDividends())) == 1;
         }
 
         private void Date_Change(object sender, DateRangeEventArgs e)
@@ -53,7 +58,7 @@ namespace MyPersonalIndex
             if (sender == StartCalendar)
             {
                 StartCalendar.SelectionStart =
-                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(StartCalendar.SelectionStart), StartCalendar.MinDate));
+                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
                 btnStartDate.HideDropDown();
                 btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             }
@@ -99,22 +104,6 @@ namespace MyPersonalIndex
         private void cmdOk_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.OK;
-        }
-
-        private void btnRefresh_Click(object sender, EventArgs e)
-        {
-            switch (cmb.SelectedIndex)
-            {
-                case 0:
-                    LoadGraph(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
-                    break;
-                case 1:
-                    LoadCorrelations(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
-                    break;
-                case 2:
-                    LoadStat(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
-                    break;
-            }
         }
 
         private void LoadCorrelations(DateTime StartDate, DateTime EndDate)
@@ -301,7 +290,7 @@ namespace MyPersonalIndex
             {
                 CurrentSplits = CurrentSplits * (double)rs.GetDecimal(ordSplit);
                 double NewPrice = (double)rs.GetDecimal(ordPrice) * CurrentSplits;
-                double NewGain = (NewPrice - (double)rs.GetDecimal(ordDiv)) / (YPrice / YGain);
+                double NewGain = (NewPrice + (btnTickerDiv.Checked ? (double)rs.GetDecimal(ordDiv) : 0)) / (YPrice / YGain);
                 list.Add(new XDate(rs.GetDateTime(ordDate)), (NewGain - 1) * 100);
                 YGain = NewGain;
                 YPrice = NewPrice;
@@ -312,10 +301,11 @@ namespace MyPersonalIndex
 
         private string CleanStatString(string SQL, string Portfolio, DateTime StartDate, DateTime EndDate)
         {
-            SQL = SQL.Replace("\n", " ");
-            SQL = SQL.Replace("%Portfolio%", Portfolio);
-            SQL = SQL.Replace("%StartDate%", StartDate.ToShortDateString());
-            SQL = SQL.Replace("%EndDate%", EndDate.ToShortDateString());
+            Dictionary<Constants.StatVariables, string> d = new Dictionary<Constants.StatVariables, string>();
+
+            d.Add(Constants.StatVariables.Portfolio, Portfolio);
+            d.Add(Constants.StatVariables.StartDate, StartDate.ToShortDateString());
+            d.Add(Constants.StatVariables.EndDate, EndDate.ToShortDateString());
 
             SqlCeResultSet rs = this.SQL.ExecuteResultSet(Queries.Adv_GetPortfolio(Portfolio, EndDate));
             try
@@ -324,15 +314,16 @@ namespace MyPersonalIndex
                     return SQL;
                 rs.ReadFirst();
 
-                SQL = SQL.Replace("%PortfolioName%", rs.GetString(rs.GetOrdinal("Name")));
-                SQL = SQL.Replace("%TotalValue%", rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
-                SQL = SQL.Replace("%NAVStartValue%", rs.GetDecimal(rs.GetOrdinal("NAVStartValue")).ToString());
+                d.Add(Constants.StatVariables.PortfolioName, rs.GetString(rs.GetOrdinal("Name")));
+                d.Add(Constants.StatVariables.TotalValue, rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
+                d.Add(Constants.StatVariables.NAVStartValue, rs.GetDecimal(rs.GetOrdinal("NAVStartValue")).ToString());
             }
             finally
             {
                 rs.Close();
             }
-            return SQL;
+
+            return Functions.CleanStatString(SQL, d);
         }
 
         
@@ -346,7 +337,7 @@ namespace MyPersonalIndex
 
             DataTable dt = (DataTable)lst.DataSource;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Adv_GetStats());
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetStats(0));
 
             try
             {
@@ -354,6 +345,7 @@ namespace MyPersonalIndex
                 if (!rs.HasRows)
                     return;
 
+                int ordID = rs.GetOrdinal("ID");
                 int ordDescription = rs.GetOrdinal("Description");
                 int ordSQL = rs.GetOrdinal("SQL");
                 int ordFormat = rs.GetOrdinal("Format");
@@ -372,8 +364,14 @@ namespace MyPersonalIndex
                 if (dg.Columns.Count <= 0)
                     return;
 
+                foreach (DataGridViewColumn d in dg.Columns)
+                    d.SortMode = DataGridViewColumnSortMode.NotSortable;
+
                 do
                 {
+                    if (rs.GetInt32(ordID) == -1)
+                        continue;
+
                     int Row = dg.Rows.Add();
                     Col = 0;
                     dg.Rows[Row].HeaderCell.Value = rs.GetString(ordDescription);
@@ -391,6 +389,10 @@ namespace MyPersonalIndex
                         {
                             dg[Col, Row].Value = "Error";
                         }
+                        catch (ArgumentOutOfRangeException)
+                        {
+                            dg[Col, Row].Value = "Error";
+                        }
                         Col++;
                     }
                 }
@@ -402,5 +404,95 @@ namespace MyPersonalIndex
             }
         }
 
+        private void btnRefresh_ButtonClick(object sender, EventArgs e)
+        {
+            switch (cmb.SelectedIndex)
+            {
+                case 0:
+                    LoadGraph(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
+                    break;
+                case 1:
+                    LoadCorrelations(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
+                    break;
+                case 2:
+                    LoadStat(StartCalendar.SelectionStart, EndCalendar.SelectionStart);
+                    break;
+            }
+        }
+
+        private void btnTickerDiv_Click(object sender, EventArgs e)
+        {
+            btnTickerDiv.Checked = !btnTickerDiv.Checked;
+        }
+
+        private void frmAdvanced_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SQL.ExecuteNonQuery(Queries.Adv_UpdateIncludeDividends(btnTickerDiv.Checked));
+        }
+
+        private void Export(DataGridView dg)
+        {
+            if (dSave.ShowDialog() != DialogResult.OK)
+                return;
+
+            string[] lines = new string[dg.Rows.Count + 1];
+            string delimiter = "";
+
+            switch (dSave.FilterIndex)
+            {
+                case 1:
+                    delimiter = "\t";
+                    break;
+                case 2:
+                    delimiter = ",";
+                    break;
+                case 3:
+                    delimiter = "|";
+                    break;
+            }
+
+            int columnCount = dg.Columns.Count;
+
+            lines[0] = delimiter;
+
+            for (int x = 0; x < columnCount; x++)
+            {
+                lines[0] = lines[0] +
+                    (delimiter == "," ? dg.Columns[x].HeaderText.Replace(",", "") : dg.Columns[x].HeaderText) +
+                    (x == columnCount - 1 ? "" : delimiter);
+            }
+
+            for (int i = 0; i < dg.Rows.Count; i++)
+            {
+                lines[i + 1] = (delimiter == "," ? dg.Rows[i].HeaderCell.Value.ToString().Replace(",", "") : dg.Rows[i].HeaderCell.Value.ToString())
+                    + delimiter;
+                for (int x = 0; x < columnCount; x++)
+                {
+                    lines[i + 1] = lines[i + 1] +
+                        (delimiter == "," ? dg[x, i].FormattedValue.ToString().Replace(",", "") : dg[x, i].FormattedValue.ToString()) +
+                        (x == columnCount - 1 ? "" : delimiter);
+                }
+            }
+
+            File.WriteAllLines(dSave.FileName, lines);
+            MessageBox.Show("Export successful!");
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            if (dg.Visible)
+                Export(dg);
+            else
+                if (zed.Visible)
+                    zed.SaveAs();
+        }
+
+        private void btnStat_Click(object sender, EventArgs e)
+        {
+            using (frmStats f = new frmStats(0, "Advanced Comparison"))
+            {
+                f.ShowDialog();
+            }
+        }
     }
 }

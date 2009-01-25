@@ -75,7 +75,7 @@
             this.btnHoldingsExport = new System.Windows.Forms.ToolStripButton();
             this.tbStatistics = new System.Windows.Forms.TabPage();
             this.tsStat = new System.Windows.Forms.ToolStrip();
-            this.btnEdit = new System.Windows.Forms.ToolStripButton();
+            this.btnStatEdit = new System.Windows.Forms.ToolStripButton();
             this.sStat1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStatStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnStatEndDate = new System.Windows.Forms.ToolStripDropDownButton();
@@ -457,7 +457,7 @@
             // 
             this.tsStat.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.tsStat.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnEdit,
+            this.btnStatEdit,
             this.sStat1,
             this.btnStatStartDate,
             this.btnStatEndDate,
@@ -469,15 +469,15 @@
             this.tsStat.TabIndex = 1;
             this.tsStat.Text = "toolStrip4";
             // 
-            // btnEdit
+            // btnStatEdit
             // 
-            this.btnEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnEdit.Image")));
-            this.btnEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(98, 22);
-            this.btnEdit.Text = "Add/Edit Statistics";
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnStatEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnStatEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnStatEdit.Image")));
+            this.btnStatEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnStatEdit.Name = "btnStatEdit";
+            this.btnStatEdit.Size = new System.Drawing.Size(98, 22);
+            this.btnStatEdit.Text = "Add/Edit Statistics";
+            this.btnStatEdit.Click += new System.EventHandler(this.btnStatEdit_Click);
             // 
             // sStat1
             // 
@@ -1045,7 +1045,7 @@
             // stbFiller
             // 
             this.stbFiller.Name = "stbFiller";
-            this.stbFiller.Size = new System.Drawing.Size(424, 17);
+            this.stbFiller.Size = new System.Drawing.Size(455, 17);
             this.stbFiller.Spring = true;
             // 
             // stbUpdateStatus
@@ -1320,7 +1320,7 @@
         private System.Windows.Forms.ToolStripSeparator sMain4;
         private System.Windows.Forms.ToolStripButton btnMainUpdate;
         private System.Windows.Forms.ToolStrip tsStat;
-        private System.Windows.Forms.ToolStripButton btnEdit;
+        private System.Windows.Forms.ToolStripButton btnStatEdit;
         private System.Windows.Forms.ToolStripSeparator sStat1;
         private System.Windows.Forms.ToolStripDropDownButton btnStatStartDate;
         private System.Windows.Forms.ToolStripSeparator sStat2;

@@ -8,14 +8,11 @@ using System.Data.SqlServerCe;
 using System.Data.SqlTypes;
 using System.Net;
 using ZedGraph;
-using System.Diagnostics;
 
 namespace MyPersonalIndex
 {
     public partial class frmMain : Form
     {
-        
-        
         public struct MPISettings
         {
             public DateTime DataStartDate;
@@ -335,7 +332,7 @@ namespace MyPersonalIndex
 
         private DateTime GetCurrentDateOrNext(DateTime d)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(d), MPI.Portfolio.StartDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(d), MPI.LastDate));
         }
 
         private DateTime GetCurrentDateOrNext(DateTime d, DateTime defaultValue)
@@ -551,14 +548,16 @@ namespace MyPersonalIndex
 
         private string CleanStatString(string SQL)
         {
-            SQL = SQL.Replace("\n", " ");
-            SQL = SQL.Replace("%Portfolio%", MPI.Portfolio.ID.ToString());
-            SQL = SQL.Replace("%PortfolioName%", MPI.Portfolio.Name);
-            SQL = SQL.Replace("%StartDate%", MPI.Stat.BeginDate.ToShortDateString());
-            SQL = SQL.Replace("%EndDate%", MPI.Stat.EndDate.ToShortDateString());
-            SQL = SQL.Replace("%TotalValue%", MPI.Stat.TotalValue.ToString());
-            SQL = SQL.Replace("%NAVStartValue%", MPI.Portfolio.NAVStart.ToString());
-            return SQL;
+            Dictionary<Constants.StatVariables, string> d = new Dictionary<Constants.StatVariables, string>();
+
+            d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
+            d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
+            d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
+            d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
+            d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
+            d.Add(Constants.StatVariables.NAVStartValue, MPI.Portfolio.NAVStart.ToString());
+
+            return Functions.CleanStatString(SQL, d);
         }
 
         private double GetTotalValue(DateTime Date)
@@ -582,7 +581,7 @@ namespace MyPersonalIndex
 
             MPI.Stat.TotalValue = GetTotalValue(EndDate);
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetStats(MPI.Portfolio.ID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetStats(MPI.Portfolio.ID));
             try
             {
                 if (!rs.HasRows)
@@ -634,6 +633,10 @@ namespace MyPersonalIndex
                             MPI.Stat.TextBoxes[x].Text = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (Constants.OutputFormat)rs.GetInt32(ordFormat));
                         }
                         catch (SqlCeException)
+                        {
+                            MPI.Stat.TextBoxes[x].Text = "Error";
+                        }
+                        catch (ArgumentOutOfRangeException)
                         {
                             MPI.Stat.TextBoxes[x].Text = "Error";
                         }
@@ -1788,7 +1791,7 @@ namespace MyPersonalIndex
             MessageBox.Show("Export successful!");
         }
 
-        private void btnEdit_Click(object sender, EventArgs e)
+        private void btnStatEdit_Click(object sender, EventArgs e)
         {
             using (frmStats f = new frmStats(MPI.Portfolio.ID, MPI.Portfolio.Name))
             {

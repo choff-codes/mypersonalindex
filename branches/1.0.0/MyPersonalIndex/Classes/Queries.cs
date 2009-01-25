@@ -631,7 +631,7 @@ namespace MyPersonalIndex
             return "DELETE FROM ClosingPrices";
         }
 
-        public static string Main_GetStats(int Portfolio)
+        public static string Common_GetStats(int Portfolio)
         {
             return string.Format(
                 "SELECT Statistic AS ID, SQL, Format, Description" +
@@ -746,6 +746,16 @@ namespace MyPersonalIndex
         public static string Adv_GetStats()
         {
             return "SELECT SQL, Format, Description FROM UserStatistics";
+        }
+
+        public static string Adv_GetIncludeDividends()
+        {
+            return "SELECT TickerDiv FROM Settings";
+        }
+
+        public static string Adv_UpdateIncludeDividends(bool TickerDiv)
+        {
+            return string.Format("UPDATE Settings SET TickerDiv = {0}", Convert.ToByte(TickerDiv));
         }
     }
 }

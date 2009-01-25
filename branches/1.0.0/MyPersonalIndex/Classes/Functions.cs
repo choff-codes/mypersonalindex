@@ -55,7 +55,7 @@ namespace MyPersonalIndex
                     case Constants.OutputFormat.Decimal:
                         return string.Format("{0:N2}", Convert.ToDouble(s));
                     case Constants.OutputFormat.Integer:
-                        return string.Format("{0:0,0}", Convert.ToDouble(s));
+                        return string.Format("{0:#,0}", Convert.ToDouble(s));
                     case Constants.OutputFormat.Percentage:
                         return string.Format("{0:N2}%", Convert.ToDouble(s));
                     case Constants.OutputFormat.LongDate:
@@ -74,6 +74,18 @@ namespace MyPersonalIndex
             {
                 return Convert.ToString(s);
             }
+        }
+
+        public static string CleanStatString(string SQL, Dictionary<Constants.StatVariables, string> d)
+        {
+            if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
+                throw new ArgumentOutOfRangeException("Dictionary must be correct length");
+ 
+            //SQL = SQL.Replace("\n", " ");
+            foreach (KeyValuePair<Constants.StatVariables, string> p in d)
+                SQL = SQL.Replace("%" + Enum.GetName(typeof(Constants.StatVariables), p.Key) + "%", p.Value);
+
+            return SQL;
         }
     }
 }

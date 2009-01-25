@@ -1,7 +1,7 @@
 [Setup]
 AppId={{5B21E6C6-04C8-4131-8556-08CC6CCE1DE0}
 AppName=MyPersonalIndex
-AppVerName=MyPersonalIndex 1.0.0
+AppVerName=MyPersonalIndex 1.0.1
 AppPublisher=Matthew Wikler
 AppPublisherURL=http://code.google.com/p/mypersonalindex/
 AppSupportURL=http://code.google.com/p/mypersonalindex/
@@ -9,13 +9,14 @@ AppUpdatesURL=http://code.google.com/p/mypersonalindex/downloads/list
 DefaultDirName={pf}\MyPersonalIndex
 DefaultGroupName=MyPersonalIndex
 AllowNoIcons=yes
-LicenseFile=D:\docs\MyPersonalIndex\trunk\Setup\Info.txt
+LicenseFile=Info.txt
 ;InfoBeforeFile=
-OutputDir=D:\docs\MyPersonalIndex\trunk\Setup
+OutputDir=..\Setup
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
 MinVersion=0,5.01.2600sp2
+AppMutex=MyPersonalIndex
 
 [Languages]
 Name: english; MessagesFile: compiler:Default.isl
@@ -24,18 +25,18 @@ Name: english; MessagesFile: compiler:Default.isl
 Name: desktopicon; Description: {cm:CreateDesktopIcon}; GroupDescription: {cm:AdditionalIcons}; Flags: unchecked
 
 [Files]
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\MyPersonalIndex.exe; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlceca35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlcecompact35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlceer35EN.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlceme35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlceoledb35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlceqp35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\SQLCe\sqlcese35.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\System.Data.SqlServerCe.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\ZedGraph.dll; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\MyPersonalIndex\bin\Release\MPI.sdf; DestDir: {app}; Flags: ignoreversion
-Source: D:\docs\MyPersonalIndex\trunk\Setup\License.txt; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\MyPersonalIndex.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlceca35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlcecompact35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlceer35EN.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlceme35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlceoledb35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlceqp35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\SQLCe\sqlcese35.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\System.Data.SqlServerCe.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\ZedGraph.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\bin\Release\MPI.sdf; DestDir: {app}; Flags: ignoreversion
+Source: ..\Setup\License.txt; DestDir: {app}; Flags: ignoreversion
 
 [Icons]
 Name: {group}\MyPersonalIndex; Filename: {app}\MyPersonalIndex.exe

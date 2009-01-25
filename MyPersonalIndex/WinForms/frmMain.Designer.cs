@@ -29,7 +29,6 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -37,6 +36,7 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -50,6 +50,17 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
             this.tb = new System.Windows.Forms.TabControl();
             this.tbHoldings = new System.Windows.Forms.TabPage();
+            this.dgHoldings = new System.Windows.Forms.DataGridView();
+            this.colHoldingsActive = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colHoldingsTicker = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsClosingPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsAvgPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsTotalValueP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsAA = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tsHoldings = new System.Windows.Forms.ToolStrip();
             this.btnHoldingsAdd = new System.Windows.Forms.ToolStripButton();
             this.btnHoldingsEdit = new System.Windows.Forms.ToolStripButton();
@@ -62,44 +73,34 @@
             this.btnHoldingsHidden = new System.Windows.Forms.ToolStripButton();
             this.sHoldings3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnHoldingsExport = new System.Windows.Forms.ToolStripButton();
-            this.dgHoldings = new System.Windows.Forms.DataGridView();
-            this.colHoldingsActive = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.colHoldingsTicker = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsClosingPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsAvgPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsTotalValueP = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsAA = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tbStatistics = new System.Windows.Forms.TabPage();
             this.tsStat = new System.Windows.Forms.ToolStrip();
-            this.btnEdit = new System.Windows.Forms.ToolStripButton();
+            this.btnStatEdit = new System.Windows.Forms.ToolStripButton();
             this.sStat1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStatStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnStatEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.sStat2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStatExport = new System.Windows.Forms.ToolStripButton();
             this.tbChart = new System.Windows.Forms.TabPage();
+            this.zedChart = new ZedGraph.ZedGraphControl();
             this.tsChart = new System.Windows.Forms.ToolStrip();
             this.btnChartStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnChartEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.sChart1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnChartExport = new System.Windows.Forms.ToolStripButton();
-            this.zedChart = new ZedGraph.ZedGraphControl();
             this.tbPerformance = new System.Windows.Forms.TabPage();
-            this.tsPerformance = new System.Windows.Forms.ToolStrip();
-            this.btnPerformanceSortDesc = new System.Windows.Forms.ToolStripButton();
-            this.sPerformance1 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnPerformanceExport = new System.Windows.Forms.ToolStripButton();
             this.dgPerformance = new System.Windows.Forms.DataGridView();
             this.colPerformanceDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPerformanceTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPerformanceIndex = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPerformancePChange = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colPerformancePGain = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsPerformance = new System.Windows.Forms.ToolStrip();
+            this.btnPerformanceSortDesc = new System.Windows.Forms.ToolStripButton();
+            this.sPerformance1 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnPerformanceExport = new System.Windows.Forms.ToolStripButton();
             this.tbCorrelations = new System.Windows.Forms.TabPage();
+            this.dgCorrelation = new System.Windows.Forms.DataGridView();
             this.tsCorrelation = new System.Windows.Forms.ToolStrip();
             this.btnCorrelationCalc = new System.Windows.Forms.ToolStripButton();
             this.sCorrelation1 = new System.Windows.Forms.ToolStripSeparator();
@@ -109,7 +110,6 @@
             this.btnCorrelationHidden = new System.Windows.Forms.ToolStripButton();
             this.sCorrelation3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnCorrelationExport = new System.Windows.Forms.ToolStripButton();
-            this.dgCorrelation = new System.Windows.Forms.DataGridView();
             this.tbAA = new System.Windows.Forms.TabPage();
             this.dgAA = new System.Windows.Forms.DataGridView();
             this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -137,7 +137,7 @@
             this.tsMain = new System.Windows.Forms.ToolStrip();
             this.btnMainUpdate = new System.Windows.Forms.ToolStripButton();
             this.sMain1 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnMainOptions = new System.Windows.Forms.ToolStripButton();
+            this.btnMainCompare = new System.Windows.Forms.ToolStripButton();
             this.sMain2 = new System.Windows.Forms.ToolStripSeparator();
             this.lblMainPortfolio = new System.Windows.Forms.ToolStripLabel();
             this.cmbMainPortfolio = new System.Windows.Forms.ToolStripComboBox();
@@ -146,36 +146,25 @@
             this.sMain3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnMainAddPortfolio = new System.Windows.Forms.ToolStripButton();
             this.sMain4 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnMainOptions = new System.Windows.Forms.ToolStripButton();
             this.sMainAbout = new System.Windows.Forms.ToolStripButton();
-            this.toolStripDropDownButton5 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.charToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.correlationCompareToolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
-            this.applyAdvancedFiltersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripDropDownButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripComboBox1 = new System.Windows.Forms.ToolStripComboBox();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.dSave = new System.Windows.Forms.SaveFileDialog();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton3 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton4 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton5 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton6 = new System.Windows.Forms.ToolStripButton();
+            this.lblClosing = new System.Windows.Forms.Label();
+            this.bw = new MyPersonalIndex.MPIBackgroundWorker();
             this.tb.SuspendLayout();
             this.tbHoldings.SuspendLayout();
-            this.tsHoldings.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHoldings)).BeginInit();
+            this.tsHoldings.SuspendLayout();
             this.tbStatistics.SuspendLayout();
             this.tsStat.SuspendLayout();
             this.tbChart.SuspendLayout();
             this.tsChart.SuspendLayout();
             this.tbPerformance.SuspendLayout();
-            this.tsPerformance.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgPerformance)).BeginInit();
+            this.tsPerformance.SuspendLayout();
             this.tbCorrelations.SuspendLayout();
-            this.tsCorrelation.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgCorrelation)).BeginInit();
+            this.tsCorrelation.SuspendLayout();
             this.tbAA.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAA)).BeginInit();
             this.tsAA.SuspendLayout();
@@ -202,8 +191,8 @@
             // 
             // tbHoldings
             // 
-            this.tbHoldings.Controls.Add(this.tsHoldings);
             this.tbHoldings.Controls.Add(this.dgHoldings);
+            this.tbHoldings.Controls.Add(this.tsHoldings);
             this.tbHoldings.Location = new System.Drawing.Point(4, 22);
             this.tbHoldings.Name = "tbHoldings";
             this.tbHoldings.Padding = new System.Windows.Forms.Padding(3);
@@ -212,120 +201,8 @@
             this.tbHoldings.Text = "Holdings";
             this.tbHoldings.UseVisualStyleBackColor = true;
             // 
-            // tsHoldings
-            // 
-            this.tsHoldings.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.tsHoldings.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnHoldingsAdd,
-            this.btnHoldingsEdit,
-            this.btnHoldingsDelete,
-            this.sHoldings1,
-            this.btnHoldingsDate,
-            this.sHoldings2,
-            this.lblHoldingsSortBy,
-            this.cmbHoldingsSortBy,
-            this.btnHoldingsHidden,
-            this.sHoldings3,
-            this.btnHoldingsExport});
-            this.tsHoldings.Location = new System.Drawing.Point(3, 3);
-            this.tsHoldings.Name = "tsHoldings";
-            this.tsHoldings.Size = new System.Drawing.Size(778, 25);
-            this.tsHoldings.TabIndex = 0;
-            this.tsHoldings.Text = "toolStrip2";
-            // 
-            // btnHoldingsAdd
-            // 
-            this.btnHoldingsAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsAdd.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsAdd.Image")));
-            this.btnHoldingsAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsAdd.Name = "btnHoldingsAdd";
-            this.btnHoldingsAdd.Size = new System.Drawing.Size(42, 22);
-            this.btnHoldingsAdd.Text = "Add...";
-            this.btnHoldingsAdd.Click += new System.EventHandler(this.btnHoldingsAdd_Click);
-            // 
-            // btnHoldingsEdit
-            // 
-            this.btnHoldingsEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsEdit.Image")));
-            this.btnHoldingsEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsEdit.Name = "btnHoldingsEdit";
-            this.btnHoldingsEdit.Size = new System.Drawing.Size(41, 22);
-            this.btnHoldingsEdit.Text = "Edit...";
-            this.btnHoldingsEdit.Click += new System.EventHandler(this.btnHoldingsEdit_Click);
-            // 
-            // btnHoldingsDelete
-            // 
-            this.btnHoldingsDelete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDelete.Image")));
-            this.btnHoldingsDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsDelete.Name = "btnHoldingsDelete";
-            this.btnHoldingsDelete.Size = new System.Drawing.Size(42, 22);
-            this.btnHoldingsDelete.Text = "Delete";
-            this.btnHoldingsDelete.Click += new System.EventHandler(this.btnHoldingsDelete_Click);
-            // 
-            // sHoldings1
-            // 
-            this.sHoldings1.Name = "sHoldings1";
-            this.sHoldings1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnHoldingsDate
-            // 
-            this.btnHoldingsDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsDate.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDate.Image")));
-            this.btnHoldingsDate.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsDate.Name = "btnHoldingsDate";
-            this.btnHoldingsDate.Size = new System.Drawing.Size(47, 22);
-            this.btnHoldingsDate.Text = "Date:";
-            // 
-            // sHoldings2
-            // 
-            this.sHoldings2.Name = "sHoldings2";
-            this.sHoldings2.Size = new System.Drawing.Size(6, 25);
-            // 
-            // lblHoldingsSortBy
-            // 
-            this.lblHoldingsSortBy.Name = "lblHoldingsSortBy";
-            this.lblHoldingsSortBy.Size = new System.Drawing.Size(46, 22);
-            this.lblHoldingsSortBy.Text = "Sort By:";
-            // 
-            // cmbHoldingsSortBy
-            // 
-            this.cmbHoldingsSortBy.Name = "cmbHoldingsSortBy";
-            this.cmbHoldingsSortBy.Size = new System.Drawing.Size(121, 25);
-            this.cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(this.cmbHoldingsSortBy_SelectedIndexChanged);
-            // 
-            // btnHoldingsHidden
-            // 
-            this.btnHoldingsHidden.Checked = true;
-            this.btnHoldingsHidden.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.btnHoldingsHidden.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsHidden.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsHidden.Image")));
-            this.btnHoldingsHidden.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsHidden.Name = "btnHoldingsHidden";
-            this.btnHoldingsHidden.Size = new System.Drawing.Size(73, 22);
-            this.btnHoldingsHidden.Text = "Show Hidden";
-            this.btnHoldingsHidden.Click += new System.EventHandler(this.btnHoldingsHidden_Click);
-            // 
-            // sHoldings3
-            // 
-            this.sHoldings3.Name = "sHoldings3";
-            this.sHoldings3.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnHoldingsExport
-            // 
-            this.btnHoldingsExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsExport.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsExport.Image")));
-            this.btnHoldingsExport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnHoldingsExport.Name = "btnHoldingsExport";
-            this.btnHoldingsExport.Size = new System.Drawing.Size(55, 22);
-            this.btnHoldingsExport.Text = "Export...";
-            this.btnHoldingsExport.Click += new System.EventHandler(this.btnHoldingsExport_Click);
-            // 
             // dgHoldings
             // 
-            this.dgHoldings.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.dgHoldings.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgHoldings.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgHoldings.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -339,10 +216,11 @@
             this.colHoldingsTotalValueP,
             this.colHoldingsAA,
             this.colHoldingsID});
-            this.dgHoldings.Location = new System.Drawing.Point(0, 31);
+            this.dgHoldings.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgHoldings.Location = new System.Drawing.Point(3, 28);
             this.dgHoldings.Name = "dgHoldings";
-            this.dgHoldings.Size = new System.Drawing.Size(781, 463);
-            this.dgHoldings.TabIndex = 0;
+            this.dgHoldings.Size = new System.Drawing.Size(778, 463);
+            this.dgHoldings.TabIndex = 1;
             this.dgHoldings.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgHoldings_CellFormatting);
             // 
             // colHoldingsActive
@@ -453,6 +331,116 @@
             this.colHoldingsID.ReadOnly = true;
             this.colHoldingsID.Visible = false;
             // 
+            // tsHoldings
+            // 
+            this.tsHoldings.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.tsHoldings.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnHoldingsAdd,
+            this.btnHoldingsEdit,
+            this.btnHoldingsDelete,
+            this.sHoldings1,
+            this.btnHoldingsDate,
+            this.sHoldings2,
+            this.lblHoldingsSortBy,
+            this.cmbHoldingsSortBy,
+            this.btnHoldingsHidden,
+            this.sHoldings3,
+            this.btnHoldingsExport});
+            this.tsHoldings.Location = new System.Drawing.Point(3, 3);
+            this.tsHoldings.Name = "tsHoldings";
+            this.tsHoldings.Size = new System.Drawing.Size(778, 25);
+            this.tsHoldings.TabIndex = 0;
+            this.tsHoldings.Text = "toolStrip2";
+            // 
+            // btnHoldingsAdd
+            // 
+            this.btnHoldingsAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsAdd.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsAdd.Image")));
+            this.btnHoldingsAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsAdd.Name = "btnHoldingsAdd";
+            this.btnHoldingsAdd.Size = new System.Drawing.Size(42, 22);
+            this.btnHoldingsAdd.Text = "Add...";
+            this.btnHoldingsAdd.Click += new System.EventHandler(this.btnHoldingsAdd_Click);
+            // 
+            // btnHoldingsEdit
+            // 
+            this.btnHoldingsEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsEdit.Image")));
+            this.btnHoldingsEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsEdit.Name = "btnHoldingsEdit";
+            this.btnHoldingsEdit.Size = new System.Drawing.Size(41, 22);
+            this.btnHoldingsEdit.Text = "Edit...";
+            this.btnHoldingsEdit.Click += new System.EventHandler(this.btnHoldingsEdit_Click);
+            // 
+            // btnHoldingsDelete
+            // 
+            this.btnHoldingsDelete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDelete.Image")));
+            this.btnHoldingsDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsDelete.Name = "btnHoldingsDelete";
+            this.btnHoldingsDelete.Size = new System.Drawing.Size(42, 22);
+            this.btnHoldingsDelete.Text = "Delete";
+            this.btnHoldingsDelete.Click += new System.EventHandler(this.btnHoldingsDelete_Click);
+            // 
+            // sHoldings1
+            // 
+            this.sHoldings1.Name = "sHoldings1";
+            this.sHoldings1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnHoldingsDate
+            // 
+            this.btnHoldingsDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsDate.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDate.Image")));
+            this.btnHoldingsDate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsDate.Name = "btnHoldingsDate";
+            this.btnHoldingsDate.Size = new System.Drawing.Size(47, 22);
+            this.btnHoldingsDate.Text = "Date:";
+            // 
+            // sHoldings2
+            // 
+            this.sHoldings2.Name = "sHoldings2";
+            this.sHoldings2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // lblHoldingsSortBy
+            // 
+            this.lblHoldingsSortBy.Name = "lblHoldingsSortBy";
+            this.lblHoldingsSortBy.Size = new System.Drawing.Size(46, 22);
+            this.lblHoldingsSortBy.Text = "Sort By:";
+            // 
+            // cmbHoldingsSortBy
+            // 
+            this.cmbHoldingsSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbHoldingsSortBy.Name = "cmbHoldingsSortBy";
+            this.cmbHoldingsSortBy.Size = new System.Drawing.Size(121, 25);
+            this.cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(this.cmbHoldingsSortBy_SelectedIndexChanged);
+            // 
+            // btnHoldingsHidden
+            // 
+            this.btnHoldingsHidden.Checked = true;
+            this.btnHoldingsHidden.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.btnHoldingsHidden.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsHidden.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsHidden.Image")));
+            this.btnHoldingsHidden.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsHidden.Name = "btnHoldingsHidden";
+            this.btnHoldingsHidden.Size = new System.Drawing.Size(73, 22);
+            this.btnHoldingsHidden.Text = "Show Hidden";
+            this.btnHoldingsHidden.Click += new System.EventHandler(this.btnHoldingsHidden_Click);
+            // 
+            // sHoldings3
+            // 
+            this.sHoldings3.Name = "sHoldings3";
+            this.sHoldings3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnHoldingsExport
+            // 
+            this.btnHoldingsExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnHoldingsExport.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsExport.Image")));
+            this.btnHoldingsExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnHoldingsExport.Name = "btnHoldingsExport";
+            this.btnHoldingsExport.Size = new System.Drawing.Size(55, 22);
+            this.btnHoldingsExport.Text = "Export...";
+            this.btnHoldingsExport.Click += new System.EventHandler(this.btnHoldingsExport_Click);
+            // 
             // tbStatistics
             // 
             this.tbStatistics.AutoScroll = true;
@@ -469,7 +457,7 @@
             // 
             this.tsStat.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.tsStat.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnEdit,
+            this.btnStatEdit,
             this.sStat1,
             this.btnStatStartDate,
             this.btnStatEndDate,
@@ -481,15 +469,15 @@
             this.tsStat.TabIndex = 1;
             this.tsStat.Text = "toolStrip4";
             // 
-            // btnEdit
+            // btnStatEdit
             // 
-            this.btnEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnEdit.Image")));
-            this.btnEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnEdit.Name = "btnEdit";
-            this.btnEdit.Size = new System.Drawing.Size(98, 22);
-            this.btnEdit.Text = "Add/Edit Statistics";
-            this.btnEdit.Click += new System.EventHandler(this.btnEdit_Click);
+            this.btnStatEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnStatEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnStatEdit.Image")));
+            this.btnStatEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnStatEdit.Name = "btnStatEdit";
+            this.btnStatEdit.Size = new System.Drawing.Size(98, 22);
+            this.btnStatEdit.Text = "Add/Edit Statistics";
+            this.btnStatEdit.Click += new System.EventHandler(this.btnStatEdit_Click);
             // 
             // sStat1
             // 
@@ -531,8 +519,8 @@
             // 
             // tbChart
             // 
-            this.tbChart.Controls.Add(this.tsChart);
             this.tbChart.Controls.Add(this.zedChart);
+            this.tbChart.Controls.Add(this.tsChart);
             this.tbChart.Location = new System.Drawing.Point(4, 22);
             this.tbChart.Name = "tbChart";
             this.tbChart.Padding = new System.Windows.Forms.Padding(3);
@@ -540,6 +528,21 @@
             this.tbChart.TabIndex = 2;
             this.tbChart.Text = "Chart";
             this.tbChart.UseVisualStyleBackColor = true;
+            // 
+            // zedChart
+            // 
+            this.zedChart.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.zedChart.Location = new System.Drawing.Point(3, 28);
+            this.zedChart.Name = "zedChart";
+            this.zedChart.ScrollGrace = 0;
+            this.zedChart.ScrollMaxX = 0;
+            this.zedChart.ScrollMaxY = 0;
+            this.zedChart.ScrollMaxY2 = 0;
+            this.zedChart.ScrollMinX = 0;
+            this.zedChart.ScrollMinY = 0;
+            this.zedChart.ScrollMinY2 = 0;
+            this.zedChart.Size = new System.Drawing.Size(778, 463);
+            this.zedChart.TabIndex = 3;
             // 
             // tsChart
             // 
@@ -585,27 +588,10 @@
             this.btnChartExport.Text = "Export...";
             this.btnChartExport.Click += new System.EventHandler(this.btnChartExport_Click);
             // 
-            // zedChart
-            // 
-            this.zedChart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.zedChart.Location = new System.Drawing.Point(0, 31);
-            this.zedChart.Name = "zedChart";
-            this.zedChart.ScrollGrace = 0;
-            this.zedChart.ScrollMaxX = 0;
-            this.zedChart.ScrollMaxY = 0;
-            this.zedChart.ScrollMaxY2 = 0;
-            this.zedChart.ScrollMinX = 0;
-            this.zedChart.ScrollMinY = 0;
-            this.zedChart.ScrollMinY2 = 0;
-            this.zedChart.Size = new System.Drawing.Size(785, 467);
-            this.zedChart.TabIndex = 0;
-            // 
             // tbPerformance
             // 
-            this.tbPerformance.Controls.Add(this.tsPerformance);
             this.tbPerformance.Controls.Add(this.dgPerformance);
+            this.tbPerformance.Controls.Add(this.tsPerformance);
             this.tbPerformance.Location = new System.Drawing.Point(4, 22);
             this.tbPerformance.Name = "tbPerformance";
             this.tbPerformance.Padding = new System.Windows.Forms.Padding(3);
@@ -614,51 +600,8 @@
             this.tbPerformance.Text = "Performance";
             this.tbPerformance.UseVisualStyleBackColor = true;
             // 
-            // tsPerformance
-            // 
-            this.tsPerformance.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
-            this.tsPerformance.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnPerformanceSortDesc,
-            this.sPerformance1,
-            this.btnPerformanceExport});
-            this.tsPerformance.Location = new System.Drawing.Point(3, 3);
-            this.tsPerformance.Name = "tsPerformance";
-            this.tsPerformance.Size = new System.Drawing.Size(778, 25);
-            this.tsPerformance.TabIndex = 0;
-            this.tsPerformance.Text = "toolStrip3";
-            // 
-            // btnPerformanceSortDesc
-            // 
-            this.btnPerformanceSortDesc.Checked = true;
-            this.btnPerformanceSortDesc.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.btnPerformanceSortDesc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnPerformanceSortDesc.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceSortDesc.Image")));
-            this.btnPerformanceSortDesc.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnPerformanceSortDesc.Name = "btnPerformanceSortDesc";
-            this.btnPerformanceSortDesc.Size = new System.Drawing.Size(89, 22);
-            this.btnPerformanceSortDesc.Text = "Sort Descending";
-            this.btnPerformanceSortDesc.Click += new System.EventHandler(this.btnPerformanceSortDesc_Click);
-            // 
-            // sPerformance1
-            // 
-            this.sPerformance1.Name = "sPerformance1";
-            this.sPerformance1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // btnPerformanceExport
-            // 
-            this.btnPerformanceExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnPerformanceExport.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceExport.Image")));
-            this.btnPerformanceExport.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnPerformanceExport.Name = "btnPerformanceExport";
-            this.btnPerformanceExport.Size = new System.Drawing.Size(55, 22);
-            this.btnPerformanceExport.Text = "Export...";
-            this.btnPerformanceExport.Click += new System.EventHandler(this.btnPerformanceExport_Click);
-            // 
             // dgPerformance
             // 
-            this.dgPerformance.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.dgPerformance.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgPerformance.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgPerformance.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -667,10 +610,11 @@
             this.colPerformanceIndex,
             this.colPerformancePChange,
             this.colPerformancePGain});
-            this.dgPerformance.Location = new System.Drawing.Point(3, 31);
+            this.dgPerformance.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgPerformance.Location = new System.Drawing.Point(3, 28);
             this.dgPerformance.Name = "dgPerformance";
             this.dgPerformance.Size = new System.Drawing.Size(778, 463);
-            this.dgPerformance.TabIndex = 1;
+            this.dgPerformance.TabIndex = 2;
             // 
             // colPerformanceDate
             // 
@@ -732,10 +676,50 @@
             this.colPerformancePGain.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.colPerformancePGain.Width = 101;
             // 
+            // tsPerformance
+            // 
+            this.tsPerformance.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.tsPerformance.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnPerformanceSortDesc,
+            this.sPerformance1,
+            this.btnPerformanceExport});
+            this.tsPerformance.Location = new System.Drawing.Point(3, 3);
+            this.tsPerformance.Name = "tsPerformance";
+            this.tsPerformance.Size = new System.Drawing.Size(778, 25);
+            this.tsPerformance.TabIndex = 0;
+            this.tsPerformance.Text = "toolStrip3";
+            // 
+            // btnPerformanceSortDesc
+            // 
+            this.btnPerformanceSortDesc.Checked = true;
+            this.btnPerformanceSortDesc.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.btnPerformanceSortDesc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnPerformanceSortDesc.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceSortDesc.Image")));
+            this.btnPerformanceSortDesc.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnPerformanceSortDesc.Name = "btnPerformanceSortDesc";
+            this.btnPerformanceSortDesc.Size = new System.Drawing.Size(89, 22);
+            this.btnPerformanceSortDesc.Text = "Sort Descending";
+            this.btnPerformanceSortDesc.Click += new System.EventHandler(this.btnPerformanceSortDesc_Click);
+            // 
+            // sPerformance1
+            // 
+            this.sPerformance1.Name = "sPerformance1";
+            this.sPerformance1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnPerformanceExport
+            // 
+            this.btnPerformanceExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnPerformanceExport.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceExport.Image")));
+            this.btnPerformanceExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnPerformanceExport.Name = "btnPerformanceExport";
+            this.btnPerformanceExport.Size = new System.Drawing.Size(55, 22);
+            this.btnPerformanceExport.Text = "Export...";
+            this.btnPerformanceExport.Click += new System.EventHandler(this.btnPerformanceExport_Click);
+            // 
             // tbCorrelations
             // 
-            this.tbCorrelations.Controls.Add(this.tsCorrelation);
             this.tbCorrelations.Controls.Add(this.dgCorrelation);
+            this.tbCorrelations.Controls.Add(this.tsCorrelation);
             this.tbCorrelations.Location = new System.Drawing.Point(4, 22);
             this.tbCorrelations.Name = "tbCorrelations";
             this.tbCorrelations.Padding = new System.Windows.Forms.Padding(3);
@@ -743,6 +727,30 @@
             this.tbCorrelations.TabIndex = 4;
             this.tbCorrelations.Text = "Correlations";
             this.tbCorrelations.UseVisualStyleBackColor = true;
+            // 
+            // dgCorrelation
+            // 
+            this.dgCorrelation.AllowUserToAddRows = false;
+            this.dgCorrelation.AllowUserToDeleteRows = false;
+            this.dgCorrelation.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgCorrelation.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgCorrelation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle13.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle13.Format = "#0.00\'%\'";
+            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgCorrelation.DefaultCellStyle = dataGridViewCellStyle13;
+            this.dgCorrelation.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgCorrelation.Location = new System.Drawing.Point(3, 28);
+            this.dgCorrelation.Name = "dgCorrelation";
+            this.dgCorrelation.ReadOnly = true;
+            this.dgCorrelation.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            this.dgCorrelation.Size = new System.Drawing.Size(778, 463);
+            this.dgCorrelation.TabIndex = 4;
             // 
             // tsCorrelation
             // 
@@ -825,32 +833,6 @@
             this.btnCorrelationExport.Text = "Export...";
             this.btnCorrelationExport.Click += new System.EventHandler(this.btnCorrelationExport_Click);
             // 
-            // dgCorrelation
-            // 
-            this.dgCorrelation.AllowUserToAddRows = false;
-            this.dgCorrelation.AllowUserToDeleteRows = false;
-            this.dgCorrelation.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.dgCorrelation.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgCorrelation.BorderStyle = System.Windows.Forms.BorderStyle.None;
-            this.dgCorrelation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle13.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle13.Format = "#0.00\'%\'";
-            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgCorrelation.DefaultCellStyle = dataGridViewCellStyle13;
-            this.dgCorrelation.Location = new System.Drawing.Point(0, 31);
-            this.dgCorrelation.Name = "dgCorrelation";
-            this.dgCorrelation.ReadOnly = true;
-            this.dgCorrelation.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            this.dgCorrelation.Size = new System.Drawing.Size(781, 463);
-            this.dgCorrelation.TabIndex = 0;
-            // 
             // tbAA
             // 
             this.tbAA.Controls.Add(this.dgAA);
@@ -865,9 +847,6 @@
             // 
             // dgAA
             // 
-            this.dgAA.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
             this.dgAA.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgAA.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgAA.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
@@ -877,9 +856,10 @@
             this.colAATarget,
             this.colAAOffset,
             this.colAAHoldings});
-            this.dgAA.Location = new System.Drawing.Point(0, 31);
+            this.dgAA.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgAA.Location = new System.Drawing.Point(3, 28);
             this.dgAA.Name = "dgAA";
-            this.dgAA.Size = new System.Drawing.Size(781, 463);
+            this.dgAA.Size = new System.Drawing.Size(778, 463);
             this.dgAA.TabIndex = 1;
             this.dgAA.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgAA_CellFormatting);
             // 
@@ -1003,6 +983,7 @@
             // 
             // cmbAASortBy
             // 
+            this.cmbAASortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbAASortBy.Name = "cmbAASortBy";
             this.cmbAASortBy.Size = new System.Drawing.Size(121, 25);
             this.cmbAASortBy.SelectedIndexChanged += new System.EventHandler(this.cmbAASortBy_SelectedIndexChanged);
@@ -1064,15 +1045,15 @@
             // stbFiller
             // 
             this.stbFiller.Name = "stbFiller";
-            this.stbFiller.Size = new System.Drawing.Size(417, 17);
+            this.stbFiller.Size = new System.Drawing.Size(455, 17);
             this.stbFiller.Spring = true;
             // 
             // stbUpdateStatus
             // 
             this.stbUpdateStatus.BorderSides = System.Windows.Forms.ToolStripStatusLabelBorderSides.Left;
             this.stbUpdateStatus.Name = "stbUpdateStatus";
-            this.stbUpdateStatus.Size = new System.Drawing.Size(84, 17);
-            this.stbUpdateStatus.Text = "Update Status:";
+            this.stbUpdateStatus.Size = new System.Drawing.Size(46, 17);
+            this.stbUpdateStatus.Text = "Status:";
             // 
             // stbUpdateStatusPB
             // 
@@ -1085,7 +1066,7 @@
             this.tsMain.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnMainUpdate,
             this.sMain1,
-            this.btnMainOptions,
+            this.btnMainCompare,
             this.sMain2,
             this.lblMainPortfolio,
             this.cmbMainPortfolio,
@@ -1094,9 +1075,8 @@
             this.sMain3,
             this.btnMainAddPortfolio,
             this.sMain4,
-            this.sMainAbout,
-            this.toolStripDropDownButton5,
-            this.toolStripButton1});
+            this.btnMainOptions,
+            this.sMainAbout});
             this.tsMain.Location = new System.Drawing.Point(0, 0);
             this.tsMain.Name = "tsMain";
             this.tsMain.Size = new System.Drawing.Size(792, 25);
@@ -1117,14 +1097,14 @@
             this.sMain1.Name = "sMain1";
             this.sMain1.Size = new System.Drawing.Size(6, 25);
             // 
-            // btnMainOptions
+            // btnMainCompare
             // 
-            this.btnMainOptions.Image = global::MyPersonalIndex.Properties.Resources.spanner_48;
-            this.btnMainOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnMainOptions.Name = "btnMainOptions";
-            this.btnMainOptions.Size = new System.Drawing.Size(64, 22);
-            this.btnMainOptions.Text = "Options";
-            this.btnMainOptions.Click += new System.EventHandler(this.btnMainOptions_Click);
+            this.btnMainCompare.Image = global::MyPersonalIndex.Properties.Resources.pie_chart_48;
+            this.btnMainCompare.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnMainCompare.Name = "btnMainCompare";
+            this.btnMainCompare.Size = new System.Drawing.Size(82, 22);
+            this.btnMainCompare.Text = "Compare...";
+            this.btnMainCompare.Click += new System.EventHandler(this.btnMainCompare_Click);
             // 
             // sMain2
             // 
@@ -1139,6 +1119,7 @@
             // 
             // cmbMainPortfolio
             // 
+            this.cmbMainPortfolio.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMainPortfolio.Name = "cmbMainPortfolio";
             this.cmbMainPortfolio.Size = new System.Drawing.Size(100, 25);
             this.cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(this.cmbMainPortfolio_SelectedIndexChanged);
@@ -1180,6 +1161,15 @@
             this.sMain4.Name = "sMain4";
             this.sMain4.Size = new System.Drawing.Size(6, 25);
             // 
+            // btnMainOptions
+            // 
+            this.btnMainOptions.Image = global::MyPersonalIndex.Properties.Resources.spanner_48;
+            this.btnMainOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnMainOptions.Name = "btnMainOptions";
+            this.btnMainOptions.Size = new System.Drawing.Size(64, 22);
+            this.btnMainOptions.Text = "Options";
+            this.btnMainOptions.Click += new System.EventHandler(this.btnMainOptions_Click);
+            // 
             // sMainAbout
             // 
             this.sMainAbout.Image = global::MyPersonalIndex.Properties.Resources.blue_speech_bubble_48;
@@ -1189,126 +1179,36 @@
             this.sMainAbout.Text = "About";
             this.sMainAbout.Click += new System.EventHandler(this.btnMainAbout_Click);
             // 
-            // toolStripDropDownButton5
-            // 
-            this.toolStripDropDownButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripDropDownButton5.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.charToolStripMenuItem,
-            this.correlationCompareToolStripMenuItem1,
-            this.applyAdvancedFiltersToolStripMenuItem});
-            this.toolStripDropDownButton5.Image = ((System.Drawing.Image)(resources.GetObject("toolStripDropDownButton5.Image")));
-            this.toolStripDropDownButton5.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripDropDownButton5.Name = "toolStripDropDownButton5";
-            this.toolStripDropDownButton5.Size = new System.Drawing.Size(29, 22);
-            this.toolStripDropDownButton5.Text = "Advanced Actions";
-            this.toolStripDropDownButton5.Visible = false;
-            // 
-            // charToolStripMenuItem
-            // 
-            this.charToolStripMenuItem.Name = "charToolStripMenuItem";
-            this.charToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
-            this.charToolStripMenuItem.Text = "Chart Compare...";
-            // 
-            // correlationCompareToolStripMenuItem1
-            // 
-            this.correlationCompareToolStripMenuItem1.Name = "correlationCompareToolStripMenuItem1";
-            this.correlationCompareToolStripMenuItem1.Size = new System.Drawing.Size(196, 22);
-            this.correlationCompareToolStripMenuItem1.Text = "Correlation Compare...";
-            // 
-            // applyAdvancedFiltersToolStripMenuItem
-            // 
-            this.applyAdvancedFiltersToolStripMenuItem.Name = "applyAdvancedFiltersToolStripMenuItem";
-            this.applyAdvancedFiltersToolStripMenuItem.Size = new System.Drawing.Size(196, 22);
-            this.applyAdvancedFiltersToolStripMenuItem.Text = "Apply Advanced Filters...";
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(29, 22);
-            this.toolStripButton1.Text = "Reports";
-            this.toolStripButton1.Visible = false;
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(46, 22);
-            this.toolStripLabel1.Text = "Sort By:";
-            // 
-            // toolStripComboBox1
-            // 
-            this.toolStripComboBox1.Name = "toolStripComboBox1";
-            this.toolStripComboBox1.Size = new System.Drawing.Size(121, 21);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
-            // 
             // dSave
             // 
             this.dSave.DefaultExt = "txt";
             this.dSave.Filter = "Tab Delimited File|*.txt|Comma Delimited File|*.csv|Pipe Delimited File|*.txt";
             // 
-            // toolStripButton2
+            // lblClosing
             // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(42, 22);
-            this.toolStripButton2.Text = "Add...";
+            this.lblClosing.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblClosing.Location = new System.Drawing.Point(286, 421);
+            this.lblClosing.Name = "lblClosing";
+            this.lblClosing.Size = new System.Drawing.Size(205, 90);
+            this.lblClosing.TabIndex = 3;
+            this.lblClosing.Text = "Waiting for calculations to complete...";
+            this.lblClosing.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            this.lblClosing.Visible = false;
             // 
-            // toolStripButton3
+            // bw
             // 
-            this.toolStripButton3.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton3.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton3.Image")));
-            this.toolStripButton3.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton3.Name = "toolStripButton3";
-            this.toolStripButton3.Size = new System.Drawing.Size(41, 22);
-            this.toolStripButton3.Text = "Edit...";
-            // 
-            // toolStripButton4
-            // 
-            this.toolStripButton4.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton4.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton4.Image")));
-            this.toolStripButton4.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton4.Name = "toolStripButton4";
-            this.toolStripButton4.Size = new System.Drawing.Size(42, 22);
-            this.toolStripButton4.Text = "Delete";
-            // 
-            // toolStripButton5
-            // 
-            this.toolStripButton5.Checked = true;
-            this.toolStripButton5.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.toolStripButton5.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton5.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton5.Image")));
-            this.toolStripButton5.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton5.Name = "toolStripButton5";
-            this.toolStripButton5.Size = new System.Drawing.Size(73, 22);
-            this.toolStripButton5.Text = "Show Hidden";
-            // 
-            // toolStripButton6
-            // 
-            this.toolStripButton6.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.toolStripButton6.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton6.Image")));
-            this.toolStripButton6.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton6.Name = "toolStripButton6";
-            this.toolStripButton6.Size = new System.Drawing.Size(55, 22);
-            this.toolStripButton6.Text = "Export...";
+            this.bw.PortfolioName = null;
+            this.bw.WorkerReportsProgress = true;
+            this.bw.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bw_DoWork);
+            this.bw.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bw_RunWorkerCompleted);
+            this.bw.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.bw_ProgressChanged);
             // 
             // frmMain
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(792, 573);
+            this.Controls.Add(this.lblClosing);
             this.Controls.Add(this.tsMain);
             this.Controls.Add(this.stb);
             this.Controls.Add(this.tb);
@@ -1321,9 +1221,9 @@
             this.tb.ResumeLayout(false);
             this.tbHoldings.ResumeLayout(false);
             this.tbHoldings.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgHoldings)).EndInit();
             this.tsHoldings.ResumeLayout(false);
             this.tsHoldings.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgHoldings)).EndInit();
             this.tbStatistics.ResumeLayout(false);
             this.tbStatistics.PerformLayout();
             this.tsStat.ResumeLayout(false);
@@ -1334,14 +1234,14 @@
             this.tsChart.PerformLayout();
             this.tbPerformance.ResumeLayout(false);
             this.tbPerformance.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgPerformance)).EndInit();
             this.tsPerformance.ResumeLayout(false);
             this.tsPerformance.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgPerformance)).EndInit();
             this.tbCorrelations.ResumeLayout(false);
             this.tbCorrelations.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgCorrelation)).EndInit();
             this.tsCorrelation.ResumeLayout(false);
             this.tsCorrelation.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgCorrelation)).EndInit();
             this.tbAA.ResumeLayout(false);
             this.tbAA.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAA)).EndInit();
@@ -1361,7 +1261,6 @@
         private System.Windows.Forms.TabControl tb;
         private System.Windows.Forms.TabPage tbHoldings;
         private System.Windows.Forms.TabPage tbStatistics;
-        private System.Windows.Forms.DataGridView dgHoldings;
         private System.Windows.Forms.TabPage tbChart;
         private System.Windows.Forms.TabPage tbPerformance;
         private System.Windows.Forms.TabPage tbCorrelations;
@@ -1379,8 +1278,6 @@
         private System.Windows.Forms.ToolStripStatusLabel stbUpdateStatus;
         private System.Windows.Forms.ToolStripProgressBar stbUpdateStatusPB;
         private System.Windows.Forms.ToolStripButton sMainAbout;
-        private System.Windows.Forms.DataGridView dgPerformance;
-        private ZedGraph.ZedGraphControl zedChart;
         private System.Windows.Forms.ToolStripButton btnMainOptions;
         private System.Windows.Forms.ToolStrip tsAA;
         private System.Windows.Forms.ToolStripButton btnAAEditAA;
@@ -1402,26 +1299,6 @@
         private System.Windows.Forms.ToolStripSeparator sHoldings2;
         private System.Windows.Forms.ToolStripButton btnHoldingsExport;
         private System.Windows.Forms.ToolStripSeparator sMain2;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripDropDownButton5;
-        private System.Windows.Forms.ToolStripMenuItem charToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem correlationCompareToolStripMenuItem1;
-        private System.Windows.Forms.ToolStripMenuItem applyAdvancedFiltersToolStripMenuItem;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceTotalValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceIndex;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePChange;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePGain;
-        private System.Windows.Forms.ToolStripDropDownButton toolStripButton1;
-        private System.Windows.Forms.DataGridView dgCorrelation;
-        private System.Windows.Forms.ToolStripButton toolStripButton2;
-        private System.Windows.Forms.ToolStripButton toolStripButton3;
-        private System.Windows.Forms.ToolStripButton toolStripButton4;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripComboBox toolStripComboBox1;
-        private System.Windows.Forms.ToolStripButton toolStripButton5;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
-        private System.Windows.Forms.ToolStripButton toolStripButton6;
         private System.Windows.Forms.ToolStripDropDownButton btnHoldingsDate;
         private System.Windows.Forms.ToolStripSeparator sHoldings3;
         private System.Windows.Forms.ToolStripStatusLabel stbFiller;
@@ -1443,22 +1320,12 @@
         private System.Windows.Forms.ToolStripSeparator sMain4;
         private System.Windows.Forms.ToolStripButton btnMainUpdate;
         private System.Windows.Forms.ToolStrip tsStat;
-        private System.Windows.Forms.ToolStripButton btnEdit;
+        private System.Windows.Forms.ToolStripButton btnStatEdit;
         private System.Windows.Forms.ToolStripSeparator sStat1;
         private System.Windows.Forms.ToolStripDropDownButton btnStatStartDate;
         private System.Windows.Forms.ToolStripSeparator sStat2;
         private System.Windows.Forms.ToolStripButton btnStatExport;
         private System.Windows.Forms.ToolStripDropDownButton btnStatEndDate;
-        private System.Windows.Forms.DataGridViewCheckBoxColumn colHoldingsActive;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTicker;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsClosingPrice;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsShares;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAvgPrice;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsGainLoss;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValue;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValueP;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAA;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsID;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAAAssetAllocation;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAATotalValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAAPofPortfolio;
@@ -1472,6 +1339,28 @@
         private System.Windows.Forms.ToolStripButton btnAAShowBlank;
         private System.Windows.Forms.ToolStripButton btnCorrelationHidden;
         private System.Windows.Forms.ToolStripSeparator sCorrelation3;
+        private System.Windows.Forms.Label lblClosing;
+        private MPIBackgroundWorker bw;
+        private System.Windows.Forms.ToolStripButton btnMainCompare;
+        private System.Windows.Forms.DataGridView dgHoldings;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colHoldingsActive;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTicker;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsClosingPrice;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsShares;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAvgPrice;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsGainLoss;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValueP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAA;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsID;
+        private ZedGraph.ZedGraphControl zedChart;
+        private System.Windows.Forms.DataGridView dgPerformance;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceTotalValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceIndex;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePChange;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePGain;
+        private System.Windows.Forms.DataGridView dgCorrelation;
     }
 }
 

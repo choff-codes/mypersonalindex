@@ -8,7 +8,7 @@ using System.IO;
 namespace MyPersonalIndex
 {
     public class Queries : IDisposable
-    {
+    { 
         private SqlCeConnection cn;
 
         public ConnectionState Connection { get { return cn.State; } }
@@ -94,10 +94,7 @@ namespace MyPersonalIndex
             return dt;
         }
 
-        private static string SQLCleanString(string s)
-        {
-            return s.Replace("'", "''");
-        }
+        
 
         public static string Main_GetLastDate()
         {
@@ -130,7 +127,6 @@ namespace MyPersonalIndex
                     " ON a.Ticker = c.Ticker" +
                 " LEFT JOIN (SELECT Ticker, Price" +
                             " FROM AvgPricePerShare) AS d" +
-                            //" WHERE Portfolio = {1}) AS d" +
                     " ON a.ID = d.Ticker" +
                 " LEFT JOIN (SELECT ID, AA" +
                             " FROM AA" +
@@ -167,7 +163,7 @@ namespace MyPersonalIndex
             return string.Format("SELECT TotalValue FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
-        public static string Main_GetNAV(int Portfolio, DateTime Date)
+        public static string Common_GetNAV(int Portfolio, DateTime Date)
         {
             return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
@@ -211,18 +207,7 @@ namespace MyPersonalIndex
 
         public static string Main_GetAvgPricesTrades(int Portfolio, DateTime MaxDate)
         {
-            /*return string.Format(
-                "SELECT a.TickerID, a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
-                        " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
-                " FROM Trades a" +
-                " LEFT JOIN Splits b" +
-                   " ON a.Ticker = b.Ticker AND b.Date >= a.Date" +
-                " WHERE a.Portfolio = {0}" +
-                " GROUP BY a.ID, a.TickerID, a.Price, a.Shares, a.Date " +
-                " ORDER BY a.TickerID, a.Date",
-                Portfolio);*/
-
-            return string.Format(
+             return string.Format(
                 "SELECT a.TickerID, a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
                         " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
                 " FROM Trades a" +
@@ -247,7 +232,7 @@ namespace MyPersonalIndex
 
         public static string Main_GetNAVPortfolios()
         {
-            return "SELECT ID, StartDate, Dividends, NAVStartValue FROM Portfolios";
+            return "SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios";
         }
 
         public static string Main_DeleteNAVPrices(int Portfolio, DateTime MinDate)
@@ -261,11 +246,12 @@ namespace MyPersonalIndex
             return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
-        public static string Main_GetAllNav(int Portfolio, DateTime StartDate, double StartValue, bool Desc)
+        public static string Main_GetAllNav(int Portfolio, double StartValue, bool Desc)
         {
             return string.Format(
-                "SELECT Date, TotalValue, NAV, Change, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date >= '{2}' ORDER BY Date {3}",
-                StartValue, Portfolio, StartDate.ToShortDateString(), (Desc ? " DESC" : ""));
+                "SELECT Date, TotalValue, NAV, Change, (CASE WHEN Change IS NOT NULL THEN 100 * ((NAV / {0}) - 1) END) AS Gain" +
+                " FROM NAV WHERE Portfolio = {1} ORDER BY Date {2}",
+                StartValue, Portfolio, (Desc ? " DESC" : ""));
         }
 
         public static string Main_GetDistinctDates(DateTime MinDate)
@@ -273,17 +259,17 @@ namespace MyPersonalIndex
             return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}'", MinDate.ToShortDateString());
         }
 
-        public static string Main_GetPreviousDay(DateTime Date)
+        public static string Common_GetPreviousDay(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
         }
 
-        public static string Main_GetCurrentDayOrPrevious(DateTime Date)
+        public static string Common_GetCurrentDayOrPrevious(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
         }
 
-        public static string Main_GetCurrentDayOrNext(DateTime Date)
+        public static string Common_GetCurrentDayOrNext(DateTime Date)
         {
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
         }
@@ -311,12 +297,12 @@ namespace MyPersonalIndex
 
         public static string Main_GetDividend(string Ticker, DateTime Date)
         {
-            return string.Format("SELECT Amount FROM Dividends WHERE Ticker = '{0}' AND Date = '{1}'", SQLCleanString(Ticker), Date.ToShortDateString());
+            return string.Format("SELECT Amount FROM Dividends WHERE Ticker = '{0}' AND Date = '{1}'", Functions.SQLCleanString(Ticker), Date.ToShortDateString());
         }
 
         public static string Main_GetSplit(string Ticker, DateTime Date)
         {
-            return string.Format("SELECT Ratio FROM Splits WHERE Ticker = '{0}' AND Date = '{1}'", SQLCleanString(Ticker), Date.ToShortDateString());
+            return string.Format("SELECT Ratio FROM Splits WHERE Ticker = '{0}' AND Date = '{1}'", Functions.SQLCleanString(Ticker), Date.ToShortDateString());
         }
 
         public static string Main_GetDailyActivity(int Portfolio, DateTime Date)
@@ -339,7 +325,7 @@ namespace MyPersonalIndex
         {
             return string.Format(
                 "INSERT INTO Tickers (Ticker, Portfolio, Active, AA, Hide) VALUES ('{0}', {1}, {2}, {3}, {4})",
-                SQLCleanString(Ticker), Portfolio, Convert.ToByte(Active), AA, Convert.ToByte(Hide));
+                Functions.SQLCleanString(Ticker), Portfolio, Convert.ToByte(Active), AA, Convert.ToByte(Hide));
         }
 
         public static string Ticker_UpdateTicker(int Portfolio, int Ticker, int AA, bool Hide, bool Active)
@@ -363,6 +349,11 @@ namespace MyPersonalIndex
             return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
         }
 
+        public static string Main_GetEarliestTrade(int Portfolio, int Ticker)
+        {
+            return string.Format("SELECT MIN(Date) FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+        }
+
         public static string Ticker_GetAttributes(int Portfolio, int Ticker)
         {
             return string.Format("SELECT AA, Active, Hide FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
@@ -370,12 +361,12 @@ namespace MyPersonalIndex
 
         public static string Main_DeleteTickerClosingPrices(string Ticker)
         {
-            return string.Format("DELETE FROM ClosingPrices WHERE Ticker = '{0}'", SQLCleanString(Ticker));
+            return string.Format("DELETE FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
         }
 
         public static string Main_DeleteTickerDividends(string Ticker)
         {
-            return string.Format("DELETE FROM Dividends WHERE Ticker = '{0}'", SQLCleanString(Ticker));
+            return string.Format("DELETE FROM Dividends WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
         }
 
         public static string Main_DeleteTicker(int Portfolio, int Ticker)
@@ -436,12 +427,12 @@ namespace MyPersonalIndex
 
         public static string AA_UpdateAA(int ID, string AA, double? Target)
         {
-            return string.Format("UPDATE AA SET AA = '{0}', Target = {1} WHERE ID = {2}", SQLCleanString(AA), Target == null ? "NULL" : Target.ToString(), ID);
+            return string.Format("UPDATE AA SET AA = '{0}', Target = {1} WHERE ID = {2}", Functions.SQLCleanString(AA), Target == null ? "NULL" : Target.ToString(), ID);
         }
 
         public static string AA_InsertAA(int Portfolio, string AA, double? Target)
         {
-            return string.Format("INSERT INTO AA (Portfolio, AA, Target) VALUES ({0}, '{1}', {2})", Portfolio, SQLCleanString(AA), Target == null ? "NULL" : Target.ToString());
+            return string.Format("INSERT INTO AA (Portfolio, AA, Target) VALUES ({0}, '{1}', {2})", Portfolio, Functions.SQLCleanString(AA), Target == null ? "NULL" : Target.ToString());
         }
 
         public static string Common_GetPortfolioAttributes(int Portfolio)
@@ -452,14 +443,14 @@ namespace MyPersonalIndex
         public static string Portfolio_UpdatePortfolio(int Portfolio, string Name, bool Dividends, double NAVStart, int CostCalc, int AAThreshold, DateTime StartDate)
         {
             return string.Format("UPDATE Portfolios SET Name = '{0}', Dividends = {1}, NAVStartValue = {2}, CostCalc = {3}, AAThreshold = {4}, StartDate = '{5}' WHERE ID = {6}",
-                SQLCleanString(Name), Convert.ToByte(Dividends), NAVStart, CostCalc, AAThreshold, StartDate, Portfolio);
+                Functions.SQLCleanString(Name), Convert.ToByte(Dividends), NAVStart, CostCalc, AAThreshold, StartDate, Portfolio);
         }
 
         public static string Portfolio_InsertPortfolio(string Name, bool Dividends, double NAVStart, int CostCalc, int AAThreshold, DateTime StartDate)
         {
             return string.Format("INSERT INTO Portfolios (Name, Dividends, NAVStartValue, CostCalc, AAThreshold, StartDate, HoldingsShowHidden, NAVSort, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden)" +
                 " VALUES ('{0}', {1}, {2}, {3}, {4}, '{5}', 1, 1, '', '', 1, 1)",
-                SQLCleanString(Name), Convert.ToByte(Dividends), NAVStart, CostCalc, AAThreshold, StartDate.ToShortDateString());
+                Functions.SQLCleanString(Name), Convert.ToByte(Dividends), NAVStart, CostCalc, AAThreshold, StartDate.ToShortDateString());
         }
 
         public static string Common_GetIdentity()
@@ -536,9 +527,15 @@ namespace MyPersonalIndex
                 Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
         }
 
-        public static string Main_GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
+        public static string Common_GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
         {
-            int tmp;
+            bool Ticker1Portfolio = Ticker1.Contains(Constants.SignifyPortfolio);
+            bool Ticker2Portfolio = Ticker2.Contains(Constants.SignifyPortfolio);
+            if (Ticker1Portfolio)
+                Ticker1 = Functions.StripSignifyPortfolio(Ticker1);
+            if (Ticker2Portfolio)
+                Ticker2 = Functions.StripSignifyPortfolio(Ticker2); ;
+
             return string.Format(
                 "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" + 
                         " Sqrt((Ticker1Square - Power(Ticker1Sum,2) / TotalDays) * (Ticker2Square - Power(Ticker2Sum,2) / TotalDays)) * 100" +
@@ -549,17 +546,17 @@ namespace MyPersonalIndex
                             " SUM(a.Change * b.Change) AS ProductSquare," +
                             " COUNT(*) AS TotalDays" +
                         " FROM " +
-                                (Int32.TryParse(Ticker1, out tmp) ? 
+                                (Ticker1Portfolio ? 
                                     " (SELECT Date, Change FROM NAV WHERE Portfolio = {0}" :
                                     " (SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{0}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS a" +
                         " INNER JOIN " +
-                                (Int32.TryParse(Ticker2, out tmp) ?
+                                (Ticker2Portfolio ? 
                                     "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
                                     "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS b" +
-                " ON a.DATE = b.DATE) Correl",
-                SQLCleanString(Ticker1), SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
+                        " ON a.DATE = b.DATE) Correl",
+                Functions.SQLCleanString(Ticker1), Functions.SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
         //=(1/n)*(sum(x^2))-((SUM(X)/N)^2)
@@ -567,12 +564,12 @@ namespace MyPersonalIndex
 
         public static string Ticker_GetSplits(string Ticker)
         {
-            return string.Format("SELECT Date, Ratio FROM Splits WHERE Ticker = '{0}' ORDER BY Date DESC", SQLCleanString(Ticker));
+            return string.Format("SELECT Date, Ratio FROM Splits WHERE Ticker = '{0}' ORDER BY Date DESC", Functions.SQLCleanString(Ticker));
         }
 
         public static string Ticker_GetDividends(string Ticker)
         {
-            return string.Format("SELECT Date, Amount FROM Dividends WHERE Ticker = '{0}' ORDER BY Date DESC", SQLCleanString(Ticker));
+            return string.Format("SELECT Date, Amount FROM Dividends WHERE Ticker = '{0}' ORDER BY Date DESC", Functions.SQLCleanString(Ticker));
         }
 
         public static string Main_GetAvgPricesTrade(int Portfolio, int Ticker, DateTime MaxDate)
@@ -592,6 +589,11 @@ namespace MyPersonalIndex
         public static string Options_GetPortfoliosMinDate()
         {
             return "SELECT MIN(StartDate) FROM Portfolios";
+        }
+
+        public static string Options_UpdateSplits(bool Splits)
+        {
+            return string.Format("UPDATE Settings SET Splits = {0}", Convert.ToByte(Splits));
         }
 
         public static string Common_UpdateDataStartDate(DateTime Date)
@@ -629,7 +631,7 @@ namespace MyPersonalIndex
             return "DELETE FROM ClosingPrices";
         }
 
-        public static string Main_GetStats(int Portfolio)
+        public static string Common_GetStats(int Portfolio)
         {
             return string.Format(
                 "SELECT Statistic AS ID, SQL, Format, Description" +
@@ -672,14 +674,14 @@ namespace MyPersonalIndex
         {
             return string.Format(
                 "UPDATE UserStatistics SET Description = '{0}', SQL = '{1}', Format = {2} WHERE ID = {3}",
-                SQLCleanString(Description), SQLCleanString(SQL), Format, ID);
+                Functions.SQLCleanString(Description), Functions.SQLCleanString(SQL), Format, ID);
         }
 
         public static string UserStat_InsertStat(string Description, string SQL, int Format)
         {
             return string.Format(
                 "INSERT INTO UserStatistics (Description, SQL, Format) VALUES ('{0}', '{1}', {2})",
-                SQLCleanString(Description), SQLCleanString(SQL), Format);
+                Functions.SQLCleanString(Description), Functions.SQLCleanString(SQL), Format);
         }
 
         public static string Stats_DeleteUserStat(int ID)
@@ -690,6 +692,80 @@ namespace MyPersonalIndex
         public static string Stats_DeleteStatUserStat(int ID)
         {
             return string.Format("DELETE FROM Stats WHERE Statistic = {0}", ID);
+        }
+
+        public static string Adv_GetTickerList()
+        {
+            return string.Format(
+                "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
+                " UNION ALL " +
+                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a",
+                Constants.SignifyPortfolio);
+        }
+
+        public static string Adv_GetChartPortfolio(string Ticker, double StartValue, DateTime StartDate, DateTime EndDate)
+        {
+            return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
+                    StartValue, Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+        }
+
+        public static string Adv_GetChartTicker(string Ticker, DateTime StartDate, DateTime EndDate)
+        {
+                return string.Format(
+                    "SELECT a.Date, a.Price, COALESCE(b.Amount, 0) AS Dividend, COALESCE(c.Ratio, 1) AS Split" +
+                    " FROM ClosingPrices a" +
+                    " LEFT JOIN Dividends b" +
+                    " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
+                    " LEFT JOIN Splits c" +
+                    " ON a.Ticker = c.Ticker AND a.Date = c.Date" +
+                    " WHERE a.Ticker = '{0}' AND a.Date BETWEEN '{1}' AND '{2}'" +
+                    " ORDER BY a.Date",
+                    Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+        }
+
+        public static string Adv_GetPortfolioStart(string Portfolio)
+        {
+            return string.Format("SELECT StartDate FROM Portfolios WHERE ID = {0}", Portfolio);
+        }
+
+        public static string Adv_GetTickerStart(string Ticker)
+        {
+            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Ticker);
+        }
+
+        public static string Adv_GetPortfolio(string Portfolio, DateTime EndDate)
+        {
+            return string.Format(
+                "SELECT a.Name, a.StartDate, b.TotalValue" +
+                " FROM Portfolios a" +
+                " INNER JOIN NAV b" +
+                " ON b.Date = '{0}' and b.Portfolio = {1}" +
+                " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
+        }
+
+        public static string Adv_GetStats()
+        {
+            return "SELECT SQL, Format, Description FROM UserStatistics";
+        }
+
+        public static string Adv_GetIncludeDividends()
+        {
+            return "SELECT TickerDiv FROM Settings";
+        }
+
+        public static string Adv_UpdateIncludeDividends(bool TickerDiv)
+        {
+            return string.Format("UPDATE Settings SET TickerDiv = {0}", Convert.ToByte(TickerDiv));
+        }
+
+        public static string Common_GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
+        }
+
+        public static string Common_GetPreviousPortfolioDay(int Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
         }
     }
 }

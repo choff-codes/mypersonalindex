@@ -98,7 +98,11 @@ namespace MyPersonalIndex
 
             try
             {
-                Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency);
+                if (Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency) <= 0)
+                {
+                    MessageBox.Show("NAV Start Value must be greater than 0!");
+                    return;
+                }
             }
             catch (FormatException)
             {

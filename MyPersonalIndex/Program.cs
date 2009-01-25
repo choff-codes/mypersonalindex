@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.Threading;
 
 namespace MyPersonalIndex
 {
@@ -13,7 +14,13 @@ namespace MyPersonalIndex
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new frmMain());
+
+            bool firstInstance;
+            Mutex mutex = new Mutex(false, "Local\\MyPersonalIndex", out firstInstance);
+            if (firstInstance)
+                Application.Run(new frmMain());
+            else
+                MessageBox.Show("Only one instance can be run at a time!");
         }
     }
 }

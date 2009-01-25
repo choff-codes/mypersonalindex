@@ -34,6 +34,7 @@
             this.cmdCancel = new System.Windows.Forms.Button();
             this.cmdOK = new System.Windows.Forms.Button();
             this.mnuDate = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.chkSplit = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // lblDate
@@ -59,7 +60,7 @@
             // cmdCancel
             // 
             this.cmdCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdCancel.Location = new System.Drawing.Point(135, 61);
+            this.cmdCancel.Location = new System.Drawing.Point(135, 78);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(57, 23);
             this.cmdCancel.TabIndex = 3;
@@ -69,7 +70,7 @@
             // 
             // cmdOK
             // 
-            this.cmdOK.Location = new System.Drawing.Point(57, 61);
+            this.cmdOK.Location = new System.Drawing.Point(57, 78);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(57, 23);
             this.cmdOK.TabIndex = 2;
@@ -82,15 +83,26 @@
             this.mnuDate.Name = "mnuDate";
             this.mnuDate.Size = new System.Drawing.Size(61, 4);
             // 
+            // chkSplit
+            // 
+            this.chkSplit.AutoSize = true;
+            this.chkSplit.Location = new System.Drawing.Point(23, 48);
+            this.chkSplit.Name = "chkSplit";
+            this.chkSplit.Size = new System.Drawing.Size(215, 17);
+            this.chkSplit.TabIndex = 4;
+            this.chkSplit.Text = "Download Splits (Advanced Users Only)";
+            this.chkSplit.UseVisualStyleBackColor = true;
+            // 
             // frmOptions
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cmdCancel;
-            this.ClientSize = new System.Drawing.Size(248, 93);
+            this.ClientSize = new System.Drawing.Size(248, 113);
+            this.Controls.Add(this.chkSplit);
+            this.Controls.Add(this.lblDate);
             this.Controls.Add(this.cmdCancel);
             this.Controls.Add(this.cmdOK);
-            this.Controls.Add(this.lblDate);
             this.Controls.Add(this.btnDate);
             this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
@@ -114,5 +126,6 @@
         private System.Windows.Forms.Button cmdCancel;
         private System.Windows.Forms.Button cmdOK;
         private System.Windows.Forms.ContextMenuStrip mnuDate;
+        private System.Windows.Forms.CheckBox chkSplit;
     }
 }

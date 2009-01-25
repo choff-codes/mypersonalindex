@@ -212,7 +212,7 @@ namespace MyPersonalIndex
                         Ticker = Functions.StripSignifyPortfolio(Ticker);
                         
                         DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetPortfolioStart(Ticker), SqlDateTime.MinValue.Value));
-                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Ticker, PreviousDay), SqlDateTime.MinValue.Value));
+                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Ticker, PreviousDay), SqlDateTime.MinValue.Value));
                         PreviousDay = YDay < PreviousDay ? PreviousDay : YDay;
 
                         rs = SQL.ExecuteResultSet(Queries.Adv_GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetNAV(Convert.ToInt32(Ticker), PreviousDay), 1)), StartDate, EndDate));
@@ -314,8 +314,8 @@ namespace MyPersonalIndex
 
                 d.Add(Constants.StatVariables.PortfolioName, rs.GetString(rs.GetOrdinal("Name")));
                 DateTime PortfolioStartDate = rs.GetDateTime(rs.GetOrdinal("StartDate"));
-                PortfolioStartDate = Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Portfolio, PortfolioStartDate), PortfolioStartDate));
-                d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Portfolio, StartDate), PortfolioStartDate)).ToShortDateString());
+                PortfolioStartDate = Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Portfolio, PortfolioStartDate), PortfolioStartDate));
+                d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Portfolio, StartDate), PortfolioStartDate)).ToShortDateString());
                 d.Add(Constants.StatVariables.TotalValue, rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
             }
             finally

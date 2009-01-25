@@ -40,12 +40,12 @@
             this.lblDesc = new System.Windows.Forms.Label();
             this.txtDesc = new System.Windows.Forms.TextBox();
             this.mnuParameters = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.portfolioIDToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.portfolioNameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.totalValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.startDateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.endDateToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.nAVStartValueToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuID = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuPortfolioName = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuTotalValue = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuStartDate = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuEndDate = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnuPrev = new System.Windows.Forms.ToolStripMenuItem();
             this.gpProperties.SuspendLayout();
             this.mnuParameters.SuspendLayout();
             this.SuspendLayout();
@@ -163,56 +163,56 @@
             // mnuParameters
             // 
             this.mnuParameters.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.portfolioIDToolStripMenuItem,
-            this.portfolioNameToolStripMenuItem,
-            this.totalValueToolStripMenuItem,
-            this.startDateToolStripMenuItem,
-            this.endDateToolStripMenuItem,
-            this.nAVStartValueToolStripMenuItem});
+            this.mnuID,
+            this.mnuPortfolioName,
+            this.mnuTotalValue,
+            this.mnuStartDate,
+            this.mnuEndDate,
+            this.mnuPrev});
             this.mnuParameters.Name = "mnuParameters";
-            this.mnuParameters.Size = new System.Drawing.Size(151, 136);
+            this.mnuParameters.Size = new System.Drawing.Size(153, 158);
             // 
-            // portfolioIDToolStripMenuItem
+            // mnuID
             // 
-            this.portfolioIDToolStripMenuItem.Name = "portfolioIDToolStripMenuItem";
-            this.portfolioIDToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.portfolioIDToolStripMenuItem.Text = "Portfolio ID";
-            this.portfolioIDToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuID.Name = "mnuID";
+            this.mnuID.Size = new System.Drawing.Size(152, 22);
+            this.mnuID.Text = "Portfolio ID";
+            this.mnuID.Click += new System.EventHandler(this.AddMenuParameter);
             // 
-            // portfolioNameToolStripMenuItem
+            // mnuPortfolioName
             // 
-            this.portfolioNameToolStripMenuItem.Name = "portfolioNameToolStripMenuItem";
-            this.portfolioNameToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.portfolioNameToolStripMenuItem.Text = "Portfolio Name";
-            this.portfolioNameToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuPortfolioName.Name = "mnuPortfolioName";
+            this.mnuPortfolioName.Size = new System.Drawing.Size(152, 22);
+            this.mnuPortfolioName.Text = "Portfolio Name";
+            this.mnuPortfolioName.Click += new System.EventHandler(this.AddMenuParameter);
             // 
-            // totalValueToolStripMenuItem
+            // mnuTotalValue
             // 
-            this.totalValueToolStripMenuItem.Name = "totalValueToolStripMenuItem";
-            this.totalValueToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.totalValueToolStripMenuItem.Text = "Total Value";
-            this.totalValueToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuTotalValue.Name = "mnuTotalValue";
+            this.mnuTotalValue.Size = new System.Drawing.Size(152, 22);
+            this.mnuTotalValue.Text = "Total Value";
+            this.mnuTotalValue.Click += new System.EventHandler(this.AddMenuParameter);
             // 
-            // startDateToolStripMenuItem
+            // mnuStartDate
             // 
-            this.startDateToolStripMenuItem.Name = "startDateToolStripMenuItem";
-            this.startDateToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.startDateToolStripMenuItem.Text = "Start Date";
-            this.startDateToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuStartDate.Name = "mnuStartDate";
+            this.mnuStartDate.Size = new System.Drawing.Size(152, 22);
+            this.mnuStartDate.Text = "Start Date";
+            this.mnuStartDate.Click += new System.EventHandler(this.AddMenuParameter);
             // 
-            // endDateToolStripMenuItem
+            // mnuEndDate
             // 
-            this.endDateToolStripMenuItem.Name = "endDateToolStripMenuItem";
-            this.endDateToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.endDateToolStripMenuItem.Text = "End Date";
-            this.endDateToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuEndDate.Name = "mnuEndDate";
+            this.mnuEndDate.Size = new System.Drawing.Size(152, 22);
+            this.mnuEndDate.Text = "End Date";
+            this.mnuEndDate.Click += new System.EventHandler(this.AddMenuParameter);
             // 
-            // nAVStartValueToolStripMenuItem
+            // mnuPrev
             // 
-            this.nAVStartValueToolStripMenuItem.Name = "nAVStartValueToolStripMenuItem";
-            this.nAVStartValueToolStripMenuItem.Size = new System.Drawing.Size(150, 22);
-            this.nAVStartValueToolStripMenuItem.Text = "NAV Start Value";
-            this.nAVStartValueToolStripMenuItem.Click += new System.EventHandler(this.AddMenuParameter);
+            this.mnuPrev.Name = "mnuPrev";
+            this.mnuPrev.Size = new System.Drawing.Size(152, 22);
+            this.mnuPrev.Text = "Previous Day";
+            this.mnuPrev.Click += new System.EventHandler(this.AddMenuParameter);
             // 
             // frmUserStatistics
             // 
@@ -253,11 +253,11 @@
         private System.Windows.Forms.TextBox txtDesc;
         private System.Windows.Forms.Button cmdAddParameter;
         private System.Windows.Forms.ContextMenuStrip mnuParameters;
-        private System.Windows.Forms.ToolStripMenuItem portfolioIDToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem portfolioNameToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem totalValueToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem startDateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem endDateToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem nAVStartValueToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem mnuID;
+        private System.Windows.Forms.ToolStripMenuItem mnuPortfolioName;
+        private System.Windows.Forms.ToolStripMenuItem mnuTotalValue;
+        private System.Windows.Forms.ToolStripMenuItem mnuStartDate;
+        private System.Windows.Forms.ToolStripMenuItem mnuEndDate;
+        private System.Windows.Forms.ToolStripMenuItem mnuPrev;
     }
 }

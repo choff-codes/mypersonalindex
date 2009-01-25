@@ -58,14 +58,14 @@ namespace MyPersonalIndex
             if (sender == StartCalendar)
             {
                 StartCalendar.SelectionStart =
-                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
+                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
                 btnStartDate.HideDropDown();
                 btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             }
             else
             {
                 EndCalendar.SelectionStart =
-                   Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
+                   Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
                 btnEndDate.HideDropDown();
                 btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
             }
@@ -199,7 +199,7 @@ namespace MyPersonalIndex
             int Seed = 1;
 
             LoadGraphSettings(g);
-            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
            
             foreach (int i in lst.CheckedIndices)
             {
@@ -212,12 +212,10 @@ namespace MyPersonalIndex
                         Ticker = Functions.StripSignifyPortfolio(Ticker);
                         
                         DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetPortfolioStart(Ticker), SqlDateTime.MinValue.Value));
-                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(PreviousDay), SqlDateTime.MinValue.Value));
+                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Ticker, PreviousDay), SqlDateTime.MinValue.Value));
                         PreviousDay = YDay < PreviousDay ? PreviousDay : YDay;
 
-                        rs = SQL.ExecuteResultSet(Queries.Adv_GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetNAV(Convert.ToInt32(Ticker), PreviousDay), 1)), StartDate, EndDate));
-
-                        string s = Queries.Adv_GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetNAV(Convert.ToInt32(Ticker), YDay < PreviousDay ? PreviousDay : YDay), 1)), StartDate, EndDate);
+                        rs = SQL.ExecuteResultSet(Queries.Adv_GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetNAV(Convert.ToInt32(Ticker), PreviousDay), 1)), StartDate, EndDate));
 
                         PointPairList list = new PointPairList();
                         int ordDate = rs.GetOrdinal("Date");
@@ -241,7 +239,7 @@ namespace MyPersonalIndex
                     else
                     {
                         DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetTickerStart(Ticker), SqlDateTime.MinValue.Value));
-                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(PreviousDay), SqlDateTime.MinValue.Value));
+                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(PreviousDay), SqlDateTime.MinValue.Value));
                         PreviousDay = YDay < PreviousDay ? PreviousDay : YDay;
 
                         rs = SQL.ExecuteResultSet(Queries.Adv_GetChartTicker(Ticker, PreviousDay, EndDate));
@@ -315,8 +313,10 @@ namespace MyPersonalIndex
                 rs.ReadFirst();
 
                 d.Add(Constants.StatVariables.PortfolioName, rs.GetString(rs.GetOrdinal("Name")));
+                DateTime PortfolioStartDate = rs.GetDateTime(rs.GetOrdinal("StartDate"));
+                PortfolioStartDate = Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Portfolio, PortfolioStartDate), PortfolioStartDate));
+                d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Adv_GetPreviousPortfolioDay(Portfolio, StartDate), PortfolioStartDate)).ToShortDateString());
                 d.Add(Constants.StatVariables.TotalValue, rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
-                d.Add(Constants.StatVariables.NAVStartValue, rs.GetDecimal(rs.GetOrdinal("NAVStartValue")).ToString());
             }
             finally
             {

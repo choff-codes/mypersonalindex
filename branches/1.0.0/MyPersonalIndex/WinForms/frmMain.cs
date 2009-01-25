@@ -327,17 +327,17 @@ namespace MyPersonalIndex
 
         private DateTime GetCurrentDateOrPrevious(DateTime d)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrPrevious(d), MPI.Portfolio.StartDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrPrevious(d), MPI.Portfolio.StartDate));
         }
 
         private DateTime GetCurrentDateOrNext(DateTime d)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(d), MPI.LastDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(d), MPI.LastDate));
         }
 
         private DateTime GetCurrentDateOrNext(DateTime d, DateTime defaultValue)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetCurrentDayOrNext(d), defaultValue));
+            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(d), defaultValue));
         }
 
         private void ResetCalendars()
@@ -413,8 +413,8 @@ namespace MyPersonalIndex
 
             LoadGraphSettings(g);
 
-            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
+            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
 
             try
             {
@@ -552,10 +552,10 @@ namespace MyPersonalIndex
 
             d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
             d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
+            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
             d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
             d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
             d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
-            d.Add(Constants.StatVariables.NAVStartValue, MPI.Portfolio.NAVStart.ToString());
 
             return Functions.CleanStatString(SQL, d);
         }
@@ -1207,7 +1207,7 @@ namespace MyPersonalIndex
 
                 rs.ReadFirst();
 
-                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
+                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
                 double YNAV = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetSpecificNav(Portfolio, YDay), 0));
                 double YTotalValue;
 

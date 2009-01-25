@@ -95,6 +95,13 @@ namespace MyPersonalIndex.Properties {
             }
         }
         
+        internal static System.Drawing.Bitmap pie_chart_48 {
+            get {
+                object obj = ResourceManager.GetObject("pie_chart_48", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
         internal static System.Drawing.Bitmap refresh_48 {
             get {
                 object obj = ResourceManager.GetObject("refresh_48", resourceCulture);

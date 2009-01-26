@@ -456,8 +456,6 @@ namespace MyPersonalIndex
 
         private void LoadPortfolio()
         {
-            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
-
             if (((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows.Count == 0)
                 DisableItems(true);
             else
@@ -1554,7 +1552,12 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedClosingPrices());
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedDividends());
             SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedSplits());
-            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();  
+
+            cmbMainPortfolio.SelectedIndexChanged -= cmbMainPortfolio_SelectedIndexChanged;
+            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
+            ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
+            cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
+            cmbMainPortfolio_SelectedIndexChanged(null, null);
         }
 
         private bool IsInternetConnection()

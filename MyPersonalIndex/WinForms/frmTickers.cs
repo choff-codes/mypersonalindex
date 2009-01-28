@@ -16,7 +16,7 @@ namespace MyPersonalIndex
 
         public TickerRetValues TickerReturnValues { get { return _TickerReturnValues; } }
 
-        private Queries SQL = new Queries();
+        private TickerQueries SQL = new TickerQueries();
         private int PortfolioID;
         private int TickerID;
         private bool Pasted;
@@ -46,7 +46,7 @@ namespace MyPersonalIndex
             LoadAADropDown();
             LoadTicker();
 
-            dsTicker.Tables.Add(SQL.ExecuteDataset(Queries.Ticker_GetTradesDataset(PortfolioID, TickerID)));
+            dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTradesDataset(PortfolioID, TickerID)));
             dgTickers.DataSource = dsTicker.Tables[0];
 
             dsTicker.AcceptChanges();
@@ -68,7 +68,7 @@ namespace MyPersonalIndex
 
         private void LoadTicker()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Ticker_GetAttributes(PortfolioID, TickerID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAttributes(PortfolioID, TickerID));
             try
             {
                 if (!rs.HasRows)
@@ -89,7 +89,7 @@ namespace MyPersonalIndex
 
         private void LoadAADropDown()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetAA(PortfolioID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAA(PortfolioID));
             try
             {
 
@@ -226,14 +226,14 @@ namespace MyPersonalIndex
             _TickerReturnValues.Changed = TickerReturnValues.Changed != chkCalc.Checked;
             if (TickerID == -1)
             {
-                SQL.ExecuteNonQuery(Queries.Ticker_InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
-                TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.Common_GetIdentity()));
+                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
+                TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
             {
-                SQL.ExecuteNonQuery(Queries.Ticker_UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
+                SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
                 if (dsTicker.HasChanges() || Pasted)
-                    SQL.ExecuteNonQuery(Queries.Common_DeleteTickerTrades(PortfolioID, TickerID));
+                    SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID));
             }
         
             if (dsTicker.HasChanges() || Pasted)
@@ -292,7 +292,7 @@ namespace MyPersonalIndex
 
         private void btnSplit_Click(object sender, EventArgs e)
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Ticker_GetSplits(txtSymbol.Text));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetSplits(txtSymbol.Text));
 
             try
             {
@@ -322,7 +322,7 @@ namespace MyPersonalIndex
 
         private void btnDividends_Click(object sender, EventArgs e)
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Ticker_GetDividends(txtSymbol.Text));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetDividends(txtSymbol.Text));
 
             try
             {

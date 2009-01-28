@@ -8,7 +8,7 @@ namespace MyPersonalIndex
 {
     public partial class frmStats : Form
     {
-        private Queries SQL = new Queries();
+        private StatsQueries SQL = new StatsQueries();
         private int PortfolioID;
         private bool Changed = false;
 
@@ -27,7 +27,7 @@ namespace MyPersonalIndex
                 return;
             }
 
-            DataTable dt = SQL.ExecuteDataset(Queries.Stats_GetStats());
+            DataTable dt = SQL.ExecuteDataset(StatsQueries.GetStats());
 
             cmb.DisplayMember = "Description";
             cmb.ValueMember = "ID";
@@ -43,7 +43,7 @@ namespace MyPersonalIndex
             dt2.Clear();
             lst2.DataSource = dt2;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Stats_GetPortfolioStats(PortfolioID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(StatsQueries.GetPortfolioStats(PortfolioID));
 
             try
             {
@@ -204,7 +204,7 @@ namespace MyPersonalIndex
         {
             DataTable dt2 = (DataTable)lst2.DataSource;
 
-            SQL.ExecuteNonQuery(Queries.Stats_DeletePortfolioStats(PortfolioID));
+            SQL.ExecuteNonQuery(StatsQueries.DeletePortfolioStats(PortfolioID));
 
             if (dt2.Rows.Count > 0)
             {
@@ -275,8 +275,8 @@ namespace MyPersonalIndex
                 return;
 
             int StatisticID = Convert.ToInt32(cmb.SelectedValue);
-            SQL.ExecuteNonQuery(Queries.Stats_DeleteUserStat(StatisticID));
-            SQL.ExecuteNonQuery(Queries.Stats_DeleteStatUserStat(StatisticID));
+            SQL.ExecuteNonQuery(StatsQueries.DeleteUserStat(StatisticID));
+            SQL.ExecuteNonQuery(StatsQueries.DeleteStatUserStat(StatisticID));
             ((DataTable)cmb.DataSource).Rows.RemoveAt(cmb.SelectedIndex);
 
             DataTable dt = (DataTable)lst1.DataSource;

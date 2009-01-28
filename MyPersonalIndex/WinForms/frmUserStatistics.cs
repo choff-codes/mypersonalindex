@@ -14,7 +14,7 @@ namespace MyPersonalIndex
         }
 
         public UserStatRetValues UserStatReturnValues { get { return _UserStatReturnValues; } }
-        private Queries SQL = new Queries();
+        private UserStatQueries SQL = new UserStatQueries();
         private int StatisticID;
         private UserStatRetValues _UserStatReturnValues = new UserStatRetValues();
 
@@ -69,7 +69,7 @@ namespace MyPersonalIndex
 
         private void LoadUserStat()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.UserStat_GetStat(StatisticID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID));
 
             try
             {
@@ -113,11 +113,11 @@ namespace MyPersonalIndex
             
             if (StatisticID == -1)
             {
-                SQL.ExecuteNonQuery(Queries.UserStat_InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
-                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.Common_GetIdentity()));
+                SQL.ExecuteNonQuery(UserStatQueries.InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
+                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
-                SQL.ExecuteNonQuery(Queries.UserStat_UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
+                SQL.ExecuteNonQuery(UserStatQueries.UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
 
             _UserStatReturnValues.ID = StatisticID;
             _UserStatReturnValues.Description = txtDesc.Text;

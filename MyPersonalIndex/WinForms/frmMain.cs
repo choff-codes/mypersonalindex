@@ -93,7 +93,7 @@ namespace MyPersonalIndex
             public MPIStat Stat;
         }
 
-        Queries SQL;
+        MainQueries SQL;
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
 
         public frmMain()
@@ -114,7 +114,7 @@ namespace MyPersonalIndex
                     MessageBox.Show("Cannot write to the user settings folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
                 }
 
-            SQL = new Queries();
+            SQL = new MainQueries();
 
             if (SQL.Connection == ConnectionState.Closed)
             {
@@ -191,7 +191,7 @@ namespace MyPersonalIndex
         {
             cmbMainPortfolio.SelectedIndexChanged -= cmbMainPortfolio_SelectedIndexChanged;
             
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetPortfolios());
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolios());
             try
             {
                 DataTable t = new DataTable();
@@ -231,7 +231,7 @@ namespace MyPersonalIndex
 
         private void LoadSettings(ref int LastPortfolio)
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetSettings());
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetSettings());
             try
             {
                 if (rs.HasRows)
@@ -254,7 +254,7 @@ namespace MyPersonalIndex
                 rs.Close();
             }
 
-            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetLastDate(), MPI.Settings.DataStartDate));
+            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
             stbLastUpdated.Text = stbLastUpdated.Text + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
         }
 
@@ -327,17 +327,17 @@ namespace MyPersonalIndex
 
         private DateTime GetCurrentDateOrPrevious(DateTime d)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrPrevious(d), MPI.Portfolio.StartDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrPrevious(d), MPI.Portfolio.StartDate));
         }
 
         private DateTime GetCurrentDateOrNext(DateTime d)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(d), MPI.LastDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(d), MPI.LastDate));
         }
 
         private DateTime GetCurrentDateOrNext(DateTime d, DateTime defaultValue)
         {
-            return Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(d), defaultValue));
+            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(d), defaultValue));
         }
 
         private void ResetCalendars()
@@ -413,8 +413,8 @@ namespace MyPersonalIndex
 
             LoadGraphSettings(g);
 
-            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
+            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
 
             try
             {
@@ -460,8 +460,8 @@ namespace MyPersonalIndex
                 DisableItems(true);
             else
             {
-                if (SQL.ExecuteScalar(Queries.Main_GetPortfolioExists(MPI.Portfolio.ID)) != null)
-                    SQL.ExecuteNonQuery(Queries.Main_UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
+                if (SQL.ExecuteScalar(MainQueries.GetPortfolioExists(MPI.Portfolio.ID)) != null)
+                    SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
                         btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked));
 
                 DisableItems(false);
@@ -469,7 +469,7 @@ namespace MyPersonalIndex
                 MPI.Portfolio.ID = Convert.ToInt32(((DataRowView)cmbMainPortfolio.ComboBox.SelectedItem)["Value"]);
                 MPI.Portfolio.Name = (string)((DataRowView)cmbMainPortfolio.ComboBox.SelectedItem)["Display"];
 
-                SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetPortfolioAttributes(MPI.Portfolio.ID));
+                SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolioAttributes(MPI.Portfolio.ID));
 
                 try
                 {
@@ -535,13 +535,13 @@ namespace MyPersonalIndex
 
         private void LoadNAV()
         {
-            dgPerformance.DataSource = SQL.ExecuteResultSet(Queries.Main_GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked)); ;
+            dgPerformance.DataSource = SQL.ExecuteResultSet(MainQueries.GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked)); ;
         }
 
         private void LoadAssetAllocation(DateTime Date)
         {
             MPI.AA.TotalValue = GetTotalValue(Date);
-            dgAA.DataSource = SQL.ExecuteResultSet(Queries.Main_GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
+            dgAA.DataSource = SQL.ExecuteResultSet(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
 
             dgAA.Columns[MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.AA.TotalValue);
         }
@@ -552,7 +552,7 @@ namespace MyPersonalIndex
 
             d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
             d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
-            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(MPI.Portfolio.ID, MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
+            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(MainQueries.GetPreviousPortfolioDay(MPI.Portfolio.ID, MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
             d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
             d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
             d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
@@ -562,7 +562,7 @@ namespace MyPersonalIndex
 
         private double GetTotalValue(DateTime Date)
         {
-            return Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValue(MPI.Portfolio.ID, Date), 0));
+            return Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValue(MPI.Portfolio.ID, Date), 0));
         }
 
         private void LoadStat(DateTime StartDate, DateTime EndDate, bool DateChange)
@@ -581,7 +581,7 @@ namespace MyPersonalIndex
 
             MPI.Stat.TotalValue = GetTotalValue(EndDate);
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetStats(MPI.Portfolio.ID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetStats(MPI.Portfolio.ID));
             try
             {
                 if (!rs.HasRows)
@@ -657,7 +657,7 @@ namespace MyPersonalIndex
         {
             GetAveragePricePerShare();
             MPI.Holdings.TotalValue = GetTotalValue(Date);
-            dgHoldings.DataSource = SQL.ExecuteResultSet(Queries.Main_GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
+            dgHoldings.DataSource = SQL.ExecuteResultSet(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
 
             dgHoldings.Columns[MPIHoldings.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Holdings.TotalValue);
         }
@@ -667,7 +667,7 @@ namespace MyPersonalIndex
             dgCorrelation.Rows.Clear();
             dgCorrelation.Columns.Clear();
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetCorrelationDistinctTickers(MPI.Portfolio.ID, btnCorrelationHidden.Checked));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetCorrelationDistinctTickers(MPI.Portfolio.ID, btnCorrelationHidden.Checked));
             this.Cursor = Cursors.WaitCursor;
             
             try
@@ -708,7 +708,7 @@ namespace MyPersonalIndex
                         {
                             try
                             {
-                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
+                                dgCorrelation[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
                                 dgCorrelation[x, i].Value = dgCorrelation[i, x].Value;
                             }
                             catch (SqlCeException)
@@ -746,7 +746,7 @@ namespace MyPersonalIndex
 
         private void UpdatePrices()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetUpdateDistinctTickers());
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetUpdateDistinctTickers());
             DateTime MinDate;
             List<string> TickersNotUpdated = new List<string>();
 
@@ -826,7 +826,7 @@ namespace MyPersonalIndex
             if (NewDataStartDate == MPI.Settings.DataStartDate)
                 return;
 
-            SQL.ExecuteNonQuery(Queries.Common_UpdateDataStartDate(NewDataStartDate));
+            SQL.ExecuteNonQuery(MainQueries.UpdateDataStartDate(NewDataStartDate));
             MPI.Settings.DataStartDate = NewDataStartDate;
         }
 
@@ -846,7 +846,7 @@ namespace MyPersonalIndex
             int rs_ordPrice = rs.GetOrdinal("Price");
             int rs_ordChange = rs.GetOrdinal("Change");
 
-            s = Client.OpenRead(Queries.Main_GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.StockPrices));
+            s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.StockPrices));
             try
             {
                 sr = new StreamReader(s);
@@ -866,8 +866,8 @@ namespace MyPersonalIndex
                     newRecord.SetString(rs_ordTicker, Ticker);
                     newRecord.SetDecimal(rs_ordPrice, (decimal)Price);
 
-                    double Split = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetSplit(Ticker, Convert.ToDateTime(columns[0])), 1));
-                    double Div = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetDividend(Ticker, Convert.ToDateTime(columns[0])), 0));
+                    double Split = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSplit(Ticker, Convert.ToDateTime(columns[0])), 1));
+                    double Div = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividend(Ticker, Convert.ToDateTime(columns[0])), 0));
 
                     Price = (Price * Split) + Div;
 
@@ -913,7 +913,7 @@ namespace MyPersonalIndex
             int rs_ordTicker = rs.GetOrdinal("Ticker");
             int rs_ordRatio = rs.GetOrdinal("Ratio");
 
-            s = Client.OpenRead(Queries.Main_GetSplitAddress(Ticker));
+            s = Client.OpenRead(MainQueries.GetSplitAddress(Ticker));
             try
             {
                 sr = new StreamReader(s);
@@ -970,7 +970,7 @@ namespace MyPersonalIndex
             int rs_ordTicker = rs.GetOrdinal("Ticker");
             int rs_ordAmount = rs.GetOrdinal("Amount");
 
-            s = Client.OpenRead(Queries.Main_GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.Dividends));
+            s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.Dividends));
             try
             {
                 sr = new StreamReader(s);
@@ -999,9 +999,9 @@ namespace MyPersonalIndex
 
         private void GetAveragePricePerShare()
         {
-            SQL.ExecuteNonQuery(Queries.Main_DeleteAvgPrices());
+            SQL.ExecuteNonQuery(MainQueries.DeleteAvgPrices());
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetAvgPricesTrades(MPI.Portfolio.ID, MPI.Holdings.SelDate));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAvgPricesTrades(MPI.Portfolio.ID, MPI.Holdings.SelDate));
             SqlCeResultSet rs2 = SQL.ExecuteTableUpdate("AvgPricePerShare");
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
             int CurrentTicker;
@@ -1139,7 +1139,7 @@ namespace MyPersonalIndex
             }
             else
             {
-                SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetNAVPortfolios());
+                SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetNAVPortfolios());
 
                 try
                 {
@@ -1182,14 +1182,14 @@ namespace MyPersonalIndex
         {
             DateTime NewStartDate = GetCurrentDateOrNext(StartDate, StartDate);
             if (NewStartDate != StartDate)
-                SQL.ExecuteNonQuery(Queries.Main_UpdatePortfolioStartDate(Portfolio, NewStartDate));
+                SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioStartDate(Portfolio, NewStartDate));
             return NewStartDate;
         }
 
         public void GetNAVValues(int Portfolio, DateTime MinDate, DateTime StartDate, bool Dividends, double NAVStart)
         {
-            SQL.ExecuteNonQuery(Queries.Main_DeleteNAVPrices(Portfolio, MinDate <= StartDate ? SqlDateTime.MinValue.Value : MinDate));
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Main_GetDistinctDates(MinDate));
+            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, MinDate <= StartDate ? SqlDateTime.MinValue.Value : MinDate));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetDistinctDates(MinDate));
             SqlCeResultSet rs2 = SQL.ExecuteTableUpdate("NAV");
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
 
@@ -1207,14 +1207,14 @@ namespace MyPersonalIndex
 
                 rs.ReadFirst();
 
-                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
-                double YNAV = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetSpecificNav(Portfolio, YDay), 0));
+                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
+                double YNAV = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSpecificNav(Portfolio, YDay), 0));
                 double YTotalValue;
 
                 if (rs.GetDateTime(rs_ordDate) == StartDate)
                 {
                     YNAV = NAVStart;
-                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValueNew(Portfolio, YDay), 0));
+                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, YDay), 0));
                     newRecord.SetInt32(rs2_ordPortfolio, Portfolio);
                     newRecord.SetDateTime(rs2_ordDate, YDay);
                     newRecord.SetDecimal(rs2_ordTotalValue, (decimal)YTotalValue);
@@ -1222,7 +1222,7 @@ namespace MyPersonalIndex
                     rs2.Insert(newRecord);
                 }
                 else
-                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValue(Portfolio, YDay), 0));
+                    YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValue(Portfolio, YDay), 0));
 
                 do
                 {
@@ -1230,11 +1230,11 @@ namespace MyPersonalIndex
                     newRecord.SetInt32(rs2_ordPortfolio, Portfolio);
                     newRecord.SetDateTime(rs2_ordDate, d);
 
-                    double NewTotalValue = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetTotalValueNew(Portfolio, d), 0));
+                    double NewTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, d), 0));
                     double NAV = 0;
-                    double NetPurchases = Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetDailyActivity(Portfolio, d), 0));
+                    double NetPurchases = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDailyActivity(Portfolio, d), 0));
                     if (Dividends)
-                        NetPurchases = NetPurchases - Convert.ToDouble(SQL.ExecuteScalar(Queries.Main_GetDividends(Portfolio, d), 0));
+                        NetPurchases = NetPurchases - Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividends(Portfolio, d), 0));
 
                     newRecord.SetDecimal(rs2_ordTotalValue, (decimal)NewTotalValue);
 
@@ -1297,9 +1297,9 @@ namespace MyPersonalIndex
             if (!Deleted)
                 return;
 
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedClosingPrices());
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedDividends());
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedSplits());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
             StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MinDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MinDate, MPI.Portfolio.ID);
         }
 
@@ -1307,9 +1307,9 @@ namespace MyPersonalIndex
         {
             if (MessageBox.Show("Are you sure you want to delete " + sTicker + "?", "Delete?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                MinDate = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetEarliestTrade(MPI.Portfolio.ID, Ticker), DateTime.Today));
-                SQL.ExecuteNonQuery(Queries.Common_DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
-                SQL.ExecuteNonQuery(Queries.Main_DeleteTicker(MPI.Portfolio.ID, Ticker));
+                MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetEarliestTrade(MPI.Portfolio.ID, Ticker), DateTime.Today));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTicker(MPI.Portfolio.ID, Ticker));
                 return true;
             }
             return false;
@@ -1387,14 +1387,14 @@ namespace MyPersonalIndex
             try
             {
                 int? Portfolio = MPI.Portfolio.ID;
-                if (SQL.ExecuteScalar(Queries.Main_GetPortfolioExists(MPI.Portfolio.ID)) == null)
+                if (SQL.ExecuteScalar(MainQueries.GetPortfolioExists(MPI.Portfolio.ID)) == null)
                     Portfolio = null;
 
                 if (Portfolio != null)
-                    SQL.ExecuteNonQuery(Queries.Main_UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
+                    SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
                         btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked));
 
-                SQL.ExecuteNonQuery(Queries.Main_UpdateSettings(Portfolio,
+                SQL.ExecuteNonQuery(MainQueries.UpdateSettings(Portfolio,
                     this.WindowState == FormWindowState.Normal ? new Rectangle(this.Location, this.Size) : new Rectangle(this.RestoreBounds.Location, this.RestoreBounds.Size),
                     this.WindowState == FormWindowState.Maximized ? FormWindowState.Maximized : FormWindowState.Normal));
             }
@@ -1543,15 +1543,15 @@ namespace MyPersonalIndex
             if (MessageBox.Show("Are you sure you want to delete " + MPI.Portfolio.Name + "?", "Delete?", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return;
             
-            SQL.ExecuteNonQuery(Queries.Main_DeleteAA(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(Queries.Main_DeleteNAVPrices(MPI.Portfolio.ID, SqlDateTime.MinValue.Value));
-            SQL.ExecuteNonQuery(Queries.Main_DeleteTickers(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(Queries.Main_DeleteStatistics(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(Queries.Main_DeleteTrades(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(Queries.Main_DeletePortfolio(MPI.Portfolio.ID));   
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedClosingPrices());
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedDividends());
-            SQL.ExecuteNonQuery(Queries.Main_DeleteUnusedSplits());
+            SQL.ExecuteNonQuery(MainQueries.DeleteAA(MPI.Portfolio.ID));
+            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(MPI.Portfolio.ID, SqlDateTime.MinValue.Value));
+            SQL.ExecuteNonQuery(MainQueries.DeleteTickers(MPI.Portfolio.ID));
+            SQL.ExecuteNonQuery(MainQueries.DeleteStatistics(MPI.Portfolio.ID));
+            SQL.ExecuteNonQuery(MainQueries.DeleteTrades(MPI.Portfolio.ID));
+            SQL.ExecuteNonQuery(MainQueries.DeletePortfolio(MPI.Portfolio.ID));   
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
 
             cmbMainPortfolio.SelectedIndexChanged -= cmbMainPortfolio_SelectedIndexChanged;
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
@@ -1741,11 +1741,11 @@ namespace MyPersonalIndex
 
                 MPI.Settings.Splits = f.OptionReturnValues.Splits;
                 MPI.Settings.DataStartDate = f.OptionReturnValues.DataStartDate;
-                SQL.ExecuteNonQuery(Queries.Main_UpdatePortfolioStartDates(MPI.Settings.DataStartDate));
-                SQL.ExecuteNonQuery(Queries.Main_DeleteNAV());
-                SQL.ExecuteNonQuery(Queries.Main_DeleteSplits());
-                SQL.ExecuteNonQuery(Queries.Main_DeleteClosingPrices());
-                SQL.ExecuteNonQuery(Queries.Main_DeleteDividends());
+                SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioStartDates(MPI.Settings.DataStartDate));
+                SQL.ExecuteNonQuery(MainQueries.DeleteNAV());
+                SQL.ExecuteNonQuery(MainQueries.DeleteSplits());
+                SQL.ExecuteNonQuery(MainQueries.DeleteClosingPrices());
+                SQL.ExecuteNonQuery(MainQueries.DeleteDividends());
 
                 if (cmbMainPortfolio.ComboBox.Items.Count > 0)
                 {
@@ -1856,7 +1856,7 @@ namespace MyPersonalIndex
                 
                 MessageBox.Show("Finished");
 
-                DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Main_GetLastDate(), SqlDateTime.MinValue.Value));
+                DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), SqlDateTime.MinValue.Value));
                 if (d != SqlDateTime.MinValue.Value)
                 {
                     MPI.LastDate = d;

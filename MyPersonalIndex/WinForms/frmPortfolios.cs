@@ -20,8 +20,8 @@ namespace MyPersonalIndex
         }
 
         public PortfolioRetValues PortfolioReturnValues { get { return _PortfolioReturnValues; } }
-        
-        private Queries SQL = new Queries();
+
+        private PortfolioQueries SQL = new PortfolioQueries();
         private int Portfolio;
         private PortfolioRetValues _PortfolioReturnValues = new PortfolioRetValues();
         private MonthCalendar IndexDate;
@@ -48,7 +48,7 @@ namespace MyPersonalIndex
             mnuDate.Items.Insert(0, host);
             IndexDate.DateSelected += new DateRangeEventHandler(Date_Change);
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetPortfolioAttributes(Portfolio));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetPortfolioAttributes(Portfolio));
 
             try
             {
@@ -112,13 +112,13 @@ namespace MyPersonalIndex
 
             if (Portfolio == -1)
             {
-                SQL.ExecuteNonQuery(Queries.Portfolio_InsertPortfolio(txtName.Text, chkDiv.Checked,
+                SQL.ExecuteNonQuery(PortfolioQueries.InsertPortfolio(txtName.Text, chkDiv.Checked,
                     Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
-                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.Common_GetIdentity()));
+                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
-                SQL.ExecuteNonQuery(Queries.Portfolio_UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,
+                SQL.ExecuteNonQuery(PortfolioQueries.UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,
                     Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
 

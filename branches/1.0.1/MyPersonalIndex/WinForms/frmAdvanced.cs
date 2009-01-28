@@ -12,7 +12,7 @@ namespace MyPersonalIndex
 {
     public partial class frmAdvanced : Form
     {
-        private Queries SQL = new Queries();
+        private AdvQueries SQL = new AdvQueries();
         private DateTime LastDate;
         private MonthCalendar StartCalendar;
         private MonthCalendar EndCalendar;
@@ -46,11 +46,11 @@ namespace MyPersonalIndex
             btnEndDate.DropDownItems.Insert(0, host);
             EndCalendar.DateSelected += new DateRangeEventHandler(Date_Change);
 
-            lst.DataSource = SQL.ExecuteDataset(Queries.Adv_GetTickerList());
+            lst.DataSource = SQL.ExecuteDataset(AdvQueries.GetTickerList());
             lst.DisplayMember = "Name";
             lst.ValueMember = "ID";
 
-            btnTickerDiv.Checked = Convert.ToInt32(SQL.ExecuteScalar(Queries.Adv_GetIncludeDividends())) == 1;
+            btnTickerDiv.Checked = Convert.ToInt32(SQL.ExecuteScalar(AdvQueries.GetIncludeDividends())) == 1;
         }
 
         private void Date_Change(object sender, DateRangeEventArgs e)
@@ -58,14 +58,14 @@ namespace MyPersonalIndex
             if (sender == StartCalendar)
             {
                 StartCalendar.SelectionStart =
-                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
+                    Convert.ToDateTime(SQL.ExecuteScalar(Queries.GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
                 btnStartDate.HideDropDown();
                 btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             }
             else
             {
                 EndCalendar.SelectionStart =
-                   Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
+                   Convert.ToDateTime(SQL.ExecuteScalar(Queries.GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
                 btnEndDate.HideDropDown();
                 btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
             }
@@ -143,7 +143,7 @@ namespace MyPersonalIndex
                         {
                             try
                             {
-                                dg[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
+                                dg[i, x].Value = Convert.ToDouble(SQL.ExecuteScalar(Queries.GetCorrelation(CorrelationItems[i], CorrelationItems[x], StartDate, EndDate), 0));
                                 dg[x, i].Value = dg[i, x].Value;
                             }
                             catch (SqlCeException)
@@ -199,7 +199,7 @@ namespace MyPersonalIndex
             int Seed = 1;
 
             LoadGraphSettings(g);
-            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+            DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
            
             foreach (int i in lst.CheckedIndices)
             {
@@ -211,11 +211,11 @@ namespace MyPersonalIndex
                     {
                         Ticker = Functions.StripSignifyPortfolio(Ticker);
                         
-                        DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetPortfolioStart(Ticker), SqlDateTime.MinValue.Value));
-                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Ticker, PreviousDay), SqlDateTime.MinValue.Value));
+                        DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetPortfolioStart(Ticker), SqlDateTime.MinValue.Value));
+                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.GetPreviousPortfolioDay(Ticker, PreviousDay), SqlDateTime.MinValue.Value));
                         PreviousDay = YDay < PreviousDay ? PreviousDay : YDay;
 
-                        rs = SQL.ExecuteResultSet(Queries.Adv_GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.Common_GetNAV(Convert.ToInt32(Ticker), PreviousDay), 1)), StartDate, EndDate));
+                        rs = SQL.ExecuteResultSet(AdvQueries.GetChartPortfolio(Ticker, Convert.ToDouble(SQL.ExecuteScalar(Queries.GetNAV(Convert.ToInt32(Ticker), PreviousDay), 1)), StartDate, EndDate));
 
                         PointPairList list = new PointPairList();
                         int ordDate = rs.GetOrdinal("Date");
@@ -238,11 +238,11 @@ namespace MyPersonalIndex
                     }
                     else
                     {
-                        DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Adv_GetTickerStart(Ticker), SqlDateTime.MinValue.Value));
-                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.Common_GetPreviousDay(PreviousDay), SqlDateTime.MinValue.Value));
+                        DateTime PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetTickerStart(Ticker), SqlDateTime.MinValue.Value));
+                        PreviousDay = Convert.ToDateTime(SQL.ExecuteScalar(Queries.GetPreviousDay(PreviousDay), SqlDateTime.MinValue.Value));
                         PreviousDay = YDay < PreviousDay ? PreviousDay : YDay;
 
-                        rs = SQL.ExecuteResultSet(Queries.Adv_GetChartTicker(Ticker, PreviousDay, EndDate));
+                        rs = SQL.ExecuteResultSet(AdvQueries.GetChartTicker(Ticker, PreviousDay, EndDate));
                         PointPairList list = GetTickerChart(rs);
                         if (list.Count > 0)
                         {
@@ -305,7 +305,7 @@ namespace MyPersonalIndex
             d.Add(Constants.StatVariables.StartDate, StartDate.ToShortDateString());
             d.Add(Constants.StatVariables.EndDate, EndDate.ToShortDateString());
 
-            SqlCeResultSet rs = this.SQL.ExecuteResultSet(Queries.Adv_GetPortfolio(Portfolio, EndDate));
+            SqlCeResultSet rs = this.SQL.ExecuteResultSet(AdvQueries.GetPortfolio(Portfolio, EndDate));
             try
             {
                 if (!rs.HasRows)
@@ -314,8 +314,8 @@ namespace MyPersonalIndex
 
                 d.Add(Constants.StatVariables.PortfolioName, rs.GetString(rs.GetOrdinal("Name")));
                 DateTime PortfolioStartDate = rs.GetDateTime(rs.GetOrdinal("StartDate"));
-                PortfolioStartDate = Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Portfolio, PortfolioStartDate), PortfolioStartDate));
-                d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.Common_GetPreviousPortfolioDay(Portfolio, StartDate), PortfolioStartDate)).ToShortDateString());
+                PortfolioStartDate = Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.GetPreviousPortfolioDay(Portfolio, PortfolioStartDate), PortfolioStartDate));
+                d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(Queries.GetPreviousPortfolioDay(Portfolio, StartDate), PortfolioStartDate)).ToShortDateString());
                 d.Add(Constants.StatVariables.TotalValue, rs.GetDecimal(rs.GetOrdinal("TotalValue")).ToString());
             }
             finally
@@ -337,7 +337,7 @@ namespace MyPersonalIndex
 
             DataTable dt = (DataTable)lst.DataSource;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetStats(0));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetStats(0));
 
             try
             {
@@ -427,7 +427,7 @@ namespace MyPersonalIndex
 
         private void frmAdvanced_FormClosing(object sender, FormClosingEventArgs e)
         {
-            SQL.ExecuteNonQuery(Queries.Adv_UpdateIncludeDividends(btnTickerDiv.Checked));
+            SQL.ExecuteNonQuery(AdvQueries.UpdateIncludeDividends(btnTickerDiv.Checked));
         }
 
         private void Export(DataGridView dg)

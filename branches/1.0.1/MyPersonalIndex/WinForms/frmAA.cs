@@ -6,7 +6,7 @@ namespace MyPersonalIndex
 {
     public partial class frmAA : Form
     {
-        private Queries SQL = new Queries();
+        private AAQueries SQL = new AAQueries();
         private int PortfolioID;
         private bool Pasted;
 
@@ -27,7 +27,7 @@ namespace MyPersonalIndex
 
             Pasted = false;
 
-            dsAA.Tables.Add(SQL.ExecuteDataset(Queries.Common_GetAA(PortfolioID)));
+            dsAA.Tables.Add(SQL.ExecuteDataset(AAQueries.GetAA(PortfolioID)));
             dgAA.DataSource = dsAA.Tables[0];
 
             dsAA.AcceptChanges();
@@ -145,7 +145,7 @@ namespace MyPersonalIndex
                 if (!string.IsNullOrEmpty(AAin))
                     AAin = AAin.Substring(0, AAin.Length - 1);
 
-                SQL.ExecuteNonQuery(Queries.AA_DeleteAA(PortfolioID, AAin));
+                SQL.ExecuteNonQuery(AAQueries.DeleteAA(PortfolioID, AAin));
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
                 {
@@ -153,14 +153,14 @@ namespace MyPersonalIndex
                     {
                         if (Convert.ToInt32(dr["ID"]) == 0)
                             if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(Queries.AA_InsertAA(PortfolioID, (string)dr["AA"], null));
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr["AA"], null));
                             else
-                                SQL.ExecuteNonQuery(Queries.AA_InsertAA(PortfolioID, (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr["AA"], Convert.ToDouble(dr["Target"])));
                         else
                             if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(Queries.AA_UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], null));
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], null));
                             else
-                                SQL.ExecuteNonQuery(Queries.AA_UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], Convert.ToDouble(dr["Target"])));
                     }
                     catch
                     {

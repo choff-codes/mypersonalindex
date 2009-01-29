@@ -1893,5 +1893,13 @@ namespace MyPersonalIndex
                 f.ShowDialog();
             }
         }
+
+        private void dgCorrelation_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (Convert.ToInt32(e.Value) < 0)
+                e.CellStyle.BackColor = Color.FromArgb(255, 255 + Convert.ToInt32(e.Value), 255);
+            else
+                e.CellStyle.BackColor = Color.FromArgb(255 - Convert.ToInt32(e.Value), 255, 255);
+        }
     }
 }

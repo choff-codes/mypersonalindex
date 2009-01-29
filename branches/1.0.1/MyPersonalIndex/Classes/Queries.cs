@@ -119,6 +119,7 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
         }
 
+        public enum eGetAA { AA, Target, ID };
         public static string GetAA(int Portfolio)
         {
             return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
@@ -174,6 +175,7 @@ namespace MyPersonalIndex
             return string.Format("UPDATE Settings SET DataStartDate = '{0}'", Date.ToShortDateString());
         }
 
+        public enum eGetStats { ID, SQL, Format, Description };
         public static string GetStats(int Portfolio)
         {
             return string.Format(

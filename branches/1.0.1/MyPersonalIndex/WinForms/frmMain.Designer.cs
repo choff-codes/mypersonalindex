@@ -751,6 +751,7 @@
             this.dgCorrelation.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dgCorrelation.Size = new System.Drawing.Size(778, 463);
             this.dgCorrelation.TabIndex = 4;
+            this.dgCorrelation.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgCorrelation_CellFormatting);
             // 
             // tsCorrelation
             // 

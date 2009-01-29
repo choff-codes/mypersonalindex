@@ -84,6 +84,7 @@ namespace MyPersonalIndex
             return string.Format("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s={0}", Symbol);
         }
 
+        public enum eGetUpdateDistinctTickers { Ticker, Date, Price };
         public static string GetUpdateDistinctTickers()
         {
             return
@@ -99,6 +100,7 @@ namespace MyPersonalIndex
                 " ON a.Ticker = b.Ticker";
         }
 
+        public enum eGetCorrelationDistinctTickers { Ticker };
         public static string GetCorrelationDistinctTickers(int Portfolio, bool Hidden)
         {
             return string.Format(
@@ -110,6 +112,7 @@ namespace MyPersonalIndex
             return "DELETE FROM AvgPricePerShare";
         }
 
+        public enum eGetAvgPricesTrades { TickerID, Price, Shares }
         public static string GetAvgPricesTrades(int Portfolio, DateTime MaxDate)
         {
             return string.Format(
@@ -124,17 +127,20 @@ namespace MyPersonalIndex
                Portfolio, MaxDate.ToShortDateString());
         }
 
+        public enum eGetAvgPricesTickerList { TickerID };
         public static string GetAvgPricesTickerList(int Portfolio)
         {
             return string.Format(
                 "SELECT DISTINCT TickerID FROM Trades WHERE Portfolio = {0}", Portfolio);
         }
 
+        public enum eGetPortfolios { ID, Name };
         public static string GetPortfolios()
         {
             return "SELECT ID, Name FROM Portfolios";
         }
 
+        public enum eGetNAVPortfolios { ID, Name, StartDate, Dividends, NAVStartValue };
         public static string GetNAVPortfolios()
         {
             return "SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios";
@@ -159,6 +165,7 @@ namespace MyPersonalIndex
                 StartValue, Portfolio, (Desc ? " DESC" : ""));
         }
 
+        public enum eGetDistinctDates { Date };
         public static string GetDistinctDates(DateTime MinDate)
         {
             return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}'", MinDate.ToShortDateString());
@@ -205,6 +212,7 @@ namespace MyPersonalIndex
                 " WHERE a.Portfolio = {0} AND  a.Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
+        public enum eGetChart { Date, Gain };
         public static string GetChart(int Portfolio, double StartValue, DateTime StartDate, DateTime EndDate)
         {
             return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
@@ -231,9 +239,10 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
+        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Version, Splits };
         public static string GetSettings()
         {
-            return "SELECT * FROM Settings";
+            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Version, Splits FROM Settings";
         }
 
         public static string UpdateSettings(int? LastPortfolio, Rectangle WindowPosition, FormWindowState f)
@@ -343,6 +352,7 @@ namespace MyPersonalIndex
                 Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
         }
 
+        public enum eGetAvgPricesTrade { Price, Shares };
         public static string GetAvgPricesTrade(int Portfolio, int Ticker, DateTime MaxDate)
         {
             return string.Format(

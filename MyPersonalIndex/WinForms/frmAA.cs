@@ -69,10 +69,10 @@ namespace MyPersonalIndex
                                 switch (col + i)
                                 {
                                     case 0:
-                                        dsAA.Tables[0].Rows[row]["AA"] = cells[i];
+                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i];
                                         break;
                                     case 1:
-                                        dsAA.Tables[0].Rows[row]["Target"] = Convert.ToDecimal(cells[i]);
+                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i]);
                                         break;
                                 }
                             }
@@ -139,8 +139,8 @@ namespace MyPersonalIndex
                 string AAin = "";
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
-                    if (Convert.ToInt32(dr["ID"]) != 0)
-                        AAin = AAin + Convert.ToInt32(dr["ID"]).ToString() + ",";
+                    if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) != 0)
+                        AAin = AAin + Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]).ToString() + ",";
 
                 if (!string.IsNullOrEmpty(AAin))
                     AAin = AAin.Substring(0, AAin.Length - 1);
@@ -151,16 +151,16 @@ namespace MyPersonalIndex
                 {
                     try
                     {
-                        if (Convert.ToInt32(dr["ID"]) == 0)
-                            if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr["AA"], null));
+                        if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) == 0)
+                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], null));
                             else
-                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
                         else
-                            if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], null));
+                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], null));
                             else
-                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
                     }
                     catch
                     {

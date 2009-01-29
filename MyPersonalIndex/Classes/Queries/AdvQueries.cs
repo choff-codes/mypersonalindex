@@ -4,6 +4,7 @@ namespace MyPersonalIndex
 {
     class AdvQueries: Queries
     {
+        public enum eGetTickerList { Name, ID };
         public static string GetTickerList()
         {
             return string.Format(
@@ -13,12 +14,14 @@ namespace MyPersonalIndex
                 Constants.SignifyPortfolio);
         }
 
+        public enum eGetChartPortfolio { Date, Gain };
         public static string GetChartPortfolio(string Ticker, double StartValue, DateTime StartDate, DateTime EndDate)
         {
             return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
                     StartValue, Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
+        public enum eGetChartTicker { Date, Price, Dividend, Split };
         public static string GetChartTicker(string Ticker, DateTime StartDate, DateTime EndDate)
         {
             return string.Format(
@@ -43,6 +46,7 @@ namespace MyPersonalIndex
             return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Ticker);
         }
 
+        public enum eGetPortfolio { Name, StartDate, TotalValue };
         public static string GetPortfolio(string Portfolio, DateTime EndDate)
         {
             return string.Format(
@@ -51,11 +55,6 @@ namespace MyPersonalIndex
                 " INNER JOIN NAV b" +
                 " ON b.Date = '{0}' and b.Portfolio = {1}" +
                 " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
-        }
-
-        public static string GetStats()
-        {
-            return "SELECT SQL, Format, Description FROM UserStatistics";
         }
 
         public static string GetIncludeDividends()

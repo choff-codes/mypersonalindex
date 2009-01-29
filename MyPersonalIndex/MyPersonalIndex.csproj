@@ -88,7 +88,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -295,27 +295,54 @@
     </Content>
     <Content Include="Resources\55.ico" />
     <None Include="Resources\pie_chart_48.png" />
-    <Content Include="SQLCe\sqlceca35.dll">
+    <None Include="SQLCe\x64\sqlceca35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlcecompact35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlcecompact35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceer35EN.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceer35EN.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceme35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceme35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceoledb35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceoledb35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceqp35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceqp35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlcese35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlcese35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Include="SQLCe\x64\System.Data.SqlServerCe.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceca35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlcecompact35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceer35EN.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceme35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceoledb35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceqp35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlcese35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\System.Data.SqlServerCe.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="app.config" />
     <None Include="Resources\blue_speech_bubble_48.png" />
     <None Include="Resources\spanner_48.png" />

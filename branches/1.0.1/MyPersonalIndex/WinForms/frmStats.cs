@@ -27,18 +27,18 @@ namespace MyPersonalIndex
                 return;
             }
 
-            DataTable dt = SQL.ExecuteDataset(StatsQueries.GetStats());
+            DataTable dt = SQL.ExecuteDataset(StatsQueries.GetUserStats());
 
-            cmb.DisplayMember = "Description";
-            cmb.ValueMember = "ID";
+            cmb.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
+            cmb.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             cmb.DataSource = dt.Copy();
 
-            lst1.DisplayMember = "Description";
-            lst1.ValueMember = "ID";
+            lst1.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
+            lst1.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             lst1.DataSource = dt;
 
-            lst2.DisplayMember = "Description";
-            lst2.ValueMember = "ID";
+            lst2.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
+            lst2.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             DataTable dt2 = dt.Copy();
             dt2.Clear();
             lst2.DataSource = dt2;
@@ -49,14 +49,12 @@ namespace MyPersonalIndex
             {
                 if (rs.HasRows)
                 {
-                    int ordID = rs.GetOrdinal("ID");
-
                     rs.ReadFirst();
 
                     do
                     {
                         int i = 0;
-                        int ID = rs.GetInt32(ordID);
+                        int ID = rs.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
 
                         if (ID == -1)
                         {
@@ -65,7 +63,7 @@ namespace MyPersonalIndex
                         }
                         else
                         {
-                            while (Convert.ToInt32(dt.Rows[i]["ID"]) != ID)
+                            while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
                             {
                                 i++;
                             }
@@ -102,7 +100,7 @@ namespace MyPersonalIndex
 
             foreach (int i in lst2.SelectedIndices)
             {
-                if (Convert.ToInt32(((DataTable)lst2.DataSource).Rows[i]["ID"]) != -1)
+                if (Convert.ToInt32(((DataTable)lst2.DataSource).Rows[i][(int)StatsQueries.eGetUserStats.ID]) != -1)
                 {
                     object[] o = ((DataTable)lst2.DataSource).Rows[i].ItemArray;
                     ((DataTable)lst1.DataSource).Rows.Add(o);
@@ -208,20 +206,16 @@ namespace MyPersonalIndex
 
             if (dt2.Rows.Count > 0)
             {
-                SqlCeResultSet rs = SQL.ExecuteTableUpdate("Stats");
+                SqlCeResultSet rs = SQL.ExecuteTableUpdate(StatsQueries.Tables.Stats);
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();
 
                 try
                 {      
-                    int ordPortfolio = rs.GetOrdinal("Portfolio");
-                    int ordStatistic = rs.GetOrdinal("Statistic");
-                    int ordLocation = rs.GetOrdinal("Location");
-
                     for (int i = 0; i < dt2.Rows.Count; i++)
                     {
-                        newRecord.SetInt32(ordPortfolio, PortfolioID);
-                        newRecord.SetInt32(ordStatistic, Convert.ToInt32(dt2.Rows[i]["ID"]));
-                        newRecord.SetInt32(ordLocation, i);
+                        newRecord.SetInt32((int)StatsQueries.Tables.eStats.Portfolio, PortfolioID);
+                        newRecord.SetInt32((int)StatsQueries.Tables.eStats.Statistic, Convert.ToInt32(dt2.Rows[i][(int)StatsQueries.eGetUserStats.ID]));
+                        newRecord.SetInt32((int)StatsQueries.Tables.eStats.Location, i);
 
                         rs.Insert(newRecord);
                     }
@@ -248,16 +242,16 @@ namespace MyPersonalIndex
                 DataTable dt2 = (DataTable)lst2.DataSource;
 
                 foreach (DataRow d in dt.Rows)
-                    if (Convert.ToInt32(d["ID"]) == f.UserStatReturnValues.ID)
-                        d["Description"] = f.UserStatReturnValues.Description;
+                    if (Convert.ToInt32(d[(int)StatsQueries.eGetUserStats.ID]) == f.UserStatReturnValues.ID)
+                        d[(int)StatsQueries.eGetUserStats.Description] = f.UserStatReturnValues.Description;
                 dt.AcceptChanges();
 
                 foreach (DataRow d in dt2.Rows)
-                    if (Convert.ToInt32(d["ID"]) == f.UserStatReturnValues.ID)
-                        d["Description"] = f.UserStatReturnValues.Description;
+                    if (Convert.ToInt32(d[(int)StatsQueries.eGetUserStats.ID]) == f.UserStatReturnValues.ID)
+                        d[(int)StatsQueries.eGetUserStats.Description] = f.UserStatReturnValues.Description;
                 dt2.AcceptChanges();
 
-                ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex]["Description"] = f.UserStatReturnValues.Description;
+                ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] = f.UserStatReturnValues.Description;
                 ((DataTable)cmb.DataSource).AcceptChanges();
 
                 Changed = true;
@@ -270,8 +264,8 @@ namespace MyPersonalIndex
                 return;
 
             if (MessageBox.Show("Are you sure you want to delete " +
-                ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex]["Description"] + "? This will also remove it from other portfolios.", 
-                "Delete " + ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex]["Description"] + "?", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "? This will also remove it from other portfolios.",
+                "Delete " + ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "?", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return;
 
             int StatisticID = Convert.ToInt32(cmb.SelectedValue);
@@ -283,12 +277,12 @@ namespace MyPersonalIndex
             DataTable dt2 = (DataTable)lst2.DataSource;
 
             foreach (DataRow d in dt.Rows)
-                if (Convert.ToInt32(d["ID"]) == StatisticID)
+                if (Convert.ToInt32(d[(int)StatsQueries.eGetUserStats.ID]) == StatisticID)
                     d.Delete();
             dt.AcceptChanges();
 
             foreach (DataRow d in dt2.Rows)
-                if (Convert.ToInt32(d["ID"]) == StatisticID)
+                if (Convert.ToInt32(d[(int)StatsQueries.eGetUserStats.ID]) == StatisticID)
                     d.Delete();
             dt2.AcceptChanges();
 

@@ -46,7 +46,7 @@ namespace MyPersonalIndex
             LoadAADropDown();
             LoadTicker();
 
-            dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTradesDataset(PortfolioID, TickerID)));
+            dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTrades(PortfolioID, TickerID)));
             dgTickers.DataSource = dsTicker.Tables[0];
 
             dsTicker.AcceptChanges();
@@ -61,8 +61,8 @@ namespace MyPersonalIndex
             _TickerReturnValues.MinDate = DateTime.Today;
             _TickerReturnValues.Changed = chkCalc.Checked;
             foreach (DataRow dr in dsTicker.Tables[0].Rows)
-                if (Convert.ToDateTime(dr["Date"]) < _TickerReturnValues.MinDate)
-                    _TickerReturnValues.MinDate = Convert.ToDateTime(dr["Date"]);
+                if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < _TickerReturnValues.MinDate)
+                    _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
 
         }
 
@@ -75,11 +75,11 @@ namespace MyPersonalIndex
                     return;
 
                 rs.ReadFirst();
-                cmbAA.SelectedValue = rs.GetInt32(rs.GetOrdinal("AA"));
+                cmbAA.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.AA);
                 if (cmbAA.SelectedValue == null)
                     cmbAA.SelectedValue = -1;
-                chkCalc.Checked = rs.GetSqlBoolean(rs.GetOrdinal("Active")).IsTrue;
-                chkHide.Checked = rs.GetSqlBoolean(rs.GetOrdinal("Hide")).IsTrue;
+                chkCalc.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Active).IsTrue;
+                chkHide.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Hide).IsTrue;
             }
             finally
             {
@@ -101,13 +101,10 @@ namespace MyPersonalIndex
 
                 if (rs.HasRows)
                 {
-                    int ordName = rs.GetOrdinal("AA");
-                    int ordID = rs.GetOrdinal("ID");
-
                     rs.ReadFirst();
                     do
                     {
-                        t.Rows.Add(rs.GetString(ordName), rs.GetInt32(ordID));
+                        t.Rows.Add(rs.GetString((int)TickerQueries.eGetAA.AA), rs.GetInt32((int)TickerQueries.eGetAA.ID));
                     }
                     while (rs.Read());
                 }
@@ -163,13 +160,13 @@ namespace MyPersonalIndex
                                 switch (col + i)
                                 {
                                     case 0:
-                                        dsTicker.Tables[0].Rows[row]["Date"] = Convert.ToDateTime(cells[i]);
+                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Date] = Convert.ToDateTime(cells[i]);
                                         break;
                                     case 1:
-                                        dsTicker.Tables[0].Rows[row]["Shares"] = Convert.ToDecimal(cells[i]);
+                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i]);
                                         break;
                                     case 2:
-                                        dsTicker.Tables[0].Rows[row]["Price"] = Convert.ToDecimal(cells[i]);
+                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Convert.ToDecimal(cells[i]);
                                         break;
                                 }
                             }
@@ -241,16 +238,8 @@ namespace MyPersonalIndex
                 _TickerReturnValues.Changed = true;
                 dsTicker.AcceptChanges();
 
-                SqlCeResultSet rs = SQL.ExecuteTableUpdate("Trades");
+                SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades);
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-                int ordDate = rs.GetOrdinal("Date");
-                int ordShares = rs.GetOrdinal("Shares");
-                int ordPrice = rs.GetOrdinal("Price");
-                int ordPortfolio = rs.GetOrdinal("Portfolio");
-                int ordTickerID = rs.GetOrdinal("TickerID");
-                int ordID = rs.GetOrdinal("ID");
-                int ordTicker = rs.GetOrdinal("Ticker");
 
                 int i = 0;
 
@@ -258,18 +247,18 @@ namespace MyPersonalIndex
                 {
                     foreach (DataRow dr in dsTicker.Tables[0].Rows)
                     {
-                        newRecord.SetDateTime(ordDate, Convert.ToDateTime(dr["Date"]));
-                        newRecord.SetDecimal(ordShares, Convert.IsDBNull(dr["Shares"]) ? 0 : Convert.ToDecimal(dr["Shares"]));
-                        newRecord.SetDecimal(ordPrice, Convert.IsDBNull(dr["Price"]) ? 0 : Convert.ToDecimal(dr["Price"]));
-                        newRecord.SetInt32(ordPortfolio, PortfolioID);
-                        newRecord.SetInt32(ordTickerID, TickerID);
-                        newRecord.SetInt32(ordID, i);
-                        newRecord.SetString(ordTicker, txtSymbol.Text);
+                        newRecord.SetDateTime((int)TickerQueries.Tables.eTrades.Date, Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]));
+                        newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Shares, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Shares]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Shares]));
+                        newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Price, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Price]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Price]));
+                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.Portfolio, PortfolioID);
+                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.TickerID, TickerID);
+                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.ID, i);
+                        newRecord.SetString((int)TickerQueries.Tables.eTrades.Ticker, txtSymbol.Text);
                         rs.Insert(newRecord);
 
                         i++;
-                        if (Convert.ToDateTime(dr["Date"]) < TickerReturnValues.MinDate)
-                            _TickerReturnValues.MinDate = Convert.ToDateTime(dr["Date"]);
+                        if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < TickerReturnValues.MinDate)
+                            _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
                     }
                 }
                 finally
@@ -300,14 +289,11 @@ namespace MyPersonalIndex
                     MessageBox.Show("Currently no splits exist for this symbol.");
                 else
                 {
-                    int ordDate = rs.GetOrdinal("Date");
-                    int ordRatio = rs.GetOrdinal("Ratio");
-
                     rs.ReadFirst();
                     string Message = txtSymbol.Text + " has the following splits:";
                     do
                     {
-                        Message = Message + "\n" + rs.GetDateTime(ordDate).ToShortDateString() + " - " + ((double)rs.GetDecimal(ordRatio)).ToString() + ":1";
+                        Message = Message + "\n" + rs.GetDateTime((int)TickerQueries.eGetSplits.Date).ToShortDateString() + " - " + ((double)rs.GetDecimal((int)TickerQueries.eGetSplits.Ratio)).ToString() + ":1";
                     }
                     while (rs.Read());
                     using (frmMsgBox f = new frmMsgBox("Splits", Message))
@@ -330,14 +316,11 @@ namespace MyPersonalIndex
                     MessageBox.Show("Currently there have been no dividends for this symbol.");
                 else
                 {
-                    int ordDate = rs.GetOrdinal("Date");
-                    int ordAmount = rs.GetOrdinal("Amount");
-
                     rs.ReadFirst();
                     string Message = txtSymbol.Text + " has the following dividends:";
                     do
                     {
-                        Message = Message + "\n" + rs.GetDateTime(ordDate).ToShortDateString() + " - " + ((double)rs.GetDecimal(ordAmount)).ToString("C");
+                        Message = Message + "\n" + rs.GetDateTime((int)TickerQueries.eGetDividends.Date).ToShortDateString() + " - " + ((double)rs.GetDecimal((int)TickerQueries.eGetDividends.Amount)).ToString("C");
                     }
                     while (rs.Read());
                     using (frmMsgBox f = new frmMsgBox("Dividends", Message))

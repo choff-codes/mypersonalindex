@@ -8,10 +8,34 @@ using System.IO;
 namespace MyPersonalIndex
 {
     public class Queries : IDisposable
-    { 
-        private SqlCeConnection cn;
-
+    {
         public ConnectionState Connection { get { return cn.State; } }
+
+        public struct Tables
+        {
+            public const string AA = "AA";
+            public const string AvgPricePerShare = "AvgPricePerShare";
+            public const string ClosingPrices = "ClosingPrices";
+            public const string Dividends = "Dividends";
+            public const string NAV = "NAV";
+            public const string Portfolios = "Portfolios";
+            public const string Settings = "Settings";
+            public const string Splits = "Splits";
+            public const string Stats = "Stats";
+            public const string Tickers = "Tickers";
+            public const string Trades = "Trades";
+            public const string UserStatistics = "UserStatistics";
+
+            public enum eClosingPrices { Date, Ticker, Price, Change };
+            public enum eSplits { Ticker, Date, Ratio };
+            public enum eDividends { Date, Ticker, Amount };
+            public enum eAvgPricePerShare { Ticker, Price };
+            public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };
+            public enum eStats { Portfolio, Statistic, Location };
+            public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID }
+        }
+        
+        private SqlCeConnection cn;
 
         public Queries()
         {
@@ -125,9 +149,18 @@ namespace MyPersonalIndex
             return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
         }
 
+        public enum eGetPortfolioAttributes
+        {
+            ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,
+            CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank,
+            CorrelationShowHidden
+        };
         public static string GetPortfolioAttributes(int Portfolio)
         {
-            return string.Format("SELECT * FROM Portfolios WHERE ID = {0}", Portfolio);
+            return string.Format(
+                "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue," +
+                " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden" +
+                " FROM Portfolios WHERE ID = {0}", Portfolio);
         }
 
         public static string GetIdentity()
@@ -186,16 +219,6 @@ namespace MyPersonalIndex
                 " WHERE Portfolio = {0}" +
                 " ORDER BY a.Location",
                 Portfolio);
-        }
-
-        public static string GetPreviousPortfolioDay(string Portfolio, DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
-        }
-
-        public static string GetPreviousPortfolioDay(int Portfolio, DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
         }
     }
 }

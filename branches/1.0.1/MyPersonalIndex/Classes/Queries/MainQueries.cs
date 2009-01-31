@@ -352,20 +352,20 @@ namespace MyPersonalIndex
                 Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
         }
 
-        public enum eGetAvgPricesTrade { Price, Shares };
-        public static string GetAvgPricesTrade(int Portfolio, int Ticker, DateTime MaxDate)
-        {
-            return string.Format(
-                "SELECT a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
-                        " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
-                " FROM Trades a" +
-                " LEFT JOIN Splits b" +
-                   " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
-                " WHERE a.Portfolio = {0} AND a.TickerID = {1} AND a.Date <= '{2}'" +
-                " GROUP BY a.ID, a.Price, a.Shares, a.Date " +
-                " ORDER BY a.Date",
-                Portfolio, Ticker, MaxDate.ToShortDateString());
-        }
+        //public enum eGetAvgPricesTrade { Price, Shares };
+        //public static string GetAvgPricesTrade(int Portfolio, int Ticker, DateTime MaxDate)
+        //{
+        //    return string.Format(
+        //        "SELECT a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
+        //                " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
+        //        " FROM Trades a" +
+        //        " LEFT JOIN Splits b" +
+        //           " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
+        //        " WHERE a.Portfolio = {0} AND a.TickerID = {1} AND a.Date <= '{2}'" +
+        //        " GROUP BY a.ID, a.Price, a.Shares, a.Date " +
+        //        " ORDER BY a.Date",
+        //        Portfolio, Ticker, MaxDate.ToShortDateString());
+        //}
 
         public static string UpdatePortfolioStartDates(DateTime MinDate)
         {

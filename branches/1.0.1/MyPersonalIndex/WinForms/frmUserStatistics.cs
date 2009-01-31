@@ -76,15 +76,11 @@ namespace MyPersonalIndex
                 if (!rs.HasRows)
                     return;
 
-                int ordDescription = rs.GetOrdinal("Description");
-                int ordSQL = rs.GetOrdinal("SQL");
-                int ordFormat = rs.GetOrdinal("Format");
-
                 rs.ReadFirst();
 
-                txtDesc.Text = rs.GetString(ordDescription);
-                txtSQL.Text = rs.GetString(ordSQL);
-                cmbFormat.SelectedIndex = rs.GetInt32(ordFormat);
+                txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
+                txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
+                cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
             }
             finally
             {

@@ -4,6 +4,11 @@ namespace MyPersonalIndex
 {
     class AdvQueries: Queries
     {
+        public static string GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
+        }
+
         public enum eGetTickerList { Name, ID };
         public static string GetTickerList()
         {
@@ -33,7 +38,7 @@ namespace MyPersonalIndex
                 " ON a.Ticker = c.Ticker AND a.Date = c.Date" +
                 " WHERE a.Ticker = '{0}' AND a.Date BETWEEN '{1}' AND '{2}'" +
                 " ORDER BY a.Date",
-                Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+                Functions.SQLCleanString(Ticker), StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
         public static string GetPortfolioStart(string Portfolio)
@@ -43,7 +48,7 @@ namespace MyPersonalIndex
 
         public static string GetTickerStart(string Ticker)
         {
-            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Ticker);
+            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
         }
 
         public enum eGetPortfolio { Name, StartDate, TotalValue };

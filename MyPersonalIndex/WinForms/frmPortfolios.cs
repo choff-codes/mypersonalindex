@@ -56,12 +56,12 @@ namespace MyPersonalIndex
                 {
                     rs.ReadFirst();
 
-                    txtName.Text = rs.GetString(rs.GetOrdinal("Name"));
-                    chkDiv.Checked = rs.GetSqlBoolean(rs.GetOrdinal("Dividends")).IsTrue;
-                    txtValue.Text = string.Format("{0:C}", rs.GetDecimal(rs.GetOrdinal("NavStartValue")));
-                    numAA.Value = rs.GetInt32(rs.GetOrdinal("AAThreshold"));
-                    cmbCost.SelectedIndex = rs.GetInt32(rs.GetOrdinal("CostCalc"));
-                    IndexDate.SetDate(rs.GetDateTime(rs.GetOrdinal("StartDate")));
+                    txtName.Text = rs.GetString((int)PortfolioQueries.eGetPortfolioAttributes.Name);
+                    chkDiv.Checked = rs.GetSqlBoolean((int)PortfolioQueries.eGetPortfolioAttributes.Dividends).IsTrue;
+                    txtValue.Text = string.Format("{0:C}", rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
+                    numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
+                    cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
+                    IndexDate.SetDate(rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate));
                 }
             }
             finally

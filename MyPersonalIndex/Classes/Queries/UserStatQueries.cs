@@ -4,9 +4,10 @@ namespace MyPersonalIndex
 {
     class UserStatQueries: Queries
     {
+        public enum eGetStat { ID, SQL, Description, Format };
         public static string GetStat(int ID)
         {
-            return string.Format("SELECT * FROM UserStatistics WHERE ID = {0}", ID);
+            return string.Format("SELECT ID, SQL, Description, Format FROM UserStatistics WHERE ID = {0}", ID);
         }
 
         public static string UpdateStat(int ID, string Description, string SQL, int Format)

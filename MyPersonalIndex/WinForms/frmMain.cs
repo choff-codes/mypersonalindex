@@ -200,14 +200,11 @@ namespace MyPersonalIndex
 
                 if (rs.HasRows)
                 {
-                    int ordName = rs.GetOrdinal("Name");
-                    int ordID = rs.GetOrdinal("ID");
-
                     rs.ReadFirst();
 
                     do
                     {
-                        t.Rows.Add(rs.GetString(ordName), rs.GetInt32(ordID));
+                        t.Rows.Add(rs.GetString((int)MainQueries.eGetPortfolios.Name), rs.GetInt32((int)MainQueries.eGetPortfolios.ID));
                     }
                     while (rs.Read());
                 }
@@ -238,15 +235,15 @@ namespace MyPersonalIndex
                 {
                     rs.ReadFirst();
                     
-                    MPI.Settings.DataStartDate = rs.GetDateTime(rs.GetOrdinal("DataStartDate"));
-                    MPI.Settings.Splits = rs.GetSqlBoolean(rs.GetOrdinal("Splits")).IsTrue;
-                    if (!Convert.IsDBNull(rs.GetValue(rs.GetOrdinal("WindowState"))))
+                    MPI.Settings.DataStartDate = rs.GetDateTime((int)MainQueries.eGetSettings.DataStartDate);
+                    MPI.Settings.Splits = rs.GetSqlBoolean((int)MainQueries.eGetSettings.Splits).IsTrue;
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.WindowState)))
                     {
-                        this.Location = new Point(rs.GetInt32(rs.GetOrdinal("WindowX")), rs.GetInt32(rs.GetOrdinal("WindowY")));
-                        this.Size = new Size(rs.GetInt32(rs.GetOrdinal("WindowWidth")), rs.GetInt32(rs.GetOrdinal("WindowHeight")));
-                        this.WindowState = (FormWindowState)rs.GetInt32(rs.GetOrdinal("WindowState"));
+                        this.Location = new Point(rs.GetInt32((int)MainQueries.eGetSettings.WindowX), rs.GetInt32((int)MainQueries.eGetSettings.WindowY));
+                        this.Size = new Size(rs.GetInt32((int)MainQueries.eGetSettings.WindowWidth), rs.GetInt32((int)MainQueries.eGetSettings.WindowHeight));
+                        this.WindowState = (FormWindowState)rs.GetInt32((int)MainQueries.eGetSettings.WindowState);
                     }
-                    LastPortfolio = Convert.IsDBNull(rs.GetValue(rs.GetOrdinal("LastPortfolio"))) ? -1 : rs.GetInt32(rs.GetOrdinal("LastPortfolio"));
+                    LastPortfolio = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.LastPortfolio)) ? -1 : rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
                 }
             }
             finally
@@ -419,8 +416,6 @@ namespace MyPersonalIndex
             try
             {
                 PointPairList list = new PointPairList();
-                int ordDate = rs.GetOrdinal("Date");
-                int ordValue = rs.GetOrdinal("Gain");
 
                 if (rs.HasRows)
                 {
@@ -429,7 +424,7 @@ namespace MyPersonalIndex
                     rs.ReadFirst();
                     do
                     {
-                        list.Add(new XDate(rs.GetDateTime(ordDate)), (double)rs.GetDecimal(ordValue));
+                        list.Add(new XDate(rs.GetDateTime((int)MainQueries.eGetChart.Date)), (double)rs.GetDecimal((int)MainQueries.eGetChart.Gain));
                     }
                     while (rs.Read());
 
@@ -501,21 +496,21 @@ namespace MyPersonalIndex
 
         private void LoadPortfolioSettings(SqlCeResultSet rs)
         {
-            MPI.Portfolio.StartDate = rs.GetDateTime(rs.GetOrdinal("StartDate"));
+            MPI.Portfolio.StartDate = rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate);
             stbIndexStart.Text = "Index Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
-            MPI.Portfolio.Dividends = rs.GetSqlBoolean(rs.GetOrdinal("Dividends")).IsTrue;
-            MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32(rs.GetOrdinal("CostCalc"));
-            MPI.Portfolio.NAVStart = (double)rs.GetDecimal(rs.GetOrdinal("NAVStartValue"));
-            MPI.Portfolio.AAThreshold = rs.GetInt32(rs.GetOrdinal("AAThreshold"));
-            btnHoldingsHidden.Checked = rs.GetSqlBoolean(rs.GetOrdinal("HoldingsShowHidden")).IsTrue;
-            btnPerformanceSortDesc.Checked = rs.GetSqlBoolean(rs.GetOrdinal("NAVSort")).IsTrue;
-            btnAAShowBlank.Checked = rs.GetSqlBoolean(rs.GetOrdinal("AAShowBlank")).IsTrue;
-            btnCorrelationHidden.Checked = rs.GetSqlBoolean(rs.GetOrdinal("CorrelationShowHidden")).IsTrue;
+            MPI.Portfolio.Dividends = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.Dividends).IsTrue;
+            MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.CostCalc);
+            MPI.Portfolio.NAVStart = (double)rs.GetDecimal((int)MainQueries.eGetPortfolioAttributes.NAVStartValue);
+            MPI.Portfolio.AAThreshold = rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.AAThreshold);
+            btnHoldingsHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.HoldingsShowHidden).IsTrue;
+            btnPerformanceSortDesc.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.NAVSort).IsTrue;
+            btnAAShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AAShowBlank).IsTrue;
+            btnCorrelationHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.CorrelationShowHidden).IsTrue;
 
-            MPI.Holdings.Sort = rs.GetString(rs.GetOrdinal("HoldingsSort"));
+            MPI.Holdings.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.HoldingsSort);
             ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
 
-            MPI.AA.Sort = rs.GetString(rs.GetOrdinal("AASort"));
+            MPI.AA.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AASort);
             ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
         }
 
@@ -552,7 +547,7 @@ namespace MyPersonalIndex
 
             d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
             d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
-            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(MainQueries.GetPreviousPortfolioDay(MPI.Portfolio.ID, MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
+            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(MainQueries.GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
             d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
             d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
             d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
@@ -589,17 +584,12 @@ namespace MyPersonalIndex
 
                 rs.ReadFirst();
 
-                int ordDescription = rs.GetOrdinal("Description");
-                int ordSQL = rs.GetOrdinal("SQL");
-                int ordFormat = rs.GetOrdinal("Format");
-                int ordID = rs.GetOrdinal("ID");
-
                 int i = 0;
                 int x = 0;
                 bool EvenOdd = true;
                 do
                 {
-                    if (rs.GetInt32(ordID) != -1)
+                    if (rs.GetInt32((int)MainQueries.eGetStats.ID) != -1)
                     {
                         if (!DateChange)
                         {
@@ -608,7 +598,7 @@ namespace MyPersonalIndex
                                 Width = 150,
                                 AutoSize = false,
                                 AutoEllipsis = true,
-                                Text = rs.GetString(ordDescription) + ":"
+                                Text = rs.GetString((int)MainQueries.eGetStats.Description) + ":"
                             });
                             MPI.Stat.TextBoxes.Add(new TextBox { Width = 175 });
 
@@ -630,7 +620,8 @@ namespace MyPersonalIndex
                         }
                         try
                         {
-                            MPI.Stat.TextBoxes[x].Text = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString(ordSQL))), (Constants.OutputFormat)rs.GetInt32(ordFormat));
+                            MPI.Stat.TextBoxes[x].Text = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString((int)MainQueries.eGetStats.SQL))),
+                                (Constants.OutputFormat)rs.GetInt32((int)MainQueries.eGetStats.Format));
                         }
                         catch (SqlCeException)
                         {
@@ -673,7 +664,6 @@ namespace MyPersonalIndex
             try
             {
                 List<string> CorrelationItems = new List<string>();
-                int ordTicker = rs.GetOrdinal("Ticker");
 
                 CorrelationItems.Add(Constants.SignifyPortfolio + MPI.Portfolio.ID.ToString());
 
@@ -683,7 +673,7 @@ namespace MyPersonalIndex
 
                     do
                     {
-                        CorrelationItems.Add(rs.GetString(ordTicker));
+                        CorrelationItems.Add(rs.GetString((int)MainQueries.eGetCorrelationDistinctTickers.Ticker));
                     }
                     while (rs.Read());
                 }
@@ -755,24 +745,20 @@ namespace MyPersonalIndex
                 if (!rs.HasRows)
                     return;
 
-                int rs_ordTicker = rs.GetOrdinal("Ticker");
-                int rs_ordDate = rs.GetOrdinal("Date");
-                int rs_ordPrice = rs.GetOrdinal("Price");
-
                 rs.ReadFirst();
                 MinDate = DateTime.Today.AddDays(1);
                 do
                 {
                     DateTime Date;
 
-                    if (Convert.IsDBNull(rs.GetValue(rs_ordDate)))
+                    if (Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Date)))
                     {
                         Date = MPI.Settings.DataStartDate.AddDays(-6);
                         MinDate = MPI.Settings.DataStartDate;
                     }
                     else
                     {
-                        Date = rs.GetDateTime(rs_ordDate);
+                        Date = rs.GetDateTime((int)MainQueries.eGetUpdateDistinctTickers.Date);
                         if (Date < MinDate)
                             MinDate = Date;
                     }
@@ -782,17 +768,17 @@ namespace MyPersonalIndex
 
                     try
                     {
-                        string Ticker = rs.GetString(rs_ordTicker);
+                        string Ticker = rs.GetString((int)MainQueries.eGetUpdateDistinctTickers.Ticker);
                         GetDividends(Ticker, Date);
                         if (MPI.Settings.Splits)
                             GetSplits(Ticker, Date);
                         GetPrices(Ticker, Date,
-                            Convert.IsDBNull(rs.GetValue(rs_ordPrice)) ? 0 : (double)rs.GetDecimal(rs_ordPrice));
+                            Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Price)) ? 0 : (double)rs.GetDecimal((int)MainQueries.eGetUpdateDistinctTickers.Price));
 
                     }
                     catch (WebException)
                     {
-                        TickersNotUpdated.Add(rs.GetString(rs_ordTicker));  
+                        TickersNotUpdated.Add(rs.GetString((int)MainQueries.eGetUpdateDistinctTickers.Ticker));  
                     }
                 }
                 while (rs.Read());
@@ -838,13 +824,8 @@ namespace MyPersonalIndex
             string line;
             string[] columns;
 
-            SqlCeResultSet rs = SQL.ExecuteTableUpdate("ClosingPrices");
+            SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.ClosingPrices);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-            int rs_ordDate = rs.GetOrdinal("Date");
-            int rs_ordTicker = rs.GetOrdinal("Ticker");
-            int rs_ordPrice = rs.GetOrdinal("Price");
-            int rs_ordChange = rs.GetOrdinal("Change");
 
             s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.StockPrices));
             try
@@ -862,9 +843,9 @@ namespace MyPersonalIndex
                     
                     double Price = Convert.ToDouble(columns[4]);        
 
-                    newRecord.SetDateTime(rs_ordDate, Convert.ToDateTime(columns[0]));
-                    newRecord.SetString(rs_ordTicker, Ticker);
-                    newRecord.SetDecimal(rs_ordPrice, (decimal)Price);
+                    newRecord.SetDateTime((int)MainQueries.Tables.eClosingPrices.Date, Convert.ToDateTime(columns[0]));
+                    newRecord.SetString((int)MainQueries.Tables.eClosingPrices.Ticker, Ticker);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Price, (decimal)Price);
 
                     double Split = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSplit(Ticker, Convert.ToDateTime(columns[0])), 1));
                     double Div = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividend(Ticker, Convert.ToDateTime(columns[0])), 0));
@@ -876,14 +857,14 @@ namespace MyPersonalIndex
                     if (line != null)
                     {
                         columns = line.Split(',');
-                        newRecord.SetDecimal(rs_ordChange, (decimal)(((Price / Convert.ToDouble(columns[4])) - 1) * 100));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / Convert.ToDouble(columns[4])) - 1) * 100));
                     }
                     else
                     {
                         if (LastPrice == 0)
-                            newRecord.SetValue(rs_ordChange, System.DBNull.Value);
+                            newRecord.SetValue((int)MainQueries.Tables.eClosingPrices.Change, System.DBNull.Value);
                         else
-                            newRecord.SetDecimal(rs_ordChange, (decimal)(((Price / LastPrice) - 1) * 100));
+                            newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / LastPrice) - 1) * 100));
                     }
 
                     rs.Insert(newRecord);
@@ -906,12 +887,8 @@ namespace MyPersonalIndex
             string HTMLSplitStart = "<center>Splits:<nobr>";
             string HTMLSplitNone = "<br><center>Splits:none</center>";
 
-            SqlCeResultSet rs = SQL.ExecuteTableUpdate("Splits");
+            SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Splits);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-            int rs_ordDate = rs.GetOrdinal("Date");
-            int rs_ordTicker = rs.GetOrdinal("Ticker");
-            int rs_ordRatio = rs.GetOrdinal("Ratio");
 
             s = Client.OpenRead(MainQueries.GetSplitAddress(Ticker));
             try
@@ -942,9 +919,9 @@ namespace MyPersonalIndex
                     split[1] = split[1].Substring(1, split[1].Length - 2);
                     string[] divisor = split[1].Split(':');
 
-                    newRecord.SetString(rs_ordTicker, Ticker);
-                    newRecord.SetDateTime(rs_ordDate, Convert.ToDateTime(split[0]));
-                    newRecord.SetDecimal(rs_ordRatio, Convert.ToDecimal(divisor[0]) / Convert.ToDecimal(divisor[1]));
+                    newRecord.SetString((int)MainQueries.Tables.eSplits.Ticker, Ticker);
+                    newRecord.SetDateTime((int)MainQueries.Tables.eSplits.Date, Convert.ToDateTime(split[0]));
+                    newRecord.SetDecimal((int)MainQueries.Tables.eSplits.Ratio, Convert.ToDecimal(divisor[0]) / Convert.ToDecimal(divisor[1]));
                     rs.Insert(newRecord);
                 }
             }
@@ -963,12 +940,8 @@ namespace MyPersonalIndex
             string line;
             string[] columns;
 
-            SqlCeResultSet rs = SQL.ExecuteTableUpdate("Dividends");
+            SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Dividends);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-            int rs_ordDate = rs.GetOrdinal("Date");
-            int rs_ordTicker = rs.GetOrdinal("Ticker");
-            int rs_ordAmount = rs.GetOrdinal("Amount");
 
             s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.Dividends));
             try
@@ -981,9 +954,9 @@ namespace MyPersonalIndex
                 {
                     columns = line.Split(',');
 
-                    newRecord.SetDateTime(rs_ordDate, Convert.ToDateTime(columns[0]));
-                    newRecord.SetString(rs_ordTicker, Ticker);
-                    newRecord.SetDecimal(rs_ordAmount, Convert.ToDecimal(columns[1]));
+                    newRecord.SetDateTime((int)MainQueries.Tables.eDividends.Date, Convert.ToDateTime(columns[0]));
+                    newRecord.SetString((int)MainQueries.Tables.eDividends.Ticker, Ticker);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eDividends.Amount, Convert.ToDecimal(columns[1]));
 
                     rs.Insert(newRecord);
 
@@ -1002,16 +975,10 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(MainQueries.DeleteAvgPrices());
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAvgPricesTrades(MPI.Portfolio.ID, MPI.Holdings.SelDate));
-            SqlCeResultSet rs2 = SQL.ExecuteTableUpdate("AvgPricePerShare");
+            SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.AvgPricePerShare);
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
             int CurrentTicker;
             bool EndOfResultSet = false;
-
-            int rs_ordPrice = rs.GetOrdinal("Price");
-            int rs_ordTickerID = rs.GetOrdinal("TickerID");
-            int rs_ordShares = rs.GetOrdinal("Shares");
-            int rs2_ordTicker = rs2.GetOrdinal("Ticker");
-            int rs2_ordPrice = rs2.GetOrdinal("Price");
 
             try
             {
@@ -1028,12 +995,12 @@ namespace MyPersonalIndex
                     double Total = 0;
                     bool NewTicker = false;
 
-                    CurrentTicker = rs.GetInt32(rs_ordTickerID);
+                    CurrentTicker = rs.GetInt32((int)MainQueries.eGetAvgPricesTrades.TickerID);
 
                     do
                     {
-                        double TransactionShares = (double)rs.GetDecimal(rs_ordShares);
-                        double TransactionPrice = (double)rs.GetDecimal(rs_ordPrice);
+                        double TransactionShares = (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Shares);
+                        double TransactionPrice = (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Price);
 
                         if (TransactionShares < 0 && MPI.Portfolio.CostCalc != Constants.AvgShareCalc.AVG)
                         {
@@ -1080,7 +1047,7 @@ namespace MyPersonalIndex
                             NewTicker = true;
                             EndOfResultSet = true;
                         }
-                        else if (rs.GetInt32(rs_ordTickerID) != CurrentTicker)
+                        else if (rs.GetInt32((int)MainQueries.eGetAvgPricesTrades.TickerID) != CurrentTicker)
                             NewTicker = true;
                             
                     }
@@ -1094,8 +1061,8 @@ namespace MyPersonalIndex
 
                     if (TotalShares > 0)
                     {
-                        newRecord.SetInt32(rs2_ordTicker, CurrentTicker);
-                        newRecord.SetDecimal(rs2_ordPrice, (decimal)(Total / TotalShares));
+                        newRecord.SetInt32((int)MainQueries.Tables.eAvgPricePerShare.Ticker, CurrentTicker);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eAvgPricePerShare.Price, (decimal)(Total / TotalShares));
 
                         rs2.Insert(newRecord);
                     }
@@ -1143,23 +1110,17 @@ namespace MyPersonalIndex
 
                 try
                 {
-                    int ordID = rs.GetOrdinal("ID");
-                    int ordStartDate = rs.GetOrdinal("StartDate");
-                    int ordDividends = rs.GetOrdinal("Dividends");
-                    int ordNAVStartValue = rs.GetOrdinal("NAVStartValue");
-                    int ordName = rs.GetOrdinal("Name");
-
                     if (!rs.HasRows)
                         return;
                     rs.ReadFirst();
 
                     do
                     {
-                        bw.PortfolioName = rs.GetString(ordName);
+                        bw.PortfolioName = rs.GetString((int)MainQueries.eGetNAVPortfolios.Name);
                         bw.ReportProgress(50);
 
-                        int p = rs.GetInt32(ordID);
-                        DateTime StartDate = rs.GetDateTime(ordStartDate);
+                        int p = rs.GetInt32((int)MainQueries.eGetNAVPortfolios.ID);
+                        DateTime StartDate = rs.GetDateTime((int)MainQueries.eGetNAVPortfolios.StartDate);
                         DateTime portfolioMinDate = MinDate;
 
                         if (portfolioMinDate <= StartDate)
@@ -1167,7 +1128,8 @@ namespace MyPersonalIndex
                             StartDate = CheckPortfolioStartDate(p, StartDate);
                             portfolioMinDate = StartDate;
                         }
-                        GetNAVValues(p, portfolioMinDate, StartDate, rs.GetSqlBoolean(ordDividends).IsTrue, (double)rs.GetDecimal(ordNAVStartValue));
+                        GetNAVValues(p, portfolioMinDate, StartDate, rs.GetSqlBoolean((int)MainQueries.eGetNAVPortfolios.Dividends).IsTrue,
+                            (double)rs.GetDecimal((int)MainQueries.eGetNAVPortfolios.NAVStartValue));
                     }
                     while (rs.Read());
                 }
@@ -1190,15 +1152,8 @@ namespace MyPersonalIndex
         {
             SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, MinDate <= StartDate ? SqlDateTime.MinValue.Value : MinDate));
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetDistinctDates(MinDate));
-            SqlCeResultSet rs2 = SQL.ExecuteTableUpdate("NAV");
+            SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.NAV);
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
-
-            int rs_ordDate = rs.GetOrdinal("Date");
-            int rs2_ordPortfolio = rs2.GetOrdinal("Portfolio");
-            int rs2_ordDate = rs2.GetOrdinal("Date");
-            int rs2_ordTotalValue = rs2.GetOrdinal("TotalValue");
-            int rs2_ordNAV = rs2.GetOrdinal("NAV");
-            int rs2_ordChange = rs2.GetOrdinal("Change");
 
             try
             {
@@ -1207,18 +1162,19 @@ namespace MyPersonalIndex
 
                 rs.ReadFirst();
 
-                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(rs.GetDateTime(rs_ordDate)), SqlDateTime.MinValue.Value));
+                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(rs.GetDateTime((int)MainQueries.eGetDistinctDates.Date)),
+                    SqlDateTime.MinValue.Value));
                 double YNAV = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSpecificNav(Portfolio, YDay), 0));
                 double YTotalValue;
 
-                if (rs.GetDateTime(rs_ordDate) == StartDate)
+                if (rs.GetDateTime((int)MainQueries.eGetDistinctDates.Date) == StartDate)
                 {
                     YNAV = NAVStart;
                     YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, YDay), 0));
-                    newRecord.SetInt32(rs2_ordPortfolio, Portfolio);
-                    newRecord.SetDateTime(rs2_ordDate, YDay);
-                    newRecord.SetDecimal(rs2_ordTotalValue, (decimal)YTotalValue);
-                    newRecord.SetDecimal(rs2_ordNAV, (decimal)YNAV);
+                    newRecord.SetInt32((int)MainQueries.Tables.eNAV.Portfolio, Portfolio);
+                    newRecord.SetDateTime((int)MainQueries.Tables.eNAV.Date, YDay);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eNAV.TotalValue, (decimal)YTotalValue);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)YNAV);
                     rs2.Insert(newRecord);
                 }
                 else
@@ -1226,9 +1182,9 @@ namespace MyPersonalIndex
 
                 do
                 {
-                    DateTime d = rs.GetDateTime(rs_ordDate);
-                    newRecord.SetInt32(rs2_ordPortfolio, Portfolio);
-                    newRecord.SetDateTime(rs2_ordDate, d);
+                    DateTime d = rs.GetDateTime((int)MainQueries.eGetDistinctDates.Date);
+                    newRecord.SetInt32((int)MainQueries.Tables.eNAV.Portfolio, Portfolio);
+                    newRecord.SetDateTime((int)MainQueries.Tables.eNAV.Date, d);
 
                     double NewTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, d), 0));
                     double NAV = 0;
@@ -1236,7 +1192,7 @@ namespace MyPersonalIndex
                     if (Dividends)
                         NetPurchases = NetPurchases - Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividends(Portfolio, d), 0));
 
-                    newRecord.SetDecimal(rs2_ordTotalValue, (decimal)NewTotalValue);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eNAV.TotalValue, (decimal)NewTotalValue);
 
                     if (NetPurchases < 0)
                         NAV = (NewTotalValue - NetPurchases) / (YTotalValue / YNAV);
@@ -1245,14 +1201,14 @@ namespace MyPersonalIndex
 
                     if (!double.IsNaN(NAV) && !double.IsInfinity(NAV))
                     {
-                        newRecord.SetDecimal(rs2_ordNAV, (decimal)NAV);
-                        newRecord.SetDecimal(rs2_ordChange, (decimal)(((NAV / YNAV) - 1) * 100));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)NAV);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, (decimal)(((NAV / YNAV) - 1) * 100));
                         YNAV = NAV;
                     }
                     else
                     {
-                        newRecord.SetDecimal(rs2_ordNAV, (decimal)YNAV);
-                        newRecord.SetDecimal(rs2_ordChange, 0);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)YNAV);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, 0);
                     }
 
                     YTotalValue = NewTotalValue;

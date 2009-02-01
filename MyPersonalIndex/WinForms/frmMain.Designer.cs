@@ -74,6 +74,8 @@
             this.sHoldings3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnHoldingsExport = new System.Windows.Forms.ToolStripButton();
             this.tbStatistics = new System.Windows.Forms.TabPage();
+            this.dgStats = new System.Windows.Forms.DataGridView();
+            this.colStats = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tsStat = new System.Windows.Forms.ToolStrip();
             this.btnStatEdit = new System.Windows.Forms.ToolStripButton();
             this.sStat1 = new System.Windows.Forms.ToolStripSeparator();
@@ -156,6 +158,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgHoldings)).BeginInit();
             this.tsHoldings.SuspendLayout();
             this.tbStatistics.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgStats)).BeginInit();
             this.tsStat.SuspendLayout();
             this.tbChart.SuspendLayout();
             this.tsChart.SuspendLayout();
@@ -445,6 +448,7 @@
             // 
             this.tbStatistics.AutoScroll = true;
             this.tbStatistics.BackColor = System.Drawing.SystemColors.Control;
+            this.tbStatistics.Controls.Add(this.dgStats);
             this.tbStatistics.Controls.Add(this.tsStat);
             this.tbStatistics.Location = new System.Drawing.Point(4, 22);
             this.tbStatistics.Name = "tbStatistics";
@@ -452,6 +456,31 @@
             this.tbStatistics.Size = new System.Drawing.Size(784, 494);
             this.tbStatistics.TabIndex = 1;
             this.tbStatistics.Text = "Statistics";
+            // 
+            // dgStats
+            // 
+            this.dgStats.AllowUserToAddRows = false;
+            this.dgStats.AllowUserToDeleteRows = false;
+            this.dgStats.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgStats.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgStats.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgStats.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colStats});
+            this.dgStats.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgStats.Location = new System.Drawing.Point(3, 28);
+            this.dgStats.Name = "dgStats";
+            this.dgStats.ReadOnly = true;
+            this.dgStats.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
+            this.dgStats.Size = new System.Drawing.Size(778, 463);
+            this.dgStats.TabIndex = 2;
+            // 
+            // colStats
+            // 
+            this.colStats.HeaderText = "Results";
+            this.colStats.Name = "colStats";
+            this.colStats.ReadOnly = true;
+            this.colStats.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colStats.Width = 48;
             // 
             // tsStat
             // 
@@ -1227,6 +1256,7 @@
             this.tsHoldings.PerformLayout();
             this.tbStatistics.ResumeLayout(false);
             this.tbStatistics.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgStats)).EndInit();
             this.tsStat.ResumeLayout(false);
             this.tsStat.PerformLayout();
             this.tbChart.ResumeLayout(false);
@@ -1362,6 +1392,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePChange;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePGain;
         private System.Windows.Forms.DataGridView dgCorrelation;
+        private System.Windows.Forms.DataGridView dgStats;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStats;
     }
 }
 

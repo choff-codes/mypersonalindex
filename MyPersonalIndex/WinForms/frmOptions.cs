@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlTypes;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {

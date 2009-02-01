@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -24,8 +24,9 @@ namespace MyPersonalIndex
         private TickerRetValues _TickerReturnValues = new TickerRetValues();
 
         public frmTickers(int Portfolio, int Ticker, string sTicker)
-        {
+        { 
             InitializeComponent();
+            this.Width = 336;
             PortfolioID = Portfolio;
             TickerID = Ticker;
             this.Text = (string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker) + " Properties";
@@ -40,8 +41,10 @@ namespace MyPersonalIndex
                 DialogResult = DialogResult.Cancel;
                 return;
             }
-            
+
             Pasted = false;
+            cmbHis.SelectedIndex = 0;
+            cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
 
             LoadAADropDown();
             LoadTicker();
@@ -54,8 +57,7 @@ namespace MyPersonalIndex
             if (TickerID == -1)
             {
                 txtSymbol.Enabled = true;
-                btnSplit.Visible = false;
-                btnDividends.Visible = false;
+                btnHistorical.Visible = false;
             }
 
             _TickerReturnValues.MinDate = DateTime.Today;
@@ -279,63 +281,79 @@ namespace MyPersonalIndex
             SQL.Dispose();
         }
 
-        private void btnSplit_Click(object sender, EventArgs e)
-        {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetSplits(txtSymbol.Text));
-
-            try
-            {
-                if (!rs.HasRows)
-                    MessageBox.Show("Currently no splits exist for this symbol.");
-                else
-                {
-                    rs.ReadFirst();
-                    string Message = txtSymbol.Text + " has the following splits:";
-                    do
-                    {
-                        Message = Message + "\n" + rs.GetDateTime((int)TickerQueries.eGetSplits.Date).ToShortDateString() + " - " + ((double)rs.GetDecimal((int)TickerQueries.eGetSplits.Ratio)).ToString() + ":1";
-                    }
-                    while (rs.Read());
-                    using (frmMsgBox f = new frmMsgBox("Splits", Message))
-                        f.ShowDialog();
-                }
-            }
-            finally
-            {
-                rs.Close();
-            }
-        }
-
-        private void btnDividends_Click(object sender, EventArgs e)
-        {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetDividends(txtSymbol.Text));
-
-            try
-            {
-                if (!rs.HasRows)
-                    MessageBox.Show("Currently there have been no dividends for this symbol.");
-                else
-                {
-                    rs.ReadFirst();
-                    string Message = txtSymbol.Text + " has the following dividends:";
-                    do
-                    {
-                        Message = Message + "\n" + rs.GetDateTime((int)TickerQueries.eGetDividends.Date).ToShortDateString() + " - " + ((double)rs.GetDecimal((int)TickerQueries.eGetDividends.Amount)).ToString("C");
-                    }
-                    while (rs.Read());
-                    using (frmMsgBox f = new frmMsgBox("Dividends", Message))
-                        f.ShowDialog();
-                }
-            }
-            finally
-            {
-                rs.Close();
-            }
-        }
-
         private void dgTickers_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
             MessageBox.Show("Invalid format, must be a number!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void cmbHis_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            dgHistory.DataSource = null;
+            dgHistory.Columns.Clear();
+
+            int i;
+            i = dgHistory.Columns.Add("colHisDate", "Date");
+            dgHistory.Columns[i].DefaultCellStyle.Format = "d";
+            dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+            dgHistory.Columns[i].DataPropertyName = "Date";
+
+            if (cmbHis.SelectedIndex == 0)
+            {
+                i = dgHistory.Columns.Add("colHisPrice", "Price");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Price";
+            }
+
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 1)
+            {
+                i = dgHistory.Columns.Add("colHisChange", "Change");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "#0.00'%'";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Change";
+            }
+
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 2)
+            {
+                i = dgHistory.Columns.Add("colHisDividend", "Dividend");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Dividend";
+            }
+
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 3)
+            {
+                i = dgHistory.Columns.Add("colHisSplit", "Split");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Split";
+            }
+  
+            dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, cmbHis.SelectedIndex, chkSort.Checked));
+        }
+
+        private void btnHistorical_Click(object sender, EventArgs e)
+        {
+            if (gbHistorical.Enabled)
+                return;
+
+            this.Width = 679;
+            this.Left = this.Left - ((679 - 336) / 2);
+            gbHistorical.Enabled = true;
+            cmbHis_SelectedIndexChanged(null, null);
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            this.Width = 336;
+            this.Left = this.Left + ((679 - 336) / 2);
+            dgHistory.DataSource = null;
+            gbHistorical.Enabled = false;
+        }
+
+        private void chkSort_CheckedChanged(object sender, EventArgs e)
+        {
+            cmbHis_SelectedIndexChanged(null, null);
         }
     }
 }

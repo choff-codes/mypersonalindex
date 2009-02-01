@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Data;
-using System.Windows.Forms;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlServerCe;
-using ZedGraph;
-using System.Drawing;
 using System.Data.SqlTypes;
+using System.Drawing;
 using System.IO;
+using System.Windows.Forms;
+using ZedGraph;
 
 namespace MyPersonalIndex
 {
@@ -205,6 +205,7 @@ namespace MyPersonalIndex
             {
                 string Ticker = ((DataTable)lst.DataSource).Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString();
                 SqlCeResultSet rs = null;
+                this.Cursor = Cursors.WaitCursor;
                 try
                 {
                     if (Ticker.Contains(Constants.SignifyPortfolio))
@@ -253,6 +254,7 @@ namespace MyPersonalIndex
                 finally
                 {
                     rs.Close();
+                    this.Cursor = Cursors.Default;
                 }
                 Seed++;
             }

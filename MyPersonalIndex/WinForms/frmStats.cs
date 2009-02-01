@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -56,25 +56,17 @@ namespace MyPersonalIndex
                         int i = 0;
                         int ID = rs.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
 
-                        if (ID == -1)
+                        while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
                         {
-                            dt2.Rows.Add(ID, "(Blank)");
-                            dt2.AcceptChanges();
+                            i++;
                         }
-                        else
-                        {
-                            while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
-                            {
-                                i++;
-                            }
 
-                            object[] o = dt.Rows[i].ItemArray;
-                            dt2.Rows.Add(o);
-                            dt.Rows[i].Delete();
+                        object[] o = dt.Rows[i].ItemArray;
+                        dt2.Rows.Add(o);
+                        dt.Rows[i].Delete();
 
-                            dt.AcceptChanges();
-                            dt2.AcceptChanges();
-                        }
+                        dt.AcceptChanges();
+                        dt2.AcceptChanges();
                     }
                     while (rs.Read());
                 }
@@ -100,12 +92,10 @@ namespace MyPersonalIndex
 
             foreach (int i in lst2.SelectedIndices)
             {
-                if (Convert.ToInt32(((DataTable)lst2.DataSource).Rows[i][(int)StatsQueries.eGetUserStats.ID]) != -1)
-                {
-                    object[] o = ((DataTable)lst2.DataSource).Rows[i].ItemArray;
-                    ((DataTable)lst1.DataSource).Rows.Add(o);
-                    ((DataTable)lst1.DataSource).AcceptChanges();
-                }
+                
+                object[] o = ((DataTable)lst2.DataSource).Rows[i].ItemArray;
+                ((DataTable)lst1.DataSource).Rows.Add(o);
+                ((DataTable)lst1.DataSource).AcceptChanges();
                 ItemsToRemove.Add(i);
             }
 
@@ -144,14 +134,6 @@ namespace MyPersonalIndex
             lst2.SelectedIndex = -1;
             for (int i = StartIndex + 1; i < lst2.Items.Count; i++)
                 lst2.SelectedIndex = i;
-        }
-
-        private void cmdAddBlank_Click(object sender, EventArgs e)
-        {
-            ((DataTable)lst2.DataSource).Rows.Add(-1, "(Blank)");
-            ((DataTable)lst2.DataSource).AcceptChanges();
-            lst2.SelectedIndex = -1;
-            lst2.SelectedIndex = lst2.Items.Count - 1;
         }
 
         private void cmdMoveUp_Click(object sender, EventArgs e)

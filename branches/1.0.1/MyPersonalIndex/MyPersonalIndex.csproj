@@ -134,12 +134,6 @@
     <Compile Include="WinForms\frmAA.Designer.cs">
       <DependentUpon>frmAA.cs</DependentUpon>
     </Compile>
-    <Compile Include="WinForms\frmMsgBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WinForms\frmMsgBox.Designer.cs">
-      <DependentUpon>frmMsgBox.cs</DependentUpon>
-    </Compile>
     <Compile Include="WinForms\frmOptions.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -196,9 +190,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WinForms\frmMsgBox.resx">
-      <DependentUpon>frmMsgBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmOptions.resx">
       <DependentUpon>frmOptions.cs</DependentUpon>

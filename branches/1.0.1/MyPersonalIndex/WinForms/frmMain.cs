@@ -1,12 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Drawing;
-using System.IO;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
 using System.Data.SqlTypes;
+using System.Drawing;
+using System.IO;
 using System.Net;
+using System.Windows.Forms;
 using ZedGraph;
 
 namespace MyPersonalIndex
@@ -50,8 +50,6 @@ namespace MyPersonalIndex
             public double TotalValue;
             public MonthCalendar CalendarBegin;
             public MonthCalendar CalendarEnd;
-            public List<System.Windows.Forms.Label> Labels;
-            public List<TextBox> TextBoxes;
         }
 
         public struct MPIPortfolio
@@ -130,8 +128,6 @@ namespace MyPersonalIndex
         private void LoadInitial()
         {
             int LastPortfolio = 0; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the settings with nothing when called
-            MPI.Stat.Labels = new List<System.Windows.Forms.Label>();
-            MPI.Stat.TextBoxes = new List<TextBox>();
 
             LoadSettings(ref LastPortfolio);
             LoadPortfolioDropDown(LastPortfolio);
@@ -563,17 +559,7 @@ namespace MyPersonalIndex
         private void LoadStat(DateTime StartDate, DateTime EndDate, bool DateChange)
         {
             if (!DateChange)
-            {
-                foreach (System.Windows.Forms.Label l in MPI.Stat.Labels)
-                    tbStatistics.Controls.Remove(l);
-
-                foreach (TextBox t in MPI.Stat.TextBoxes)
-                    tbStatistics.Controls.Remove(t);
-
-                MPI.Stat.Labels.Clear();
-                MPI.Stat.TextBoxes.Clear();
-            }
-
+                dgStats.Rows.Clear();
             MPI.Stat.TotalValue = GetTotalValue(EndDate);
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetStats(MPI.Portfolio.ID));
@@ -583,58 +569,28 @@ namespace MyPersonalIndex
                     return;
 
                 rs.ReadFirst();
-
-                int i = 0;
-                int x = 0;
-                bool EvenOdd = true;
+                int i = -1;
                 do
                 {
-                    if (rs.GetInt32((int)MainQueries.eGetStats.ID) != -1)
+                    if (!DateChange)
+                        i = dgStats.Rows.Add();
+                    else
+                        i++;
+
+                    try
                     {
-                        if (!DateChange)
-                        {
-                            MPI.Stat.Labels.Add(new System.Windows.Forms.Label
-                            {
-                                Width = 150,
-                                AutoSize = false,
-                                AutoEllipsis = true,
-                                Text = rs.GetString((int)MainQueries.eGetStats.Description) + ":"
-                            });
-                            MPI.Stat.TextBoxes.Add(new TextBox { Width = 175 });
-
-                            if (EvenOdd)
-                            {
-                                MPI.Stat.Labels[x].Left = 20;
-                                MPI.Stat.TextBoxes[x].Left = 176;
-                            }
-                            else
-                            {
-                                MPI.Stat.Labels[x].Left = 395;
-                                MPI.Stat.TextBoxes[x].Left = 551;
-                            }
-                            MPI.Stat.Labels[x].Top = (i / 2) * 45 + 50;
-                            MPI.Stat.TextBoxes[x].Top = (i / 2) * 45 + 47;
-
-                            tbStatistics.Controls.Add(MPI.Stat.Labels[x]);
-                            tbStatistics.Controls.Add(MPI.Stat.TextBoxes[x]);
-                        }
-                        try
-                        {
-                            MPI.Stat.TextBoxes[x].Text = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString((int)MainQueries.eGetStats.SQL))),
-                                (Constants.OutputFormat)rs.GetInt32((int)MainQueries.eGetStats.Format));
-                        }
-                        catch (SqlCeException)
-                        {
-                            MPI.Stat.TextBoxes[x].Text = "Error";
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            MPI.Stat.TextBoxes[x].Text = "Error";
-                        }
-                        x++;
+                        dgStats[0, i].Value = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString((int)MainQueries.eGetStats.SQL))),
+                            (Constants.OutputFormat)rs.GetInt32((int)MainQueries.eGetStats.Format));
+                        dgStats.Rows[i].HeaderCell.Value = rs.GetString((int)MainQueries.eGetStats.Description);
                     }
-                    i++;
-                    EvenOdd = !EvenOdd;
+                    catch (SqlCeException)
+                    {
+                        dgStats[0, i].Value = "Error";
+                    }
+                    catch (ArgumentOutOfRangeException)
+                    {
+                        dgStats[0, i].Value = "Error";
+                    }
                 }
                 while (rs.Read());
             }
@@ -1612,17 +1568,16 @@ namespace MyPersonalIndex
 
         private void btnHoldingsExport_Click(object sender, EventArgs e)
         {
-            Export(dgHoldings);
+            Export(dgHoldings, false, 1);
         }
 
-        private void Export(DataGridView dg)
+        private void Export(DataGridView dg, bool IncludeRowLabels, int IgnoreEndColumns)
         {
             if (dSave.ShowDialog() != DialogResult.OK)
                 return;
 
             string[] lines = new string[dg.Rows.Count + 1];
             string delimiter = "";
-            bool CorrelationGrid = dg == dgCorrelation;
 
             switch (dSave.FilterIndex)
             {
@@ -1637,10 +1592,8 @@ namespace MyPersonalIndex
                     break;
             }
 
-            int columnCount = dg.Columns.Count;
-            if (dg == dgHoldings)
-                columnCount--;
-            if (CorrelationGrid)
+            int columnCount = dg.Columns.Count - IgnoreEndColumns;
+            if (IncludeRowLabels)
                 lines[0] = delimiter;
                 
             for (int x = 0; x < columnCount; x++)
@@ -1652,7 +1605,7 @@ namespace MyPersonalIndex
 
             for (int i = 0; i < dg.Rows.Count; i++)
             {
-                if (CorrelationGrid)
+                if (IncludeRowLabels)
                     lines[i + 1] = (delimiter == "," ? dg.Rows[i].HeaderCell.Value.ToString().Replace(",", "") : dg.Rows[i].HeaderCell.Value.ToString())
                         +  delimiter;
                 for (int x = 0; x < columnCount; x++)
@@ -1669,20 +1622,20 @@ namespace MyPersonalIndex
 
         private void btnPerformanceExport_Click(object sender, EventArgs e)
         {
-            Export(dgPerformance);
+            Export(dgPerformance, false, 0);
         }
 
         private void btnCorrelationExport_Click(object sender, EventArgs e)
         {
             if (dgCorrelation.Rows.Count != 0)
-                Export(dgCorrelation);
+                Export(dgCorrelation, true, 0);
             else
                 MessageBox.Show("First calculate correlations before exporting.");
         }
 
         private void btnAAExport_Click(object sender, EventArgs e)
         {
-            Export(dgAA);
+            Export(dgAA, false, 0);
         }
 
         private void btnMainOptions_Click(object sender, EventArgs e)
@@ -1719,42 +1672,6 @@ namespace MyPersonalIndex
         {
             btnAAShowBlank.Checked = !btnAAShowBlank.Checked;
             LoadAssetAllocation(MPI.AA.SelDate);
-        }
-
-        private void btnStatExport_Click(object sender, EventArgs e)
-        {
-            if (MPI.Stat.Labels.Count == 0)
-                return;
-            
-            if (dSave.ShowDialog() != DialogResult.OK)
-                return;
-
-            string[] lines = new string[MPI.Stat.Labels.Count + 1];
-            string delimiter = "";
-
-            switch (dSave.FilterIndex)
-            {
-                case 1:
-                    delimiter = "\t";
-                    break;
-                case 2:
-                    delimiter = ",";
-                    break;
-                case 3:
-                    delimiter = "|";
-                    break;
-            }
-
-            lines[0] = "Description" + delimiter + "Result";
-
-            for (int x = 0; x < MPI.Stat.Labels.Count; x++)
-            {
-                lines[x + 1] = (delimiter == "," ? MPI.Stat.Labels[x].Text.Replace(",", "").Substring(0, MPI.Stat.Labels[x].Text.Length - 1) : MPI.Stat.Labels[x].Text.Substring(0, MPI.Stat.Labels[x].Text.Length - 1)) +
-                    delimiter + (delimiter == "," ? MPI.Stat.TextBoxes[x].Text.Replace(",", "") : MPI.Stat.TextBoxes[x].Text);
-            }
-
-            File.WriteAllLines(dSave.FileName, lines);
-            MessageBox.Show("Export successful!");
         }
 
         private void btnStatEdit_Click(object sender, EventArgs e)
@@ -1856,6 +1773,11 @@ namespace MyPersonalIndex
                 e.CellStyle.BackColor = Color.FromArgb(255, 255 + Convert.ToInt32(e.Value), 255);
             else
                 e.CellStyle.BackColor = Color.FromArgb(255 - Convert.ToInt32(e.Value), 255, 255);
+        }
+
+        private void btnStatExport_Click(object sender, EventArgs e)
+        {
+            Export(dgStats, true, 0);
         }
     }
 }

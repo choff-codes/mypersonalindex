@@ -353,7 +353,6 @@
             this.tsHoldings.Name = "tsHoldings";
             this.tsHoldings.Size = new System.Drawing.Size(778, 25);
             this.tsHoldings.TabIndex = 0;
-            this.tsHoldings.Text = "toolStrip2";
             // 
             // btnHoldingsAdd
             // 
@@ -496,7 +495,6 @@
             this.tsStat.Name = "tsStat";
             this.tsStat.Size = new System.Drawing.Size(778, 25);
             this.tsStat.TabIndex = 1;
-            this.tsStat.Text = "toolStrip4";
             // 
             // btnStatEdit
             // 
@@ -585,7 +583,6 @@
             this.tsChart.Name = "tsChart";
             this.tsChart.Size = new System.Drawing.Size(778, 25);
             this.tsChart.TabIndex = 2;
-            this.tsChart.Text = "toolStrip2";
             // 
             // btnChartStartDate
             // 
@@ -716,7 +713,6 @@
             this.tsPerformance.Name = "tsPerformance";
             this.tsPerformance.Size = new System.Drawing.Size(778, 25);
             this.tsPerformance.TabIndex = 0;
-            this.tsPerformance.Text = "toolStrip3";
             // 
             // btnPerformanceSortDesc
             // 
@@ -798,7 +794,6 @@
             this.tsCorrelation.Name = "tsCorrelation";
             this.tsCorrelation.Size = new System.Drawing.Size(778, 25);
             this.tsCorrelation.TabIndex = 3;
-            this.tsCorrelation.Text = "toolStrip1";
             // 
             // btnCorrelationCalc
             // 
@@ -839,6 +834,7 @@
             // btnCorrelationHidden
             // 
             this.btnCorrelationHidden.Checked = true;
+            this.btnCorrelationHidden.CheckOnClick = true;
             this.btnCorrelationHidden.CheckState = System.Windows.Forms.CheckState.Checked;
             this.btnCorrelationHidden.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnCorrelationHidden.Image = ((System.Drawing.Image)(resources.GetObject("btnCorrelationHidden.Image")));
@@ -846,7 +842,6 @@
             this.btnCorrelationHidden.Name = "btnCorrelationHidden";
             this.btnCorrelationHidden.Size = new System.Drawing.Size(73, 22);
             this.btnCorrelationHidden.Text = "Show Hidden";
-            this.btnCorrelationHidden.Click += new System.EventHandler(this.btnCorrelationHidden_Click);
             // 
             // sCorrelation3
             // 
@@ -974,7 +969,6 @@
             this.tsAA.Name = "tsAA";
             this.tsAA.Size = new System.Drawing.Size(778, 25);
             this.tsAA.TabIndex = 0;
-            this.tsAA.Text = "toolStrip4";
             // 
             // btnAAEditAA
             // 
@@ -1111,7 +1105,6 @@
             this.tsMain.Name = "tsMain";
             this.tsMain.Size = new System.Drawing.Size(792, 25);
             this.tsMain.TabIndex = 0;
-            this.tsMain.Text = "toolStrip1";
             // 
             // btnMainUpdate
             // 

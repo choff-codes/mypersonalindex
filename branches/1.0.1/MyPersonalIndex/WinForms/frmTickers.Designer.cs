@@ -30,6 +30,7 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmTickers));
             this.gbTicker = new System.Windows.Forms.GroupBox();
             this.btnHistorical = new System.Windows.Forms.Button();
             this.txtSymbol = new System.Windows.Forms.TextBox();
@@ -47,8 +48,9 @@
             this.dsTicker = new System.Data.DataSet();
             this.btnCancel = new System.Windows.Forms.Button();
             this.gbHistorical = new System.Windows.Forms.GroupBox();
-            this.chkSort = new System.Windows.Forms.CheckBox();
-            this.cmbHis = new System.Windows.Forms.ComboBox();
+            this.tsHis = new System.Windows.Forms.ToolStrip();
+            this.cmbHis = new System.Windows.Forms.ToolStripComboBox();
+            this.chkSort = new System.Windows.Forms.ToolStripButton();
             this.dgHistory = new System.Windows.Forms.DataGridView();
             this.btnClose = new System.Windows.Forms.Button();
             this.gbTicker.SuspendLayout();
@@ -56,6 +58,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).BeginInit();
             this.gbHistorical.SuspendLayout();
+            this.tsHis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).BeginInit();
             this.SuspendLayout();
             // 
@@ -224,8 +227,7 @@
             // 
             // gbHistorical
             // 
-            this.gbHistorical.Controls.Add(this.chkSort);
-            this.gbHistorical.Controls.Add(this.cmbHis);
+            this.gbHistorical.Controls.Add(this.tsHis);
             this.gbHistorical.Controls.Add(this.dgHistory);
             this.gbHistorical.Enabled = false;
             this.gbHistorical.Location = new System.Drawing.Point(339, 9);
@@ -235,33 +237,38 @@
             this.gbHistorical.TabStop = false;
             this.gbHistorical.Text = "Historical Prices";
             // 
-            // chkSort
+            // tsHis
             // 
-            this.chkSort.Appearance = System.Windows.Forms.Appearance.Button;
-            this.chkSort.AutoSize = true;
-            this.chkSort.Checked = true;
-            this.chkSort.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkSort.Location = new System.Drawing.Point(118, 16);
-            this.chkSort.Name = "chkSort";
-            this.chkSort.Size = new System.Drawing.Size(95, 23);
-            this.chkSort.TabIndex = 1;
-            this.chkSort.Text = "Sort Descending";
-            this.chkSort.UseVisualStyleBackColor = false;
-            this.chkSort.CheckedChanged += new System.EventHandler(this.chkSort_CheckedChanged);
+            this.tsHis.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.cmbHis,
+            this.chkSort});
+            this.tsHis.Location = new System.Drawing.Point(3, 17);
+            this.tsHis.Name = "tsHis";
+            this.tsHis.Size = new System.Drawing.Size(314, 25);
+            this.tsHis.TabIndex = 3;
             // 
             // cmbHis
             // 
-            this.cmbHis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.cmbHis.FormattingEnabled = true;
             this.cmbHis.Items.AddRange(new object[] {
             "Show All",
             "Show % Change",
             "Show Dividends",
             "Show Splits"});
-            this.cmbHis.Location = new System.Drawing.Point(7, 18);
             this.cmbHis.Name = "cmbHis";
-            this.cmbHis.Size = new System.Drawing.Size(105, 21);
-            this.cmbHis.TabIndex = 0;
+            this.cmbHis.Size = new System.Drawing.Size(121, 25);
+            // 
+            // chkSort
+            // 
+            this.chkSort.Checked = true;
+            this.chkSort.CheckOnClick = true;
+            this.chkSort.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkSort.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.chkSort.Image = ((System.Drawing.Image)(resources.GetObject("chkSort.Image")));
+            this.chkSort.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.chkSort.Name = "chkSort";
+            this.chkSort.Size = new System.Drawing.Size(89, 22);
+            this.chkSort.Text = "Sort Descending";
+            this.chkSort.CheckedChanged += new System.EventHandler(this.chkSort_CheckedChanged);
             // 
             // dgHistory
             // 
@@ -315,6 +322,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).EndInit();
             this.gbHistorical.ResumeLayout(false);
             this.gbHistorical.PerformLayout();
+            this.tsHis.ResumeLayout(false);
+            this.tsHis.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).EndInit();
             this.ResumeLayout(false);
 
@@ -334,14 +343,15 @@
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.TextBox txtSymbol;
         private System.Windows.Forms.Label lblSymbol;
+        private System.Windows.Forms.Button btnHistorical;
+        private System.Windows.Forms.GroupBox gbHistorical;
+        private System.Windows.Forms.DataGridView dgHistory;
+        private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.ToolStrip tsHis;
+        private System.Windows.Forms.ToolStripButton chkSort;
+        private System.Windows.Forms.ToolStripComboBox cmbHis;
         private CalendarColumn colTickersDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersShares;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersPrice;
-        private System.Windows.Forms.Button btnHistorical;
-        private System.Windows.Forms.GroupBox gbHistorical;
-        private System.Windows.Forms.ComboBox cmbHis;
-        private System.Windows.Forms.DataGridView dgHistory;
-        private System.Windows.Forms.Button btnClose;
-        private System.Windows.Forms.CheckBox chkSort;
     }
 }

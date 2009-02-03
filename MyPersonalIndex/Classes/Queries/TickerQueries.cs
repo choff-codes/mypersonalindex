@@ -29,18 +29,6 @@ namespace MyPersonalIndex
             return string.Format("SELECT AA, Active, Hide FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
-        //public enum eGetSplits { Date, Ratio };
-        //public static string GetSplits(string Ticker)
-        //{
-        //    return string.Format("SELECT Date, Ratio FROM Splits WHERE Ticker = '{0}' ORDER BY Date DESC", Functions.SQLCleanString(Ticker));
-        //}
-
-        //public enum eGetDividends { Date, Amount };
-        //public static string GetDividends(string Ticker)
-        //{
-        //    return string.Format("SELECT Date, Amount FROM Dividends WHERE Ticker = '{0}' ORDER BY Date DESC", Functions.SQLCleanString(Ticker));
-        //}
-
         public static string GetHistorical(string Ticker, int Selected, bool Desc)
         {
             switch (Selected)

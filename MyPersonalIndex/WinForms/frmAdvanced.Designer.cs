@@ -191,7 +191,6 @@
             this.ts.Name = "ts";
             this.ts.Size = new System.Drawing.Size(574, 25);
             this.ts.TabIndex = 2;
-            this.ts.Text = "toolStrip4";
             // 
             // lblReport
             // 

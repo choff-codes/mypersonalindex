@@ -671,12 +671,6 @@ namespace MyPersonalIndex
             }
         }
 
-        private void btnHoldingsHidden_Click(object sender, EventArgs e)
-        {
-            btnHoldingsHidden.Checked = !btnHoldingsHidden.Checked;
-            LoadHoldings(MPI.Holdings.SelDate);
-        }
-
         private void btnMainUpdate_Click(object sender, EventArgs e)
         {
             if (!IsInternetConnection())
@@ -1337,12 +1331,6 @@ namespace MyPersonalIndex
             }
         }
 
-        private void btnPerformanceSortDesc_Click(object sender, EventArgs e)
-        {
-            btnPerformanceSortDesc.Checked = !btnPerformanceSortDesc.Checked;
-            LoadNAV();
-        }
-
         private void dgAA_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.ColumnIndex != MPIAssetAllocation.OffsetColumn || Convert.IsDBNull(e.Value))
@@ -1668,12 +1656,6 @@ namespace MyPersonalIndex
             }
         }
 
-        private void btnAAShowBlank_Click(object sender, EventArgs e)
-        {
-            btnAAShowBlank.Checked = !btnAAShowBlank.Checked;
-            LoadAssetAllocation(MPI.AA.SelDate);
-        }
-
         private void btnStatEdit_Click(object sender, EventArgs e)
         {
             using (frmStats f = new frmStats(MPI.Portfolio.ID, MPI.Portfolio.Name))
@@ -1681,11 +1663,6 @@ namespace MyPersonalIndex
                 if (f.ShowDialog() == DialogResult.OK)
                     LoadStat(MPI.Stat.BeginDate, MPI.Stat.EndDate, false);
             }
-        }
-
-        private void btnCorrelationHidden_Click(object sender, EventArgs e)
-        {
-            btnCorrelationHidden.Checked = !btnCorrelationHidden.Checked;
         }
 
         private void bw_DoWork(object sender, System.ComponentModel.DoWorkEventArgs e)
@@ -1778,6 +1755,24 @@ namespace MyPersonalIndex
         private void btnStatExport_Click(object sender, EventArgs e)
         {
             Export(dgStats, true, 0);
+        }
+
+        private void btnHoldingsHidden_Click(object sender, EventArgs e)
+        {
+            btnHoldingsHidden.Checked = !btnHoldingsHidden.Checked;
+            LoadHoldings(MPI.Holdings.SelDate);
+        }
+
+        private void btnPerformanceSortDesc_Click(object sender, EventArgs e)
+        {
+            btnPerformanceSortDesc.Checked = !btnPerformanceSortDesc.Checked;
+            LoadNAV();
+        }
+
+        private void btnAAShowBlank_Click(object sender, EventArgs e)
+        {
+            btnAAShowBlank.Checked = !btnAAShowBlank.Checked;
+            LoadAssetAllocation(MPI.AA.SelDate);
         }
     }
 }

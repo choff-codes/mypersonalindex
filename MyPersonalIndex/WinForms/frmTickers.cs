@@ -17,16 +17,18 @@ namespace MyPersonalIndex
         public TickerRetValues TickerReturnValues { get { return _TickerReturnValues; } }
 
         private TickerQueries SQL = new TickerQueries();
+        private const int OriginalWidth = 336;
+        private const int ExpandedWidth = 679;
+        private const int DateColumn = 0;
         private int PortfolioID;
         private int TickerID;
         private bool Pasted;
-        private const int DateColumn = 0;
         private TickerRetValues _TickerReturnValues = new TickerRetValues();
 
         public frmTickers(int Portfolio, int Ticker, string sTicker)
         { 
             InitializeComponent();
-            this.Width = 336;
+            this.Width = OriginalWidth;
             PortfolioID = Portfolio;
             TickerID = Ticker;
             this.Text = (string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker) + " Properties";
@@ -221,7 +223,6 @@ namespace MyPersonalIndex
                 MessageBox.Show("Set a symbol before saving!");
                 return;
             }
-            
             _TickerReturnValues.Changed = TickerReturnValues.Changed != chkCalc.Checked;
             if (TickerID == -1)
             {
@@ -337,8 +338,8 @@ namespace MyPersonalIndex
             if (gbHistorical.Enabled)
                 return;
 
-            this.Width = 679;
-            this.Left = this.Left - ((679 - 336) / 2);
+            this.Width = ExpandedWidth;
+            this.Left = this.Left - ((ExpandedWidth - OriginalWidth) / 2);
             gbHistorical.Enabled = true;
             cmbHis_SelectedIndexChanged(null, null);
         }
@@ -346,7 +347,7 @@ namespace MyPersonalIndex
         private void btnClose_Click(object sender, EventArgs e)
         {
             this.Width = 336;
-            this.Left = this.Left + ((679 - 336) / 2);
+            this.Left = this.Left + ((ExpandedWidth - OriginalWidth) / 2);
             dgHistory.DataSource = null;
             gbHistorical.Enabled = false;
         }

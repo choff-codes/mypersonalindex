@@ -23,7 +23,7 @@ namespace MyPersonalIndex
         public static string GetChartPortfolio(string Ticker, double StartValue, DateTime StartDate, DateTime EndDate)
         {
             return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
-                    StartValue, Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+                    StartValue == 0 ? 1 : StartValue, Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
         public enum eGetChartTicker { Date, Price, Dividend, Split };

@@ -230,7 +230,34 @@ namespace MyPersonalIndex
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
-                    
+
+                    // to be removed once the database is more stable
+                    Version v = new Version(Application.ProductVersion);
+                    double databaseVersion = (double)rs.GetDecimal((int)MainQueries.eGetSettings.Version);
+                    if ( databaseVersion < v.Major + (v.Minor / 10.0) + (v.Build / 100.0))
+                    {
+                        rs.Close();
+                        SQL.Dispose();
+                        try
+                        {
+                            File.Move(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf",
+                                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI " + databaseVersion.ToString() + ".sdf");
+                            File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
+                            MessageBox.Show("Old database backed up successfully!");
+
+                            SQL = new MainQueries();
+                            rs = SQL.ExecuteResultSet(MainQueries.GetSettings());
+                            if (!rs.HasRows)
+                                return;
+                            rs.ReadFirst();
+                        }
+                        catch(SystemException e)
+                        {
+                            MessageBox.Show(e.Message);
+                            MessageBox.Show("Old version of database not backed up successfully!");
+                        }
+                    }
+
                     MPI.Settings.DataStartDate = rs.GetDateTime((int)MainQueries.eGetSettings.DataStartDate);
                     MPI.Settings.Splits = rs.GetSqlBoolean((int)MainQueries.eGetSettings.Splits).IsTrue;
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.WindowState)))
@@ -398,6 +425,8 @@ namespace MyPersonalIndex
             g.Title.FontSpec.Size = 13;
             g.Legend.IsVisible = false;
             g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
+            zedChart.AxisChange();
+            zedChart.Refresh();
         }
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
@@ -407,6 +436,10 @@ namespace MyPersonalIndex
             LoadGraphSettings(g);
 
             DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
+
+            if (YDay == SqlDateTime.MinValue.Value)
+                return;
+
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
 
             try
@@ -430,14 +463,13 @@ namespace MyPersonalIndex
                     g.XAxis.Scale.Min = list[0].X;
                     g.XAxis.Scale.Max = list[list.Count - 1].X;
                 }
-
-                zedChart.AxisChange();
-                zedChart.Refresh();
             }
             finally
             {
                 rs.Close();
-            }
+                zedChart.AxisChange();
+                zedChart.Refresh();
+            }   
         }
 
         private void cmbMainPortfolio_SelectedIndexChanged(object sender, EventArgs e)
@@ -1457,7 +1489,7 @@ namespace MyPersonalIndex
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
-            cmbMainPortfolio_SelectedIndexChanged(null, null);
+            LoadPortfolio();
         }
 
         private bool IsInternetConnection()

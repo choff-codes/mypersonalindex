@@ -216,7 +216,7 @@ namespace MyPersonalIndex
         public static string GetChart(int Portfolio, double StartValue, DateTime StartDate, DateTime EndDate)
         {
             return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
-                StartValue, Portfolio, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+                StartValue == 0 ? 1 : StartValue, Portfolio, StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
         public static string GetEarliestTrade(int Portfolio, int Ticker)

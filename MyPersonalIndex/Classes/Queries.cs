@@ -27,7 +27,7 @@ namespace MyPersonalIndex
             public const string UserStatistics = "UserStatistics";
 
             public enum eClosingPrices { Date, Ticker, Price, Change };
-            public enum eSplits { Ticker, Date, Ratio };
+            public enum eSplits { Date, Ticker, Ratio };
             public enum eDividends { Date, Ticker, Amount };
             public enum eAvgPricePerShare { Ticker, Price };
             public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };

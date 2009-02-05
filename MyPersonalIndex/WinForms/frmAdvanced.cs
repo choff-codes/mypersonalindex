@@ -186,6 +186,8 @@ namespace MyPersonalIndex
             g.Title.FontSpec.Size = 13;
             g.Legend.IsVisible = true;
             g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
+            zed.AxisChange();
+            zed.Refresh();
         }
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
@@ -200,7 +202,10 @@ namespace MyPersonalIndex
 
             LoadGraphSettings(g);
             DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
-           
+
+            if (YDay == SqlDateTime.MinValue.Value)
+                return;
+
             foreach (int i in lst.CheckedIndices)
             {
                 string Ticker = ((DataTable)lst.DataSource).Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString();

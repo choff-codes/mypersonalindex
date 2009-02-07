@@ -16,10 +16,10 @@ namespace MyPersonalIndex
             return string.Format(
                 "SELECT a.Active AS fActive, a.Ticker AS fTicker, c.Price AS fPrice," +
                         " Coalesce(b.Shares,0) AS fShares," +
-                        " (CASE WHEN Coalesce(b.Shares,0) = 0 THEN NULL ELSE d.Price END) AS fAverage," +
-                        " (CASE WHEN Coalesce(b.Shares,0) = 0 THEN NULL WHEN d.Price = 0 THEN NULL ELSE 100 * ((c.Price / d.Price) - 1) END) AS fGain," +
-                        " (CASE WHEN a.Active = 0 THEN NULL ELSE c.Price * b.Shares END) AS fTotalValue," +
-                        " (CASE WHEN {0} = 0 THEN NULL WHEN a.Active = 0 THEN NULL ELSE c.Price * b.Shares / {0} * 100 END) AS fTotalValueP," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price END) AS fAverage," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND d.Price <> 0 THEN 100 * ((c.Price / d.Price) - 1) END) AS fGain," +
+                        " (CASE WHEN a.Active = 1 THEN c.Price * b.Shares END) AS fTotalValue," +
+                        " (CASE WHEN {0} <> 0 AND a.Active = 1 THEN c.Price * b.Shares / {0} * 100 END) AS fTotalValueP," +
                         " e.AA AS fAA, a.ID as fID" +
                 " FROM Tickers AS a" +
                 " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
@@ -219,11 +219,6 @@ namespace MyPersonalIndex
                 StartValue == 0 ? 1 : StartValue, Portfolio, StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
-        public static string GetEarliestTrade(int Portfolio, int Ticker)
-        {
-            return string.Format("SELECT MIN(Date) FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
-        }
-
         public static string DeleteTickerClosingPrices(string Ticker)
         {
             return string.Format("DELETE FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
@@ -255,10 +250,10 @@ namespace MyPersonalIndex
         {
             return string.Format(
                 "SELECT Coalesce(d.AA, '(Blank)') AS fAssetAllocation," +
-                        " (CASE WHEN {0} = 0 THEN NULL ELSE 100 * COALESCE(SUM(c.Price * b.Shares), 0) / {0} END) AS fPercentage," +
+                        " (CASE WHEN {0} <> 0 THEN 100 * COALESCE(SUM(c.Price * b.Shares), 0) / {0} END) AS fPercentage," +
                         " COALESCE(SUM(c.Price * b.Shares), 0) AS fTotalValue," +
                         " d.Target as fTarget," +
-                        " (CASE WHEN {0} = 0 THEN NULL ELSE (100 * COALESCE(SUM(c.Price * b.Shares), 0) / {0}) - d.Target END) AS fOffset," +
+                        " (CASE WHEN {0} <> 0 THEN (100 * COALESCE(SUM(c.Price * b.Shares), 0) / {0}) - d.Target END) AS fOffset," +
                         " COUNT(*) as fHoldings" +
                 " FROM Tickers AS a" +
                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
@@ -352,30 +347,15 @@ namespace MyPersonalIndex
                 Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
         }
 
-        //public enum eGetAvgPricesTrade { Price, Shares };
-        //public static string GetAvgPricesTrade(int Portfolio, int Ticker, DateTime MaxDate)
-        //{
-        //    return string.Format(
-        //        "SELECT a.Price / CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Price," +
-        //                " a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) AS Shares" +
-        //        " FROM Trades a" +
-        //        " LEFT JOIN Splits b" +
-        //           " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
-        //        " WHERE a.Portfolio = {0} AND a.TickerID = {1} AND a.Date <= '{2}'" +
-        //        " GROUP BY a.ID, a.Price, a.Shares, a.Date " +
-        //        " ORDER BY a.Date",
-        //        Portfolio, Ticker, MaxDate.ToShortDateString());
-        //}
-
         public static string UpdatePortfolioStartDates(DateTime MinDate)
         {
             return string.Format("UPDATE Portfolios SET StartDate = '{0}' WHERE StartDate < '{0}'", MinDate.ToShortDateString());
         }
 
-        public static string UpdatePortfolioStartDate(int Portfolio, DateTime MinDate)
-        {
-            return string.Format("UPDATE Portfolios SET StartDate = '{0}' WHERE ID = {1}", MinDate.ToShortDateString(), Portfolio);
-        }
+        //public static string UpdatePortfolioStartDate(int Portfolio, DateTime MinDate)
+        //{
+        //    return string.Format("UPDATE Portfolios SET StartDate = '{0}' WHERE ID = {1}", MinDate.ToShortDateString(), Portfolio);
+        //}
 
         public static string DeleteNAV()
         {

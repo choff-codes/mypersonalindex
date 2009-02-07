@@ -21,11 +21,29 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
 
-            StartCalendar = new MonthCalendar { MaxSelectionCount = 1, MinDate = DataStartDate, SelectionStart = DataStartDate };
-            EndCalendar = new MonthCalendar { MaxSelectionCount = 1, MinDate = DataStartDate, SelectionStart =  LastDate};
+            StartCalendar = new MonthCalendar { 
+                MaxSelectionCount = 1,
+                MinDate = CheckStartDate(DataStartDate, LastDate), 
+                SelectionStart = CheckStartDate(DataStartDate, LastDate) 
+            };
+            EndCalendar = new MonthCalendar { 
+                MaxSelectionCount = 1,
+                MinDate = CheckStartDate(DataStartDate, LastDate), 
+                SelectionStart =  LastDate
+            };
             btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
             btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
             this.LastDate = LastDate;
+        }
+
+        public DateTime CheckStartDate(DateTime StartDate, DateTime LastDate)
+        {
+            StartDate = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrNext(StartDate), LastDate));
+
+            if (Convert.ToInt32(SQL.ExecuteScalar(AdvQueries.GetDaysNowAndBefore(StartDate))) >= 2)
+                return StartDate;
+
+            return Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetSecondDay(), LastDate));
         }
 
         private void frmAdvanced_Load(object sender, EventArgs e)

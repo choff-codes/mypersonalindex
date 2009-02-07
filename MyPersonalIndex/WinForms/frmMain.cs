@@ -127,7 +127,7 @@ namespace MyPersonalIndex
 
         private void LoadInitial()
         {
-            int LastPortfolio = 0; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the settings with nothing when called
+            int LastPortfolio = 0; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the portfolio settings with nothing when called
 
             LoadSettings(ref LastPortfolio);
             LoadPortfolioDropDown(LastPortfolio);
@@ -524,7 +524,9 @@ namespace MyPersonalIndex
 
         private void LoadPortfolioSettings(SqlCeResultSet rs)
         {
-            MPI.Portfolio.StartDate = rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate);
+            bool tmp = false;
+            MPI.Portfolio.StartDate = CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate), ref tmp);
+
             stbIndexStart.Text = "Index Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
             MPI.Portfolio.Dividends = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.Dividends).IsTrue;
             MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.CostCalc);
@@ -765,12 +767,6 @@ namespace MyPersonalIndex
                 }
                 while (rs.Read());
 
-                if (MinDate == MPI.Settings.DataStartDate)
-                {
-                    CheckDataStartDate();
-                    MinDate = MPI.Settings.DataStartDate;
-                }
-
                 GetNAV(-1, MinDate);
             }
             finally
@@ -785,17 +781,6 @@ namespace MyPersonalIndex
                     MessageBox.Show("The following tickers were not updated:\n" + Tickers);
                 }
             }
-        }
-
-        public void CheckDataStartDate()
-        {
-            DateTime NewDataStartDate = GetCurrentDateOrNext(MPI.Settings.DataStartDate, MPI.Settings.DataStartDate);
-
-            if (NewDataStartDate == MPI.Settings.DataStartDate)
-                return;
-
-            SQL.ExecuteNonQuery(MainQueries.UpdateDataStartDate(NewDataStartDate));
-            MPI.Settings.DataStartDate = NewDataStartDate;
         }
 
         public void GetPrices(string Ticker, DateTime MinDate, double LastPrice)
@@ -1079,12 +1064,15 @@ namespace MyPersonalIndex
             {
                 bw.PortfolioName = MPI.Portfolio.Name;
                 bw.ReportProgress(50);
+
+                bool PortfolioStartDate = false;
                 if (MinDate <= MPI.Portfolio.StartDate)
                 {
-                    MPI.Portfolio.StartDate = CheckPortfolioStartDate(MPI.Portfolio.ID, MPI.Portfolio.StartDate);
                     MinDate = MPI.Portfolio.StartDate;
+                    PortfolioStartDate = true;
                 }
-                GetNAVValues(MPI.Portfolio.ID, MinDate, MPI.Portfolio.StartDate, MPI.Portfolio.Dividends, MPI.Portfolio.NAVStart);
+                MinDate = CheckPortfolioStartDate(MinDate, ref PortfolioStartDate);
+                GetNAVValues(MPI.Portfolio.ID, MinDate, PortfolioStartDate, MPI.Portfolio.Dividends, MPI.Portfolio.NAVStart);
             }
             else
             {
@@ -1103,14 +1091,17 @@ namespace MyPersonalIndex
 
                         int p = rs.GetInt32((int)MainQueries.eGetNAVPortfolios.ID);
                         DateTime StartDate = rs.GetDateTime((int)MainQueries.eGetNAVPortfolios.StartDate);
-                        DateTime portfolioMinDate = MinDate;
+                        DateTime PortfolioMinDate = MinDate;
 
-                        if (portfolioMinDate <= StartDate)
+                        bool PortfolioStartDate = false;
+                        if (PortfolioMinDate <= StartDate)
                         {
-                            StartDate = CheckPortfolioStartDate(p, StartDate);
-                            portfolioMinDate = StartDate;
+                            PortfolioMinDate = StartDate;
+                            PortfolioStartDate = true;
                         }
-                        GetNAVValues(p, portfolioMinDate, StartDate, rs.GetSqlBoolean((int)MainQueries.eGetNAVPortfolios.Dividends).IsTrue,
+                        PortfolioMinDate = CheckPortfolioStartDate(PortfolioMinDate, ref PortfolioStartDate);
+
+                        GetNAVValues(p, PortfolioMinDate, PortfolioStartDate, rs.GetSqlBoolean((int)MainQueries.eGetNAVPortfolios.Dividends).IsTrue,
                             (double)rs.GetDecimal((int)MainQueries.eGetNAVPortfolios.NAVStartValue));
                     }
                     while (rs.Read());
@@ -1122,17 +1113,20 @@ namespace MyPersonalIndex
             }
         }
 
-        public DateTime CheckPortfolioStartDate(int Portfolio, DateTime StartDate)
+        public DateTime CheckPortfolioStartDate(DateTime StartDate, ref bool PortfolioStart)
         {
-            DateTime NewStartDate = GetCurrentDateOrNext(StartDate, StartDate);
-            if (NewStartDate != StartDate)
-                SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioStartDate(Portfolio, NewStartDate));
-            return NewStartDate;
+            StartDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(StartDate), StartDate));
+
+            if (Convert.ToInt32(SQL.ExecuteScalar(MainQueries.GetDaysNowAndBefore(StartDate))) >= 2)
+                return StartDate;
+
+            PortfolioStart = true;
+            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate));
         }
 
-        public void GetNAVValues(int Portfolio, DateTime MinDate, DateTime StartDate, bool Dividends, double NAVStart)
+        public void GetNAVValues(int Portfolio, DateTime MinDate, bool PortfolioStartDate, bool Dividends, double NAVStart)
         {
-            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, MinDate <= StartDate ? SqlDateTime.MinValue.Value : MinDate));
+            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetDistinctDates(MinDate));
             SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.NAV);
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
@@ -1149,7 +1143,7 @@ namespace MyPersonalIndex
                 double YNAV = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSpecificNav(Portfolio, YDay), 0));
                 double YTotalValue;
 
-                if (rs.GetDateTime((int)MainQueries.eGetDistinctDates.Date) == StartDate)
+                if (PortfolioStartDate)
                 {
                     YNAV = NAVStart;
                     YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, YDay), 0));
@@ -1209,19 +1203,13 @@ namespace MyPersonalIndex
         private void btnHoldingsDelete_Click(object sender, EventArgs e)
         {
             bool Deleted = false;
-            DateTime MinDate = DateTime.Today;
 
             if (dgHoldings.SelectedRows.Count > 0)
                 for (int i = 0; i < dgHoldings.SelectedRows.Count; i++)
                 {
-                    DateTime OutDate = DateTime.Today;
                     if (DeleteTicker(Convert.ToInt32(dgHoldings.SelectedRows[i].Cells[MPIHoldings.TickerIDColumn].Value),
-                                Convert.ToString(dgHoldings.SelectedRows[i].Cells[MPIHoldings.TickerStringColumn].Value), ref OutDate))
-                    {
+                                Convert.ToString(dgHoldings.SelectedRows[i].Cells[MPIHoldings.TickerStringColumn].Value)))
                         Deleted = true;
-                        if (OutDate < MinDate)
-                            MinDate = OutDate;
-                    }
                 }
             else
             {
@@ -1229,7 +1217,7 @@ namespace MyPersonalIndex
                     return;
 
                 Deleted = DeleteTicker(Convert.ToInt32(dgHoldings[MPIHoldings.TickerIDColumn, dgHoldings.CurrentCell.RowIndex].Value),
-                    Convert.ToString(dgHoldings[MPIHoldings.TickerStringColumn, dgHoldings.CurrentCell.RowIndex].Value), ref MinDate);
+                    Convert.ToString(dgHoldings[MPIHoldings.TickerStringColumn, dgHoldings.CurrentCell.RowIndex].Value));
             }
 
             if (!Deleted)
@@ -1238,14 +1226,14 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
-            StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MinDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MinDate, MPI.Portfolio.ID);
+            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
+            StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
         }
 
-        private bool DeleteTicker(int Ticker, string sTicker, ref DateTime MinDate)
+        private bool DeleteTicker(int Ticker, string sTicker)
         {
             if (MessageBox.Show("Are you sure you want to delete " + sTicker + "?", "Delete?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetEarliestTrade(MPI.Portfolio.ID, Ticker), DateTime.Today));
                 SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
                 SQL.ExecuteNonQuery(MainQueries.DeleteTicker(MPI.Portfolio.ID, Ticker));
                 return true;
@@ -1476,7 +1464,7 @@ namespace MyPersonalIndex
                 return;
             
             SQL.ExecuteNonQuery(MainQueries.DeleteAA(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(MPI.Portfolio.ID, SqlDateTime.MinValue.Value));
+            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(MPI.Portfolio.ID, MPI.Portfolio.StartDate));
             SQL.ExecuteNonQuery(MainQueries.DeleteTickers(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteStatistics(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteTrades(MPI.Portfolio.ID));

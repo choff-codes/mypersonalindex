@@ -138,6 +138,16 @@ namespace MyPersonalIndex
             return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
         }
 
+        public static string GetDaysNowAndBefore(DateTime Date)
+        {
+            return string.Format("SELECT COUNT(*) FROM (SELECT DISTINCT Date FROM ClosingPrices WHERE Date <= '{0}') a", Date.ToShortDateString());
+        }
+
+        public static string GetSecondDay()
+        {
+            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM ClosingPrices ORDER BY Date) a ORDER BY Date DESC";
+        }
+
         public static string DeleteTickerTrades(int Portfolio, int Ticker)
         {
             return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);

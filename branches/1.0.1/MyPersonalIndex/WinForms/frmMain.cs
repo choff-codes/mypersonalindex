@@ -21,9 +21,11 @@ namespace MyPersonalIndex
 
         public struct MPIHoldings
         {
-            public const byte GainLossColumn = 5;
-            public const byte TotalValueColumn = 6;
-            public const byte TickerIDColumn = 9;
+            public const byte GainLossColumn = 6;
+            public const byte GainLossColumnP = 7;
+            public const byte TotalValueColumn = 8;
+            public const byte CostBasisColumn = 5;
+            public const byte TickerIDColumn = 12;
             public const byte TickerStringColumn = 1;
             public const string StockPrices = "d";
             public const string Dividends = "v";
@@ -37,6 +39,19 @@ namespace MyPersonalIndex
         {
             public const byte OffsetColumn = 4;
             public const byte TotalValueColumn = 2;
+            public double TotalValue;
+            public DateTime SelDate;
+            public MonthCalendar Calendar;
+            public string Sort;
+        }
+
+        public struct MPIAccount
+        {
+            public const byte GainLossColumn = 5;
+            public const byte GainLossColumnP = 6;
+            public const byte TotalValueColumn = 2;
+            public const byte CostBasisColumn = 1;
+            public const byte TaxLiabilityColumn = 4;
             public double TotalValue;
             public DateTime SelDate;
             public MonthCalendar Calendar;
@@ -86,6 +101,7 @@ namespace MyPersonalIndex
             public MPISettings Settings;
             public MPIHoldings Holdings;
             public MPIAssetAllocation AA;
+            public MPIAccount Account;
             public MPICorrelation Correlation;
             public MPIChart Chart;
             public MPIStat Stat;
@@ -136,51 +152,36 @@ namespace MyPersonalIndex
 
         private void LoadSortDropDowns()
         {
-            LoadSortDropDownHoldings();
-            LoadSortDropDownAA();
-        }
-
-        private void LoadSortDropDownAA()
-        {
             cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
-
-            DataTable dt = new DataTable();
-            dt.Columns.Add("Display");
-            dt.Columns.Add("Value");
-
-            dt.Rows.Add("", "");
-
-            foreach (DataGridViewColumn dg in dgAA.Columns)
-                dt.Rows.Add(dg.HeaderText, dg.DataPropertyName + (dg.DefaultCellStyle.Format == "" ? "" : " DESC"));
-
-            dt.Rows.Add("Custom...", "Custom");
-            cmbAASortBy.ComboBox.DisplayMember = "Display";
-            cmbAASortBy.ComboBox.ValueMember = "Value";
-            cmbAASortBy.ComboBox.DataSource = dt;
-
-            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
-        }
-
-        private void LoadSortDropDownHoldings()
-        {
+            cmbAcctSortBy.SelectedIndexChanged -= cmbAcctSortBy_SelectedIndexChanged;
             cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
 
+            LoadSortDropDown(cmbHoldingsSortBy, dgHoldings, true);
+            LoadSortDropDown(cmbAASortBy, dgAA, false);
+            LoadSortDropDown(cmbAcctSortBy, dgAcct, false);
+
+            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
+            cmbAcctSortBy.SelectedIndexChanged += new System.EventHandler(cmbAcctSortBy_SelectedIndexChanged);
+            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
+        }
+
+        private void LoadSortDropDown(ToolStripComboBox t, DataGridView dg, bool RemoveLastColumn)
+        {
             DataTable dt = new DataTable();
             dt.Columns.Add("Display");
             dt.Columns.Add("Value");
 
             dt.Rows.Add("", "");
 
-            foreach (DataGridViewColumn dg in dgHoldings.Columns)
-                dt.Rows.Add(dg.HeaderText, dg.DataPropertyName + (dg.DefaultCellStyle.Format == "" ? "" : " DESC"));
+            foreach (DataGridViewColumn dc in dg.Columns)
+                dt.Rows.Add(dc.HeaderText, dc.DataPropertyName + (dc.DefaultCellStyle.Format == "" ? "" : " DESC"));
 
-            dt.Rows.RemoveAt(dt.Rows.Count - 1);
+            if (RemoveLastColumn)
+                dt.Rows.RemoveAt(dt.Rows.Count - 1);
             dt.Rows.Add("Custom...", "Custom");
-            cmbHoldingsSortBy.ComboBox.DisplayMember = "Display";
-            cmbHoldingsSortBy.ComboBox.ValueMember = "Value";
-            cmbHoldingsSortBy.ComboBox.DataSource = dt;
-
-            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
+            t.ComboBox.DisplayMember = "Display";
+            t.ComboBox.ValueMember = "Value";
+            t.ComboBox.DataSource = dt;
         }
 
         private void LoadPortfolioDropDown(int LastPortfolio)
@@ -282,12 +283,13 @@ namespace MyPersonalIndex
         {
             LoadCalendar(out MPI.Holdings.Calendar, btnHoldingsDate);
             LoadCalendar(out MPI.AA.Calendar, btnAADate);
+            LoadCalendar(out MPI.Account.Calendar, btnAcctDate);
             LoadCalendar(out MPI.Chart.CalendarBegin, btnChartStartDate);
             LoadCalendar(out MPI.Chart.CalendarEnd, btnChartEndDate);
             LoadCalendar(out MPI.Correlation.CalendarBegin, btnCorrelationStartDate);
             LoadCalendar(out MPI.Correlation.CalendarEnd, btnCorrelationEndDate);
             LoadCalendar(out MPI.Stat.CalendarBegin, btnStatStartDate);
-            LoadCalendar(out MPI.Stat.CalendarEnd, btnStatEndDate);
+            LoadCalendar(out MPI.Stat.CalendarEnd, btnStatEndDate);    
         }
 
         private void LoadCalendar(out MonthCalendar m, ToolStripDropDownButton t)
@@ -313,6 +315,13 @@ namespace MyPersonalIndex
                 btnAADate.HideDropDown();
                 btnAADate.Text = "Date: " + MPI.AA.SelDate.ToShortDateString();
                 LoadAssetAllocation(MPI.AA.SelDate);
+            }
+            else if (sender == MPI.Account.Calendar)
+            {
+                MPI.Account.SelDate = GetCurrentDateOrPrevious(MPI.Account.Calendar.SelectionStart);
+                btnAcctDate.HideDropDown();
+                btnAcctDate.Text = "Date: " + MPI.Account.SelDate.ToShortDateString();
+                LoadAccounts(MPI.Account.SelDate);
             }
             else if (sender == MPI.Chart.CalendarBegin || sender == MPI.Chart.CalendarEnd)
             {
@@ -363,6 +372,7 @@ namespace MyPersonalIndex
         private void ResetCalendars()
         {
             ResetCalendar(MPI.AA.Calendar, btnAADate, out MPI.AA.SelDate);
+            ResetCalendar(MPI.Account.Calendar, btnAcctDate, out MPI.Account.SelDate);
             ResetCalendar(MPI.Holdings.Calendar, btnHoldingsDate, out MPI.Holdings.SelDate);
             ResetCalendar(MPI.Correlation.CalendarBegin, MPI.Correlation.CalendarEnd, btnCorrelationStartDate, 
                 btnCorrelationEndDate, out MPI.Correlation.BeginDate, out MPI.Correlation.EndDate);
@@ -370,7 +380,6 @@ namespace MyPersonalIndex
                 btnChartEndDate, out MPI.Chart.BeginDate, out MPI.Chart.EndDate);
             ResetCalendar(MPI.Stat.CalendarBegin, MPI.Stat.CalendarEnd, btnStatStartDate,
                 btnStatEndDate, out MPI.Stat.BeginDate, out MPI.Stat.EndDate);
-
         }
 
         private void ResetCalendar(MonthCalendar m, ToolStripDropDownButton t, out DateTime d)
@@ -485,7 +494,8 @@ namespace MyPersonalIndex
             {
                 if (SQL.ExecuteScalar(MainQueries.GetPortfolioExists(MPI.Portfolio.ID)) != null)
                     SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
-                        btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked));
+                        btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked,
+                        btnAcctShowBlank.Checked, MPI.Account.Sort));
 
                 DisableItems(false);
 
@@ -517,6 +527,7 @@ namespace MyPersonalIndex
                 LoadHoldings(MPI.LastDate);
                 LoadNAV();
                 LoadAssetAllocation(MPI.LastDate);
+                LoadAccounts(MPI.LastDate);
                 LoadStat(MPI.Portfolio.StartDate, MPI.LastDate, false);
                 LoadGraph(MPI.Portfolio.StartDate, MPI.LastDate);
             }
@@ -536,12 +547,16 @@ namespace MyPersonalIndex
             btnPerformanceSortDesc.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.NAVSort).IsTrue;
             btnAAShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AAShowBlank).IsTrue;
             btnCorrelationHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.CorrelationShowHidden).IsTrue;
+            btnAcctShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AcctShowBlank).IsTrue;
 
             MPI.Holdings.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.HoldingsSort);
             ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
 
             MPI.AA.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AASort);
             ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
+
+            MPI.Account.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AcctSort);
+            ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort);
         }
 
         private void DisableItems(bool Disabled)
@@ -569,6 +584,35 @@ namespace MyPersonalIndex
             dgAA.DataSource = SQL.ExecuteResultSet(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
 
             dgAA.Columns[MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.AA.TotalValue);
+        }
+
+        private void LoadAccounts(DateTime Date)
+        {
+            GetAveragePricePerShare(MPI.Account.SelDate);
+            MPI.Account.TotalValue = GetTotalValue(Date);
+            dgAcct.DataSource = SQL.ExecuteResultSet(MainQueries.GetAcct(MPI.Portfolio.ID, Date, MPI.Account.TotalValue, MPI.Account.Sort, btnAcctShowBlank.Checked));
+
+            double CostBasis = 0;
+            double GainLoss = 0;
+            double TaxLiability = 0;
+
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date));
+
+            if (rs.HasRows)
+            {
+                rs.ReadFirst();
+                CostBasis = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
+                GainLoss = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
+                TaxLiability = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability));
+            }
+
+            dgAcct.Columns[MPIAccount.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
+            dgAcct.Columns[MPIAccount.TaxLiabilityColumn].HeaderCell.Value = "Tax Liability (" + String.Format("{0:C})", TaxLiability);
+            string sGainLoss = String.Format("{0:C})", GainLoss);
+            if (GainLoss < 0)
+                sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
+            dgAcct.Columns[MPIAccount.GainLossColumn].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
+            dgAcct.Columns[MPIAccount.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Account.TotalValue);
         }
 
         private string CleanStatString(string SQL)
@@ -636,10 +680,27 @@ namespace MyPersonalIndex
 
         private void LoadHoldings(DateTime Date)
         {
-            GetAveragePricePerShare();
+            GetAveragePricePerShare(MPI.Holdings.SelDate);
             MPI.Holdings.TotalValue = GetTotalValue(Date);
             dgHoldings.DataSource = SQL.ExecuteResultSet(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
 
+            double CostBasis = 0;
+            double GainLoss = 0;
+
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date));
+
+            if (rs.HasRows)
+            {
+                rs.ReadFirst();
+                CostBasis = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
+                GainLoss = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
+            }
+
+            dgHoldings.Columns[MPIHoldings.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
+            string sGainLoss = String.Format("{0:C})", GainLoss);
+            if (GainLoss < 0)
+                sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
+            dgHoldings.Columns[MPIHoldings.GainLossColumn].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
             dgHoldings.Columns[MPIHoldings.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Holdings.TotalValue);
         }
 
@@ -937,11 +998,11 @@ namespace MyPersonalIndex
             }
         }
 
-        private void GetAveragePricePerShare()
+        private void GetAveragePricePerShare(DateTime Date)
         {
             SQL.ExecuteNonQuery(MainQueries.DeleteAvgPrices());
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAvgPricesTrades(MPI.Portfolio.ID, MPI.Holdings.SelDate));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAvgPricesTrades(MPI.Portfolio.ID, Date));
             SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.AvgPricePerShare);
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
             int CurrentTicker;
@@ -1066,6 +1127,10 @@ namespace MyPersonalIndex
                 bw.ReportProgress(50);
 
                 bool PortfolioStartDate = false;
+                DateTime LastUpdate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastUpdate(MPI.Portfolio.ID), MPI.Portfolio.StartDate));
+                
+                if (LastUpdate < MinDate)
+                    MinDate = LastUpdate;
                 if (MinDate <= MPI.Portfolio.StartDate)
                 {
                     MinDate = MPI.Portfolio.StartDate;
@@ -1092,8 +1157,12 @@ namespace MyPersonalIndex
                         int p = rs.GetInt32((int)MainQueries.eGetNAVPortfolios.ID);
                         DateTime StartDate = rs.GetDateTime((int)MainQueries.eGetNAVPortfolios.StartDate);
                         DateTime PortfolioMinDate = MinDate;
-
+                        DateTime LastUpdate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastUpdate(p), StartDate));
                         bool PortfolioStartDate = false;
+
+                        if (LastUpdate < PortfolioMinDate)
+                            PortfolioMinDate = LastUpdate;
+
                         if (PortfolioMinDate <= StartDate)
                         {
                             PortfolioMinDate = StartDate;
@@ -1284,6 +1353,7 @@ namespace MyPersonalIndex
             {
                 LoadHoldings(MPI.Holdings.SelDate);
                 LoadAssetAllocation(MPI.AA.SelDate);
+                LoadAccounts(MPI.Account.SelDate);
             }
         }
 
@@ -1318,7 +1388,8 @@ namespace MyPersonalIndex
 
                 if (Portfolio != null)
                     SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioAttributes(MPI.Portfolio.ID, btnHoldingsHidden.Checked,
-                        btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked));
+                        btnPerformanceSortDesc.Checked, btnAAShowBlank.Checked, MPI.Holdings.Sort, MPI.AA.Sort, btnCorrelationHidden.Checked,
+                        btnAcctShowBlank.Checked, MPI.Account.Sort));
 
                 SQL.ExecuteNonQuery(MainQueries.UpdateSettings(Portfolio,
                     this.WindowState == FormWindowState.Normal ? new Rectangle(this.Location, this.Size) : new Rectangle(this.RestoreBounds.Location, this.RestoreBounds.Size),
@@ -1348,6 +1419,7 @@ namespace MyPersonalIndex
             {
                 LoadHoldings(MPI.Holdings.SelDate);
                 LoadAssetAllocation(MPI.AA.SelDate);
+                LoadAccounts(MPI.Account.SelDate);
             }
         }
 
@@ -1366,7 +1438,7 @@ namespace MyPersonalIndex
 
         private void dgHoldings_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != MPIHoldings.GainLossColumn || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != MPIHoldings.GainLossColumnP || Convert.IsDBNull(e.Value))
                 return;
             
             if (Convert.ToDouble(e.Value) < 0)
@@ -1542,6 +1614,7 @@ namespace MyPersonalIndex
         {
             cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
             cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
+            cmbAcctSortBy.SelectedIndexChanged -= cmbAcctSortBy_SelectedIndexChanged;
 
             t.ComboBox.SelectedValue = Sort;
             if ((t.ComboBox.SelectedValue == null || t.ComboBox.SelectedValue.ToString() == "") && Sort != "")
@@ -1549,6 +1622,30 @@ namespace MyPersonalIndex
 
             cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
             cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
+            cmbAcctSortBy.SelectedIndexChanged += new System.EventHandler(cmbAcctSortBy_SelectedIndexChanged);
+        }
+
+        private void cmbAcctSortBy_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if ((string)cmbAcctSortBy.ComboBox.SelectedValue != "Custom")
+            {
+                MPI.Account.Sort = (string)cmbAcctSortBy.ComboBox.SelectedValue;
+                LoadAccounts(MPI.Account.SelDate);
+            }
+            else
+            {
+                DataTable dt = ((DataTable)cmbAcctSortBy.ComboBox.DataSource).Copy();
+                dt.Rows.RemoveAt(dt.Rows.Count - 1);
+                using (frmSort f = new frmSort(dt, MPI.Account.Sort))
+                {
+                    if (f.ShowDialog() == DialogResult.OK)
+                    {
+                        MPI.Account.Sort = f.SortReturnValues.Sort;
+                        LoadAccounts(MPI.Account.SelDate);
+                    }
+                    ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort);
+                }
+            }
         }
 
         private void cmbAASortBy_SelectedIndexChanged(object sender, EventArgs e)
@@ -1793,6 +1890,40 @@ namespace MyPersonalIndex
         {
             btnAAShowBlank.Checked = !btnAAShowBlank.Checked;
             LoadAssetAllocation(MPI.AA.SelDate);
+        }
+
+        private void btnEditAccts_Click(object sender, EventArgs e)
+        {
+            using (frmAccounts f = new frmAccounts(MPI.Portfolio.ID, MPI.Portfolio.Name))
+            {
+                if (f.ShowDialog() != DialogResult.OK)
+                    return;
+
+                LoadHoldings(MPI.Holdings.SelDate);
+                LoadAccounts(MPI.Account.SelDate);
+            }
+        }
+
+        private void btnAcctShowBlank_Click(object sender, EventArgs e)
+        {
+            btnAcctShowBlank.Checked = !btnAcctShowBlank.Checked;
+            LoadAccounts(MPI.Account.SelDate);
+        }
+
+        private void btnAcctExport_Click(object sender, EventArgs e)
+        {
+            Export(dgAcct, false, 0);
+        }
+
+        private void dgAcct_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        {
+            if (e.ColumnIndex != MPIAccount.GainLossColumnP || Convert.IsDBNull(e.Value))
+                return;
+
+            if (Convert.ToDouble(e.Value) < 0)
+                e.CellStyle.ForeColor = Color.Red;
+            else
+                e.CellStyle.ForeColor = Color.Green;
         }
     }
 }

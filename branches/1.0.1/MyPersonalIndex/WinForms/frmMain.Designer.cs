@@ -36,7 +36,6 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle6 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle7 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle8 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle9 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle10 = new System.Windows.Forms.DataGridViewCellStyle();
@@ -48,6 +47,17 @@
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle16 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle17 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle18 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle19 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle20 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle21 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle22 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle23 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle24 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle25 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle26 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle27 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle28 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.tb = new System.Windows.Forms.TabControl();
             this.tbHoldings = new System.Windows.Forms.TabPage();
             this.dgHoldings = new System.Windows.Forms.DataGridView();
@@ -56,9 +66,12 @@
             this.colHoldingsClosingPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsAvgPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsCostBasis = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsTotalValueP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsGainLossP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colHoldingsAcct = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsAA = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colHoldingsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tsHoldings = new System.Windows.Forms.ToolStrip();
@@ -112,6 +125,27 @@
             this.btnCorrelationHidden = new System.Windows.Forms.ToolStripButton();
             this.sCorrelation3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnCorrelationExport = new System.Windows.Forms.ToolStripButton();
+            this.tbAcct = new System.Windows.Forms.TabPage();
+            this.dgAcct = new System.Windows.Forms.DataGridView();
+            this.colAcctName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctCostBasis = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctTotalValue = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctTaxRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctTaxLiability = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctGainLoss = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colGainLossP = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctPercentage = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctHoldings = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.tsAcct = new System.Windows.Forms.ToolStrip();
+            this.btnEditAccts = new System.Windows.Forms.ToolStripButton();
+            this.sAcct1 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnAcctDate = new System.Windows.Forms.ToolStripDropDownButton();
+            this.sAcct2 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnAcctSortBy = new System.Windows.Forms.ToolStripLabel();
+            this.cmbAcctSortBy = new System.Windows.Forms.ToolStripComboBox();
+            this.btnAcctShowBlank = new System.Windows.Forms.ToolStripButton();
+            this.sAcct3 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnAcctExport = new System.Windows.Forms.ToolStripButton();
             this.tbAA = new System.Windows.Forms.TabPage();
             this.dgAA = new System.Windows.Forms.DataGridView();
             this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -168,6 +202,9 @@
             this.tbCorrelations.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgCorrelation)).BeginInit();
             this.tsCorrelation.SuspendLayout();
+            this.tbAcct.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgAcct)).BeginInit();
+            this.tsAcct.SuspendLayout();
             this.tbAA.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAA)).BeginInit();
             this.tsAA.SuspendLayout();
@@ -185,11 +222,12 @@
             this.tb.Controls.Add(this.tbChart);
             this.tb.Controls.Add(this.tbPerformance);
             this.tb.Controls.Add(this.tbCorrelations);
+            this.tb.Controls.Add(this.tbAcct);
             this.tb.Controls.Add(this.tbAA);
             this.tb.Location = new System.Drawing.Point(0, 28);
             this.tb.Name = "tb";
             this.tb.SelectedIndex = 0;
-            this.tb.Size = new System.Drawing.Size(792, 520);
+            this.tb.Size = new System.Drawing.Size(998, 620);
             this.tb.TabIndex = 1;
             // 
             // tbHoldings
@@ -199,7 +237,7 @@
             this.tbHoldings.Location = new System.Drawing.Point(4, 22);
             this.tbHoldings.Name = "tbHoldings";
             this.tbHoldings.Padding = new System.Windows.Forms.Padding(3);
-            this.tbHoldings.Size = new System.Drawing.Size(784, 494);
+            this.tbHoldings.Size = new System.Drawing.Size(990, 594);
             this.tbHoldings.TabIndex = 0;
             this.tbHoldings.Text = "Holdings";
             this.tbHoldings.UseVisualStyleBackColor = true;
@@ -214,15 +252,18 @@
             this.colHoldingsClosingPrice,
             this.colHoldingsShares,
             this.colHoldingsAvgPrice,
-            this.colHoldingsGainLoss,
+            this.colHoldingsCostBasis,
             this.colHoldingsTotalValue,
             this.colHoldingsTotalValueP,
+            this.colHoldingsGainLoss,
+            this.colHoldingsGainLossP,
+            this.colHoldingsAcct,
             this.colHoldingsAA,
             this.colHoldingsID});
             this.dgHoldings.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgHoldings.Location = new System.Drawing.Point(3, 28);
             this.dgHoldings.Name = "dgHoldings";
-            this.dgHoldings.Size = new System.Drawing.Size(778, 463);
+            this.dgHoldings.Size = new System.Drawing.Size(984, 563);
             this.dgHoldings.TabIndex = 1;
             this.dgHoldings.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgHoldings_CellFormatting);
             // 
@@ -232,7 +273,7 @@
             this.colHoldingsActive.HeaderText = "Active";
             this.colHoldingsActive.Name = "colHoldingsActive";
             this.colHoldingsActive.ReadOnly = true;
-            this.colHoldingsActive.Width = 52;
+            this.colHoldingsActive.Width = 43;
             // 
             // colHoldingsTicker
             // 
@@ -241,7 +282,7 @@
             this.colHoldingsTicker.Name = "colHoldingsTicker";
             this.colHoldingsTicker.ReadOnly = true;
             this.colHoldingsTicker.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTicker.Width = 50;
+            this.colHoldingsTicker.Width = 60;
             // 
             // colHoldingsClosingPrice
             // 
@@ -253,7 +294,7 @@
             this.colHoldingsClosingPrice.Name = "colHoldingsClosingPrice";
             this.colHoldingsClosingPrice.ReadOnly = true;
             this.colHoldingsClosingPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsClosingPrice.Width = 80;
+            this.colHoldingsClosingPrice.Width = 75;
             // 
             // colHoldingsShares
             // 
@@ -265,7 +306,7 @@
             this.colHoldingsShares.Name = "colHoldingsShares";
             this.colHoldingsShares.ReadOnly = true;
             this.colHoldingsShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsShares.Width = 85;
+            this.colHoldingsShares.Width = 90;
             // 
             // colHoldingsAvgPrice
             // 
@@ -277,19 +318,18 @@
             this.colHoldingsAvgPrice.Name = "colHoldingsAvgPrice";
             this.colHoldingsAvgPrice.ReadOnly = true;
             this.colHoldingsAvgPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsAvgPrice.Width = 85;
+            this.colHoldingsAvgPrice.Width = 75;
             // 
-            // colHoldingsGainLoss
+            // colHoldingsCostBasis
             // 
-            this.colHoldingsGainLoss.DataPropertyName = "fGain";
-            dataGridViewCellStyle4.Format = "#0.00\'%\'";
+            this.colHoldingsCostBasis.DataPropertyName = "fCostBasis";
+            dataGridViewCellStyle4.Format = "C2";
             dataGridViewCellStyle4.NullValue = null;
-            this.colHoldingsGainLoss.DefaultCellStyle = dataGridViewCellStyle4;
-            this.colHoldingsGainLoss.HeaderText = "% Gain/Loss";
-            this.colHoldingsGainLoss.Name = "colHoldingsGainLoss";
-            this.colHoldingsGainLoss.ReadOnly = true;
-            this.colHoldingsGainLoss.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsGainLoss.Width = 80;
+            this.colHoldingsCostBasis.DefaultCellStyle = dataGridViewCellStyle4;
+            this.colHoldingsCostBasis.HeaderText = "Cost Basis";
+            this.colHoldingsCostBasis.Name = "colHoldingsCostBasis";
+            this.colHoldingsCostBasis.ReadOnly = true;
+            this.colHoldingsCostBasis.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             // 
             // colHoldingsTotalValue
             // 
@@ -301,7 +341,6 @@
             this.colHoldingsTotalValue.Name = "colHoldingsTotalValue";
             this.colHoldingsTotalValue.ReadOnly = true;
             this.colHoldingsTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTotalValue.Width = 95;
             // 
             // colHoldingsTotalValueP
             // 
@@ -312,7 +351,38 @@
             this.colHoldingsTotalValueP.Name = "colHoldingsTotalValueP";
             this.colHoldingsTotalValueP.ReadOnly = true;
             this.colHoldingsTotalValueP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsTotalValueP.Width = 85;
+            this.colHoldingsTotalValueP.Width = 65;
+            // 
+            // colHoldingsGainLoss
+            // 
+            this.colHoldingsGainLoss.DataPropertyName = "fGain";
+            dataGridViewCellStyle7.Format = "C2";
+            dataGridViewCellStyle7.NullValue = null;
+            this.colHoldingsGainLoss.DefaultCellStyle = dataGridViewCellStyle7;
+            this.colHoldingsGainLoss.HeaderText = "Gain/Loss";
+            this.colHoldingsGainLoss.Name = "colHoldingsGainLoss";
+            this.colHoldingsGainLoss.ReadOnly = true;
+            // 
+            // colHoldingsGainLossP
+            // 
+            this.colHoldingsGainLossP.DataPropertyName = "fGainP";
+            dataGridViewCellStyle8.Format = "#0.00\'%\'";
+            dataGridViewCellStyle8.NullValue = null;
+            this.colHoldingsGainLossP.DefaultCellStyle = dataGridViewCellStyle8;
+            this.colHoldingsGainLossP.HeaderText = "Gain/Loss %";
+            this.colHoldingsGainLossP.Name = "colHoldingsGainLossP";
+            this.colHoldingsGainLossP.ReadOnly = true;
+            this.colHoldingsGainLossP.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsGainLossP.Width = 65;
+            // 
+            // colHoldingsAcct
+            // 
+            this.colHoldingsAcct.DataPropertyName = "fAcct";
+            this.colHoldingsAcct.HeaderText = "Account";
+            this.colHoldingsAcct.Name = "colHoldingsAcct";
+            this.colHoldingsAcct.ReadOnly = true;
+            this.colHoldingsAcct.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colHoldingsAcct.Width = 75;
             // 
             // colHoldingsAA
             // 
@@ -321,18 +391,19 @@
             this.colHoldingsAA.Name = "colHoldingsAA";
             this.colHoldingsAA.ReadOnly = true;
             this.colHoldingsAA.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colHoldingsAA.Width = 115;
+            this.colHoldingsAA.Width = 95;
             // 
             // colHoldingsID
             // 
             this.colHoldingsID.DataPropertyName = "fID";
-            dataGridViewCellStyle7.Format = "N0";
-            dataGridViewCellStyle7.NullValue = null;
-            this.colHoldingsID.DefaultCellStyle = dataGridViewCellStyle7;
+            dataGridViewCellStyle9.Format = "N0";
+            dataGridViewCellStyle9.NullValue = null;
+            this.colHoldingsID.DefaultCellStyle = dataGridViewCellStyle9;
             this.colHoldingsID.HeaderText = "ID";
             this.colHoldingsID.Name = "colHoldingsID";
             this.colHoldingsID.ReadOnly = true;
             this.colHoldingsID.Visible = false;
+            this.colHoldingsID.Width = 43;
             // 
             // tsHoldings
             // 
@@ -351,13 +422,12 @@
             this.btnHoldingsExport});
             this.tsHoldings.Location = new System.Drawing.Point(3, 3);
             this.tsHoldings.Name = "tsHoldings";
-            this.tsHoldings.Size = new System.Drawing.Size(778, 25);
+            this.tsHoldings.Size = new System.Drawing.Size(984, 25);
             this.tsHoldings.TabIndex = 0;
             // 
             // btnHoldingsAdd
             // 
             this.btnHoldingsAdd.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsAdd.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsAdd.Image")));
             this.btnHoldingsAdd.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsAdd.Name = "btnHoldingsAdd";
             this.btnHoldingsAdd.Size = new System.Drawing.Size(42, 22);
@@ -367,7 +437,6 @@
             // btnHoldingsEdit
             // 
             this.btnHoldingsEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsEdit.Image")));
             this.btnHoldingsEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsEdit.Name = "btnHoldingsEdit";
             this.btnHoldingsEdit.Size = new System.Drawing.Size(41, 22);
@@ -377,7 +446,6 @@
             // btnHoldingsDelete
             // 
             this.btnHoldingsDelete.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsDelete.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDelete.Image")));
             this.btnHoldingsDelete.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsDelete.Name = "btnHoldingsDelete";
             this.btnHoldingsDelete.Size = new System.Drawing.Size(42, 22);
@@ -392,7 +460,6 @@
             // btnHoldingsDate
             // 
             this.btnHoldingsDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsDate.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsDate.Image")));
             this.btnHoldingsDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsDate.Name = "btnHoldingsDate";
             this.btnHoldingsDate.Size = new System.Drawing.Size(47, 22);
@@ -421,7 +488,6 @@
             this.btnHoldingsHidden.Checked = true;
             this.btnHoldingsHidden.CheckState = System.Windows.Forms.CheckState.Checked;
             this.btnHoldingsHidden.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsHidden.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsHidden.Image")));
             this.btnHoldingsHidden.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsHidden.Name = "btnHoldingsHidden";
             this.btnHoldingsHidden.Size = new System.Drawing.Size(73, 22);
@@ -436,7 +502,6 @@
             // btnHoldingsExport
             // 
             this.btnHoldingsExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnHoldingsExport.Image = ((System.Drawing.Image)(resources.GetObject("btnHoldingsExport.Image")));
             this.btnHoldingsExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHoldingsExport.Name = "btnHoldingsExport";
             this.btnHoldingsExport.Size = new System.Drawing.Size(55, 22);
@@ -452,9 +517,10 @@
             this.tbStatistics.Location = new System.Drawing.Point(4, 22);
             this.tbStatistics.Name = "tbStatistics";
             this.tbStatistics.Padding = new System.Windows.Forms.Padding(3);
-            this.tbStatistics.Size = new System.Drawing.Size(784, 494);
+            this.tbStatistics.Size = new System.Drawing.Size(990, 594);
             this.tbStatistics.TabIndex = 1;
             this.tbStatistics.Text = "Statistics";
+            this.tbStatistics.UseVisualStyleBackColor = true;
             // 
             // dgStats
             // 
@@ -470,7 +536,7 @@
             this.dgStats.Name = "dgStats";
             this.dgStats.ReadOnly = true;
             this.dgStats.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            this.dgStats.Size = new System.Drawing.Size(778, 463);
+            this.dgStats.Size = new System.Drawing.Size(984, 563);
             this.dgStats.TabIndex = 2;
             // 
             // colStats
@@ -493,13 +559,12 @@
             this.btnStatExport});
             this.tsStat.Location = new System.Drawing.Point(3, 3);
             this.tsStat.Name = "tsStat";
-            this.tsStat.Size = new System.Drawing.Size(778, 25);
+            this.tsStat.Size = new System.Drawing.Size(984, 25);
             this.tsStat.TabIndex = 1;
             // 
             // btnStatEdit
             // 
             this.btnStatEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnStatEdit.Image = ((System.Drawing.Image)(resources.GetObject("btnStatEdit.Image")));
             this.btnStatEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStatEdit.Name = "btnStatEdit";
             this.btnStatEdit.Size = new System.Drawing.Size(98, 22);
@@ -514,7 +579,6 @@
             // btnStatStartDate
             // 
             this.btnStatStartDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnStatStartDate.Image = ((System.Drawing.Image)(resources.GetObject("btnStatStartDate.Image")));
             this.btnStatStartDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStatStartDate.Name = "btnStatStartDate";
             this.btnStatStartDate.Size = new System.Drawing.Size(74, 22);
@@ -523,7 +587,6 @@
             // btnStatEndDate
             // 
             this.btnStatEndDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnStatEndDate.Image = ((System.Drawing.Image)(resources.GetObject("btnStatEndDate.Image")));
             this.btnStatEndDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStatEndDate.Name = "btnStatEndDate";
             this.btnStatEndDate.Size = new System.Drawing.Size(68, 22);
@@ -537,7 +600,6 @@
             // btnStatExport
             // 
             this.btnStatExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnStatExport.Image = ((System.Drawing.Image)(resources.GetObject("btnStatExport.Image")));
             this.btnStatExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStatExport.Name = "btnStatExport";
             this.btnStatExport.Size = new System.Drawing.Size(55, 22);
@@ -551,7 +613,7 @@
             this.tbChart.Location = new System.Drawing.Point(4, 22);
             this.tbChart.Name = "tbChart";
             this.tbChart.Padding = new System.Windows.Forms.Padding(3);
-            this.tbChart.Size = new System.Drawing.Size(784, 494);
+            this.tbChart.Size = new System.Drawing.Size(990, 594);
             this.tbChart.TabIndex = 2;
             this.tbChart.Text = "Chart";
             this.tbChart.UseVisualStyleBackColor = true;
@@ -568,7 +630,7 @@
             this.zedChart.ScrollMinX = 0;
             this.zedChart.ScrollMinY = 0;
             this.zedChart.ScrollMinY2 = 0;
-            this.zedChart.Size = new System.Drawing.Size(778, 463);
+            this.zedChart.Size = new System.Drawing.Size(984, 563);
             this.zedChart.TabIndex = 3;
             // 
             // tsChart
@@ -581,7 +643,7 @@
             this.btnChartExport});
             this.tsChart.Location = new System.Drawing.Point(3, 3);
             this.tsChart.Name = "tsChart";
-            this.tsChart.Size = new System.Drawing.Size(778, 25);
+            this.tsChart.Size = new System.Drawing.Size(984, 25);
             this.tsChart.TabIndex = 2;
             // 
             // btnChartStartDate
@@ -593,7 +655,6 @@
             // btnChartEndDate
             // 
             this.btnChartEndDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnChartEndDate.Image = ((System.Drawing.Image)(resources.GetObject("btnChartEndDate.Image")));
             this.btnChartEndDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnChartEndDate.Name = "btnChartEndDate";
             this.btnChartEndDate.Size = new System.Drawing.Size(68, 22);
@@ -607,7 +668,6 @@
             // btnChartExport
             // 
             this.btnChartExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnChartExport.Image = ((System.Drawing.Image)(resources.GetObject("btnChartExport.Image")));
             this.btnChartExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnChartExport.Name = "btnChartExport";
             this.btnChartExport.Size = new System.Drawing.Size(55, 22);
@@ -621,7 +681,7 @@
             this.tbPerformance.Location = new System.Drawing.Point(4, 22);
             this.tbPerformance.Name = "tbPerformance";
             this.tbPerformance.Padding = new System.Windows.Forms.Padding(3);
-            this.tbPerformance.Size = new System.Drawing.Size(784, 494);
+            this.tbPerformance.Size = new System.Drawing.Size(990, 594);
             this.tbPerformance.TabIndex = 3;
             this.tbPerformance.Text = "Performance";
             this.tbPerformance.UseVisualStyleBackColor = true;
@@ -639,68 +699,63 @@
             this.dgPerformance.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgPerformance.Location = new System.Drawing.Point(3, 28);
             this.dgPerformance.Name = "dgPerformance";
-            this.dgPerformance.Size = new System.Drawing.Size(778, 463);
+            this.dgPerformance.Size = new System.Drawing.Size(984, 563);
             this.dgPerformance.TabIndex = 2;
             // 
             // colPerformanceDate
             // 
             this.colPerformanceDate.DataPropertyName = "Date";
-            dataGridViewCellStyle8.Format = "d";
-            dataGridViewCellStyle8.NullValue = null;
-            this.colPerformanceDate.DefaultCellStyle = dataGridViewCellStyle8;
+            dataGridViewCellStyle10.Format = "d";
+            dataGridViewCellStyle10.NullValue = null;
+            this.colPerformanceDate.DefaultCellStyle = dataGridViewCellStyle10;
             this.colPerformanceDate.HeaderText = "Date";
             this.colPerformanceDate.Name = "colPerformanceDate";
             this.colPerformanceDate.ReadOnly = true;
             this.colPerformanceDate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceDate.Width = 101;
             // 
             // colPerformanceTotalValue
             // 
             this.colPerformanceTotalValue.DataPropertyName = "TotalValue";
-            dataGridViewCellStyle9.Format = "C2";
-            dataGridViewCellStyle9.NullValue = null;
-            this.colPerformanceTotalValue.DefaultCellStyle = dataGridViewCellStyle9;
+            dataGridViewCellStyle11.Format = "C2";
+            dataGridViewCellStyle11.NullValue = null;
+            this.colPerformanceTotalValue.DefaultCellStyle = dataGridViewCellStyle11;
             this.colPerformanceTotalValue.HeaderText = "Total Value";
             this.colPerformanceTotalValue.Name = "colPerformanceTotalValue";
             this.colPerformanceTotalValue.ReadOnly = true;
             this.colPerformanceTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceTotalValue.Width = 101;
             // 
             // colPerformanceIndex
             // 
             this.colPerformanceIndex.DataPropertyName = "NAV";
-            dataGridViewCellStyle10.Format = "N2";
-            dataGridViewCellStyle10.NullValue = null;
-            this.colPerformanceIndex.DefaultCellStyle = dataGridViewCellStyle10;
+            dataGridViewCellStyle12.Format = "N2";
+            dataGridViewCellStyle12.NullValue = null;
+            this.colPerformanceIndex.DefaultCellStyle = dataGridViewCellStyle12;
             this.colPerformanceIndex.HeaderText = "Index";
             this.colPerformanceIndex.Name = "colPerformanceIndex";
             this.colPerformanceIndex.ReadOnly = true;
             this.colPerformanceIndex.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformanceIndex.Width = 101;
             // 
             // colPerformancePChange
             // 
             this.colPerformancePChange.DataPropertyName = "Change";
-            dataGridViewCellStyle11.Format = "#0.0000\'%\'";
-            dataGridViewCellStyle11.NullValue = null;
-            this.colPerformancePChange.DefaultCellStyle = dataGridViewCellStyle11;
+            dataGridViewCellStyle13.Format = "#0.0000\'%\'";
+            dataGridViewCellStyle13.NullValue = null;
+            this.colPerformancePChange.DefaultCellStyle = dataGridViewCellStyle13;
             this.colPerformancePChange.HeaderText = "% Change";
             this.colPerformancePChange.Name = "colPerformancePChange";
             this.colPerformancePChange.ReadOnly = true;
             this.colPerformancePChange.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformancePChange.Width = 101;
             // 
             // colPerformancePGain
             // 
             this.colPerformancePGain.DataPropertyName = "Gain";
-            dataGridViewCellStyle12.Format = "#0.0000\'%\'";
-            dataGridViewCellStyle12.NullValue = null;
-            this.colPerformancePGain.DefaultCellStyle = dataGridViewCellStyle12;
+            dataGridViewCellStyle14.Format = "#0.0000\'%\'";
+            dataGridViewCellStyle14.NullValue = null;
+            this.colPerformancePGain.DefaultCellStyle = dataGridViewCellStyle14;
             this.colPerformancePGain.HeaderText = "% Gain";
             this.colPerformancePGain.Name = "colPerformancePGain";
             this.colPerformancePGain.ReadOnly = true;
             this.colPerformancePGain.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colPerformancePGain.Width = 101;
             // 
             // tsPerformance
             // 
@@ -711,7 +766,7 @@
             this.btnPerformanceExport});
             this.tsPerformance.Location = new System.Drawing.Point(3, 3);
             this.tsPerformance.Name = "tsPerformance";
-            this.tsPerformance.Size = new System.Drawing.Size(778, 25);
+            this.tsPerformance.Size = new System.Drawing.Size(984, 25);
             this.tsPerformance.TabIndex = 0;
             // 
             // btnPerformanceSortDesc
@@ -719,7 +774,6 @@
             this.btnPerformanceSortDesc.Checked = true;
             this.btnPerformanceSortDesc.CheckState = System.Windows.Forms.CheckState.Checked;
             this.btnPerformanceSortDesc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnPerformanceSortDesc.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceSortDesc.Image")));
             this.btnPerformanceSortDesc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnPerformanceSortDesc.Name = "btnPerformanceSortDesc";
             this.btnPerformanceSortDesc.Size = new System.Drawing.Size(89, 22);
@@ -734,7 +788,6 @@
             // btnPerformanceExport
             // 
             this.btnPerformanceExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnPerformanceExport.Image = ((System.Drawing.Image)(resources.GetObject("btnPerformanceExport.Image")));
             this.btnPerformanceExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnPerformanceExport.Name = "btnPerformanceExport";
             this.btnPerformanceExport.Size = new System.Drawing.Size(55, 22);
@@ -748,7 +801,7 @@
             this.tbCorrelations.Location = new System.Drawing.Point(4, 22);
             this.tbCorrelations.Name = "tbCorrelations";
             this.tbCorrelations.Padding = new System.Windows.Forms.Padding(3);
-            this.tbCorrelations.Size = new System.Drawing.Size(784, 494);
+            this.tbCorrelations.Size = new System.Drawing.Size(990, 594);
             this.tbCorrelations.TabIndex = 4;
             this.tbCorrelations.Text = "Correlations";
             this.tbCorrelations.UseVisualStyleBackColor = true;
@@ -760,21 +813,21 @@
             this.dgCorrelation.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgCorrelation.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgCorrelation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridViewCellStyle13.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle13.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle13.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle13.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle13.Format = "#0.00\'%\'";
-            dataGridViewCellStyle13.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle13.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle13.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dgCorrelation.DefaultCellStyle = dataGridViewCellStyle13;
+            dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Window;
+            dataGridViewCellStyle15.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            dataGridViewCellStyle15.ForeColor = System.Drawing.SystemColors.ControlText;
+            dataGridViewCellStyle15.Format = "#0.00\'%\'";
+            dataGridViewCellStyle15.SelectionBackColor = System.Drawing.SystemColors.Highlight;
+            dataGridViewCellStyle15.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
+            dataGridViewCellStyle15.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
+            this.dgCorrelation.DefaultCellStyle = dataGridViewCellStyle15;
             this.dgCorrelation.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgCorrelation.Location = new System.Drawing.Point(3, 28);
             this.dgCorrelation.Name = "dgCorrelation";
             this.dgCorrelation.ReadOnly = true;
             this.dgCorrelation.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            this.dgCorrelation.Size = new System.Drawing.Size(778, 463);
+            this.dgCorrelation.Size = new System.Drawing.Size(984, 563);
             this.dgCorrelation.TabIndex = 4;
             this.dgCorrelation.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgCorrelation_CellFormatting);
             // 
@@ -792,14 +845,13 @@
             this.btnCorrelationExport});
             this.tsCorrelation.Location = new System.Drawing.Point(3, 3);
             this.tsCorrelation.Name = "tsCorrelation";
-            this.tsCorrelation.Size = new System.Drawing.Size(778, 25);
+            this.tsCorrelation.Size = new System.Drawing.Size(984, 25);
             this.tsCorrelation.TabIndex = 3;
             // 
             // btnCorrelationCalc
             // 
             this.btnCorrelationCalc.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnCorrelationCalc.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold);
-            this.btnCorrelationCalc.Image = ((System.Drawing.Image)(resources.GetObject("btnCorrelationCalc.Image")));
             this.btnCorrelationCalc.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnCorrelationCalc.Name = "btnCorrelationCalc";
             this.btnCorrelationCalc.Size = new System.Drawing.Size(63, 22);
@@ -820,7 +872,6 @@
             // btnCorrelationEndDate
             // 
             this.btnCorrelationEndDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnCorrelationEndDate.Image = ((System.Drawing.Image)(resources.GetObject("btnCorrelationEndDate.Image")));
             this.btnCorrelationEndDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnCorrelationEndDate.Name = "btnCorrelationEndDate";
             this.btnCorrelationEndDate.Size = new System.Drawing.Size(68, 22);
@@ -837,7 +888,6 @@
             this.btnCorrelationHidden.CheckOnClick = true;
             this.btnCorrelationHidden.CheckState = System.Windows.Forms.CheckState.Checked;
             this.btnCorrelationHidden.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnCorrelationHidden.Image = ((System.Drawing.Image)(resources.GetObject("btnCorrelationHidden.Image")));
             this.btnCorrelationHidden.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnCorrelationHidden.Name = "btnCorrelationHidden";
             this.btnCorrelationHidden.Size = new System.Drawing.Size(73, 22);
@@ -851,12 +901,222 @@
             // btnCorrelationExport
             // 
             this.btnCorrelationExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnCorrelationExport.Image = ((System.Drawing.Image)(resources.GetObject("btnCorrelationExport.Image")));
             this.btnCorrelationExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnCorrelationExport.Name = "btnCorrelationExport";
             this.btnCorrelationExport.Size = new System.Drawing.Size(55, 22);
             this.btnCorrelationExport.Text = "Export...";
             this.btnCorrelationExport.Click += new System.EventHandler(this.btnCorrelationExport_Click);
+            // 
+            // tbAcct
+            // 
+            this.tbAcct.Controls.Add(this.dgAcct);
+            this.tbAcct.Controls.Add(this.tsAcct);
+            this.tbAcct.Location = new System.Drawing.Point(4, 22);
+            this.tbAcct.Name = "tbAcct";
+            this.tbAcct.Padding = new System.Windows.Forms.Padding(3);
+            this.tbAcct.Size = new System.Drawing.Size(990, 594);
+            this.tbAcct.TabIndex = 6;
+            this.tbAcct.Text = "Accounts";
+            this.tbAcct.UseVisualStyleBackColor = true;
+            // 
+            // dgAcct
+            // 
+            this.dgAcct.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgAcct.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgAcct.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colAcctName,
+            this.colAcctCostBasis,
+            this.colAcctTotalValue,
+            this.colAcctTaxRate,
+            this.colAcctTaxLiability,
+            this.colAcctGainLoss,
+            this.colGainLossP,
+            this.colAcctPercentage,
+            this.colAcctHoldings});
+            this.dgAcct.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgAcct.Location = new System.Drawing.Point(3, 28);
+            this.dgAcct.Name = "dgAcct";
+            this.dgAcct.Size = new System.Drawing.Size(984, 563);
+            this.dgAcct.TabIndex = 1;
+            this.dgAcct.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgAcct_CellFormatting);
+            // 
+            // colAcctName
+            // 
+            this.colAcctName.DataPropertyName = "fName";
+            this.colAcctName.HeaderText = "Account";
+            this.colAcctName.Name = "colAcctName";
+            this.colAcctName.ReadOnly = true;
+            this.colAcctName.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctName.Width = 115;
+            // 
+            // colAcctCostBasis
+            // 
+            this.colAcctCostBasis.DataPropertyName = "fCostBasis";
+            dataGridViewCellStyle16.Format = "C2";
+            dataGridViewCellStyle16.NullValue = null;
+            this.colAcctCostBasis.DefaultCellStyle = dataGridViewCellStyle16;
+            this.colAcctCostBasis.HeaderText = "Cost Basis";
+            this.colAcctCostBasis.Name = "colAcctCostBasis";
+            this.colAcctCostBasis.ReadOnly = true;
+            // 
+            // colAcctTotalValue
+            // 
+            this.colAcctTotalValue.DataPropertyName = "fTotalValue";
+            dataGridViewCellStyle17.Format = "C2";
+            dataGridViewCellStyle17.NullValue = null;
+            this.colAcctTotalValue.DefaultCellStyle = dataGridViewCellStyle17;
+            this.colAcctTotalValue.HeaderText = "Total Value";
+            this.colAcctTotalValue.Name = "colAcctTotalValue";
+            this.colAcctTotalValue.ReadOnly = true;
+            this.colAcctTotalValue.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            // 
+            // colAcctTaxRate
+            // 
+            this.colAcctTaxRate.DataPropertyName = "fTaxRate";
+            dataGridViewCellStyle18.Format = "#0.00\'%\'";
+            dataGridViewCellStyle18.NullValue = null;
+            this.colAcctTaxRate.DefaultCellStyle = dataGridViewCellStyle18;
+            this.colAcctTaxRate.HeaderText = "Tax Rate";
+            this.colAcctTaxRate.Name = "colAcctTaxRate";
+            this.colAcctTaxRate.ReadOnly = true;
+            this.colAcctTaxRate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctTaxRate.Width = 80;
+            // 
+            // colAcctTaxLiability
+            // 
+            this.colAcctTaxLiability.DataPropertyName = "fTaxLiability";
+            dataGridViewCellStyle19.Format = "C2";
+            dataGridViewCellStyle19.NullValue = null;
+            this.colAcctTaxLiability.DefaultCellStyle = dataGridViewCellStyle19;
+            this.colAcctTaxLiability.HeaderText = "Tax Liability";
+            this.colAcctTaxLiability.Name = "colAcctTaxLiability";
+            this.colAcctTaxLiability.ReadOnly = true;
+            // 
+            // colAcctGainLoss
+            // 
+            this.colAcctGainLoss.DataPropertyName = "fGain";
+            dataGridViewCellStyle20.Format = "C2";
+            dataGridViewCellStyle20.NullValue = null;
+            this.colAcctGainLoss.DefaultCellStyle = dataGridViewCellStyle20;
+            this.colAcctGainLoss.HeaderText = "Gain/Loss";
+            this.colAcctGainLoss.Name = "colAcctGainLoss";
+            this.colAcctGainLoss.ReadOnly = true;
+            // 
+            // colGainLossP
+            // 
+            this.colGainLossP.DataPropertyName = "fGainLossP";
+            dataGridViewCellStyle21.Format = "#0.00\'%\'";
+            this.colGainLossP.DefaultCellStyle = dataGridViewCellStyle21;
+            this.colGainLossP.HeaderText = "Gain/Loss %";
+            this.colGainLossP.Name = "colGainLossP";
+            this.colGainLossP.Width = 80;
+            // 
+            // colAcctPercentage
+            // 
+            this.colAcctPercentage.DataPropertyName = "fPercentage";
+            dataGridViewCellStyle22.Format = "#0.00\'%\'";
+            dataGridViewCellStyle22.NullValue = null;
+            this.colAcctPercentage.DefaultCellStyle = dataGridViewCellStyle22;
+            this.colAcctPercentage.HeaderText = "% of Portfolio";
+            this.colAcctPercentage.Name = "colAcctPercentage";
+            this.colAcctPercentage.ReadOnly = true;
+            this.colAcctPercentage.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctPercentage.Width = 80;
+            // 
+            // colAcctHoldings
+            // 
+            this.colAcctHoldings.DataPropertyName = "fHoldings";
+            dataGridViewCellStyle23.Format = "N0";
+            dataGridViewCellStyle23.NullValue = null;
+            this.colAcctHoldings.DefaultCellStyle = dataGridViewCellStyle23;
+            this.colAcctHoldings.HeaderText = "# Holdings";
+            this.colAcctHoldings.Name = "colAcctHoldings";
+            this.colAcctHoldings.ReadOnly = true;
+            this.colAcctHoldings.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctHoldings.Width = 80;
+            // 
+            // tsAcct
+            // 
+            this.tsAcct.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
+            this.tsAcct.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnEditAccts,
+            this.sAcct1,
+            this.btnAcctDate,
+            this.sAcct2,
+            this.btnAcctSortBy,
+            this.cmbAcctSortBy,
+            this.btnAcctShowBlank,
+            this.sAcct3,
+            this.btnAcctExport});
+            this.tsAcct.Location = new System.Drawing.Point(3, 3);
+            this.tsAcct.Name = "tsAcct";
+            this.tsAcct.Size = new System.Drawing.Size(984, 25);
+            this.tsAcct.TabIndex = 0;
+            // 
+            // btnEditAccts
+            // 
+            this.btnEditAccts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnEditAccts.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnEditAccts.Name = "btnEditAccts";
+            this.btnEditAccts.Size = new System.Drawing.Size(76, 22);
+            this.btnEditAccts.Text = "Edit Accounts";
+            this.btnEditAccts.Click += new System.EventHandler(this.btnEditAccts_Click);
+            // 
+            // sAcct1
+            // 
+            this.sAcct1.Name = "sAcct1";
+            this.sAcct1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnAcctDate
+            // 
+            this.btnAcctDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAcctDate.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAcctDate.Name = "btnAcctDate";
+            this.btnAcctDate.Size = new System.Drawing.Size(47, 22);
+            this.btnAcctDate.Text = "Date:";
+            // 
+            // sAcct2
+            // 
+            this.sAcct2.Name = "sAcct2";
+            this.sAcct2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnAcctSortBy
+            // 
+            this.btnAcctSortBy.Name = "btnAcctSortBy";
+            this.btnAcctSortBy.Size = new System.Drawing.Size(46, 22);
+            this.btnAcctSortBy.Text = "Sort By:";
+            // 
+            // cmbAcctSortBy
+            // 
+            this.cmbAcctSortBy.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbAcctSortBy.Name = "cmbAcctSortBy";
+            this.cmbAcctSortBy.Size = new System.Drawing.Size(121, 25);
+            this.cmbAcctSortBy.SelectedIndexChanged += new System.EventHandler(this.cmbAcctSortBy_SelectedIndexChanged);
+            // 
+            // btnAcctShowBlank
+            // 
+            this.btnAcctShowBlank.Checked = true;
+            this.btnAcctShowBlank.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.btnAcctShowBlank.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAcctShowBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAcctShowBlank.Name = "btnAcctShowBlank";
+            this.btnAcctShowBlank.Size = new System.Drawing.Size(73, 22);
+            this.btnAcctShowBlank.Text = "Show (Blank)";
+            this.btnAcctShowBlank.Click += new System.EventHandler(this.btnAcctShowBlank_Click);
+            // 
+            // sAcct3
+            // 
+            this.sAcct3.Name = "sAcct3";
+            this.sAcct3.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnAcctExport
+            // 
+            this.btnAcctExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAcctExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAcctExport.Name = "btnAcctExport";
+            this.btnAcctExport.Size = new System.Drawing.Size(55, 22);
+            this.btnAcctExport.Text = "Export...";
+            this.btnAcctExport.Click += new System.EventHandler(this.btnAcctExport_Click);
             // 
             // tbAA
             // 
@@ -865,7 +1125,7 @@
             this.tbAA.Location = new System.Drawing.Point(4, 22);
             this.tbAA.Name = "tbAA";
             this.tbAA.Padding = new System.Windows.Forms.Padding(3);
-            this.tbAA.Size = new System.Drawing.Size(784, 494);
+            this.tbAA.Size = new System.Drawing.Size(990, 594);
             this.tbAA.TabIndex = 5;
             this.tbAA.Text = "Asset Allocation";
             this.tbAA.UseVisualStyleBackColor = true;
@@ -884,7 +1144,7 @@
             this.dgAA.Dock = System.Windows.Forms.DockStyle.Fill;
             this.dgAA.Location = new System.Drawing.Point(3, 28);
             this.dgAA.Name = "dgAA";
-            this.dgAA.Size = new System.Drawing.Size(778, 463);
+            this.dgAA.Size = new System.Drawing.Size(984, 563);
             this.dgAA.TabIndex = 1;
             this.dgAA.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dgAA_CellFormatting);
             // 
@@ -900,18 +1160,18 @@
             // colAATotalValue
             // 
             this.colAATotalValue.DataPropertyName = "fTotalValue";
-            dataGridViewCellStyle14.Format = "C2";
-            dataGridViewCellStyle14.NullValue = null;
-            this.colAATotalValue.DefaultCellStyle = dataGridViewCellStyle14;
+            dataGridViewCellStyle24.Format = "C2";
+            dataGridViewCellStyle24.NullValue = null;
+            this.colAATotalValue.DefaultCellStyle = dataGridViewCellStyle24;
             this.colAATotalValue.HeaderText = "Total Value";
             this.colAATotalValue.Name = "colAATotalValue";
             // 
             // colAAPofPortfolio
             // 
             this.colAAPofPortfolio.DataPropertyName = "fPercentage";
-            dataGridViewCellStyle15.Format = "#0.00\'%\'";
-            dataGridViewCellStyle15.NullValue = null;
-            this.colAAPofPortfolio.DefaultCellStyle = dataGridViewCellStyle15;
+            dataGridViewCellStyle25.Format = "#0.00\'%\'";
+            dataGridViewCellStyle25.NullValue = null;
+            this.colAAPofPortfolio.DefaultCellStyle = dataGridViewCellStyle25;
             this.colAAPofPortfolio.HeaderText = "% of Portfolio";
             this.colAAPofPortfolio.Name = "colAAPofPortfolio";
             this.colAAPofPortfolio.ReadOnly = true;
@@ -921,9 +1181,9 @@
             // colAATarget
             // 
             this.colAATarget.DataPropertyName = "fTarget";
-            dataGridViewCellStyle16.Format = "#0.00\'%\'";
-            dataGridViewCellStyle16.NullValue = null;
-            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle16;
+            dataGridViewCellStyle26.Format = "#0.00\'%\'";
+            dataGridViewCellStyle26.NullValue = null;
+            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle26;
             this.colAATarget.HeaderText = "Target %";
             this.colAATarget.Name = "colAATarget";
             this.colAATarget.ReadOnly = true;
@@ -933,9 +1193,9 @@
             // colAAOffset
             // 
             this.colAAOffset.DataPropertyName = "fOffset";
-            dataGridViewCellStyle17.Format = "#0.00\'%\'";
-            dataGridViewCellStyle17.NullValue = null;
-            this.colAAOffset.DefaultCellStyle = dataGridViewCellStyle17;
+            dataGridViewCellStyle27.Format = "#0.00\'%\'";
+            dataGridViewCellStyle27.NullValue = null;
+            this.colAAOffset.DefaultCellStyle = dataGridViewCellStyle27;
             this.colAAOffset.HeaderText = "Offset";
             this.colAAOffset.Name = "colAAOffset";
             this.colAAOffset.ReadOnly = true;
@@ -945,9 +1205,9 @@
             // colAAHoldings
             // 
             this.colAAHoldings.DataPropertyName = "fHoldings";
-            dataGridViewCellStyle18.Format = "N0";
-            dataGridViewCellStyle18.NullValue = null;
-            this.colAAHoldings.DefaultCellStyle = dataGridViewCellStyle18;
+            dataGridViewCellStyle28.Format = "N0";
+            dataGridViewCellStyle28.NullValue = null;
+            this.colAAHoldings.DefaultCellStyle = dataGridViewCellStyle28;
             this.colAAHoldings.HeaderText = "# Holdings";
             this.colAAHoldings.Name = "colAAHoldings";
             this.colAAHoldings.ReadOnly = true;
@@ -967,13 +1227,12 @@
             this.btnAAExport});
             this.tsAA.Location = new System.Drawing.Point(3, 3);
             this.tsAA.Name = "tsAA";
-            this.tsAA.Size = new System.Drawing.Size(778, 25);
+            this.tsAA.Size = new System.Drawing.Size(984, 25);
             this.tsAA.TabIndex = 0;
             // 
             // btnAAEditAA
             // 
             this.btnAAEditAA.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAAEditAA.Image = ((System.Drawing.Image)(resources.GetObject("btnAAEditAA.Image")));
             this.btnAAEditAA.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAAEditAA.Name = "btnAAEditAA";
             this.btnAAEditAA.Size = new System.Drawing.Size(108, 22);
@@ -988,7 +1247,6 @@
             // btnAADate
             // 
             this.btnAADate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAADate.Image = ((System.Drawing.Image)(resources.GetObject("btnAADate.Image")));
             this.btnAADate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAADate.Name = "btnAADate";
             this.btnAADate.Size = new System.Drawing.Size(47, 22);
@@ -1017,7 +1275,6 @@
             this.btnAAShowBlank.Checked = true;
             this.btnAAShowBlank.CheckState = System.Windows.Forms.CheckState.Checked;
             this.btnAAShowBlank.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAAShowBlank.Image = ((System.Drawing.Image)(resources.GetObject("btnAAShowBlank.Image")));
             this.btnAAShowBlank.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAAShowBlank.Name = "btnAAShowBlank";
             this.btnAAShowBlank.Size = new System.Drawing.Size(73, 22);
@@ -1032,7 +1289,6 @@
             // btnAAExport
             // 
             this.btnAAExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAAExport.Image = ((System.Drawing.Image)(resources.GetObject("btnAAExport.Image")));
             this.btnAAExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAAExport.Name = "btnAAExport";
             this.btnAAExport.Size = new System.Drawing.Size(55, 22);
@@ -1047,9 +1303,9 @@
             this.stbFiller,
             this.stbUpdateStatus,
             this.stbUpdateStatusPB});
-            this.stb.Location = new System.Drawing.Point(0, 551);
+            this.stb.Location = new System.Drawing.Point(0, 651);
             this.stb.Name = "stb";
-            this.stb.Size = new System.Drawing.Size(792, 22);
+            this.stb.Size = new System.Drawing.Size(998, 22);
             this.stb.TabIndex = 2;
             this.stb.Text = "statusStrip1";
             // 
@@ -1069,7 +1325,7 @@
             // stbFiller
             // 
             this.stbFiller.Name = "stbFiller";
-            this.stbFiller.Size = new System.Drawing.Size(455, 17);
+            this.stbFiller.Size = new System.Drawing.Size(661, 17);
             this.stbFiller.Spring = true;
             // 
             // stbUpdateStatus
@@ -1103,7 +1359,7 @@
             this.sMainAbout});
             this.tsMain.Location = new System.Drawing.Point(0, 0);
             this.tsMain.Name = "tsMain";
-            this.tsMain.Size = new System.Drawing.Size(792, 25);
+            this.tsMain.Size = new System.Drawing.Size(998, 25);
             this.tsMain.TabIndex = 0;
             // 
             // btnMainUpdate
@@ -1230,7 +1486,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(792, 573);
+            this.ClientSize = new System.Drawing.Size(998, 673);
             this.Controls.Add(this.lblClosing);
             this.Controls.Add(this.tsMain);
             this.Controls.Add(this.stb);
@@ -1266,6 +1522,11 @@
             ((System.ComponentModel.ISupportInitialize)(this.dgCorrelation)).EndInit();
             this.tsCorrelation.ResumeLayout(false);
             this.tsCorrelation.PerformLayout();
+            this.tbAcct.ResumeLayout(false);
+            this.tbAcct.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgAcct)).EndInit();
+            this.tsAcct.ResumeLayout(false);
+            this.tsAcct.PerformLayout();
             this.tbAA.ResumeLayout(false);
             this.tbAA.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAA)).EndInit();
@@ -1367,26 +1628,50 @@
         private MPIBackgroundWorker bw;
         private System.Windows.Forms.ToolStripButton btnMainCompare;
         private System.Windows.Forms.DataGridView dgHoldings;
+        private ZedGraph.ZedGraphControl zedChart;
+        private System.Windows.Forms.DataGridView dgPerformance;
+        private System.Windows.Forms.DataGridView dgCorrelation;
+        private System.Windows.Forms.DataGridView dgStats;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colStats;
+        private System.Windows.Forms.TabPage tbAcct;
+        private System.Windows.Forms.DataGridView dgAcct;
+        private System.Windows.Forms.ToolStrip tsAcct;
+        private System.Windows.Forms.ToolStripButton btnEditAccts;
+        private System.Windows.Forms.ToolStripSeparator sAcct1;
+        private System.Windows.Forms.ToolStripDropDownButton btnAcctDate;
+        private System.Windows.Forms.ToolStripSeparator sAcct2;
+        private System.Windows.Forms.ToolStripLabel btnAcctSortBy;
+        private System.Windows.Forms.ToolStripComboBox cmbAcctSortBy;
+        private System.Windows.Forms.ToolStripButton btnAcctShowBlank;
+        private System.Windows.Forms.ToolStripSeparator sAcct3;
+        private System.Windows.Forms.ToolStripButton btnAcctExport;
         private System.Windows.Forms.DataGridViewCheckBoxColumn colHoldingsActive;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTicker;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsClosingPrice;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsShares;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAvgPrice;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsGainLoss;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsCostBasis;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsTotalValueP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsGainLoss;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsGainLossP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAcct;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsAA;
         private System.Windows.Forms.DataGridViewTextBoxColumn colHoldingsID;
-        private ZedGraph.ZedGraphControl zedChart;
-        private System.Windows.Forms.DataGridView dgPerformance;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceTotalValue;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformanceIndex;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePChange;
         private System.Windows.Forms.DataGridViewTextBoxColumn colPerformancePGain;
-        private System.Windows.Forms.DataGridView dgCorrelation;
-        private System.Windows.Forms.DataGridView dgStats;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colStats;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctName;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctCostBasis;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctTotalValue;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctTaxRate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctTaxLiability;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctGainLoss;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colGainLossP;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctPercentage;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctHoldings;
     }
 }
 

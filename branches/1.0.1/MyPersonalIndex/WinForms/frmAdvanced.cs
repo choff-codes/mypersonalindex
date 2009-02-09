@@ -446,6 +446,9 @@ namespace MyPersonalIndex
 
         private void Export(DataGridView dg)
         {
+            if (dg.Rows.Count <= 0)
+                return;
+
             if (dSave.ShowDialog() != DialogResult.OK)
                 return;
 

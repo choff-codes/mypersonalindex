@@ -49,6 +49,7 @@ namespace MyPersonalIndex
             cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
 
             LoadAADropDown();
+            LoadAcctDropDown();
             LoadTicker();
 
             dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTrades(PortfolioID, TickerID)));
@@ -82,6 +83,9 @@ namespace MyPersonalIndex
                 cmbAA.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.AA);
                 if (cmbAA.SelectedValue == null)
                     cmbAA.SelectedValue = -1;
+                cmbAcct.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.Acct);
+                if (cmbAcct.SelectedValue == null)
+                    cmbAcct.SelectedValue = -1;
                 chkCalc.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Active).IsTrue;
                 chkHide.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Hide).IsTrue;
             }
@@ -118,6 +122,40 @@ namespace MyPersonalIndex
                 cmbAA.DataSource = t;
 
                 cmbAA.SelectedValue = -1;
+            }
+            finally
+            {
+                rs.Close();
+            }
+        }
+
+        private void LoadAcctDropDown()
+        {
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID));
+            try
+            {
+
+                DataTable t = new DataTable();
+                t.Columns.Add("Display");
+                t.Columns.Add("Value");
+
+                t.Rows.Add("(Blank)", -1);
+
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    do
+                    {
+                        t.Rows.Add(rs.GetString((int)TickerQueries.eGetAcct.Name), rs.GetInt32((int)TickerQueries.eGetAcct.ID));
+                    }
+                    while (rs.Read());
+                }
+
+                cmbAcct.DisplayMember = "Display";
+                cmbAcct.ValueMember = "Value";
+                cmbAcct.DataSource = t;
+
+                cmbAcct.SelectedValue = -1;
             }
             finally
             {
@@ -226,12 +264,14 @@ namespace MyPersonalIndex
             _TickerReturnValues.Changed = TickerReturnValues.Changed != chkCalc.Checked;
             if (TickerID == -1)
             {
-                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
+                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), 
+                    Convert.ToInt32(((DataRowView)cmbAcct.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
                 TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
             {
-                SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
+                SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]),
+                    Convert.ToInt32(((DataRowView)cmbAcct.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
                 if (dsTicker.HasChanges() || Pasted)
                     SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID));
             }
@@ -329,7 +369,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
                 dgHistory.Columns[i].DataPropertyName = "Split";
             }
-  
+
             dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, cmbHis.SelectedIndex, chkSort.Checked));
         }
 

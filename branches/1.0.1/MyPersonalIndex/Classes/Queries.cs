@@ -159,17 +159,24 @@ namespace MyPersonalIndex
             return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
         }
 
+        public enum eGetAcct { Name, TaxRate, ID };
+        public static string GetAcct(int Portfolio)
+        {
+            return string.Format("SELECT Name, TaxRate, ID FROM Accounts WHERE Portfolio = {0} ORDER BY Name", Portfolio);
+        }
+
         public enum eGetPortfolioAttributes
         {
             ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,
             CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank,
-            CorrelationShowHidden
+            CorrelationShowHidden, AcctSort, AcctShowBlank
         };
         public static string GetPortfolioAttributes(int Portfolio)
         {
             return string.Format(
                 "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue," +
-                " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden" +
+                    " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden," +
+                    " AcctSort, AcctShowBlank " +
                 " FROM Portfolios WHERE ID = {0}", Portfolio);
         }
 

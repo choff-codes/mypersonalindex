@@ -12,8 +12,8 @@ namespace MyPersonalIndex
 
         public static string InsertPortfolio(string Name, bool Dividends, double NAVStart, int CostCalc, int AAThreshold, DateTime StartDate)
         {
-            return string.Format("INSERT INTO Portfolios (Name, Dividends, NAVStartValue, CostCalc, AAThreshold, StartDate, HoldingsShowHidden, NAVSort, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden)" +
-                " VALUES ('{0}', {1}, {2}, {3}, {4}, '{5}', 1, 1, '', '', 1, 1)",
+            return string.Format("INSERT INTO Portfolios (Name, Dividends, NAVStartValue, CostCalc, AAThreshold, StartDate, HoldingsShowHidden, NAVSort, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden, AcctSort, AcctShowBlank)" +
+                " VALUES ('{0}', {1}, {2}, {3}, {4}, '{5}', 1, 1, '', '', 1, 1, '', 1)",
                 Functions.SQLCleanString(Name), Convert.ToByte(Dividends), NAVStart, CostCalc, AAThreshold, StartDate.ToShortDateString());
         }
     }

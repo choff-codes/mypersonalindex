@@ -101,6 +101,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Queries\AAQueries.cs" />
+    <Compile Include="Classes\Queries\AcctQueries.cs" />
     <Compile Include="Classes\Queries\AdvQueries.cs" />
     <Compile Include="Classes\Constants.cs" />
     <Compile Include="Classes\Functions.cs" />
@@ -110,6 +111,12 @@
     <Compile Include="Classes\Queries\StatsQueries.cs" />
     <Compile Include="Classes\Queries\TickerQueries.cs" />
     <Compile Include="Classes\Queries\UserStatQueries.cs" />
+    <Compile Include="WinForms\frmAccounts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\frmAccounts.Designer.cs">
+      <DependentUpon>frmAccounts.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\frmAdvanced.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -179,6 +186,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="WinForms\frmAccounts.resx">
+      <DependentUpon>frmAccounts.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmAdvanced.resx">
       <DependentUpon>frmAdvanced.cs</DependentUpon>
     </EmbeddedResource>

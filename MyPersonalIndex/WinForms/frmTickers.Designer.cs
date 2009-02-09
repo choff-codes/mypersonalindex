@@ -30,8 +30,9 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmTickers));
             this.gbTicker = new System.Windows.Forms.GroupBox();
+            this.cmbAcct = new System.Windows.Forms.ComboBox();
+            this.lblAccount = new System.Windows.Forms.Label();
             this.btnHistorical = new System.Windows.Forms.Button();
             this.txtSymbol = new System.Windows.Forms.TextBox();
             this.lblSymbol = new System.Windows.Forms.Label();
@@ -48,22 +49,24 @@
             this.dsTicker = new System.Data.DataSet();
             this.btnCancel = new System.Windows.Forms.Button();
             this.gbHistorical = new System.Windows.Forms.GroupBox();
+            this.dgHistory = new System.Windows.Forms.DataGridView();
             this.tsHis = new System.Windows.Forms.ToolStrip();
             this.cmbHis = new System.Windows.Forms.ToolStripComboBox();
             this.chkSort = new System.Windows.Forms.ToolStripButton();
-            this.dgHistory = new System.Windows.Forms.DataGridView();
             this.btnClose = new System.Windows.Forms.Button();
             this.gbTicker.SuspendLayout();
             this.gbActivity.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).BeginInit();
             this.gbHistorical.SuspendLayout();
-            this.tsHis.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).BeginInit();
+            this.tsHis.SuspendLayout();
             this.SuspendLayout();
             // 
             // gbTicker
             // 
+            this.gbTicker.Controls.Add(this.cmbAcct);
+            this.gbTicker.Controls.Add(this.lblAccount);
             this.gbTicker.Controls.Add(this.btnHistorical);
             this.gbTicker.Controls.Add(this.txtSymbol);
             this.gbTicker.Controls.Add(this.lblSymbol);
@@ -73,10 +76,28 @@
             this.gbTicker.Controls.Add(this.lblAA);
             this.gbTicker.Location = new System.Drawing.Point(10, 9);
             this.gbTicker.Name = "gbTicker";
-            this.gbTicker.Size = new System.Drawing.Size(312, 89);
+            this.gbTicker.Size = new System.Drawing.Size(312, 114);
             this.gbTicker.TabIndex = 0;
             this.gbTicker.TabStop = false;
             this.gbTicker.Text = "Ticker";
+            // 
+            // cmbAcct
+            // 
+            this.cmbAcct.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbAcct.FormattingEnabled = true;
+            this.cmbAcct.Location = new System.Drawing.Point(96, 64);
+            this.cmbAcct.Name = "cmbAcct";
+            this.cmbAcct.Size = new System.Drawing.Size(209, 21);
+            this.cmbAcct.TabIndex = 6;
+            // 
+            // lblAccount
+            // 
+            this.lblAccount.AutoSize = true;
+            this.lblAccount.Location = new System.Drawing.Point(5, 67);
+            this.lblAccount.Name = "lblAccount";
+            this.lblAccount.Size = new System.Drawing.Size(50, 13);
+            this.lblAccount.TabIndex = 5;
+            this.lblAccount.Text = "Account:";
             // 
             // btnHistorical
             // 
@@ -109,10 +130,10 @@
             // chkHide
             // 
             this.chkHide.AutoSize = true;
-            this.chkHide.Location = new System.Drawing.Point(206, 66);
+            this.chkHide.Location = new System.Drawing.Point(206, 91);
             this.chkHide.Name = "chkHide";
             this.chkHide.Size = new System.Drawing.Size(101, 17);
-            this.chkHide.TabIndex = 6;
+            this.chkHide.TabIndex = 8;
             this.chkHide.Text = "Hide in Portfolio";
             this.chkHide.UseVisualStyleBackColor = true;
             // 
@@ -121,10 +142,10 @@
             this.chkCalc.AutoSize = true;
             this.chkCalc.Checked = true;
             this.chkCalc.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkCalc.Location = new System.Drawing.Point(9, 66);
+            this.chkCalc.Location = new System.Drawing.Point(9, 91);
             this.chkCalc.Name = "chkCalc";
             this.chkCalc.Size = new System.Drawing.Size(134, 17);
-            this.chkCalc.TabIndex = 5;
+            this.chkCalc.TabIndex = 7;
             this.chkCalc.Text = "Include In Calculations";
             this.chkCalc.UseVisualStyleBackColor = true;
             // 
@@ -149,7 +170,7 @@
             // gbActivity
             // 
             this.gbActivity.Controls.Add(this.dgTickers);
-            this.gbActivity.Location = new System.Drawing.Point(11, 104);
+            this.gbActivity.Location = new System.Drawing.Point(12, 129);
             this.gbActivity.Name = "gbActivity";
             this.gbActivity.Size = new System.Drawing.Size(310, 226);
             this.gbActivity.TabIndex = 1;
@@ -176,7 +197,7 @@
             this.colTickersDate.DataPropertyName = "Date";
             this.colTickersDate.HeaderText = "Date";
             this.colTickersDate.Name = "colTickersDate";
-            this.colTickersDate.Width = 85;
+            this.colTickersDate.Width = 80;
             // 
             // colTickersShares
             // 
@@ -198,11 +219,11 @@
             this.colTickersPrice.HeaderText = "Price";
             this.colTickersPrice.MaxInputLength = 8;
             this.colTickersPrice.Name = "colTickersPrice";
-            this.colTickersPrice.Width = 85;
+            this.colTickersPrice.Width = 75;
             // 
             // btnOK
             // 
-            this.btnOK.Location = new System.Drawing.Point(191, 336);
+            this.btnOK.Location = new System.Drawing.Point(191, 361);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(62, 25);
             this.btnOK.TabIndex = 2;
@@ -217,7 +238,7 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(259, 336);
+            this.btnCancel.Location = new System.Drawing.Point(259, 361);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 25);
             this.btnCancel.TabIndex = 3;
@@ -227,15 +248,28 @@
             // 
             // gbHistorical
             // 
-            this.gbHistorical.Controls.Add(this.tsHis);
             this.gbHistorical.Controls.Add(this.dgHistory);
+            this.gbHistorical.Controls.Add(this.tsHis);
             this.gbHistorical.Enabled = false;
             this.gbHistorical.Location = new System.Drawing.Point(339, 9);
             this.gbHistorical.Name = "gbHistorical";
-            this.gbHistorical.Size = new System.Drawing.Size(320, 321);
+            this.gbHistorical.Size = new System.Drawing.Size(320, 346);
             this.gbHistorical.TabIndex = 4;
             this.gbHistorical.TabStop = false;
             this.gbHistorical.Text = "Historical Prices";
+            // 
+            // dgHistory
+            // 
+            this.dgHistory.AllowUserToAddRows = false;
+            this.dgHistory.AllowUserToDeleteRows = false;
+            this.dgHistory.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
+            this.dgHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgHistory.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.dgHistory.Location = new System.Drawing.Point(3, 42);
+            this.dgHistory.Name = "dgHistory";
+            this.dgHistory.ReadOnly = true;
+            this.dgHistory.Size = new System.Drawing.Size(314, 301);
+            this.dgHistory.TabIndex = 5;
             // 
             // tsHis
             // 
@@ -245,7 +279,7 @@
             this.tsHis.Location = new System.Drawing.Point(3, 17);
             this.tsHis.Name = "tsHis";
             this.tsHis.Size = new System.Drawing.Size(314, 25);
-            this.tsHis.TabIndex = 3;
+            this.tsHis.TabIndex = 4;
             // 
             // cmbHis
             // 
@@ -263,28 +297,14 @@
             this.chkSort.CheckOnClick = true;
             this.chkSort.CheckState = System.Windows.Forms.CheckState.Checked;
             this.chkSort.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.chkSort.Image = ((System.Drawing.Image)(resources.GetObject("chkSort.Image")));
             this.chkSort.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.chkSort.Name = "chkSort";
             this.chkSort.Size = new System.Drawing.Size(89, 22);
             this.chkSort.Text = "Sort Descending";
-            this.chkSort.CheckedChanged += new System.EventHandler(this.chkSort_CheckedChanged);
-            // 
-            // dgHistory
-            // 
-            this.dgHistory.AllowUserToAddRows = false;
-            this.dgHistory.AllowUserToDeleteRows = false;
-            this.dgHistory.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
-            this.dgHistory.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgHistory.Location = new System.Drawing.Point(6, 45);
-            this.dgHistory.Name = "dgHistory";
-            this.dgHistory.ReadOnly = true;
-            this.dgHistory.Size = new System.Drawing.Size(308, 270);
-            this.dgHistory.TabIndex = 2;
             // 
             // btnClose
             // 
-            this.btnClose.Location = new System.Drawing.Point(584, 338);
+            this.btnClose.Location = new System.Drawing.Point(584, 363);
             this.btnClose.Name = "btnClose";
             this.btnClose.Size = new System.Drawing.Size(75, 23);
             this.btnClose.TabIndex = 5;
@@ -298,7 +318,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(673, 373);
+            this.ClientSize = new System.Drawing.Size(673, 398);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.gbHistorical);
             this.Controls.Add(this.btnCancel);
@@ -322,9 +342,9 @@
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).EndInit();
             this.gbHistorical.ResumeLayout(false);
             this.gbHistorical.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).EndInit();
             this.tsHis.ResumeLayout(false);
             this.tsHis.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -345,11 +365,13 @@
         private System.Windows.Forms.Label lblSymbol;
         private System.Windows.Forms.Button btnHistorical;
         private System.Windows.Forms.GroupBox gbHistorical;
-        private System.Windows.Forms.DataGridView dgHistory;
         private System.Windows.Forms.Button btnClose;
+        private System.Windows.Forms.DataGridView dgHistory;
         private System.Windows.Forms.ToolStrip tsHis;
-        private System.Windows.Forms.ToolStripButton chkSort;
         private System.Windows.Forms.ToolStripComboBox cmbHis;
+        private System.Windows.Forms.ToolStripButton chkSort;
+        private System.Windows.Forms.ComboBox cmbAcct;
+        private System.Windows.Forms.Label lblAccount;
         private CalendarColumn colTickersDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersShares;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersPrice;

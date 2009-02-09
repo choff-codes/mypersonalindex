@@ -17,10 +17,12 @@ namespace MyPersonalIndex
                 "SELECT a.Active AS fActive, a.Ticker AS fTicker, c.Price AS fPrice," +
                         " Coalesce(b.Shares,0) AS fShares," +
                         " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price END) AS fAverage," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND d.Price <> 0 THEN 100 * ((c.Price / d.Price) - 1) END) AS fGain," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price * b.Shares END) AS fCostBasis," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
                         " (CASE WHEN a.Active = 1 THEN c.Price * b.Shares END) AS fTotalValue," +
                         " (CASE WHEN {0} <> 0 AND a.Active = 1 THEN c.Price * b.Shares / {0} * 100 END) AS fTotalValueP," +
-                        " e.AA AS fAA, a.ID as fID" +
+                        " f.Name AS fAcct, e.AA AS fAA, a.ID as fID" +
                 " FROM Tickers AS a" +
                 " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                             " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares " +
@@ -33,7 +35,7 @@ namespace MyPersonalIndex
                     " ON a.ID = b.TickerID" +
                 " LEFT JOIN (SELECT Ticker, Price" +
                             " FROM ClosingPrices" +
-                            " WHERE DATE = '{2}') AS c" +
+                            " WHERE Date = '{2}') AS c" +
                     " ON a.Ticker = c.Ticker" +
                 " LEFT JOIN (SELECT Ticker, Price" +
                             " FROM AvgPricePerShare) AS d" +
@@ -42,6 +44,10 @@ namespace MyPersonalIndex
                             " FROM AA" +
                             " WHERE Portfolio = {1}) AS e" +
                     " ON a.AA = e.ID" +
+                " LEFT JOIN (SELECT ID, Name, TaxRate" +
+                            " FROM Accounts" +
+                            " WHERE Portfolio = {1}) AS f" +
+                    " ON a.Acct = f.ID" +
                 " WHERE  Portfolio = {1}{3}{4}",
                 totalValue, Portfolio, LastestDate.ToShortDateString(), Hidden ? "" : " AND Hide = 0",
                 string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
@@ -71,6 +77,37 @@ namespace MyPersonalIndex
         public static string GetTotalValue(int Portfolio, DateTime Date)
         {
             return string.Format("SELECT TotalValue FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
+        }
+
+        public enum eGetGainLossInfo { CostBasis, GainLoss, TaxLiability };
+        public static string GetGainLossInfo(int Portfolio, DateTime Date)
+        {
+            return string.Format(
+                "SELECT SUM(c.Price * b.Shares) AS CostBasis," +
+                    " SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END)) AS GainLoss," +
+                    " SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability" +
+                " FROM Tickers AS a" +
+                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                             " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                                    " FROM Trades a" +
+                                    " LEFT JOIN Splits b" +
+                                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{0}'" +
+                                    " WHERE a.Portfolio = {1} AND a.Date <= '{0}'" +
+                                    " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" +
+                             " GROUP BY TickerID) AS b" +
+                     " ON a.ID = b.TickerID" +
+                " LEFT JOIN (SELECT Ticker, Price" +
+                            " FROM AvgPricePerShare) AS c" +
+                    " ON a.ID = c.Ticker" +
+                " LEFT JOIN (SELECT Ticker, Price" +
+                            " FROM ClosingPrices" +
+                            " WHERE DATE = '{0}') AS d" +
+                    " ON a.Ticker = d.Ticker" +
+                " LEFT JOIN (SELECT ID, Name, TaxRate" +
+                            " FROM Accounts" +
+                            " WHERE Portfolio = {1}) AS e" +
+                    " ON a.Acct = e.ID" +
+                " WHERE Portfolio = {1}", Date.ToShortDateString(), Portfolio);
         }
 
         public static string GetCSVAddress(string Symbol, DateTime Begin, DateTime End, string Type)
@@ -246,6 +283,45 @@ namespace MyPersonalIndex
                 LastPortfolio == null ? "NULL" : LastPortfolio.ToString(), WindowPosition.X, WindowPosition.Y, WindowPosition.Height, WindowPosition.Width, (int)f);
         }
 
+        public static string GetAcct(int Portfolio, DateTime LastestDate, double TotalValue, string Sort, bool ShowBlank)
+        {
+            return string.Format(
+                "SELECT COALESCE(e.Name, '(Blank)') AS fName," +
+                        " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price * b.Shares END)) AS fCostBasis," + 
+                        " SUM(c.Price * b.Shares) AS fTotalValue," +
+                        " e.TaxRate AS fTaxRate," +
+                        " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(e.TaxRate/100, 0) ELSE 0 END) END)) AS fTaxLiability," +
+                        " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END)) AS fGain," +
+                        " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END))" + 
+	                        " / (CASE WHEN SUM(c.Price * b.Shares) <> 0 THEN SUM(c.Price * b.Shares) END) * 100 AS fGainLossP," +
+                        " (CASE WHEN {0} <> 0 THEN SUM(c.Price * b.Shares) / {0} * 100 END) AS fPercentage," +
+                        " COUNT(*) AS fHoldings" +
+                " FROM Tickers AS a" + 
+                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" + 
+                            " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +  
+                                   " FROM Trades a" + 
+                                   " LEFT JOIN Splits b" + 
+                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
+                                   " WHERE a.Portfolio = {1} AND a.Date <= '{2}'" + 
+                                   " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" + 
+                            " GROUP BY TickerID) AS b" + 
+                    " ON a.ID = b.TickerID" + 
+                " LEFT JOIN (SELECT Ticker, Price" + 
+                            " FROM ClosingPrices" +
+                            " WHERE Date = '{2}') AS c" + 
+                    " ON a.Ticker = c.Ticker" + 
+                " LEFT JOIN (SELECT Ticker, Price" + 
+                            " FROM AvgPricePerShare) AS d" + 
+                    " ON a.ID = d.Ticker" + 
+                " LEFT JOIN (SELECT ID, Name, TaxRate" + 
+                            " FROM Accounts" +
+                            " WHERE Portfolio = {1}) AS e" +
+                    " ON a.Acct = e.ID" +
+                " WHERE  Portfolio = {1} AND A.Active = 1{3}" +
+                " GROUP BY e.ID, e.Name, e.TaxRate{4}", 
+                TotalValue, Portfolio, LastestDate.ToShortDateString(), ShowBlank ? "" : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+        }
+
         public static string GetAA(int Portfolio, DateTime LatestDate, double TotalValue, string Sort, bool ShowBlank)
         {
             return string.Format(
@@ -275,7 +351,7 @@ namespace MyPersonalIndex
                     " ON a.AA = d.ID" +
                 " WHERE a.Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY d.ID, d.AA, d.Target{4}",
-                TotalValue, Portfolio, LatestDate.ToShortDateString(), ShowBlank ? "" : " AND d.AA IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+                TotalValue, Portfolio, LatestDate.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
         }
 
         public static string DeletePortfolio(int Portfolio)
@@ -341,10 +417,13 @@ namespace MyPersonalIndex
             return string.Format("SELECT ID FROM Portfolios WHERE ID = {0}", Portfolio);
         }
 
-        public static string UpdatePortfolioAttributes(int Portfolio, bool HoldingsShowHidden, bool NAVSort, bool ShowAABlank, string HoldingsSort, string AASort, bool CorrelationShowHidden)
+        public static string UpdatePortfolioAttributes(int Portfolio, bool HoldingsShowHidden, bool NAVSort, 
+            bool ShowAABlank, string HoldingsSort, string AASort, bool CorrelationShowHidden, bool ShowAcctBlank, string AcctSort)
         {
-            return string.Format("UPDATE Portfolios SET HoldingsShowHidden = {0}, NAVSort = {1}, AAShowBlank = {2}, HoldingsSort = '{3}', AASort = '{4}', CorrelationShowHidden = {5} WHERE ID = {6}",
-                Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, AASort, Convert.ToByte(CorrelationShowHidden), Portfolio);
+            return string.Format("UPDATE Portfolios SET HoldingsShowHidden = {0}, NAVSort = {1}, AAShowBlank = {2}, HoldingsSort = '{3}'," +
+                " AASort = '{4}', CorrelationShowHidden = {5}, AcctShowBlank = {6}, AcctSort = '{7}' WHERE ID = {8}",
+                Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort, 
+                AASort, Convert.ToByte(CorrelationShowHidden), Convert.ToByte(ShowAcctBlank), AcctSort, Portfolio);
         }
 
         public static string UpdatePortfolioStartDates(DateTime MinDate)
@@ -375,6 +454,11 @@ namespace MyPersonalIndex
         public static string DeleteClosingPrices()
         {
             return "DELETE FROM ClosingPrices";
+        }
+
+        public static string GetLastUpdate(int Portfolio)
+        {
+            return string.Format("SELECT MAX(Date) FROM NAV WHERE Portfolio = {0}", Portfolio);
         }
     }
 }

@@ -30,7 +30,6 @@
         {
             this.components = new System.ComponentModel.Container();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvanced));
             this.lst = new System.Windows.Forms.CheckedListBox();
             this.cmdSelectAll = new System.Windows.Forms.Button();
             this.cmdClear = new System.Windows.Forms.Button();
@@ -194,6 +193,7 @@
             // 
             // lblReport
             // 
+            this.lblReport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.lblReport.Name = "lblReport";
             this.lblReport.Size = new System.Drawing.Size(44, 22);
             this.lblReport.Text = "Report:";
@@ -242,7 +242,6 @@
             // btnStartDate
             // 
             this.btnStartDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnStartDate.Image = ((System.Drawing.Image)(resources.GetObject("btnStartDate.Image")));
             this.btnStartDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStartDate.Name = "btnStartDate";
             this.btnStartDate.Size = new System.Drawing.Size(74, 22);
@@ -251,7 +250,6 @@
             // btnEndDate
             // 
             this.btnEndDate.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnEndDate.Image = ((System.Drawing.Image)(resources.GetObject("btnEndDate.Image")));
             this.btnEndDate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEndDate.Name = "btnEndDate";
             this.btnEndDate.Size = new System.Drawing.Size(68, 22);
@@ -265,7 +263,6 @@
             // btnExport
             // 
             this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExport.Image = ((System.Drawing.Image)(resources.GetObject("btnExport.Image")));
             this.btnExport.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(55, 22);

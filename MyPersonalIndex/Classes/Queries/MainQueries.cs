@@ -11,6 +11,11 @@ namespace MyPersonalIndex
             return "SELECT MAX(Date) from ClosingPrices";
         }
 
+        public static string GetFirstDate()
+        {
+            return "SELECT MIN(Date) from ClosingPrices";
+        }
+
         public static string GetHoldings(int Portfolio, DateTime LastestDate, double totalValue, bool Hidden, string Sort)
         {
             return string.Format(
@@ -407,6 +412,11 @@ namespace MyPersonalIndex
                                 " WHERE b.Ticker IS NULL )";
         }
 
+        public static string GetFirstDate(int Portfolio)
+        {
+            return string.Format("SELECT MIN(Date) FROM NAV WHERE Portfolio = {0}", Portfolio);
+        }
+
         public static string DeleteTrades(int Portfolio)
         {
             return string.Format("DELETE FROM Trades WHERE Portfolio = {0}", Portfolio);
@@ -459,6 +469,6 @@ namespace MyPersonalIndex
         public static string GetLastUpdate(int Portfolio)
         {
             return string.Format("SELECT MAX(Date) FROM NAV WHERE Portfolio = {0}", Portfolio);
-        }
+        }    
     }
 }

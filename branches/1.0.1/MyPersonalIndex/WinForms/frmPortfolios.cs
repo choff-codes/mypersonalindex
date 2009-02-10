@@ -149,7 +149,14 @@ namespace MyPersonalIndex
         private void txtValue_Enter(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(txtValue.Text))
-                txtValue.Text = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency).ToString();
+                try
+                {
+                    txtValue.Text = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency).ToString();
+                }
+                catch (FormatException)
+                {
+                    //do nothing
+                }
         }
 
         private void btnDate_Click(object sender, EventArgs e)

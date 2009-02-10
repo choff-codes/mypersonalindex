@@ -267,6 +267,9 @@ namespace MyPersonalIndex
                         this.Size = new Size(rs.GetInt32((int)MainQueries.eGetSettings.WindowWidth), rs.GetInt32((int)MainQueries.eGetSettings.WindowHeight));
                         this.WindowState = (FormWindowState)rs.GetInt32((int)MainQueries.eGetSettings.WindowState);
                     }
+                    else
+                        MessageBox.Show("Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Add a new Portfolio\n2. Set your asset allocation\n3. Set your accounts\n" +
+                            "4. Add holdings\n5. Add relevent portfolio statistics\n6. Update prices!");
                     LastPortfolio = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.LastPortfolio)) ? -1 : rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
                 }
             }
@@ -1295,8 +1298,8 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
             SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
-            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
-            StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
+
+            CheckUnusedNAVs(false);
         }
 
         private bool DeleteTicker(int Ticker, string sTicker)
@@ -1549,7 +1552,45 @@ namespace MyPersonalIndex
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
-            LoadPortfolio();
+
+            CheckUnusedNAVs(true);
+        }
+
+        private void CheckUnusedNAVs(bool PortfolioDelete)
+        {
+            DateTime MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetFirstDate(), DateTime.Today.AddDays(1)));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolios());
+            bool RecalcAll = false;
+            try
+            {
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    do
+                    {
+                        int p = rs.GetInt32((int)MainQueries.eGetPortfolios.ID);
+                        if (p != MPI.Portfolio.ID)
+                            if (Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetFirstDate(p), DateTime.Today)) < MinDate)
+                                RecalcAll = true;
+                    }
+                    while (rs.Read());
+                }
+            }
+            finally
+            {
+                rs.Close();
+            }
+
+            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
+            stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+
+            if (RecalcAll)
+                StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Settings.DataStartDate, -1);
+            else
+                if (PortfolioDelete)
+                    LoadPortfolio();
+                else
+                    StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
         }
 
         private bool IsInternetConnection()

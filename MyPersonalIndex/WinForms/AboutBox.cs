@@ -9,7 +9,7 @@ namespace MyPersonalIndex
         public AboutBox()
         {
             InitializeComponent();
-            this.Text = String.Format("About {0} {0}", AssemblyTitle);
+            this.Text = String.Format("About {0}", AssemblyTitle);
             this.labelProductName.Text = AssemblyProduct;
             this.labelVersion.Text = String.Format("Version {0}", AssemblyVersion);
             this.labelCopyright.Text = AssemblyCopyright;
@@ -40,7 +40,8 @@ namespace MyPersonalIndex
         {
             get
             {
-                return Assembly.GetExecutingAssembly().GetName().Version.ToString();
+                Version v = Assembly.GetExecutingAssembly().GetName().Version;
+                return v.ToString().Substring(0, v.ToString().LastIndexOf('.'));
             }
         }
 
@@ -96,10 +97,5 @@ namespace MyPersonalIndex
             }
         }
         #endregion
-
-        private void AboutBox_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }

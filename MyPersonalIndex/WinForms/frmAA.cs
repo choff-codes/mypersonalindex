@@ -6,7 +6,7 @@ namespace MyPersonalIndex
 {
     public partial class frmAA : Form
     {
-        private Queries SQL = new Queries();
+        private AAQueries SQL = new AAQueries();
         private int PortfolioID;
         private bool Pasted;
 
@@ -27,7 +27,7 @@ namespace MyPersonalIndex
 
             Pasted = false;
 
-            dsAA.Tables.Add(SQL.ExecuteDataset(Queries.Common_GetAA(PortfolioID)));
+            dsAA.Tables.Add(SQL.ExecuteDataset(AAQueries.GetAA(PortfolioID)));
             dgAA.DataSource = dsAA.Tables[0];
 
             dsAA.AcceptChanges();
@@ -69,10 +69,10 @@ namespace MyPersonalIndex
                                 switch (col + i)
                                 {
                                     case 0:
-                                        dsAA.Tables[0].Rows[row]["AA"] = cells[i];
+                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i];
                                         break;
                                     case 1:
-                                        dsAA.Tables[0].Rows[row]["Target"] = Convert.ToDecimal(cells[i]);
+                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i]);
                                         break;
                                 }
                             }
@@ -139,28 +139,28 @@ namespace MyPersonalIndex
                 string AAin = "";
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
-                    if (Convert.ToInt32(dr["ID"]) != 0)
-                        AAin = AAin + Convert.ToInt32(dr["ID"]).ToString() + ",";
+                    if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) != 0)
+                        AAin = AAin + Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]).ToString() + ",";
 
                 if (!string.IsNullOrEmpty(AAin))
                     AAin = AAin.Substring(0, AAin.Length - 1);
 
-                SQL.ExecuteNonQuery(Queries.AA_DeleteAA(PortfolioID, AAin));
+                SQL.ExecuteNonQuery(AAQueries.DeleteAA(PortfolioID, AAin));
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
                 {
                     try
                     {
-                        if (Convert.ToInt32(dr["ID"]) == 0)
-                            if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(Queries.AA_InsertAA(PortfolioID, (string)dr["AA"], null));
+                        if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) == 0)
+                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], null));
                             else
-                                SQL.ExecuteNonQuery(Queries.AA_InsertAA(PortfolioID, (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
                         else
-                            if (string.IsNullOrEmpty(dr["Target"].ToString()))
-                                SQL.ExecuteNonQuery(Queries.AA_UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], null));
+                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], null));
                             else
-                                SQL.ExecuteNonQuery(Queries.AA_UpdateAA(Convert.ToInt32(dr["ID"]), (string)dr["AA"], Convert.ToDouble(dr["Target"])));
+                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
                     }
                     catch
                     {

@@ -276,10 +276,15 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
-        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Version, Splits };
+        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
         public static string GetSettings()
         {
-            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Version, Splits FROM Settings";
+            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings";
+        }
+
+        public static string GetVersion()
+        {
+            return "SELECT Version FROM Settings";
         }
 
         public static string UpdateSettings(int? LastPortfolio, Rectangle WindowPosition, FormWindowState f)

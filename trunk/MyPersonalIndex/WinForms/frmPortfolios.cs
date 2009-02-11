@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -20,8 +20,8 @@ namespace MyPersonalIndex
         }
 
         public PortfolioRetValues PortfolioReturnValues { get { return _PortfolioReturnValues; } }
-        
-        private Queries SQL = new Queries();
+
+        private PortfolioQueries SQL = new PortfolioQueries();
         private int Portfolio;
         private PortfolioRetValues _PortfolioReturnValues = new PortfolioRetValues();
         private MonthCalendar IndexDate;
@@ -48,7 +48,7 @@ namespace MyPersonalIndex
             mnuDate.Items.Insert(0, host);
             IndexDate.DateSelected += new DateRangeEventHandler(Date_Change);
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.Common_GetPortfolioAttributes(Portfolio));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetPortfolioAttributes(Portfolio));
 
             try
             {
@@ -56,12 +56,12 @@ namespace MyPersonalIndex
                 {
                     rs.ReadFirst();
 
-                    txtName.Text = rs.GetString(rs.GetOrdinal("Name"));
-                    chkDiv.Checked = rs.GetSqlBoolean(rs.GetOrdinal("Dividends")).IsTrue;
-                    txtValue.Text = string.Format("{0:C}", rs.GetDecimal(rs.GetOrdinal("NavStartValue")));
-                    numAA.Value = rs.GetInt32(rs.GetOrdinal("AAThreshold"));
-                    cmbCost.SelectedIndex = rs.GetInt32(rs.GetOrdinal("CostCalc"));
-                    IndexDate.SetDate(rs.GetDateTime(rs.GetOrdinal("StartDate")));
+                    txtName.Text = rs.GetString((int)PortfolioQueries.eGetPortfolioAttributes.Name);
+                    chkDiv.Checked = rs.GetSqlBoolean((int)PortfolioQueries.eGetPortfolioAttributes.Dividends).IsTrue;
+                    txtValue.Text = string.Format("{0:C}", rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
+                    numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
+                    cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
+                    IndexDate.SetDate(rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate));
                 }
             }
             finally
@@ -112,13 +112,13 @@ namespace MyPersonalIndex
 
             if (Portfolio == -1)
             {
-                SQL.ExecuteNonQuery(Queries.Portfolio_InsertPortfolio(txtName.Text, chkDiv.Checked,
+                SQL.ExecuteNonQuery(PortfolioQueries.InsertPortfolio(txtName.Text, chkDiv.Checked,
                     Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
-                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.Common_GetIdentity()));
+                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
-                SQL.ExecuteNonQuery(Queries.Portfolio_UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,
+                SQL.ExecuteNonQuery(PortfolioQueries.UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,
                     Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
 
@@ -149,7 +149,14 @@ namespace MyPersonalIndex
         private void txtValue_Enter(object sender, EventArgs e)
         {
             if (!string.IsNullOrEmpty(txtValue.Text))
-                txtValue.Text = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency).ToString();
+                try
+                {
+                    txtValue.Text = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency).ToString();
+                }
+                catch (FormatException)
+                {
+                    //do nothing
+                }
         }
 
         private void btnDate_Click(object sender, EventArgs e)

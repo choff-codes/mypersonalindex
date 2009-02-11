@@ -33,7 +33,6 @@
             this.cmdMoveOver = new System.Windows.Forms.Button();
             this.cmdMoveUp = new System.Windows.Forms.Button();
             this.cmdMoveDown = new System.Windows.Forms.Button();
-            this.cmdAddBlank = new System.Windows.Forms.Button();
             this.lst2 = new System.Windows.Forms.ListBox();
             this.lst1 = new System.Windows.Forms.ListBox();
             this.gpEdit = new System.Windows.Forms.GroupBox();
@@ -53,7 +52,6 @@
             this.gpPortfolio.Controls.Add(this.cmdMoveOver);
             this.gpPortfolio.Controls.Add(this.cmdMoveUp);
             this.gpPortfolio.Controls.Add(this.cmdMoveDown);
-            this.gpPortfolio.Controls.Add(this.cmdAddBlank);
             this.gpPortfolio.Controls.Add(this.lst2);
             this.gpPortfolio.Controls.Add(this.lst1);
             this.gpPortfolio.Location = new System.Drawing.Point(12, 12);
@@ -85,7 +83,7 @@
             // 
             // cmdMoveUp
             // 
-            this.cmdMoveUp.Location = new System.Drawing.Point(334, 16);
+            this.cmdMoveUp.Location = new System.Drawing.Point(334, 40);
             this.cmdMoveUp.Name = "cmdMoveUp";
             this.cmdMoveUp.Size = new System.Drawing.Size(75, 27);
             this.cmdMoveUp.TabIndex = 4;
@@ -95,23 +93,13 @@
             // 
             // cmdMoveDown
             // 
-            this.cmdMoveDown.Location = new System.Drawing.Point(334, 56);
+            this.cmdMoveDown.Location = new System.Drawing.Point(334, 73);
             this.cmdMoveDown.Name = "cmdMoveDown";
             this.cmdMoveDown.Size = new System.Drawing.Size(75, 27);
             this.cmdMoveDown.TabIndex = 5;
             this.cmdMoveDown.Text = "Move Down";
             this.cmdMoveDown.UseVisualStyleBackColor = true;
             this.cmdMoveDown.Click += new System.EventHandler(this.cmdMoveDown_Click);
-            // 
-            // cmdAddBlank
-            // 
-            this.cmdAddBlank.Location = new System.Drawing.Point(334, 96);
-            this.cmdAddBlank.Name = "cmdAddBlank";
-            this.cmdAddBlank.Size = new System.Drawing.Size(75, 27);
-            this.cmdAddBlank.TabIndex = 6;
-            this.cmdAddBlank.Text = "Add Blank";
-            this.cmdAddBlank.UseVisualStyleBackColor = true;
-            this.cmdAddBlank.Click += new System.EventHandler(this.cmdAddBlank_Click);
             // 
             // lst2
             // 
@@ -236,7 +224,6 @@
         private System.Windows.Forms.Button cmdMoveOver;
         private System.Windows.Forms.Button cmdMoveUp;
         private System.Windows.Forms.Button cmdMoveDown;
-        private System.Windows.Forms.Button cmdAddBlank;
         private System.Windows.Forms.ListBox lst2;
         private System.Windows.Forms.ListBox lst1;
         private System.Windows.Forms.GroupBox gpEdit;

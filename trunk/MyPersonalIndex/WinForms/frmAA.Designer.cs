@@ -127,7 +127,7 @@
             // 
             this.colAAAssetAllocation.DataPropertyName = "AA";
             this.colAAAssetAllocation.HeaderText = "Asset Allocation";
-            this.colAAAssetAllocation.MaxInputLength = 6;
+            this.colAAAssetAllocation.MaxInputLength = 255;
             this.colAAAssetAllocation.Name = "colAAAssetAllocation";
             this.colAAAssetAllocation.Width = 175;
             // 

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlTypes;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -15,7 +15,7 @@ namespace MyPersonalIndex
 
         public OptionRetValues OptionReturnValues { get { return _OptionReturnValues; } }
 
-        private Queries SQL = new Queries();
+        private OptionQueries SQL = new OptionQueries();
         private OptionRetValues _OptionReturnValues = new OptionRetValues();
         private MonthCalendar DataStartCalendar;
 
@@ -67,7 +67,7 @@ namespace MyPersonalIndex
         {
             DateTime NewDataStartDate = DataStartCalendar.SelectionStart;
 
-            SQL.ExecuteNonQuery(Queries.Options_UpdateSplits(chkSplit.Checked));
+            SQL.ExecuteNonQuery(OptionQueries.UpdateSplits(chkSplit.Checked));
             _OptionReturnValues.Splits = chkSplit.Checked;
 
             if (NewDataStartDate == _OptionReturnValues.DataStartDate)
@@ -78,12 +78,12 @@ namespace MyPersonalIndex
 
             if (MessageBox.Show("Are you sure you want to change the data start date? This will cause you to redownload all price data.", "Start Date", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
-                if (Convert.ToDateTime(SQL.ExecuteScalar(Queries.Options_GetPortfoliosMinDate(), DateTime.Today)) < NewDataStartDate.Date)
+                if (Convert.ToDateTime(SQL.ExecuteScalar(OptionQueries.GetPortfoliosMinDate(), DateTime.Today)) < NewDataStartDate.Date)
                     if (MessageBox.Show("Some Portfolios start before this date. Would you like to update their start date?", "Portfolio Index Date", MessageBoxButtons.YesNo) != DialogResult.Yes)
                         return;
 
                 _OptionReturnValues.DataStartDate = NewDataStartDate;
-                SQL.ExecuteNonQuery(Queries.Common_UpdateDataStartDate(NewDataStartDate));
+                SQL.ExecuteNonQuery(Queries.UpdateDataStartDate(NewDataStartDate));
                 DialogResult = DialogResult.OK;
             }
             else

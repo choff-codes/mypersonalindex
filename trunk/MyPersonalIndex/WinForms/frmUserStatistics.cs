@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -14,7 +14,7 @@ namespace MyPersonalIndex
         }
 
         public UserStatRetValues UserStatReturnValues { get { return _UserStatReturnValues; } }
-        private Queries SQL = new Queries();
+        private UserStatQueries SQL = new UserStatQueries();
         private int StatisticID;
         private UserStatRetValues _UserStatReturnValues = new UserStatRetValues();
 
@@ -69,22 +69,18 @@ namespace MyPersonalIndex
 
         private void LoadUserStat()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.UserStat_GetStat(StatisticID));
+            SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID));
 
             try
             {
                 if (!rs.HasRows)
                     return;
 
-                int ordDescription = rs.GetOrdinal("Description");
-                int ordSQL = rs.GetOrdinal("SQL");
-                int ordFormat = rs.GetOrdinal("Format");
-
                 rs.ReadFirst();
 
-                txtDesc.Text = rs.GetString(ordDescription);
-                txtSQL.Text = rs.GetString(ordSQL);
-                cmbFormat.SelectedIndex = rs.GetInt32(ordFormat);
+                txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
+                txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
+                cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
             }
             finally
             {
@@ -113,11 +109,11 @@ namespace MyPersonalIndex
             
             if (StatisticID == -1)
             {
-                SQL.ExecuteNonQuery(Queries.UserStat_InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
-                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.Common_GetIdentity()));
+                SQL.ExecuteNonQuery(UserStatQueries.InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
+                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
-                SQL.ExecuteNonQuery(Queries.UserStat_UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
+                SQL.ExecuteNonQuery(UserStatQueries.UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
 
             _UserStatReturnValues.ID = StatisticID;
             _UserStatReturnValues.Description = txtDesc.Text;

@@ -19,6 +19,7 @@
     <ManifestKeyFile>MyPersonalIndex_TemporaryKey.pfx</ManifestKeyFile>
     <GenerateManifests>true</GenerateManifests>
     <SignManifests>true</SignManifests>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -34,7 +35,6 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
     <BootstrapperEnabled>true</BootstrapperEnabled>
-    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -55,10 +55,40 @@
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x86</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <OutputPath>bin\x86\Release\</OutputPath>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x86</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <Optimize>true</Optimize>
+    <PlatformTarget>x64</PlatformTarget>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
+    <ErrorReport>prompt</ErrorReport>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data.SqlServerCe, Version=3.5.1.0, Culture=neutral, PublicKeyToken=89845dcd8080cc91, processorArchitecture=MSIL">
-      <Private>True</Private>
+      <Private>False</Private>
     </Reference>
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
@@ -70,8 +100,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Queries\AAQueries.cs" />
+    <Compile Include="Classes\Queries\AcctQueries.cs" />
+    <Compile Include="Classes\Queries\AdvQueries.cs" />
     <Compile Include="Classes\Constants.cs" />
     <Compile Include="Classes\Functions.cs" />
+    <Compile Include="Classes\Queries\MainQueries.cs" />
+    <Compile Include="Classes\Queries\OptionQueries.cs" />
+    <Compile Include="Classes\Queries\PortfolioQueries.cs" />
+    <Compile Include="Classes\Queries\StatsQueries.cs" />
+    <Compile Include="Classes\Queries\TickerQueries.cs" />
+    <Compile Include="Classes\Queries\UserStatQueries.cs" />
+    <Compile Include="WinForms\frmAccounts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\frmAccounts.Designer.cs">
+      <DependentUpon>frmAccounts.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\frmAdvanced.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -95,12 +140,6 @@
     </Compile>
     <Compile Include="WinForms\frmAA.Designer.cs">
       <DependentUpon>frmAA.cs</DependentUpon>
-    </Compile>
-    <Compile Include="WinForms\frmMsgBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="WinForms\frmMsgBox.Designer.cs">
-      <DependentUpon>frmMsgBox.cs</DependentUpon>
     </Compile>
     <Compile Include="WinForms\frmOptions.cs">
       <SubType>Form</SubType>
@@ -147,6 +186,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="WinForms\frmAccounts.resx">
+      <DependentUpon>frmAccounts.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmAdvanced.resx">
       <DependentUpon>frmAdvanced.cs</DependentUpon>
     </EmbeddedResource>
@@ -158,9 +200,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="WinForms\frmMsgBox.resx">
-      <DependentUpon>frmMsgBox.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmOptions.resx">
       <DependentUpon>frmOptions.cs</DependentUpon>
@@ -257,27 +296,54 @@
     </Content>
     <Content Include="Resources\55.ico" />
     <None Include="Resources\pie_chart_48.png" />
-    <Content Include="SQLCe\sqlceca35.dll">
+    <None Include="SQLCe\x64\sqlceca35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlcecompact35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlcecompact35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceer35EN.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceer35EN.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceme35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceme35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceoledb35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceoledb35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlceqp35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlceqp35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SQLCe\sqlcese35.dll">
+    </None>
+    <None Include="SQLCe\x64\sqlcese35.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    </None>
+    <None Include="SQLCe\x64\System.Data.SqlServerCe.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceca35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlcecompact35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceer35EN.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceme35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceoledb35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlceqp35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\sqlcese35.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="SQLCe\x86\System.Data.SqlServerCe.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="app.config" />
     <None Include="Resources\blue_speech_bubble_48.png" />
     <None Include="Resources\spanner_48.png" />

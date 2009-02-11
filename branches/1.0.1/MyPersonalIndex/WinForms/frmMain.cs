@@ -223,42 +223,45 @@ namespace MyPersonalIndex
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
         }
 
+        private void CheckVersion()
+        {
+            // to be removed once the database is more stable
+            Version v = new Version(Application.ProductVersion);
+            double databaseVersion = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetVersion()));
+
+            if (databaseVersion < v.Major + (v.Minor / 10.0) + (v.Build / 100.0))
+            {
+                SQL.Dispose();
+                try
+                {
+                    File.Move(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf",
+                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI " + databaseVersion.ToString("###0.00") + ".sdf");
+                    File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
+                    MessageBox.Show("Old database backed up successfully!");
+                }
+                catch (SystemException e)
+                {
+                    MessageBox.Show(e.Message);
+                    MessageBox.Show("Old version of database not backed up successfully!");
+                }
+                finally
+                {
+                    SQL = new MainQueries();
+                }
+            }
+        }
+
         private void LoadSettings(ref int LastPortfolio)
         {
+            CheckVersion();
+
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetSettings());
             try
             {
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
-
-                    // to be removed once the database is more stable
-                    Version v = new Version(Application.ProductVersion);
-                    double databaseVersion = (double)rs.GetDecimal((int)MainQueries.eGetSettings.Version);
-                    if ( databaseVersion < v.Major + (v.Minor / 10.0) + (v.Build / 100.0))
-                    {
-                        rs.Close();
-                        SQL.Dispose();
-                        try
-                        {
-                            File.Move(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf",
-                                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI " + databaseVersion.ToString() + ".sdf");
-                            File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
-                            MessageBox.Show("Old database backed up successfully!");
-
-                            SQL = new MainQueries();
-                            rs = SQL.ExecuteResultSet(MainQueries.GetSettings());
-                            if (!rs.HasRows)
-                                return;
-                            rs.ReadFirst();
-                        }
-                        catch(SystemException e)
-                        {
-                            MessageBox.Show(e.Message);
-                            MessageBox.Show("Old version of database not backed up successfully!");
-                        }
-                    }
-
+                   
                     MPI.Settings.DataStartDate = rs.GetDateTime((int)MainQueries.eGetSettings.DataStartDate);
                     MPI.Settings.Splits = rs.GetSqlBoolean((int)MainQueries.eGetSettings.Splits).IsTrue;
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.WindowState)))
@@ -660,9 +663,9 @@ namespace MyPersonalIndex
 
                     try
                     {
+                        dgStats.Rows[i].HeaderCell.Value = rs.GetString((int)MainQueries.eGetStats.Description);
                         dgStats[0, i].Value = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rs.GetString((int)MainQueries.eGetStats.SQL))),
                             (Constants.OutputFormat)rs.GetInt32((int)MainQueries.eGetStats.Format));
-                        dgStats.Rows[i].HeaderCell.Value = rs.GetString((int)MainQueries.eGetStats.Description);
                     }
                     catch (SqlCeException)
                     {

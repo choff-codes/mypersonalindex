@@ -208,7 +208,7 @@ namespace MyPersonalIndex
                                         dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i]);
                                         break;
                                     case 2:
-                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Convert.ToDecimal(cells[i]);
+                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Double.Parse(cells[i], System.Globalization.NumberStyles.Currency);
                                         break;
                                 }
                             }
@@ -234,7 +234,7 @@ namespace MyPersonalIndex
                         {
                             dsTicker.Tables[0].Rows.Add(Convert.ToDateTime(cells[0]),
                                                         Convert.ToDecimal(cells[1]),
-                                                        Convert.ToDecimal(cells[2]));
+                                                        Double.Parse(cells[2], System.Globalization.NumberStyles.Currency));
 
                             row++;
                         }

@@ -43,7 +43,7 @@ namespace MyPersonalIndex
                 return;
 
             Pasted = true;
-
+            
             string s = Clipboard.GetText();
             s = s.Replace("\r", "");
             string[] lines = s.Split('\n');
@@ -75,7 +75,7 @@ namespace MyPersonalIndex
                                         dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.Name] = cells[i];
                                         break;
                                     case 1:
-                                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.TaxRate] = Convert.ToDecimal(cells[i]);
+                                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.TaxRate] = Convert.ToDecimal(cells[i].Replace("%", ""));
                                         break;
                                 }
                             }
@@ -100,7 +100,7 @@ namespace MyPersonalIndex
                     {
                         try
                         {
-                            dsAcct.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1]), 0);
+                            dsAcct.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1].Replace("%", "")), 0);
                             row++;
                         }
                         catch (System.FormatException)

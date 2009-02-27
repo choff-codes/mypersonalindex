@@ -303,7 +303,7 @@ namespace MyPersonalIndex
                         " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(e.TaxRate/100, 0) ELSE 0 END) END)) AS fTaxLiability," +
                         " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END)) AS fGain," +
                         " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END))" + 
-	                        " / (CASE WHEN SUM(c.Price * b.Shares) <> 0 THEN SUM(c.Price * b.Shares) END) * 100 AS fGainLossP," +
+	                        " / (CASE WHEN SUM(d.Price * b.Shares) <> 0 THEN SUM(d.Price * b.Shares) END) * 100 AS fGainLossP," +
                         " (CASE WHEN {0} <> 0 THEN SUM(c.Price * b.Shares) / {0} * 100 END) AS fPercentage," +
                         " COUNT(*) AS fHoldings" +
                 " FROM Tickers AS a" + 

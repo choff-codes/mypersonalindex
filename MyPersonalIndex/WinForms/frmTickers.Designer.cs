@@ -41,6 +41,10 @@
             this.cmbAA = new System.Windows.Forms.ComboBox();
             this.lblAA = new System.Windows.Forms.Label();
             this.gbActivity = new System.Windows.Forms.GroupBox();
+            this.dgTickers = new System.Windows.Forms.DataGridView();
+            this.colTickersDate = new MyPersonalIndex.CalendarColumn();
+            this.colTickersShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colTickersPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.btnOK = new System.Windows.Forms.Button();
             this.dsTicker = new System.Data.DataSet();
             this.btnCancel = new System.Windows.Forms.Button();
@@ -50,17 +54,13 @@
             this.cmbHis = new System.Windows.Forms.ToolStripComboBox();
             this.chkSort = new System.Windows.Forms.ToolStripButton();
             this.btnClose = new System.Windows.Forms.Button();
-            this.dgTickers = new System.Windows.Forms.DataGridView();
-            this.colTickersDate = new MyPersonalIndex.CalendarColumn();
-            this.colTickersShares = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colTickersPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbTicker.SuspendLayout();
             this.gbActivity.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).BeginInit();
             this.gbHistorical.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).BeginInit();
             this.tsHis.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).BeginInit();
             this.SuspendLayout();
             // 
             // gbTicker
@@ -177,6 +177,53 @@
             this.gbActivity.TabStop = false;
             this.gbActivity.Text = "Activity";
             // 
+            // dgTickers
+            // 
+            this.dgTickers.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
+            this.dgTickers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dgTickers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.colTickersDate,
+            this.colTickersShares,
+            this.colTickersPrice});
+            this.dgTickers.Location = new System.Drawing.Point(5, 18);
+            this.dgTickers.Name = "dgTickers";
+            this.dgTickers.Size = new System.Drawing.Size(299, 202);
+            this.dgTickers.TabIndex = 0;
+            this.dgTickers.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgTickers_DefaultValuesNeeded);
+            this.dgTickers.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgTickers_DataError);
+            this.dgTickers.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgTickers_KeyDown);
+            // 
+            // colTickersDate
+            // 
+            this.colTickersDate.DataPropertyName = "Date";
+            this.colTickersDate.HeaderText = "Date";
+            this.colTickersDate.Name = "colTickersDate";
+            this.colTickersDate.Width = 80;
+            // 
+            // colTickersShares
+            // 
+            this.colTickersShares.DataPropertyName = "Shares";
+            dataGridViewCellStyle1.Format = "N4";
+            dataGridViewCellStyle1.NullValue = "0.0000";
+            this.colTickersShares.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colTickersShares.HeaderText = "Shares";
+            this.colTickersShares.MaxInputLength = 8;
+            this.colTickersShares.Name = "colTickersShares";
+            this.colTickersShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colTickersShares.Width = 85;
+            // 
+            // colTickersPrice
+            // 
+            this.colTickersPrice.DataPropertyName = "Price";
+            dataGridViewCellStyle2.Format = "C4";
+            dataGridViewCellStyle2.NullValue = "$0.0000";
+            this.colTickersPrice.DefaultCellStyle = dataGridViewCellStyle2;
+            this.colTickersPrice.HeaderText = "Price";
+            this.colTickersPrice.MaxInputLength = 8;
+            this.colTickersPrice.Name = "colTickersPrice";
+            this.colTickersPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colTickersPrice.Width = 75;
+            // 
             // btnOK
             // 
             this.btnOK.Location = new System.Drawing.Point(191, 361);
@@ -239,6 +286,7 @@
             // 
             // cmbHis
             // 
+            this.cmbHis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbHis.Items.AddRange(new object[] {
             "Show All",
             "Show % Change",
@@ -269,53 +317,6 @@
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // dgTickers
-            // 
-            this.dgTickers.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
-            this.dgTickers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgTickers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.colTickersDate,
-            this.colTickersShares,
-            this.colTickersPrice});
-            this.dgTickers.Location = new System.Drawing.Point(5, 18);
-            this.dgTickers.Name = "dgTickers";
-            this.dgTickers.Size = new System.Drawing.Size(299, 202);
-            this.dgTickers.TabIndex = 0;
-            this.dgTickers.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgTickers_DefaultValuesNeeded);
-            this.dgTickers.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgTickers_DataError);
-            this.dgTickers.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgTickers_KeyDown);
-            // 
-            // colTickersDate
-            // 
-            this.colTickersDate.DataPropertyName = "Date";
-            this.colTickersDate.HeaderText = "Date";
-            this.colTickersDate.Name = "colTickersDate";
-            this.colTickersDate.Width = 80;
-            // 
-            // colTickersShares
-            // 
-            this.colTickersShares.DataPropertyName = "Shares";
-            dataGridViewCellStyle1.Format = "N4";
-            dataGridViewCellStyle1.NullValue = "0.0000";
-            this.colTickersShares.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colTickersShares.HeaderText = "Shares";
-            this.colTickersShares.MaxInputLength = 8;
-            this.colTickersShares.Name = "colTickersShares";
-            this.colTickersShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colTickersShares.Width = 85;
-            // 
-            // colTickersPrice
-            // 
-            this.colTickersPrice.DataPropertyName = "Price";
-            dataGridViewCellStyle2.Format = "C4";
-            dataGridViewCellStyle2.NullValue = "$0.0000";
-            this.colTickersPrice.DefaultCellStyle = dataGridViewCellStyle2;
-            this.colTickersPrice.HeaderText = "Price";
-            this.colTickersPrice.MaxInputLength = 8;
-            this.colTickersPrice.Name = "colTickersPrice";
-            this.colTickersPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colTickersPrice.Width = 75;
-            // 
             // frmTickers
             // 
             this.AcceptButton = this.btnOK;
@@ -342,13 +343,13 @@
             this.gbTicker.ResumeLayout(false);
             this.gbTicker.PerformLayout();
             this.gbActivity.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsTicker)).EndInit();
             this.gbHistorical.ResumeLayout(false);
             this.gbHistorical.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgHistory)).EndInit();
             this.tsHis.ResumeLayout(false);
             this.tsHis.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).EndInit();
             this.ResumeLayout(false);
 
         }

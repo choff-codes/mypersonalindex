@@ -229,7 +229,7 @@ namespace MyPersonalIndex
             Version v = new Version(Application.ProductVersion);
             double databaseVersion = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetVersion()));
 
-            if (databaseVersion < v.Major + (v.Minor / 10.0) + (v.Build / 100.0))
+            if (databaseVersion < 1.02) //v.Major + (v.Minor / 10.0) + (v.Build / 100.0))
             {
                 SQL.Dispose();
                 try

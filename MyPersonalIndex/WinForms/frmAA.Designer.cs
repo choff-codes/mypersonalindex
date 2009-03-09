@@ -28,19 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.gbAA = new System.Windows.Forms.GroupBox();
             this.dgAA = new System.Windows.Forms.DataGridView();
+            this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAATarget = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAAID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dsAA = new System.Data.DataSet();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAAssetAllocation = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAATarget = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAAID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbAA.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAA)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsAA)).BeginInit();
@@ -81,6 +81,7 @@
             // 
             // dgAA
             // 
+            this.dgAA.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.dgAA.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgAA.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colAAAssetAllocation,
@@ -93,6 +94,34 @@
             this.dgAA.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgAA_DefaultValuesNeeded);
             this.dgAA.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgAA_DataError);
             this.dgAA.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgAA_KeyDown);
+            // 
+            // colAAAssetAllocation
+            // 
+            this.colAAAssetAllocation.DataPropertyName = "AA";
+            this.colAAAssetAllocation.HeaderText = "Asset Allocation";
+            this.colAAAssetAllocation.MaxInputLength = 255;
+            this.colAAAssetAllocation.Name = "colAAAssetAllocation";
+            this.colAAAssetAllocation.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAAAssetAllocation.Width = 175;
+            // 
+            // colAATarget
+            // 
+            this.colAATarget.DataPropertyName = "Target";
+            dataGridViewCellStyle1.Format = "#0.00\'%\'";
+            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colAATarget.HeaderText = "Target %";
+            this.colAATarget.MaxInputLength = 14;
+            this.colAATarget.Name = "colAATarget";
+            this.colAATarget.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAATarget.Width = 80;
+            // 
+            // colAAID
+            // 
+            this.colAAID.DataPropertyName = "ID";
+            this.colAAID.HeaderText = "ID";
+            this.colAAID.Name = "colAAID";
+            this.colAAID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAAID.Visible = false;
             // 
             // dsAA
             // 
@@ -122,31 +151,6 @@
             this.dataGridViewTextBoxColumn3.HeaderText = "ID";
             this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
             this.dataGridViewTextBoxColumn3.Visible = false;
-            // 
-            // colAAAssetAllocation
-            // 
-            this.colAAAssetAllocation.DataPropertyName = "AA";
-            this.colAAAssetAllocation.HeaderText = "Asset Allocation";
-            this.colAAAssetAllocation.MaxInputLength = 255;
-            this.colAAAssetAllocation.Name = "colAAAssetAllocation";
-            this.colAAAssetAllocation.Width = 175;
-            // 
-            // colAATarget
-            // 
-            this.colAATarget.DataPropertyName = "Target";
-            dataGridViewCellStyle1.Format = "#0.00\'%\'";
-            this.colAATarget.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colAATarget.HeaderText = "Target %";
-            this.colAATarget.MaxInputLength = 14;
-            this.colAATarget.Name = "colAATarget";
-            this.colAATarget.Width = 80;
-            // 
-            // colAAID
-            // 
-            this.colAAID.DataPropertyName = "ID";
-            this.colAAID.HeaderText = "ID";
-            this.colAAID.Name = "colAAID";
-            this.colAAID.Visible = false;
             // 
             // frmAA
             // 

@@ -72,7 +72,7 @@ namespace MyPersonalIndex
                                         dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i];
                                         break;
                                     case 1:
-                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i]);
+                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i].Replace("%", ""));
                                         break;
                                 }
                             }
@@ -97,7 +97,7 @@ namespace MyPersonalIndex
                     {
                         try
                         {
-                            dsAA.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1]), 0);
+                            dsAA.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1].Replace("%", "")), 0);
                             row++;
                         }
                         catch (System.FormatException)

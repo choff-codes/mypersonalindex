@@ -245,6 +245,7 @@
             // dgHoldings
             // 
             this.dgHoldings.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgHoldings.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgHoldings.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgHoldings.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colHoldingsActive,
@@ -528,6 +529,7 @@
             this.dgStats.AllowUserToDeleteRows = false;
             this.dgStats.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgStats.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgStats.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgStats.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgStats.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colStats});
@@ -689,6 +691,7 @@
             // dgPerformance
             // 
             this.dgPerformance.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgPerformance.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgPerformance.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgPerformance.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colPerformanceDate,
@@ -812,6 +815,7 @@
             this.dgCorrelation.AllowUserToDeleteRows = false;
             this.dgCorrelation.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.AllCells;
             this.dgCorrelation.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgCorrelation.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgCorrelation.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewCellStyle15.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
             dataGridViewCellStyle15.BackColor = System.Drawing.SystemColors.Window;
@@ -922,6 +926,7 @@
             // dgAcct
             // 
             this.dgAcct.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgAcct.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgAcct.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgAcct.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colAcctName,
@@ -1133,6 +1138,7 @@
             // dgAA
             // 
             this.dgAA.BorderStyle = System.Windows.Forms.BorderStyle.None;
+            this.dgAA.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgAA.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgAA.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colAAAssetAllocation,

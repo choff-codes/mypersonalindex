@@ -179,6 +179,7 @@
             // 
             // dgTickers
             // 
+            this.dgTickers.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableWithoutHeaderText;
             this.dgTickers.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.dgTickers.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colTickersDate,
@@ -208,6 +209,7 @@
             this.colTickersShares.HeaderText = "Shares";
             this.colTickersShares.MaxInputLength = 8;
             this.colTickersShares.Name = "colTickersShares";
+            this.colTickersShares.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.colTickersShares.Width = 85;
             // 
             // colTickersPrice
@@ -219,6 +221,7 @@
             this.colTickersPrice.HeaderText = "Price";
             this.colTickersPrice.MaxInputLength = 8;
             this.colTickersPrice.Name = "colTickersPrice";
+            this.colTickersPrice.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.colTickersPrice.Width = 75;
             // 
             // btnOK
@@ -283,6 +286,7 @@
             // 
             // cmbHis
             // 
+            this.cmbHis.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbHis.Items.AddRange(new object[] {
             "Show All",
             "Show % Change",
@@ -301,6 +305,7 @@
             this.chkSort.Name = "chkSort";
             this.chkSort.Size = new System.Drawing.Size(89, 22);
             this.chkSort.Text = "Sort Descending";
+            this.chkSort.CheckedChanged += new System.EventHandler(this.chkSort_CheckedChanged);
             // 
             // btnClose
             // 

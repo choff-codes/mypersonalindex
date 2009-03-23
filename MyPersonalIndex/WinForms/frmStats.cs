@@ -92,7 +92,6 @@ namespace MyPersonalIndex
 
             foreach (int i in lst2.SelectedIndices)
             {
-                
                 object[] o = ((DataTable)lst2.DataSource).Rows[i].ItemArray;
                 ((DataTable)lst1.DataSource).Rows.Add(o);
                 ((DataTable)lst1.DataSource).AcceptChanges();

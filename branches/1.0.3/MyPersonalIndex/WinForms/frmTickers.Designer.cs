@@ -30,6 +30,8 @@
         {
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
             this.gbTicker = new System.Windows.Forms.GroupBox();
             this.cmbAcct = new System.Windows.Forms.ComboBox();
             this.lblAccount = new System.Windows.Forms.Label();
@@ -54,6 +56,10 @@
             this.cmbHis = new System.Windows.Forms.ToolStripComboBox();
             this.chkSort = new System.Windows.Forms.ToolStripButton();
             this.btnClose = new System.Windows.Forms.Button();
+            this.calendarColumn1 = new MyPersonalIndex.CalendarColumn();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.btnCustom = new System.Windows.Forms.Button();
             this.gbTicker.SuspendLayout();
             this.gbActivity.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgTickers)).BeginInit();
@@ -317,6 +323,47 @@
             this.btnClose.UseVisualStyleBackColor = true;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // calendarColumn1
+            // 
+            this.calendarColumn1.DataPropertyName = "Date";
+            this.calendarColumn1.HeaderText = "Date";
+            this.calendarColumn1.Name = "calendarColumn1";
+            this.calendarColumn1.Width = 80;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "Shares";
+            dataGridViewCellStyle3.Format = "N4";
+            dataGridViewCellStyle3.NullValue = "0.0000";
+            this.dataGridViewTextBoxColumn1.DefaultCellStyle = dataGridViewCellStyle3;
+            this.dataGridViewTextBoxColumn1.HeaderText = "Shares";
+            this.dataGridViewTextBoxColumn1.MaxInputLength = 8;
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            this.dataGridViewTextBoxColumn1.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.dataGridViewTextBoxColumn1.Width = 85;
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "Price";
+            dataGridViewCellStyle4.Format = "C4";
+            dataGridViewCellStyle4.NullValue = "$0.0000";
+            this.dataGridViewTextBoxColumn2.DefaultCellStyle = dataGridViewCellStyle4;
+            this.dataGridViewTextBoxColumn2.HeaderText = "Price";
+            this.dataGridViewTextBoxColumn2.MaxInputLength = 8;
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            this.dataGridViewTextBoxColumn2.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.dataGridViewTextBoxColumn2.Width = 75;
+            // 
+            // btnCustom
+            // 
+            this.btnCustom.Location = new System.Drawing.Point(12, 361);
+            this.btnCustom.Name = "btnCustom";
+            this.btnCustom.Size = new System.Drawing.Size(75, 25);
+            this.btnCustom.TabIndex = 6;
+            this.btnCustom.Text = "Custom...";
+            this.btnCustom.UseVisualStyleBackColor = true;
+            this.btnCustom.Click += new System.EventHandler(this.btnCustom_Click);
+            // 
             // frmTickers
             // 
             this.AcceptButton = this.btnOK;
@@ -324,6 +371,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(673, 398);
+            this.Controls.Add(this.btnCustom);
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.gbHistorical);
             this.Controls.Add(this.btnCancel);
@@ -380,5 +428,9 @@
         private CalendarColumn colTickersDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersShares;
         private System.Windows.Forms.DataGridViewTextBoxColumn colTickersPrice;
+        private CalendarColumn calendarColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
+        private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
+        private System.Windows.Forms.Button btnCustom;
     }
 }

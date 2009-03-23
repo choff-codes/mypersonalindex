@@ -396,5 +396,13 @@ namespace MyPersonalIndex
         {
             cmbHis_SelectedIndexChanged(null, null);
         }
+
+        private void btnCustom_Click(object sender, EventArgs e)
+        {
+            using (frmTrades f = new frmTrades(PortfolioID, TickerID, txtSymbol.Text))
+            {
+                f.ShowDialog();
+            }
+        }
     }
 }

@@ -110,6 +110,7 @@
     <Compile Include="Classes\Queries\PortfolioQueries.cs" />
     <Compile Include="Classes\Queries\StatsQueries.cs" />
     <Compile Include="Classes\Queries\TickerQueries.cs" />
+    <Compile Include="Classes\Queries\TradeQueries.cs" />
     <Compile Include="Classes\Queries\UserStatQueries.cs" />
     <Compile Include="WinForms\frmAccounts.cs">
       <SubType>Form</SubType>

@@ -31,8 +31,7 @@
             this.components = new System.ComponentModel.Container();
             this.gpAttributes = new System.Windows.Forms.GroupBox();
             this.btnOnce = new System.Windows.Forms.Button();
-            this.mnuDate = new System.Windows.Forms.ContextMenuStrip(this.components);
-            this.textBox2 = new System.Windows.Forms.TextBox();
+            this.txtPrice = new System.Windows.Forms.TextBox();
             this.label5 = new System.Windows.Forms.Label();
             this.txtShares = new System.Windows.Forms.TextBox();
             this.lblShares = new System.Windows.Forms.Label();
@@ -43,15 +42,16 @@
             this.cmbFreq = new System.Windows.Forms.ComboBox();
             this.cmbYear = new System.Windows.Forms.DateTimePicker();
             this.cmbMonth = new System.Windows.Forms.ComboBox();
-            this.cmbDaily = new System.Windows.Forms.ComboBox();
+            this.cmbWeekly = new System.Windows.Forms.ComboBox();
+            this.mnuDate = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.s1 = new System.Windows.Forms.ToolStripSeparator();
+            this.addMultipleDatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.cmdCancel = new System.Windows.Forms.Button();
             this.cmdOK = new System.Windows.Forms.Button();
             this.gpTrades = new System.Windows.Forms.GroupBox();
             this.lst = new System.Windows.Forms.ListBox();
             this.cmdDelete = new System.Windows.Forms.Button();
             this.cmdAddNew = new System.Windows.Forms.Button();
-            this.addMultipleDatesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.s1 = new System.Windows.Forms.ToolStripSeparator();
             this.gpAttributes.SuspendLayout();
             this.mnuDate.SuspendLayout();
             this.gpTrades.SuspendLayout();
@@ -60,7 +60,7 @@
             // gpAttributes
             // 
             this.gpAttributes.Controls.Add(this.btnOnce);
-            this.gpAttributes.Controls.Add(this.textBox2);
+            this.gpAttributes.Controls.Add(this.txtPrice);
             this.gpAttributes.Controls.Add(this.label5);
             this.gpAttributes.Controls.Add(this.txtShares);
             this.gpAttributes.Controls.Add(this.lblShares);
@@ -71,7 +71,8 @@
             this.gpAttributes.Controls.Add(this.cmbFreq);
             this.gpAttributes.Controls.Add(this.cmbYear);
             this.gpAttributes.Controls.Add(this.cmbMonth);
-            this.gpAttributes.Controls.Add(this.cmbDaily);
+            this.gpAttributes.Controls.Add(this.cmbWeekly);
+            this.gpAttributes.Enabled = false;
             this.gpAttributes.Location = new System.Drawing.Point(229, 8);
             this.gpAttributes.Name = "gpAttributes";
             this.gpAttributes.Size = new System.Drawing.Size(197, 177);
@@ -90,20 +91,12 @@
             this.btnOnce.UseVisualStyleBackColor = true;
             this.btnOnce.Click += new System.EventHandler(this.btnOnce_Click);
             // 
-            // mnuDate
+            // txtPrice
             // 
-            this.mnuDate.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.s1,
-            this.addMultipleDatesToolStripMenuItem});
-            this.mnuDate.Name = "mnuDate";
-            this.mnuDate.Size = new System.Drawing.Size(176, 54);
-            // 
-            // textBox2
-            // 
-            this.textBox2.Location = new System.Drawing.Point(74, 148);
-            this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(111, 21);
-            this.textBox2.TabIndex = 21;
+            this.txtPrice.Location = new System.Drawing.Point(74, 148);
+            this.txtPrice.Name = "txtPrice";
+            this.txtPrice.Size = new System.Drawing.Size(111, 21);
+            this.txtPrice.TabIndex = 21;
             // 
             // label5
             // 
@@ -236,20 +229,40 @@
             this.cmbMonth.TabIndex = 22;
             this.cmbMonth.Visible = false;
             // 
-            // cmbDaily
+            // cmbWeekly
             // 
-            this.cmbDaily.FormattingEnabled = true;
-            this.cmbDaily.Items.AddRange(new object[] {
+            this.cmbWeekly.FormattingEnabled = true;
+            this.cmbWeekly.Items.AddRange(new object[] {
             "Monday",
             "Tuesday",
             "Wednesday",
             "Thursday",
             "Friday"});
-            this.cmbDaily.Location = new System.Drawing.Point(74, 82);
-            this.cmbDaily.Name = "cmbDaily";
-            this.cmbDaily.Size = new System.Drawing.Size(111, 21);
-            this.cmbDaily.TabIndex = 16;
-            this.cmbDaily.Visible = false;
+            this.cmbWeekly.Location = new System.Drawing.Point(74, 82);
+            this.cmbWeekly.Name = "cmbWeekly";
+            this.cmbWeekly.Size = new System.Drawing.Size(111, 21);
+            this.cmbWeekly.TabIndex = 16;
+            this.cmbWeekly.Visible = false;
+            // 
+            // mnuDate
+            // 
+            this.mnuDate.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.s1,
+            this.addMultipleDatesToolStripMenuItem});
+            this.mnuDate.Name = "mnuDate";
+            this.mnuDate.Size = new System.Drawing.Size(176, 32);
+            // 
+            // s1
+            // 
+            this.s1.Name = "s1";
+            this.s1.Size = new System.Drawing.Size(172, 6);
+            // 
+            // addMultipleDatesToolStripMenuItem
+            // 
+            this.addMultipleDatesToolStripMenuItem.Name = "addMultipleDatesToolStripMenuItem";
+            this.addMultipleDatesToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
+            this.addMultipleDatesToolStripMenuItem.Text = "Add Multiple Dates...";
+            this.addMultipleDatesToolStripMenuItem.Click += new System.EventHandler(this.addMultipleDatesToolStripMenuItem_Click);
             // 
             // cmdCancel
             // 
@@ -289,6 +302,7 @@
             this.lst.Name = "lst";
             this.lst.Size = new System.Drawing.Size(196, 121);
             this.lst.TabIndex = 4;
+            this.lst.SelectedIndexChanged += new System.EventHandler(this.lst_SelectedIndexChanged);
             // 
             // cmdDelete
             // 
@@ -307,18 +321,6 @@
             this.cmdAddNew.TabIndex = 3;
             this.cmdAddNew.Text = "Add New";
             this.cmdAddNew.UseVisualStyleBackColor = true;
-            // 
-            // addMultipleDatesToolStripMenuItem
-            // 
-            this.addMultipleDatesToolStripMenuItem.Name = "addMultipleDatesToolStripMenuItem";
-            this.addMultipleDatesToolStripMenuItem.Size = new System.Drawing.Size(175, 22);
-            this.addMultipleDatesToolStripMenuItem.Text = "Add Multiple Dates...";
-            this.addMultipleDatesToolStripMenuItem.Click += new System.EventHandler(this.addMultipleDatesToolStripMenuItem_Click);
-            // 
-            // s1
-            // 
-            this.s1.Name = "s1";
-            this.s1.Size = new System.Drawing.Size(172, 6);
             // 
             // frmTrades
             // 
@@ -351,12 +353,12 @@
         #endregion
 
         private System.Windows.Forms.GroupBox gpAttributes;
-        private System.Windows.Forms.TextBox textBox2;
+        private System.Windows.Forms.TextBox txtPrice;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txtShares;
         private System.Windows.Forms.Label lblShares;
         private System.Windows.Forms.Label lblWhen;
-        private System.Windows.Forms.ComboBox cmbDaily;
+        private System.Windows.Forms.ComboBox cmbWeekly;
         private System.Windows.Forms.Label lblType;
         private System.Windows.Forms.ComboBox cmbType;
         private System.Windows.Forms.Label lblFreq;

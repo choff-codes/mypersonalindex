@@ -10,18 +10,19 @@ namespace MyPersonalIndex
         public enum StatVariables { Portfolio, PortfolioName, StartDate, EndDate, PreviousDay, TotalValue };
         public enum DynamicTradeType { Shares, Fixed, TotalValue, AA };
         public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
+        public enum BusinessDays { Monday, Tuesday, Wednesday, Thursday, Friday };
 
-        public struct DynamicTrade
+        public class DynamicTrade
         {
             public Constants.DynamicTradeType TradeType;
             public Constants.DynamicTradeFreq Frequency;
-            string When;
+            public string When;
             // % for AA, Total Amount
             // Shares for Price * Shares
-            double Value1;
+            public double Value1;
             //Price for Price * Shares
             //Amount for fixed trade
-            double Value2;
+            public double Value2;
         }
     }
 }

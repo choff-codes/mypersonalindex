@@ -18,11 +18,9 @@ namespace MyPersonalIndex
             public Constants.DynamicTradeFreq Frequency;
             public string When;
             // % for AA, Total Amount
-            // Shares for Price * Shares
+            // Shares for Shares
+            // $ Amount for Fixed
             public double Value1;
-            //Price for Price * Shares
-            //Amount for fixed trade
-            public double Value2;
         }
     }
 }

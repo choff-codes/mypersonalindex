@@ -31,8 +31,6 @@
             this.components = new System.ComponentModel.Container();
             this.gpAttributes = new System.Windows.Forms.GroupBox();
             this.btnOnce = new System.Windows.Forms.Button();
-            this.txtPrice = new System.Windows.Forms.TextBox();
-            this.label5 = new System.Windows.Forms.Label();
             this.txtShares = new System.Windows.Forms.TextBox();
             this.lblShares = new System.Windows.Forms.Label();
             this.lblWhen = new System.Windows.Forms.Label();
@@ -60,8 +58,6 @@
             // gpAttributes
             // 
             this.gpAttributes.Controls.Add(this.btnOnce);
-            this.gpAttributes.Controls.Add(this.txtPrice);
-            this.gpAttributes.Controls.Add(this.label5);
             this.gpAttributes.Controls.Add(this.txtShares);
             this.gpAttributes.Controls.Add(this.lblShares);
             this.gpAttributes.Controls.Add(this.lblWhen);
@@ -83,7 +79,7 @@
             // btnOnce
             // 
             this.btnOnce.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.btnOnce.Location = new System.Drawing.Point(74, 82);
+            this.btnOnce.Location = new System.Drawing.Point(74, 100);
             this.btnOnce.Name = "btnOnce";
             this.btnOnce.Size = new System.Drawing.Size(111, 23);
             this.btnOnce.TabIndex = 24;
@@ -91,42 +87,26 @@
             this.btnOnce.UseVisualStyleBackColor = true;
             this.btnOnce.Click += new System.EventHandler(this.btnOnce_Click);
             // 
-            // txtPrice
-            // 
-            this.txtPrice.Location = new System.Drawing.Point(74, 148);
-            this.txtPrice.Name = "txtPrice";
-            this.txtPrice.Size = new System.Drawing.Size(111, 21);
-            this.txtPrice.TabIndex = 21;
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(10, 155);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(34, 13);
-            this.label5.TabIndex = 20;
-            this.label5.Text = "Price:";
-            // 
             // txtShares
             // 
-            this.txtShares.Location = new System.Drawing.Point(74, 115);
+            this.txtShares.Location = new System.Drawing.Point(74, 144);
             this.txtShares.Name = "txtShares";
             this.txtShares.Size = new System.Drawing.Size(111, 21);
             this.txtShares.TabIndex = 19;
             // 
             // lblShares
             // 
-            this.lblShares.AutoSize = true;
-            this.lblShares.Location = new System.Drawing.Point(10, 121);
+            this.lblShares.Location = new System.Drawing.Point(6, 136);
             this.lblShares.Name = "lblShares";
-            this.lblShares.Size = new System.Drawing.Size(44, 13);
+            this.lblShares.Size = new System.Drawing.Size(64, 33);
             this.lblShares.TabIndex = 18;
             this.lblShares.Text = "Shares:";
+            this.lblShares.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblWhen
             // 
             this.lblWhen.AutoSize = true;
-            this.lblWhen.Location = new System.Drawing.Point(10, 87);
+            this.lblWhen.Location = new System.Drawing.Point(6, 105);
             this.lblWhen.Name = "lblWhen";
             this.lblWhen.Size = new System.Drawing.Size(39, 13);
             this.lblWhen.TabIndex = 17;
@@ -135,7 +115,7 @@
             // lblType
             // 
             this.lblType.AutoSize = true;
-            this.lblType.Location = new System.Drawing.Point(10, 19);
+            this.lblType.Location = new System.Drawing.Point(6, 19);
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(35, 13);
             this.lblType.TabIndex = 14;
@@ -154,11 +134,12 @@
             this.cmbType.Name = "cmbType";
             this.cmbType.Size = new System.Drawing.Size(111, 21);
             this.cmbType.TabIndex = 13;
+            this.cmbType.SelectedIndexChanged += new System.EventHandler(this.cmbType_SelectedIndexChanged);
             // 
             // lblFreq
             // 
             this.lblFreq.AutoSize = true;
-            this.lblFreq.Location = new System.Drawing.Point(10, 53);
+            this.lblFreq.Location = new System.Drawing.Point(6, 61);
             this.lblFreq.Name = "lblFreq";
             this.lblFreq.Size = new System.Drawing.Size(62, 13);
             this.lblFreq.TabIndex = 12;
@@ -166,6 +147,7 @@
             // 
             // cmbFreq
             // 
+            this.cmbFreq.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbFreq.FormattingEnabled = true;
             this.cmbFreq.Items.AddRange(new object[] {
             "Specific Day(s)",
@@ -173,7 +155,7 @@
             "Weekly",
             "Monthly",
             "Yearly"});
-            this.cmbFreq.Location = new System.Drawing.Point(74, 49);
+            this.cmbFreq.Location = new System.Drawing.Point(74, 58);
             this.cmbFreq.Name = "cmbFreq";
             this.cmbFreq.Size = new System.Drawing.Size(111, 21);
             this.cmbFreq.TabIndex = 11;
@@ -182,7 +164,7 @@
             // 
             this.cmbYear.CustomFormat = "MM/dd";
             this.cmbYear.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.cmbYear.Location = new System.Drawing.Point(74, 82);
+            this.cmbYear.Location = new System.Drawing.Point(74, 102);
             this.cmbYear.Name = "cmbYear";
             this.cmbYear.Size = new System.Drawing.Size(111, 21);
             this.cmbYear.TabIndex = 23;
@@ -223,7 +205,7 @@
             "29",
             "30",
             "31"});
-            this.cmbMonth.Location = new System.Drawing.Point(74, 82);
+            this.cmbMonth.Location = new System.Drawing.Point(74, 102);
             this.cmbMonth.Name = "cmbMonth";
             this.cmbMonth.Size = new System.Drawing.Size(111, 21);
             this.cmbMonth.TabIndex = 22;
@@ -238,7 +220,7 @@
             "Wednesday",
             "Thursday",
             "Friday"});
-            this.cmbWeekly.Location = new System.Drawing.Point(74, 82);
+            this.cmbWeekly.Location = new System.Drawing.Point(74, 102);
             this.cmbWeekly.Name = "cmbWeekly";
             this.cmbWeekly.Size = new System.Drawing.Size(111, 21);
             this.cmbWeekly.TabIndex = 16;
@@ -282,6 +264,7 @@
             this.cmdOK.TabIndex = 13;
             this.cmdOK.Text = "&OK";
             this.cmdOK.UseVisualStyleBackColor = true;
+            this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
             // 
             // gpTrades
             // 
@@ -353,8 +336,6 @@
         #endregion
 
         private System.Windows.Forms.GroupBox gpAttributes;
-        private System.Windows.Forms.TextBox txtPrice;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txtShares;
         private System.Windows.Forms.Label lblShares;
         private System.Windows.Forms.Label lblWhen;

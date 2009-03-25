@@ -58,7 +58,6 @@ namespace MyPersonalIndex
                         dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)TradeQueries.eGetTrades.TradeType);
                         dt.When = rs.GetString((int)TradeQueries.eGetTrades.Dates);
                         dt.Value1 = Convert.ToDouble(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
-                        dt.Value2 = Convert.ToDouble(rs.GetDecimal((int)TradeQueries.eGetTrades.Value2));
 
                         Trades.Add(dt);
                     }
@@ -102,7 +101,7 @@ namespace MyPersonalIndex
                     s = s + dt.When + " of every month";
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    s = s + (new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(dt.When))).ToString("MM/dd");
+                    s = s + (new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("MM/dd");
                     break;
             }
 
@@ -133,12 +132,52 @@ namespace MyPersonalIndex
         private void lst_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lst.SelectedIndex == -1)
+            {
+                gpAttributes.Enabled = false;
                 return;
+            }
 
             if (CurrentItem != -1)
-                SaveItem();
+                if (!SaveItem())
+                    return;
 
+            gpAttributes.Enabled = true;
+            btnOnce.Visible = false;
+            btnOnce.Enabled = true;
+            cmbWeekly.Visible = false;
+            cmbMonth.Visible = false;
+            cmbYear.Visible = false;
 
+            CurrentItem = lst.SelectedIndex;
+
+            cmbFreq.SelectedIndex = (int)Trades[CurrentItem].Frequency;
+            cmbType.SelectedIndex = (int)Trades[CurrentItem].TradeType;
+            txtShares.Text = Trades[CurrentItem].Value1.ToString("#######0.00");
+
+            switch (Trades[CurrentItem].Frequency)
+            {
+                case Constants.DynamicTradeFreq.Daily:
+                    btnOnce.Visible = true;
+                    btnOnce.Enabled = false;
+                    btnOnce.Text = "Everyday";
+                    break;
+                case Constants.DynamicTradeFreq.Once:
+                    btnOnce.Visible = true;
+                    btnOnce.Text = (Trades[CurrentItem].When.Contains(";") ? "Multiple Dates" : Trades[CurrentItem].When);
+                    break;
+                case Constants.DynamicTradeFreq.Weekly:
+                    cmbWeekly.Visible = true;
+                    cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
+                    break;
+                case Constants.DynamicTradeFreq.Monthly:
+                    cmbMonth.Visible = true;
+                    cmbMonth.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
+                    break;
+                case Constants.DynamicTradeFreq.Yearly:
+                    cmbYear.Visible = true;
+                    cmbYear.Value = new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(Trades[CurrentItem].When) - 1);
+                    break;
+            }
         }
 
         private bool SaveItem()
@@ -146,25 +185,25 @@ namespace MyPersonalIndex
             double tmp;
             if (!double.TryParse(txtShares.Text, out tmp))
             {
-                //
+                MessageBox.Show("Invalid number format entered!");
                 return false;
             }
 
-            try
-            {
-                tmp = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
-            }
-            catch(SystemException)
-            {
-                //
-                return false;
-            }
+            //try
+            //{
+            //    tmp = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
+            //}
+            //catch(SystemException)
+            //{
+            //    MessageBox.Show("Invalid currency format entered!");
+            //    return false;
+            //}
 
 
             Trades[CurrentItem].Frequency = (Constants.DynamicTradeFreq)cmbFreq.SelectedIndex;
             Trades[CurrentItem].TradeType = (Constants.DynamicTradeType)cmbType.SelectedIndex;
             Trades[CurrentItem].Value1 = Convert.ToDouble(txtShares.Text);
-            Trades[CurrentItem].Value2 = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
+            //Trades[CurrentItem].Value2 = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
 
             switch (Trades[CurrentItem].Frequency)
             {
@@ -186,6 +225,30 @@ namespace MyPersonalIndex
             }
 
             return true;
+        }
+
+        private void cmdOK_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.OK;
+        }
+
+        private void cmbType_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch((Constants.DynamicTradeType)cmbType.SelectedIndex)
+            {
+                case Constants.DynamicTradeType.AA:
+                    lblShares.Text = "% of Target AA:";
+                    break;
+                case Constants.DynamicTradeType.Fixed:
+                    lblShares.Text = "Amount($):";
+                    break;
+                case Constants.DynamicTradeType.Shares:
+                    lblShares.Text = "Shares";
+                    break;
+                case Constants.DynamicTradeType.TotalValue:
+                    lblShares.Text = "% of Total Value:";
+                    break;
+            }
         }
     }
 }

@@ -11,5 +11,10 @@ namespace MyPersonalIndex
                 Ticker);
         }
 
+        public static string DeleteTrades(int Ticker)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
+        }
+
     }
 }

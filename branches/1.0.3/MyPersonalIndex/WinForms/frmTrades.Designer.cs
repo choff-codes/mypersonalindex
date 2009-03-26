@@ -72,7 +72,7 @@
             this.gpAttributes.Location = new System.Drawing.Point(229, 8);
             this.gpAttributes.Name = "gpAttributes";
             this.gpAttributes.Size = new System.Drawing.Size(197, 177);
-            this.gpAttributes.TabIndex = 11;
+            this.gpAttributes.TabIndex = 1;
             this.gpAttributes.TabStop = false;
             this.gpAttributes.Text = "Attributes";
             // 
@@ -82,7 +82,7 @@
             this.btnOnce.Location = new System.Drawing.Point(74, 100);
             this.btnOnce.Name = "btnOnce";
             this.btnOnce.Size = new System.Drawing.Size(111, 23);
-            this.btnOnce.TabIndex = 24;
+            this.btnOnce.TabIndex = 5;
             this.btnOnce.Text = "Date";
             this.btnOnce.UseVisualStyleBackColor = true;
             this.btnOnce.Click += new System.EventHandler(this.btnOnce_Click);
@@ -92,25 +92,25 @@
             this.txtShares.Location = new System.Drawing.Point(74, 144);
             this.txtShares.Name = "txtShares";
             this.txtShares.Size = new System.Drawing.Size(111, 21);
-            this.txtShares.TabIndex = 19;
+            this.txtShares.TabIndex = 7;
             // 
             // lblShares
             // 
             this.lblShares.Location = new System.Drawing.Point(6, 136);
             this.lblShares.Name = "lblShares";
             this.lblShares.Size = new System.Drawing.Size(64, 33);
-            this.lblShares.TabIndex = 18;
+            this.lblShares.TabIndex = 6;
             this.lblShares.Text = "Shares:";
             this.lblShares.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblWhen
             // 
-            this.lblWhen.AutoSize = true;
-            this.lblWhen.Location = new System.Drawing.Point(6, 105);
+            this.lblWhen.Location = new System.Drawing.Point(4, 96);
             this.lblWhen.Name = "lblWhen";
-            this.lblWhen.Size = new System.Drawing.Size(39, 13);
-            this.lblWhen.TabIndex = 17;
+            this.lblWhen.Size = new System.Drawing.Size(64, 31);
+            this.lblWhen.TabIndex = 4;
             this.lblWhen.Text = "When:";
+            this.lblWhen.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // lblType
             // 
@@ -118,7 +118,7 @@
             this.lblType.Location = new System.Drawing.Point(6, 19);
             this.lblType.Name = "lblType";
             this.lblType.Size = new System.Drawing.Size(35, 13);
-            this.lblType.TabIndex = 14;
+            this.lblType.TabIndex = 0;
             this.lblType.Text = "Type:";
             // 
             // cmbType
@@ -133,7 +133,7 @@
             this.cmbType.Location = new System.Drawing.Point(74, 16);
             this.cmbType.Name = "cmbType";
             this.cmbType.Size = new System.Drawing.Size(111, 21);
-            this.cmbType.TabIndex = 13;
+            this.cmbType.TabIndex = 1;
             this.cmbType.SelectedIndexChanged += new System.EventHandler(this.cmbType_SelectedIndexChanged);
             // 
             // lblFreq
@@ -142,7 +142,7 @@
             this.lblFreq.Location = new System.Drawing.Point(6, 61);
             this.lblFreq.Name = "lblFreq";
             this.lblFreq.Size = new System.Drawing.Size(62, 13);
-            this.lblFreq.TabIndex = 12;
+            this.lblFreq.TabIndex = 2;
             this.lblFreq.Text = "Frequency:";
             // 
             // cmbFreq
@@ -158,7 +158,8 @@
             this.cmbFreq.Location = new System.Drawing.Point(74, 58);
             this.cmbFreq.Name = "cmbFreq";
             this.cmbFreq.Size = new System.Drawing.Size(111, 21);
-            this.cmbFreq.TabIndex = 11;
+            this.cmbFreq.TabIndex = 3;
+            this.cmbFreq.SelectedIndexChanged += new System.EventHandler(this.cmbFreq_SelectedIndexChanged);
             // 
             // cmbYear
             // 
@@ -172,6 +173,7 @@
             // 
             // cmbMonth
             // 
+            this.cmbMonth.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbMonth.FormattingEnabled = true;
             this.cmbMonth.Items.AddRange(new object[] {
             "1",
@@ -213,6 +215,7 @@
             // 
             // cmbWeekly
             // 
+            this.cmbWeekly.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbWeekly.FormattingEnabled = true;
             this.cmbWeekly.Items.AddRange(new object[] {
             "Monday",
@@ -252,16 +255,17 @@
             this.cmdCancel.Location = new System.Drawing.Point(369, 191);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(57, 23);
-            this.cmdCancel.TabIndex = 14;
+            this.cmdCancel.TabIndex = 3;
             this.cmdCancel.Text = "&Cancel";
             this.cmdCancel.UseVisualStyleBackColor = true;
+            this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
             // 
             // cmdOK
             // 
             this.cmdOK.Location = new System.Drawing.Point(292, 191);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(57, 23);
-            this.cmdOK.TabIndex = 13;
+            this.cmdOK.TabIndex = 2;
             this.cmdOK.Text = "&OK";
             this.cmdOK.UseVisualStyleBackColor = true;
             this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
@@ -274,7 +278,7 @@
             this.gpTrades.Location = new System.Drawing.Point(12, 8);
             this.gpTrades.Name = "gpTrades";
             this.gpTrades.Size = new System.Drawing.Size(211, 177);
-            this.gpTrades.TabIndex = 12;
+            this.gpTrades.TabIndex = 0;
             this.gpTrades.TabStop = false;
             this.gpTrades.Text = "Trades";
             // 
@@ -284,7 +288,7 @@
             this.lst.Location = new System.Drawing.Point(6, 16);
             this.lst.Name = "lst";
             this.lst.Size = new System.Drawing.Size(196, 121);
-            this.lst.TabIndex = 4;
+            this.lst.TabIndex = 0;
             this.lst.SelectedIndexChanged += new System.EventHandler(this.lst_SelectedIndexChanged);
             // 
             // cmdDelete
@@ -295,15 +299,17 @@
             this.cmdDelete.TabIndex = 2;
             this.cmdDelete.Text = "Delete";
             this.cmdDelete.UseVisualStyleBackColor = true;
+            this.cmdDelete.Click += new System.EventHandler(this.cmdDelete_Click);
             // 
             // cmdAddNew
             // 
             this.cmdAddNew.Location = new System.Drawing.Point(6, 150);
             this.cmdAddNew.Name = "cmdAddNew";
             this.cmdAddNew.Size = new System.Drawing.Size(75, 21);
-            this.cmdAddNew.TabIndex = 3;
+            this.cmdAddNew.TabIndex = 1;
             this.cmdAddNew.Text = "Add New";
             this.cmdAddNew.UseVisualStyleBackColor = true;
+            this.cmdAddNew.Click += new System.EventHandler(this.cmdAddNew_Click);
             // 
             // frmTrades
             // 

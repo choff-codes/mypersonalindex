@@ -27,6 +27,9 @@ namespace MyPersonalIndex
             string[] s = When.Split('|');
             for (int i = 0; i < s.Length; i++)
             {
+                if (string.IsNullOrEmpty(s[i]))
+                    continue;
+
                 SelDates.Add(Convert.ToDateTime(s[i]));
                 lst.Items.Add(s[i]);
             }

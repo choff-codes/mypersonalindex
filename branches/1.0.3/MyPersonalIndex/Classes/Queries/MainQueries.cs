@@ -276,6 +276,11 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
+        public static string DeleteCustomTrade(int Ticker)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
+        }
+
         public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
         public static string GetSettings()
         {
@@ -372,6 +377,11 @@ namespace MyPersonalIndex
         public static string DeleteAA(int Portfolio)
         {
             return string.Format("DELETE FROM AA WHERE Portfolio = {0}", Portfolio);
+        }
+
+        public static string DeleteCustomTrades(int Portfolio)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE TickerID IN (SELECT ID FROM Tickers WHERE Portfolio = {0})", Portfolio);
         }
 
         public static string DeleteTickers(int Portfolio)

@@ -1309,6 +1309,7 @@ namespace MyPersonalIndex
         {
             if (MessageBox.Show("Are you sure you want to delete " + sTicker + "?", "Delete?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
+                SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrade(Ticker));
                 SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
                 SQL.ExecuteNonQuery(MainQueries.DeleteTicker(MPI.Portfolio.ID, Ticker));
                 return true;
@@ -1543,6 +1544,7 @@ namespace MyPersonalIndex
             
             SQL.ExecuteNonQuery(MainQueries.DeleteAA(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(MPI.Portfolio.ID, MPI.Portfolio.StartDate));
+            SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteTickers(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteStatistics(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteTrades(MPI.Portfolio.ID));

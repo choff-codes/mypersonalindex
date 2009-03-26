@@ -61,6 +61,7 @@ namespace MyPersonalIndex
             {
                 txtSymbol.Enabled = true;
                 btnHistorical.Visible = false;
+                btnCustom.Enabled = false;
             }
 
             _TickerReturnValues.MinDate = DateTime.Today;
@@ -314,7 +315,13 @@ namespace MyPersonalIndex
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            DialogResult = DialogResult.Cancel;
+            if (_TickerReturnValues.MinDate == DateTime.MinValue)
+            {
+                _TickerReturnValues.Changed = true;
+                DialogResult = DialogResult.OK;
+            }
+            else
+                DialogResult = DialogResult.Cancel;
         }
 
         private void frmTickers_FormClosing(object sender, FormClosingEventArgs e)
@@ -401,7 +408,11 @@ namespace MyPersonalIndex
         {
             using (frmTrades f = new frmTrades(PortfolioID, TickerID, txtSymbol.Text))
             {
-                f.ShowDialog();
+                if (f.ShowDialog() == DialogResult.OK)
+                {
+                    Pasted = true;  // ticker changed
+                    _TickerReturnValues.MinDate = DateTime.MinValue;
+                }
             }
         }
     }

@@ -25,6 +25,7 @@ namespace MyPersonalIndex
             public const string Tickers = "Tickers";
             public const string Trades = "Trades";
             public const string UserStatistics = "UserStatistics";
+            public const string CustomTrades = "CustomTrades";
 
             public enum eClosingPrices { Date, Ticker, Price, Change };
             public enum eSplits { Date, Ticker, Ratio };
@@ -33,6 +34,7 @@ namespace MyPersonalIndex
             public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };
             public enum eStats { Portfolio, Statistic, Location };
             public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID }
+            public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value1 };
         }
         
         private SqlCeConnection cn;

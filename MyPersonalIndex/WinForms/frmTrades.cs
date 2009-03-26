@@ -29,6 +29,7 @@ namespace MyPersonalIndex
         private void Date_Change(object sender, DateRangeEventArgs e)
         {
             mnuDate.Close();
+            btnOnce.Tag = DailyCalendar.SelectionStart.ToShortDateString();
             btnOnce.Text = DailyCalendar.SelectionStart.ToShortDateString();
         }
 
@@ -92,7 +93,7 @@ namespace MyPersonalIndex
                     s = s + "Everyday";
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    s = s + (dt.When.Contains(";") ? "Multiple dates" : dt.When);
+                    s = s + (dt.When.Contains("|") ? "Multiple dates" : string.IsNullOrEmpty(dt.When) ? "No date" : dt.When);
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
                     s = s + Enum.GetName(typeof(Constants.BusinessDays), (Constants.BusinessDays)Convert.ToInt32(dt.When));
@@ -120,12 +121,15 @@ namespace MyPersonalIndex
 
         private void addMultipleDatesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            using (frmDates f = new frmDates(Trades[CurrentItem].When))
+            using (frmDates f = new frmDates(btnOnce.Tag.ToString()))
             {
                 f.Location = gpAttributes.PointToScreen(btnOnce.Location);
                 f.Top = f.Top + btnOnce.Height;
                 if (f.ShowDialog() == DialogResult.OK)
-                    Trades[0].When = f.TradeReturnValues.When;
+                {
+                    btnOnce.Tag = f.TradeReturnValues.When;
+                    btnOnce.Text = (f.TradeReturnValues.When.Contains("|") ? "Multiple Dates" : f.TradeReturnValues.When);
+                }
             }
         }
 
@@ -133,22 +137,24 @@ namespace MyPersonalIndex
         {
             if (lst.SelectedIndex == -1)
             {
+                CurrentItem = -1;
                 gpAttributes.Enabled = false;
                 return;
             }
+
+            if (CurrentItem == lst.SelectedIndex)
+                return;
 
             if (CurrentItem != -1)
                 if (!SaveItem())
                     return;
 
             gpAttributes.Enabled = true;
-            btnOnce.Visible = false;
-            btnOnce.Enabled = true;
-            cmbWeekly.Visible = false;
-            cmbMonth.Visible = false;
-            cmbYear.Visible = false;
-
             CurrentItem = lst.SelectedIndex;
+            cmbYear.Value = DateTime.Today;
+            cmbMonth.SelectedIndex = 0;
+            cmbWeekly.SelectedIndex = 0;
+            cmbFreq.Focus();
 
             cmbFreq.SelectedIndex = (int)Trades[CurrentItem].Frequency;
             cmbType.SelectedIndex = (int)Trades[CurrentItem].TradeType;
@@ -157,24 +163,18 @@ namespace MyPersonalIndex
             switch (Trades[CurrentItem].Frequency)
             {
                 case Constants.DynamicTradeFreq.Daily:
-                    btnOnce.Visible = true;
-                    btnOnce.Enabled = false;
-                    btnOnce.Text = "Everyday";
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    btnOnce.Visible = true;
-                    btnOnce.Text = (Trades[CurrentItem].When.Contains(";") ? "Multiple Dates" : Trades[CurrentItem].When);
+                    btnOnce.Text = (Trades[CurrentItem].When.Contains("|") ? "Multiple Dates" : string.IsNullOrEmpty(Trades[CurrentItem].When) ? "Date" : Trades[CurrentItem].When);
+                    btnOnce.Tag = Trades[CurrentItem].When ?? "";
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
-                    cmbWeekly.Visible = true;
                     cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
-                    cmbMonth.Visible = true;
                     cmbMonth.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    cmbYear.Visible = true;
                     cmbYear.Value = new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(Trades[CurrentItem].When) - 1);
                     break;
             }
@@ -186,19 +186,16 @@ namespace MyPersonalIndex
             if (!double.TryParse(txtShares.Text, out tmp))
             {
                 MessageBox.Show("Invalid number format entered!");
+                lst.SelectedIndex = CurrentItem;
                 return false;
             }
 
-            //try
-            //{
-            //    tmp = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
-            //}
-            //catch(SystemException)
-            //{
-            //    MessageBox.Show("Invalid currency format entered!");
-            //    return false;
-            //}
-
+            if ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex == Constants.DynamicTradeFreq.Once && (btnOnce.Tag == null ? true : string.IsNullOrEmpty(btnOnce.Tag.ToString())))
+            {
+                MessageBox.Show("Please set a date!");
+                lst.SelectedIndex = CurrentItem;
+                return false;
+            }
 
             Trades[CurrentItem].Frequency = (Constants.DynamicTradeFreq)cmbFreq.SelectedIndex;
             Trades[CurrentItem].TradeType = (Constants.DynamicTradeType)cmbType.SelectedIndex;
@@ -224,11 +221,41 @@ namespace MyPersonalIndex
                     break;
             }
 
+            lst.Items[CurrentItem] = GetSummary(Trades[CurrentItem]);
+
             return true;
         }
 
         private void cmdOK_Click(object sender, EventArgs e)
         {
+            if (CurrentItem != -1)
+                if (!SaveItem())
+                    return;
+
+            SQL.ExecuteNonQuery(TradeQueries.DeleteTrades(TickerID));
+
+            SqlCeResultSet rs = SQL.ExecuteTableUpdate(TradeQueries.Tables.CustomTrades);
+            SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+
+            try
+            {
+                foreach (Constants.DynamicTrade dt in Trades)
+                {
+                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TickerID, TickerID);
+                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.Portfolio, PortfolioID);
+                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
+                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
+                    newRecord.SetString((int)TradeQueries.Tables.eCustomTrades.Dates, dt.When ?? "");
+                    newRecord.SetDecimal((int)TradeQueries.Tables.eCustomTrades.Value1, Convert.ToDecimal(dt.Value1));
+
+                    rs.Insert(newRecord);
+                }
+            }
+            finally
+            {
+                rs.Close();
+            }
+
             DialogResult = DialogResult.OK;
         }
 
@@ -249,6 +276,79 @@ namespace MyPersonalIndex
                     lblShares.Text = "% of Total Value:";
                     break;
             }
+        }
+
+        private void cmbFreq_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            btnOnce.Visible = false;
+            btnOnce.Enabled = true;
+            cmbWeekly.Visible = false; 
+            cmbMonth.Visible = false;
+            cmbYear.Visible = false;
+            btnOnce.Text = "Date";
+            btnOnce.Tag = "";
+
+            switch ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex)
+            {
+                case Constants.DynamicTradeFreq.Daily:
+                    btnOnce.Visible = true;
+                    btnOnce.Enabled = false;
+                    btnOnce.Text = "Everyday";
+                    lblWhen.Text = "When:";
+                    break;
+                case Constants.DynamicTradeFreq.Once:
+                    btnOnce.Visible = true;
+                    lblWhen.Text = "When:";
+                    break;
+                case Constants.DynamicTradeFreq.Weekly:
+                    cmbWeekly.Visible = true;
+                    lblWhen.Text = "When (Day of Week):";
+                    break;
+                case Constants.DynamicTradeFreq.Monthly:
+                    cmbMonth.Visible = true;
+                    lblWhen.Text = "When (Day of Month):";
+                    break;
+                case Constants.DynamicTradeFreq.Yearly:
+                    cmbYear.Visible = true;
+                    lblWhen.Text = "When (Day of Year):";
+                    break;
+            }
+        }
+
+        private void cmdAddNew_Click(object sender, EventArgs e)
+        {
+            if (CurrentItem != -1)
+                if (!SaveItem())
+                    return;
+
+            Constants.DynamicTrade dt = new Constants.DynamicTrade();
+
+            dt.Frequency = Constants.DynamicTradeFreq.Once;
+            dt.TradeType = Constants.DynamicTradeType.Shares;
+            dt.When = "";
+
+            Trades.Add(dt);
+            lst.Items.Add(GetSummary(dt));
+            lst.SelectedIndex = lst.Items.Count - 1;            
+        }
+
+        private void cmdCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+        }
+
+        private void cmdDelete_Click(object sender, EventArgs e)
+        {
+            int tmp = CurrentItem;
+
+            Trades.RemoveAt(CurrentItem);
+            lst.Items.RemoveAt(CurrentItem);
+
+            if (lst.Items.Count > 0)
+                if (lst.Items.Count == tmp)
+                    lst.SelectedIndex = tmp - 1;
+                else
+                    lst.SelectedIndex = tmp;
         }
     }
 }

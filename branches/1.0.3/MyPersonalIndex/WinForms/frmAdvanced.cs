@@ -36,7 +36,7 @@ namespace MyPersonalIndex
             this.LastDate = LastDate;
         }
 
-        public DateTime CheckStartDate(DateTime StartDate, DateTime LastDate)
+        private DateTime CheckStartDate(DateTime StartDate, DateTime LastDate)
         {
             StartDate = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrNext(StartDate), LastDate));
 

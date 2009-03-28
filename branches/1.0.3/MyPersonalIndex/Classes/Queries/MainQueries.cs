@@ -194,6 +194,18 @@ namespace MyPersonalIndex
                 "DELETE FROM NAV WHERE Portfolio = {0} AND Date >= '{1}'", Portfolio, MinDate.ToShortDateString());
         }
 
+        public static string DeleteCustomTrades(int Portfolio, DateTime MinDate)
+        {
+            return string.Format(
+                "DELETE FROM Trades WHERE Portfolio = {0} AND Date >= '{1}' AND Custom IS NOT NULL", Portfolio, MinDate.ToShortDateString());
+        }
+
+        public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value1 };
+        public static string GetCustomTrades(int Portfolio)
+        {
+            return string.Format("SELECT TickerID, TradeType, Frequency, Dates, Value1 FROM CustomTrades WHERE Portfolio = {0} ORDER BY TickerID", Portfolio);
+        }
+
         public static string GetSpecificNav(int Portfolio, DateTime Date)
         {
             return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
@@ -210,7 +222,7 @@ namespace MyPersonalIndex
         public enum eGetDistinctDates { Date };
         public static string GetDistinctDates(DateTime MinDate)
         {
-            return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}'", MinDate.ToShortDateString());
+            return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", MinDate.ToShortDateString());
         }
 
         public static string GetDividends(int Portfolio, DateTime Date)

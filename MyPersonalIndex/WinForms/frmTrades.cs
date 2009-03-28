@@ -96,7 +96,7 @@ namespace MyPersonalIndex
                     s = s + (dt.When.Contains("|") ? "Multiple dates" : string.IsNullOrEmpty(dt.When) ? "No date" : dt.When);
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
-                    s = s + Enum.GetName(typeof(Constants.BusinessDays), (Constants.BusinessDays)Convert.ToInt32(dt.When));
+                    s = s + Enum.GetName(typeof(DayOfWeek), (DayOfWeek)Convert.ToInt32(dt.When));
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
                     s = s + dt.When + " of every month";
@@ -169,10 +169,10 @@ namespace MyPersonalIndex
                     btnOnce.Tag = Trades[CurrentItem].When ?? "";
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
-                    cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
+                    cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When) - 1;
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
-                    cmbMonth.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When);
+                    cmbMonth.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When) - 1;
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
                     cmbYear.Value = new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(Trades[CurrentItem].When) - 1);
@@ -200,7 +200,6 @@ namespace MyPersonalIndex
             Trades[CurrentItem].Frequency = (Constants.DynamicTradeFreq)cmbFreq.SelectedIndex;
             Trades[CurrentItem].TradeType = (Constants.DynamicTradeType)cmbType.SelectedIndex;
             Trades[CurrentItem].Value1 = Convert.ToDouble(txtShares.Text);
-            //Trades[CurrentItem].Value2 = Double.Parse(txtShares.Text, System.Globalization.NumberStyles.Currency);
 
             switch (Trades[CurrentItem].Frequency)
             {
@@ -211,10 +210,10 @@ namespace MyPersonalIndex
                     Trades[CurrentItem].When = (string)btnOnce.Tag;
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
-                    Trades[CurrentItem].When = cmbWeekly.SelectedIndex.ToString();
+                    Trades[CurrentItem].When = (cmbWeekly.SelectedIndex + 1).ToString();
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
-                    Trades[CurrentItem].When = cmbMonth.SelectedText;
+                    Trades[CurrentItem].When = (cmbMonth.SelectedIndex + 1).ToString();
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
                     Trades[CurrentItem].When = cmbYear.Value.DayOfYear.ToString();
@@ -339,6 +338,9 @@ namespace MyPersonalIndex
 
         private void cmdDelete_Click(object sender, EventArgs e)
         {
+            if (CurrentItem == -1 || lst.Items.Count == 0)
+                return;
+
             int tmp = CurrentItem;
 
             Trades.RemoveAt(CurrentItem);

@@ -33,7 +33,7 @@ namespace MyPersonalIndex
             public enum eAvgPricePerShare { Ticker, Price };
             public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };
             public enum eStats { Portfolio, Statistic, Location };
-            public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID }
+            public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
             public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value1 };
         }
         
@@ -150,9 +150,9 @@ namespace MyPersonalIndex
             return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM ClosingPrices ORDER BY Date) a ORDER BY Date DESC";
         }
 
-        public static string DeleteTickerTrades(int Portfolio, int Ticker)
+        public static string DeleteTickerTrades(int Portfolio, int Ticker, bool Custom)
         {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}{2}", Portfolio, Ticker, Custom ? "" : " AND Custom IS NULL");
         }
 
         public enum eGetAA { AA, Target, ID };

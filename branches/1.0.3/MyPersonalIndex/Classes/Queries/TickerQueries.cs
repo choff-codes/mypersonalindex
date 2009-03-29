@@ -20,7 +20,7 @@ namespace MyPersonalIndex
         public enum eGetTrades { Date, Shares, Price };
         public static string GetTrades(int Portfolio, int Ticker)
         {
-            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} ORDER BY Date", Portfolio, Ticker);
+            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL ORDER BY Date", Portfolio, Ticker);
         }
 
         public enum eGetAttributes { AA, Acct, Active, Hide };

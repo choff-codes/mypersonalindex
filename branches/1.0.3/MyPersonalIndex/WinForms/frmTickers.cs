@@ -274,7 +274,7 @@ namespace MyPersonalIndex
                 SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]),
                     Convert.ToInt32(((DataRowView)cmbAcct.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
                 if (dsTicker.HasChanges() || Pasted)
-                    SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID));
+                    SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID, false));
             }
         
             if (dsTicker.HasChanges() || Pasted)

@@ -389,26 +389,9 @@ namespace MyPersonalIndex
                 TotalValue, Portfolio, Date.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
         }
 
-        public static string GetAA(int Portfolio, int AA, DateTime Date)
+        public static string GetAATarget(int AA)
         {
-            return string.Format(
-                "SELECT COALESCE(SUM(c.Price * b.Shares), 0) AS TotalValue" +
-                " FROM Tickers AS a" +
-                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
-                            " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares " +
-                                   " FROM Trades a" +
-                                   " LEFT JOIN Splits b" +
-                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
-                                   " WHERE a.Portfolio = {0} AND a.Date <= '{2}'" +
-                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
-                            " GROUP BY TickerID) AS b" +
-                    " ON a.ID = b.TickerID" +
-                " LEFT JOIN (SELECT Ticker, Price" +
-                            " FROM ClosingPrices" +
-                            " WHERE DATE = '{2}') AS c" +
-                    " ON a.Ticker = c.Ticker" +
-                " WHERE a.Portfolio = {0} AND a.AA = {1} AND a.Active = 1",
-                Portfolio, AA, Date.ToShortDateString());
+            return string.Format("SELECT Target FROM AA WHERE ID = {0}", AA);
         }
 
         public enum eGetTickerValue { TotalValue, Price, Ticker, Ratio };

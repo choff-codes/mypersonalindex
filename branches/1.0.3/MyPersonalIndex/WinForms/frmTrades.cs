@@ -99,7 +99,7 @@ namespace MyPersonalIndex
                     s = s + Enum.GetName(typeof(DayOfWeek), (DayOfWeek)Convert.ToInt32(dt.When));
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
-                    s = s + dt.When + " of every month";
+                    s = s + "Day " + dt.When;
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
                     s = s + (new DateTime(2008, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("MM/dd");

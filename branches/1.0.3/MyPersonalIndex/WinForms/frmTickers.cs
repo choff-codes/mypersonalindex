@@ -262,7 +262,11 @@ namespace MyPersonalIndex
                 MessageBox.Show("Set a symbol before saving!");
                 return;
             }
-            _TickerReturnValues.Changed = TickerReturnValues.Changed != chkCalc.Checked;
+            if (TickerReturnValues.Changed != chkCalc.Checked)
+            {
+                _TickerReturnValues.Changed = true;
+                _TickerReturnValues.MinDate = DateTime.MinValue;  // if any custom trades, we need to redo all NAV
+            }
             if (TickerID == -1)
             {
                 SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), 

@@ -1152,6 +1152,7 @@ namespace MyPersonalIndex
                     PortfolioStartDate = true;
                 }
                 MinDate = CheckPortfolioStartDate(MinDate, ref PortfolioStartDate);
+
                 GetNAVValues(MPI.Portfolio.ID, MinDate, PortfolioStartDate, MPI.Portfolio.Dividends, MPI.Portfolio.NAVStart);
             }
             else
@@ -1323,7 +1324,8 @@ namespace MyPersonalIndex
 
                     KeyValuePair<Int32, Int32> Ticker = new KeyValuePair<int, int>(
                         rs.GetInt32((int)MainQueries.eGetCustomTrades.TickerID),
-                        rs.GetInt32((int)MainQueries.eGetCustomTrades.AA));
+                        Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetCustomTrades.AA))
+                            ? -1 : rs.GetInt32((int)MainQueries.eGetCustomTrades.AA));
 
                     if (!AllTrades.ContainsKey(Ticker))
                         AllTrades.Add(Ticker, new List<DynamicTrades>());
@@ -1352,17 +1354,16 @@ namespace MyPersonalIndex
                 return false;
         }
 
-        private void InsertCustomTrades(int Portfolio, DateTime Date, DateTime YDay, double TotalValue, Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> Trades)
+        private void InsertCustomTrades(int Portfolio, DateTime Date, DateTime YDay, double TotalValue, Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> Trades, Dictionary<int, double> AAValues)
         {
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Trades);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-            Dictionary<int, double> AAValues = new Dictionary<int, double>();
 
             //i.key.key = tickerID
             //i.key.value = AA ID
             //i.value = list of dynamic trades
             //AAValues.key = AA ID
-            //AAValues.value = total value
+            //AAValues.value = target %
             //TickerPrice.key = TickerID
             //TickerPrice.value.key = current share price
             //TickerPrice.value.value = total value of ticker ID
@@ -1412,10 +1413,10 @@ namespace MyPersonalIndex
                         switch (dt.TradeType)
                         {
                             case Constants.DynamicTradeType.AA:
-                                if (!AAValues.ContainsKey(i.Key.Value))
-                                    AAValues.Add(i.Key.Value, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetAA(Portfolio, i.Key.Value, YDay))));
+                                if (i.Key.Value == -1) // AA not assigned
+                                    continue;
 
-                                SharesToBuy = ((AAValues[i.Key.Value] * (dt.Value1 / 100)) - TickerValue) / (Price / SplitRatio);
+                                SharesToBuy = ((TotalValue * (AAValues[i.Key.Value] / 100)) - TickerValue) / (Price / SplitRatio);
                                 break;
                             case Constants.DynamicTradeType.Fixed:
                                 SharesToBuy = dt.Value1 / (Price / SplitRatio);
@@ -1465,6 +1466,7 @@ namespace MyPersonalIndex
                 while (rs.Read());
 
                 Dictionary<KeyValuePair<int, int>, List<DynamicTrades>> CustomTrades = GetCustomTrades(Portfolio, MinDate, Dates[Dates.Count - 1], Dates);
+                Dictionary<int, double> AAValues = new Dictionary<int, double>();
 
                 DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(Dates[0]),
                     SqlDateTime.MinValue.Value));
@@ -1487,10 +1489,11 @@ namespace MyPersonalIndex
                 foreach (DateTime d in Dates)
                 {
                     Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> TickersWithCustomTrades = new Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>>();
-                    
-                    foreach(KeyValuePair<KeyValuePair<int, int>, List<DynamicTrades>> i in CustomTrades)
-                        foreach(DynamicTrades dt in i.Value)
-                            foreach(DateTime tradedate in dt.Dates)
+
+                    foreach (KeyValuePair<KeyValuePair<int, int>, List<DynamicTrades>> i in CustomTrades)
+                    {
+                        foreach (DynamicTrades dt in i.Value)
+                            foreach (DateTime tradedate in dt.Dates)
                                 if (tradedate == d || dt.Trade.Frequency == Constants.DynamicTradeFreq.Daily)
                                 {
                                     if (!TickersWithCustomTrades.ContainsKey(i.Key))
@@ -1498,7 +1501,11 @@ namespace MyPersonalIndex
                                     TickersWithCustomTrades[i.Key].Add(dt.Trade);
                                 }
 
-                    InsertCustomTrades(Portfolio, d, YDay, YTotalValue, TickersWithCustomTrades);
+                        if (!AAValues.ContainsKey(i.Key.Value))
+                            AAValues.Add(i.Key.Value, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetAATarget(i.Key.Value), 0)));
+                    }
+
+                    InsertCustomTrades(Portfolio, d, YDay, YTotalValue, TickersWithCustomTrades, AAValues);
 
                     newRecord.SetInt32((int)MainQueries.Tables.eNAV.Portfolio, Portfolio);
                     newRecord.SetDateTime((int)MainQueries.Tables.eNAV.Date, d);

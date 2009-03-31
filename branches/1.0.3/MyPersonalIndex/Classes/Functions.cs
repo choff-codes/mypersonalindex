@@ -20,15 +20,12 @@ namespace MyPersonalIndex
 
         public static Color GetRandomColor(int Seed)
         {
-            PropertyInfo[] Properties;
-            List<Color> Colors;
-            Color c;
+            PropertyInfo[] Properties = typeof(Color).GetProperties (BindingFlags.Public | BindingFlags.Static);
+            List<Color> Colors = new List<Color>();
 
-            Properties = typeof (Color).GetProperties (BindingFlags.Public | BindingFlags.Static);
-            Colors = new List<Color>();
             foreach (PropertyInfo prop in Properties)
             {
-                c = (Color)prop.GetValue(null, null);
+                Color c = (Color)prop.GetValue(null, null);
                 if (c == Color.Transparent || c == Color.Empty)
                     continue;
                 if (c.B + c.A + c.G > 700)
@@ -37,15 +34,16 @@ namespace MyPersonalIndex
             }
 
             while (Seed * 3 > Colors.Count - 1)
-            {
                 Seed = Seed * 3 - Colors.Count - 1;
-            }
             
             return Colors[Seed * 3];
         }
 
         public static string FormatStatString(object s, Constants.OutputFormat o)
         {
+            if (s == null)
+                return "";
+
             try
             {
                 switch (o)
@@ -80,8 +78,7 @@ namespace MyPersonalIndex
         {
             if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
                 throw new ArgumentOutOfRangeException("Dictionary must be correct length");
- 
-            //SQL = SQL.Replace("\n", " ");
+
             foreach (KeyValuePair<Constants.StatVariables, string> p in d)
                 SQL = SQL.Replace("%" + Enum.GetName(typeof(Constants.StatVariables), p.Key) + "%", p.Value);
 

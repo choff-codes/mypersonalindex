@@ -121,18 +121,23 @@ namespace MyPersonalIndex
             InitializeComponent();
         }
 
+        private void CreateDatabase()
+        {
+            try
+            {
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex");
+                File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
+            }
+            catch (SystemException)
+            {
+                MessageBox.Show("Cannot write to the user settings folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+            }
+        }
+
         private void frmMain_Load(object sender, EventArgs e)
         {
             if (!File.Exists(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf"))
-                try
-                {
-                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex");
-                    File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
-                }
-                catch(SystemException)
-                {
-                    MessageBox.Show("Cannot write to the user settings folder!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
-                }
+                CreateDatabase();
 
             SQL = new MainQueries();
 
@@ -149,30 +154,24 @@ namespace MyPersonalIndex
 
         private void LoadInitial()
         {
-            int LastPortfolio = 0; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the portfolio settings with nothing when called
+            int LastPortfolio; // cannot set MPI.Portfolio.ID yet since LoadPortfolio will overwrite the portfolio settings with nothing when called
 
-            LoadSettings(ref LastPortfolio);
+            LastPortfolio = LoadSettings();
             LoadPortfolioDropDown(LastPortfolio);
             LoadSortDropDowns();
         }
 
         private void LoadSortDropDowns()
         {
-            cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
-            cmbAcctSortBy.SelectedIndexChanged -= cmbAcctSortBy_SelectedIndexChanged;
-            cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
-
-            LoadSortDropDown(cmbHoldingsSortBy, dgHoldings, true);
-            LoadSortDropDown(cmbAASortBy, dgAA, false);
-            LoadSortDropDown(cmbAcctSortBy, dgAcct, false);
-
-            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
-            cmbAcctSortBy.SelectedIndexChanged += new System.EventHandler(cmbAcctSortBy_SelectedIndexChanged);
-            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
+            LoadSortDropDown(cmbHoldingsSortBy, dgHoldings, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
+            LoadSortDropDown(cmbAASortBy, dgAA, new EventHandler(cmbAASortBy_SelectedIndexChanged));
+            LoadSortDropDown(cmbAcctSortBy, dgAcct, new EventHandler(cmbAcctSortBy_SelectedIndexChanged));
         }
 
-        private void LoadSortDropDown(ToolStripComboBox t, DataGridView dg, bool RemoveLastColumn)
+        private void LoadSortDropDown(ToolStripComboBox t, DataGridView dg, EventHandler eh)
         {
+            t.SelectedIndexChanged -= eh;
+
             DataTable dt = new DataTable();
             dt.Columns.Add("Display");
             dt.Columns.Add("Value");
@@ -180,14 +179,16 @@ namespace MyPersonalIndex
             dt.Rows.Add("", "");
 
             foreach (DataGridViewColumn dc in dg.Columns)
-                dt.Rows.Add(dc.HeaderText, dc.DataPropertyName + (dc.DefaultCellStyle.Format == "" ? "" : " DESC"));
+                if (dc.Visible)
+                    // all formatted columns are numeric, so sort desc - keep text sorted ascending
+                    dt.Rows.Add(dc.HeaderText, dc.DataPropertyName + (dc.DefaultCellStyle.Format == "" ? "" : " DESC"));
 
-            if (RemoveLastColumn)
-                dt.Rows.RemoveAt(dt.Rows.Count - 1);
             dt.Rows.Add("Custom...", "Custom");
             t.ComboBox.DisplayMember = "Display";
             t.ComboBox.ValueMember = "Value";
             t.ComboBox.DataSource = dt;
+
+            t.SelectedIndexChanged += eh;
         }
 
         private void LoadPortfolioDropDown(int LastPortfolio)
@@ -204,7 +205,6 @@ namespace MyPersonalIndex
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
-
                     do
                     {
                         t.Rows.Add(rs.GetString((int)MainQueries.eGetPortfolios.Name), rs.GetInt32((int)MainQueries.eGetPortfolios.ID));
@@ -238,29 +238,36 @@ namespace MyPersonalIndex
                 return;
 
             if (databaseVersion < 1.02)
+                Version102(databaseVersion); // backup database and start anew
+            else if (databaseVersion < 1.04)
+            { }
+        }
+
+        private void Version102(double databaseVersion)
+        {
+            SQL.Dispose();
+            try
             {
-                SQL.Dispose();
-                try
-                {
-                    File.Move(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf",
-                        Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI " + databaseVersion.ToString("###0.00") + ".sdf");
-                    File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
-                    MessageBox.Show("Old database backed up successfully!");
-                }
-                catch (SystemException e)
-                {
-                    MessageBox.Show(e.Message);
-                    MessageBox.Show("Old version of database not backed up successfully!");
-                }
-                finally
-                {
-                    SQL = new MainQueries();
-                }
+                File.Move(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf",
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI " + databaseVersion.ToString("###0.00") + ".sdf");
+                File.Copy(Path.GetDirectoryName(Application.ExecutablePath) + "\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
+                MessageBox.Show("Old database backed up successfully!");
+            }
+            catch (SystemException e)
+            {
+                MessageBox.Show(e.Message);
+                MessageBox.Show("Old version of database not backed up successfully!");
+            }
+            finally
+            {
+                SQL = new MainQueries();
             }
         }
 
-        private void LoadSettings(ref int LastPortfolio)
+        private int LoadSettings() // returns portfolio to load
         {
+            int LastPortfolio = -1;
+
             CheckVersion();
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetSettings());
@@ -279,9 +286,10 @@ namespace MyPersonalIndex
                         this.WindowState = (FormWindowState)rs.GetInt32((int)MainQueries.eGetSettings.WindowState);
                     }
                     else
-                        MessageBox.Show("Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Add a new Portfolio\n2. Set your asset allocation\n3. Set your accounts\n" +
-                            "4. Add holdings\n5. Add relevent portfolio statistics\n6. Update prices!");
-                    LastPortfolio = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.LastPortfolio)) ? -1 : rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
+                        MessageBox.Show("Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Set the start date under options.\n2. Add a new Portfolio\n3. Set your asset allocation" +
+                            "\n4. Set your accounts\n5. Add holdings\n6. Add relevent portfolio statistics\n7. Update prices!");
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.LastPortfolio)))
+                        LastPortfolio =  rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
                 }
             }
             finally
@@ -291,6 +299,7 @@ namespace MyPersonalIndex
 
             MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
             stbLastUpdated.Text = stbLastUpdated.Text + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+            return LastPortfolio;
         }
 
         private void InitializeCalendars()
@@ -398,26 +407,22 @@ namespace MyPersonalIndex
 
         private void ResetCalendar(MonthCalendar m, ToolStripDropDownButton t, out DateTime d)
         {
-            DateTime End = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
+            d = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
             m.MinDate = MPI.Portfolio.StartDate;
-            m.SetDate(End);
-            t.Text = "Date: " + End.ToShortDateString();
-
-            d = End;
+            m.SetDate(d);
+            t.Text = "Date: " + d.ToShortDateString();
         }
 
         private void ResetCalendar(MonthCalendar m1, MonthCalendar m2, ToolStripDropDownButton t1, ToolStripDropDownButton t2, out DateTime d1, out DateTime d2)
         {
-            DateTime End = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
+            d2 = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
+            d1 = MPI.Portfolio.StartDate;
             m1.MinDate = MPI.Portfolio.StartDate;
             m1.SetDate(MPI.Portfolio.StartDate);
             t1.Text = "Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
             m2.MinDate = MPI.Portfolio.StartDate;
-            m2.SetDate(End);
-            t2.Text = "End Date: " + End.ToShortDateString();
-
-            d1 = MPI.Portfolio.StartDate;
-            d2 = End;
+            m2.SetDate(d2);
+            t2.Text = "End Date: " + d2.ToShortDateString();
         }
 
         private void LoadGraphSettings(GraphPane g)
@@ -459,21 +464,18 @@ namespace MyPersonalIndex
             LoadGraphSettings(g);
 
             DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
-
             if (YDay == SqlDateTime.MinValue.Value)
                 return;
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetChart(MPI.Portfolio.ID, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetNAV(MPI.Portfolio.ID, YDay))), StartDate, EndDate));
-
             try
             {
                 PointPairList list = new PointPairList();
-
                 if (rs.HasRows)
                 {
-                    list.Add(new XDate(YDay), 0);
-
                     rs.ReadFirst();
+                    
+                    list.Add(new XDate(YDay), 0);              
                     do
                     {
                         list.Add(new XDate(rs.GetDateTime((int)MainQueries.eGetChart.Date)), (double)rs.GetDecimal((int)MainQueries.eGetChart.Gain));
@@ -502,7 +504,7 @@ namespace MyPersonalIndex
 
         private void LoadPortfolio()
         {
-            if (((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows.Count == 0)
+            if (cmbMainPortfolio.ComboBox.Items.Count == 0)
                 DisableItems(true);
             else
             {
@@ -513,28 +515,14 @@ namespace MyPersonalIndex
 
                 DisableItems(false);
 
-                MPI.Portfolio.ID = Convert.ToInt32(((DataRowView)cmbMainPortfolio.ComboBox.SelectedItem)["Value"]);
-                MPI.Portfolio.Name = (string)((DataRowView)cmbMainPortfolio.ComboBox.SelectedItem)["Display"];
+                MPI.Portfolio.ID = Convert.ToInt32(cmbMainPortfolio.ComboBox.SelectedValue);
+                MPI.Portfolio.Name = cmbMainPortfolio.ComboBox.Text;
 
-                SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolioAttributes(MPI.Portfolio.ID));
-
-                try
+                if (!LoadPortfolioSettings())
                 {
-                    if (rs.HasRows)
-                    {
-                        rs.ReadFirst();
-                        LoadPortfolioSettings(rs);
-                    }
-                    else
-                    {
-                        MPI.Portfolio.ID = -1;
-                        LoadPortfolio();
-                        return;
-                    }
-                }
-                finally
-                {
-                    rs.Close();
+                    MessageBox.Show("Portfolio appears to be deleted. Please restart.");
+                    DisableItems(true);
+                    return;
                 }
 
                 ResetCalendars();
@@ -547,30 +535,44 @@ namespace MyPersonalIndex
             }
         }
 
-        private void LoadPortfolioSettings(SqlCeResultSet rs)
+        private bool LoadPortfolioSettings()
         {
-            bool tmp = false;
-            MPI.Portfolio.StartDate = CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate), ref tmp);
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolioAttributes(MPI.Portfolio.ID));
+            try
+            {
+                if (!rs.HasRows)
+                    return false;
 
-            stbIndexStart.Text = "Index Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
-            MPI.Portfolio.Dividends = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.Dividends).IsTrue;
-            MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.CostCalc);
-            MPI.Portfolio.NAVStart = (double)rs.GetDecimal((int)MainQueries.eGetPortfolioAttributes.NAVStartValue);
-            MPI.Portfolio.AAThreshold = rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.AAThreshold);
-            btnHoldingsHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.HoldingsShowHidden).IsTrue;
-            btnPerformanceSortDesc.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.NAVSort).IsTrue;
-            btnAAShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AAShowBlank).IsTrue;
-            btnCorrelationHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.CorrelationShowHidden).IsTrue;
-            btnAcctShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AcctShowBlank).IsTrue;
+                rs.ReadFirst();
 
-            MPI.Holdings.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.HoldingsSort);
-            ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
+                bool tmp = false; // do not use tmp, set start date equal to earliest data day possible (may be after start datE)
+                MPI.Portfolio.StartDate = CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate), ref tmp);
 
-            MPI.AA.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AASort);
-            ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
+                stbIndexStart.Text = "Index Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
+                MPI.Portfolio.Dividends = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.Dividends).IsTrue;
+                MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.CostCalc);
+                MPI.Portfolio.NAVStart = (double)rs.GetDecimal((int)MainQueries.eGetPortfolioAttributes.NAVStartValue);
+                MPI.Portfolio.AAThreshold = rs.GetInt32((int)MainQueries.eGetPortfolioAttributes.AAThreshold);
+                btnHoldingsHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.HoldingsShowHidden).IsTrue;
+                btnPerformanceSortDesc.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.NAVSort).IsTrue;
+                btnAAShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AAShowBlank).IsTrue;
+                btnCorrelationHidden.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.CorrelationShowHidden).IsTrue;
+                btnAcctShowBlank.Checked = rs.GetSqlBoolean((int)MainQueries.eGetPortfolioAttributes.AcctShowBlank).IsTrue;
 
-            MPI.Account.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AcctSort);
-            ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort);
+                MPI.Holdings.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.HoldingsSort);
+                ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
+
+                MPI.AA.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AASort);
+                ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
+
+                MPI.Account.Sort = rs.GetString((int)MainQueries.eGetPortfolioAttributes.AcctSort);
+                ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort, new EventHandler(cmbAcctSortBy_SelectedIndexChanged));
+            }
+            finally
+            {
+                rs.Close();
+            }
+            return true;
         }
 
         private void DisableItems(bool Disabled)
@@ -611,13 +613,15 @@ namespace MyPersonalIndex
             double TaxLiability = 0;
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date));
-
             if (rs.HasRows)
             {
                 rs.ReadFirst();
-                CostBasis = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
-                GainLoss = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
-                TaxLiability = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability));
+                if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
+                    CostBasis = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
+                if(!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
+                    GainLoss = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
+                if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)))
+                    TaxLiability = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability));
             }
 
             dgAcct.Columns[MPIAccount.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
@@ -650,6 +654,8 @@ namespace MyPersonalIndex
 
         private void LoadStat(DateTime StartDate, DateTime EndDate, bool DateChange)
         {
+            GetAveragePricePerShare(MPI.Stat.EndDate);
+
             if (!DateChange)
                 dgStats.Rows.Clear();
             MPI.Stat.TotalValue = GetTotalValue(EndDate);
@@ -706,13 +712,15 @@ namespace MyPersonalIndex
             if (rs.HasRows)
             {
                 rs.ReadFirst();
-                CostBasis = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
-                GainLoss = Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)) ? 0.0 : Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
+                if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
+                    CostBasis = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis));
+                if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
+                    GainLoss = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss));
             }
 
             dgHoldings.Columns[MPIHoldings.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
             string sGainLoss = String.Format("{0:C})", GainLoss);
-            if (GainLoss < 0)
+            if (GainLoss < 0) // instead of double parens for negative currency, replace with a negative sign
                 sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
             dgHoldings.Columns[MPIHoldings.GainLossColumn].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
             dgHoldings.Columns[MPIHoldings.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Holdings.TotalValue);
@@ -724,18 +732,15 @@ namespace MyPersonalIndex
             dgCorrelation.Columns.Clear();
 
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetCorrelationDistinctTickers(MPI.Portfolio.ID, btnCorrelationHidden.Checked));
-            this.Cursor = Cursors.WaitCursor;
-            
+            this.Cursor = Cursors.WaitCursor; 
             try
             {
                 List<string> CorrelationItems = new List<string>();
-
                 CorrelationItems.Add(Constants.SignifyPortfolio + MPI.Portfolio.ID.ToString());
 
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
-
                     do
                     {
                         CorrelationItems.Add(rs.GetString((int)MainQueries.eGetCorrelationDistinctTickers.Ticker));
@@ -751,7 +756,8 @@ namespace MyPersonalIndex
                 dgCorrelation.Rows.Add(CorrelationItems.Count);
                 for (int i = 0; i < CorrelationItems.Count; i++)
                     dgCorrelation.Rows[i].HeaderCell.Value = CorrelationItems[i];
-
+                
+                // replace portfolio ID with portfolio name
                 dgCorrelation.Rows[0].HeaderCell.Value = MPI.Portfolio.Name;
                 dgCorrelation.Columns[0].HeaderCell.Value = MPI.Portfolio.Name;
 
@@ -805,22 +811,16 @@ namespace MyPersonalIndex
                     return;
 
                 rs.ReadFirst();
-                MinDate = DateTime.Today.AddDays(1);
+                MinDate = DateTime.Today.AddDays(1); // arbitrary value
                 do
                 {
                     DateTime Date;
 
                     if (Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Date)))
-                    {
-                        Date = MPI.Settings.DataStartDate.AddDays(-6);
-                        MinDate = MPI.Settings.DataStartDate;
-                    }
+                        // get 6 days of data before the data start date, this ensures we have at least a day or two of pervious closing prices
+                        Date = MPI.Settings.DataStartDate.AddDays(-6);  
                     else
-                    {
                         Date = rs.GetDateTime((int)MainQueries.eGetUpdateDistinctTickers.Date);
-                        if (Date < MinDate)
-                            MinDate = Date;
-                    }
 
                     if (Date.ToShortDateString() == DateTime.Today.ToShortDateString())
                         continue;
@@ -833,6 +833,10 @@ namespace MyPersonalIndex
                             GetSplits(Ticker, Date);
                         GetPrices(Ticker, Date,
                             Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Price)) ? 0 : (double)rs.GetDecimal((int)MainQueries.eGetUpdateDistinctTickers.Price));
+
+                        // Set this here so if a ticker is not updated, mindate is not effected
+                        if (Date < MinDate)
+                            MinDate = Date;
                     }
                     catch (WebException)
                     {
@@ -841,19 +845,14 @@ namespace MyPersonalIndex
                 }
                 while (rs.Read());
 
-                GetNAV(-1, MinDate);
+                GetNAV(-1, MinDate); // update all portfolios
             }
             finally
             {
                 rs.Close();
 
                 if (TickersNotUpdated.Count != 0)
-                {
-                    string Tickers = TickersNotUpdated[0];
-                    for (int i = 1; i < TickersNotUpdated.Count; i++)
-                        Tickers = Tickers + ", " + TickersNotUpdated[i];
-                    MessageBox.Show("The following tickers were not updated:\n" + Tickers);
-                }
+                    MessageBox.Show("The following tickers were not updated:\n" + string.Join(", ", TickersNotUpdated.ToArray()));
             }
         }
 
@@ -868,43 +867,44 @@ namespace MyPersonalIndex
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.ClosingPrices);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
 
+            // add a day to mindate since we already have data for mindate
             s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.StockPrices));
             try
             {
                 sr = new StreamReader(s);
-                sr.ReadLine();
+                sr.ReadLine();  // first row is header
                 line = sr.ReadLine();
 
                 if (line == null)
                     return;
 
                 columns = line.Split(',');
-                // 0 = Date
-                // 4 = Close Price
+                // columns[0] = Date
+                // columns[4] = Close Price
                 do
                 {
-                    
-                    double Price = Convert.ToDouble(columns[4]);        
+                    DateTime Day = Convert.ToDateTime(columns[0]);
+                    double Price = Convert.ToDouble(columns[4]);
 
-                    newRecord.SetDateTime((int)MainQueries.Tables.eClosingPrices.Date, Convert.ToDateTime(columns[0]));
+                    newRecord.SetDateTime((int)MainQueries.Tables.eClosingPrices.Date, Day);
                     newRecord.SetString((int)MainQueries.Tables.eClosingPrices.Ticker, Ticker);
                     newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Price, (decimal)Price);
 
-                    double Split = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSplit(Ticker, Convert.ToDateTime(columns[0])), 1));
-                    double Div = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividend(Ticker, Convert.ToDateTime(columns[0])), 0));
+                    double Split = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSplit(Ticker, Day), 1));
+                    double Div = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividend(Ticker, Day), 0));
 
                     Price = (Price * Split) + Div;
 
-                    line = sr.ReadLine();
+                    line = sr.ReadLine(); // data is sorted by date descending, get next row to calculate change
 
                     if (line != null)
                     {
                         columns = line.Split(',');
                         newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / Convert.ToDouble(columns[4])) - 1) * 100));
                     }
-                    else
+                    else // use last price that is passed in as a parameter
                     {
-                        if (LastPrice == 0)
+                        if (LastPrice == 0) // no previous day, so it's the first closing price
                             newRecord.SetValue((int)MainQueries.Tables.eClosingPrices.Change, System.DBNull.Value);
                         else
                             newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / LastPrice) - 1) * 100));
@@ -927,8 +927,8 @@ namespace MyPersonalIndex
             Stream s = null;
             StreamReader sr;
             string line;
-            string HTMLSplitStart = "<center>Splits:<nobr>";
-            string HTMLSplitNone = "<br><center>Splits:none</center>";
+            string HTMLSplitStart = "<center>Splits:<nobr>";  // text starting splits
+            string HTMLSplitNone = "<br><center>Splits:none</center>"; // same line, but signifying no splits
 
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Splits);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
@@ -943,22 +943,27 @@ namespace MyPersonalIndex
                     if (line == null)
                         break;
                 }
-                while (line.IndexOf(HTMLSplitStart) < 1 && line.IndexOf(HTMLSplitNone) < 1);
+                while (!line.Contains(HTMLSplitStart) && !line.Contains(HTMLSplitNone));
 
-                if (line == null || line.IndexOf(HTMLSplitNone) > 0)
+                if (line == null || line.Contains(HTMLSplitNone)) // no splits
                     return;
 
                 int i = line.IndexOf(HTMLSplitStart) + HTMLSplitStart.Length;
-                line = line.Substring(i, line.IndexOf("</center>", i) - i);
+                line = line.Substring(i, line.IndexOf("</center>", i) - i); // read up to </center> tag
                 string[] splits = line.Split(new string[1] { "</nobr>, <nobr>" }, StringSplitOptions.None);
+                //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
                 splits[splits.Length - 1] = splits[splits.Length - 1].Replace("</nobr>", "");
 
                 foreach (string p in splits)
                 {
+                    // split[0] = date of split
+                    // split[1] = ratio
                     string[] split = p.Split(' ');
+                    // if split is less than mindate, don't add unless this is the first time run for the ticker
                     if (Convert.ToDateTime(split[0]) <= MinDate && MinDate >= MPI.Settings.DataStartDate)
                         continue;
 
+                    // ratio looks like [2:1], so strip off the brackets
                     split[1] = split[1].Substring(1, split[1].Length - 2);
                     string[] divisor = split[1].Split(':');
 
@@ -1359,14 +1364,14 @@ namespace MyPersonalIndex
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Trades);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
 
-            //i.key.key = tickerID
-            //i.key.value = AA ID
-            //i.value = list of dynamic trades
-            //AAValues.key = AA ID
-            //AAValues.value = target %
-            //TickerPrice.key = TickerID
-            //TickerPrice.value.key = current share price
-            //TickerPrice.value.value = total value of ticker ID
+            // i.key.key = tickerID
+            // i.key.value = AA ID
+            // i.value = list of dynamic trades
+            // AAValues.key = AA ID
+            // AAValues.value = target %
+            // TickerPrice.key = TickerID
+            // TickerPrice.value.key = current share price
+            // TickerPrice.value.value = total value of ticker ID
 
             try
             {
@@ -1404,30 +1409,31 @@ namespace MyPersonalIndex
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.Portfolio, Portfolio);
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.TickerID, TickerID);
                         newRecord.SetString((int)MainQueries.Tables.eTrades.Ticker, Ticker);
-                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, Convert.ToDecimal(Price / SplitRatio));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, Convert.ToDecimal(SplitRatio == 0 ? 0 : Price / SplitRatio));
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.ID, Counter);
                         newRecord.SetBoolean((int)MainQueries.Tables.eTrades.Custom, true);
 
                         double SharesToBuy = 0;
 
-                        switch (dt.TradeType)
-                        {
-                            case Constants.DynamicTradeType.AA:
-                                if (i.Key.Value == -1) // AA not assigned
-                                    continue;
+                        if (Price != 0 && SplitRatio != 0)
+                            switch (dt.TradeType)
+                            {
+                                case Constants.DynamicTradeType.AA:
+                                    if (i.Key.Value == -1) // AA not assigned
+                                        continue;
 
-                                SharesToBuy = ((TotalValue * (AAValues[i.Key.Value] / 100)) - TickerValue) / (Price / SplitRatio);
-                                break;
-                            case Constants.DynamicTradeType.Fixed:
-                                SharesToBuy = dt.Value1 / (Price / SplitRatio);
-                                break;
-                            case Constants.DynamicTradeType.Shares:
-                                SharesToBuy = dt.Value1; 
-                                break;
-                            case Constants.DynamicTradeType.TotalValue:
-                                SharesToBuy = (TotalValue * (dt.Value1 / 100)) / (Price / SplitRatio);
-                                break;
-                        }
+                                    SharesToBuy = ((TotalValue * (AAValues[i.Key.Value] / 100)) - TickerValue) / (Price / SplitRatio);
+                                    break;
+                                case Constants.DynamicTradeType.Fixed:
+                                    SharesToBuy = dt.Value1 / (Price / SplitRatio);
+                                    break;
+                                case Constants.DynamicTradeType.Shares:
+                                    SharesToBuy = dt.Value1; 
+                                    break;
+                                case Constants.DynamicTradeType.TotalValue:
+                                    SharesToBuy = (TotalValue * (dt.Value1 / 100)) / (Price / SplitRatio);
+                                    break;
+                            }
                         newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Shares, Convert.ToDecimal(SharesToBuy));
 
                         rs.Insert(newRecord);
@@ -1924,24 +1930,20 @@ namespace MyPersonalIndex
                         MPI.Holdings.Sort = f.SortReturnValues.Sort;
                         LoadHoldings(MPI.Holdings.SelDate);
                     }
-                    ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort);
+                    ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
                 }
             }
         }
 
-        private void ResetSortDropDown(ToolStripComboBox t, string Sort)
+        private void ResetSortDropDown(ToolStripComboBox t, string Sort, EventHandler eh)
         {
-            cmbHoldingsSortBy.SelectedIndexChanged -= cmbHoldingsSortBy_SelectedIndexChanged;
-            cmbAASortBy.SelectedIndexChanged -= cmbAASortBy_SelectedIndexChanged;
-            cmbAcctSortBy.SelectedIndexChanged -= cmbAcctSortBy_SelectedIndexChanged;
+            t.SelectedIndexChanged -= eh;
 
             t.ComboBox.SelectedValue = Sort;
             if ((t.ComboBox.SelectedValue == null || t.ComboBox.SelectedValue.ToString() == "") && Sort != "")
                 t.ComboBox.SelectedValue = "Custom";
 
-            cmbHoldingsSortBy.SelectedIndexChanged += new System.EventHandler(cmbHoldingsSortBy_SelectedIndexChanged);
-            cmbAASortBy.SelectedIndexChanged += new System.EventHandler(cmbAASortBy_SelectedIndexChanged);
-            cmbAcctSortBy.SelectedIndexChanged += new System.EventHandler(cmbAcctSortBy_SelectedIndexChanged);
+            t.SelectedIndexChanged += eh;
         }
 
         private void cmbAcctSortBy_SelectedIndexChanged(object sender, EventArgs e)
@@ -1962,7 +1964,7 @@ namespace MyPersonalIndex
                         MPI.Account.Sort = f.SortReturnValues.Sort;
                         LoadAccounts(MPI.Account.SelDate);
                     }
-                    ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort);
+                    ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort, new EventHandler(cmbAcctSortBy_SelectedIndexChanged));
                 }
             }
         }
@@ -1985,7 +1987,7 @@ namespace MyPersonalIndex
                         MPI.AA.Sort = f.SortReturnValues.Sort;
                         LoadAssetAllocation(MPI.AA.SelDate);
                     }
-                    ResetSortDropDown(cmbAASortBy, MPI.AA.Sort);
+                    ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
                 }
             }
         }
@@ -2136,7 +2138,7 @@ namespace MyPersonalIndex
 
             if (bw.UpdateType == MPIBackgroundWorker.MPIUpdateType.UpdatePrices)
             {
-                //hack to make the button not look pressed
+                // hack to make the button not look pressed
                 btnMainUpdate.Visible = false;
                 btnMainUpdate.Visible = true;
                 

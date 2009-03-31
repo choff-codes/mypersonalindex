@@ -381,7 +381,20 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Split";
             }
 
-            dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, cmbHis.SelectedIndex, chkSort.Checked));
+            if (cmbHis.SelectedIndex == 4)
+            {
+                i = dgHistory.Columns.Add("colHisPrice", "Price");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Price";
+
+                i = dgHistory.Columns.Add("colHisShares", "Shares");
+                dgHistory.Columns[i].DefaultCellStyle.Format = "N4";
+                dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
+                dgHistory.Columns[i].DataPropertyName = "Shares";
+            }
+
+            dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, TickerID, cmbHis.SelectedIndex, chkSort.Checked));
         }
 
         private void btnHistorical_Click(object sender, EventArgs e)

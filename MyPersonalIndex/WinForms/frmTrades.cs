@@ -58,7 +58,7 @@ namespace MyPersonalIndex
                         dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)TradeQueries.eGetTrades.Frequency);
                         dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)TradeQueries.eGetTrades.TradeType);
                         dt.When = rs.GetString((int)TradeQueries.eGetTrades.Dates);
-                        dt.Value1 = Convert.ToDouble(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
+                        dt.Value1 = (double)(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
 
                         Trades.Add(dt);
                     }

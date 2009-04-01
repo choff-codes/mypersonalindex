@@ -991,17 +991,19 @@ namespace MyPersonalIndex
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Dividends);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
 
+            // add a day to mindate since we already have data for mindate
             s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, MPIHoldings.Dividends));
             try
             {
                 sr = new StreamReader(s);
-                sr.ReadLine();
+                sr.ReadLine();  // first row is header
                 line = sr.ReadLine();
 
                 while (line != null)
                 {
                     columns = line.Split(',');
-
+                    // columns[0] = Date
+                    // columns[1] = Dividend
                     newRecord.SetDateTime((int)MainQueries.Tables.eDividends.Date, Convert.ToDateTime(columns[0]));
                     newRecord.SetString((int)MainQueries.Tables.eDividends.Ticker, Ticker);
                     newRecord.SetDecimal((int)MainQueries.Tables.eDividends.Amount, Convert.ToDecimal(columns[1]));
@@ -1025,111 +1027,93 @@ namespace MyPersonalIndex
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAvgPricesTrades(MPI.Portfolio.ID, Date));
             SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.AvgPricePerShare);
             SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
-            int CurrentTicker;
-            bool EndOfResultSet = false;
+            Dictionary<int, List<Constants.Pair<double, double>>> Prices = new Dictionary<int, List<Constants.Pair<double, double>>>();
 
             try
             {
                 if (!rs.HasRows)
                     return;
-                
+
                 rs.ReadFirst();
 
+                //Value1 = Shares
+                //Value2 = Price
                 do
                 {
-                    List<double> Shares = new List<double>();
-                    List<double> Prices = new List<double>();
-                    double TotalShares = 0;
-                    double Total = 0;
-                    bool NewTicker = false;
+                    int Ticker = rs.GetInt32((int)MainQueries.eGetAvgPricesTrades.TickerID);
 
-                    CurrentTicker = rs.GetInt32((int)MainQueries.eGetAvgPricesTrades.TickerID);
+                    Constants.Pair<double, double> P = new Constants.Pair<double, double>(
+                        (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Shares),
+                        (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Price)
+                    );
 
-                    do
+                    if (MPI.Portfolio.CostCalc == Constants.AvgShareCalc.AVG)
+                        if (P.Value1 < 0)
+                            continue;
+
+                    if (P.Value1 < 0)
                     {
-                        double TransactionShares = (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Shares);
-                        double TransactionPrice = (double)rs.GetDecimal((int)MainQueries.eGetAvgPricesTrades.Price);
-
-                        if (TransactionShares < 0 && MPI.Portfolio.CostCalc != Constants.AvgShareCalc.AVG)
+                        if (Prices.ContainsKey(Ticker))
                         {
-                            if (Shares.Count < 1)
-                                continue;
-
-                            int i = MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO ? Shares.Count - 1 : 0;
-
-                            do
+                            List<Constants.Pair<double, double>> Pairs = Prices[Ticker];
+                            while (Pairs.Count != 0 && P.Value1 != 0)
                             {
-                                if (-1 * TransactionShares == Shares[i])
+                                int i = MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO ? Pairs.Count - 1 : 0;
+                                if (Pairs[i].Value1 == -1 * P.Value1)
                                 {
-                                    Shares.RemoveAt(i);
-                                    Prices.RemoveAt(i);
-                                    TransactionShares = 0;
+                                    Pairs.RemoveAt(i);
+                                    P.Value1 = 0;
                                 }
-                                else if (Shares[i] > -1 * TransactionShares)
+                                else if (Pairs[i].Value1 > -1 * P.Value1)
                                 {
-                                    Shares[i] = Shares[i] - TransactionShares;
-                                    TransactionShares = 0;
+                                    Pairs[i].Value1 += P.Value1;
+                                    P.Value1 = 0;
                                 }
                                 else
                                 {
-                                    TransactionShares = TransactionShares - Shares[i];
-                                    Shares.RemoveAt(i);
-                                    Prices.RemoveAt(i);
+                                    P.Value1 += Pairs[i].Value1;
+                                    Pairs.RemoveAt(i);
                                 }
-
-                                if (MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO)
-                                    i--;
-                                else
-                                    i++;
                             }
-                            while (TransactionShares > 0 && i != Shares.Count && i >= 0);
                         }
-                        else if (TransactionShares > 0)
-                        {
-                            Shares.Add(TransactionShares);
-                            Prices.Add(TransactionPrice);
-                        }
-
-                        if (!rs.Read())
-                        {
-                            NewTicker = true;
-                            EndOfResultSet = true;
-                        }
-                        else if (rs.GetInt32((int)MainQueries.eGetAvgPricesTrades.TickerID) != CurrentTicker)
-                            NewTicker = true;
-                            
                     }
-                    while (!NewTicker);
-
-                    for (int i = 0; i < Shares.Count; i++)
+                    else
                     {
-                        Total += Shares[i] * Prices[i];
-                        TotalShares += Shares[i];
+                        if (!Prices.ContainsKey(Ticker))
+                            Prices.Add(Ticker, new List<Constants.Pair<double, double>>());
+                        Prices[Ticker].Add(P);
                     }
+                }
+                while (rs.Read());
 
-                    if (TotalShares > 0)
+                foreach (KeyValuePair<int, List<Constants.Pair<double, double>>> Ticker in Prices)
+                {
+                    double Shares = 0;
+                    double Total = 0;
+                    foreach (Constants.Pair<double, double> P in Ticker.Value)
                     {
-                        newRecord.SetInt32((int)MainQueries.Tables.eAvgPricePerShare.Ticker, CurrentTicker);
-                        newRecord.SetDecimal((int)MainQueries.Tables.eAvgPricePerShare.Price, (decimal)(Total / TotalShares));
-
+                        Shares += P.Value1;
+                        Total += P.Value1 * P.Value2;
+                    }
+                    if (Shares > 0)
+                    {
+                        newRecord.SetInt32((int)MainQueries.Tables.eAvgPricePerShare.Ticker, Ticker.Key);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eAvgPricePerShare.Price, (decimal)(Total / Shares));
                         rs2.Insert(newRecord);
                     }
                 }
-                while (!EndOfResultSet);    
             }
             finally
             {
                 rs.Close();
                 rs2.Close();
-            }
+            }             
         }
 
         private void btnMainAbout_Click(object sender, EventArgs e)
         {
             using (AboutBox a = new AboutBox())
-            {
                 a.ShowDialog();
-            }
         }
 
         private void StartNAV(MPIBackgroundWorker.MPIUpdateType u, DateTime d, int ID)

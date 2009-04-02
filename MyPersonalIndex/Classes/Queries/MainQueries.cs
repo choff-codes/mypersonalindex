@@ -183,9 +183,10 @@ namespace MyPersonalIndex
         }
 
         public enum eGetNAVPortfolios { ID, Name, StartDate, Dividends, NAVStartValue };
-        public static string GetNAVPortfolios()
+        public static string GetNAVPortfolios(int Portfolio)
         {
-            return "SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios";
+            return string.Format("SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios WHERE ID = {0}", 
+                Portfolio == -1 ? "ID" : Portfolio.ToString());
         }
 
         public static string DeleteNAVPrices(int Portfolio, DateTime MinDate)

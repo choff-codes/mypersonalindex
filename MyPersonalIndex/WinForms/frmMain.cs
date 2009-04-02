@@ -1125,69 +1125,48 @@ namespace MyPersonalIndex
 
         private void GetNAV(int Portfolio, DateTime MinDate)
         {
-            if (Portfolio != -1)
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetNAVPortfolios(Portfolio)); 
+            try
             {
-                bw.PortfolioName = MPI.Portfolio.Name;
-                bw.ReportProgress(50);
+                if (!rs.HasRows)
+                    return;
+                rs.ReadFirst();
 
-                bool PortfolioStartDate = false;
-                DateTime LastUpdate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastUpdate(MPI.Portfolio.ID), MPI.Portfolio.StartDate));
-                
-                if (LastUpdate < MinDate)
-                    MinDate = LastUpdate;
-                if (MinDate <= MPI.Portfolio.StartDate)
+                do
                 {
-                    MinDate = MPI.Portfolio.StartDate;
-                    PortfolioStartDate = true;
-                }
-                MinDate = CheckPortfolioStartDate(MinDate, ref PortfolioStartDate);
+                    int p = rs.GetInt32((int)MainQueries.eGetNAVPortfolios.ID);
+                    DateTime StartDate = rs.GetDateTime((int)MainQueries.eGetNAVPortfolios.StartDate);
+                    
+                    bw.PortfolioName = rs.GetString((int)MainQueries.eGetNAVPortfolios.Name);
+                    bw.ReportProgress(50);
 
-                GetNAVValues(MPI.Portfolio.ID, MinDate, PortfolioStartDate, MPI.Portfolio.Dividends, MPI.Portfolio.NAVStart);
-            }
-            else
-            {
-                SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetNAVPortfolios());
+                    // date to recalculate NAV from
+                    DateTime PortfolioMinDate = MinDate;
+                    // Last time the portfolio was updated
+                    DateTime LastUpdate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastUpdate(p), StartDate));
+                    bool PortfolioStartDate = false;
 
-                try
-                {
-                    if (!rs.HasRows)
-                        return;
-                    rs.ReadFirst();
+                    // check if the portfolio needs to be recalculated even before the mindate
+                    if (LastUpdate < PortfolioMinDate)
+                        PortfolioMinDate = LastUpdate;
 
-                    do
+                    if (PortfolioMinDate <= StartDate)
                     {
-                        bw.PortfolioName = rs.GetString((int)MainQueries.eGetNAVPortfolios.Name);
-                        bw.ReportProgress(50);
-
-                        int p = rs.GetInt32((int)MainQueries.eGetNAVPortfolios.ID);
-                        DateTime StartDate = rs.GetDateTime((int)MainQueries.eGetNAVPortfolios.StartDate);
-                        // date to recalculate NAV from
-                        DateTime PortfolioMinDate = MinDate;
-                        // Last time the portfolio was updated
-                        DateTime LastUpdate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastUpdate(p), StartDate));
-                        bool PortfolioStartDate = false;
-
-                        // the portfolio needs to be recalculated even before the mindate
-                        if (LastUpdate < PortfolioMinDate)
-                            PortfolioMinDate = LastUpdate;
-
                         // portfolio will recalculate from its startdate
-                        if (PortfolioMinDate <= StartDate)
-                        {
-                            PortfolioMinDate = StartDate;
-                            PortfolioStartDate = true;
-                        }
-                        PortfolioMinDate = CheckPortfolioStartDate(PortfolioMinDate, ref PortfolioStartDate);
-
-                        GetNAVValues(p, PortfolioMinDate, PortfolioStartDate, rs.GetSqlBoolean((int)MainQueries.eGetNAVPortfolios.Dividends).IsTrue,
-                            (double)rs.GetDecimal((int)MainQueries.eGetNAVPortfolios.NAVStartValue));
+                        PortfolioMinDate = StartDate;
+                        PortfolioStartDate = true;
                     }
-                    while (rs.Read());
+                    PortfolioMinDate = CheckPortfolioStartDate(PortfolioMinDate, ref PortfolioStartDate);
+
+                    GetNAVValues(p, PortfolioMinDate, PortfolioStartDate, 
+                        rs.GetSqlBoolean((int)MainQueries.eGetNAVPortfolios.Dividends).IsTrue,
+                        (double)rs.GetDecimal((int)MainQueries.eGetNAVPortfolios.NAVStartValue));
                 }
-                finally
-                {
-                    rs.Close();
-                }
+                while (rs.Read());
+            }
+            finally
+            {
+                rs.Close();
             }
         }
 
@@ -1196,12 +1175,12 @@ namespace MyPersonalIndex
             // if start date is not a market day, find the next day
             StartDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(StartDate), StartDate));
 
-            // if there is a day before, good, return
+            // if there is a day before, return successfully
             // otherwise, there needs to be 1 day before to pull previous day closing prices
             if (Convert.ToInt32(SQL.ExecuteScalar(MainQueries.GetDaysNowAndBefore(StartDate))) >= 2)
                 return StartDate;
 
-            // recalculate portfolio from the start on the 2nd day of pricing
+            // recalculate portfolio from the start of the 2nd day of pricing
             PortfolioStart = true;
             return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate));
         }
@@ -1431,21 +1410,14 @@ namespace MyPersonalIndex
             }
         }
 
-        private void GetNAVValues(int Portfolio, DateTime MinDate, bool PortfolioStartDate, bool Dividends, double NAVStart)
+        private List<DateTime> GetDistinctDates(DateTime MinDate)
         {
-            // remove NAV prices that are to be recalculated
-            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
-            SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
-
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetDistinctDates(MinDate));
-            SqlCeResultSet rs2 = SQL.ExecuteTableUpdate(MainQueries.Tables.NAV);
-            SqlCeUpdatableRecord newRecord = rs2.CreateRecord();
             List<DateTime> Dates = new List<DateTime>();
-
             try
             {
                 if (!rs.HasRows)
-                    return;
+                    return Dates;
 
                 rs.ReadFirst();
 
@@ -1454,66 +1426,97 @@ namespace MyPersonalIndex
                     Dates.Add(rs.GetDateTime((int)MainQueries.eGetDistinctDates.Date));
                 }
                 while (rs.Read());
+            }
+            finally
+            {
+                rs.Close();
+            }
+            return Dates;
+        }
 
+        private Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> GetSpecificCustomTrades(DateTime d, 
+            Dictionary<KeyValuePair<int, int>, List<DynamicTrades>> CustomTrades, Dictionary<int, double> AAValues)
+        {
+            Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> TickersWithCustomTrades = new Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>>();
+
+            foreach (KeyValuePair<KeyValuePair<int, int>, List<DynamicTrades>> i in CustomTrades)
+            {
+                foreach (DynamicTrades dt in i.Value)
+                    foreach (DateTime tradedate in dt.Dates)
+                        if (tradedate == d || dt.Trade.Frequency == Constants.DynamicTradeFreq.Daily)
+                        {
+                            if (!TickersWithCustomTrades.ContainsKey(i.Key))
+                                TickersWithCustomTrades.Add(i.Key, new List<Constants.DynamicTrade>());
+                            TickersWithCustomTrades[i.Key].Add(dt.Trade);
+                        }
+
+                if (!AAValues.ContainsKey(i.Key.Value))
+                    AAValues.Add(i.Key.Value, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetAATarget(i.Key.Value), 0)));
+            }
+
+            return TickersWithCustomTrades;
+        }
+
+        private void GetNAVValues(int Portfolio, DateTime MinDate, bool PortfolioStartDate, bool Dividends, double NAVStart)
+        {
+            // remove NAV prices that are to be recalculated
+            SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
+            // remove custom trades that are to be recalculated
+            SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
+            
+            SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.NAV);
+            SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+            List<DateTime> Dates = GetDistinctDates(MinDate);
+
+            try
+            {
+                // Holds all dynamic trades and the dates they should take place
                 Dictionary<KeyValuePair<int, int>, List<DynamicTrades>> CustomTrades = GetCustomTrades(Portfolio, MinDate, Dates[Dates.Count - 1], Dates);
+                // Holds AA IDs and their thresholds for AA dynamic trades
                 Dictionary<int, double> AAValues = new Dictionary<int, double>();
 
-                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(Dates[0]),
-                    SqlDateTime.MinValue.Value));
+                DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(Dates[0]), SqlDateTime.MinValue.Value));
                 double YNAV = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSpecificNav(Portfolio, YDay), 0));
                 double YTotalValue;
 
                 if (PortfolioStartDate)
                 {
+                    // Insert row the day before the start date at the NAV start value (baseline record)
                     YNAV = NAVStart;
                     YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, YDay), 0));
                     newRecord.SetInt32((int)MainQueries.Tables.eNAV.Portfolio, Portfolio);
                     newRecord.SetDateTime((int)MainQueries.Tables.eNAV.Date, YDay);
                     newRecord.SetDecimal((int)MainQueries.Tables.eNAV.TotalValue, (decimal)YTotalValue);
                     newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)YNAV);
-                    rs2.Insert(newRecord);
+                    rs.Insert(newRecord);
                 }
                 else
                     YTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValue(Portfolio, YDay), 0));
 
                 foreach (DateTime d in Dates)
                 {
-                    Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>> TickersWithCustomTrades = new Dictionary<KeyValuePair<int, int>, List<Constants.DynamicTrade>>();
-
-                    foreach (KeyValuePair<KeyValuePair<int, int>, List<DynamicTrades>> i in CustomTrades)
-                    {
-                        foreach (DynamicTrades dt in i.Value)
-                            foreach (DateTime tradedate in dt.Dates)
-                                if (tradedate == d || dt.Trade.Frequency == Constants.DynamicTradeFreq.Daily)
-                                {
-                                    if (!TickersWithCustomTrades.ContainsKey(i.Key))
-                                        TickersWithCustomTrades.Add(i.Key, new List<Constants.DynamicTrade>());
-                                    TickersWithCustomTrades[i.Key].Add(dt.Trade);
-                                }
-
-                        if (!AAValues.ContainsKey(i.Key.Value))
-                            AAValues.Add(i.Key.Value, Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetAATarget(i.Key.Value), 0)));
-                    }
-
-                    InsertCustomTrades(Portfolio, d, YDay, YTotalValue, TickersWithCustomTrades, AAValues);
+                    // Add all custom trades to the Trades table (for this day) before calculating the NAV
+                    InsertCustomTrades(Portfolio, d, YDay, YTotalValue, 
+                        GetSpecificCustomTrades(d, CustomTrades, AAValues), // only pass trades that have this specific date
+                        AAValues);
 
                     newRecord.SetInt32((int)MainQueries.Tables.eNAV.Portfolio, Portfolio);
                     newRecord.SetDateTime((int)MainQueries.Tables.eNAV.Date, d);
 
                     double NewTotalValue = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValueNew(Portfolio, d), 0));
+                    newRecord.SetDecimal((int)MainQueries.Tables.eNAV.TotalValue, (decimal)NewTotalValue);
+
                     double NAV = 0;
                     double NetPurchases = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDailyActivity(Portfolio, d), 0));
                     if (Dividends)
                         NetPurchases = NetPurchases - Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividends(Portfolio, d), 0));
-
-                    newRecord.SetDecimal((int)MainQueries.Tables.eNAV.TotalValue, (decimal)NewTotalValue);
 
                     if (NetPurchases < 0)
                         NAV = (NewTotalValue - NetPurchases) / (YTotalValue / YNAV);
                     else
                         NAV = NewTotalValue / ((YTotalValue + NetPurchases) / YNAV);
 
-                    if (double.IsNaN(NAV) || double.IsInfinity(NAV))
+                    if (double.IsNaN(NAV) || double.IsInfinity(NAV)) // divide by 0, continue with previous NAV before NAV went to 0
                     {
                         newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)YNAV);
                         newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, 0);
@@ -1524,17 +1527,15 @@ namespace MyPersonalIndex
                         newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, (decimal)(((NAV / YNAV) - 1) * 100));
                         YNAV = NAV;
                     }
-
                     YTotalValue = NewTotalValue;
-
-                    rs2.Insert(newRecord);
                     YDay = d;
+
+                    rs.Insert(newRecord);
                 }
             }
             finally
             {
                 rs.Close();
-                rs2.Close();
             }
         }
 

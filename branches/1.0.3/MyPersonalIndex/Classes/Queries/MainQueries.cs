@@ -390,9 +390,10 @@ namespace MyPersonalIndex
                 TotalValue, Portfolio, Date.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
         }
 
-        public static string GetAATarget(int AA)
+        public enum eGetAATargets { AA, Target };
+        public static string GetAATargets(int Portfolio)
         {
-            return string.Format("SELECT Target FROM AA WHERE ID = {0}", AA);
+            return string.Format("SELECT ID, COALESCE(Target, 0) AS Target FROM AA WHERE Portfolio = {0}", Portfolio);
         }
 
         public enum eGetTickerValue { TotalValue, Price, Ticker, Ratio };

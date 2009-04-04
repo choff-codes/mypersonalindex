@@ -126,20 +126,30 @@ namespace MyPersonalIndex
             return string.Format("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s={0}", Symbol);
         }
 
-        public enum eGetUpdateDistinctTickers { Ticker, Date, Price };
+        public enum eGetUpdateDistinctTickers { Ticker };
         public static string GetUpdateDistinctTickers()
         {
+            return "SELECT DISTINCT Ticker FROM Tickers";
+        }
+
+        public enum eGetUpdateLastRunDates { Ticker, Date, Price, Type };
+        public static string GetUpdateLastRunDates()
+        {
             return
-                "SELECT a.Ticker, b.Date, b.Price" +
-                " FROM (SELECT DISTINCT Ticker" +
-                        " FROM Tickers) AS a" +
-                " LEFT JOIN (SELECT a.Ticker, a.Price, a.Date AS Date" +
-                            " FROM ClosingPrices a" +
-                            " INNER JOIN (SELECT Ticker, MAX(Date) as Date" +
-                                        " FROM ClosingPrices" +
-                                        " GROUP BY Ticker) b" +
-                            " ON a.Ticker = b.Ticker AND a.Date = b.Date) b" +
-                " ON a.Ticker = b.Ticker";
+                    "SELECT a.Ticker, b.Date, b.Price, 'C' AS Type" +
+                    " FROM (SELECT Ticker, MAX(Date) as Date" +
+                          " FROM ClosingPrices" +
+                          " GROUP BY Ticker) a" +
+                    " INNER JOIN ClosingPrices b" +
+                    " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
+                " UNION ALL" +
+                    " SELECT Ticker, MAX(Date) as Date, 0, 'D'" +
+                    " FROM Dividends" +
+                    " GROUP BY Ticker" +
+                " UNION ALL" +
+                    " SELECT Ticker, MAX(Date) as Date, 0, 'S'" +
+                    " FROM Splits" +
+                    " GROUP BY Ticker";
         }
 
         public enum eGetCorrelationDistinctTickers { Ticker };

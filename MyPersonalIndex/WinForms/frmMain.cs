@@ -129,6 +129,29 @@ namespace MyPersonalIndex
             }
         }
 
+        public class TickerInfo
+        {
+            public double Price = 0;
+            public double TotalValue = 0;
+            public double SplitRatio = 1;
+            public string Ticker = "";
+        }
+
+        public class UpdateInfo
+        {
+            public double Price = 0;
+            public DateTime ClosingDate;
+            public DateTime DividendDate;
+            public DateTime SplitDate;
+
+            public UpdateInfo(DateTime MinDate)
+            {
+                ClosingDate = MinDate;
+                DividendDate = MinDate;
+                SplitDate = MinDate;
+            }
+        }
+
         MainQueries SQL;
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
 
@@ -815,61 +838,105 @@ namespace MyPersonalIndex
             bw.RunWorkerAsync(MPIBackgroundWorker.MPIUpdateType.UpdatePrices); 
         }
 
-        private void UpdatePrices()
+        private Dictionary<string, UpdateInfo> GetTickerUpdateList()
         {
+            Dictionary<string, UpdateInfo> Tickers = new Dictionary<string, UpdateInfo>();
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetUpdateDistinctTickers());
-            DateTime MinDate;
-            List<string> TickersNotUpdated = new List<string>();
+            try
+            {
+                if (!rs.HasRows)
+                    return Tickers;
 
+                rs.ReadFirst();
+
+                do
+                {
+                    // get 6 days of data before the data start date, this ensures we have at least a day or two of pervious closing prices
+                    UpdateInfo Info = new UpdateInfo(MPI.Settings.DataStartDate.AddDays(-6));
+                    Tickers.Add(rs.GetString((int)MainQueries.eGetUpdateDistinctTickers.Ticker), Info);
+                }
+                while (rs.Read());
+            }
+            finally
+            {
+                rs.Close();
+            }
+            return Tickers;
+        }
+
+        private void GetTickerUpdateInfo(Dictionary<string, UpdateInfo> Tickers)
+        {
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetUpdateLastRunDates());
             try
             {
                 if (!rs.HasRows)
                     return;
 
                 rs.ReadFirst();
-                MinDate = DateTime.Today.AddDays(1); // arbitrary value
+
                 do
                 {
-                    DateTime Date;
-
-                    if (Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Date)))
-                        // get 6 days of data before the data start date, this ensures we have at least a day or two of pervious closing prices
-                        Date = MPI.Settings.DataStartDate.AddDays(-6);  
-                    else
-                        Date = rs.GetDateTime((int)MainQueries.eGetUpdateDistinctTickers.Date);
-
-                    if (Date.ToShortDateString() == DateTime.Today.ToShortDateString())
-                        continue;
-
-                    try
+                    UpdateInfo Info = Tickers[rs.GetString((int)MainQueries.eGetUpdateLastRunDates.Ticker)];
+                    switch (rs.GetString((int)MainQueries.eGetUpdateLastRunDates.Type))
                     {
-                        string Ticker = rs.GetString((int)MainQueries.eGetUpdateDistinctTickers.Ticker);
-                        GetDividends(Ticker, Date);
-                        if (MPI.Settings.Splits)
-                            GetSplits(Ticker, Date);
-                        GetPrices(Ticker, Date,
-                            Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetUpdateDistinctTickers.Price)) ? 0 : (double)rs.GetDecimal((int)MainQueries.eGetUpdateDistinctTickers.Price));
-
-                        // Set this here so if a ticker is not updated, mindate is not effected
-                        if (Date < MinDate)
-                            MinDate = Date;
-                    }
-                    catch (WebException)
-                    {
-                        TickersNotUpdated.Add(rs.GetString((int)MainQueries.eGetUpdateDistinctTickers.Ticker));  
+                        case "C":
+                            Info.ClosingDate = rs.GetDateTime((int)MainQueries.eGetUpdateLastRunDates.Date);
+                            Info.Price = (double)rs.GetDecimal((int)MainQueries.eGetUpdateLastRunDates.Price);
+                            break;
+                        case "D":
+                            Info.DividendDate = rs.GetDateTime((int)MainQueries.eGetUpdateLastRunDates.Date);
+                            break;
+                        case "S":
+                            Info.SplitDate = rs.GetDateTime((int)MainQueries.eGetUpdateLastRunDates.Date);
+                            break;
                     }
                 }
                 while (rs.Read());
-
-                GetNAV(-1, MinDate); // update all portfolios
             }
             finally
             {
                 rs.Close();
-
-                if (TickersNotUpdated.Count != 0)
-                    MessageBox.Show("The following tickers were not updated:\n" + string.Join(", ", TickersNotUpdated.ToArray()));
             }
+        }
+
+        private void UpdatePrices()
+        {
+            Dictionary<string, UpdateInfo> Tickers = GetTickerUpdateList();
+            DateTime MinDate;
+            List<string> TickersNotUpdated = new List<string>();
+
+            GetTickerUpdateInfo(Tickers);
+            MinDate = DateTime.Today.AddDays(1); // arbitrary value
+
+            foreach(KeyValuePair<string, UpdateInfo> i in Tickers)
+            {
+                if (i.Value.ClosingDate == DateTime.Today)
+                    continue;
+
+                try
+                {
+                    // Prices are the last thing updated, so it is possible to download dividends/splits for a day and not prices
+                    // Therefore, a check needs to be added to prevent duplicate dividends/splits
+                    GetDividends(i.Key, i.Value.DividendDate > i.Value.ClosingDate ? i.Value.DividendDate :  i.Value.ClosingDate);
+                    if (MPI.Settings.Splits)
+                        GetSplits(i.Key, i.Value.SplitDate > i.Value.ClosingDate ? i.Value.SplitDate : i.Value.ClosingDate);
+                    GetPrices(i.Key, i.Value.ClosingDate, i.Value.Price);
+
+                    // Set this here so if a ticker is not updated, mindate is not effected
+                    // ClosingDate will always be the earliest, not dividend or split dates
+                    if (i.Value.ClosingDate < MinDate)
+                        MinDate = i.Value.ClosingDate;
+                }
+                catch (WebException)
+                {
+                    TickersNotUpdated.Add(i.Key);  
+                }
+            }
+
+            GetNAV(-1, MinDate); // update all portfolios
+
+            if (TickersNotUpdated.Count != 0)
+                MessageBox.Show("The following tickers were not updated:\n" + string.Join(", ", TickersNotUpdated.ToArray()));
         }
 
         private void GetPrices(string Ticker, DateTime MinDate, double LastPrice)
@@ -1216,10 +1283,114 @@ namespace MyPersonalIndex
             return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate));
         }
 
-        private Dictionary<Symbol, List<DynamicTrades>> GetCustomTrades(int Portfolio, DateTime MinDate, DateTime MaxDate, List<DateTime> MarketDays)
+        public List<DateTime> GetDailyDynamicDates(List<DateTime> MarketDays)
+        {
+            // add a dummy date for loop in GetNAVValues - the foreach always does daily, but won't loop if nothing is there
+            return new List<DateTime> {DateTime.Now};
+        }
+
+        public List<DateTime> GetWeeklyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        {
+            List<DateTime> TradeDates = new List<DateTime>();
+            DateTime FirstWeekday = MinDate;
+            DayOfWeek Day = (DayOfWeek)Convert.ToInt32(When);
+
+            while (FirstWeekday.DayOfWeek != Day)
+                FirstWeekday = FirstWeekday.AddDays(1);
+
+            int i = 0;
+            do
+            {
+                DateTime weekday = FirstWeekday.AddDays(i * 7);
+                if (GetCurrentDateOrNext(ref weekday, MarketDays))
+                    TradeDates.Add(weekday);
+                i++;
+            }
+            while (FirstWeekday.AddDays(i * 7) <= MaxDate);
+
+            return TradeDates;
+        }
+
+        public List<DateTime> GetMonthlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        {
+            List<DateTime> TradeDates = new List<DateTime>();
+
+            DateTime FirstMonthday = MinDate;
+            int DayOfMonth = Convert.ToInt32(When);
+
+            int i = 0;
+            do
+            {
+                DateTime monthday = FirstMonthday.AddMonths(i);
+
+                if (monthday.Day > DayOfMonth)
+                    monthday.AddMonths(1);
+
+                if (DayOfMonth > DateTime.DaysInMonth(monthday.Year, monthday.Month))
+                    monthday = new DateTime(monthday.AddMonths(1).Year, monthday.AddMonths(1).Month, 1);
+                else
+                    monthday = new DateTime(monthday.Year, monthday.Month, DayOfMonth);
+
+                if (GetCurrentDateOrNext(ref monthday, MarketDays))
+                    TradeDates.Add(monthday);
+                i++;
+            }
+            while (FirstMonthday.AddMonths(i) <= MaxDate);
+
+            return TradeDates;
+        }
+
+        public List<DateTime> GetYearlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        {
+            List<DateTime> TradeDates = new List<DateTime>();
+
+            DateTime FirstYearday = MinDate;
+            int DayOfYear = Convert.ToInt32(When);
+
+            // special case to not get invalid leap-year dates
+            if (DayOfYear == 60)
+                DayOfYear++;
+
+            int i = 0;
+            do
+            {
+                DateTime yearday = FirstYearday.AddYears(i);
+
+                if (yearday.DayOfYear > DayOfYear)
+                    yearday.AddYears(1);
+
+                yearday = new DateTime(yearday.Year, 1, 1).AddDays(DayOfYear - 1);
+
+                if (GetCurrentDateOrNext(ref yearday, MarketDays))
+                    TradeDates.Add(yearday);
+                i++;
+            }
+            while (FirstYearday.AddYears(i) <= MaxDate);
+
+            return TradeDates;
+        }
+
+        public List<DateTime> GetSpecificDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        {
+            List<DateTime> TradeDates = new List<DateTime>();
+
+            string[] s = When.Split('|');
+            foreach (string date in s)
+            {
+                DateTime d = Convert.ToDateTime(date);
+                if (d >= MinDate && d <= MaxDate)
+                    if (GetCurrentDateOrNext(ref d, MarketDays))
+                        TradeDates.Add(d);
+            }
+
+            return TradeDates;
+        }
+
+        private Dictionary<Symbol, List<DynamicTrades>> GetCustomTrades(int Portfolio, DateTime MinDate, List<DateTime> MarketDays)
         {
             Dictionary<Symbol, List<DynamicTrades>> AllTrades = new Dictionary<Symbol, List<DynamicTrades>>();
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetCustomTrades(Portfolio));
+            DateTime MaxDate = MarketDays[MarketDays.Count - 1];
 
             try
             {
@@ -1231,93 +1402,30 @@ namespace MyPersonalIndex
                 do
                 {
                     DynamicTrades dts = new DynamicTrades();
-                    dts.Trade = new Constants.DynamicTrade();
-                    dts.Dates = new List<DateTime>();
-                    dts.Trade.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)MainQueries.eGetCustomTrades.Frequency);
-                    dts.Trade.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)MainQueries.eGetCustomTrades.TradeType);
-                    dts.Trade.Value1 = (double)rs.GetDecimal((int)MainQueries.eGetCustomTrades.Value1);
-                    dts.Trade.When = rs.GetString((int)MainQueries.eGetCustomTrades.Dates);
+
+                    Constants.DynamicTrade dt = new Constants.DynamicTrade();
+                    dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)MainQueries.eGetCustomTrades.Frequency);
+                    dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)MainQueries.eGetCustomTrades.TradeType);
+                    dt.Value1 = (double)rs.GetDecimal((int)MainQueries.eGetCustomTrades.Value1);
+                    dt.When = rs.GetString((int)MainQueries.eGetCustomTrades.Dates);
+                    dts.Trade = dt;
 
                     switch (dts.Trade.Frequency)
                     {
                         case Constants.DynamicTradeFreq.Daily:
-                            // add a dummy date for loop in GetNAVValues - the foreach always does daily, but won't loop if nothing is there
-                            dts.Dates.Add(DateTime.Now);
+                            dts.Dates = GetDailyDynamicDates(MarketDays);
                             break;
                         case Constants.DynamicTradeFreq.Once:
-                            string[] s = dts.Trade.When.Split('|');
-                            foreach (string date in s)
-                            {
-                                DateTime d = Convert.ToDateTime(date);
-                                if (d >= MinDate && d <= MaxDate)
-                                    if (GetCurrentDateOrNext(ref d, MarketDays))
-                                        dts.Dates.Add(d);
-                            }
+                            dts.Dates = GetSpecificDynamicDates(MarketDays, dt.When, MinDate, MaxDate);
                             break;
                         case Constants.DynamicTradeFreq.Weekly:
-                            DateTime FirstWeekday = MinDate;
-                            while (FirstWeekday.DayOfWeek != (DayOfWeek)Convert.ToInt32(dts.Trade.When))
-                                FirstWeekday = FirstWeekday.AddDays(1);
-
-                            int i = 0;
-                            do
-                            {
-                                DateTime weekday = FirstWeekday.AddDays(i * 7);
-                                if (GetCurrentDateOrNext(ref weekday, MarketDays))
-                                    dts.Dates.Add(weekday);
-                                i++;
-                            }
-                            while (FirstWeekday.AddDays(i * 7) <= MaxDate);
-
+                            dts.Dates = GetWeeklyDynamicDates(MarketDays, dt.When, MinDate, MaxDate);
                             break;
                         case Constants.DynamicTradeFreq.Monthly:
-                            DateTime FirstMonthday = MinDate;
-                            int DayOfMonth = Convert.ToInt32(dts.Trade.When);
-
-                            int x = 0;
-                            do
-                            {
-                                DateTime monthday = FirstMonthday.AddMonths(x);
-
-                                if (monthday.Day > DayOfMonth)
-                                    monthday.AddMonths(1);
-
-                                if (DayOfMonth > DateTime.DaysInMonth(monthday.Year, monthday.Month))
-                                    monthday = new DateTime(monthday.AddMonths(1).Year, monthday.AddMonths(1).Month, 1);
-                                else
-                                    monthday = new DateTime(monthday.Year, monthday.Month, DayOfMonth);
-                               
-                                if (GetCurrentDateOrNext(ref monthday, MarketDays))
-                                    dts.Dates.Add(monthday);
-                                x++;
-                            }
-                            while (FirstMonthday.AddMonths(x) <= MaxDate);
-
+                            dts.Dates = GetMonthlyDynamicDates(MarketDays, dt.When, MinDate, MaxDate);
                             break;
                         case Constants.DynamicTradeFreq.Yearly:
-                            DateTime FirstYearday = MinDate;
-                            int DayOfYear = Convert.ToInt32(dts.Trade.When);
-                            
-                            // special case to not get invalid leap-year dates
-                            if (DayOfYear == 60)
-                                DayOfYear++;
-
-                            int z = 0;
-                            do
-                            {
-                                DateTime yearday = FirstYearday.AddYears(z);
-
-                                if (yearday.DayOfYear > DayOfYear)
-                                    yearday.AddYears(1);
-
-                                yearday = new DateTime(yearday.Year, 1, 1).AddDays(DayOfYear - 1);
-
-                                if (GetCurrentDateOrNext(ref yearday, MarketDays))
-                                    dts.Dates.Add(yearday);
-                                z++;
-                            }
-                            while (FirstYearday.AddYears(z) <= MaxDate);
-
+                            dts.Dates = GetYearlyDynamicDates(MarketDays, dt.When, MinDate, MaxDate);
                             break;
                     }
 
@@ -1353,49 +1461,43 @@ namespace MyPersonalIndex
                 return false;
         }
 
-        private void InsertCustomTrades(int Portfolio, DateTime Date, DateTime YDay, double TotalValue, 
-            Dictionary<Symbol, List<Constants.DynamicTrade>> Trades, Dictionary<int, double> AAValues)
+        private TickerInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
+        {
+            TickerInfo Info = new TickerInfo();
+
+            SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetTickerValue(TickerID, Date, YDay));
+            try
+            {
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetTickerValue.Price)))
+                        Info.Price = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetTickerValue.Price));
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetTickerValue.TotalValue)))
+                        Info.TotalValue = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetTickerValue.TotalValue));
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetTickerValue.Ratio)))
+                        Info.SplitRatio = Convert.ToDouble(rs.GetDecimal((int)MainQueries.eGetTickerValue.Ratio));
+                    Info.Ticker = rs.GetString((int)MainQueries.eGetTickerValue.Ticker); ;
+                }
+            }
+            finally
+            {
+                rs.Close();
+            }
+            return Info;
+        }
+
+        private void InsertCustomTrades(int Portfolio, DateTime Date, DateTime YDay, double YTotalValue, Dictionary<Symbol, List<Constants.DynamicTrade>> Trades, Dictionary<int, double> AAValues)
         {
             SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Trades);
             SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-            // i.key.key = tickerID
-            // i.key.value = AA ID
-            // i.value = list of dynamic trades
-            // AAValues.key = AA ID
-            // AAValues.value = target %
-            // TickerPrice.key = TickerID
-            // TickerPrice.value.key = current share price
-            // TickerPrice.value.value = total value of ticker ID
 
             try
             {
                 foreach (KeyValuePair<Symbol, List<Constants.DynamicTrade>> i in Trades)
                 {
                     int TickerID = i.Key.TickerID;
-                    SqlCeResultSet rs2 = SQL.ExecuteResultSet(MainQueries.GetTickerValue(TickerID, Date, YDay));
-                    double Price = 0;
-                    double TickerValue = 0;
-                    double SplitRatio = 1;
-                    string Ticker = "";
-                    try
-                    {
-                        if (rs2.HasRows)
-                        {
-                            rs2.ReadFirst();
-                            if (!Convert.IsDBNull(rs2.GetValue((int)MainQueries.eGetTickerValue.Price)))
-                                Price = Convert.ToDouble(rs2.GetDecimal((int)MainQueries.eGetTickerValue.Price));
-                            if (!Convert.IsDBNull(rs2.GetValue((int)MainQueries.eGetTickerValue.TotalValue)))
-                                TickerValue = Convert.ToDouble(rs2.GetDecimal((int)MainQueries.eGetTickerValue.TotalValue));
-                            if (!Convert.IsDBNull(rs2.GetValue((int)MainQueries.eGetTickerValue.Ratio)))
-                                SplitRatio = Convert.ToDouble(rs2.GetDecimal((int)MainQueries.eGetTickerValue.Ratio));
-                            Ticker = rs2.GetString((int)MainQueries.eGetTickerValue.Ticker); ;
-                        }
-                    }
-                    finally
-                    {
-                        rs2.Close();
-                    }
+                    TickerInfo Info = GetTickerValue(TickerID, Date, YDay);
 
                     int Counter = Convert.ToInt32(SQL.ExecuteScalar(MainQueries.GetLastTickerID(TickerID), -1)) + 1;
                     foreach (Constants.DynamicTrade dt in i.Value)
@@ -1403,30 +1505,28 @@ namespace MyPersonalIndex
                         newRecord.SetDateTime((int)MainQueries.Tables.eTrades.Date, Date);
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.Portfolio, Portfolio);
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.TickerID, TickerID);
-                        newRecord.SetString((int)MainQueries.Tables.eTrades.Ticker, Ticker);
-                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, Convert.ToDecimal(SplitRatio == 0 ? 0 : Price / SplitRatio));
+                        newRecord.SetString((int)MainQueries.Tables.eTrades.Ticker, Info.Ticker);
+                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, Convert.ToDecimal(Info.SplitRatio == 0 ? 0 : Info.Price / Info.SplitRatio));
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.ID, Counter);
                         newRecord.SetBoolean((int)MainQueries.Tables.eTrades.Custom, true);
 
                         double SharesToBuy = 0;
-
-                        if (Price != 0 && SplitRatio != 0)
+                        if (Info.Price != 0 && Info.SplitRatio != 0)
                             switch (dt.TradeType)
                             {
                                 case Constants.DynamicTradeType.AA:
-                                    if (i.Key.AA == -1 && AAValues[i.Key.AA] != 0) // AA not assigned, or target not set
+                                    if (i.Key.AA == -1 || AAValues[i.Key.AA] == 0) // AA not assigned, or target not set
                                         continue;
-
-                                    SharesToBuy = ((TotalValue * (AAValues[i.Key.AA] / 100)) - TickerValue) / (Price / SplitRatio);
+                                    SharesToBuy = ((YTotalValue * (AAValues[i.Key.AA] / 100)) - Info.TotalValue) / (Info.Price / Info.SplitRatio);
                                     break;
                                 case Constants.DynamicTradeType.Fixed:
-                                    SharesToBuy = dt.Value1 / (Price / SplitRatio);
+                                    SharesToBuy = dt.Value1 / (Info.Price / Info.SplitRatio);
                                     break;
                                 case Constants.DynamicTradeType.Shares:
                                     SharesToBuy = dt.Value1; 
                                     break;
                                 case Constants.DynamicTradeType.TotalValue:
-                                    SharesToBuy = (TotalValue * (dt.Value1 / 100)) / (Price / SplitRatio);
+                                    SharesToBuy = (YTotalValue * (dt.Value1 / 100)) / (Info.Price / Info.SplitRatio);
                                     break;
                             }
                         newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Shares, Convert.ToDecimal(SharesToBuy));
@@ -1465,8 +1565,7 @@ namespace MyPersonalIndex
             return Dates;
         }
 
-        private Dictionary<Symbol, List<Constants.DynamicTrade>> GetSpecificCustomTrades(DateTime d,
-            Dictionary<Symbol, List<DynamicTrades>> CustomTrades)
+        private Dictionary<Symbol, List<Constants.DynamicTrade>> GetSpecificCustomTrades(DateTime d, Dictionary<Symbol, List<DynamicTrades>> CustomTrades)
         {
             Dictionary<Symbol, List<Constants.DynamicTrade>> TickersWithCustomTrades = new Dictionary<Symbol, List<Constants.DynamicTrade>>();
 
@@ -1520,7 +1619,7 @@ namespace MyPersonalIndex
             try
             {
                 // Holds all dynamic trades and the dates they should take place
-                Dictionary<Symbol, List<DynamicTrades>> CustomTrades = GetCustomTrades(Portfolio, MinDate, Dates[Dates.Count - 1], Dates);
+                Dictionary<Symbol, List<DynamicTrades>> CustomTrades = GetCustomTrades(Portfolio, MinDate, Dates);
                 // Holds AA IDs and their targets for AA dynamic trades
                 Dictionary<int, double> AAValues = GetAATargets(Portfolio);
 
@@ -1601,7 +1700,7 @@ namespace MyPersonalIndex
                 }
             else
             {
-                if (dgHoldings.RowCount < 1)
+                if (dgHoldings.RowCount == 0)
                     return;
 
                 Deleted = DeleteTicker(Convert.ToInt32(dgHoldings[MPIHoldings.TickerIDColumn, dgHoldings.CurrentCell.RowIndex].Value),
@@ -1611,11 +1710,8 @@ namespace MyPersonalIndex
             if (!Deleted)
                 return;
 
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
-
-            CheckUnusedNAVs(false);
+            DeleteUnusedInfo();
+            CheckForInvalidStartDates(false);
         }
 
         private bool DeleteTicker(int Ticker, string sTicker)
@@ -1847,6 +1943,14 @@ namespace MyPersonalIndex
             }
         }
 
+        private void DeleteUnusedInfo()
+        {
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
+            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
+            ResetLastDate();
+        }
+
         private void btnMainDelete_Click(object sender, EventArgs e)
         {
             if (cmbMainPortfolio.ComboBox.SelectedValue == null)
@@ -1861,20 +1965,18 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(MainQueries.DeleteTickers(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteStatistics(MPI.Portfolio.ID));
             SQL.ExecuteNonQuery(MainQueries.DeleteTrades(MPI.Portfolio.ID));
-            SQL.ExecuteNonQuery(MainQueries.DeletePortfolio(MPI.Portfolio.ID));   
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedClosingPrices());
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedDividends());
-            SQL.ExecuteNonQuery(MainQueries.DeleteUnusedSplits());
+            SQL.ExecuteNonQuery(MainQueries.DeletePortfolio(MPI.Portfolio.ID));
+            DeleteUnusedInfo();
 
             cmbMainPortfolio.SelectedIndexChanged -= cmbMainPortfolio_SelectedIndexChanged;
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).Rows[cmbMainPortfolio.ComboBox.SelectedIndex].Delete();
             ((DataTable)cmbMainPortfolio.ComboBox.DataSource).AcceptChanges();
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);
 
-            CheckUnusedNAVs(true);
+            CheckForInvalidStartDates(true);
         }
 
-        private void CheckUnusedNAVs(bool PortfolioDelete)
+        private void CheckForInvalidStartDates(bool ReloadPortfolio)
         {
             DateTime MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetFirstDate(), DateTime.Today.AddDays(1)));
             SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetPortfolios());
@@ -1899,16 +2001,19 @@ namespace MyPersonalIndex
                 rs.Close();
             }
 
-            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
-            stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
-
             if (RecalcAll)
                 StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Settings.DataStartDate, -1);
             else
-                if (PortfolioDelete)
+                if (ReloadPortfolio)
                     LoadPortfolio();
                 else
                     StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
+        }
+
+        private void ResetLastDate()
+        {
+            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
+            stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
         }
 
         private bool IsInternetConnection()
@@ -2175,16 +2280,17 @@ namespace MyPersonalIndex
                 // hack to make the button not look pressed
                 btnMainUpdate.Visible = false;
                 btnMainUpdate.Visible = true;
-                
+
+                ResetLastDate();
                 MessageBox.Show("Finished");
 
-                DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), SqlDateTime.MinValue.Value));
-                if (d != SqlDateTime.MinValue.Value)
-                {
-                    MPI.LastDate = d;
-                    ResetCalendars();
-                    stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
-                }
+                //DateTime d = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), SqlDateTime.MinValue.Value));
+                //if (d != SqlDateTime.MinValue.Value)
+                //{
+                //    MPI.LastDate = d;
+                //    ResetCalendars();
+                //    stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+                //}
             }
 
             LoadPortfolio();

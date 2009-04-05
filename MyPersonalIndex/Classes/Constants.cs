@@ -10,7 +10,6 @@ namespace MyPersonalIndex
         public enum StatVariables { Portfolio, PortfolioName, StartDate, EndDate, PreviousDay, TotalValue };
         public enum DynamicTradeType { Shares, Fixed, TotalValue, AA };
         public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
-        public enum BusinessDays { Monday, Tuesday, Wednesday, Thursday, Friday };
 
         public class DynamicTrade
         {
@@ -23,21 +22,20 @@ namespace MyPersonalIndex
             public double Value1;
         }
 
-        public class Pair<T, U>
-        {
-            public Pair()
-            {
-            }
+        //public class Pair<T, U>
+        //{
+        //    public Pair()
+        //    {
+        //    }
 
-            public Pair(T Value1, U Value2)
-            {
-                this.Value1 = Value1;
-                this.Value2 = Value2;
-            }
+        //    public Pair(T Value1, U Value2)
+        //    {
+        //        this.Value1 = Value1;
+        //        this.Value2 = Value2;
+        //    }
 
-            public T Value1 { get; set; }
-            public U Value2 { get; set; }
-        };
-
+        //    public T Value1 { get; set; }
+        //    public U Value2 { get; set; }
+        //};
     }
 }

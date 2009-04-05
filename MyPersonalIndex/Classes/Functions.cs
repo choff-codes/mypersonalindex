@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net;
 using System.Reflection;
 
 namespace MyPersonalIndex
@@ -83,6 +84,36 @@ namespace MyPersonalIndex
                 SQL = SQL.Replace("%" + Enum.GetName(typeof(Constants.StatVariables), p.Key) + "%", p.Value);
 
             return SQL;
+        }
+
+        public static bool IsInternetConnection()
+        {
+            HttpWebRequest httpRequest;
+            HttpWebResponse httpResponse = null;
+            try
+            {
+                httpRequest = (HttpWebRequest)WebRequest.Create("http://finance.yahoo.com");
+                httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+
+                if (httpResponse.StatusCode == HttpStatusCode.OK)
+                    return true;
+                else
+                    return false;
+            }
+            catch (WebException)
+            {
+                return false;
+            }
+            finally
+            {
+                if (httpResponse != null)
+                    httpResponse.Close();
+            }
+        }
+
+        public static string RemoveDelimiter(string Delimiter, string Value)
+        {
+            return Value.Replace(Delimiter, "");
         }
     }
 }

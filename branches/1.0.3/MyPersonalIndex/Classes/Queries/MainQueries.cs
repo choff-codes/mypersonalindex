@@ -186,10 +186,10 @@ namespace MyPersonalIndex
                 "SELECT DISTINCT TickerID FROM Trades WHERE Portfolio = {0}", Portfolio);
         }
 
-        public enum eGetPortfolios { ID, Name };
+        public enum eGetPortfolios { Name, ID};
         public static string GetPortfolios()
         {
-            return "SELECT ID, Name FROM Portfolios";
+            return "SELECT Name, ID FROM Portfolios";
         }
 
         public enum eGetNAVPortfolios { ID, Name, StartDate, Dividends, NAVStartValue };
@@ -209,6 +209,11 @@ namespace MyPersonalIndex
         {
             return string.Format(
                 "DELETE FROM Trades WHERE Portfolio = {0} AND Date >= '{1}' AND Custom IS NOT NULL", Portfolio, MinDate.ToShortDateString());
+        }
+
+        public static string DeleteCustomTrades()
+        {
+            return "DELETE FROM Trades WHERE Custom IS NOT NULL";
         }
 
         public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value1, AA };
@@ -446,9 +451,14 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM AA WHERE Portfolio = {0}", Portfolio);
         }
 
+        public static string DeleteAccount(int Portfolio)
+        {
+            return string.Format("DELETE FROM Accounts WHERE Portfolio = {0}", Portfolio);
+        }
+
         public static string DeleteCustomTrades(int Portfolio)
         {
-            return string.Format("DELETE FROM CustomTrades WHERE TickerID IN (SELECT ID FROM Tickers WHERE Portfolio = {0})", Portfolio);
+            return string.Format("DELETE FROM CustomTrades WHERE Portfolio = {0}", Portfolio);
         }
 
         public static string DeleteTickers(int Portfolio)

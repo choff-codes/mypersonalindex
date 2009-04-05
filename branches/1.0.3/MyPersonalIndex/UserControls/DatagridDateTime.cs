@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Windows.Forms;
 
+// from http://msdn.microsoft.com/en-us/library/7tas5c80.aspx
+
 namespace MyPersonalIndex
 {
     public class CalendarColumn : DataGridViewColumn
@@ -75,7 +77,7 @@ namespace MyPersonalIndex
             get
             {
                 // Use the current date and time as the default value.
-                return DateTime.Now;
+                return DateTime.Today;
             }
         }
     }

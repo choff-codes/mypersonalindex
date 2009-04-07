@@ -19,7 +19,7 @@ namespace MyPersonalIndex
             // % for AA, Total Amount
             // Shares for Shares
             // $ Amount for Fixed
-            public double Value1;
+            public double Value;
         }
 
         //public class Pair<T, U>

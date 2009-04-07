@@ -31,18 +31,22 @@ namespace MyPersonalIndex
                 MinDate = CheckStartDate(DataStartDate, LastDate), 
                 SelectionStart =  LastDate
             };
-            btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
-            btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
+            btnStartDate.Text = string.Format("Start Date: {0}", StartCalendar.SelectionStart.ToShortDateString());
+            btnEndDate.Text = string.Format("End Date: {0}", EndCalendar.SelectionStart.ToShortDateString());
             this.LastDate = LastDate;
         }
 
         private DateTime CheckStartDate(DateTime StartDate, DateTime LastDate)
         {
+            // if start date is not a market day, find the next day, stopping at LastDate
             StartDate = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrNext(StartDate), LastDate));
 
+            // if there is a day before, return successfully
+            // otherwise, there needs to be 1 day before to pull previous day closing prices
             if (Convert.ToInt32(SQL.ExecuteScalar(AdvQueries.GetDaysNowAndBefore(StartDate))) >= 2)
                 return StartDate;
 
+            // get date from the start of the 2nd day of pricing, up to LastDate
             return Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetSecondDay(), LastDate));
         }
 
@@ -68,37 +72,40 @@ namespace MyPersonalIndex
             lst.DisplayMember = Enum.GetName(typeof(AdvQueries.eGetTickerList), AdvQueries.eGetTickerList.Name);
             lst.ValueMember = Enum.GetName(typeof(AdvQueries.eGetTickerList), AdvQueries.eGetTickerList.ID); ;
 
-            btnTickerDiv.Checked = Convert.ToInt32(SQL.ExecuteScalar(AdvQueries.GetIncludeDividends())) == 1;
+            // include dividend setting
+            btnTickerDiv.Checked = Convert.ToBoolean(SQL.ExecuteScalar(AdvQueries.GetIncludeDividends()));
         }
 
         private void Date_Change(object sender, DateRangeEventArgs e)
         {
             if (sender == StartCalendar)
             {
-                StartCalendar.SelectionStart =
-                    Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
+                StartCalendar.SelectionStart = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrNext(StartCalendar.SelectionStart), LastDate));
                 btnStartDate.HideDropDown();
-                btnStartDate.Text = "Start Date: " + StartCalendar.SelectionStart.ToShortDateString();
+                btnStartDate.Text = string.Format("Start Date: {0}", StartCalendar.SelectionStart.ToShortDateString());
             }
             else
             {
-                EndCalendar.SelectionStart =
-                   Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
+                EndCalendar.SelectionStart = Convert.ToDateTime(SQL.ExecuteScalar(AdvQueries.GetCurrentDayOrPrevious(EndCalendar.SelectionStart), EndCalendar.MinDate));
                 btnEndDate.HideDropDown();
-                btnEndDate.Text = "End Date: " + EndCalendar.SelectionStart.ToShortDateString();
+                btnEndDate.Text = string.Format("End Date: {0}", EndCalendar.SelectionStart.ToShortDateString());
             }
         }
 
         private void cmdSelectAll_Click(object sender, EventArgs e)
         {
-            for(int i = 0; i < lst.Items.Count; i++)
-                lst.SetItemChecked(i, true);
+            CheckListItems(true);
         }
 
         private void cmdClear_Click(object sender, EventArgs e)
         {
+            CheckListItems(false);
+        }
+
+        private void CheckListItems(bool Checked)
+        {
             for (int i = 0; i < lst.Items.Count; i++)
-                lst.SetItemChecked(i, false);
+                lst.SetItemChecked(i, Checked);
         }
 
         private void cmdPortfolios_Click(object sender, EventArgs e)

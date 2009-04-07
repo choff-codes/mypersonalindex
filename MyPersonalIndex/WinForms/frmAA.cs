@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Windows.Forms;
 
@@ -8,13 +9,13 @@ namespace MyPersonalIndex
     {
         private AAQueries SQL = new AAQueries();
         private int PortfolioID;
-        private bool Pasted;
+        private bool Pasted = false;
 
         public frmAA(int Portfolio, string PortfolioName)
         {
             InitializeComponent();
             PortfolioID = Portfolio;
-            this.Text = PortfolioName + " Asset Allocation";
+            this.Text = string.Format("{0} Asset Allocation", PortfolioName);
         }
 
         private void frmAA_Load(object sender, EventArgs e)
@@ -25,13 +26,25 @@ namespace MyPersonalIndex
                 return;
             }
 
-            Pasted = false;
-
             dsAA.Tables.Add(SQL.ExecuteDataset(AAQueries.GetAA(PortfolioID)));
             dgAA.DataSource = dsAA.Tables[0];
+            dsAA.AcceptChanges();  // set all records = clean
+        }
 
-            dsAA.AcceptChanges();
+        private bool CheckValidPasteItem(string s, AAQueries.eGetAA Column)
+        {
+            decimal tmp;
 
+            if (Column == AAQueries.eGetAA.AA)
+                return !string.IsNullOrEmpty(s);
+            else  // AAQueries.eGetAA.Target
+                return decimal.TryParse(s, out tmp);
+        }
+
+        private bool CheckValidPasteItem(string s, string s2)
+        {
+            decimal tmp;
+            return (!string.IsNullOrEmpty(s)) && decimal.TryParse(s2, out tmp);
         }
 
         private void dgAA_KeyDown(object sender, KeyEventArgs e)
@@ -39,86 +52,50 @@ namespace MyPersonalIndex
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
-            Pasted = true;
+            Pasted = true;  // there have been changes
 
-            string s = Clipboard.GetText();
-            s = s.Replace("\r", "");
-            string[] lines = s.Split('\n');
+            string[] lines = Functions.GetClipboardText();
             int row = dgAA.CurrentCell.RowIndex;
             int origrow = dgAA.CurrentCell.RowIndex;
             int col = dgAA.CurrentCell.ColumnIndex;
-
 
             dgAA.CancelEdit();
             dsAA.AcceptChanges();
 
             foreach (string line in lines)
             {
-                if (line == "")
+                if (string.IsNullOrEmpty(line))
                     continue;
 
-                string[] cells = line.Split('\t');
-                if (row < dgAA.Rows.Count - 1)
-                {
-                    for (int i = 0; i < cells.Length; ++i)
-                    {
-                        if (col + i < dgAA.Columns.Count - 1)
-                        {
-                            try
-                            {
-                                switch (col + i)
-                                {
-                                    case 0:
-                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i];
-                                        break;
-                                    case 1:
-                                        dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i].Replace("%", ""));
-                                        break;
-                                }
-                            }
-                            catch (System.FormatException)
-                            {
-                                // do nothing
-                            }
-                            catch (System.OverflowException)
-                            {
-                                // do nothing
-                            }
+                string[] cells = line.Split('\t');  // tab seperated values
 
-                            dsAA.AcceptChanges();
-                        }
-                    }
-                    row++;
-
-                }
-                else
-                {
-                    if (cells.Length == dgAA.Columns.Count - 1)
+                if (row >= dgAA.Rows.Count - 1 && col == 0 && cells.Length == dgAA.Columns.Count - 1)  // -1 since there is a hidden column
+                    if (CheckValidPasteItem(cells[(int)AAQueries.eGetAA.AA], cells[(int)AAQueries.eGetAA.Target].Replace("%", "")))
                     {
-                        try
-                        {
-                            dsAA.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1].Replace("%", "")), 0);
-                            row++;
-                        }
-                        catch (System.FormatException)
-                        {
-                            // do nothing
-                        }
-                        catch (System.OverflowException)
-                        {
-                            // do nothing
-                        }
+                        dsAA.Tables[0].Rows.Add(cells[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(cells[(int)AAQueries.eGetAA.Target].Replace("%", "")), 0);
                         dsAA.AcceptChanges();
+                        row++;
+                        continue;
                     }
-                }
-            }
 
+                if (row >= dgAA.Rows.Count - 1)
+                    continue;
+
+                for (int i = col; i <= dgAA.Columns.Count - 2; i++)  // -2 since there is a hidden ID column
+                    if (i == (int)AAQueries.eGetAA.AA && CheckValidPasteItem(cells[i - col], AAQueries.eGetAA.AA))
+                            dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i - col];
+                    else if (i == (int)AAQueries.eGetAA.Target && CheckValidPasteItem(cells[i - col].Replace("%", ""), AAQueries.eGetAA.Target))
+                            dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i - col].Replace("%", ""));
+
+                    dsAA.AcceptChanges();
+                    row++;
+            }
             dgAA.CurrentCell = dgAA[col, origrow];
         }
 
         private void dgAA_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
         {
-            e.Row.Cells[2].Value = 0;
+            e.Row.Cells[(int)AAQueries.eGetAA.ID].Value = 0;
         }
 
         private void frmAA_FormClosing(object sender, FormClosingEventArgs e)
@@ -136,35 +113,24 @@ namespace MyPersonalIndex
             if (dsAA.HasChanges() || Pasted)
             {
                 dsAA.AcceptChanges();
-                string AAin = "";
+                List<string> AAin = new List<string>();  // delete anything not added to this list
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
-                    if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) != 0)
-                        AAin = AAin + Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]).ToString() + ",";
+                    if ((int)dr[(int)AAQueries.eGetAA.ID] != 0) // existing rows, all new rows have a 0 ID
+                        AAin.Add(dr[(int)AAQueries.eGetAA.ID].ToString());
 
-                if (!string.IsNullOrEmpty(AAin))
-                    AAin = AAin.Substring(0, AAin.Length - 1);
-
-                SQL.ExecuteNonQuery(AAQueries.DeleteAA(PortfolioID, AAin));
+                SQL.ExecuteNonQuery(AAQueries.DeleteAA(PortfolioID, string.Join(",", AAin.ToArray())));
 
                 foreach (DataRow dr in dsAA.Tables[0].Rows)
                 {
-                    try
-                    {
-                        if (Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]) == 0)
-                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
-                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], null));
-                            else
-                                SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
-                        else
-                            if (string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
-                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], null));
-                            else
-                                SQL.ExecuteNonQuery(AAQueries.UpdateAA(Convert.ToInt32(dr[(int)AAQueries.eGetAA.ID]), (string)dr[(int)AAQueries.eGetAA.AA], Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target])));
-                    }
-                    catch
-                    {
-                    }
+                    double? Target = null;  // store blank targets as null
+                    if (!string.IsNullOrEmpty(dr[(int)AAQueries.eGetAA.Target].ToString()))
+                        Target = Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target]);
+
+                    if ((int)dr[(int)AAQueries.eGetAA.ID] == 0)
+                        SQL.ExecuteNonQuery(AAQueries.InsertAA(PortfolioID, (string)dr[(int)AAQueries.eGetAA.AA], Target));
+                    else
+                        SQL.ExecuteNonQuery(AAQueries.UpdateAA((int)dr[(int)AAQueries.eGetAA.ID], (string)dr[(int)AAQueries.eGetAA.AA], Target));
                 }
                 DialogResult = DialogResult.OK;
             }

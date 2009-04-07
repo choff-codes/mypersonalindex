@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Net;
 using System.Reflection;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -114,6 +115,11 @@ namespace MyPersonalIndex
         public static string RemoveDelimiter(string Delimiter, string Value)
         {
             return Value.Replace(Delimiter, "");
+        }
+
+        public static string[] GetClipboardText()
+        {
+            return Clipboard.GetText().Replace("\r", "").Split('\n');  // dos new lines include \r, unix does not
         }
     }
 }

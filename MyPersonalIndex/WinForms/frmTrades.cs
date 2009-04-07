@@ -58,7 +58,7 @@ namespace MyPersonalIndex
                         dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)TradeQueries.eGetTrades.Frequency);
                         dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)TradeQueries.eGetTrades.TradeType);
                         dt.When = rs.GetString((int)TradeQueries.eGetTrades.Dates);
-                        dt.Value1 = (double)(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
+                        dt.Value = (double)(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
 
                         Trades.Add(dt);
                     }
@@ -158,7 +158,7 @@ namespace MyPersonalIndex
 
             cmbFreq.SelectedIndex = (int)Trades[CurrentItem].Frequency;
             cmbType.SelectedIndex = (int)Trades[CurrentItem].TradeType;
-            txtShares.Text = Trades[CurrentItem].Value1.ToString("#######0.00");
+            txtShares.Text = Trades[CurrentItem].Value.ToString("#######0.00");
 
             switch (Trades[CurrentItem].Frequency)
             {
@@ -199,7 +199,7 @@ namespace MyPersonalIndex
 
             Trades[CurrentItem].Frequency = (Constants.DynamicTradeFreq)cmbFreq.SelectedIndex;
             Trades[CurrentItem].TradeType = (Constants.DynamicTradeType)cmbType.SelectedIndex;
-            Trades[CurrentItem].Value1 = Convert.ToDouble(txtShares.Text);
+            Trades[CurrentItem].Value = Convert.ToDouble(txtShares.Text);
 
             switch (Trades[CurrentItem].Frequency)
             {
@@ -245,7 +245,7 @@ namespace MyPersonalIndex
                     newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
                     newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
                     newRecord.SetString((int)TradeQueries.Tables.eCustomTrades.Dates, dt.When ?? "");
-                    newRecord.SetDecimal((int)TradeQueries.Tables.eCustomTrades.Value1, Convert.ToDecimal(dt.Value1));
+                    newRecord.SetDecimal((int)TradeQueries.Tables.eCustomTrades.Value1, Convert.ToDecimal(dt.Value));
 
                     rs.Insert(newRecord);
                 }

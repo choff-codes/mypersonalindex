@@ -376,21 +376,21 @@ namespace MyPersonalIndex
             {
                 MPI.Holdings.SelDate = GetCurrentDateOrPrevious(MPI.Holdings.Calendar.SelectionStart);
                 btnHoldingsDate.HideDropDown();
-                btnHoldingsDate.Text = "Date: " + MPI.Holdings.SelDate.ToShortDateString();
+                btnHoldingsDate.Text = string.Format("Date: {0}", MPI.Holdings.SelDate.ToShortDateString());
                 LoadHoldings(MPI.Holdings.SelDate);
             }
             else if (sender == MPI.AA.Calendar)
             {
                 MPI.AA.SelDate = GetCurrentDateOrPrevious(MPI.AA.Calendar.SelectionStart);
                 btnAADate.HideDropDown();
-                btnAADate.Text = "Date: " + MPI.AA.SelDate.ToShortDateString();
+                btnAADate.Text = string.Format("Date: {0}", MPI.AA.SelDate.ToShortDateString());
                 LoadAssetAllocation(MPI.AA.SelDate);
             }
             else if (sender == MPI.Account.Calendar)
             {
                 MPI.Account.SelDate = GetCurrentDateOrPrevious(MPI.Account.Calendar.SelectionStart);
                 btnAcctDate.HideDropDown();
-                btnAcctDate.Text = "Date: " + MPI.Account.SelDate.ToShortDateString();
+                btnAcctDate.Text = string.Format("Date: {0}", MPI.Account.SelDate.ToShortDateString());
                 LoadAccounts(MPI.Account.SelDate);
             }
             else if (sender == MPI.Chart.CalendarBegin || sender == MPI.Chart.CalendarEnd)
@@ -399,8 +399,8 @@ namespace MyPersonalIndex
                 MPI.Chart.EndDate = GetCurrentDateOrPrevious(MPI.Chart.CalendarEnd.SelectionStart); 
                 btnChartStartDate.HideDropDown();
                 btnChartEndDate.HideDropDown();
-                btnChartStartDate.Text = "Start Date: " + MPI.Chart.BeginDate.ToShortDateString();
-                btnChartEndDate.Text = "End Date: " + MPI.Chart.EndDate.ToShortDateString();
+                btnChartStartDate.Text = string.Format("Start Date: {0}", MPI.Chart.BeginDate.ToShortDateString());
+                btnChartEndDate.Text = string.Format("End Date: {0}", MPI.Chart.EndDate.ToShortDateString());
                 LoadGraph(MPI.Chart.BeginDate, MPI.Chart.EndDate);
             }
             else if (sender == MPI.Correlation.CalendarBegin || sender == MPI.Correlation.CalendarEnd)
@@ -409,8 +409,8 @@ namespace MyPersonalIndex
                 MPI.Correlation.EndDate = GetCurrentDateOrPrevious(MPI.Correlation.CalendarEnd.SelectionStart); 
                 btnCorrelationStartDate.HideDropDown();
                 btnCorrelationEndDate.HideDropDown();
-                btnCorrelationStartDate.Text = "Start Date: " + MPI.Correlation.BeginDate.ToShortDateString();
-                btnCorrelationEndDate.Text = "End Date: " + MPI.Correlation.EndDate.ToShortDateString();
+                btnCorrelationStartDate.Text = string.Format("Start Date: {0}", MPI.Correlation.BeginDate.ToShortDateString());
+                btnCorrelationEndDate.Text = string.Format("End Date: {0}", MPI.Correlation.EndDate.ToShortDateString());
             }
             else if (sender == MPI.Stat.CalendarBegin || sender == MPI.Stat.CalendarEnd)
             {
@@ -418,8 +418,8 @@ namespace MyPersonalIndex
                 MPI.Stat.EndDate = GetCurrentDateOrPrevious(MPI.Stat.CalendarEnd.SelectionStart); 
                 btnStatStartDate.HideDropDown();
                 btnStatEndDate.HideDropDown();
-                btnStatStartDate.Text = "Start Date: " + MPI.Stat.BeginDate.ToShortDateString();
-                btnStatEndDate.Text = "End Date: " + MPI.Stat.EndDate.ToShortDateString();
+                btnStatStartDate.Text = string.Format("Start Date: {0}", MPI.Stat.BeginDate.ToShortDateString());
+                btnStatEndDate.Text = string.Format("End Date: {0}", MPI.Stat.EndDate.ToShortDateString());
                 LoadStat(MPI.Stat.BeginDate, MPI.Stat.EndDate, true);
             }
         }
@@ -1289,13 +1289,13 @@ namespace MyPersonalIndex
             return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate));
         }
 
-        public List<DateTime> GetDailyDynamicDates(List<DateTime> MarketDays)
+        private List<DateTime> GetDailyDynamicDates(List<DateTime> MarketDays)
         {
             // add a dummy date for loop in GetNAVValues - the foreach always does daily, but won't loop if nothing is there
             return new List<DateTime> {DateTime.Now};
         }
 
-        public List<DateTime> GetWeeklyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        private List<DateTime> GetWeeklyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
             DateTime FirstWeekday = MinDate;
@@ -1317,7 +1317,7 @@ namespace MyPersonalIndex
             return TradeDates;
         }
 
-        public List<DateTime> GetMonthlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        private List<DateTime> GetMonthlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
 
@@ -1346,7 +1346,7 @@ namespace MyPersonalIndex
             return TradeDates;
         }
 
-        public List<DateTime> GetYearlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        private List<DateTime> GetYearlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
 
@@ -1376,7 +1376,7 @@ namespace MyPersonalIndex
             return TradeDates;
         }
 
-        public List<DateTime> GetSpecificDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
+        private List<DateTime> GetSpecificDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
 
@@ -1412,7 +1412,7 @@ namespace MyPersonalIndex
                     Constants.DynamicTrade dt = new Constants.DynamicTrade();
                     dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)MainQueries.eGetCustomTrades.Frequency);
                     dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)MainQueries.eGetCustomTrades.TradeType);
-                    dt.Value1 = (double)rs.GetDecimal((int)MainQueries.eGetCustomTrades.Value1);
+                    dt.Value = (double)rs.GetDecimal((int)MainQueries.eGetCustomTrades.Value1);
                     dt.When = rs.GetString((int)MainQueries.eGetCustomTrades.Dates);
                     dts.Trade = dt;
 
@@ -1526,13 +1526,13 @@ namespace MyPersonalIndex
                                     SharesToBuy = ((YTotalValue * (AAValues[i.Key.AA] / 100)) - Info.TotalValue) / (Info.Price / Info.SplitRatio);
                                     break;
                                 case Constants.DynamicTradeType.Fixed:
-                                    SharesToBuy = dt.Value1 / (Info.Price / Info.SplitRatio);
+                                    SharesToBuy = dt.Value / (Info.Price / Info.SplitRatio);
                                     break;
                                 case Constants.DynamicTradeType.Shares:
-                                    SharesToBuy = dt.Value1; 
+                                    SharesToBuy = dt.Value; 
                                     break;
                                 case Constants.DynamicTradeType.TotalValue:
-                                    SharesToBuy = (YTotalValue * (dt.Value1 / 100)) / (Info.Price / Info.SplitRatio);
+                                    SharesToBuy = (YTotalValue * (dt.Value / 100)) / (Info.Price / Info.SplitRatio);
                                     break;
                             }
                         newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Shares, (decimal)SharesToBuy);

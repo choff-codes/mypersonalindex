@@ -51,7 +51,6 @@
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.cmdOk = new System.Windows.Forms.Button();
-            this.dSave = new System.Windows.Forms.SaveFileDialog();
             this.pnl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).BeginInit();
             this.ts.SuspendLayout();
@@ -281,11 +280,6 @@
             this.cmdOk.UseVisualStyleBackColor = true;
             this.cmdOk.Click += new System.EventHandler(this.cmdOk_Click);
             // 
-            // dSave
-            // 
-            this.dSave.DefaultExt = "txt";
-            this.dSave.Filter = "Tab Delimited File|*.txt|Comma Delimited File|*.csv|Pipe Delimited File|*.txt";
-            // 
             // frmAdvanced
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -339,7 +333,6 @@
         private System.Windows.Forms.ToolStripSplitButton btnRefresh;
         private System.Windows.Forms.ToolStripMenuItem btnTickerDiv;
         private System.Windows.Forms.ToolStripMenuItem btnStat;
-        private System.Windows.Forms.SaveFileDialog dSave;
 
     }
 }

@@ -184,7 +184,6 @@
             this.sMain4 = new System.Windows.Forms.ToolStripSeparator();
             this.btnMainOptions = new System.Windows.Forms.ToolStripButton();
             this.sMainAbout = new System.Windows.Forms.ToolStripButton();
-            this.dSave = new System.Windows.Forms.SaveFileDialog();
             this.lblClosing = new System.Windows.Forms.Label();
             this.bw = new MyPersonalIndex.MPIBackgroundWorker();
             this.tb.SuspendLayout();
@@ -1464,11 +1463,6 @@
             this.sMainAbout.Text = "About";
             this.sMainAbout.Click += new System.EventHandler(this.btnMainAbout_Click);
             // 
-            // dSave
-            // 
-            this.dSave.DefaultExt = "txt";
-            this.dSave.Filter = "Tab Delimited File|*.txt|Comma Delimited File|*.csv|Pipe Delimited File|*.txt";
-            // 
             // lblClosing
             // 
             this.lblClosing.Font = new System.Drawing.Font("Tahoma", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -1626,7 +1620,6 @@
         private System.Windows.Forms.ToolStripLabel lblAASort;
         private System.Windows.Forms.ToolStripComboBox cmbAASortBy;
         private System.Windows.Forms.ToolStripSeparator sAA3;
-        private System.Windows.Forms.SaveFileDialog dSave;
         private System.Windows.Forms.ToolStripButton btnAAShowBlank;
         private System.Windows.Forms.ToolStripButton btnCorrelationHidden;
         private System.Windows.Forms.ToolStripSeparator sCorrelation3;

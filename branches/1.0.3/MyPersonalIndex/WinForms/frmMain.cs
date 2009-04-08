@@ -2115,71 +2115,25 @@ namespace MyPersonalIndex
 
         private void btnHoldingsExport_Click(object sender, EventArgs e)
         {
-            Export(dgHoldings, false, 1);
-        }
-
-        private void Export(DataGridView dg, bool IncludeRowLabels, int IgnoreEndColumns)
-        {
-            if (dSave.ShowDialog() != DialogResult.OK)
-                return;
-
-            List<string> lines = new List<string>(dg.Rows.Count + 1); // contains the entire output
-            List<string> line = new List<string>(); // cleared after each line
-            int columnCount = dg.Columns.Count - IgnoreEndColumns;
-            string delimiter = "";
-
-            switch (dSave.FilterIndex)
-            {
-                case 1:
-                    delimiter = "\t";
-                    break;
-                case 2:
-                    delimiter = ",";
-                    break;
-                case 3:
-                    delimiter = "|";
-                    break;
-            }
-
-            if (IncludeRowLabels)
-                line.Add("");  // cell 0,0 will be nothing if there are row headers
-            
-            // write out column headers
-            for (int x = 0; x < columnCount; x++)
-                line.Add(Functions.RemoveDelimiter(delimiter, dg.Columns[x].HeaderText));
-
-            lines.Add(string.Join(delimiter, line.ToArray()));
-
-            foreach (DataGridViewRow dr in dg.Rows)
-            {
-                line.Clear();
-                if (IncludeRowLabels)
-                    line.Add(Functions.RemoveDelimiter(delimiter, dr.HeaderCell.Value.ToString()));
-                for (int x = 0; x < columnCount; x++)
-                    line.Add(Functions.RemoveDelimiter(delimiter, dr.Cells[x].FormattedValue.ToString()));
-                lines.Add(string.Join(delimiter, line.ToArray()));
-            }
-
-            File.WriteAllLines(dSave.FileName, lines.ToArray());
-            MessageBox.Show("Export successful!");
+            Functions.Export(dgHoldings, false, 1);
         }
 
         private void btnPerformanceExport_Click(object sender, EventArgs e)
         {
-            Export(dgPerformance, false, 0);
+            Functions.Export(dgPerformance, false, 0);
         }
 
         private void btnCorrelationExport_Click(object sender, EventArgs e)
         {
             if (dgCorrelation.Rows.Count != 0)
-                Export(dgCorrelation, true, 0);
+                Functions.Export(dgCorrelation, true, 0);
             else
                 MessageBox.Show("First calculate correlations before exporting.");
         }
 
         private void btnAAExport_Click(object sender, EventArgs e)
         {
-            Export(dgAA, false, 0);
+            Functions.Export(dgAA, false, 0);
         }
 
         private void btnMainOptions_Click(object sender, EventArgs e)
@@ -2297,7 +2251,7 @@ namespace MyPersonalIndex
 
         private void btnStatExport_Click(object sender, EventArgs e)
         {
-            Export(dgStats, true, 0);
+            Functions.Export(dgStats, true, 0);
         }
 
         private void btnHoldingsHidden_Click(object sender, EventArgs e)
@@ -2337,7 +2291,7 @@ namespace MyPersonalIndex
 
         private void btnAcctExport_Click(object sender, EventArgs e)
         {
-            Export(dgAcct, false, 0);
+            Functions.Export(dgAcct, false, 0);
         }
 
         private void dgAcct_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

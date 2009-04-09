@@ -127,8 +127,8 @@ namespace MyPersonalIndex
                 f.Top = f.Top + btnOnce.Height;
                 if (f.ShowDialog() == DialogResult.OK)
                 {
-                    btnOnce.Tag = f.TradeReturnValues.When;
-                    btnOnce.Text = (f.TradeReturnValues.When.Contains("|") ? "Multiple Dates" : f.TradeReturnValues.When);
+                    btnOnce.Tag = f.DateReturnValues.When;
+                    btnOnce.Text = (f.DateReturnValues.When.Contains("|") ? "Multiple Dates" : f.DateReturnValues.When);
                 }
             }
         }

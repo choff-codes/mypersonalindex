@@ -10,28 +10,28 @@ namespace MyPersonalIndex
 {
     public partial class frmDates : Form
     {
-        public struct TradeRetValues
+        public struct DateRetValues
         {
             public string When;
         }
 
-        public TradeRetValues TradeReturnValues { get { return _TradeReturnValues; } }
+        public DateRetValues DateReturnValues { get { return _DateReturnValues; } }
 
         private List<DateTime> SelDates = new List<DateTime>();
-        private TradeRetValues _TradeReturnValues = new TradeRetValues();
+        private DateRetValues _DateReturnValues = new DateRetValues();
 
         public frmDates(string When)
         {
             InitializeComponent();
 
-            string[] s = When.Split('|');
-            for (int i = 0; i < s.Length; i++)
+            string[] dates = When.Split('|');
+            foreach (string s in dates)
             {
-                if (string.IsNullOrEmpty(s[i]))
+                if (string.IsNullOrEmpty(s))
                     continue;
 
-                SelDates.Add(Convert.ToDateTime(s[i]));
-                lst.Items.Add(s[i]);
+                SelDates.Add(Convert.ToDateTime(s));
+                lst.Items.Add(s);
             }
         }
 
@@ -68,10 +68,9 @@ namespace MyPersonalIndex
             string[] s = new string[SelDates.Count];
 
             for (int i = 0; i < SelDates.Count; i++)
-            {
                 s[i] = SelDates[i].ToShortDateString();
-            }
-            _TradeReturnValues.When = string.Join("|", s);
+
+            _DateReturnValues.When = string.Join("|", s);
             DialogResult = DialogResult.OK;
         }
     }

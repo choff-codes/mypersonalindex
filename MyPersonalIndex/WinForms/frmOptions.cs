@@ -22,9 +22,13 @@ namespace MyPersonalIndex
         public frmOptions(DateTime DataStartDate, bool Splits)
         {
             InitializeComponent();
+
             _OptionReturnValues.DataStartDate = DataStartDate;
             _OptionReturnValues.Splits = Splits;
-            DataStartCalendar = new MonthCalendar { MaxSelectionCount = 1, MaxDate = DateTime.Today, MinDate = SqlDateTime.MinValue.Value, SelectionStart = DataStartDate };
+            DataStartCalendar = new MonthCalendar { 
+                MaxSelectionCount = 1, MaxDate = DateTime.Today, 
+                MinDate = SqlDateTime.MinValue.Value, SelectionStart = DataStartDate 
+            };
             btnDate.Text = DataStartDate.ToShortDateString();
             chkSplit.Checked = Splits;
         }
@@ -67,6 +71,7 @@ namespace MyPersonalIndex
         {
             DateTime NewDataStartDate = DataStartCalendar.SelectionStart;
 
+            // Update splits, but only return OK if the date changed
             SQL.ExecuteNonQuery(OptionQueries.UpdateSplits(chkSplit.Checked));
             _OptionReturnValues.Splits = chkSplit.Checked;
 

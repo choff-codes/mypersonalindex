@@ -16,7 +16,7 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
             PortfolioID = Portfolio;
-            this.Text = PortfolioName + " Statistics";
+            this.Text = string.Format("{0} Statistics", PortfolioName);
         }
 
         private void frmStats_Load(object sender, EventArgs e)
@@ -29,52 +29,70 @@ namespace MyPersonalIndex
 
             DataTable dt = SQL.ExecuteDataset(StatsQueries.GetUserStats());
 
+            // Copy all stats to drop down
             cmb.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
             cmb.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             cmb.DataSource = dt.Copy();
 
+            // Copy all stats to left side list box
             lst1.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
             lst1.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             lst1.DataSource = dt;
 
+            // Copy a blank template to the right side list box
             lst2.DisplayMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.Description);
             lst2.ValueMember = Enum.GetName(typeof(StatsQueries.eGetUserStats), StatsQueries.eGetUserStats.ID);
             DataTable dt2 = dt.Copy();
             dt2.Clear();
             lst2.DataSource = dt2;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(StatsQueries.GetPortfolioStats(PortfolioID));
-
-            try
-            {
-                if (rs.HasRows)
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(StatsQueries.GetPortfolioStats(PortfolioID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
                 {
-                    rs.ReadFirst();
+                    int i = 0;
+                    int ID = rec.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
 
-                    do
-                    {
-                        int i = 0;
-                        int ID = rs.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
+                    while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
+                        i++;
 
-                        while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
-                        {
-                            i++;
-                        }
+                    dt2.Rows.Add(dt.Rows[i].ItemArray);
+                    dt.Rows[i].Delete();
 
-                        object[] o = dt.Rows[i].ItemArray;
-                        dt2.Rows.Add(o);
-                        dt.Rows[i].Delete();
-
-                        dt.AcceptChanges();
-                        dt2.AcceptChanges();
-                    }
-                    while (rs.Read());
+                    dt.AcceptChanges();
+                    dt2.AcceptChanges();
                 }
-            }
-            finally
-            {
-                rs.Close();
-            }
+
+            //foreach (SqlCeUpdatableRecord rec in rs)
+            //{
+            //    //rec.GetInt32
+            //}
+            //try
+            //{
+            //    if (rs.HasRows)
+            //    {
+            //        rs.ReadFirst();
+
+            //        do
+            //        {
+            //            int i = 0;
+            //            int ID = rs.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
+
+            //            while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
+            //                i++;
+
+            //            dt2.Rows.Add(dt.Rows[i].ItemArray);
+            //            dt.Rows[i].Delete();
+
+            //            dt.AcceptChanges();
+            //            dt2.AcceptChanges();
+            //        }
+            //        while (rs.Read());
+            //    }
+            //}
+            //finally
+            //{
+            //    rs.Close();
+            //}
 
             lst1.SelectedIndex = -1;
             lst2.SelectedIndex = -1;
@@ -186,12 +204,9 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(StatsQueries.DeletePortfolioStats(PortfolioID));
 
             if (dt2.Rows.Count > 0)
-            {
-                SqlCeResultSet rs = SQL.ExecuteTableUpdate(StatsQueries.Tables.Stats);
-                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-                try
-                {      
+                using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(StatsQueries.Tables.Stats))
+                {
+                    SqlCeUpdatableRecord newRecord = rs.CreateRecord();
                     for (int i = 0; i < dt2.Rows.Count; i++)
                     {
                         newRecord.SetInt32((int)StatsQueries.Tables.eStats.Portfolio, PortfolioID);
@@ -201,11 +216,7 @@ namespace MyPersonalIndex
                         rs.Insert(newRecord);
                     }
                 }
-                finally
-                {
-                    rs.Close();
-                }
-            }
+
             DialogResult = DialogResult.OK;
         }
 

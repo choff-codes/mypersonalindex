@@ -74,94 +74,55 @@ namespace MyPersonalIndex
 
         private void LoadTicker()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAttributes(PortfolioID, TickerID));
-            try
-            {
-                if (!rs.HasRows)
-                    return;
-
-                rs.ReadFirst();
-                cmbAA.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.AA);
-                if (cmbAA.SelectedValue == null)
-                    cmbAA.SelectedValue = -1;
-                cmbAcct.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.Acct);
-                if (cmbAcct.SelectedValue == null)
-                    cmbAcct.SelectedValue = -1;
-                chkCalc.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Active).IsTrue;
-                chkHide.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Hide).IsTrue;
-            }
-            finally
-            {
-                rs.Close();
-            }
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAttributes(PortfolioID, TickerID)))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    cmbAA.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.AA);
+                    if (cmbAA.SelectedValue == null)
+                        cmbAA.SelectedValue = -1;
+                    cmbAcct.SelectedValue = rs.GetInt32((int)TickerQueries.eGetAttributes.Acct);
+                    if (cmbAcct.SelectedValue == null)
+                        cmbAcct.SelectedValue = -1;
+                    chkCalc.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Active).IsTrue;
+                    chkHide.Checked = rs.GetSqlBoolean((int)TickerQueries.eGetAttributes.Hide).IsTrue;
+                }
         }
 
         private void LoadAADropDown()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAA(PortfolioID));
-            try
-            {
+            DataTable t = new DataTable();
+            t.Columns.Add("Display");
+            t.Columns.Add("Value");
+            t.Rows.Add("(Blank)", -1);
 
-                DataTable t = new DataTable();
-                t.Columns.Add("Display");
-                t.Columns.Add("Value");
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAA(PortfolioID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAA.AA), rec.GetInt32((int)TickerQueries.eGetAA.ID));
 
-                t.Rows.Add("(Blank)", -1);
+            cmbAA.DisplayMember = "Display";
+            cmbAA.ValueMember = "Value";
+            cmbAA.DataSource = t;
 
-                if (rs.HasRows)
-                {
-                    rs.ReadFirst();
-                    do
-                    {
-                        t.Rows.Add(rs.GetString((int)TickerQueries.eGetAA.AA), rs.GetInt32((int)TickerQueries.eGetAA.ID));
-                    }
-                    while (rs.Read());
-                }
-
-                cmbAA.DisplayMember = "Display";
-                cmbAA.ValueMember = "Value";
-                cmbAA.DataSource = t;
-
-                cmbAA.SelectedValue = -1;
-            }
-            finally
-            {
-                rs.Close();
-            }
+            cmbAA.SelectedValue = -1;
         }
 
         private void LoadAcctDropDown()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID));
-            try
-            {
+            DataTable t = new DataTable();
+            t.Columns.Add("Display");
+            t.Columns.Add("Value");
+            t.Rows.Add("(Blank)", -1);
 
-                DataTable t = new DataTable();
-                t.Columns.Add("Display");
-                t.Columns.Add("Value");
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID)))
+                foreach(SqlCeUpdatableRecord rec in rs)
+                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
 
-                t.Rows.Add("(Blank)", -1);
+            cmbAcct.DisplayMember = "Display";
+            cmbAcct.ValueMember = "Value";
+            cmbAcct.DataSource = t;
 
-                if (rs.HasRows)
-                {
-                    rs.ReadFirst();
-                    do
-                    {
-                        t.Rows.Add(rs.GetString((int)TickerQueries.eGetAcct.Name), rs.GetInt32((int)TickerQueries.eGetAcct.ID));
-                    }
-                    while (rs.Read());
-                }
-
-                cmbAcct.DisplayMember = "Display";
-                cmbAcct.ValueMember = "Value";
-                cmbAcct.DataSource = t;
-
-                cmbAcct.SelectedValue = -1;
-            }
-            finally
-            {
-                rs.Close();
-            }
+            cmbAcct.SelectedValue = -1;
         }
 
         private void dgTickers_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
@@ -286,13 +247,11 @@ namespace MyPersonalIndex
                 _TickerReturnValues.Changed = true;
                 dsTicker.AcceptChanges();
 
-                SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades);
-                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-                int i = 0;
-
-                try
+                using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades))
                 {
+                    SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+                    int i = 0;
+
                     foreach (DataRow dr in dsTicker.Tables[0].Rows)
                     {
                         newRecord.SetDateTime((int)TickerQueries.Tables.eTrades.Date, Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]));
@@ -308,10 +267,6 @@ namespace MyPersonalIndex
                         if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < TickerReturnValues.MinDate)
                             _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
                     }
-                }
-                finally
-                {
-                    rs.Close();
                 }
             }
             DialogResult = DialogResult.OK;

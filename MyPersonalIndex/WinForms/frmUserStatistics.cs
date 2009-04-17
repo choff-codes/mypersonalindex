@@ -69,23 +69,15 @@ namespace MyPersonalIndex
 
         private void LoadUserStat()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID));
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID)))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
 
-            try
-            {
-                if (!rs.HasRows)
-                    return;
-
-                rs.ReadFirst();
-
-                txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
-                txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
-                cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
-            }
-            finally
-            {
-                rs.Close();
-            }
+                    txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
+                    txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
+                    cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
+               }
         }
 
         private void frmUserStatistics_FormClosing(object sender, FormClosingEventArgs e)

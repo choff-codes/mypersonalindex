@@ -43,32 +43,18 @@ namespace MyPersonalIndex
 
             CurrentItem = -1;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(TradeQueries.GetTrades(TickerID));
-
-            try
-            {
-                if (rs.HasRows)
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TradeQueries.GetTrades(TickerID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
                 {
-                    rs.ReadFirst();
+                    Constants.DynamicTrade dt = new Constants.DynamicTrade();
 
-                    do
-                    {
-                        Constants.DynamicTrade dt = new Constants.DynamicTrade();
+                    dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)TradeQueries.eGetTrades.Frequency);
+                    dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)TradeQueries.eGetTrades.TradeType);
+                    dt.When = rs.GetString((int)TradeQueries.eGetTrades.Dates);
+                    dt.Value = (double)(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
 
-                        dt.Frequency = (Constants.DynamicTradeFreq)rs.GetInt32((int)TradeQueries.eGetTrades.Frequency);
-                        dt.TradeType = (Constants.DynamicTradeType)rs.GetInt32((int)TradeQueries.eGetTrades.TradeType);
-                        dt.When = rs.GetString((int)TradeQueries.eGetTrades.Dates);
-                        dt.Value = (double)(rs.GetDecimal((int)TradeQueries.eGetTrades.Value1));
-
-                        Trades.Add(dt);
-                    }
-                    while (rs.Read());
+                    Trades.Add(dt);
                 }
-            }
-            finally
-            {
-                rs.Close();
-            }
 
             DailyCalendar = new MonthCalendar { MaxSelectionCount = 1 };
             ToolStripControlHost host = new ToolStripControlHost(DailyCalendar);
@@ -233,11 +219,9 @@ namespace MyPersonalIndex
 
             SQL.ExecuteNonQuery(TradeQueries.DeleteTrades(TickerID));
 
-            SqlCeResultSet rs = SQL.ExecuteTableUpdate(TradeQueries.Tables.CustomTrades);
-            SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-
-            try
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TradeQueries.Tables.CustomTrades))
             {
+                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
                 foreach (Constants.DynamicTrade dt in Trades)
                 {
                     newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TickerID, TickerID);
@@ -249,10 +233,6 @@ namespace MyPersonalIndex
 
                     rs.Insert(newRecord);
                 }
-            }
-            finally
-            {
-                rs.Close();
             }
 
             DialogResult = DialogResult.OK;

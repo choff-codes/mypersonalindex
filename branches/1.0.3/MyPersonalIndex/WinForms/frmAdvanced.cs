@@ -245,26 +245,16 @@ namespace MyPersonalIndex
             DateTime PortfolioDate = GetCurrentDateOrNext(Portfolio, YDay, true);
             PointPairList list = new PointPairList();
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetChartPortfolio(Portfolio, Convert.ToDouble(SQL.ExecuteScalar(AdvQueries.GetNAV(Convert.ToInt32(Portfolio), PortfolioDate), 1)), PortfolioDate, EndDate));
-            try
-            { 
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetChartPortfolio(Portfolio, Convert.ToDouble(SQL.ExecuteScalar(AdvQueries.GetNAV(Convert.ToInt32(Portfolio), PortfolioDate), 1)), PortfolioDate, EndDate)))
+            {
                 if (!rs.HasRows)
                     return list;
 
                 list.Add(new XDate(PortfolioDate), 0);
 
-                rs.ReadFirst();
-                do
-                {
-                    list.Add(new XDate(rs.GetDateTime((int)AdvQueries.eGetChartPortfolio.Date)), (double)rs.GetDecimal((int)AdvQueries.eGetChartPortfolio.Gain));
-                }
-                while (rs.Read());
+                foreach (SqlCeUpdatableRecord rec in rs)
+                    list.Add(new XDate(rec.GetDateTime((int)AdvQueries.eGetChartPortfolio.Date)), (double)rec.GetDecimal((int)AdvQueries.eGetChartPortfolio.Gain));
             }
-            finally
-            {
-                rs.Close();
-            }
-
             return list;
         }
 
@@ -323,8 +313,7 @@ namespace MyPersonalIndex
             double YPrice = 0;
             double YGain = 1;
 
-            SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetChartTicker(Ticker, TickerDate, EndDate));
-            try
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetChartTicker(Ticker, TickerDate, EndDate)))
             {
                 if (!rs.HasRows)
                     return list;
@@ -343,10 +332,6 @@ namespace MyPersonalIndex
                     YPrice = NewPrice;
                 }
             }
-            finally
-            {
-                rs.Close();
-            }
             return list;
         }
 
@@ -357,8 +342,7 @@ namespace MyPersonalIndex
             d.Add(Constants.StatVariables.Portfolio, Portfolio);
             d.Add(Constants.StatVariables.EndDate, EndDate.ToShortDateString());
 
-            SqlCeResultSet rs = this.SQL.ExecuteResultSet(AdvQueries.GetPortfolio(Portfolio, EndDate));
-            try
+            using (SqlCeResultSet rs = this.SQL.ExecuteResultSet(AdvQueries.GetPortfolio(Portfolio, EndDate)))
             {
                 if (!rs.HasRows)
                     return SQL;
@@ -374,11 +358,6 @@ namespace MyPersonalIndex
                 d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(AdvQueries.GetPreviousPortfolioDay(Portfolio, StartDate), StartDate)).ToShortDateString());
                 d.Add(Constants.StatVariables.TotalValue, rs.GetDecimal((int)AdvQueries.eGetPortfolio.TotalValue).ToString());
             }
-            finally
-            {
-                rs.Close();
-            }
-
             return Functions.CleanStatString(SQL, d);
         }
 
@@ -387,18 +366,14 @@ namespace MyPersonalIndex
         private void LoadStat(DateTime StartDate, DateTime EndDate)
         {
             ChangeVisibility(dg);
-
             DataTable dt = (DataTable)lst.DataSource;
+            
             // ID 0 in the Stats table is always for this form
-            SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetStats(0));
-
-            try
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetStats(0)))
             {
                 if (!rs.HasRows)
                     return;
 
-                rs.ReadFirst();
-                
                 int Col = 0;
                 foreach (int i in lst.CheckedIndices)
                 {
@@ -414,7 +389,7 @@ namespace MyPersonalIndex
                 foreach (DataGridViewColumn d in dg.Columns)
                     d.SortMode = DataGridViewColumnSortMode.NotSortable;
 
-                do
+                foreach(SqlCeUpdatableRecord rec in rs)
                 {
                     int Row = dg.Rows.Add();
                     Col = 0;
@@ -430,8 +405,8 @@ namespace MyPersonalIndex
                         try
                         {
                             dg[Col, Row].Value = Functions.FormatStatString(
-                                SQL.ExecuteScalar(CleanStatString(rs.GetString((int)AdvQueries.eGetStats.SQL), Functions.StripSignifyPortfolio(Ticker), StartDate, EndDate)),
-                                (Constants.OutputFormat)rs.GetInt32((int)AdvQueries.eGetStats.Format));
+                                SQL.ExecuteScalar(CleanStatString(rec.GetString((int)AdvQueries.eGetStats.SQL), Functions.StripSignifyPortfolio(Ticker), StartDate, EndDate)),
+                                (Constants.OutputFormat)rec.GetInt32((int)AdvQueries.eGetStats.Format));
                         }
                         catch (SqlCeException)
                         {
@@ -444,11 +419,6 @@ namespace MyPersonalIndex
                         Col++;
                     }
                 }
-                while (rs.Read());
-            }
-            finally
-            {
-                rs.Close();
             }
         }
 

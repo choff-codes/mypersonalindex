@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
-using System.Drawing;
-using System.IO;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -58,12 +56,11 @@ namespace MyPersonalIndex
             if (cn != null)
             {
                 if (cn.State == ConnectionState.Open)
-                {
                     cn.Close();
-                }
+                
                 cn.Dispose();
                 cn = null;
-            };
+            }
         }
 
         public void ExecuteNonQuery(string sql)

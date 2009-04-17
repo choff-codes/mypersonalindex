@@ -54,8 +54,7 @@ namespace MyPersonalIndex
 
         private void LoadPortfolioAttributes()
         {
-            SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetPortfolioAttributes(Portfolio));
-            try
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetPortfolioAttributes(Portfolio)))
             {
                 if (!rs.HasRows)
                     return;
@@ -68,10 +67,6 @@ namespace MyPersonalIndex
                 numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
                 cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
                 IndexDate.SetDate(rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate));
-            }
-            finally
-            {
-                rs.Close();
             }
         }
 

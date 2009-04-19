@@ -32,7 +32,7 @@ namespace MyPersonalIndex
             public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };
             public enum eStats { Portfolio, Statistic, Location };
             public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
-            public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value1 };
+            public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value };
         }
         
         private SqlCeConnection cn;

@@ -21,21 +21,5 @@ namespace MyPersonalIndex
             // $ Amount for Fixed
             public double Value;
         }
-
-        //public class Pair<T, U>
-        //{
-        //    public Pair()
-        //    {
-        //    }
-
-        //    public Pair(T Value1, U Value2)
-        //    {
-        //        this.Value1 = Value1;
-        //        this.Value2 = Value2;
-        //    }
-
-        //    public T Value1 { get; set; }
-        //    public U Value2 { get; set; }
-        //};
     }
 }

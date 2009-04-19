@@ -393,7 +393,7 @@ namespace MyPersonalIndex
                 {
                     int Row = dg.Rows.Add();
                     Col = 0;
-                    dg.Rows[Row].HeaderCell.Value = rs.GetString((int)AdvQueries.eGetStats.Description);
+                    dg.Rows[Row].HeaderCell.Value = rec.GetString((int)AdvQueries.eGetStats.Description);
 
                     foreach (int i in lst.CheckedIndices)
                     {

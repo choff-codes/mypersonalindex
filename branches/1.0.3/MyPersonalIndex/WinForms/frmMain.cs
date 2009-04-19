@@ -160,7 +160,7 @@ namespace MyPersonalIndex
             }
         }
 
-        MainQueries SQL;
+        MainQueries SQL; // initialized in form load after checking that database exists
         MyPersonalIndexStruct MPI = new MyPersonalIndexStruct();
 
         public frmMain()
@@ -263,9 +263,9 @@ namespace MyPersonalIndex
                 return;
 
             if (databaseVersion < 1.02)
-                Version102(databaseVersion); // backup database and start anew
-            else if (databaseVersion < 1.04)
-            { }
+                Version102(databaseVersion); // backup database and start fresh
+            else if (databaseVersion < 1.1)
+                Version110();
         }
 
         private void Version102(double databaseVersion)
@@ -289,6 +289,32 @@ namespace MyPersonalIndex
             }
         }
 
+        private void Version110()
+        {
+            // new custom trades table/fields
+            SQL.ExecuteNonQuery("CREATE TABLE [CustomTrades] ([TickerID] int NULL, [Portfolio] int NULL, [TradeType] int NULL, [Frequency] int NULL, [Dates] nvarchar(4000) NULL, [Value] numeric(18,4) NULL)");
+            SQL.ExecuteNonQuery("CREATE INDEX [TickerPortfolio] ON [CustomTrades] ([TickerID] Asc,[Portfolio] Asc)");
+            SQL.ExecuteNonQuery("ALTER TABLE [Trades] ADD [Custom] bit NULL");
+            
+            // 3 new user statistics
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(c.Price * b.Shares) AS CostBasis  FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND" + 
+                " ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN" +
+                " (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker WHERE Portfolio = %Portfolio%', 'Cost Basis', 0)");
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0)" +
+                " ELSE 1.0 END)) AS GainLoss FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
+                " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
+                " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
+                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE Portfolio = %Portfolio%'" +
+                ", 'Gain/Loss', 0)");
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability" +
+                " FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
+                " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
+                " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
+                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE Portfolio = %Portfolio%'" +
+                ", 'Tax Liabliity', 0)");
+        }
+
         private int LoadSettings() // returns portfolio to load
         {
             int LastPortfolio = -1;
@@ -309,8 +335,12 @@ namespace MyPersonalIndex
                         this.WindowState = (FormWindowState)rs.GetInt32((int)MainQueries.eGetSettings.WindowState);
                     }
                     else
-                        MessageBox.Show("Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Set the start date under options.\n2. Add a new Portfolio\n3. Set your asset allocation" +
-                            "\n4. Set your accounts\n5. Add holdings\n6. Add relevent portfolio statistics\n7. Update prices!");
+                    {
+                        string WelcomeMessage = "Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Set the start date under options (on the top toolbar).\n2. Add a new Portfolio\n3. Set your asset allocation" +
+                            "\n4. Set your accounts\n5. Add holdings\n6. Add relevant portfolio statistics\n7. Update prices!\n\nThis text has been copied to the clipboard for your convenience.";
+                        Clipboard.SetText(WelcomeMessage);
+                        MessageBox.Show(WelcomeMessage);
+                    }
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.LastPortfolio)))
                         LastPortfolio =  rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
                 }
@@ -936,6 +966,9 @@ namespace MyPersonalIndex
                 }
                 while (!line.Contains(HTMLSplitStart) && !line.Contains(HTMLSplitNone));
 
+                if (line == null || line.Contains(HTMLSplitNone)) // no splits
+                    return;
+
                 int i = line.IndexOf(HTMLSplitStart) + HTMLSplitStart.Length;
                 line = line.Substring(i, line.IndexOf("</center>", i) - i); // read up to </center> tag
                 string[] splits = line.Split(new string[1] { "</nobr>, <nobr>" }, StringSplitOptions.None);
@@ -1253,7 +1286,7 @@ namespace MyPersonalIndex
                     Constants.DynamicTrade dt = new Constants.DynamicTrade();
                     dt.Frequency = (Constants.DynamicTradeFreq)rec.GetInt32((int)MainQueries.eGetCustomTrades.Frequency);
                     dt.TradeType = (Constants.DynamicTradeType)rec.GetInt32((int)MainQueries.eGetCustomTrades.TradeType);
-                    dt.Value = (double)rec.GetDecimal((int)MainQueries.eGetCustomTrades.Value1);
+                    dt.Value = (double)rec.GetDecimal((int)MainQueries.eGetCustomTrades.Value);
                     dt.When = rec.GetString((int)MainQueries.eGetCustomTrades.Dates);
                     dts.Trade = dt;
 
@@ -1403,7 +1436,7 @@ namespace MyPersonalIndex
             Dictionary<int, double> AATargets = new Dictionary<int, double>();
             using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetAATargets(Portfolio)))
                 foreach (SqlCeUpdatableRecord rec in rs)
-                    AATargets.Add(rs.GetInt32((int)MainQueries.eGetAATargets.AA), (double)rs.GetDecimal((int)MainQueries.eGetAATargets.Target));
+                    AATargets.Add(rec.GetInt32((int)MainQueries.eGetAATargets.AA), (double)rec.GetDecimal((int)MainQueries.eGetAATargets.Target));
 
             return AATargets;
         }

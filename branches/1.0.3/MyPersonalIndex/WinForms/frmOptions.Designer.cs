@@ -88,9 +88,9 @@
             this.chkSplit.AutoSize = true;
             this.chkSplit.Location = new System.Drawing.Point(23, 48);
             this.chkSplit.Name = "chkSplit";
-            this.chkSplit.Size = new System.Drawing.Size(215, 17);
+            this.chkSplit.Size = new System.Drawing.Size(182, 17);
             this.chkSplit.TabIndex = 4;
-            this.chkSplit.Text = "Download Splits (Advanced Users Only)";
+            this.chkSplit.Text = "Download Splits (Recommended)";
             this.chkSplit.UseVisualStyleBackColor = true;
             // 
             // frmOptions

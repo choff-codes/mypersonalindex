@@ -22,7 +22,7 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
             StatisticID = Statistic;
-            this.Text = (string.IsNullOrEmpty(Description) ? "New Statistic" : Description) + " Properties";
+            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(Description) ? "New Statistic" : Description);
         }
 
         private void AddMenuParameter(object sender, EventArgs e)
@@ -85,21 +85,29 @@ namespace MyPersonalIndex
             SQL.Dispose();
         }
 
-        private void btnOK_Click(object sender, EventArgs e)
+        private bool GetErrors()
         {
             if (string.IsNullOrEmpty(txtDesc.Text))
             {
                 MessageBox.Show("Please set a description!");
-                return;
+                return false;
             }
 
             if (string.IsNullOrEmpty(txtSQL.Text))
             {
                 MessageBox.Show("Please set a SQL query!");
-                return;
+                return false;
             }
+
+            return true;
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            if (!GetErrors())
+                return;
             
-            if (StatisticID == -1)
+            if (StatisticID == -1) // add new
             {
                 SQL.ExecuteNonQuery(UserStatQueries.InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
                 StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));

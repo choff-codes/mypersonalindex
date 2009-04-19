@@ -8,6 +8,7 @@ namespace MyPersonalIndex
 {
     public partial class frmStats : Form
     {
+        private enum Direction {Up, Down};
         private StatsQueries SQL = new StatsQueries();
         private int PortfolioID;
         private bool Changed = false;
@@ -62,38 +63,6 @@ namespace MyPersonalIndex
                     dt2.AcceptChanges();
                 }
 
-            //foreach (SqlCeUpdatableRecord rec in rs)
-            //{
-            //    //rec.GetInt32
-            //}
-            //try
-            //{
-            //    if (rs.HasRows)
-            //    {
-            //        rs.ReadFirst();
-
-            //        do
-            //        {
-            //            int i = 0;
-            //            int ID = rs.GetInt32((int)StatsQueries.eGetPortfolioStats.ID);
-
-            //            while (Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]) != ID)
-            //                i++;
-
-            //            dt2.Rows.Add(dt.Rows[i].ItemArray);
-            //            dt.Rows[i].Delete();
-
-            //            dt.AcceptChanges();
-            //            dt2.AcceptChanges();
-            //        }
-            //        while (rs.Read());
-            //    }
-            //}
-            //finally
-            //{
-            //    rs.Close();
-            //}
-
             lst1.SelectedIndex = -1;
             lst2.SelectedIndex = -1;
         }
@@ -101,128 +70,118 @@ namespace MyPersonalIndex
         private void frmStats_FormClosing(object sender, FormClosingEventArgs e)
         {
             SQL.Dispose();
-        }
 
-        private void cmdMoveBack_Click(object sender, EventArgs e)
-        {
-            List<int> ItemsToRemove = new List<int>();
-            int StartIndex = lst1.Items.Count - 1;
-
-            foreach (int i in lst2.SelectedIndices)
-            {
-                object[] o = ((DataTable)lst2.DataSource).Rows[i].ItemArray;
-                ((DataTable)lst1.DataSource).Rows.Add(o);
-                ((DataTable)lst1.DataSource).AcceptChanges();
-                ItemsToRemove.Add(i);
-            }
-
-            ItemsToRemove.Reverse();
-            foreach(int i in ItemsToRemove)
-                ((DataTable)lst2.DataSource).Rows.RemoveAt(i);
-
-            ((DataTable)lst2.DataSource).AcceptChanges();
-
-            lst1.SelectedIndex = -1;
-            lst2.SelectedIndex = -1;
-            for (int i = StartIndex + 1; i < lst1.Items.Count; i++)
-                lst1.SelectedIndex = i;
-        }
-
-        private void cmdMoveOver_Click(object sender, EventArgs e)
-        {
-            List<int> ItemsToRemove = new List<int>();
-            int StartIndex = lst2.Items.Count - 1;
-
-            foreach (int i in lst1.SelectedIndices)
-            {
-                object[] o = ((DataTable)lst1.DataSource).Rows[i].ItemArray;
-                ((DataTable)lst2.DataSource).Rows.Add(o);
-                ((DataTable)lst2.DataSource).AcceptChanges();
-                ItemsToRemove.Add(i);
-            }
-
-            ItemsToRemove.Reverse();
-            foreach (int i in ItemsToRemove)
-                ((DataTable)lst1.DataSource).Rows.RemoveAt(i);
-
-            ((DataTable)lst1.DataSource).AcceptChanges();
-
-            lst1.SelectedIndex = -1;
-            lst2.SelectedIndex = -1;
-            for (int i = StartIndex + 1; i < lst2.Items.Count; i++)
-                lst2.SelectedIndex = i;
-        }
-
-        private void cmdMoveUp_Click(object sender, EventArgs e)
-        {
-            if (lst2.Items.Count == 0)
-                return;
-
-            if (lst2.SelectedIndex <= 0)
-                return;
-
-            DataTable dt2 = (DataTable)lst2.DataSource;
-            int i = lst2.SelectedIndex;
-            object[] o = ((DataTable)lst2.DataSource).Rows[i - 1].ItemArray;
-            dt2.Rows[i - 1].ItemArray = dt2.Rows[i].ItemArray;
-            dt2.Rows[i].ItemArray = o;
-            dt2.AcceptChanges();
-            lst2.SelectedIndex = -1;
-            lst2.SelectedIndex = i - 1;
-        }
-
-        private void cmdMoveDown_Click(object sender, EventArgs e)
-        {
-            if (lst2.Items.Count == 0)
-                return;
-
-            if (lst2.SelectedIndex >= lst2.Items.Count - 1)
-                return;
-
-            DataTable dt2 = (DataTable)lst2.DataSource;
-            int i = lst2.SelectedIndex;
-            object[] o = ((DataTable)lst2.DataSource).Rows[i + 1].ItemArray;
-            dt2.Rows[i + 1].ItemArray = dt2.Rows[i].ItemArray;
-            dt2.Rows[i].ItemArray = o;
-            dt2.AcceptChanges();
-            lst2.SelectedIndex = -1;
-            lst2.SelectedIndex = i + 1;
-        }
-
-        private void cmdCancel_Click(object sender, EventArgs e)
-        {
             if (Changed)
                 DialogResult = DialogResult.OK;
             else
                 DialogResult = DialogResult.Cancel;
         }
 
+        private void MoveItemsHorizontally(ListBox StartList, ListBox EndList)
+        {
+            List<int> ItemsToRemove = new List<int>();
+            //The current end of the list the items are being moved to
+            int StartIndex = EndList.Items.Count - 1;
+
+            foreach (int i in StartList.SelectedIndices)
+            {
+                object[] o = ((DataTable)StartList.DataSource).Rows[i].ItemArray;
+                ((DataTable)EndList.DataSource).Rows.Add(o);
+                ((DataTable)EndList.DataSource).AcceptChanges();
+                ItemsToRemove.Add(i);
+            }
+
+            ItemsToRemove.Reverse();
+            foreach (int i in ItemsToRemove)
+                ((DataTable)StartList.DataSource).Rows.RemoveAt(i);
+
+            ((DataTable)StartList.DataSource).AcceptChanges();
+
+            StartList.SelectedIndex = -1;
+            EndList.SelectedIndex = -1;
+            // Select all the newly added items
+            for (int i = StartIndex + 1; i < EndList.Items.Count; i++)
+                EndList.SelectedIndex = i;
+        }
+
+        private void cmdMoveBack_Click(object sender, EventArgs e)
+        {
+            MoveItemsHorizontally(lst2, lst1);
+        }
+
+        private void cmdMoveOver_Click(object sender, EventArgs e)
+        {
+            MoveItemsHorizontally(lst1, lst2);
+        }
+
+        private void MoveItemVertically(Direction d)
+        {
+            // -1 to move up a position, +1 to move down a position
+            int Pos = d == Direction.Up ? -1 : 1;
+
+            DataTable dt = (DataTable)lst2.DataSource;
+            int i = lst2.SelectedIndex;
+            object[] o = dt.Rows[i + Pos].ItemArray;  // need a copy to switch items
+
+            // switch items
+            dt.Rows[i + Pos].ItemArray = dt.Rows[i].ItemArray;
+            dt.Rows[i].ItemArray = o;
+            dt.AcceptChanges();
+
+            // select the same item moved up or down one position
+            lst2.SelectedIndex = -1;
+            lst2.SelectedIndex = i + Pos;
+        }
+
+        private void cmdMoveUp_Click(object sender, EventArgs e)
+        {
+            if (lst2.Items.Count == 0 || lst2.SelectedIndex == -1)
+                return;
+
+            MoveItemVertically(Direction.Up);
+        }
+
+        private void cmdMoveDown_Click(object sender, EventArgs e)
+        {
+            if (lst2.Items.Count == 0 || lst2.SelectedIndex >= lst2.Items.Count - 1)
+                return;
+
+            MoveItemVertically(Direction.Down);
+        }
+
+        private void cmdCancel_Click(object sender, EventArgs e)
+        {
+            // if user stats changed, still pass back DialogResult.OK on form close
+            Close();
+        }
+
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            DataTable dt2 = (DataTable)lst2.DataSource;
-
             SQL.ExecuteNonQuery(StatsQueries.DeletePortfolioStats(PortfolioID));
-
-            if (dt2.Rows.Count > 0)
+            
+            DataTable dt = (DataTable)lst2.DataSource;
+            if (dt.Rows.Count > 0)
                 using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(StatsQueries.Tables.Stats))
                 {
                     SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-                    for (int i = 0; i < dt2.Rows.Count; i++)
+                    for (int i = 0; i < dt.Rows.Count; i++)
                     {
                         newRecord.SetInt32((int)StatsQueries.Tables.eStats.Portfolio, PortfolioID);
-                        newRecord.SetInt32((int)StatsQueries.Tables.eStats.Statistic, Convert.ToInt32(dt2.Rows[i][(int)StatsQueries.eGetUserStats.ID]));
+                        newRecord.SetInt32((int)StatsQueries.Tables.eStats.Statistic, Convert.ToInt32(dt.Rows[i][(int)StatsQueries.eGetUserStats.ID]));
                         newRecord.SetInt32((int)StatsQueries.Tables.eStats.Location, i);
 
                         rs.Insert(newRecord);
                     }
                 }
 
-            DialogResult = DialogResult.OK;
+            Changed = true;
+            // form close will pass back DialogResult.OK
+            Close();
         }
 
         private void cmdEdit_Click(object sender, EventArgs e)
         {
-            if (cmb.SelectedIndex < 0)
+            if (cmb.SelectedIndex == -1)
                 return;
 
             using (frmUserStatistics f = new frmUserStatistics(Convert.ToInt32(cmb.SelectedValue), cmb.SelectedText))
@@ -255,15 +214,19 @@ namespace MyPersonalIndex
             if (cmb.SelectedIndex < 0)
                 return;
 
+            DataTable cmbDataTable = (DataTable)cmb.DataSource;
+
             if (MessageBox.Show("Are you sure you want to delete " +
-                ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "? This will also remove it from other portfolios.",
-                "Delete " + ((DataTable)cmb.DataSource).Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "?", MessageBoxButtons.YesNo) != DialogResult.Yes)
+                cmbDataTable.Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "? This will also remove it from other portfolios.",
+                "Delete " + cmbDataTable.Rows[cmb.SelectedIndex][(int)StatsQueries.eGetUserStats.Description] + "?", MessageBoxButtons.YesNo) != DialogResult.Yes)
                 return;
 
             int StatisticID = Convert.ToInt32(cmb.SelectedValue);
+            // delete from user stat table
             SQL.ExecuteNonQuery(StatsQueries.DeleteUserStat(StatisticID));
+            // delete user stat ID from statistics table of all portfolios
             SQL.ExecuteNonQuery(StatsQueries.DeleteStatUserStat(StatisticID));
-            ((DataTable)cmb.DataSource).Rows.RemoveAt(cmb.SelectedIndex);
+            cmbDataTable.Rows.RemoveAt(cmb.SelectedIndex);
 
             DataTable dt = (DataTable)lst1.DataSource;
             DataTable dt2 = (DataTable)lst2.DataSource;
@@ -293,6 +256,7 @@ namespace MyPersonalIndex
                 ((DataTable)cmb.DataSource).Rows.Add(f.UserStatReturnValues.ID, f.UserStatReturnValues.Description);
                 ((DataTable)cmb.DataSource).AcceptChanges();
                 lst1.SelectedIndex = -1;
+                // select new item
                 lst1.SelectedIndex = lst1.Items.Count - 1;
                 cmb.SelectedIndex = cmb.Items.Count - 1;
 

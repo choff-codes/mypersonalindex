@@ -7,7 +7,6 @@ namespace MyPersonalIndex
 {
     public partial class frmTickers : Form
     {
-
         public struct TickerRetValues
         {
             public DateTime MinDate;
@@ -16,13 +15,19 @@ namespace MyPersonalIndex
 
         public TickerRetValues TickerReturnValues { get { return _TickerReturnValues; } }
 
+        private enum CloseButton { Cancel, OK };
         private TickerQueries SQL = new TickerQueries();
+        // starting width of form
         private const int OriginalWidth = 336;
+        // width of form when historical prices is opened
         private const int ExpandedWidth = 679;
         private const int DateColumn = 0;
+
         private int PortfolioID;
         private int TickerID;
-        private bool Pasted;
+        private bool Pasted = false; // for changes outside of the datagrid
+        private bool ActiveFlag; // track original "Include in Calculation" value
+        private CloseButton btn = CloseButton.Cancel;
         private TickerRetValues _TickerReturnValues = new TickerRetValues();
 
         public frmTickers(int Portfolio, int Ticker, string sTicker)
@@ -31,9 +36,9 @@ namespace MyPersonalIndex
             this.Width = OriginalWidth;
             PortfolioID = Portfolio;
             TickerID = Ticker;
-            this.Text = (string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker) + " Properties";
+            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker);
             txtSymbol.Text = sTicker;
-            gbActivity.Text = sTicker + " Activity";
+            gbActivity.Text = string.Format("{0} Activity", sTicker);
         }
 
         private void frmTickers_Load(object sender, EventArgs e)
@@ -44,7 +49,6 @@ namespace MyPersonalIndex
                 return;
             }
 
-            Pasted = false;
             cmbHis.SelectedIndex = 0;
             cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
 
@@ -52,20 +56,23 @@ namespace MyPersonalIndex
             LoadAcctDropDown();
             LoadTicker();
 
+            // use a DataSet instead of Datatable to have the ability to check for underlying changes
             dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTrades(PortfolioID, TickerID)));
             dgTickers.DataSource = dsTicker.Tables[0];
-
             dsTicker.AcceptChanges();
 
             if (TickerID == -1)
             {
+                // allow ticker symbol to be set, but disable historical prices and custom trades
                 txtSymbol.Enabled = true;
                 btnHistorical.Visible = false;
                 btnCustom.Enabled = false;
             }
 
+            ActiveFlag = chkCalc.Checked;
             _TickerReturnValues.MinDate = DateTime.Today;
-            _TickerReturnValues.Changed = chkCalc.Checked;
+            _TickerReturnValues.Changed = false;
+            // find the earliest date that currently exists in the trades
             foreach (DataRow dr in dsTicker.Tables[0].Rows)
                 if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < _TickerReturnValues.MinDate)
                     _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
@@ -103,7 +110,6 @@ namespace MyPersonalIndex
             cmbAA.DisplayMember = "Display";
             cmbAA.ValueMember = "Value";
             cmbAA.DataSource = t;
-
             cmbAA.SelectedValue = -1;
         }
 
@@ -121,25 +127,38 @@ namespace MyPersonalIndex
             cmbAcct.DisplayMember = "Display";
             cmbAcct.ValueMember = "Value";
             cmbAcct.DataSource = t;
-
             cmbAcct.SelectedValue = -1;
         }
 
         private void dgTickers_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
         {
+            // default new row value, does not include time portion
             e.Row.Cells[0].Value = DateTime.Today;
+        }
+
+        private bool CheckValidPasteItem(string s, TickerQueries.eGetTrades Column)
+        {
+            if (Column == TickerQueries.eGetTrades.Date)
+                return Functions.StringIsDateTime(s);
+            else if (Column == TickerQueries.eGetTrades.Shares)
+                return Functions.StringIsDecimal(s, false);
+            else // TickerQueries.eGetTrades.Price
+                return Functions.StringIsDecimal(s, true);
+        }
+
+        private bool CheckValidPasteItem(string s, string s2, string s3)
+        {
+            return Functions.StringIsDateTime(s) && Functions.StringIsDecimal(s2, false) && Functions.StringIsDecimal(s3, true); 
         }
 
         private void dgTickers_KeyDown(object sender, KeyEventArgs e)
         {
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
-            
-            Pasted = true;
 
-            string s = Clipboard.GetText();
-            s = s.Replace("\r", "");
-            string[] lines = s.Split('\n');
+            Pasted = true;  // there have been changes outside of the datatable
+
+            string[] lines = Functions.GetClipboardText();
             int row = dgTickers.CurrentCell.RowIndex;
             int origrow = dgTickers.CurrentCell.RowIndex;
             int col = dgTickers.CurrentCell.ColumnIndex;
@@ -149,103 +168,68 @@ namespace MyPersonalIndex
 
             foreach (string line in lines)
             {
-                if (line == "")
+                if (string.IsNullOrEmpty(line))
                     continue;
 
-                string[] cells = line.Split('\t');
-                if (row < dgTickers.Rows.Count - 1)
-                {
-                    for (int i = 0; i < cells.Length; i++)
-                    {
-                        if (col + i < 3)
-                        {
-                            try
-                            {
-                                switch (col + i)
-                                {
-                                    case 0:
-                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Date] = Convert.ToDateTime(cells[i]);
-                                        break;
-                                    case 1:
-                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i]);
-                                        break;
-                                    case 2:
-                                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Double.Parse(cells[i], System.Globalization.NumberStyles.Currency);
-                                        break;
-                                }
-                            }
-                            catch (System.FormatException)
-                            {
-                                // do nothing
-                            }
-                            catch (System.OverflowException)
-                            {
-                                // do nothing
-                            }
-                            dsTicker.AcceptChanges();
-                        }
-                    }
-                    row++;
+                string[] cells = line.Split('\t');  // tab seperated values
 
-                }
-                else
-                {
-                    if (cells.Length == dgTickers.Columns.Count)
+                if (row >= dgTickers.Rows.Count - 1 && col == 0 && cells.Length == dgTickers.Columns.Count)
+                    if (CheckValidPasteItem(cells[(int)TickerQueries.eGetTrades.Date], cells[(int)TickerQueries.eGetTrades.Shares], cells[(int)TickerQueries.eGetTrades.Price]))
                     {
-                        try
-                        {
-                            dsTicker.Tables[0].Rows.Add(Convert.ToDateTime(cells[0]),
-                                                        Convert.ToDecimal(cells[1]),
-                                                        Double.Parse(cells[2], System.Globalization.NumberStyles.Currency));
-
-                            row++;
-                        }
-                        catch (System.FormatException)
-                        {
-                            // do nothing
-                        }
-                        catch (System.OverflowException)
-                        {
-                            // do nothing
-                        }
+                        dsTicker.Tables[0].Rows.Add(cells[(int)TickerQueries.eGetTrades.Date], Convert.ToDecimal(cells[(int)TickerQueries.eGetTrades.Shares]), Functions.ConvertFromCurrency(cells[(int)TickerQueries.eGetTrades.Price]));
                         dsTicker.AcceptChanges();
+                        row++;
+                        continue;
                     }
-                }
+
+                if (row >= dgTickers.Rows.Count - 1)
+                    continue;
+
+                for (int i = col; i <= dgTickers.Columns.Count - 1 && i < col + cells.Length; i++)
+                    if (i == (int)TickerQueries.eGetTrades.Date && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Date))
+                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Date] = cells[i - col];
+                    else if (i == (int)TickerQueries.eGetTrades.Shares && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Shares))
+                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i - col]);
+                    else if (i == (int)TickerQueries.eGetTrades.Price && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Price))
+                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Functions.ConvertFromCurrency(cells[i - col]);
+
+                dsTicker.AcceptChanges();
+                row++;
             }
-              
             dgTickers.CurrentCell = dgTickers[col, origrow];
         }
 
-        private void btnOK_Click(object sender, EventArgs e)
+        private bool GetErrors()
         {
             if (string.IsNullOrEmpty(txtSymbol.Text))
             {
                 MessageBox.Show("Set a symbol before saving!");
+                return false;
+            }
+            return true;
+        }
+
+        private void btnOK_Click(object sender, EventArgs e)
+        {
+            if (!GetErrors())
                 return;
-            }
-            if (TickerReturnValues.Changed != chkCalc.Checked)
+
+            if (TickerID == -1) // add new ticker
             {
-                _TickerReturnValues.Changed = true;
-                _TickerReturnValues.MinDate = DateTime.MinValue;  // if any custom trades, we need to redo all NAV
-            }
-            if (TickerID == -1)
-            {
-                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]), 
-                    Convert.ToInt32(((DataRowView)cmbAcct.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
+                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue), 
+                    Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
                 TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
+                SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(cmbAA.SelectedValue),
+                    Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
+
+            if (dsTicker.HasChanges() || Pasted) // delete existing trades (excluding custom) and reinsert all trades
             {
-                SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(((DataRowView)cmbAA.SelectedItem)["Value"]),
-                    Convert.ToInt32(((DataRowView)cmbAcct.SelectedItem)["Value"]), chkHide.Checked, chkCalc.Checked));
-                if (dsTicker.HasChanges() || Pasted)
-                    SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID, false));
-            }
-        
-            if (dsTicker.HasChanges() || Pasted)
-            {
+                SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID, false));
+
                 _TickerReturnValues.Changed = true;
-                dsTicker.AcceptChanges();
+                dsTicker.AcceptChanges(); // do this here since HasChanges is set to false when this function runs
 
                 using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades))
                 {
@@ -262,30 +246,43 @@ namespace MyPersonalIndex
                         newRecord.SetInt32((int)TickerQueries.Tables.eTrades.ID, i);
                         newRecord.SetString((int)TickerQueries.Tables.eTrades.Ticker, txtSymbol.Text);
                         rs.Insert(newRecord);
-
-                        i++;
+                        
+                        // find new earliest trade date
                         if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < TickerReturnValues.MinDate)
                             _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
+                        i++;
                     }
                 }
             }
-            DialogResult = DialogResult.OK;
+            btn = CloseButton.OK;
+            Close();
         }
 
         private void btnCancel_Click(object sender, EventArgs e)
         {
-            if (_TickerReturnValues.MinDate == DateTime.MinValue)
-            {
-                _TickerReturnValues.Changed = true;
-                DialogResult = DialogResult.OK;
-            }
-            else
-                DialogResult = DialogResult.Cancel;
+            Close();
         }
 
         private void frmTickers_FormClosing(object sender, FormClosingEventArgs e)
         {
             SQL.Dispose();
+
+            // true if custom trades were modified or OK was clicked
+            if (_TickerReturnValues.MinDate == DateTime.MinValue || btn == CloseButton.OK)
+            {
+                if (_TickerReturnValues.MinDate == DateTime.MinValue) // custom trades were modified
+                    _TickerReturnValues.Changed = true;
+
+                if (ActiveFlag != chkCalc.Checked) // active flag was changed
+                {
+                    _TickerReturnValues.MinDate = DateTime.MinValue; // use MinValue because if there any custom trades, we need to redo all NAV
+                    _TickerReturnValues.Changed = true;
+                }
+
+                DialogResult = DialogResult.OK;
+            }
+            else
+                DialogResult = DialogResult.Cancel;
         }
 
         private void dgTickers_DataError(object sender, DataGridViewDataErrorEventArgs e)
@@ -304,7 +301,7 @@ namespace MyPersonalIndex
             dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgHistory.Columns[i].DataPropertyName = "Date";
 
-            if (cmbHis.SelectedIndex == 0)
+            if (cmbHis.SelectedIndex == 0) // price only shown when all items is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -312,7 +309,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Price";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 1)
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 1) // change shown on all items or % Change
             {
                 i = dgHistory.Columns.Add("colHisChange", "Change");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "#0.00'%'";
@@ -320,7 +317,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Change";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 2)
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 2) // dividends shown on all items or dividends
             {
                 i = dgHistory.Columns.Add("colHisDividend", "Dividend");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -328,7 +325,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Dividend";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 3)
+            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 3) // splits shown on all items or splits
             {
                 i = dgHistory.Columns.Add("colHisSplit", "Split");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -336,7 +333,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Split";
             }
 
-            if (cmbHis.SelectedIndex == 4)
+            if (cmbHis.SelectedIndex == 4) // trades only appear when trades is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -349,6 +346,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Shares";
             }
 
+            // the data set return will match the order of the column creation above
             dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, TickerID, cmbHis.SelectedIndex, chkSort.Checked));
         }
 
@@ -360,6 +358,7 @@ namespace MyPersonalIndex
             this.Width = ExpandedWidth;
             this.Left = this.Left - ((ExpandedWidth - OriginalWidth) / 2);
             gbHistorical.Enabled = true;
+            // load automatically without selection
             cmbHis_SelectedIndexChanged(null, null);
         }
 
@@ -368,7 +367,7 @@ namespace MyPersonalIndex
             this.Width = 336;
             this.Left = this.Left + ((ExpandedWidth - OriginalWidth) / 2);
             dgHistory.DataSource = null;
-            gbHistorical.Enabled = false;
+            gbHistorical.Enabled = false; // keep controls out of tab order
         }
 
         private void chkSort_CheckedChanged(object sender, EventArgs e)
@@ -379,13 +378,8 @@ namespace MyPersonalIndex
         private void btnCustom_Click(object sender, EventArgs e)
         {
             using (frmTrades f = new frmTrades(PortfolioID, TickerID, txtSymbol.Text))
-            {
                 if (f.ShowDialog() == DialogResult.OK)
-                {
-                    Pasted = true;  // ticker changed
-                    _TickerReturnValues.MinDate = DateTime.MinValue;
-                }
-            }
+                    _TickerReturnValues.MinDate = DateTime.MinValue; // will need to recalcuate all dates
         }
     }
 }

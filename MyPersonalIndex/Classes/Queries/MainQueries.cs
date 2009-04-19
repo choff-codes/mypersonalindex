@@ -216,11 +216,11 @@ namespace MyPersonalIndex
             return "DELETE FROM Trades WHERE Custom IS NOT NULL";
         }
 
-        public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value1, AA };
+        public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value, AA };
         public static string GetCustomTrades(int Portfolio)
         {
             return string.Format(
-                "SELECT a.TickerID, a.TradeType, a.Frequency, a.Dates, a.Value1, c.ID AS AA" +
+                "SELECT a.TickerID, a.TradeType, a.Frequency, a.Dates, a.Value, c.ID AS AA" +
                 " FROM CustomTrades a " +
                 " INNER JOIN Tickers b" +
 	                " ON a.TickerID = b.ID" + 

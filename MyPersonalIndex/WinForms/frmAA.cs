@@ -33,18 +33,15 @@ namespace MyPersonalIndex
 
         private bool CheckValidPasteItem(string s, AAQueries.eGetAA Column)
         {
-            decimal tmp;
-
             if (Column == AAQueries.eGetAA.AA)
                 return !string.IsNullOrEmpty(s);
             else  // AAQueries.eGetAA.Target
-                return decimal.TryParse(s, out tmp);
+                return Functions.StringIsDecimal(s, false);
         }
 
         private bool CheckValidPasteItem(string s, string s2)
         {
-            decimal tmp;
-            return (!string.IsNullOrEmpty(s)) && decimal.TryParse(s2, out tmp);
+            return (!string.IsNullOrEmpty(s)) && Functions.StringIsDecimal(s2, false);
         }
 
         private void dgAA_KeyDown(object sender, KeyEventArgs e)
@@ -81,7 +78,7 @@ namespace MyPersonalIndex
                 if (row >= dgAA.Rows.Count - 1)
                     continue;
 
-                for (int i = col; i <= dgAA.Columns.Count - 2; i++)  // -2 since there is a hidden ID column
+                for (int i = col; i <= dgAA.Columns.Count - 2 && i < col + cells.Length; i++)  // -2 since there is a hidden ID column
                     if (i == (int)AAQueries.eGetAA.AA && CheckValidPasteItem(cells[i - col], AAQueries.eGetAA.AA))
                             dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i - col];
                     else if (i == (int)AAQueries.eGetAA.Target && CheckValidPasteItem(cells[i - col].Replace("%", ""), AAQueries.eGetAA.Target))

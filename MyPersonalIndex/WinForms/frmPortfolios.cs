@@ -63,7 +63,7 @@ namespace MyPersonalIndex
 
                 txtName.Text = rs.GetString((int)PortfolioQueries.eGetPortfolioAttributes.Name);
                 chkDiv.Checked = rs.GetSqlBoolean((int)PortfolioQueries.eGetPortfolioAttributes.Dividends).IsTrue;
-                txtValue.Text = string.Format("{0:C}", rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
+                txtValue.Text = Functions.ConvertToCurrency(rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
                 numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
                 cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
                 IndexDate.SetDate(rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate));
@@ -97,7 +97,7 @@ namespace MyPersonalIndex
 
             try
             {
-                if (Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency) <= 0)
+                if (Functions.ConvertFromCurrency(txtValue.Text) <= 0)
                 {
                     MessageBox.Show("NAV Start Value must be greater than 0!");
                     return false;
@@ -120,13 +120,13 @@ namespace MyPersonalIndex
             if (Portfolio == -1)
             {
                 SQL.ExecuteNonQuery(PortfolioQueries.InsertPortfolio(txtName.Text, chkDiv.Checked,
-                    Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
+                    Functions.ConvertFromCurrency(txtValue.Text), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
                 Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(PortfolioQueries.UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,
-                    Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency), cmbCost.SelectedIndex,
+                    Functions.ConvertFromCurrency(txtValue.Text), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
 
             _PortfolioReturnValues.ID = Portfolio;
@@ -134,7 +134,7 @@ namespace MyPersonalIndex
             _PortfolioReturnValues.Dividends = chkDiv.Checked;
             _PortfolioReturnValues.AAThreshold = Convert.ToInt32(numAA.Value);
             _PortfolioReturnValues.CostCalc = cmbCost.SelectedIndex;
-            _PortfolioReturnValues.NAVStart = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency);
+            _PortfolioReturnValues.NAVStart = (double)Functions.ConvertFromCurrency(txtValue.Text);
             _PortfolioReturnValues.StartDate = Convert.ToDateTime(btnDate.Text);
             DialogResult = DialogResult.OK;       
         }
@@ -144,7 +144,7 @@ namespace MyPersonalIndex
             if (!string.IsNullOrEmpty(txtValue.Text))
                 try
                 {
-                    txtValue.Text = string.Format("{0:C}", Convert.ToDouble(txtValue.Text));
+                    txtValue.Text = Functions.ConvertToCurrency(Convert.ToDecimal(txtValue.Text));
                 }
                 catch (FormatException)
                 {
@@ -157,7 +157,7 @@ namespace MyPersonalIndex
             if (!string.IsNullOrEmpty(txtValue.Text))
                 try
                 {
-                    txtValue.Text = Double.Parse(txtValue.Text, System.Globalization.NumberStyles.Currency).ToString();
+                    txtValue.Text = Functions.ConvertFromCurrency(txtValue.Text).ToString();
                 }
                 catch (FormatException)
                 {

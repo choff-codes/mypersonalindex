@@ -90,6 +90,7 @@
             // txtShares
             // 
             this.txtShares.Location = new System.Drawing.Point(74, 144);
+            this.txtShares.MaxLength = 18;
             this.txtShares.Name = "txtShares";
             this.txtShares.Size = new System.Drawing.Size(111, 21);
             this.txtShares.TabIndex = 7;

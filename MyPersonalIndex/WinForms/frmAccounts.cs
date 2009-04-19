@@ -33,18 +33,15 @@ namespace MyPersonalIndex
 
         private bool CheckValidPasteItem(string s, AcctQueries.eGetAcct Column)
         {
-            decimal tmp;
-
             if (Column == AcctQueries.eGetAcct.Name)
                 return !string.IsNullOrEmpty(s);
             else  // AcctQueries.eGetAcct.TaxRate
-                return decimal.TryParse(s, out tmp);
+                return Functions.StringIsDecimal(s, false);
         }
 
         private bool CheckValidPasteItem(string s, string s2)
         {
-            decimal tmp;
-            return (!string.IsNullOrEmpty(s)) && decimal.TryParse(s2, out tmp);
+            return (!string.IsNullOrEmpty(s)) && Functions.StringIsDecimal(s2, false);
         }
 
         private void dgAcct_KeyDown(object sender, KeyEventArgs e)
@@ -81,7 +78,7 @@ namespace MyPersonalIndex
                 if (row >= dgAcct.Rows.Count - 1)
                     continue;
 
-                for (int i = col; i <= dgAcct.Columns.Count - 2; i++)  // -2 since there is a hidden ID column
+                for (int i = col; i <= dgAcct.Columns.Count - 2 && i < col + cells.Length; i++)  // -2 since there is a hidden ID column
                     if (i == (int)AcctQueries.eGetAcct.Name && CheckValidPasteItem(cells[i - col], AcctQueries.eGetAcct.Name))
                         dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.Name] = cells[i - col];
                     else if (i == (int)AcctQueries.eGetAcct.TaxRate && CheckValidPasteItem(cells[i - col].Replace("%", ""), AcctQueries.eGetAcct.TaxRate))

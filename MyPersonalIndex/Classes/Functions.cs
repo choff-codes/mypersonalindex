@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Windows.Forms;
-using System.IO;
 
 namespace MyPersonalIndex
 {
@@ -171,6 +171,31 @@ namespace MyPersonalIndex
 
             File.WriteAllLines(dSave.FileName, lines.ToArray());
             MessageBox.Show("Export successful!");
+        }
+
+        public static decimal ConvertFromCurrency(string s)
+        {
+            return decimal.Parse(s, System.Globalization.NumberStyles.Currency);
+        }
+
+        public static string ConvertToCurrency(decimal d)
+        {
+            return string.Format("{0:C}", d);
+        }
+
+        public static bool StringIsDecimal(string s, bool Currency)
+        {
+            decimal tmp;
+            if (Currency)
+                return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat, out tmp);
+            else
+                return decimal.TryParse(s, out tmp);
+        }
+
+        public static bool StringIsDateTime(string s)
+        {
+            DateTime tmp;
+            return DateTime.TryParse(s, out tmp);
         }
     }
 }

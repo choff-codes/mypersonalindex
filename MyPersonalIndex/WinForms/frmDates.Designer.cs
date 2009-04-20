@@ -43,7 +43,7 @@
             this.calendar.Location = new System.Drawing.Point(9, 44);
             this.calendar.MaxSelectionCount = 1;
             this.calendar.Name = "calendar";
-            this.calendar.TabIndex = 2;
+            this.calendar.TabIndex = 0;
             this.calendar.DateSelected += new System.Windows.Forms.DateRangeEventHandler(this.calendar_DateSelected);
             // 
             // lst
@@ -53,14 +53,14 @@
             this.lst.Name = "lst";
             this.lst.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lst.Size = new System.Drawing.Size(78, 134);
-            this.lst.TabIndex = 3;
+            this.lst.TabIndex = 1;
             // 
             // cmdDelete
             // 
             this.cmdDelete.Location = new System.Drawing.Point(213, 184);
             this.cmdDelete.Name = "cmdDelete";
             this.cmdDelete.Size = new System.Drawing.Size(78, 23);
-            this.cmdDelete.TabIndex = 4;
+            this.cmdDelete.TabIndex = 2;
             this.cmdDelete.Text = "Delete";
             this.cmdDelete.UseVisualStyleBackColor = true;
             this.cmdDelete.Click += new System.EventHandler(this.cmdDelete_Click);
@@ -80,7 +80,7 @@
             this.cmdCancel.Location = new System.Drawing.Point(234, 219);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(57, 23);
-            this.cmdCancel.TabIndex = 16;
+            this.cmdCancel.TabIndex = 4;
             this.cmdCancel.Text = "&Cancel";
             this.cmdCancel.UseVisualStyleBackColor = true;
             this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
@@ -90,7 +90,7 @@
             this.cmdOK.Location = new System.Drawing.Point(171, 219);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(57, 23);
-            this.cmdOK.TabIndex = 15;
+            this.cmdOK.TabIndex = 3;
             this.cmdOK.Text = "&OK";
             this.cmdOK.UseVisualStyleBackColor = true;
             this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);

@@ -313,6 +313,9 @@ namespace MyPersonalIndex
                 " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
                 " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE Portfolio = %Portfolio%'" +
                 ", 'Tax Liabliity', 0)");
+
+            // update version number
+            SQL.ExecuteNonQuery("UPDATE Settings SET Version = 1.1");
         }
 
         private int LoadSettings() // returns portfolio to load
@@ -1449,6 +1452,9 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
 
             List<DateTime> Dates = GetDistinctDates(MinDate);
+            if (Dates.Count == 0)
+                return;
+
             // Holds all dynamic trades and the dates they should take place
             Dictionary<Symbol, List<DynamicTrades>> CustomTrades = GetCustomTrades(Portfolio, MinDate, Dates);
             // Holds AA IDs and their targets for AA dynamic trades

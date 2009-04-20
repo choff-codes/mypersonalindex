@@ -82,7 +82,7 @@
             this.btnOnce.Location = new System.Drawing.Point(74, 100);
             this.btnOnce.Name = "btnOnce";
             this.btnOnce.Size = new System.Drawing.Size(111, 23);
-            this.btnOnce.TabIndex = 5;
+            this.btnOnce.TabIndex = 8;
             this.btnOnce.Text = "Date";
             this.btnOnce.UseVisualStyleBackColor = true;
             this.btnOnce.Click += new System.EventHandler(this.btnOnce_Click);
@@ -93,14 +93,14 @@
             this.txtShares.MaxLength = 18;
             this.txtShares.Name = "txtShares";
             this.txtShares.Size = new System.Drawing.Size(111, 21);
-            this.txtShares.TabIndex = 7;
+            this.txtShares.TabIndex = 10;
             // 
             // lblShares
             // 
             this.lblShares.Location = new System.Drawing.Point(6, 136);
             this.lblShares.Name = "lblShares";
             this.lblShares.Size = new System.Drawing.Size(64, 33);
-            this.lblShares.TabIndex = 6;
+            this.lblShares.TabIndex = 9;
             this.lblShares.Text = "Shares:";
             this.lblShares.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
@@ -169,7 +169,7 @@
             this.cmbYear.Location = new System.Drawing.Point(74, 102);
             this.cmbYear.Name = "cmbYear";
             this.cmbYear.Size = new System.Drawing.Size(111, 21);
-            this.cmbYear.TabIndex = 23;
+            this.cmbYear.TabIndex = 5;
             this.cmbYear.Visible = false;
             // 
             // cmbMonth
@@ -211,7 +211,7 @@
             this.cmbMonth.Location = new System.Drawing.Point(74, 102);
             this.cmbMonth.Name = "cmbMonth";
             this.cmbMonth.Size = new System.Drawing.Size(111, 21);
-            this.cmbMonth.TabIndex = 22;
+            this.cmbMonth.TabIndex = 7;
             this.cmbMonth.Visible = false;
             // 
             // cmbWeekly
@@ -227,7 +227,7 @@
             this.cmbWeekly.Location = new System.Drawing.Point(74, 102);
             this.cmbWeekly.Name = "cmbWeekly";
             this.cmbWeekly.Size = new System.Drawing.Size(111, 21);
-            this.cmbWeekly.TabIndex = 16;
+            this.cmbWeekly.TabIndex = 6;
             this.cmbWeekly.Visible = false;
             // 
             // mnuDate

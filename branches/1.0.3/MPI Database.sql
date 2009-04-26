@@ -1,4 +1,4 @@
--- 4/19/2009 12:23 AM
+-- 4/26/2009 1:05 AM
 -- Database information:
 -- locale identifier: 1033
 -- encryption mode: 
@@ -154,7 +154,7 @@ LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares
 LEFT JOIN (SELECT Ticker, Price 
             FROM AvgPricePerShare) AS c 
     ON a.ID = c.Ticker 
-WHERE Portfolio = %Portfolio%',N'Cost Basis',0);
+WHERE a.Active = 1 AND Portfolio = %Portfolio%',N'Cost Basis',0);
 GO
 Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (4,N'SELECT NAV AS NAV
 FROM NAV
@@ -217,7 +217,7 @@ LEFT JOIN (SELECT ID, Name, TaxRate
             FROM Accounts 
             WHERE Portfolio = %Portfolio%) AS e 
     ON a.Acct = e.ID 
-WHERE Portfolio = %Portfolio%',N'Gain/Loss',0);
+WHERE a.Active = 1 AND Portfolio = %Portfolio%',N'Gain/Loss',0);
 GO
 Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (11,N'SELECT (CASE WHEN Days = 0 THEN 0
 ELSE 100 * POWER(NAV, 1.0 / (Days * 6.5)) - 100 END) AS DailyReturn
@@ -421,7 +421,7 @@ LEFT JOIN (SELECT ID, Name, TaxRate
             FROM Accounts 
             WHERE Portfolio = %Portfolio%) AS e 
     ON a.Acct = e.ID 
-WHERE Portfolio = %Portfolio%',N'Tax Liabliity',0);
+WHERE a.Active = 1 AND Portfolio = %Portfolio%',N'Tax Liabliity',0);
 GO
 Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (31,N'SELECT (CASE WHEN DATEDIFF(day, ''%StartDate%'', ''%EndDate%'') / 365 = 0 THEN a.NAV / b.NAV - 1
               ELSE POWER(a.NAV / b.NAV, 1.0 / (DATEDIFF(day, ''%StartDate%'', ''%EndDate%'') / 365)) - 1 END) * 100 AS YearlyReturn

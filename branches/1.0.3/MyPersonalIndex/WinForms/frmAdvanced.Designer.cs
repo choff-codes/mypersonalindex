@@ -272,6 +272,7 @@
             // cmdOk
             // 
             this.cmdOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdOk.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdOk.Location = new System.Drawing.Point(685, 494);
             this.cmdOk.Name = "cmdOk";
             this.cmdOk.Size = new System.Drawing.Size(75, 23);
@@ -284,6 +285,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.cmdOk;
             this.ClientSize = new System.Drawing.Size(772, 524);
             this.Controls.Add(this.cmdOk);
             this.Controls.Add(this.pnl);

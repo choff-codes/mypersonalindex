@@ -22,9 +22,9 @@ namespace MyPersonalIndex
                 "SELECT a.Active AS fActive, a.Ticker AS fTicker, c.Price AS fPrice," +
                         " Coalesce(b.Shares,0) AS fShares," +
                         " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price END) AS fAverage," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price * b.Shares END) AS fCostBasis," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN d.Price * b.Shares END) AS fCostBasis," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
                         " (CASE WHEN a.Active = 1 THEN c.Price * b.Shares END) AS fTotalValue," +
                         " (CASE WHEN {0} <> 0 AND a.Active = 1 THEN c.Price * b.Shares / {0} * 100 END) AS fTotalValueP," +
                         " f.Name AS fAcct, e.AA AS fAA, a.ID as fID" +
@@ -112,7 +112,7 @@ namespace MyPersonalIndex
                             " FROM Accounts" +
                             " WHERE Portfolio = {1}) AS e" +
                     " ON a.Acct = e.ID" +
-                " WHERE Portfolio = {1}", Date.ToShortDateString(), Portfolio);
+                " WHERE a.Active = 1 AND Portfolio = {1}", Date.ToShortDateString(), Portfolio);
         }
 
         public static string GetCSVAddress(string Symbol, DateTime Begin, DateTime End, string Type)
@@ -368,7 +368,7 @@ namespace MyPersonalIndex
                             " FROM Accounts" +
                             " WHERE Portfolio = {1}) AS e" +
                     " ON a.Acct = e.ID" +
-                " WHERE  Portfolio = {1} AND A.Active = 1{3}" +
+                " WHERE Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY e.ID, e.Name, e.TaxRate{4}", 
                 TotalValue, Portfolio, LastestDate.ToShortDateString(), ShowBlank ? "" : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
         }
@@ -431,7 +431,7 @@ namespace MyPersonalIndex
                             " WHERE DATE = '{1}' ) AS c" +
                     " ON a.Ticker = c.Ticker" +
                 " LEFT JOIN Splits d" +
-	                " ON a.Ticker = d.Ticker and d.Date = '{2}'" +
+	                " ON a.Ticker = d.Ticker and d.Date = '{2}'" + // need yesterday's price, but split today if necessary
                 " WHERE a.ID = {0} AND a.Active = 1" +
                 " GROUP BY c.Price, a.Ticker, d.Ratio", TickerID, YDay.ToShortDateString(), Date.ToShortDateString());
         }

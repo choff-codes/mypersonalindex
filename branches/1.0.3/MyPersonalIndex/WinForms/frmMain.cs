@@ -300,18 +300,18 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(c.Price * b.Shares) AS CostBasis  FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                 " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND" + 
                 " ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN" +
-                " (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker WHERE Portfolio = %Portfolio%', 'Cost Basis', 0)");
+                " (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker WHERE a.Active = 1 AND Portfolio = %Portfolio%', 'Cost Basis', 0)");
             SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0)" +
                 " ELSE 1.0 END)) AS GainLoss FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
                 " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
                 " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
-                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE Portfolio = %Portfolio%'" +
+                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE a.Active = 1 AND Portfolio = %Portfolio%'" +
                 ", 'Gain/Loss', 0)");
             SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability" +
                 " FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
                 " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
                 " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
-                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE Portfolio = %Portfolio%'" +
+                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE a.Active = 1 AND Portfolio = %Portfolio%'" +
                 ", 'Tax Liabliity', 0)");
 
             // update version number
@@ -540,6 +540,9 @@ namespace MyPersonalIndex
 
         private void cmbMainPortfolio_SelectedIndexChanged(object sender, EventArgs e)
         {
+            if (Convert.ToInt32(cmbMainPortfolio.ComboBox.SelectedValue) == MPI.Portfolio.ID)
+                return;
+
             LoadPortfolio();
         }
 
@@ -623,13 +626,13 @@ namespace MyPersonalIndex
 
         private void LoadNAV()
         {
-            dgPerformance.DataSource = SQL.ExecuteResultSet(MainQueries.GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked)); ;
+            dgPerformance.DataSource = SQL.ExecuteDataset(MainQueries.GetAllNav(MPI.Portfolio.ID, MPI.Portfolio.NAVStart, btnPerformanceSortDesc.Checked));
         }
 
         private void LoadAssetAllocation(DateTime Date)
         {
             MPI.AA.TotalValue = GetTotalValue(Date);
-            dgAA.DataSource = SQL.ExecuteResultSet(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
+            dgAA.DataSource = SQL.ExecuteDataset(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
 
             dgAA.Columns[MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.AA.TotalValue);
         }
@@ -638,7 +641,7 @@ namespace MyPersonalIndex
         {
             GetAveragePricePerShare(MPI.Account.SelDate);
             MPI.Account.TotalValue = GetTotalValue(Date);
-            dgAcct.DataSource = SQL.ExecuteResultSet(MainQueries.GetAcct(MPI.Portfolio.ID, Date, MPI.Account.TotalValue, MPI.Account.Sort, btnAcctShowBlank.Checked));
+            dgAcct.DataSource = SQL.ExecuteDataset(MainQueries.GetAcct(MPI.Portfolio.ID, Date, MPI.Account.TotalValue, MPI.Account.Sort, btnAcctShowBlank.Checked));
 
             double CostBasis = 0;
             double GainLoss = 0;
@@ -722,7 +725,7 @@ namespace MyPersonalIndex
         {
             GetAveragePricePerShare(MPI.Holdings.SelDate);
             MPI.Holdings.TotalValue = GetTotalValue(Date);
-            dgHoldings.DataSource = SQL.ExecuteResultSet(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
+            dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
 
             double CostBasis = 0;
             double GainLoss = 0;
@@ -845,15 +848,18 @@ namespace MyPersonalIndex
 
         private void UpdatePrices()
         {
+            Dictionary<string, UpdateInfo> Tickers = GetTickerUpdateList();
+            DateTime MinDate;
+            List<string> TickersNotUpdated = new List<string>();
+
+            if (Tickers.Count == 0)
+                return;
+
             if (!Functions.IsInternetConnection())
             {
                 MessageBox.Show("No Internet connection!", "Connection", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-
-            Dictionary<string, UpdateInfo> Tickers = GetTickerUpdateList();
-            DateTime MinDate;
-            List<string> TickersNotUpdated = new List<string>();
 
             GetTickerUpdateInfo(Tickers);
             MinDate = DateTime.Today.AddDays(1); // arbitrary value
@@ -1051,33 +1057,34 @@ namespace MyPersonalIndex
                         if (T.Shares < 0)
                             continue;
 
+                    List<TradeInfo> ExistingTrades;
+                    bool ExistingList = Trades.TryGetValue(Ticker, out ExistingTrades);
                     if (T.Shares < 0)
                     {
-                        List<TradeInfo> Pairs;
-                        if (Trades.TryGetValue(Ticker, out Pairs))
-                        {
-                            while (Pairs.Count != 0 && T.Shares != 0)
+                        if (ExistingList)
+                            while (ExistingTrades.Count != 0 && T.Shares != 0)
                             {
-                                int i = MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO ? Pairs.Count - 1 : 0;
-                                if (Pairs[i].Shares <= -1 * T.Shares)
+                                int i = MPI.Portfolio.CostCalc == Constants.AvgShareCalc.LIFO ? ExistingTrades.Count - 1 : 0;
+                                if (ExistingTrades[i].Shares <= -1 * T.Shares)
                                 {
-                                    T.Shares += Pairs[i].Shares;
-                                    Pairs.RemoveAt(i);
+                                    T.Shares += ExistingTrades[i].Shares;
+                                    ExistingTrades.RemoveAt(i);
                                 }
                                 else
                                 {
-                                    Pairs[i].Shares += T.Shares;
+                                    ExistingTrades[i].Shares += T.Shares;
                                     T.Shares = 0;
                                 }
                             }
-                        }
                     }
                     else
-                    {
-                        if (!Trades.ContainsKey(Ticker))
+                        if (!ExistingList)
+                        {
                             Trades.Add(Ticker, new List<TradeInfo>());
-                        Trades[Ticker].Add(T);
-                    }
+                            Trades[Ticker].Add(T);
+                        }
+                        else
+                            ExistingTrades.Add(T);
                 }
 
             return Trades;
@@ -1170,7 +1177,7 @@ namespace MyPersonalIndex
 
             // recalculate portfolio from the start of the 2nd day of pricing
             PortfolioStart = true;
-            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate));
+            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetSecondDay(), MPI.LastDate < StartDate ? StartDate : MPI.LastDate));
         }
 
         private List<DateTime> GetDailyDynamicDates(List<DateTime> MarketDays)

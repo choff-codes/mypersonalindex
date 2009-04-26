@@ -54,6 +54,7 @@
             this.lst.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lst.Size = new System.Drawing.Size(78, 134);
             this.lst.TabIndex = 1;
+            this.lst.SelectedIndexChanged += new System.EventHandler(this.lst_SelectedIndexChanged);
             // 
             // cmdDelete
             // 
@@ -114,6 +115,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.cmdCancel;
             this.ClientSize = new System.Drawing.Size(304, 250);
             this.Controls.Add(this.pn);
             this.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));

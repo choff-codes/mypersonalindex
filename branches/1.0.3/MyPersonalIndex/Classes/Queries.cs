@@ -65,55 +65,59 @@ namespace MyPersonalIndex
 
         public void ExecuteNonQuery(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            cmd.ExecuteNonQuery();
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
         }
 
         public object ExecuteScalar(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteScalar();
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                return cmd.ExecuteScalar();
+            }
         }
 
         public object ExecuteScalar(string sql, object NullValue)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            object result = cmd.ExecuteScalar();
-            return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                object result = cmd.ExecuteScalar();
+                return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+            }
         }
 
         public SqlCeResultSet ExecuteResultSet(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+            }
         }
-
-        public SqlCeResultSet ExecuteResultSetUpdateable(string sql)
-        {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
-        }
-
 
         public SqlCeResultSet ExecuteTableUpdate(string table)
         {
-            SqlCeCommand cmd = new SqlCeCommand(table, cn);
-            cmd.CommandType = CommandType.TableDirect;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
+            using (SqlCeCommand cmd = new SqlCeCommand(table, cn))
+            {
+                cmd.CommandType = CommandType.TableDirect;
+                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
+            }
         }
 
         public DataTable ExecuteDataset(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            SqlCeDataAdapter da = new SqlCeDataAdapter(cmd);
             DataTable dt = new DataTable();
-            da.Fill(dt);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
+                    da.Fill(dt);
+            }
             return dt;
         }
 

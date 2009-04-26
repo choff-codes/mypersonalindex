@@ -55,9 +55,9 @@ namespace MyPersonalIndex
         public static string GetPortfolio(string Portfolio, DateTime EndDate)
         {
             return string.Format(
-                "SELECT a.Name, a.StartDate, b.TotalValue" +
+                "SELECT a.Name, a.StartDate, COALESCE(b.TotalValue, 0)" +
                 " FROM Portfolios a" +
-                " INNER JOIN NAV b" +
+                " LEFT JOIN NAV b" +
                 " ON b.Date = '{0}' and b.Portfolio = {1}" +
                 " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
         }

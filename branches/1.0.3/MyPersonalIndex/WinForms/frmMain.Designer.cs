@@ -243,6 +243,8 @@
             // 
             // dgHoldings
             // 
+            this.dgHoldings.AllowUserToAddRows = false;
+            this.dgHoldings.AllowUserToDeleteRows = false;
             this.dgHoldings.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgHoldings.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgHoldings.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -568,8 +570,8 @@
             this.btnStatEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnStatEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStatEdit.Name = "btnStatEdit";
-            this.btnStatEdit.Size = new System.Drawing.Size(98, 22);
-            this.btnStatEdit.Text = "Add/Edit Statistics";
+            this.btnStatEdit.Size = new System.Drawing.Size(110, 22);
+            this.btnStatEdit.Text = "Add/Edit Statistics...";
             this.btnStatEdit.Click += new System.EventHandler(this.btnStatEdit_Click);
             // 
             // sStat1
@@ -689,6 +691,8 @@
             // 
             // dgPerformance
             // 
+            this.dgPerformance.AllowUserToAddRows = false;
+            this.dgPerformance.AllowUserToDeleteRows = false;
             this.dgPerformance.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgPerformance.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgPerformance.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -924,6 +928,8 @@
             // 
             // dgAcct
             // 
+            this.dgAcct.AllowUserToAddRows = false;
+            this.dgAcct.AllowUserToDeleteRows = false;
             this.dgAcct.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgAcct.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgAcct.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -1062,8 +1068,8 @@
             this.btnEditAccts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnEditAccts.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnEditAccts.Name = "btnEditAccts";
-            this.btnEditAccts.Size = new System.Drawing.Size(76, 22);
-            this.btnEditAccts.Text = "Edit Accounts";
+            this.btnEditAccts.Size = new System.Drawing.Size(88, 22);
+            this.btnEditAccts.Text = "Edit Accounts...";
             this.btnEditAccts.Click += new System.EventHandler(this.btnEditAccts_Click);
             // 
             // sAcct1
@@ -1136,6 +1142,8 @@
             // 
             // dgAA
             // 
+            this.dgAA.AllowUserToAddRows = false;
+            this.dgAA.AllowUserToDeleteRows = false;
             this.dgAA.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.dgAA.ClipboardCopyMode = System.Windows.Forms.DataGridViewClipboardCopyMode.EnableAlwaysIncludeHeaderText;
             this.dgAA.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -1240,8 +1248,8 @@
             this.btnAAEditAA.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnAAEditAA.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAAEditAA.Name = "btnAAEditAA";
-            this.btnAAEditAA.Size = new System.Drawing.Size(108, 22);
-            this.btnAAEditAA.Text = "Edit Asset Allocation";
+            this.btnAAEditAA.Size = new System.Drawing.Size(120, 22);
+            this.btnAAEditAA.Text = "Edit Asset Allocation...";
             this.btnAAEditAA.Click += new System.EventHandler(this.btnAAEditAA_Click);
             // 
             // sAA1

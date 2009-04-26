@@ -43,6 +43,9 @@ namespace MyPersonalIndex
         private void cmdDelete_Click(object sender, EventArgs e)
         {
             List<int> i = new List<int>();
+            int StartIndex = -1;
+            if (lst.SelectedItems.Count == 1) // only select at item after deletion if 1 item is currently selected
+                StartIndex = lst.SelectedIndex;
 
             foreach (int selected in lst.SelectedIndices)
                 i.Add(selected);
@@ -54,6 +57,14 @@ namespace MyPersonalIndex
                 SelDates.RemoveAt(selected);
                 lst.Items.RemoveAt(selected);
             }
+
+            if (StartIndex == -1 || lst.Items.Count == 0)
+                return;
+
+            if (StartIndex == lst.Items.Count)
+                lst.SelectedIndex = StartIndex - 1;
+            else
+                lst.SelectedIndex = StartIndex;
         }
 
         private void calendar_DateSelected(object sender, DateRangeEventArgs e)
@@ -72,6 +83,12 @@ namespace MyPersonalIndex
 
             _DateReturnValues.When = string.Join("|", s);
             DialogResult = DialogResult.OK;
+        }
+
+        private void lst_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lst.SelectedIndex != -1 && lst.SelectedIndices.Count == 1)
+                calendar.SelectionStart = Convert.ToDateTime(lst.Items[lst.SelectedIndex]);
         }
     }
 }

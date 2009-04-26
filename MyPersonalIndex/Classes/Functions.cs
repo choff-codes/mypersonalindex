@@ -10,7 +10,6 @@ namespace MyPersonalIndex
 {
     class Functions
     {
-
         public static string SQLCleanString(string s)
         {
             return s.Replace("'", "''");
@@ -18,7 +17,7 @@ namespace MyPersonalIndex
 
         public static string StripSignifyPortfolio(string Ticker)
         {
-            return Ticker.Substring(Constants.SignifyPortfolio.Length, Ticker.Length - Constants.SignifyPortfolio.Length);
+            return Functions.RemoveDelimiter(Constants.SignifyPortfolio, Ticker);
         }
 
         public static Color GetRandomColor(int Seed)
@@ -31,12 +30,12 @@ namespace MyPersonalIndex
                 Color c = (Color)prop.GetValue(null, null);
                 if (c == Color.Transparent || c == Color.Empty)
                     continue;
-                if (c.B + c.A + c.G > 700)
+                if (c.B + c.A + c.G > 700) // too light
                     continue;
                 Colors.Add(c);
             }
 
-            while (Seed * 3 > Colors.Count - 1)
+            while (Seed * 3 > Colors.Count - 1) // loop back to the beginning colors
                 Seed = Seed * 3 - Colors.Count - 1;
             
             return Colors[Seed * 3];
@@ -99,8 +98,8 @@ namespace MyPersonalIndex
 
                 if (httpResponse.StatusCode == HttpStatusCode.OK)
                     return true;
-                else
-                    return false;
+
+                return false;
             }
             catch (WebException)
             {
@@ -170,8 +169,15 @@ namespace MyPersonalIndex
                     lines.Add(string.Join(delimiter, line.ToArray()));
                 }
 
-                File.WriteAllLines(dSave.FileName, lines.ToArray());
-                MessageBox.Show("Export successful!");
+                try
+                {
+                    File.WriteAllLines(dSave.FileName, lines.ToArray());
+                    MessageBox.Show("Export successful!");
+                }
+                catch (Exception)
+                {
+                    MessageBox.Show("Write failed! File may be open by another program.");
+                }
             }
         }
 

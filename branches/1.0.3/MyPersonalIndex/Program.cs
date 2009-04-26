@@ -18,9 +18,12 @@ namespace MyPersonalIndex
             bool firstInstance;
             Mutex mutex = new Mutex(false, "Local\\MyPersonalIndex", out firstInstance);
             if (firstInstance)
+            {
                 Application.Run(new frmMain());
+                GC.KeepAlive(mutex);
+            }
             else
-                MessageBox.Show("Only one instance can be run at a time!");
+                MessageBox.Show("Only one instance of My Personal Index can be run at a time!");
         }
     }
 }

@@ -1375,6 +1375,9 @@ namespace MyPersonalIndex
                     int TickerID = i.Key.TickerID;
                     TickerInfo Info = GetTickerValue(TickerID, Date, YDay);
 
+                    if (Info.Price == 0  || Info.SplitRatio == 0)
+                        continue;
+
                     int Counter = Convert.ToInt32(SQL.ExecuteScalar(MainQueries.GetLastTickerID(TickerID), -1)) + 1;
                     foreach (Constants.DynamicTrade dt in i.Value)
                     {
@@ -1382,29 +1385,28 @@ namespace MyPersonalIndex
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.Portfolio, Portfolio);
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.TickerID, TickerID);
                         newRecord.SetString((int)MainQueries.Tables.eTrades.Ticker, Info.Ticker);
-                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, (decimal)(Info.SplitRatio == 0 ? 0 : Info.Price / Info.SplitRatio));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Price, (decimal)(Info.Price / Info.SplitRatio));
                         newRecord.SetInt32((int)MainQueries.Tables.eTrades.ID, Counter);
                         newRecord.SetBoolean((int)MainQueries.Tables.eTrades.Custom, true);
 
                         double SharesToBuy = 0;
-                        if (Info.Price != 0 && Info.SplitRatio != 0)
-                            switch (dt.TradeType)
-                            {
-                                case Constants.DynamicTradeType.AA:
-                                    if (i.Key.AA == -1 || AAValues[i.Key.AA] == 0) // AA not assigned, or target not set
-                                        continue;
-                                    SharesToBuy = ((YTotalValue * (AAValues[i.Key.AA] / 100)) - Info.TotalValue) / (Info.Price / Info.SplitRatio);
-                                    break;
-                                case Constants.DynamicTradeType.Fixed:
-                                    SharesToBuy = dt.Value / (Info.Price / Info.SplitRatio);
-                                    break;
-                                case Constants.DynamicTradeType.Shares:
-                                    SharesToBuy = dt.Value;
-                                    break;
-                                case Constants.DynamicTradeType.TotalValue:
-                                    SharesToBuy = (YTotalValue * (dt.Value / 100)) / (Info.Price / Info.SplitRatio);
-                                    break;
-                            }
+                        switch (dt.TradeType)
+                        {
+                            case Constants.DynamicTradeType.AA:
+                                if (i.Key.AA == -1 || AAValues[i.Key.AA] == 0) // AA not assigned, or target not set
+                                    continue;
+                                SharesToBuy = ((YTotalValue * (AAValues[i.Key.AA] / 100)) - Info.TotalValue) / (Info.Price / Info.SplitRatio);
+                                break;
+                            case Constants.DynamicTradeType.Fixed:
+                                SharesToBuy = dt.Value / (Info.Price / Info.SplitRatio);
+                                break;
+                            case Constants.DynamicTradeType.Shares:
+                                SharesToBuy = dt.Value;
+                                break;
+                            case Constants.DynamicTradeType.TotalValue:
+                                SharesToBuy = (YTotalValue * (dt.Value / 100)) / (Info.Price / Info.SplitRatio);
+                                break;
+                        }
                         newRecord.SetDecimal((int)MainQueries.Tables.eTrades.Shares, (decimal)SharesToBuy);
 
                         rs.Insert(newRecord);
@@ -2060,10 +2062,11 @@ namespace MyPersonalIndex
 
         private void btnMainCompare_Click(object sender, EventArgs e)
         {
+            if (tb.Enabled == false) // need an active portfolio
+                return;
+
             using (frmAdvanced f = new frmAdvanced(MPI.Settings.DataStartDate, MPI.LastDate))
-            {
                 f.ShowDialog();
-            }
         }
 
         private void dgCorrelation_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)

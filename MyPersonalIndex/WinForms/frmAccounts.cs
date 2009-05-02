@@ -1,9 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
-using System.Text;
 using System.Windows.Forms;
 
 namespace MyPersonalIndex
@@ -12,13 +9,13 @@ namespace MyPersonalIndex
     {
         private AcctQueries SQL = new AcctQueries();
         private int PortfolioID;
-        private bool Pasted;
+        private bool Pasted = false;
 
         public frmAccounts(int Portfolio, string PortfolioName)
         {
             InitializeComponent();
             PortfolioID = Portfolio;
-            this.Text = PortfolioName + " Accounts";
+            this.Text = string.Format("{0} Accounts", PortfolioName);
         }
 
         private void frmAccounts_Load(object sender, EventArgs e)
@@ -29,12 +26,22 @@ namespace MyPersonalIndex
                 return;
             }
 
-            Pasted = false;
-
             dsAcct.Tables.Add(SQL.ExecuteDataset(AcctQueries.GetAcct(PortfolioID)));
             dgAcct.DataSource = dsAcct.Tables[0];
+            dsAcct.AcceptChanges();  // set all records = clean
+        }
 
-            dsAcct.AcceptChanges();
+        private bool CheckValidPasteItem(string s, AcctQueries.eGetAcct Column)
+        {
+            if (Column == AcctQueries.eGetAcct.Name)
+                return !string.IsNullOrEmpty(s);
+            else  // AcctQueries.eGetAcct.TaxRate
+                return Functions.StringIsDecimal(s, false);
+        }
+
+        private bool CheckValidPasteItem(string s, string s2)
+        {
+            return (!string.IsNullOrEmpty(s)) && Functions.StringIsDecimal(s2, false);
         }
 
         private void dgAcct_KeyDown(object sender, KeyEventArgs e)
@@ -42,86 +49,50 @@ namespace MyPersonalIndex
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
-            Pasted = true;
-            
-            string s = Clipboard.GetText();
-            s = s.Replace("\r", "");
-            string[] lines = s.Split('\n');
+            Pasted = true;  // there have been changes
+
+            string[] lines = Functions.GetClipboardText();
             int row = dgAcct.CurrentCell.RowIndex;
             int origrow = dgAcct.CurrentCell.RowIndex;
             int col = dgAcct.CurrentCell.ColumnIndex;
-
 
             dgAcct.CancelEdit();
             dsAcct.AcceptChanges();
 
             foreach (string line in lines)
             {
-                if (line == "")
+                if (string.IsNullOrEmpty(line))
                     continue;
 
-                string[] cells = line.Split('\t');
-                if (row < dgAcct.Rows.Count - 1)
-                {
-                    for (int i = 0; i < cells.Length; ++i)
-                    {
-                        if (col + i < dgAcct.Columns.Count - 1)
-                        {
-                            try
-                            {
-                                switch (col + i)
-                                {
-                                    case 0:
-                                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.Name] = cells[i];
-                                        break;
-                                    case 1:
-                                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.TaxRate] = Convert.ToDecimal(cells[i].Replace("%", ""));
-                                        break;
-                                }
-                            }
-                            catch (System.FormatException)
-                            {
-                                // do nothing
-                            }
-                            catch (System.OverflowException)
-                            {
-                                // do nothing
-                            }
+                string[] cells = line.Split('\t');  // tab seperated values
 
-                            dsAcct.AcceptChanges();
-                        }
-                    }
-                    row++;
-
-                }
-                else
-                {
-                    if (cells.Length == dgAcct.Columns.Count - 1)
+                if (row >= dgAcct.Rows.Count - 1 && col == 0 && cells.Length == dgAcct.Columns.Count - 1)  // -1 since there is a hidden column
+                    if (CheckValidPasteItem(cells[(int)AcctQueries.eGetAcct.Name], cells[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "")))
                     {
-                        try
-                        {
-                            dsAcct.Tables[0].Rows.Add(cells[0], Convert.ToDecimal(cells[1].Replace("%", "")), 0);
-                            row++;
-                        }
-                        catch (System.FormatException)
-                        {
-                            // do nothing
-                        }
-                        catch (System.OverflowException)
-                        {
-                            // do nothing
-                        }
+                        dsAcct.Tables[0].Rows.Add(cells[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(cells[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "")), 0);
                         dsAcct.AcceptChanges();
+                        row++;
+                        continue;
                     }
-                }
-            }
 
+                if (row >= dgAcct.Rows.Count - 1)
+                    continue;
+
+                for (int i = col; i <= dgAcct.Columns.Count - 2 && i < col + cells.Length; i++)  // -2 since there is a hidden ID column
+                    if (i == (int)AcctQueries.eGetAcct.Name && CheckValidPasteItem(cells[i - col], AcctQueries.eGetAcct.Name))
+                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.Name] = cells[i - col];
+                    else if (i == (int)AcctQueries.eGetAcct.TaxRate && CheckValidPasteItem(cells[i - col].Replace("%", ""), AcctQueries.eGetAcct.TaxRate))
+                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.TaxRate] = Convert.ToDecimal(cells[i - col].Replace("%", ""));
+
+                dsAcct.AcceptChanges();
+                row++;
+            }
             dgAcct.CurrentCell = dgAcct[col, origrow];
         }
 
         private void dgAcct_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
         {
-            e.Row.Cells[2].Value = 0;
+            e.Row.Cells[(int)AcctQueries.eGetAcct.ID].Value = 0;
         }
 
         private void frmAccounts_FormClosing(object sender, FormClosingEventArgs e)
@@ -144,35 +115,24 @@ namespace MyPersonalIndex
             if (dsAcct.HasChanges() || Pasted)
             {
                 dsAcct.AcceptChanges();
-                string AcctIn = "";
+                List<string> AcctIn = new List<string>();  // delete anything not added to this list
 
                 foreach (DataRow dr in dsAcct.Tables[0].Rows)
-                    if (Convert.ToInt32(dr[(int)AcctQueries.eGetAcct.ID]) != 0)
-                        AcctIn = AcctIn + Convert.ToInt32(dr[(int)AcctQueries.eGetAcct.ID]).ToString() + ",";
+                    if ((int)dr[(int)AcctQueries.eGetAcct.ID] != 0) // existing rows, all new rows have a 0 ID
+                        AcctIn.Add(dr[(int)AcctQueries.eGetAcct.ID].ToString());
 
-                if (!string.IsNullOrEmpty(AcctIn))
-                    AcctIn = AcctIn.Substring(0, AcctIn.Length - 1);
-
-                SQL.ExecuteNonQuery(AcctQueries.DeleteAcct(PortfolioID, AcctIn));
+                SQL.ExecuteNonQuery(AcctQueries.DeleteAcct(PortfolioID, string.Join(",", AcctIn.ToArray())));
 
                 foreach (DataRow dr in dsAcct.Tables[0].Rows)
                 {
-                    try
-                    {
-                        if (Convert.ToInt32(dr[(int)AcctQueries.eGetAcct.ID]) == 0)
-                            if (string.IsNullOrEmpty(dr[(int)AcctQueries.eGetAcct.TaxRate].ToString()))
-                                SQL.ExecuteNonQuery(AcctQueries.InsertAcct(PortfolioID, (string)dr[(int)AcctQueries.eGetAcct.Name], null));
-                            else
-                                SQL.ExecuteNonQuery(AcctQueries.InsertAcct(PortfolioID, (string)dr[(int)AcctQueries.eGetAcct.Name], Convert.ToDouble(dr[(int)AcctQueries.eGetAcct.TaxRate])));
-                        else
-                            if (string.IsNullOrEmpty(dr[(int)AcctQueries.eGetAcct.TaxRate].ToString()))
-                                SQL.ExecuteNonQuery(AcctQueries.UpdateAcct(Convert.ToInt32(dr[(int)AcctQueries.eGetAcct.ID]), (string)dr[(int)AcctQueries.eGetAcct.Name], null));
-                            else
-                                SQL.ExecuteNonQuery(AcctQueries.UpdateAcct(Convert.ToInt32(dr[(int)AcctQueries.eGetAcct.ID]), (string)dr[(int)AcctQueries.eGetAcct.Name], Convert.ToDouble(dr[(int)AcctQueries.eGetAcct.TaxRate])));
-                    }
-                    catch
-                    {
-                    }
+                    double? TaxRate = null;  // store blank targets as null
+                    if (!string.IsNullOrEmpty(dr[(int)AcctQueries.eGetAcct.TaxRate].ToString()))
+                        TaxRate = Convert.ToDouble(dr[(int)AcctQueries.eGetAcct.TaxRate]);
+
+                    if ((int)dr[(int)AcctQueries.eGetAcct.ID] == 0)
+                        SQL.ExecuteNonQuery(AcctQueries.InsertAcct(PortfolioID, (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate));
+                    else
+                        SQL.ExecuteNonQuery(AcctQueries.UpdateAcct((int)dr[(int)AcctQueries.eGetAcct.ID], (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate));
                 }
                 DialogResult = DialogResult.OK;
             }

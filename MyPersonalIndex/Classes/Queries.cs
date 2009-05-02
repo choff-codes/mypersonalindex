@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.Windows.Forms;
 using System.Data.SqlServerCe;
-using System.Drawing;
-using System.IO;
+using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
@@ -25,6 +23,7 @@ namespace MyPersonalIndex
             public const string Tickers = "Tickers";
             public const string Trades = "Trades";
             public const string UserStatistics = "UserStatistics";
+            public const string CustomTrades = "CustomTrades";
 
             public enum eClosingPrices { Date, Ticker, Price, Change };
             public enum eSplits { Date, Ticker, Ratio };
@@ -32,7 +31,8 @@ namespace MyPersonalIndex
             public enum eAvgPricePerShare { Ticker, Price };
             public enum eNAV { Portfolio, Date, TotalValue, NAV, Change };
             public enum eStats { Portfolio, Statistic, Location };
-            public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID }
+            public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
+            public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value };
         }
         
         private SqlCeConnection cn;
@@ -56,65 +56,68 @@ namespace MyPersonalIndex
             if (cn != null)
             {
                 if (cn.State == ConnectionState.Open)
-                {
                     cn.Close();
-                }
+                
                 cn.Dispose();
                 cn = null;
-            };
+            }
         }
 
         public void ExecuteNonQuery(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            cmd.ExecuteNonQuery();
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
         }
 
         public object ExecuteScalar(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteScalar();
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                return cmd.ExecuteScalar();
+            }
         }
 
         public object ExecuteScalar(string sql, object NullValue)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            object result = cmd.ExecuteScalar();
-            return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                object result = cmd.ExecuteScalar();
+                return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+            }
         }
 
         public SqlCeResultSet ExecuteResultSet(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+            }
         }
-
-        public SqlCeResultSet ExecuteResultSetUpdateable(string sql)
-        {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
-        }
-
 
         public SqlCeResultSet ExecuteTableUpdate(string table)
         {
-            SqlCeCommand cmd = new SqlCeCommand(table, cn);
-            cmd.CommandType = CommandType.TableDirect;
-            return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
+            using (SqlCeCommand cmd = new SqlCeCommand(table, cn))
+            {
+                cmd.CommandType = CommandType.TableDirect;
+                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable | ResultSetOptions.Updatable);
+            }
         }
 
         public DataTable ExecuteDataset(string sql)
         {
-            SqlCeCommand cmd = new SqlCeCommand(sql, cn);
-            cmd.CommandType = CommandType.Text;
-            SqlCeDataAdapter da = new SqlCeDataAdapter(cmd);
             DataTable dt = new DataTable();
-            da.Fill(dt);
+            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
+            {
+                cmd.CommandType = CommandType.Text;
+                using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
+                    da.Fill(dt);
+            }
             return dt;
         }
 
@@ -148,9 +151,9 @@ namespace MyPersonalIndex
             return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM ClosingPrices ORDER BY Date) a ORDER BY Date DESC";
         }
 
-        public static string DeleteTickerTrades(int Portfolio, int Ticker)
+        public static string DeleteTickerTrades(int Portfolio, int Ticker, bool Custom)
         {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}{2}", Portfolio, Ticker, Custom ? "" : " AND Custom IS NULL");
         }
 
         public enum eGetAA { AA, Target, ID };

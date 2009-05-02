@@ -17,8 +17,6 @@ namespace MyPersonalIndex
             this.textBoxDescription.Text = AssemblyDescription;
         }
 
-        #region Assembly Attribute Accessors
-
         public string AssemblyTitle
         {
             get
@@ -96,6 +94,5 @@ namespace MyPersonalIndex
                 return ((AssemblyCompanyAttribute)attributes[0]).Company;
             }
         }
-        #endregion
     }
 }

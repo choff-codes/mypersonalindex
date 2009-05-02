@@ -110,6 +110,7 @@
     <Compile Include="Classes\Queries\PortfolioQueries.cs" />
     <Compile Include="Classes\Queries\StatsQueries.cs" />
     <Compile Include="Classes\Queries\TickerQueries.cs" />
+    <Compile Include="Classes\Queries\TradeQueries.cs" />
     <Compile Include="Classes\Queries\UserStatQueries.cs" />
     <Compile Include="WinForms\frmAccounts.cs">
       <SubType>Form</SubType>
@@ -141,6 +142,12 @@
     <Compile Include="WinForms\frmAA.Designer.cs">
       <DependentUpon>frmAA.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\frmDates.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\frmDates.Designer.cs">
+      <DependentUpon>frmDates.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\frmOptions.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -171,6 +178,12 @@
     <Compile Include="WinForms\frmTickers.Designer.cs">
       <DependentUpon>frmTickers.cs</DependentUpon>
     </Compile>
+    <Compile Include="WinForms\frmTrades.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WinForms\frmTrades.Designer.cs">
+      <DependentUpon>frmTrades.cs</DependentUpon>
+    </Compile>
     <Compile Include="WinForms\frmUserStatistics.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -198,6 +211,9 @@
     <EmbeddedResource Include="WinForms\frmAA.resx">
       <DependentUpon>frmAA.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\frmDates.resx">
+      <DependentUpon>frmDates.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmMain.resx">
       <DependentUpon>frmMain.cs</DependentUpon>
     </EmbeddedResource>
@@ -215,6 +231,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmTickers.resx">
       <DependentUpon>frmTickers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WinForms\frmTrades.resx">
+      <DependentUpon>frmTrades.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="WinForms\frmUserStatistics.resx">
       <DependentUpon>frmUserStatistics.cs</DependentUpon>

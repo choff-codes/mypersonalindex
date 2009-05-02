@@ -22,9 +22,9 @@ namespace MyPersonalIndex
                 "SELECT a.Active AS fActive, a.Ticker AS fTicker, c.Price AS fPrice," +
                         " Coalesce(b.Shares,0) AS fShares," +
                         " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price END) AS fAverage," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price * b.Shares END) AS fCostBasis," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
-                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN d.Price * b.Shares END) AS fCostBasis," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
+                        " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
                         " (CASE WHEN a.Active = 1 THEN c.Price * b.Shares END) AS fTotalValue," +
                         " (CASE WHEN {0} <> 0 AND a.Active = 1 THEN c.Price * b.Shares / {0} * 100 END) AS fTotalValueP," +
                         " f.Name AS fAcct, e.AA AS fAA, a.ID as fID" +
@@ -35,7 +35,7 @@ namespace MyPersonalIndex
                                    " LEFT JOIN Splits b" +
                                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
                                    " WHERE a.Portfolio = {1} AND a.Date <= '{2}'" +
-                                   " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" +
+                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                             " GROUP BY TickerID) AS b" +
                     " ON a.ID = b.TickerID" +
                 " LEFT JOIN (SELECT Ticker, Price" +
@@ -73,7 +73,7 @@ namespace MyPersonalIndex
                                    " LEFT JOIN Splits c" +
                                        " ON a.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND '{0}'" +
                                    " WHERE a.Portfolio = {1} AND a.Date <= '{0}'" +
-                                   " GROUP BY a.ID, a.Ticker, a.Shares) AllTrades" +
+                                   " GROUP BY a.ID, a.Custom, a.Ticker, a.Shares) AllTrades" +
                             " GROUP BY Ticker) AS b" +
                 " ON a.Ticker = b.Ticker",
                 Date.ToShortDateString(), Portfolio);
@@ -98,7 +98,7 @@ namespace MyPersonalIndex
                                     " LEFT JOIN Splits b" +
                                         " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{0}'" +
                                     " WHERE a.Portfolio = {1} AND a.Date <= '{0}'" +
-                                    " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" +
+                                    " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                              " GROUP BY TickerID) AS b" +
                      " ON a.ID = b.TickerID" +
                 " LEFT JOIN (SELECT Ticker, Price" +
@@ -112,7 +112,7 @@ namespace MyPersonalIndex
                             " FROM Accounts" +
                             " WHERE Portfolio = {1}) AS e" +
                     " ON a.Acct = e.ID" +
-                " WHERE Portfolio = {1}", Date.ToShortDateString(), Portfolio);
+                " WHERE a.Active = 1 AND Portfolio = {1}", Date.ToShortDateString(), Portfolio);
         }
 
         public static string GetCSVAddress(string Symbol, DateTime Begin, DateTime End, string Type)
@@ -126,20 +126,30 @@ namespace MyPersonalIndex
             return string.Format("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s={0}", Symbol);
         }
 
-        public enum eGetUpdateDistinctTickers { Ticker, Date, Price };
+        public enum eGetUpdateDistinctTickers { Ticker };
         public static string GetUpdateDistinctTickers()
         {
+            return "SELECT DISTINCT Ticker FROM Tickers";
+        }
+
+        public enum eGetUpdateLastRunDates { Ticker, Date, Price, Type };
+        public static string GetUpdateLastRunDates()
+        {
             return
-                "SELECT a.Ticker, b.Date, b.Price" +
-                " FROM (SELECT DISTINCT Ticker" +
-                        " FROM Tickers) AS a" +
-                " LEFT JOIN (SELECT a.Ticker, a.Price, a.Date AS Date" +
-                            " FROM ClosingPrices a" +
-                            " INNER JOIN (SELECT Ticker, MAX(Date) as Date" +
-                                        " FROM ClosingPrices" +
-                                        " GROUP BY Ticker) b" +
-                            " ON a.Ticker = b.Ticker AND a.Date = b.Date) b" +
-                " ON a.Ticker = b.Ticker";
+                    "SELECT a.Ticker, b.Date, b.Price, 'C' AS Type" +
+                    " FROM (SELECT Ticker, MAX(Date) as Date" +
+                          " FROM ClosingPrices" +
+                          " GROUP BY Ticker) a" +
+                    " INNER JOIN ClosingPrices b" +
+                    " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
+                " UNION ALL" +
+                    " SELECT Ticker, MAX(Date) as Date, 0, 'D'" +
+                    " FROM Dividends" +
+                    " GROUP BY Ticker" +
+                " UNION ALL" +
+                    " SELECT Ticker, MAX(Date) as Date, 0, 'S'" +
+                    " FROM Splits" +
+                    " GROUP BY Ticker";
         }
 
         public enum eGetCorrelationDistinctTickers { Ticker };
@@ -164,7 +174,7 @@ namespace MyPersonalIndex
                " LEFT JOIN Splits b" +
                   " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{1}'" +
                " WHERE a.Portfolio = {0} AND a.Date <= '{1}'" +
-               " GROUP BY a.ID, a.TickerID, a.Price, a.Shares, a.Date " +
+               " GROUP BY a.ID, a.Custom, a.TickerID, a.Price, a.Shares, a.Date " +
                " ORDER BY a.TickerID, a.Date",
                Portfolio, MaxDate.ToShortDateString());
         }
@@ -176,22 +186,48 @@ namespace MyPersonalIndex
                 "SELECT DISTINCT TickerID FROM Trades WHERE Portfolio = {0}", Portfolio);
         }
 
-        public enum eGetPortfolios { ID, Name };
+        public enum eGetPortfolios { Name, ID};
         public static string GetPortfolios()
         {
-            return "SELECT ID, Name FROM Portfolios";
+            return "SELECT Name, ID FROM Portfolios";
         }
 
         public enum eGetNAVPortfolios { ID, Name, StartDate, Dividends, NAVStartValue };
-        public static string GetNAVPortfolios()
+        public static string GetNAVPortfolios(int Portfolio)
         {
-            return "SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios";
+            return string.Format("SELECT ID, Name, StartDate, Dividends, NAVStartValue FROM Portfolios WHERE ID = {0}", 
+                Portfolio == -1 ? "ID" : Portfolio.ToString());
         }
 
         public static string DeleteNAVPrices(int Portfolio, DateTime MinDate)
         {
             return string.Format(
                 "DELETE FROM NAV WHERE Portfolio = {0} AND Date >= '{1}'", Portfolio, MinDate.ToShortDateString());
+        }
+
+        public static string DeleteCustomTrades(int Portfolio, DateTime MinDate)
+        {
+            return string.Format(
+                "DELETE FROM Trades WHERE Portfolio = {0} AND Date >= '{1}' AND Custom IS NOT NULL", Portfolio, MinDate.ToShortDateString());
+        }
+
+        public static string DeleteCustomTrades()
+        {
+            return "DELETE FROM Trades WHERE Custom IS NOT NULL";
+        }
+
+        public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value, AA };
+        public static string GetCustomTrades(int Portfolio)
+        {
+            return string.Format(
+                "SELECT a.TickerID, a.TradeType, a.Frequency, a.Dates, a.Value, c.ID AS AA" +
+                " FROM CustomTrades a " +
+                " INNER JOIN Tickers b" +
+	                " ON a.TickerID = b.ID" + 
+                " LEFT JOIN AA c " +
+	                " ON b.AA = c.ID" +
+                " WHERE b.Active = 1 AND a.Portfolio = {0}" +
+                " ORDER BY a.TickerID", Portfolio);
         }
 
         public static string GetSpecificNav(int Portfolio, DateTime Date)
@@ -210,7 +246,7 @@ namespace MyPersonalIndex
         public enum eGetDistinctDates { Date };
         public static string GetDistinctDates(DateTime MinDate)
         {
-            return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}'", MinDate.ToShortDateString());
+            return string.Format("SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", MinDate.ToShortDateString());
         }
 
         public static string GetDividends(int Portfolio, DateTime Date)
@@ -228,7 +264,7 @@ namespace MyPersonalIndex
                                    " LEFT JOIN Splits c" +
                                        " ON a.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND '{0}'" +
                                    " WHERE a.Portfolio = {1} AND a.Date <= '{0}'" +
-                                   " GROUP BY a.ID, a.Ticker, a.Shares) AllTrades" +
+                                   " GROUP BY a.ID, a.Custom, a.Ticker, a.Shares) AllTrades" +
                             " GROUP BY Ticker) AS b" +
                 " ON a.Ticker = b.Ticker",
                 Date.ToShortDateString(), Portfolio);
@@ -276,6 +312,11 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
+        public static string DeleteCustomTrade(int Ticker)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
+        }
+
         public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
         public static string GetSettings()
         {
@@ -312,8 +353,8 @@ namespace MyPersonalIndex
                                    " FROM Trades a" + 
                                    " LEFT JOIN Splits b" + 
                                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
-                                   " WHERE a.Portfolio = {1} AND a.Date <= '{2}'" + 
-                                   " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" + 
+                                   " WHERE a.Portfolio = {1} AND a.Date <= '{2}'" +
+                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" + 
                             " GROUP BY TickerID) AS b" + 
                     " ON a.ID = b.TickerID" + 
                 " LEFT JOIN (SELECT Ticker, Price" + 
@@ -327,12 +368,12 @@ namespace MyPersonalIndex
                             " FROM Accounts" +
                             " WHERE Portfolio = {1}) AS e" +
                     " ON a.Acct = e.ID" +
-                " WHERE  Portfolio = {1} AND A.Active = 1{3}" +
+                " WHERE Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY e.ID, e.Name, e.TaxRate{4}", 
                 TotalValue, Portfolio, LastestDate.ToShortDateString(), ShowBlank ? "" : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
         }
 
-        public static string GetAA(int Portfolio, DateTime LatestDate, double TotalValue, string Sort, bool ShowBlank)
+        public static string GetAA(int Portfolio, DateTime Date, double TotalValue, string Sort, bool ShowBlank)
         {
             return string.Format(
                 "SELECT Coalesce(d.AA, '(Blank)') AS fAssetAllocation," +
@@ -342,13 +383,13 @@ namespace MyPersonalIndex
                         " (CASE WHEN {0} <> 0 THEN (100 * COALESCE(SUM(c.Price * b.Shares), 0) / {0}) - d.Target END) AS fOffset," +
                         " COUNT(*) as fHoldings" +
                 " FROM Tickers AS a" +
-               " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                             " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares " +
                                    " FROM Trades a" +
                                    " LEFT JOIN Splits b" +
                                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{2}'" +
                                    " WHERE a.Portfolio = {1} AND a.Date <= '{2}'" +
-                                   " GROUP BY a.ID, a.TickerID, a.Shares) AllTrades" +
+                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                             " GROUP BY TickerID) AS b" +
                     " ON a.ID = b.TickerID" +
                 " LEFT JOIN (SELECT Ticker, Price" +
@@ -361,7 +402,43 @@ namespace MyPersonalIndex
                     " ON a.AA = d.ID" +
                 " WHERE a.Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY d.ID, d.AA, d.Target{4}",
-                TotalValue, Portfolio, LatestDate.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+                TotalValue, Portfolio, Date.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+        }
+
+        public enum eGetAATargets { AA, Target };
+        public static string GetAATargets(int Portfolio)
+        {
+            return string.Format("SELECT ID, COALESCE(Target, 0) AS Target FROM AA WHERE Portfolio = {0}", Portfolio);
+        }
+
+        public enum eGetTickerValue { TotalValue, Price, Ticker, Ratio };
+        public static string GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
+        {
+            return string.Format(
+                "SELECT COALESCE(SUM(c.Price * b.Shares), 0) AS TotalValue, c.Price, a.Ticker, d.Ratio" +
+                " FROM Tickers AS a" +
+                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                            " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                                   " FROM Trades a" +
+                                   " LEFT JOIN Splits b" +
+                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{1}'" +
+                                   " WHERE a.TickerID = {0} AND a.Date <= '{1}'" +
+                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
+                            " GROUP BY TickerID) AS b" +
+                    " ON a.ID = b.TickerID" +
+                " LEFT JOIN (SELECT Ticker, Price" +
+                            " FROM ClosingPrices" +
+                            " WHERE DATE = '{1}' ) AS c" +
+                    " ON a.Ticker = c.Ticker" +
+                " LEFT JOIN Splits d" +
+	                " ON a.Ticker = d.Ticker and d.Date = '{2}'" + // need yesterday's price, but split today if necessary
+                " WHERE a.ID = {0} AND a.Active = 1" +
+                " GROUP BY c.Price, a.Ticker, d.Ratio", TickerID, YDay.ToShortDateString(), Date.ToShortDateString());
+        }
+
+        public static string GetLastTickerID(int TickerID)
+        {
+            return string.Format("SELECT MAX(ID) FROM Trades WHERE TickerID = {0} AND Custom IS NOT NULL", TickerID);
         }
 
         public static string DeletePortfolio(int Portfolio)
@@ -372,6 +449,16 @@ namespace MyPersonalIndex
         public static string DeleteAA(int Portfolio)
         {
             return string.Format("DELETE FROM AA WHERE Portfolio = {0}", Portfolio);
+        }
+
+        public static string DeleteAccount(int Portfolio)
+        {
+            return string.Format("DELETE FROM Accounts WHERE Portfolio = {0}", Portfolio);
+        }
+
+        public static string DeleteCustomTrades(int Portfolio)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE Portfolio = {0}", Portfolio);
         }
 
         public static string DeleteTickers(int Portfolio)

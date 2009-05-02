@@ -20,7 +20,7 @@ namespace MyPersonalIndex
         public enum eGetTrades { Date, Shares, Price };
         public static string GetTrades(int Portfolio, int Ticker)
         {
-            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} ORDER BY Date", Portfolio, Ticker);
+            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL ORDER BY Date", Portfolio, Ticker);
         }
 
         public enum eGetAttributes { AA, Acct, Active, Hide };
@@ -29,7 +29,7 @@ namespace MyPersonalIndex
             return string.Format("SELECT AA, Acct, Active, Hide FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
         }
 
-        public static string GetHistorical(string Ticker, int Selected, bool Desc)
+        public static string GetHistorical(string Ticker, int TickerID, int Selected, bool Desc)
         {
             switch (Selected)
             {
@@ -55,12 +55,18 @@ namespace MyPersonalIndex
                         " FROM Dividends" +
                         " WHERE Ticker = '{0}'" +
                         " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
-                default:
+                case 3:
                     return string.Format(
                         "SELECT Date, Ratio AS Split" +
                         " FROM Splits" +
                         " WHERE Ticker = '{0}'" +
                         " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
+                default:
+                    return string.Format(
+                        "SELECT Date, Price, Shares" +
+                        " FROM Trades" +
+                        " WHERE TickerID = '{0}'" +
+                        " ORDER BY Date{1}", TickerID, Desc ? " Desc" : "");
             }
         }
     }

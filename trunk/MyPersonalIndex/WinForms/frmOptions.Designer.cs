@@ -63,7 +63,7 @@
             this.cmdCancel.Location = new System.Drawing.Point(135, 78);
             this.cmdCancel.Name = "cmdCancel";
             this.cmdCancel.Size = new System.Drawing.Size(57, 23);
-            this.cmdCancel.TabIndex = 3;
+            this.cmdCancel.TabIndex = 4;
             this.cmdCancel.Text = "&Cancel";
             this.cmdCancel.UseVisualStyleBackColor = true;
             this.cmdCancel.Click += new System.EventHandler(this.cmdCancel_Click);
@@ -73,7 +73,7 @@
             this.cmdOK.Location = new System.Drawing.Point(57, 78);
             this.cmdOK.Name = "cmdOK";
             this.cmdOK.Size = new System.Drawing.Size(57, 23);
-            this.cmdOK.TabIndex = 2;
+            this.cmdOK.TabIndex = 3;
             this.cmdOK.Text = "&OK";
             this.cmdOK.UseVisualStyleBackColor = true;
             this.cmdOK.Click += new System.EventHandler(this.cmdOK_Click);
@@ -88,9 +88,9 @@
             this.chkSplit.AutoSize = true;
             this.chkSplit.Location = new System.Drawing.Point(23, 48);
             this.chkSplit.Name = "chkSplit";
-            this.chkSplit.Size = new System.Drawing.Size(215, 17);
-            this.chkSplit.TabIndex = 4;
-            this.chkSplit.Text = "Download Splits (Advanced Users Only)";
+            this.chkSplit.Size = new System.Drawing.Size(182, 17);
+            this.chkSplit.TabIndex = 2;
+            this.chkSplit.Text = "Download Splits (Recommended)";
             this.chkSplit.UseVisualStyleBackColor = true;
             // 
             // frmOptions

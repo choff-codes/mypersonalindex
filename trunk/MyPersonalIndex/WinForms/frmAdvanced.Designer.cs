@@ -51,7 +51,6 @@
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.cmdOk = new System.Windows.Forms.Button();
-            this.dSave = new System.Windows.Forms.SaveFileDialog();
             this.pnl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).BeginInit();
             this.ts.SuspendLayout();
@@ -273,6 +272,7 @@
             // cmdOk
             // 
             this.cmdOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cmdOk.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.cmdOk.Location = new System.Drawing.Point(685, 494);
             this.cmdOk.Name = "cmdOk";
             this.cmdOk.Size = new System.Drawing.Size(75, 23);
@@ -281,15 +281,11 @@
             this.cmdOk.UseVisualStyleBackColor = true;
             this.cmdOk.Click += new System.EventHandler(this.cmdOk_Click);
             // 
-            // dSave
-            // 
-            this.dSave.DefaultExt = "txt";
-            this.dSave.Filter = "Tab Delimited File|*.txt|Comma Delimited File|*.csv|Pipe Delimited File|*.txt";
-            // 
             // frmAdvanced
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.cmdOk;
             this.ClientSize = new System.Drawing.Size(772, 524);
             this.Controls.Add(this.cmdOk);
             this.Controls.Add(this.pnl);
@@ -339,7 +335,6 @@
         private System.Windows.Forms.ToolStripSplitButton btnRefresh;
         private System.Windows.Forms.ToolStripMenuItem btnTickerDiv;
         private System.Windows.Forms.ToolStripMenuItem btnStat;
-        private System.Windows.Forms.SaveFileDialog dSave;
 
     }
 }

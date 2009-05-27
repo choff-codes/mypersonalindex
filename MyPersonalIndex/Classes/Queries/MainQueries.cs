@@ -317,10 +317,10 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
         }
 
-        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
+        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, PromptMissingPrices };
         public static string GetSettings()
         {
-            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings";
+            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, PromptMissingPrices FROM Settings";
         }
 
         public static string GetVersion()
@@ -561,6 +561,16 @@ namespace MyPersonalIndex
         public static string GetLastUpdate(int Portfolio)
         {
             return string.Format("SELECT MAX(Date) FROM NAV WHERE Portfolio = {0}", Portfolio);
-        }    
+        }
+
+        public static string HasMissingPrices()
+        {
+            return "SELECT TOP (1) 1" +
+                " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices GROUP BY Ticker ) a" +
+                " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b" +
+                " LEFT JOIN ClosingPrices c" +
+                " ON a.Ticker = c.Ticker and b.Date = c.Date" +
+                " WHERE b.Date BETWEEN a.MinDate AND a.MaxDate AND c.Ticker IS NULL";
+        }
     }
 }

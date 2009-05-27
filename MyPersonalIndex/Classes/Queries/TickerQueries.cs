@@ -69,5 +69,13 @@ namespace MyPersonalIndex
                         " ORDER BY Date{1}", TickerID, Desc ? " Desc" : "");
             }
         }
+
+        public static string HasCustomTrades(int Portfolio, int Ticker)
+        {
+            return string.Format(
+                "SELECT TOP (1) 1" +
+                " FROM CustomTrades" +
+                " WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+        }
     }
 }

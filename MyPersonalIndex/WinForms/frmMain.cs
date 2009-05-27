@@ -17,6 +17,7 @@ namespace MyPersonalIndex
         {
             public DateTime DataStartDate;
             public bool Splits;
+            public bool PromptMissingPrices;
         }
 
         public class MPIHoldings
@@ -331,6 +332,7 @@ namespace MyPersonalIndex
                    
                     MPI.Settings.DataStartDate = rs.GetDateTime((int)MainQueries.eGetSettings.DataStartDate);
                     MPI.Settings.Splits = rs.GetSqlBoolean((int)MainQueries.eGetSettings.Splits).IsTrue;
+                    MPI.Settings.PromptMissingPrices = rs.GetSqlBoolean((int)MainQueries.eGetSettings.PromptMissingPrices).IsTrue;
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.WindowState)))
                     {
                         this.Location = new Point(rs.GetInt32((int)MainQueries.eGetSettings.WindowX), rs.GetInt32((int)MainQueries.eGetSettings.WindowY));
@@ -1521,7 +1523,7 @@ namespace MyPersonalIndex
                     else
                     {
                         newRecord.SetDecimal((int)MainQueries.Tables.eNAV.NAV, (decimal)NAV);
-                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, (decimal)(((NAV / YNAV) - 1) * 100));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eNAV.Change, (decimal)(YNAV == 0 ? -100 : (((NAV / YNAV) - 1) * 100)));
                         YNAV = NAV;
                     }
                     YTotalValue = NewTotalValue;
@@ -2131,6 +2133,16 @@ namespace MyPersonalIndex
                 e.CellStyle.ForeColor = Color.Red;
             else
                 e.CellStyle.ForeColor = Color.Green;
+        }
+
+        private bool HasMissingPrices()
+        {
+            return !Convert.IsDBNull(SQL.ExecuteScalar(MainQueries.HasMissingPrices()));
+        }
+
+        private void btnFixMissingPrices_Click(object sender, EventArgs e)
+        {
+            MessageBox.Show(HasMissingPrices().ToString());
         }
     }
 }

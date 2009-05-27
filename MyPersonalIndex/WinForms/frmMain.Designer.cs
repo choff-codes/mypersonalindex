@@ -171,7 +171,8 @@
             this.stbUpdateStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.stbUpdateStatusPB = new System.Windows.Forms.ToolStripProgressBar();
             this.tsMain = new System.Windows.Forms.ToolStrip();
-            this.btnMainUpdate = new System.Windows.Forms.ToolStripButton();
+            this.btnMainUpdate = new System.Windows.Forms.ToolStripSplitButton();
+            this.btnFixMissingPrices = new System.Windows.Forms.ToolStripMenuItem();
             this.sMain1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnMainCompare = new System.Windows.Forms.ToolStripButton();
             this.sMain2 = new System.Windows.Forms.ToolStripSeparator();
@@ -1377,12 +1378,21 @@
             // 
             // btnMainUpdate
             // 
+            this.btnMainUpdate.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnFixMissingPrices});
             this.btnMainUpdate.Image = global::MyPersonalIndex.Properties.Resources.refresh_48;
             this.btnMainUpdate.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnMainUpdate.Name = "btnMainUpdate";
-            this.btnMainUpdate.Size = new System.Drawing.Size(93, 22);
+            this.btnMainUpdate.Size = new System.Drawing.Size(105, 22);
             this.btnMainUpdate.Text = "Update Prices";
-            this.btnMainUpdate.Click += new System.EventHandler(this.btnMainUpdate_Click);
+            this.btnMainUpdate.ButtonClick += new System.EventHandler(this.btnMainUpdate_Click);
+            // 
+            // btnFixMissingPrices
+            // 
+            this.btnFixMissingPrices.Name = "btnFixMissingPrices";
+            this.btnFixMissingPrices.Size = new System.Drawing.Size(168, 22);
+            this.btnFixMissingPrices.Text = "Fix Missing Prices...";
+            this.btnFixMissingPrices.Click += new System.EventHandler(this.btnFixMissingPrices_Click);
             // 
             // sMain1
             // 
@@ -1611,7 +1621,6 @@
         private System.Windows.Forms.ToolStripSeparator sChart1;
         private System.Windows.Forms.ToolStripButton btnChartExport;
         private System.Windows.Forms.ToolStripSeparator sMain4;
-        private System.Windows.Forms.ToolStripButton btnMainUpdate;
         private System.Windows.Forms.ToolStrip tsStat;
         private System.Windows.Forms.ToolStripButton btnStatEdit;
         private System.Windows.Forms.ToolStripSeparator sStat1;
@@ -1679,6 +1688,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn colGainLossP;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAcctPercentage;
         private System.Windows.Forms.DataGridViewTextBoxColumn colAcctHoldings;
+        private System.Windows.Forms.ToolStripSplitButton btnMainUpdate;
+        private System.Windows.Forms.ToolStripMenuItem btnFixMissingPrices;
     }
 }
 

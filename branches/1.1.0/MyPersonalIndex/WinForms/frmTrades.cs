@@ -22,6 +22,7 @@ namespace MyPersonalIndex
             TickerID = Ticker;
             PortfolioID = Portfolio;
             gpTrades.Text = string.Format("{0} Trades", sTicker);
+            this.Text = string.Format("{0} Trades", sTicker);
         }
 
         private void Date_Change(object sender, DateRangeEventArgs e)

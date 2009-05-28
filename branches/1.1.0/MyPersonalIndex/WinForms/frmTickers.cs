@@ -11,6 +11,7 @@ namespace MyPersonalIndex
         {
             public DateTime MinDate;
             public bool Changed;
+            public bool HasCustomTrades;
         }
 
         public TickerRetValues TickerReturnValues { get { return _TickerReturnValues; } }
@@ -72,6 +73,7 @@ namespace MyPersonalIndex
             ActiveFlag = chkCalc.Checked;
             _TickerReturnValues.MinDate = DateTime.Today;
             _TickerReturnValues.Changed = false;
+            _TickerReturnValues.HasCustomTrades = SQL.ExecuteScalar(TickerQueries.HasCustomTrades(PortfolioID, TickerID)) != null;
             // find the earliest date that currently exists in the trades
             foreach (DataRow dr in dsTicker.Tables[0].Rows)
                 if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < _TickerReturnValues.MinDate)
@@ -267,20 +269,25 @@ namespace MyPersonalIndex
         {
             SQL.Dispose();
 
-            // true if custom trades were modified or OK was clicked
-            if (_TickerReturnValues.MinDate == DateTime.MinValue || btn == CloseButton.OK)
+            // true if custom trades were modified, always recalc NAV, even if cancelled
+            if (_TickerReturnValues.MinDate == DateTime.MinValue)
             {
-                if (_TickerReturnValues.MinDate == DateTime.MinValue) // custom trades were modified
-                    _TickerReturnValues.Changed = true;
-
-                if (ActiveFlag != chkCalc.Checked) // active flag was changed
-                {
-                    _TickerReturnValues.MinDate = DateTime.MinValue; // use MinValue because if there any custom trades, we need to redo all NAV
-                    _TickerReturnValues.Changed = true;
-                }
-
+                _TickerReturnValues.Changed = true;
                 DialogResult = DialogResult.OK;
+                return;
             }
+                
+            // if active flag is changed or ticker has custom trades, need to recalc NAV from beginning
+            if (btn == CloseButton.OK && (ActiveFlag != chkCalc.Checked || _TickerReturnValues.HasCustomTrades))
+            {
+                _TickerReturnValues.MinDate = DateTime.MinValue;
+                _TickerReturnValues.Changed = true;
+                DialogResult = DialogResult.OK;
+                return;
+            }
+
+            if (btn == CloseButton.OK)
+                DialogResult = DialogResult.OK;
             else
                 DialogResult = DialogResult.Cancel;
         }

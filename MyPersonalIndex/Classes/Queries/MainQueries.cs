@@ -563,14 +563,20 @@ namespace MyPersonalIndex
             return string.Format("SELECT MAX(Date) FROM NAV WHERE Portfolio = {0}", Portfolio);
         }
 
-        public static string HasMissingPrices()
+        public enum eGetMissingPrices { Ticker, Date };
+        public static string GetMissingPrices()
         {
-            return "SELECT TOP (1) 1" +
+            return "SELECT a.Ticker, b.Date" +
                 " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices GROUP BY Ticker ) a" +
                 " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b" +
                 " LEFT JOIN ClosingPrices c" +
                 " ON a.Ticker = c.Ticker and b.Date = c.Date" +
                 " WHERE b.Date BETWEEN a.MinDate AND a.MaxDate AND c.Ticker IS NULL";
+        }
+
+        public static string GetPreviousTickerClose(string Ticker, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Price FROM ClosingPrices WHERE Ticker = '{0}' AND Date < '{1}' ORDER BY Date DESC", Functions.SQLCleanString(Ticker), Date.ToShortDateString()); 
         }
     }
 }

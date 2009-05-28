@@ -17,7 +17,6 @@ namespace MyPersonalIndex
         {
             public DateTime DataStartDate;
             public bool Splits;
-            public bool PromptMissingPrices;
         }
 
         public class MPIHoldings
@@ -132,6 +131,13 @@ namespace MyPersonalIndex
             public double TotalValue = 0;
             public double SplitRatio = 1;
             public string Ticker = "";
+        }
+
+        public class MissingPriceInfo
+        {
+            public double PreviousClose;
+            public DateTime Date;
+            public string Ticker;
         }
 
         public class TradeInfo
@@ -332,7 +338,6 @@ namespace MyPersonalIndex
                    
                     MPI.Settings.DataStartDate = rs.GetDateTime((int)MainQueries.eGetSettings.DataStartDate);
                     MPI.Settings.Splits = rs.GetSqlBoolean((int)MainQueries.eGetSettings.Splits).IsTrue;
-                    MPI.Settings.PromptMissingPrices = rs.GetSqlBoolean((int)MainQueries.eGetSettings.PromptMissingPrices).IsTrue;
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetSettings.WindowState)))
                     {
                         this.Location = new Point(rs.GetInt32((int)MainQueries.eGetSettings.WindowX), rs.GetInt32((int)MainQueries.eGetSettings.WindowY));
@@ -888,10 +893,12 @@ namespace MyPersonalIndex
                 }
             }
 
+            InsertMissingPrices(); // fill in any prices Yahoo! finance is missing equal to the previous close (0% change)
+
             GetNAV(-1, MinDate); // update all portfolios
 
             if (TickersNotUpdated.Count != 0)
-                MessageBox.Show("The following tickers were not updated:\n" + string.Join(", ", TickersNotUpdated.ToArray()));
+                MessageBox.Show("The following tickers were not updated (Yahoo! Finance may not yet have today's price):\n\n" + string.Join(", ", TickersNotUpdated.ToArray()));
         }
 
         private void GetPrices(string Ticker, DateTime MinDate, double LastPrice)
@@ -2135,14 +2142,42 @@ namespace MyPersonalIndex
                 e.CellStyle.ForeColor = Color.Green;
         }
 
-        private bool HasMissingPrices()
+        private List<MissingPriceInfo> GetMissingPrices()
         {
-            return !Convert.IsDBNull(SQL.ExecuteScalar(MainQueries.HasMissingPrices()));
+            List<MissingPriceInfo> Tickers = new List<MissingPriceInfo>();
+
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetMissingPrices()))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                {
+                    MissingPriceInfo m = new MissingPriceInfo();
+                    m.Ticker = rec.GetString((int)MainQueries.eGetMissingPrices.Ticker);
+                    m.Date = rec.GetDateTime((int)MainQueries.eGetMissingPrices.Date);
+                    m.PreviousClose = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetPreviousTickerClose(m.Ticker, m.Date)));
+                    Tickers.Add(m);
+                }
+
+            return Tickers;
         }
 
-        private void btnFixMissingPrices_Click(object sender, EventArgs e)
+        private void InsertMissingPrices()
         {
-            MessageBox.Show(HasMissingPrices().ToString());
+            List<MissingPriceInfo> Tickers = GetMissingPrices();
+
+            if (Tickers.Count == 0)
+                return;
+
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.ClosingPrices))
+            {
+                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+                foreach (MissingPriceInfo m in Tickers)
+                {
+                    newRecord.SetDateTime((int)MainQueries.Tables.eClosingPrices.Date, m.Date);
+                    newRecord.SetString((int)MainQueries.Tables.eClosingPrices.Ticker, m.Ticker);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Price, (decimal)m.PreviousClose);
+                    newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, 0);
+                    rs.Insert(newRecord);
+                }
+            }
         }
     }
 }

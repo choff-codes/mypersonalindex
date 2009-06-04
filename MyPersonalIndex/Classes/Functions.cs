@@ -5,6 +5,7 @@ using System.IO;
 using System.Net;
 using System.Reflection;
 using System.Windows.Forms;
+using ZedGraph;
 
 namespace MyPersonalIndex
 {
@@ -22,7 +23,7 @@ namespace MyPersonalIndex
 
         public static Color GetRandomColor(int Seed)
         {
-            PropertyInfo[] Properties = typeof(Color).GetProperties (BindingFlags.Public | BindingFlags.Static);
+            PropertyInfo[] Properties = typeof(Color).GetProperties(BindingFlags.Public | BindingFlags.Static);
             List<Color> Colors = new List<Color>();
 
             foreach (PropertyInfo prop in Properties)
@@ -37,7 +38,7 @@ namespace MyPersonalIndex
 
             while (Seed * 3 > Colors.Count - 1) // loop back to the beginning colors
                 Seed = Seed * 3 - Colors.Count - 1;
-            
+
             return Colors[Seed * 3];
         }
 
@@ -78,8 +79,8 @@ namespace MyPersonalIndex
 
         public static string CleanStatString(string SQL, Dictionary<Constants.StatVariables, string> d)
         {
-            if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
-                throw new ArgumentOutOfRangeException("Dictionary must be correct length");
+            //if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
+            //    throw new ArgumentOutOfRangeException("Dictionary must be correct length");
 
             foreach (KeyValuePair<Constants.StatVariables, string> p in d)
                 SQL = SQL.Replace("%" + Enum.GetName(typeof(Constants.StatVariables), p.Key) + "%", p.Value);
@@ -204,6 +205,54 @@ namespace MyPersonalIndex
         {
             DateTime tmp;
             return DateTime.TryParse(s, out tmp);
+        }
+
+        public static void LoadGraphSettings(ZedGraphControl zedChart, string Title)
+        {
+            GraphPane g = zedChart.GraphPane;
+
+            g.CurveList.Clear();
+            g.XAxis.Scale.MaxAuto = true;
+            g.XAxis.Scale.MinAuto = true;
+            g.YAxis.Scale.MaxAuto = true;
+            g.YAxis.Scale.MinAuto = true;
+
+            // Set the Titles
+            g.Title.Text = Title;
+            g.Title.FontSpec.Family = "Tahoma";
+            g.XAxis.Title.Text = "Date";
+            g.XAxis.Title.FontSpec.Family = "Tahoma";
+            g.YAxis.MajorGrid.IsVisible = true;
+            g.YAxis.Title.Text = "Percent";
+            g.YAxis.Title.FontSpec.Family = "Tahoma";
+            g.XAxis.Type = AxisType.Date;
+            g.YAxis.Scale.Format = "0.00'%'";
+            g.XAxis.Scale.FontSpec.Size = 8;
+            g.XAxis.Scale.FontSpec.Family = "Tahoma";
+            g.YAxis.Scale.FontSpec.Size = 8;
+            g.YAxis.Scale.FontSpec.Family = "Tahoma";
+            g.Legend.FontSpec.Size = 14;
+            g.XAxis.Title.FontSpec.Size = 11;
+            g.YAxis.Title.FontSpec.Size = 11;
+            g.Title.FontSpec.Size = 13;
+            g.Legend.IsVisible = false;
+            g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
+            zedChart.AxisChange();
+            zedChart.Refresh();
+        }
+
+        public static List<DataGridViewRow> GetSelectedRows(DataGridView dg)
+        {
+            List<DataGridViewRow> drs = new List<DataGridViewRow>();
+            if (dg.SelectedRows.Count > 0)
+                foreach (DataGridViewRow dr in dg.SelectedRows)
+                    drs.Add(dr);
+            else
+                if (dg.RowCount != 0 && dg.CurrentCell != null)
+                    drs.Add(dg.Rows[dg.CurrentCell.RowIndex]);
+
+            drs.Reverse();
+            return drs;
         }
     }
 }

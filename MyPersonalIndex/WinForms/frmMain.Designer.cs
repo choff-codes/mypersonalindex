@@ -137,7 +137,7 @@
             this.colAcctPercentage = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.colAcctHoldings = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.tsAcct = new System.Windows.Forms.ToolStrip();
-            this.btnEditAccts = new System.Windows.Forms.ToolStripButton();
+            this.btnAcctEdit = new System.Windows.Forms.ToolStripButton();
             this.sAcct1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnAcctDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.sAcct2 = new System.Windows.Forms.ToolStripSeparator();
@@ -1049,7 +1049,7 @@
             // 
             this.tsAcct.GripStyle = System.Windows.Forms.ToolStripGripStyle.Hidden;
             this.tsAcct.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnEditAccts,
+            this.btnAcctEdit,
             this.sAcct1,
             this.btnAcctDate,
             this.sAcct2,
@@ -1063,14 +1063,14 @@
             this.tsAcct.Size = new System.Drawing.Size(984, 25);
             this.tsAcct.TabIndex = 0;
             // 
-            // btnEditAccts
+            // btnAcctEdit
             // 
-            this.btnEditAccts.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnEditAccts.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnEditAccts.Name = "btnEditAccts";
-            this.btnEditAccts.Size = new System.Drawing.Size(88, 22);
-            this.btnEditAccts.Text = "Edit Accounts...";
-            this.btnEditAccts.Click += new System.EventHandler(this.btnEditAccts_Click);
+            this.btnAcctEdit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAcctEdit.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAcctEdit.Name = "btnAcctEdit";
+            this.btnAcctEdit.Size = new System.Drawing.Size(88, 22);
+            this.btnAcctEdit.Text = "Edit Accounts...";
+            this.btnAcctEdit.Click += new System.EventHandler(this.btnAcctEdit_Click);
             // 
             // sAcct1
             // 
@@ -1642,7 +1642,7 @@
         private System.Windows.Forms.TabPage tbAcct;
         private System.Windows.Forms.DataGridView dgAcct;
         private System.Windows.Forms.ToolStrip tsAcct;
-        private System.Windows.Forms.ToolStripButton btnEditAccts;
+        private System.Windows.Forms.ToolStripButton btnAcctEdit;
         private System.Windows.Forms.ToolStripSeparator sAcct1;
         private System.Windows.Forms.ToolStripDropDownButton btnAcctDate;
         private System.Windows.Forms.ToolStripSeparator sAcct2;

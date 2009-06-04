@@ -317,10 +317,10 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
         }
 
-        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, PromptMissingPrices };
+        public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
         public static string GetSettings()
         {
-            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, PromptMissingPrices FROM Settings";
+            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings";
         }
 
         public static string GetVersion()

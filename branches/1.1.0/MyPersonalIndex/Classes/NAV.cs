@@ -8,8 +8,8 @@ namespace MyPersonalIndex
     class NAV : IDisposable
     {
         private MainQueries SQL;
-        MPIBackgroundWorker bw;
-        DateTime LastDate;
+        private MPIBackgroundWorker bw;
+        private DateTime LastDate;
 
         public NAV(MainQueries SQL, MPIBackgroundWorker bw, DateTime LastDate)
         {

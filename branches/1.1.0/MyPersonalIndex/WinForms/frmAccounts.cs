@@ -31,63 +31,13 @@ namespace MyPersonalIndex
             dsAcct.AcceptChanges();  // set all records = clean
         }
 
-        private bool CheckValidPasteItem(string s, AcctQueries.eGetAcct Column)
-        {
-            if (Column == AcctQueries.eGetAcct.Name)
-                return !string.IsNullOrEmpty(s);
-            else  // AcctQueries.eGetAcct.TaxRate
-                return Functions.StringIsDecimal(s, false);
-        }
-
-        private bool CheckValidPasteItem(string s, string s2)
-        {
-            return (!string.IsNullOrEmpty(s)) && Functions.StringIsDecimal(s2, false);
-        }
-
         private void dgAcct_KeyDown(object sender, KeyEventArgs e)
         {
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
             Pasted = true;  // there have been changes
-
-            string[] lines = Functions.GetClipboardText();
-            int row = dgAcct.CurrentCell.RowIndex;
-            int origrow = dgAcct.CurrentCell.RowIndex;
-            int col = dgAcct.CurrentCell.ColumnIndex;
-
-            dgAcct.CancelEdit();
-            dsAcct.AcceptChanges();
-
-            foreach (string line in lines)
-            {
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                string[] cells = line.Split('\t');  // tab seperated values
-
-                if (row >= dgAcct.Rows.Count - 1 && col == 0 && cells.Length == dgAcct.Columns.Count - 1)  // -1 since there is a hidden column
-                    if (CheckValidPasteItem(cells[(int)AcctQueries.eGetAcct.Name], cells[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "")))
-                    {
-                        dsAcct.Tables[0].Rows.Add(cells[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(cells[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "")), 0);
-                        dsAcct.AcceptChanges();
-                        row++;
-                        continue;
-                    }
-
-                if (row >= dgAcct.Rows.Count - 1)
-                    continue;
-
-                for (int i = col; i <= dgAcct.Columns.Count - 2 && i < col + cells.Length; i++)  // -2 since there is a hidden ID column
-                    if (i == (int)AcctQueries.eGetAcct.Name && CheckValidPasteItem(cells[i - col], AcctQueries.eGetAcct.Name))
-                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.Name] = cells[i - col];
-                    else if (i == (int)AcctQueries.eGetAcct.TaxRate && CheckValidPasteItem(cells[i - col].Replace("%", ""), AcctQueries.eGetAcct.TaxRate))
-                        dsAcct.Tables[0].Rows[row][(int)AcctQueries.eGetAcct.TaxRate] = Convert.ToDecimal(cells[i - col].Replace("%", ""));
-
-                dsAcct.AcceptChanges();
-                row++;
-            }
-            dgAcct.CurrentCell = dgAcct[col, origrow];
+            Functions.PasteItems(dgAcct, dsAcct, Constants.PasteDatagrid.dgAcct, 1);
         }
 
         private void dgAcct_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)

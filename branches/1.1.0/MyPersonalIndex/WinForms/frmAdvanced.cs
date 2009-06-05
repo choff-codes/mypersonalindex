@@ -20,18 +20,20 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
 
+            DataStartDate = CheckStartDate(DataStartDate, LastDate);
+
             StartCalendar = new MonthCalendar { 
                 MaxSelectionCount = 1,
-                MinDate = CheckStartDate(DataStartDate, LastDate), 
-                SelectionStart = CheckStartDate(DataStartDate, LastDate) 
+                MinDate = DataStartDate,
+                SelectionStart = DataStartDate 
             };
             EndCalendar = new MonthCalendar { 
                 MaxSelectionCount = 1,
-                MinDate = CheckStartDate(DataStartDate, LastDate), 
-                SelectionStart =  LastDate
+                MinDate = DataStartDate, 
+                SelectionStart = LastDate
             };
-            btnStartDate.Text = string.Format("Start Date: {0}", StartCalendar.SelectionStart.ToShortDateString());
-            btnEndDate.Text = string.Format("End Date: {0}", EndCalendar.SelectionStart.ToShortDateString());
+            btnStartDate.Text = string.Format("Start Date: {0}", DataStartDate.ToShortDateString());
+            btnEndDate.Text = string.Format("End Date: {0}", LastDate.ToShortDateString());
             this.LastDate = LastDate;
         }
 
@@ -187,37 +189,6 @@ namespace MyPersonalIndex
             }
         }
 
-        private void LoadGraphSettings(GraphPane g)
-        {
-            g.CurveList.Clear();
-            g.XAxis.Scale.MaxAuto = true;
-            g.XAxis.Scale.MinAuto = true;
-            g.YAxis.Scale.MaxAuto = true;
-            g.YAxis.Scale.MinAuto = true;
-            // Set the Titles
-            g.Title.Text = "Performance Comparison";
-            g.Title.FontSpec.Family = "Tahoma";
-            g.XAxis.Title.Text = "Date";
-            g.XAxis.Title.FontSpec.Family = "Tahoma";
-            g.YAxis.MajorGrid.IsVisible = true;
-            g.YAxis.Title.Text = "Percent";
-            g.YAxis.Title.FontSpec.Family = "Tahoma";
-            g.XAxis.Type = AxisType.Date;
-            g.YAxis.Scale.Format = "0.00'%'";
-            g.XAxis.Scale.FontSpec.Size = 8;
-            g.XAxis.Scale.FontSpec.Family = "Tahoma";
-            g.YAxis.Scale.FontSpec.Size = 8;
-            g.Legend.FontSpec.Size = 8;
-            g.YAxis.Scale.FontSpec.Family = "Tahoma";
-            g.XAxis.Title.FontSpec.Size = 11;
-            g.YAxis.Title.FontSpec.Size = 11;
-            g.Title.FontSpec.Size = 13;
-            g.Legend.IsVisible = true;
-            g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
-            zed.AxisChange();
-            zed.Refresh();
-        }
-
         private DateTime GetCurrentDateOrNext(string Ticker, DateTime YDay, bool Portfolio)
         {
             DateTime Date;
@@ -260,8 +231,7 @@ namespace MyPersonalIndex
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
         {
-            GraphPane g = zed.GraphPane;
-            LoadGraphSettings(g);
+            Functions.LoadGraphSettings(zed, "Performance Comparison", true);
             ChangeVisibility(zed);
 
             int Seed = 1;  // for graph colors
@@ -298,8 +268,8 @@ namespace MyPersonalIndex
                 this.Cursor = Cursors.Default;
             }
 
-            g.XAxis.Scale.Min = new XDate(YDay);
-            g.XAxis.Scale.Max = new XDate(EndDate);
+            zed.GraphPane.XAxis.Scale.Min = new XDate(YDay);
+            zed.GraphPane.XAxis.Scale.Max = new XDate(EndDate);
             zed.AxisChange();
             zed.Refresh();
         }

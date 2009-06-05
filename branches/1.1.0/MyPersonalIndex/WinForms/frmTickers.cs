@@ -32,7 +32,7 @@ namespace MyPersonalIndex
         private TickerRetValues _TickerReturnValues = new TickerRetValues();
 
         public frmTickers(int Portfolio, int Ticker, string sTicker)
-        { 
+        {
             InitializeComponent();
             this.Width = OriginalWidth;
             PortfolioID = Portfolio;
@@ -123,7 +123,7 @@ namespace MyPersonalIndex
             t.Rows.Add("(Blank)", -1);
 
             using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID)))
-                foreach(SqlCeUpdatableRecord rec in rs)
+                foreach (SqlCeUpdatableRecord rec in rs)
                     t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
 
             cmbAcct.DisplayMember = "Display";
@@ -138,67 +138,13 @@ namespace MyPersonalIndex
             e.Row.Cells[0].Value = DateTime.Today;
         }
 
-        private bool CheckValidPasteItem(string s, TickerQueries.eGetTrades Column)
-        {
-            if (Column == TickerQueries.eGetTrades.Date)
-                return Functions.StringIsDateTime(s);
-            else if (Column == TickerQueries.eGetTrades.Shares)
-                return Functions.StringIsDecimal(s, false);
-            else // TickerQueries.eGetTrades.Price
-                return Functions.StringIsDecimal(s, true);
-        }
-
-        private bool CheckValidPasteItem(string s, string s2, string s3)
-        {
-            return Functions.StringIsDateTime(s) && Functions.StringIsDecimal(s2, false) && Functions.StringIsDecimal(s3, true); 
-        }
-
         private void dgTickers_KeyDown(object sender, KeyEventArgs e)
         {
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
             Pasted = true;  // there have been changes outside of the datatable
-
-            string[] lines = Functions.GetClipboardText();
-            int row = dgTickers.CurrentCell.RowIndex;
-            int origrow = dgTickers.CurrentCell.RowIndex;
-            int col = dgTickers.CurrentCell.ColumnIndex;
-
-            dgTickers.CancelEdit();
-            dsTicker.AcceptChanges();
-
-            foreach (string line in lines)
-            {
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                string[] cells = line.Split('\t');  // tab seperated values
-
-                if (row >= dgTickers.Rows.Count - 1 && col == 0 && cells.Length == dgTickers.Columns.Count)
-                    if (CheckValidPasteItem(cells[(int)TickerQueries.eGetTrades.Date], cells[(int)TickerQueries.eGetTrades.Shares], cells[(int)TickerQueries.eGetTrades.Price]))
-                    {
-                        dsTicker.Tables[0].Rows.Add(cells[(int)TickerQueries.eGetTrades.Date], Convert.ToDecimal(cells[(int)TickerQueries.eGetTrades.Shares]), Functions.ConvertFromCurrency(cells[(int)TickerQueries.eGetTrades.Price]));
-                        dsTicker.AcceptChanges();
-                        row++;
-                        continue;
-                    }
-
-                if (row >= dgTickers.Rows.Count - 1)
-                    continue;
-
-                for (int i = col; i <= dgTickers.Columns.Count - 1 && i < col + cells.Length; i++)
-                    if (i == (int)TickerQueries.eGetTrades.Date && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Date))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Date] = cells[i - col];
-                    else if (i == (int)TickerQueries.eGetTrades.Shares && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Shares))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i - col]);
-                    else if (i == (int)TickerQueries.eGetTrades.Price && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Price))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Functions.ConvertFromCurrency(cells[i - col]);
-
-                dsTicker.AcceptChanges();
-                row++;
-            }
-            dgTickers.CurrentCell = dgTickers[col, origrow];
+            Functions.PasteItems(dgTickers, dsTicker, Constants.PasteDatagrid.dgTicker, 0);
         }
 
         private bool GetErrors()
@@ -218,7 +164,7 @@ namespace MyPersonalIndex
 
             if (TickerID == -1) // add new ticker
             {
-                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue), 
+                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue),
                     Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
                 TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
             }
@@ -248,7 +194,7 @@ namespace MyPersonalIndex
                         newRecord.SetInt32((int)TickerQueries.Tables.eTrades.ID, i);
                         newRecord.SetString((int)TickerQueries.Tables.eTrades.Ticker, txtSymbol.Text);
                         rs.Insert(newRecord);
-                        
+
                         // find new earliest trade date
                         if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < TickerReturnValues.MinDate)
                             _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
@@ -276,7 +222,7 @@ namespace MyPersonalIndex
                 DialogResult = DialogResult.OK;
                 return;
             }
-                
+
             // if active flag is changed or ticker has custom trades, need to recalc NAV from beginning
             if (btn == CloseButton.OK && (ActiveFlag != chkCalc.Checked || _TickerReturnValues.HasCustomTrades))
             {

@@ -106,7 +106,7 @@ namespace MyPersonalIndex
             GraphPane g = zedChart.GraphPane;
             PointPairList list = new PointPairList();
 
-            Functions.LoadGraphSettings(zedChart, MPI.Portfolio.Name);
+            Functions.LoadGraphSettings(zedChart, MPI.Portfolio.Name, false);
 
             DateTime YDay = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(StartDate), SqlDateTime.MinValue.Value));
             if (YDay == SqlDateTime.MinValue.Value)
@@ -136,7 +136,7 @@ namespace MyPersonalIndex
             AvgPrice.GetAveragePricePerShare(Date, SQL, MPI.Portfolio.CostCalc, MPI.Portfolio.ID);
 
             MPI.Holdings.TotalValue = GetTotalValue(Date);
-            dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort)); ;
+            dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort));
 
             double CostBasis = 0;
             double GainLoss = 0;

@@ -12,6 +12,7 @@ namespace MyPersonalIndex
         public enum StatVariables { Portfolio, PortfolioName, StartDate, EndDate, PreviousDay, TotalValue };
         public enum DynamicTradeType { Shares, Fixed, TotalValue, AA };
         public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
+        public enum PasteDatagrid { dgAA, dgAcct, dgTicker };
 
         public class DynamicTrade
         {

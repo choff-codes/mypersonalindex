@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -207,7 +208,7 @@ namespace MyPersonalIndex
             return DateTime.TryParse(s, out tmp);
         }
 
-        public static void LoadGraphSettings(ZedGraphControl zedChart, string Title)
+        public static void LoadGraphSettings(ZedGraphControl zedChart, string Title, bool ShowLegend)
         {
             GraphPane g = zedChart.GraphPane;
 
@@ -231,11 +232,11 @@ namespace MyPersonalIndex
             g.XAxis.Scale.FontSpec.Family = "Tahoma";
             g.YAxis.Scale.FontSpec.Size = 8;
             g.YAxis.Scale.FontSpec.Family = "Tahoma";
-            g.Legend.FontSpec.Size = 14;
+            g.Legend.FontSpec.Size = 8;
             g.XAxis.Title.FontSpec.Size = 11;
             g.YAxis.Title.FontSpec.Size = 11;
             g.Title.FontSpec.Size = 13;
-            g.Legend.IsVisible = false;
+            g.Legend.IsVisible = ShowLegend;
             g.Chart.Fill = new Fill(Color.White, Color.LightGray, 45.0F);
             zedChart.AxisChange();
             zedChart.Refresh();
@@ -253,6 +254,154 @@ namespace MyPersonalIndex
 
             drs.Reverse();
             return drs;
+        }
+
+        public static void PasteItems(DataGridView dg, DataSet ds, Constants.PasteDatagrid p, int HiddenColumns)
+        {
+            string[] lines = Functions.GetClipboardText();
+            int row = dg.CurrentCell.RowIndex;
+            int origrow = dg.CurrentCell.RowIndex;
+            int col = dg.CurrentCell.ColumnIndex;
+            bool Success = false;
+
+            dg.CancelEdit();
+            ds.AcceptChanges();
+
+            foreach (string line in lines)
+            {
+                if (string.IsNullOrEmpty(line))
+                    continue;
+
+                string[] cells = line.Split('\t');  // tab seperated values
+
+                // reached a new row in the dataset, make sure there are values for all cells
+                if (row >= dg.Rows.Count - 1 && col == 0 && cells.Length == dg.Columns.Count - HiddenColumns)  // -1 if there is a hidden column
+                {
+                    object[] newRow = CheckValidPasteItem(cells, p, ref Success);
+                    if (Success)
+                    {
+                        ds.Tables[0].Rows.Add(newRow);
+                        ds.AcceptChanges();
+                        row++;
+                        continue;
+                    }
+                }
+
+                if (row >= dg.Rows.Count - 1) // if a new row, but there were not the right amount of values, skip
+                    continue;
+
+                // overwrite existing rows
+                for (int i = col; i < dg.Columns.Count - HiddenColumns && i < col + cells.Length; i++)  // -1 if there is a hidden ID column
+                {
+                    object newCell = CheckValidPasteItem(i, cells[i - col], p, ref Success);
+                    if (Success)
+                        ds.Tables[0].Rows[row][i] = newCell;
+                }
+
+                ds.AcceptChanges();
+                row++;
+            }
+            dg.CurrentCell = dg[col, origrow];
+        }
+
+        private static object CheckValidPasteItem(int col, string s, Constants.PasteDatagrid p, ref bool Success)
+        {
+            Success = false; // default to failure
+            switch (p)
+            {
+                case Constants.PasteDatagrid.dgAA:
+                    switch (col)
+                    {
+                        case (int)AAQueries.eGetAA.AA:
+                            Success = !string.IsNullOrEmpty(s);
+                            if (Success)
+                                return s;
+                            break;
+                        case (int)AAQueries.eGetAA.Target:
+                            s = s.Replace("%", "");
+                            Success = Functions.StringIsDecimal(s, false);
+                            if (Success)
+                                return Convert.ToDecimal(s);
+                            break;
+                    }
+                    break;
+
+                case Constants.PasteDatagrid.dgAcct:
+                    switch (col)
+                    {
+                        case (int)AcctQueries.eGetAcct.Name:
+                            Success = !string.IsNullOrEmpty(s);
+                            if (Success)
+                                return s;
+                            break;
+                        case (int)AcctQueries.eGetAcct.TaxRate:
+                            s = s.Replace("%", "");
+                            Success = Functions.StringIsDecimal(s, false);
+                            if (Success)
+                                return Convert.ToDecimal(s);
+                            break;
+                    }
+                    break;
+
+                case Constants.PasteDatagrid.dgTicker:
+                    switch (col)
+                    {
+                        case (int)TickerQueries.eGetTrades.Date:
+                            Success = Functions.StringIsDateTime(s);
+                            if (Success)
+                                return s;
+                            break;
+                        case (int)TickerQueries.eGetTrades.Shares:
+                            Success = Functions.StringIsDecimal(s, false);
+                            if (Success)
+                                return Convert.ToDecimal(s);
+                            break;
+                        case (int)TickerQueries.eGetTrades.Price:
+                            Success = Functions.StringIsDecimal(s, true);
+                            if (Success)
+                                return Functions.ConvertFromCurrency(s);
+                            break;
+                    }
+                    break;
+            }
+            return null;
+        }
+
+        private static object[] CheckValidPasteItem(string[] s, Constants.PasteDatagrid p, ref bool Success)
+        {
+            Success = false;
+            switch (p)
+            {
+                case Constants.PasteDatagrid.dgAA:
+
+                    s[(int)AAQueries.eGetAA.Target] = s[(int)AAQueries.eGetAA.Target].Replace("%", "");
+                    Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false);
+                    if (Success)
+                        return new object[3] { s[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
+                    break;
+
+                case Constants.PasteDatagrid.dgAcct:
+
+                    s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "");
+                    Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false);
+                    if (Success)
+                        return new object[3] { s[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]), 0 };
+                    break;
+
+                case Constants.PasteDatagrid.dgTicker:
+
+                    Success = Functions.StringIsDateTime(s[(int)TickerQueries.eGetTrades.Date])
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Shares], false)
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Price], true);
+                    if (Success)
+                        return new object[3] {
+                            s[(int)TickerQueries.eGetTrades.Date], 
+                            Convert.ToDecimal(s[(int)TickerQueries.eGetTrades.Shares]), 
+                            Functions.ConvertFromCurrency(s[(int)TickerQueries.eGetTrades.Price])
+                        };
+                    break;
+            }
+            return null;
         }
     }
 }

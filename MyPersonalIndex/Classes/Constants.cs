@@ -7,6 +7,8 @@ namespace MyPersonalIndex
     public class Constants
     {
         public const string SignifyPortfolio = "~|";
+        public const string DateSeperatorString = "|";
+        public const char DateSeperatorChar = '|';
         public enum AvgShareCalc { FIFO, LIFO, AVG };
         public enum OutputFormat { Currency, Percentage, Decimal, Integer, ShortDate, LongDate, None };
         public enum StatVariables { Portfolio, PortfolioName, StartDate, EndDate, PreviousDay, TotalValue };

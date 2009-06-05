@@ -34,7 +34,7 @@ namespace MyPersonalIndex
             public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
             public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value };
         }
-        
+
         private SqlCeConnection cn;
 
         public Queries()
@@ -57,7 +57,7 @@ namespace MyPersonalIndex
             {
                 if (cn.State == ConnectionState.Open)
                     cn.Close();
-                
+
                 cn.Dispose();
                 cn = null;
             }
@@ -148,7 +148,7 @@ namespace MyPersonalIndex
 
         public static string GetSecondDay()
         {
-            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM ClosingPrices ORDER BY Date) a ORDER BY Date DESC";
+            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM (SELECT DISTINCT Date FROM ClosingPrices) a ORDER BY Date) a ORDER BY Date DESC";
         }
 
         public static string DeleteTickerTrades(int Portfolio, int Ticker, bool Custom)
@@ -198,7 +198,7 @@ namespace MyPersonalIndex
                 Ticker2 = Functions.StripSignifyPortfolio(Ticker2); ;
 
             return string.Format(
-                "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" + 
+                "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" +
                         " Sqrt((Ticker1Square - Power(Ticker1Sum,2) / TotalDays) * (Ticker2Square - Power(Ticker2Sum,2) / TotalDays)) * 100" +
                 " FROM   (SELECT SUM(a.Change) AS Ticker1Sum," +
                             " SUM(b.Change) AS Ticker2Sum," +
@@ -207,12 +207,12 @@ namespace MyPersonalIndex
                             " SUM(a.Change * b.Change) AS ProductSquare," +
                             " COUNT(*) AS TotalDays" +
                         " FROM " +
-                                (Ticker1Portfolio ? 
+                                (Ticker1Portfolio ?
                                     " (SELECT Date, Change FROM NAV WHERE Portfolio = {0}" :
                                     " (SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{0}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS a" +
                         " INNER JOIN " +
-                                (Ticker2Portfolio ? 
+                                (Ticker2Portfolio ?
                                     "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
                                     "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
                                 " AND Date BETWEEN '{2}' AND '{3}') AS b" +

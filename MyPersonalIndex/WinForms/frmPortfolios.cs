@@ -16,6 +16,7 @@ namespace MyPersonalIndex
             public double NAVStart;
             public int AAThreshold;
             public DateTime StartDate;
+            public DateTime OrigStartDate;
             public int CostCalc; 
         }
 
@@ -66,7 +67,8 @@ namespace MyPersonalIndex
                 txtValue.Text = Functions.ConvertToCurrency(rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
                 numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
                 cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
-                IndexDate.SetDate(rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate));
+                _PortfolioReturnValues.OrigStartDate = rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate);
+                IndexDate.SetDate(_PortfolioReturnValues.OrigStartDate);
             }
         }
 

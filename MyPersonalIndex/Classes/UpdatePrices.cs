@@ -10,9 +10,9 @@ namespace MyPersonalIndex
     class UpdatePrices : IDisposable
     {
         private MainQueries SQL;
-        Constants.MPISettings Settings;
-        MPIBackgroundWorker bw;
-        DateTime LastDate;
+        private Constants.MPISettings Settings;
+        private MPIBackgroundWorker bw;
+        private DateTime LastDate;
 
         public UpdatePrices(MainQueries SQL, Constants.MPISettings Settings, MPIBackgroundWorker bw, DateTime LastDate)
         {
@@ -72,6 +72,7 @@ namespace MyPersonalIndex
             }
 
             InsertMissingPrices(); // fill in any prices Yahoo! finance is missing equal to the previous close (0% change)
+            SQL.ExecuteNonQuery(MainQueries.InsertCashPrices()); // update the cash $1 position ti fill in for new dates
 
             using (NAV n = new NAV(SQL, bw, LastDate))
                 n.GetNAV(-1, MinDate); // update all portfolios

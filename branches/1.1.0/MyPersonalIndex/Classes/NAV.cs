@@ -310,7 +310,7 @@ namespace MyPersonalIndex
         {
             List<DateTime> TradeDates = new List<DateTime>();
 
-            string[] s = When.Split('|');
+            string[] s = When.Split(Constants.DateSeperatorChar);
             foreach (string date in s)
             {
                 DateTime d = Convert.ToDateTime(date);

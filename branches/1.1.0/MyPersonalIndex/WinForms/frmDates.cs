@@ -20,7 +20,7 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
 
-            string[] dates = When.Split('|');
+            string[] dates = When.Split(Constants.DateSeperatorChar);
             foreach (string s in dates)
             {
                 if (string.IsNullOrEmpty(s))
@@ -77,7 +77,7 @@ namespace MyPersonalIndex
             for (int i = 0; i < SelDates.Count; i++)
                 s[i] = SelDates[i].ToShortDateString();
 
-            _DateReturnValues.When = string.Join("|", s);
+            _DateReturnValues.When = string.Join(Constants.DateSeperatorString, s);
             DialogResult = DialogResult.OK;
         }
 

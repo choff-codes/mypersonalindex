@@ -55,7 +55,7 @@ namespace MyPersonalIndex
 
         private void LoadPortfolioAttributes()
         {
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetPortfolioAttributes(Portfolio)))
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(PortfolioQueries.GetPortfolioAttributes(Portfolio)))
             {
                 if (!rs.HasRows)
                     return;
@@ -124,7 +124,7 @@ namespace MyPersonalIndex
                 SQL.ExecuteNonQuery(PortfolioQueries.InsertPortfolio(txtName.Text, chkDiv.Checked,
                     Functions.ConvertFromCurrency(txtValue.Text), cmbCost.SelectedIndex,
                     Convert.ToInt32(numAA.Value), Convert.ToDateTime(btnDate.Text)));
-                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
+                Portfolio = Convert.ToInt32(SQL.ExecuteScalar(PortfolioQueries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(PortfolioQueries.UpdatePortfolio(Portfolio, txtName.Text, chkDiv.Checked,

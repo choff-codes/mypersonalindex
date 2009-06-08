@@ -4,21 +4,6 @@ namespace MyPersonalIndex
 {
     class AdvQueries: Queries
     {
-        public static string GetPreviousPortfolioDay(string Portfolio, DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
-        }
-
-        public enum eGetTickerList { Name, ID };
-        public static string GetTickerList()
-        {
-            return string.Format(
-                "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
-                " UNION ALL " +
-                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a",
-                Constants.SignifyPortfolio);
-        }
-
         public enum eGetChartPortfolio { Date, Gain };
         public static string GetChartPortfolio(string Ticker, double StartValue, DateTime StartDate, DateTime EndDate)
         {
@@ -41,14 +26,9 @@ namespace MyPersonalIndex
                 Functions.SQLCleanString(Ticker), StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
-        public static string GetPortfolioStart(string Portfolio)
+        public static string GetIncludeDividends()
         {
-            return string.Format("SELECT StartDate FROM Portfolios WHERE ID = {0}", Portfolio);
-        }
-
-        public static string GetTickerStart(string Ticker)
-        {
-            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
+            return "SELECT TickerDiv FROM Settings";
         }
 
         public enum eGetPortfolio { Name, StartDate, TotalValue };
@@ -62,9 +42,29 @@ namespace MyPersonalIndex
                 " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
         }
 
-        public static string GetIncludeDividends()
+        public static string GetPortfolioStart(string Portfolio)
         {
-            return "SELECT TickerDiv FROM Settings";
+            return string.Format("SELECT StartDate FROM Portfolios WHERE ID = {0}", Portfolio);
+        }
+
+        public static string GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
+        }
+
+        public enum eGetTickerList { Name, ID };
+        public static string GetTickerList()
+        {
+            return string.Format(
+                "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
+                " UNION ALL " +
+                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a",
+                Constants.SignifyPortfolio);
+        }
+
+        public static string GetTickerStart(string Ticker)
+        {
+            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
         }
 
         public static string UpdateIncludeDividends(bool TickerDiv)

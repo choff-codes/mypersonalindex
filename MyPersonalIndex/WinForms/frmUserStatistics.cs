@@ -110,7 +110,7 @@ namespace MyPersonalIndex
             if (StatisticID == -1) // add new
             {
                 SQL.ExecuteNonQuery(UserStatQueries.InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
-                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
+                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(UserStatQueries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(UserStatQueries.UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));

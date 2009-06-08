@@ -105,7 +105,7 @@ namespace MyPersonalIndex
             t.Columns.Add("Value");
             t.Rows.Add("(Blank)", -1);
 
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAA(PortfolioID)))
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAA(PortfolioID)))
                 foreach (SqlCeUpdatableRecord rec in rs)
                     t.Rows.Add(rec.GetString((int)TickerQueries.eGetAA.AA), rec.GetInt32((int)TickerQueries.eGetAA.ID));
 
@@ -122,7 +122,7 @@ namespace MyPersonalIndex
             t.Columns.Add("Value");
             t.Rows.Add("(Blank)", -1);
 
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID)))
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAcct(PortfolioID)))
                 foreach (SqlCeUpdatableRecord rec in rs)
                     t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
 
@@ -166,7 +166,7 @@ namespace MyPersonalIndex
             {
                 SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue),
                     Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
-                TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
+                TickerID = Convert.ToInt32(SQL.ExecuteScalar(TickerQueries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(cmbAA.SelectedValue),
@@ -174,7 +174,7 @@ namespace MyPersonalIndex
 
             if (dsTicker.HasChanges() || Pasted) // delete existing trades (excluding custom) and reinsert all trades
             {
-                SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID, false));
+                SQL.ExecuteNonQuery(TickerQueries.DeleteTickerTrades(PortfolioID, TickerID));
 
                 _TickerReturnValues.Changed = true;
                 dsTicker.AcceptChanges(); // do this here since HasChanges is set to false when this function runs

@@ -122,7 +122,7 @@ SET IDENTITY_INSERT [Portfolios] ON
 GO
 SET IDENTITY_INSERT [Portfolios] OFF
 GO
-Insert Into [Settings] ([DataStartDate],[LastPortfolio],[Version],[WindowX],[WindowY],[WindowHeight],[WindowWidth],[WindowState],[Splits],[TickerDiv]) Values ({ts '2008-01-02 12:00:00'},null,1.10,null,null,null,null,null,1,1);
+Insert Into [Settings] ([DataStartDate],[LastPortfolio],[Version],[WindowX],[WindowY],[WindowHeight],[WindowWidth],[WindowState],[Splits],[TickerDiv]) Values ({ts '2008-01-02 12:00:00'},null,2.00,null,null,null,null,null,1,1);
 GO
 SET IDENTITY_INSERT [Tickers] ON
 GO

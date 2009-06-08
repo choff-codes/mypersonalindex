@@ -16,8 +16,14 @@ namespace MyPersonalIndex
 
             if (databaseVersion < 1.02)
                 Version102(databaseVersion); // backup database and start fresh
-            else if (databaseVersion < 1.1)
-                Version110();
+            else
+            {
+                if (databaseVersion < 1.1)
+                    Version110();
+
+                if (databaseVersion < 2)
+                    Version200();
+            }
         }
 
         private void Version102(double databaseVersion)
@@ -68,6 +74,12 @@ namespace MyPersonalIndex
 
             // update version number
             SQL.ExecuteNonQuery("UPDATE Settings SET Version = 1.1");
+        }
+
+        private void Version200()
+        {
+            // update version number
+            SQL.ExecuteNonQuery("UPDATE Settings SET Version = 2.0");
         }
     }
 }

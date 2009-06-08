@@ -121,41 +121,6 @@ namespace MyPersonalIndex
             return dt;
         }
 
-        public static string GetNAV(int Portfolio, DateTime Date)
-        {
-            return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
-        }
-
-        public static string GetPreviousDay(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
-        }
-
-        public static string GetCurrentDayOrPrevious(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
-        }
-
-        public static string GetCurrentDayOrNext(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
-        }
-
-        public static string GetDaysNowAndBefore(DateTime Date)
-        {
-            return string.Format("SELECT COUNT(*) FROM (SELECT DISTINCT Date FROM ClosingPrices WHERE Date <= '{0}') a", Date.ToShortDateString());
-        }
-
-        public static string GetSecondDay()
-        {
-            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM (SELECT DISTINCT Date FROM ClosingPrices) a ORDER BY Date) a ORDER BY Date DESC";
-        }
-
-        public static string DeleteTickerTrades(int Portfolio, int Ticker, bool Custom)
-        {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}{2}", Portfolio, Ticker, Custom ? "" : " AND Custom IS NULL");
-        }
-
         public enum eGetAA { AA, Target, ID };
         public static string GetAA(int Portfolio)
         {
@@ -168,28 +133,10 @@ namespace MyPersonalIndex
             return string.Format("SELECT Name, TaxRate, ID FROM Accounts WHERE Portfolio = {0} ORDER BY Name", Portfolio);
         }
 
-        public enum eGetPortfolioAttributes
-        {
-            ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,
-            CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank,
-            CorrelationShowHidden, AcctSort, AcctShowBlank
-        };
-        public static string GetPortfolioAttributes(int Portfolio)
-        {
-            return string.Format(
-                "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue," +
-                    " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden," +
-                    " AcctSort, AcctShowBlank " +
-                " FROM Portfolios WHERE ID = {0}", Portfolio);
-        }
-
-        public static string GetIdentity()
-        {
-            return "SELECT @@IDENTITY";
-        }
-
         public static string GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
         {
+            // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ] 
+
             bool Ticker1Portfolio = Ticker1.Contains(Constants.SignifyPortfolio);
             bool Ticker2Portfolio = Ticker2.Contains(Constants.SignifyPortfolio);
             if (Ticker1Portfolio)
@@ -220,12 +167,54 @@ namespace MyPersonalIndex
                 Functions.SQLCleanString(Ticker1), Functions.SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
         }
 
-        //=(1/n)*(sum(x^2))-((SUM(X)/N)^2)
-        //SQRT((SUM(POWER(Change,2))-POWER(SUM(Change)/COUNT(*),2)) / COUNT(*))
-
-        public static string UpdateDataStartDate(DateTime Date)
+        public static string GetCurrentDayOrNext(DateTime Date)
         {
-            return string.Format("UPDATE Settings SET DataStartDate = '{0}'", Date.ToShortDateString());
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
+        }
+
+        public static string GetCurrentDayOrPrevious(DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
+        }
+
+        public static string GetDaysNowAndBefore(DateTime Date)
+        {
+            return string.Format("SELECT COUNT(*) FROM (SELECT DISTINCT Date FROM ClosingPrices WHERE Date <= '{0}') a", Date.ToShortDateString());
+        }
+
+        public static string GetIdentity()
+        {
+            return "SELECT @@IDENTITY";
+        }
+
+        public static string GetNAV(int Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
+        }
+
+        public enum eGetPortfolioAttributes
+        {
+            ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,
+            CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank,
+            CorrelationShowHidden, AcctSort, AcctShowBlank
+        };
+        public static string GetPortfolioAttributes(int Portfolio)
+        {
+            return string.Format(
+                "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue," +
+                    " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden," +
+                    " AcctSort, AcctShowBlank " +
+                " FROM Portfolios WHERE ID = {0}", Portfolio);
+        }
+
+        public static string GetPreviousDay(DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
+        }
+
+        public static string GetSecondDay()
+        {
+            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM (SELECT DISTINCT Date FROM ClosingPrices) a ORDER BY Date) a ORDER BY Date DESC";
         }
 
         public enum eGetStats { ID, SQL, Format, Description };

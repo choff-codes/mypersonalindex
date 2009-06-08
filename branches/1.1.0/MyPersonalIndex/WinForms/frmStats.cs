@@ -225,7 +225,7 @@ namespace MyPersonalIndex
             // delete from user stat table
             SQL.ExecuteNonQuery(StatsQueries.DeleteUserStat(StatisticID));
             // delete user stat ID from statistics table of all portfolios
-            SQL.ExecuteNonQuery(StatsQueries.DeleteStatUserStat(StatisticID));
+            SQL.ExecuteNonQuery(StatsQueries.DeleteStat(StatisticID));
             cmbDataTable.Rows.RemoveAt(cmb.SelectedIndex);
 
             DataTable dt = (DataTable)lst1.DataSource;

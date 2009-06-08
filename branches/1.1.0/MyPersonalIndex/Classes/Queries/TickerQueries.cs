@@ -4,23 +4,9 @@ namespace MyPersonalIndex
 {
     class TickerQueries : Queries
     {
-        public static string InsertNewTicker(int Portfolio, string Ticker, int AA, int Acct, bool Hide, bool Active)
+        public static string DeleteTickerTrades(int Portfolio, int Ticker)
         {
-            return string.Format(
-                "INSERT INTO Tickers (Ticker, Portfolio, Active, AA, Acct, Hide) VALUES ('{0}', {1}, {2}, {3}, {4}, {5})",
-                Functions.SQLCleanString(Ticker), Portfolio, Convert.ToByte(Active), AA, Acct, Convert.ToByte(Hide));
-        }
-
-        public static string UpdateTicker(int Portfolio, int Ticker, int AA, int Acct, bool Hide, bool Active)
-        {
-            return string.Format("UPDATE Tickers SET AA = {0}, Acct = {1}, Hide = {2}, Active = {3} WHERE Portfolio = {4} AND ID = {5}",
-                AA, Acct, Convert.ToByte(Hide), Convert.ToByte(Active), Portfolio, Ticker);
-        }
-
-        public enum eGetTrades { Date, Shares, Price };
-        public static string GetTrades(int Portfolio, int Ticker)
-        {
-            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL ORDER BY Date", Portfolio, Ticker);
+            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL", Portfolio, Ticker);
         }
 
         public enum eGetAttributes { AA, Acct, Active, Hide };
@@ -70,12 +56,31 @@ namespace MyPersonalIndex
             }
         }
 
+        public enum eGetTrades { Date, Shares, Price };
+        public static string GetTrades(int Portfolio, int Ticker)
+        {
+            return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL ORDER BY Date", Portfolio, Ticker);
+        }
+
         public static string HasCustomTrades(int Portfolio, int Ticker)
         {
             return string.Format(
                 "SELECT TOP (1) 1" +
                 " FROM CustomTrades" +
                 " WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+        }
+
+        public static string InsertNewTicker(int Portfolio, string Ticker, int AA, int Acct, bool Hide, bool Active)
+        {
+            return string.Format(
+                "INSERT INTO Tickers (Ticker, Portfolio, Active, AA, Acct, Hide) VALUES ('{0}', {1}, {2}, {3}, {4}, {5})",
+                Functions.SQLCleanString(Ticker), Portfolio, Convert.ToByte(Active), AA, Acct, Convert.ToByte(Hide));
+        }
+
+        public static string UpdateTicker(int Portfolio, int Ticker, int AA, int Acct, bool Hide, bool Active)
+        {
+            return string.Format("UPDATE Tickers SET AA = {0}, Acct = {1}, Hide = {2}, Active = {3} WHERE Portfolio = {4} AND ID = {5}",
+                AA, Acct, Convert.ToByte(Hide), Convert.ToByte(Active), Portfolio, Ticker);
         }
     }
 }

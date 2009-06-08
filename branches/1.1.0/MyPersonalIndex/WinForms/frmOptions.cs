@@ -88,7 +88,7 @@ namespace MyPersonalIndex
                         return;
 
                 _OptionReturnValues.DataStartDate = NewDataStartDate;
-                SQL.ExecuteNonQuery(Queries.UpdateDataStartDate(NewDataStartDate));
+                SQL.ExecuteNonQuery(OptionQueries.UpdateDataStartDate(NewDataStartDate));
                 DialogResult = DialogResult.OK;
             }
             else

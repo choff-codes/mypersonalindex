@@ -4,15 +4,19 @@ namespace MyPersonalIndex
 {
     class StatsQueries: Queries
     {
-        public enum eGetUserStats { ID, Description };
-        public static string GetUserStats()
-        {
-            return "SELECT ID, Description FROM UserStatistics ORDER BY Description";
-        }
-
         public static string DeletePortfolioStats(int Portfolio)
         {
             return string.Format("DELETE FROM Stats WHERE Portfolio = {0}", Portfolio);
+        }
+
+        public static string DeleteStat(int ID)
+        {
+            return string.Format("DELETE FROM Stats WHERE Statistic = {0}", ID);
+        }
+
+        public static string DeleteUserStat(int ID)
+        {
+            return string.Format("DELETE FROM UserStatistics WHERE ID = {0}", ID);
         }
 
         public enum eGetPortfolioStats { ID };
@@ -28,14 +32,10 @@ namespace MyPersonalIndex
                 Portfolio);
         }
 
-        public static string DeleteUserStat(int ID)
+        public enum eGetUserStats { ID, Description };
+        public static string GetUserStats()
         {
-            return string.Format("DELETE FROM UserStatistics WHERE ID = {0}", ID);
-        }
-
-        public static string DeleteStatUserStat(int ID)
-        {
-            return string.Format("DELETE FROM Stats WHERE Statistic = {0}", ID);
+            return "SELECT ID, Description FROM UserStatistics ORDER BY Description";
         }
     }
 }

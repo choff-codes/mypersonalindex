@@ -42,6 +42,13 @@ namespace MyPersonalIndex
                 return false;
             }
 
+            if ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex == Constants.DynamicTradeFreq.Yearly && cmbYear.Value.Day == 29 && cmbYear.Value.Month == 2)
+            {
+                MessageBox.Show("A leap year date is not a value choice!");
+                lst.SelectedIndex = CurrentItem;
+                return false;
+            }
+
             return true;
         }
 
@@ -65,7 +72,7 @@ namespace MyPersonalIndex
                     s = s + "Day " + dt.When;
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    s = s + (new DateTime(DateTime.Now.Year, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("MM/dd");
+                    s = s + (new DateTime(Constants.NonLeapYear, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("MM/dd");
                     break;
             }
 
@@ -96,7 +103,7 @@ namespace MyPersonalIndex
                     Trades[CurrentItem].When = (cmbMonth.SelectedIndex + 1).ToString(); // selected index is zero based, so +1
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    Trades[CurrentItem].When = cmbYear.Value.DayOfYear.ToString();
+                    Trades[CurrentItem].When = new DateTime(Constants.NonLeapYear, cmbYear.Value.Month, cmbYear.Value.Day).DayOfYear.ToString();
                     break;
             }
 
@@ -357,7 +364,7 @@ namespace MyPersonalIndex
                     cmbMonth.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When) - 1; // selected index is zero based, so -1
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    cmbYear.Value = new DateTime(DateTime.Now.Year, 1, 1).AddDays(Convert.ToInt32(Trades[CurrentItem].When) - 1);
+                    cmbYear.Value = new DateTime(DateTime.Now.Year, 1, 1).AddDays(Convert.ToInt32(Trades[CurrentItem].When) - 1 + (DateTime.IsLeapYear(DateTime.Now.Year) ? 1 : 0));
                     break;
             }
         }

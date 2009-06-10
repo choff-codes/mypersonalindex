@@ -72,7 +72,7 @@ namespace MyPersonalIndex
             }
 
             InsertMissingPrices(); // fill in any prices Yahoo! finance is missing equal to the previous close (0% change)
-            SQL.ExecuteNonQuery(MainQueries.InsertCashPrices()); // update the cash $1 position ti fill in for new dates
+            SQL.ExecuteNonQuery(MainQueries.InsertCashPrices()); // update the cash $1 position to fill in for new dates
 
             using (NAV n = new NAV(SQL, bw, LastDate))
                 n.GetNAV(-1, MinDate); // update all portfolios
@@ -152,11 +152,11 @@ namespace MyPersonalIndex
 
                     double Split = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetSplit(Ticker, Day), 1));
                     double Div = Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetDividend(Ticker, Day), 0));
-
                     Price = (Price * Split) + Div;
 
                     line = sr.ReadLine(); // data is sorted by date descending, get next row to calculate change
 
+                    // data is in descending date order, so get the next row to calculate % change
                     if (line != null)
                     {
                         columns = line.Split(',');

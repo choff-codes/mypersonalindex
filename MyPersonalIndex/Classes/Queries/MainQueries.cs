@@ -102,15 +102,10 @@ namespace MyPersonalIndex
         {
             return string.Format(
                 "SELECT Date, TotalValue, NAV, Change, (CASE WHEN Change IS NOT NULL THEN 100 * ((NAV / {0}) - 1) END) AS Gain" +
-                " FROM NAV WHERE Portfolio = {1} ORDER BY Date {2}",
+                " FROM NAV" +
+                " WHERE Portfolio = {1}" +
+                " ORDER BY Date {2}",
                 StartValue, Portfolio, (Desc ? " DESC" : ""));
-        }
-
-        public enum eGetAvgPricesTickerList { TickerID };
-        public static string GetAvgPricesTickerList(int Portfolio)
-        {
-            return string.Format(
-                "SELECT DISTINCT TickerID FROM Trades WHERE Portfolio = {0}", Portfolio);
         }
 
         public enum eGetAvgPricesTrades { TickerID, Price, Shares }

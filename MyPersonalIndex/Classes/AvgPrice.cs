@@ -72,13 +72,14 @@ namespace MyPersonalIndex
                             }
                     }
                     else
+                    {
                         if (!ExistingList)
                         {
-                            Trades.Add(Ticker, new List<Constants.TradeInfo>());
-                            Trades[Ticker].Add(T);
+                            ExistingTrades = new List<Constants.TradeInfo>();
+                            Trades.Add(Ticker, ExistingTrades);
                         }
-                        else
-                            ExistingTrades.Add(T);
+                        ExistingTrades.Add(T);
+                    }
                 }
 
             return Trades;

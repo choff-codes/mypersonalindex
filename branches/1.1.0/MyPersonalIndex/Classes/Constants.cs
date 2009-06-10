@@ -9,6 +9,7 @@ namespace MyPersonalIndex
         public const string SignifyPortfolio = "~|";
         public const string DateSeperatorString = "|";
         public const char DateSeperatorChar = '|';
+        public const int NonLeapYear = 2009;
         public enum AvgShareCalc { FIFO, LIFO, AVG };
         public enum OutputFormat { Currency, Percentage, Decimal, Integer, ShortDate, LongDate, None };
         public enum StatVariables { Portfolio, PortfolioName, StartDate, EndDate, PreviousDay, TotalValue };

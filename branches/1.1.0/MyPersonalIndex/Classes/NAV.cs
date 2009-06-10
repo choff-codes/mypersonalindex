@@ -210,10 +210,13 @@ namespace MyPersonalIndex
                         Convert.IsDBNull(rec.GetValue((int)MainQueries.eGetCustomTrades.AA))
                             ? -1 : rec.GetInt32((int)MainQueries.eGetCustomTrades.AA));
 
-                    if (!AllTrades.ContainsKey(Ticker))
-                        AllTrades.Add(Ticker, new List<Constants.DynamicTrades>());
-
-                    AllTrades[Ticker].Add(dts);
+                    List<Constants.DynamicTrades> trades;
+                    if (!AllTrades.TryGetValue(Ticker, out trades))
+                    {
+                        trades = new List<Constants.DynamicTrades>();
+                        AllTrades.Add(Ticker, trades);
+                    }
+                    trades.Add(dts);
                 }
 
             return AllTrades;
@@ -250,17 +253,15 @@ namespace MyPersonalIndex
         private List<DateTime> GetMonthlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
-
-            DateTime FirstMonthday = MinDate;
             int DayOfMonth = Convert.ToInt32(When);
 
             int i = 0;
             do
             {
-                DateTime monthday = FirstMonthday.AddMonths(i);
+                DateTime monthday = MinDate.AddMonths(i);
 
                 if (monthday.Day > DayOfMonth)
-                    monthday.AddMonths(1);
+                    monthday = monthday.AddMonths(1);
 
                 if (DayOfMonth > DateTime.DaysInMonth(monthday.Year, monthday.Month))
                     monthday = new DateTime(monthday.AddMonths(1).Year, monthday.AddMonths(1).Month, 1);
@@ -271,7 +272,7 @@ namespace MyPersonalIndex
                     TradeDates.Add(monthday);
                 i++;
             }
-            while (FirstMonthday.AddMonths(i) <= MaxDate);
+            while (MinDate.AddMonths(i) <= MaxDate);
 
             return TradeDates;
         }
@@ -279,29 +280,24 @@ namespace MyPersonalIndex
         private List<DateTime> GetYearlyDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
-
-            DateTime FirstYearday = MinDate;
             int DayOfYear = Convert.ToInt32(When);
-
-            // special case to not get invalid leap-year dates
-            if (DayOfYear == 60)
-                DayOfYear++;
 
             int i = 0;
             do
             {
-                DateTime yearday = FirstYearday.AddYears(i);
+                DateTime yearday = MinDate.AddYears(i);
+                int LeapDayofYear = DayOfYear + (DateTime.IsLeapYear(yearday.Year) ? 1 : 0);
 
-                if (yearday.DayOfYear > DayOfYear)
-                    yearday.AddYears(1);
+                if (yearday.DayOfYear > LeapDayofYear)
+                    yearday = yearday.AddYears(1);
 
-                yearday = new DateTime(yearday.Year, 1, 1).AddDays(DayOfYear - 1);
+                yearday = new DateTime(yearday.Year, 1, 1).AddDays(LeapDayofYear - 1);
 
                 if (GetCurrentDateOrNext(ref yearday, MarketDays))
                     TradeDates.Add(yearday);
                 i++;
             }
-            while (FirstYearday.AddYears(i) <= MaxDate);
+            while (MinDate.AddYears(i) <= MaxDate);
 
             return TradeDates;
         }
@@ -325,13 +321,13 @@ namespace MyPersonalIndex
         private bool GetCurrentDateOrNext(ref DateTime Date, List<DateTime> MarketDates)
         {
             int NextMarketDay = MarketDates.BinarySearch(Date);
-            if (NextMarketDay >= 0 || ~NextMarketDay != MarketDates.Count)
+            if (NextMarketDay >= 0 || ~NextMarketDay != MarketDates.Count)  // >0 is found, < MarketDates.Count gives closest value
             {
-                Date = MarketDates[NextMarketDay < 0 ? ~NextMarketDay : NextMarketDay];
+                Date = MarketDates[NextMarketDay < 0 ? ~NextMarketDay : NextMarketDay]; // ~NextMarketDay is next largest value
                 return true;
             }
-            else
-                return false;
+
+            return false;
         }
 
         /************************* AA targets ***********************************/
@@ -428,9 +424,13 @@ namespace MyPersonalIndex
                     foreach (DateTime tradedate in dt.Dates)
                         if (tradedate == d || dt.Trade.Frequency == Constants.DynamicTradeFreq.Daily)
                         {
-                            if (!TickersWithCustomTrades.ContainsKey(i.Key))
-                                TickersWithCustomTrades.Add(i.Key, new List<Constants.DynamicTrade>());
-                            TickersWithCustomTrades[i.Key].Add(dt.Trade);
+                            List<Constants.DynamicTrade> trade;
+                            if (!TickersWithCustomTrades.TryGetValue(i.Key, out trade))
+                            {
+                                trade = new List<Constants.DynamicTrade>();
+                                TickersWithCustomTrades.Add(i.Key, trade);
+                            }
+                            trade.Add(dt.Trade);
                         }
 
             return TickersWithCustomTrades;

@@ -4,6 +4,11 @@ namespace MyPersonalIndex
 {
     class TickerQueries : Queries
     {
+        public static string DeleteCustomTrades(int Ticker)
+        {
+            return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
+        }
+
         public static string DeleteTickerTrades(int Portfolio, int Ticker)
         {
             return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL", Portfolio, Ticker);
@@ -13,6 +18,13 @@ namespace MyPersonalIndex
         public static string GetAttributes(int Portfolio, int Ticker)
         {
             return string.Format("SELECT AA, Acct, Active, Hide FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
+        }
+
+        public enum eGetCustomTrades { TradeType, Frequency, Dates, Value };
+        public static string GetCustomTrades(int Ticker)
+        {
+            return string.Format("SELECT TradeType, Frequency, Dates, Value FROM CustomTrades WHERE TickerID = {0}",
+                Ticker);
         }
 
         public static string GetHistorical(string Ticker, int TickerID, int Selected, bool Desc)
@@ -60,14 +72,6 @@ namespace MyPersonalIndex
         public static string GetTrades(int Portfolio, int Ticker)
         {
             return string.Format("SELECT Date, Shares, Price FROM Trades WHERE Portfolio = {0} AND TickerID = {1} AND Custom IS NULL ORDER BY Date", Portfolio, Ticker);
-        }
-
-        public static string HasCustomTrades(int Portfolio, int Ticker)
-        {
-            return string.Format(
-                "SELECT TOP (1) 1" +
-                " FROM CustomTrades" +
-                " WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
         }
 
         public static string InsertNewTicker(int Portfolio, string Ticker, int AA, int Acct, bool Hide, bool Active)

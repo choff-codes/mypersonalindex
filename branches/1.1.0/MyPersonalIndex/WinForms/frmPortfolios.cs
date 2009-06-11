@@ -17,7 +17,7 @@ namespace MyPersonalIndex
             public int AAThreshold;
             public DateTime StartDate;
             public DateTime OrigStartDate;
-            public int CostCalc; 
+            public int CostCalc;
         }
 
         public PortfolioRetValues PortfolioReturnValues { get { return _PortfolioReturnValues; } }
@@ -27,61 +27,7 @@ namespace MyPersonalIndex
         private int Portfolio;
         private MonthCalendar IndexDate;
 
-        public frmPortfolios(int PortfolioID, string sPortfolio, DateTime DataStartDate)
-        {
-            InitializeComponent();
-            Portfolio = PortfolioID;
-            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(sPortfolio) ? "New Portfolio" : sPortfolio);
-            IndexDate = new MonthCalendar { MaxSelectionCount = 1, MaxDate = DateTime.Today, MinDate = DataStartDate, SelectionStart = DataStartDate};
-        }
-
-        private void frmPortfolios_Load(object sender, EventArgs e)
-        {
-            if (SQL.Connection == ConnectionState.Closed)
-            {
-                DialogResult = DialogResult.Cancel;
-                return;
-            }
-    
-            cmbCost.SelectedIndex = 0;
-            
-            ToolStripControlHost host = new ToolStripControlHost(IndexDate);
-            mnuDate.Items.Insert(0, host);
-            IndexDate.DateSelected += new DateRangeEventHandler(Date_Change);
-
-            LoadPortfolioAttributes();
-            btnDate.Text = IndexDate.SelectionStart.ToShortDateString();
-        }
-
-        private void LoadPortfolioAttributes()
-        {
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(PortfolioQueries.GetPortfolioAttributes(Portfolio)))
-            {
-                if (!rs.HasRows)
-                    return;
-
-                rs.ReadFirst();
-
-                txtName.Text = rs.GetString((int)PortfolioQueries.eGetPortfolioAttributes.Name);
-                chkDiv.Checked = rs.GetSqlBoolean((int)PortfolioQueries.eGetPortfolioAttributes.Dividends).IsTrue;
-                txtValue.Text = Functions.ConvertToCurrency(rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
-                numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
-                cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
-                _PortfolioReturnValues.OrigStartDate = rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate);
-                IndexDate.SetDate(_PortfolioReturnValues.OrigStartDate);
-            }
-        }
-
-        private void Date_Change(object sender, DateRangeEventArgs e)
-        {
-            mnuDate.Close();
-            btnDate.Text = IndexDate.SelectionStart.ToShortDateString();
-        }
-
-        private void frmPortfolios_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SQL.Dispose();
-        }
+        /************************* Functions ***********************************/
 
         private bool GetFormatErrors()
         {
@@ -114,6 +60,37 @@ namespace MyPersonalIndex
             return true;
         }
 
+        private void LoadPortfolioAttributes()
+        {
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(PortfolioQueries.GetPortfolioAttributes(Portfolio)))
+            {
+                if (!rs.HasRows)
+                    return;
+
+                rs.ReadFirst();
+
+                txtName.Text = rs.GetString((int)PortfolioQueries.eGetPortfolioAttributes.Name);
+                chkDiv.Checked = rs.GetSqlBoolean((int)PortfolioQueries.eGetPortfolioAttributes.Dividends).IsTrue;
+                txtValue.Text = Functions.ConvertToCurrency(rs.GetDecimal((int)PortfolioQueries.eGetPortfolioAttributes.NAVStartValue));
+                numAA.Value = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.AAThreshold);
+                cmbCost.SelectedIndex = rs.GetInt32((int)PortfolioQueries.eGetPortfolioAttributes.CostCalc);
+                _PortfolioReturnValues.OrigStartDate = rs.GetDateTime((int)PortfolioQueries.eGetPortfolioAttributes.StartDate);
+                IndexDate.SetDate(_PortfolioReturnValues.OrigStartDate);
+            }
+        }
+
+        /************************* Event Handlers ***********************************/
+
+        private void btnDate_Click(object sender, EventArgs e)
+        {
+            mnuDate.Show(btnDate, 0, btnDate.Height);
+        }
+
+        private void cmdCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+        }
+
         private void cmdOK_Click(object sender, EventArgs e)
         {
             if (!GetFormatErrors())
@@ -138,20 +115,44 @@ namespace MyPersonalIndex
             _PortfolioReturnValues.CostCalc = cmbCost.SelectedIndex;
             _PortfolioReturnValues.NAVStart = (double)Functions.ConvertFromCurrency(txtValue.Text);
             _PortfolioReturnValues.StartDate = Convert.ToDateTime(btnDate.Text);
-            DialogResult = DialogResult.OK;       
+            DialogResult = DialogResult.OK;
         }
 
-        private void txtValue_Leave(object sender, EventArgs e)
+        private void Date_Change(object sender, DateRangeEventArgs e)
         {
-            if (!string.IsNullOrEmpty(txtValue.Text))
-                try
-                {
-                    txtValue.Text = Functions.ConvertToCurrency(Convert.ToDecimal(txtValue.Text));
-                }
-                catch (FormatException)
-                {
-                    MessageBox.Show("Invalid format, must be a number!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+            mnuDate.Close();
+            btnDate.Text = IndexDate.SelectionStart.ToShortDateString();
+        }
+
+        public frmPortfolios(int PortfolioID, string sPortfolio, DateTime DataStartDate)
+        {
+            InitializeComponent();
+            Portfolio = PortfolioID;
+            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(sPortfolio) ? "New Portfolio" : sPortfolio);
+            IndexDate = new MonthCalendar { MaxSelectionCount = 1, MaxDate = DateTime.Today, MinDate = DataStartDate, SelectionStart = DataStartDate };
+        }
+
+        private void frmPortfolios_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SQL.Dispose();
+        }
+
+        private void frmPortfolios_Load(object sender, EventArgs e)
+        {
+            if (SQL.Connection == ConnectionState.Closed)
+            {
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            cmbCost.SelectedIndex = 0;
+
+            ToolStripControlHost host = new ToolStripControlHost(IndexDate);
+            mnuDate.Items.Insert(0, host);
+            IndexDate.DateSelected += new DateRangeEventHandler(Date_Change);
+
+            LoadPortfolioAttributes();
+            btnDate.Text = IndexDate.SelectionStart.ToShortDateString();
         }
 
         private void txtValue_Enter(object sender, EventArgs e)
@@ -167,14 +168,17 @@ namespace MyPersonalIndex
                 }
         }
 
-        private void btnDate_Click(object sender, EventArgs e)
+        private void txtValue_Leave(object sender, EventArgs e)
         {
-            mnuDate.Show(btnDate, 0, btnDate.Height);
-        }
-
-        private void cmdCancel_Click(object sender, EventArgs e)
-        {
-            DialogResult = DialogResult.Cancel;
+            if (!string.IsNullOrEmpty(txtValue.Text))
+                try
+                {
+                    txtValue.Text = Functions.ConvertToCurrency(Convert.ToDecimal(txtValue.Text));
+                }
+                catch (FormatException)
+                {
+                    MessageBox.Show("Invalid format, must be a number!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
         }
     }
 }

@@ -18,11 +18,6 @@ namespace MyPersonalIndex
             return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(d), MPI.LastDate));
         }
 
-        private DateTime GetCurrentDateOrNext(DateTime d, DateTime defaultValue)
-        {
-            return Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetCurrentDayOrNext(d), defaultValue));
-        }
-
         private DateTime CheckPortfolioStartDate(DateTime StartDate)
         {
             // if start date is not a market day, find the next day

@@ -31,6 +31,13 @@ namespace MyPersonalIndex
             }
         }
 
+        private void calendar_DateSelected(object sender, DateRangeEventArgs e)
+        {
+            SelDates.Add(calendar.SelectionStart);
+            SelDates.Sort();
+            lst.Items.Insert(SelDates.IndexOf(calendar.SelectionStart), calendar.SelectionStart.ToShortDateString());
+        }
+
         private void cmdCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
@@ -61,13 +68,6 @@ namespace MyPersonalIndex
                 lst.SelectedIndex = StartIndex - 1;
             else
                 lst.SelectedIndex = StartIndex;
-        }
-
-        private void calendar_DateSelected(object sender, DateRangeEventArgs e)
-        {
-            SelDates.Add(calendar.SelectionStart);
-            SelDates.Sort();
-            lst.Items.Insert(SelDates.IndexOf(calendar.SelectionStart), calendar.SelectionStart.ToShortDateString());
         }
 
         private void cmdOK_Click(object sender, EventArgs e)

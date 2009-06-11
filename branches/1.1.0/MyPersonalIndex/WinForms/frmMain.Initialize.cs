@@ -106,8 +106,7 @@ namespace MyPersonalIndex
                         LastPortfolio = rs.GetInt32((int)MainQueries.eGetSettings.LastPortfolio);
                 }
 
-            MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
-            stbLastUpdated.Text = stbLastUpdated.Text + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+            ResetLastDate();
             return LastPortfolio;
         }
 
@@ -121,7 +120,7 @@ namespace MyPersonalIndex
             cmbMainPortfolio.ComboBox.SelectedValue = LastPortfolio;
 
             if (cmbMainPortfolio.ComboBox.SelectedIndex < 0)
-                if (cmbMainPortfolio.ComboBox.Items.Count != 0)
+                if (cmbMainPortfolio.ComboBox.Items.Count != 0) // if the last portfolio doesn't exist, load the first one
                     cmbMainPortfolio.ComboBox.SelectedIndex = 0;
 
             cmbMainPortfolio.SelectedIndexChanged += new System.EventHandler(cmbMainPortfolio_SelectedIndexChanged);

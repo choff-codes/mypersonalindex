@@ -331,7 +331,6 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "frmTrades";
             this.Load += new System.EventHandler(this.frmTrades_Load);
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.frmTrades_FormClosing);
             this.gpAttributes.ResumeLayout(false);
             this.gpAttributes.PerformLayout();
             this.mnuDate.ResumeLayout(false);

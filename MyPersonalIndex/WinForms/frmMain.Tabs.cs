@@ -16,28 +16,8 @@ namespace MyPersonalIndex
             MPI.Account.TotalValue = GetTotalValue(Date);
             dgAcct.DataSource = SQL.ExecuteDataset(MainQueries.GetAcct(MPI.Portfolio.ID, Date, MPI.Account.TotalValue, MPI.Account.Sort, btnAcctShowBlank.Checked));
 
-            double CostBasis = 0;
-            double GainLoss = 0;
-            double TaxLiability = 0;
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date)))
-                if (rs.HasRows)
-                {
-                    rs.ReadFirst();
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
-                        CostBasis = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis);
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
-                        GainLoss = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss);
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)))
-                        TaxLiability = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability);
-                }
-
-            dgAcct.Columns[Constants.MPIAccount.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
-            dgAcct.Columns[Constants.MPIAccount.TaxLiabilityColumn].HeaderCell.Value = "Tax Liability (" + String.Format("{0:C})", TaxLiability);
-            string sGainLoss = String.Format("{0:C})", GainLoss);
-            if (GainLoss < 0)
-                sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
-            dgAcct.Columns[Constants.MPIAccount.GainLossColumn].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
+            LoadGainLossInfo(dgAcct, Date, (int)Constants.MPIAccount.CostBasisColumn, (int)Constants.MPIAccount.GainLossColumn,
+                (int)Constants.MPIAccount.TaxLiabilityColumn, true, true, true);
             dgAcct.Columns[Constants.MPIAccount.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Account.TotalValue);
         }
 
@@ -54,9 +34,9 @@ namespace MyPersonalIndex
             dgCorrelation.Rows.Clear();
             dgCorrelation.Columns.Clear();
 
-            this.Cursor = Cursors.WaitCursor;
             try
             {
+                this.Cursor = Cursors.WaitCursor;
                 List<string> CorrelationItems = new List<string>();
                 CorrelationItems.Add(Constants.SignifyPortfolio + MPI.Portfolio.ID.ToString());
 
@@ -101,6 +81,39 @@ namespace MyPersonalIndex
             }
         }
 
+        private void LoadGainLossInfo(DataGridView dg, DateTime Date, int CostBasisCol, int GainLossCol, int TaxCol, bool bCostBasis, bool bGainLoss, bool bTax)
+        {
+            double CostBasis = 0;
+            double GainLoss = 0;
+            double TaxLiability = 0;
+
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date)))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
+                        CostBasis = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis);
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
+                        GainLoss = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss);
+                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)))
+                        TaxLiability = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability);
+                }
+
+            if (bCostBasis)
+                dg.Columns[CostBasisCol].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
+
+            if (bTax)
+                dg.Columns[TaxCol].HeaderCell.Value = "Tax Liability (" + String.Format("{0:C})", TaxLiability);
+
+            if (bGainLoss)
+            {
+                string sGainLoss = String.Format("{0:C})", GainLoss);
+                if (GainLoss < 0)
+                    sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
+                dg.Columns[GainLossCol].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
+            }
+        }
+
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
         {
             GraphPane g = zedChart.GraphPane;
@@ -138,24 +151,8 @@ namespace MyPersonalIndex
             MPI.Holdings.TotalValue = GetTotalValue(Date);
             dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort));
 
-            double CostBasis = 0;
-            double GainLoss = 0;
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date)))
-                if (rs.HasRows)
-                {
-                    rs.ReadFirst();
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
-                        CostBasis = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis);
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
-                        GainLoss = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss);
-                }
-
-            dgHoldings.Columns[Constants.MPIHoldings.CostBasisColumn].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
-            string sGainLoss = String.Format("{0:C})", GainLoss);
-            if (GainLoss < 0) // instead of double parens for negative currency, replace with a negative sign
-                sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
-            dgHoldings.Columns[Constants.MPIHoldings.GainLossColumn].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
+            LoadGainLossInfo(dgHoldings, Date, (int)Constants.MPIHoldings.CostBasisColumn, (int)Constants.MPIHoldings.GainLossColumn,
+                0, true, true, false);
             dgHoldings.Columns[Constants.MPIHoldings.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Holdings.TotalValue);
         }
 

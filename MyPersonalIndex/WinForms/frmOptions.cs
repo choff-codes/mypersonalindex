@@ -19,52 +19,14 @@ namespace MyPersonalIndex
         private OptionRetValues _OptionReturnValues = new OptionRetValues();
         private MonthCalendar DataStartCalendar;
 
-        public frmOptions(DateTime DataStartDate, bool Splits)
+        private void btnDate_Click(object sender, EventArgs e)
         {
-            InitializeComponent();
-
-            _OptionReturnValues.DataStartDate = DataStartDate;
-            _OptionReturnValues.Splits = Splits;
-            DataStartCalendar = new MonthCalendar { 
-                MaxSelectionCount = 1, MaxDate = DateTime.Today, 
-                MinDate = SqlDateTime.MinValue.Value, SelectionStart = DataStartDate 
-            };
-            btnDate.Text = DataStartDate.ToShortDateString();
-            chkSplit.Checked = Splits;
-        }
-
-        private void frmOptions_Load(object sender, EventArgs e)
-        {
-            if (SQL.Connection == ConnectionState.Closed)
-            {
-                DialogResult = DialogResult.Cancel;
-                return;
-            }
-
-            ToolStripControlHost host = new ToolStripControlHost(DataStartCalendar);
-            mnuDate.Items.Insert(0, host);
-            DataStartCalendar.DateSelected += new DateRangeEventHandler(Date_Change);
-        }
-
-        private void Date_Change(object sender, DateRangeEventArgs e)
-        {
-            mnuDate.Close();
-            btnDate.Text = DataStartCalendar.SelectionStart.ToShortDateString();
-        }
-
-        private void frmOptions_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SQL.Dispose();
+            mnuDate.Show(btnDate, 0, btnDate.Height);
         }
 
         private void cmdCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
-        }
-
-        private void btnDate_Click(object sender, EventArgs e)
-        {
-            mnuDate.Show(btnDate, 0, btnDate.Height);
         }
 
         private void cmdOK_Click(object sender, EventArgs e)
@@ -92,7 +54,48 @@ namespace MyPersonalIndex
                 DialogResult = DialogResult.OK;
             }
             else
-                DialogResult = DialogResult.Cancel;   
+                DialogResult = DialogResult.Cancel;
+        }
+
+        private void Date_Change(object sender, DateRangeEventArgs e)
+        {
+            mnuDate.Close();
+            btnDate.Text = DataStartCalendar.SelectionStart.ToShortDateString();
+        }
+
+        public frmOptions(DateTime DataStartDate, bool Splits)
+        {
+            InitializeComponent();
+
+            _OptionReturnValues.DataStartDate = DataStartDate;
+            _OptionReturnValues.Splits = Splits;
+            DataStartCalendar = new MonthCalendar
+            {
+                MaxSelectionCount = 1,
+                MaxDate = DateTime.Today,
+                MinDate = SqlDateTime.MinValue.Value,
+                SelectionStart = DataStartDate
+            };
+            btnDate.Text = DataStartDate.ToShortDateString();
+            chkSplit.Checked = Splits;
+        }
+
+        private void frmOptions_Load(object sender, EventArgs e)
+        {
+            if (SQL.Connection == ConnectionState.Closed)
+            {
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            ToolStripControlHost host = new ToolStripControlHost(DataStartCalendar);
+            mnuDate.Items.Insert(0, host);
+            DataStartCalendar.DateSelected += new DateRangeEventHandler(Date_Change);
+        }
+
+        private void frmOptions_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SQL.Dispose();
         }
     }
 }

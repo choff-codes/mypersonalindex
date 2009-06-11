@@ -26,6 +26,21 @@ namespace MyPersonalIndex
             // Shares for Shares
             // $ Amount for Fixed
             public double Value;
+
+            public DynamicTrade Copy()
+            {
+                DynamicTrade dt = new DynamicTrade();
+                dt.TradeType = this.TradeType;
+                dt.Frequency = this.Frequency;
+                dt.When = this.When;
+                dt.Value = this.Value;
+                return dt;
+            }
+
+            public bool Equals(DynamicTrade dt)
+            {
+                return dt.TradeType == this.TradeType && dt.Frequency == this.Frequency && dt.When == this.When && dt.Value == this.Value;
+            }
         }
 
         public class MPISettings

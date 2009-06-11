@@ -18,7 +18,7 @@ namespace MyPersonalIndex
             InitializeComponent();
         }
 
-        /************************* General functions ***********************************/
+/************************* General functions ***********************************/
 
         private void CheckForInvalidStartDates(bool ReloadPortfolio)
         {
@@ -158,7 +158,7 @@ namespace MyPersonalIndex
         }
 
 
-        /************************* Event handlers ***********************************/
+/************************* Event handlers ***********************************/
 
 
         /************************* Main toolbar ***********************************/
@@ -233,10 +233,7 @@ namespace MyPersonalIndex
                 frmPortfolios.PortfolioRetValues r = f.PortfolioReturnValues;
                 bool Reload = false;
 
-                if (r.NAVStart != MPI.Portfolio.NAVStart ||
-                    // get portfolio start date from database in case it was moved to a later time on start up
-                        r.StartDate != r.OrigStartDate ||
-                        r.Dividends != MPI.Portfolio.Dividends)
+                if (r.NAVStart != MPI.Portfolio.NAVStart || r.StartDate != r.OrigStartDate || r.Dividends != MPI.Portfolio.Dividends)
                 {
                     // requires a recalc
                     MPI.Portfolio.Dividends = r.Dividends;
@@ -267,7 +264,7 @@ namespace MyPersonalIndex
                         MPI.Portfolio.CostCalc = (Constants.AvgShareCalc)r.CostCalc;
                         LoadAssetAllocation(MPI.AA.SelDate);
                         LoadHoldings(MPI.Holdings.SelDate);
-                        LoadStat(MPI.Stat.BeginDate, MPI.Stat.EndDate, true);
+                        LoadStat(MPI.Stat.BeginDate, MPI.Stat.EndDate, true); // cost calc can impact stats
                         LoadAccounts(MPI.Account.SelDate);
                     }
             }

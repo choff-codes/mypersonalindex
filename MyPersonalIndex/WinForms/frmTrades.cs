@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlServerCe;
 using System.Windows.Forms;
 
 namespace MyPersonalIndex
 {
     public partial class frmTrades : Form
     {
+        public struct TradeRetValues
+        {
+            public List<Constants.DynamicTrade> CustomTrades;
+        }
+        public TradeRetValues TradeReturnValues { get { return _TradeReturnValues; } }
+
+        private TradeRetValues _TradeReturnValues = new TradeRetValues();
         private MonthCalendar DailyCalendar;
-        private TradeQueries SQL = new TradeQueries();
         private List<Constants.DynamicTrade> Trades = new List<Constants.DynamicTrade>();
-        private int PortfolioID;
-        private int TickerID;
         private int CurrentItem;
 
         /************************* Functions ***********************************/
@@ -245,23 +247,7 @@ namespace MyPersonalIndex
                 if (!SaveItem())
                     return;
 
-            SQL.ExecuteNonQuery(TradeQueries.DeleteTrades(TickerID));
-
-            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TradeQueries.Tables.CustomTrades))
-            {
-                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-                foreach (Constants.DynamicTrade dt in Trades)
-                {
-                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TickerID, TickerID);
-                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.Portfolio, PortfolioID);
-                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
-                    newRecord.SetInt32((int)TradeQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
-                    newRecord.SetString((int)TradeQueries.Tables.eCustomTrades.Dates, dt.When ?? "");
-                    newRecord.SetDecimal((int)TradeQueries.Tables.eCustomTrades.Value, Convert.ToDecimal(dt.Value));
-
-                    rs.Insert(newRecord);
-                }
-            }
+            _TradeReturnValues.CustomTrades = Trades;
 
             DialogResult = DialogResult.OK;
         }
@@ -273,47 +259,24 @@ namespace MyPersonalIndex
             btnOnce.Text = DailyCalendar.SelectionStart.ToShortDateString();
         }
 
-        public frmTrades(int Portfolio, int Ticker, string sTicker)
+        public frmTrades(string sTicker, List<Constants.DynamicTrade> Trades)
         {
             InitializeComponent();
-            TickerID = Ticker;
-            PortfolioID = Portfolio;
             gpTrades.Text = string.Format("{0} Trades", sTicker);
             this.Text = string.Format("{0} Trades", sTicker);
-        }
 
-        private void frmTrades_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SQL.Dispose();
+            foreach (Constants.DynamicTrade dt in Trades)
+                this.Trades.Add(dt.Copy());
         }
 
         private void frmTrades_Load(object sender, EventArgs e)
         {
-            if (SQL.Connection == ConnectionState.Closed)
-            {
-                DialogResult = DialogResult.Cancel;
-                return;
-            }
-
             DailyCalendar = new MonthCalendar { MaxSelectionCount = 1 };
             ToolStripControlHost host = new ToolStripControlHost(DailyCalendar);
             mnuDate.Items.Insert(0, host);
             DailyCalendar.DateSelected += new DateRangeEventHandler(Date_Change);
 
             CurrentItem = -1;
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TradeQueries.GetTrades(TickerID)))
-                foreach (SqlCeUpdatableRecord rec in rs)
-                {
-                    Constants.DynamicTrade dt = new Constants.DynamicTrade();
-
-                    dt.Frequency = (Constants.DynamicTradeFreq)rec.GetInt32((int)TradeQueries.eGetTrades.Frequency);
-                    dt.TradeType = (Constants.DynamicTradeType)rec.GetInt32((int)TradeQueries.eGetTrades.TradeType);
-                    dt.When = rec.GetString((int)TradeQueries.eGetTrades.Dates);
-                    dt.Value = (double)(rec.GetDecimal((int)TradeQueries.eGetTrades.Value));
-
-                    Trades.Add(dt);
-                }
 
             foreach (Constants.DynamicTrade dt in Trades)
                 lst.Items.Add(GetSummary(dt));

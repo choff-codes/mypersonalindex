@@ -305,9 +305,9 @@ namespace MyPersonalIndex
 
         private void LoadCorrelations(DateTime StartDate, DateTime EndDate)
         {
-            this.Cursor = Cursors.WaitCursor;
             try
             {
+                this.Cursor = Cursors.WaitCursor;
                 ChangeVisibility(dg);
 
                 if (lst.CheckedIndices.Count <= 0)
@@ -353,60 +353,68 @@ namespace MyPersonalIndex
 
         private void LoadStat(DateTime StartDate, DateTime EndDate)
         {
-            ChangeVisibility(dg);
-            DataTable dt = (DataTable)lst.DataSource;
-
-            // ID 0 in the Stats table is always for this form
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetStats(0)))
+            try
             {
-                if (!rs.HasRows)
-                    return;
+                this.Cursor = Cursors.WaitCursor;
+                ChangeVisibility(dg);
+                DataTable dt = (DataTable)lst.DataSource;
 
-                int Col = 0;
-                foreach (int i in lst.CheckedIndices)
+                // ID 0 in the Stats table is always for this form
+                using (SqlCeResultSet rs = SQL.ExecuteResultSet(AdvQueries.GetStats(0)))
                 {
-                    if (!dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString().Contains(Constants.SignifyPortfolio))
-                        continue;
+                    if (!rs.HasRows)
+                        return;
 
-                    dg.Columns.Add(Col.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString());
-                }
-
-                if (dg.Columns.Count == 0)
-                    return;
-
-                foreach (DataGridViewColumn d in dg.Columns)
-                    d.SortMode = DataGridViewColumnSortMode.NotSortable;
-
-                foreach (SqlCeUpdatableRecord rec in rs)
-                {
-                    int Row = dg.Rows.Add();
-                    Col = 0;
-                    dg.Rows[Row].HeaderCell.Value = rec.GetString((int)AdvQueries.eGetStats.Description);
-
+                    int Col = 0;
                     foreach (int i in lst.CheckedIndices)
                     {
-                        string Ticker = dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString();
-
-                        if (!Ticker.Contains(Constants.SignifyPortfolio))
+                        if (!dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString().Contains(Constants.SignifyPortfolio))
                             continue;
 
-                        try
+                        dg.Columns.Add(Col.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString());
+                    }
+
+                    if (dg.Columns.Count == 0)
+                        return;
+
+                    foreach (DataGridViewColumn d in dg.Columns)
+                        d.SortMode = DataGridViewColumnSortMode.NotSortable;
+
+                    foreach (SqlCeUpdatableRecord rec in rs)
+                    {
+                        int Row = dg.Rows.Add();
+                        Col = 0;
+                        dg.Rows[Row].HeaderCell.Value = rec.GetString((int)AdvQueries.eGetStats.Description);
+
+                        foreach (int i in lst.CheckedIndices)
                         {
-                            dg[Col, Row].Value = Functions.FormatStatString(
-                                SQL.ExecuteScalar(CleanStatString(rec.GetString((int)AdvQueries.eGetStats.SQL), Functions.StripSignifyPortfolio(Ticker), StartDate, EndDate)),
-                                (Constants.OutputFormat)rec.GetInt32((int)AdvQueries.eGetStats.Format));
+                            string Ticker = dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString();
+
+                            if (!Ticker.Contains(Constants.SignifyPortfolio))
+                                continue;
+
+                            try
+                            {
+                                dg[Col, Row].Value = Functions.FormatStatString(
+                                    SQL.ExecuteScalar(CleanStatString(rec.GetString((int)AdvQueries.eGetStats.SQL), Functions.StripSignifyPortfolio(Ticker), StartDate, EndDate)),
+                                    (Constants.OutputFormat)rec.GetInt32((int)AdvQueries.eGetStats.Format));
+                            }
+                            catch (SqlCeException)
+                            {
+                                dg[Col, Row].Value = "Error";
+                            }
+                            catch (ArgumentOutOfRangeException)
+                            {
+                                dg[Col, Row].Value = "Error";
+                            }
+                            Col++;
                         }
-                        catch (SqlCeException)
-                        {
-                            dg[Col, Row].Value = "Error";
-                        }
-                        catch (ArgumentOutOfRangeException)
-                        {
-                            dg[Col, Row].Value = "Error";
-                        }
-                        Col++;
                     }
                 }
+            }
+            finally
+            {
+                this.Cursor = Cursors.Default;
             }
         }
 

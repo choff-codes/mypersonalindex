@@ -19,23 +19,16 @@ namespace MyPersonalIndex
             return string.Format("DELETE FROM UserStatistics WHERE ID = {0}", ID);
         }
 
-        public enum eGetPortfolioStats { ID };
-        public static string GetPortfolioStats(int Portfolio)
+        public enum eGetUserStats { ID, Description, Location };
+        public static string GetUserStats(int Portfolio)
         {
             return string.Format(
-                "SELECT Statistic AS ID" +
-                " FROM Stats a" +
-                " LEFT JOIN UserStatistics b" +
-                " ON a.Statistic = b.ID" +
-                " WHERE Portfolio = {0}" +
-                " ORDER BY a.Location",
+                "SELECT a.ID, a.Description, b.Location" +
+                " FROM UserStatistics a" +
+                " LEFT JOIN Stats b" +
+                " ON b.Portfolio = {0} AND a.ID = b.Statistic" +
+                " ORDER BY (CASE WHEN b.Location IS NULL THEN 1 ELSE 0 END), b.Location, a.Description",
                 Portfolio);
-        }
-
-        public enum eGetUserStats { ID, Description };
-        public static string GetUserStats()
-        {
-            return "SELECT ID, Description FROM UserStatistics ORDER BY Description";
         }
     }
 }

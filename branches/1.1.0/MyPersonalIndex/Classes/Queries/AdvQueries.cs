@@ -58,7 +58,7 @@ namespace MyPersonalIndex
             return string.Format(
                 "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
                 " UNION ALL " +
-                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a",
+                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices WHERE Ticker <> '$') a",
                 Constants.SignifyPortfolio);
         }
 

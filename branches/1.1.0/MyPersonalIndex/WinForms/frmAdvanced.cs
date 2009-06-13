@@ -208,7 +208,7 @@ namespace MyPersonalIndex
                 zed.SaveAs();
         }
 
-        private void btnRefresh_ButtonClick(object sender, EventArgs e)
+        private void btnRefresh_Click(object sender, EventArgs e)
         {
             switch (cmb.SelectedIndex)
             {
@@ -226,7 +226,7 @@ namespace MyPersonalIndex
 
         private void btnStat_Click(object sender, EventArgs e)
         {
-            using (frmStats f = new frmStats(0, "Advanced Comparison"))
+            using (frmStats f = new frmStats(0, this.Text))
                 f.ShowDialog();
         }
 

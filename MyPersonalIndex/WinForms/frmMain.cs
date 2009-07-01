@@ -127,7 +127,7 @@ namespace MyPersonalIndex
             t.SelectedIndexChanged -= eh;
 
             t.ComboBox.SelectedValue = Sort;
-            if (string.IsNullOrEmpty((string)t.ComboBox.SelectedValue) && Sort != "")
+            if (string.IsNullOrEmpty((string)t.ComboBox.SelectedValue) && Sort != String.Empty)
                 t.ComboBox.SelectedValue = "Custom";
 
             t.SelectedIndexChanged += eh;
@@ -171,7 +171,7 @@ namespace MyPersonalIndex
 
         private void btnMainAddPortfolio_Click(object sender, EventArgs e)
         {
-            using (frmPortfolios f = new frmPortfolios(-1, "", MPI.Settings.DataStartDate))
+            using (frmPortfolios f = new frmPortfolios(-1, String.Empty, MPI.Settings.DataStartDate))
             {
                 if (f.ShowDialog() != DialogResult.OK)
                     return;
@@ -319,7 +319,7 @@ namespace MyPersonalIndex
         {
             frmTickers.TickerRetValues t;
 
-            if (ShowTickerForm(-1, "", out t) != DialogResult.OK)
+            if (ShowTickerForm(-1, String.Empty, out t) != DialogResult.OK)
                 return;
 
             if (t.Changed)

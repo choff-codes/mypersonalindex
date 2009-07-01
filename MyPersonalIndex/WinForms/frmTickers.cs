@@ -138,7 +138,7 @@ namespace MyPersonalIndex
                     newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.Portfolio, PortfolioID);
                     newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
                     newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
-                    newRecord.SetString((int)TickerQueries.Tables.eCustomTrades.Dates, dt.When ?? "");
+                    newRecord.SetString((int)TickerQueries.Tables.eCustomTrades.Dates, dt.When ?? String.Empty);
                     newRecord.SetDecimal((int)TickerQueries.Tables.eCustomTrades.Value, Convert.ToDecimal(dt.Value));
 
                     rs.Insert(newRecord);

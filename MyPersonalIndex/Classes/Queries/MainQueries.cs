@@ -50,7 +50,7 @@ namespace MyPersonalIndex
                     " ON a.AA = d.ID" +
                 " WHERE a.Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY d.ID, d.AA, d.Target{4}",
-                TotalValue, Portfolio, Date.ToShortDateString(), ShowBlank ? "" : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+                TotalValue, Portfolio, Date.ToShortDateString(), ShowBlank ? String.Empty : " AND d.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? String.Empty : " ORDER BY " + Sort);
         }
 
         public enum eGetAATargets { AA, Target };
@@ -95,7 +95,7 @@ namespace MyPersonalIndex
                     " ON a.Acct = e.ID" +
                 " WHERE Portfolio = {1} AND a.Active = 1{3}" +
                 " GROUP BY e.ID, e.Name, e.TaxRate{4}",
-                TotalValue, Portfolio, LastestDate.ToShortDateString(), ShowBlank ? "" : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+                TotalValue, Portfolio, LastestDate.ToShortDateString(), ShowBlank ? String.Empty : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? String.Empty : " ORDER BY " + Sort);
         }
 
         public static string GetAllNav(int Portfolio, double StartValue, bool Desc)
@@ -105,7 +105,7 @@ namespace MyPersonalIndex
                 " FROM NAV" +
                 " WHERE Portfolio = {1}" +
                 " ORDER BY Date {2}",
-                StartValue, Portfolio, (Desc ? " DESC" : ""));
+                StartValue, Portfolio, (Desc ? " DESC" : String.Empty));
         }
 
         public enum eGetAvgPricesTrades { TickerID, Price, Shares }
@@ -134,7 +134,7 @@ namespace MyPersonalIndex
         public static string GetCorrelationDistinctTickers(int Portfolio, bool Hidden)
         {
             return string.Format(
-                "SELECT DISTINCT Ticker from Tickers WHERE Portfolio = {0}{1}", Portfolio, Hidden ? "" : " AND Hide = 0");
+                "SELECT DISTINCT Ticker from Tickers WHERE Portfolio = {0}{1}", Portfolio, Hidden ? String.Empty : " AND Hide = 0");
         }
 
         public enum eGetCustomTrades { TickerID, TradeType, Frequency, Dates, Value, AA };
@@ -273,8 +273,8 @@ namespace MyPersonalIndex
                             " WHERE Portfolio = {1}) AS f" +
                     " ON a.Acct = f.ID" +
                 " WHERE  Portfolio = {1}{3}{4}",
-                totalValue, Portfolio, LastestDate.ToShortDateString(), Hidden ? "" : " AND Hide = 0",
-                string.IsNullOrEmpty(Sort) ? "" : " ORDER BY " + Sort);
+                totalValue, Portfolio, LastestDate.ToShortDateString(), Hidden ? String.Empty : " AND Hide = 0",
+                string.IsNullOrEmpty(Sort) ? String.Empty : " ORDER BY " + Sort);
         }
 
         public static string GetLastDate()

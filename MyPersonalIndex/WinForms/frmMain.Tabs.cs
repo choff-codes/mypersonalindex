@@ -109,7 +109,7 @@ namespace MyPersonalIndex
             {
                 string sGainLoss = String.Format("{0:C})", GainLoss);
                 if (GainLoss < 0)
-                    sGainLoss = "-" + sGainLoss.Replace("(", "").Replace(")", "") + ")";
+                    sGainLoss = "-" + sGainLoss.Replace("(", String.Empty).Replace(")", String.Empty) + ")";
                 dg.Columns[GainLossCol].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
             }
         }
@@ -133,7 +133,7 @@ namespace MyPersonalIndex
                     foreach (SqlCeUpdatableRecord rec in rs)
                         list.Add(new XDate(rec.GetDateTime((int)MainQueries.eGetChart.Date)), (double)rec.GetDecimal((int)MainQueries.eGetChart.Gain));
 
-                    LineItem line = g.AddCurve("", list, Color.Crimson, SymbolType.None);
+                    LineItem line = g.AddCurve(String.Empty, list, Color.Crimson, SymbolType.None);
                     line.Line.Width = 3;
 
                     g.XAxis.Scale.Min = list[0].X;

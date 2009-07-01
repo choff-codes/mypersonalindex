@@ -53,11 +53,11 @@ namespace MyPersonalIndex
                 return;
 
             if (string.IsNullOrEmpty(cmb1.Text))
-                _SortReturnValues.Sort = "";
+                _SortReturnValues.Sort = String.Empty;
             else
-                _SortReturnValues.Sort = (string)cmb1.SelectedValue + (r1d.Checked ? " DESC" : "") +
-                                         (string.IsNullOrEmpty((string)cmb2.SelectedValue) ? "" : "," + (string)cmb2.SelectedValue + (r2d.Checked ? " DESC" : "")) +
-                                         (string.IsNullOrEmpty((string)cmb3.SelectedValue) ? "" : "," + (string)cmb3.SelectedValue + (r3d.Checked ? " DESC" : ""));
+                _SortReturnValues.Sort = (string)cmb1.SelectedValue + (r1d.Checked ? " DESC" : String.Empty) +
+                                         (string.IsNullOrEmpty((string)cmb2.SelectedValue) ? String.Empty : "," + (string)cmb2.SelectedValue + (r2d.Checked ? " DESC" : String.Empty)) +
+                                         (string.IsNullOrEmpty((string)cmb3.SelectedValue) ? String.Empty : "," + (string)cmb3.SelectedValue + (r3d.Checked ? " DESC" : String.Empty));
 
             DialogResult = DialogResult.OK;
         }

@@ -96,7 +96,7 @@ namespace MyPersonalIndex
 
         private void cmdAddNew_Click(object sender, EventArgs e)
         {
-            using (frmUserStatistics f = new frmUserStatistics(-1, ""))
+            using (frmUserStatistics f = new frmUserStatistics(-1, String.Empty))
             {
                 if (f.ShowDialog() != DialogResult.OK)
                     return;

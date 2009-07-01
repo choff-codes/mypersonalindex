@@ -141,12 +141,12 @@ namespace MyPersonalIndex
             dt.Columns.Add("Display");
             dt.Columns.Add("Value");
 
-            dt.Rows.Add("", "");
+            dt.Rows.Add(String.Empty, String.Empty);
 
             foreach (DataGridViewColumn dc in dg.Columns)
                 if (dc.Visible)
                     // all formatted columns are numeric, so sort desc - keep text sorted ascending
-                    dt.Rows.Add(dc.HeaderText, dc.DataPropertyName + (dc.DefaultCellStyle.Format == "" ? "" : " DESC"));
+                    dt.Rows.Add(dc.HeaderText, dc.DataPropertyName + (dc.DefaultCellStyle.Format == String.Empty ? String.Empty : " DESC"));
 
             dt.Rows.Add("Custom...", "Custom");
             t.ComboBox.DisplayMember = "Display";

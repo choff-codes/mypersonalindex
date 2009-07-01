@@ -93,7 +93,7 @@ namespace MyPersonalIndex
             switch (Trades[CurrentItem].Frequency)
             {
                 case Constants.DynamicTradeFreq.Daily:
-                    Trades[CurrentItem].When = "";
+                    Trades[CurrentItem].When = String.Empty;
                     break;
                 case Constants.DynamicTradeFreq.Once:
                     Trades[CurrentItem].When = (string)btnOnce.Tag;
@@ -155,7 +155,7 @@ namespace MyPersonalIndex
             cmbMonth.Visible = false;
             cmbYear.Visible = false;
             btnOnce.Text = "Date";
-            btnOnce.Tag = "";
+            btnOnce.Tag = String.Empty;
 
             switch ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex)
             {
@@ -212,7 +212,7 @@ namespace MyPersonalIndex
             Constants.DynamicTrade dt = new Constants.DynamicTrade();
             dt.Frequency = Constants.DynamicTradeFreq.Once;
             dt.TradeType = Constants.DynamicTradeType.Shares;
-            dt.When = "";
+            dt.When = String.Empty;
             Trades.Add(dt);
 
             lst.Items.Add(GetSummary(dt));
@@ -318,7 +318,7 @@ namespace MyPersonalIndex
                     break;
                 case Constants.DynamicTradeFreq.Once:
                     btnOnce.Text = GetDateText(Trades[CurrentItem].When, false);
-                    btnOnce.Tag = Trades[CurrentItem].When ?? "";
+                    btnOnce.Tag = Trades[CurrentItem].When ?? String.Empty;
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
                     cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When) - 1; // day of week enum starts sunday, but list starts at monday, so -1

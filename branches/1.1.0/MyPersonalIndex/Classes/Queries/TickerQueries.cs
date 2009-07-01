@@ -40,31 +40,31 @@ namespace MyPersonalIndex
                         " LEFT JOIN Splits c" +
                         " ON a.Date = c.Date AND a.Ticker = c.Ticker" +
                         " WHERE a.Ticker = '{0}'" +
-                        " ORDER BY a.Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
+                        " ORDER BY a.Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : String.Empty);
                 case 1:
                     return string.Format(
                         "SELECT Date, Change" +
                         " FROM ClosingPrices" +
                         " WHERE Ticker = '{0}'" +
-                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
+                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : String.Empty);
                 case 2:
                     return string.Format(
                         "SELECT Date, Amount AS Dividend" +
                         " FROM Dividends" +
                         " WHERE Ticker = '{0}'" +
-                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
+                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : String.Empty);
                 case 3:
                     return string.Format(
                         "SELECT Date, Ratio AS Split" +
                         " FROM Splits" +
                         " WHERE Ticker = '{0}'" +
-                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : "");
+                        " ORDER BY Date{1}", Functions.SQLCleanString(Ticker), Desc ? " Desc" : String.Empty);
                 default:
                     return string.Format(
                         "SELECT Date, Price, Shares" +
                         " FROM Trades" +
                         " WHERE TickerID = '{0}'" +
-                        " ORDER BY Date{1}", TickerID, Desc ? " Desc" : "");
+                        " ORDER BY Date{1}", TickerID, Desc ? " Desc" : String.Empty);
             }
         }
 

@@ -81,7 +81,7 @@
             // 
             // cmdClear
             // 
-            this.cmdClear.Location = new System.Drawing.Point(288, 108);
+            this.cmdClear.Location = new System.Drawing.Point(288, 131);
             this.cmdClear.Name = "cmdClear";
             this.cmdClear.Size = new System.Drawing.Size(75, 23);
             this.cmdClear.TabIndex = 15;
@@ -91,7 +91,7 @@
             // 
             // cmdSelectAll
             // 
-            this.cmdSelectAll.Location = new System.Drawing.Point(288, 79);
+            this.cmdSelectAll.Location = new System.Drawing.Point(288, 102);
             this.cmdSelectAll.Name = "cmdSelectAll";
             this.cmdSelectAll.Size = new System.Drawing.Size(75, 23);
             this.cmdSelectAll.TabIndex = 14;
@@ -123,9 +123,9 @@
             // 
             // cmdMoveUp
             // 
-            this.cmdMoveUp.Location = new System.Drawing.Point(288, 140);
+            this.cmdMoveUp.Location = new System.Drawing.Point(288, 160);
             this.cmdMoveUp.Name = "cmdMoveUp";
-            this.cmdMoveUp.Size = new System.Drawing.Size(75, 27);
+            this.cmdMoveUp.Size = new System.Drawing.Size(75, 23);
             this.cmdMoveUp.TabIndex = 12;
             this.cmdMoveUp.Text = "Move Up";
             this.cmdMoveUp.UseVisualStyleBackColor = true;
@@ -133,9 +133,9 @@
             // 
             // cmdMoveDown
             // 
-            this.cmdMoveDown.Location = new System.Drawing.Point(288, 173);
+            this.cmdMoveDown.Location = new System.Drawing.Point(288, 189);
             this.cmdMoveDown.Name = "cmdMoveDown";
-            this.cmdMoveDown.Size = new System.Drawing.Size(75, 27);
+            this.cmdMoveDown.Size = new System.Drawing.Size(75, 23);
             this.cmdMoveDown.TabIndex = 13;
             this.cmdMoveDown.Text = "Move Down";
             this.cmdMoveDown.UseVisualStyleBackColor = true;

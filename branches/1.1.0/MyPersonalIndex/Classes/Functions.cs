@@ -46,7 +46,7 @@ namespace MyPersonalIndex
         public static string FormatStatString(object s, Constants.OutputFormat o)
         {
             if (s == null)
-                return "";
+                return String.Empty;
 
             try
             {
@@ -84,7 +84,7 @@ namespace MyPersonalIndex
             //    throw new ArgumentOutOfRangeException("Dictionary must be correct length");
 
             foreach (KeyValuePair<Constants.StatVariables, string> p in d)
-                SQL = SQL.Replace("%" + Enum.GetName(typeof(Constants.StatVariables), p.Key) + "%", p.Value);
+                SQL = SQL.Replace(string.Format("%{0}%", Enum.GetName(typeof(Constants.StatVariables), p.Key)), p.Value);
 
             return SQL;
         }
@@ -116,12 +116,12 @@ namespace MyPersonalIndex
 
         public static string RemoveDelimiter(string Delimiter, string Value)
         {
-            return Value.Replace(Delimiter, "");
+            return Value.Replace(Delimiter, String.Empty);
         }
 
         public static string[] GetClipboardText()
         {
-            return Clipboard.GetText().Replace("\r", "").Split('\n');  // DOS new lines include \r, unix does not
+            return Clipboard.GetText().Replace("\r", String.Empty).Split('\n');  // DOS new lines include \r, unix does not
         }
 
         public static void Export(DataGridView dg, bool IncludeRowLabels, int IgnoreEndColumns)
@@ -137,7 +137,7 @@ namespace MyPersonalIndex
                 List<string> lines = new List<string>(dg.Rows.Count + 1); // contains the entire output
                 List<string> line = new List<string>(); // cleared after each line
                 int columnCount = dg.Columns.Count - IgnoreEndColumns;
-                string delimiter = "";
+                string delimiter = String.Empty;
 
                 switch (dSave.FilterIndex)
                 {
@@ -153,7 +153,7 @@ namespace MyPersonalIndex
                 }
 
                 if (IncludeRowLabels)
-                    line.Add("");  // cell 0,0 will be nothing if there are row headers
+                    line.Add(String.Empty);  // cell 0,0 will be nothing if there are row headers
 
                 // write out column headers
                 for (int x = 0; x < columnCount; x++)
@@ -318,7 +318,7 @@ namespace MyPersonalIndex
                                 return s;
                             break;
                         case (int)AAQueries.eGetAA.Target:
-                            s = s.Replace("%", "");
+                            s = s.Replace("%", String.Empty);
                             Success = Functions.StringIsDecimal(s, false);
                             if (Success)
                                 return Convert.ToDecimal(s);
@@ -335,7 +335,7 @@ namespace MyPersonalIndex
                                 return s;
                             break;
                         case (int)AcctQueries.eGetAcct.TaxRate:
-                            s = s.Replace("%", "");
+                            s = s.Replace("%", String.Empty);
                             Success = Functions.StringIsDecimal(s, false);
                             if (Success)
                                 return Convert.ToDecimal(s);
@@ -374,7 +374,7 @@ namespace MyPersonalIndex
             {
                 case Constants.PasteDatagrid.dgAA:
 
-                    s[(int)AAQueries.eGetAA.Target] = s[(int)AAQueries.eGetAA.Target].Replace("%", "");
+                    s[(int)AAQueries.eGetAA.Target] = s[(int)AAQueries.eGetAA.Target].Replace("%", String.Empty);
                     Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false);
                     if (Success)
                         return new object[3] { s[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
@@ -382,7 +382,7 @@ namespace MyPersonalIndex
 
                 case Constants.PasteDatagrid.dgAcct:
 
-                    s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", "");
+                    s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", String.Empty);
                     Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false);
                     if (Success)
                         return new object[3] { s[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]), 0 };

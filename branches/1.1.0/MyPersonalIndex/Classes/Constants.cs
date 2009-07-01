@@ -160,7 +160,7 @@ namespace MyPersonalIndex
             public double Price = 0;
             public double TotalValue = 0;
             public double SplitRatio = 1;
-            public string Ticker = "";
+            public string Ticker = String.Empty;
         }
 
         public class MissingPriceInfo

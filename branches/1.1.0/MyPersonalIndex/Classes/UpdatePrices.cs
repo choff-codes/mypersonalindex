@@ -207,7 +207,7 @@ namespace MyPersonalIndex
                 line = line.Substring(i, line.IndexOf("</center>", i) - i); // read up to </center> tag
                 string[] splits = line.Split(new string[1] { "</nobr>, <nobr>" }, StringSplitOptions.None);
                 //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
-                splits[splits.Length - 1] = splits[splits.Length - 1].Replace("</nobr>", "");
+                splits[splits.Length - 1] = splits[splits.Length - 1].Replace("</nobr>", String.Empty);
 
                 foreach (string p in splits)
                 {

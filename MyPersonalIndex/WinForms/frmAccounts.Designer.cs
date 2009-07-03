@@ -28,19 +28,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.gbAccount = new System.Windows.Forms.GroupBox();
             this.dgAcct = new System.Windows.Forms.DataGridView();
+            this.colAcctAccount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAccTaxRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dsAcct = new System.Data.DataSet();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAcctAccount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAccTaxRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAcctID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbAccount.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAcct)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsAcct)).BeginInit();
@@ -95,6 +95,34 @@
             this.dgAcct.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgAcct_DataError);
             this.dgAcct.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgAcct_KeyDown);
             // 
+            // colAcctAccount
+            // 
+            this.colAcctAccount.DataPropertyName = "Name";
+            this.colAcctAccount.HeaderText = "Description";
+            this.colAcctAccount.MaxInputLength = 255;
+            this.colAcctAccount.Name = "colAcctAccount";
+            this.colAcctAccount.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctAccount.Width = 165;
+            // 
+            // colAccTaxRate
+            // 
+            this.colAccTaxRate.DataPropertyName = "TaxRate";
+            dataGridViewCellStyle1.Format = "#0.00\'%\'";
+            this.colAccTaxRate.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colAccTaxRate.HeaderText = "Tax Rate %";
+            this.colAccTaxRate.MaxInputLength = 14;
+            this.colAccTaxRate.Name = "colAccTaxRate";
+            this.colAccTaxRate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAccTaxRate.Width = 90;
+            // 
+            // colAcctID
+            // 
+            this.colAcctID.DataPropertyName = "ID";
+            this.colAcctID.HeaderText = "ID";
+            this.colAcctID.Name = "colAcctID";
+            this.colAcctID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctID.Visible = false;
+            // 
             // dsAcct
             // 
             this.dsAcct.DataSetName = "NewDataSet";
@@ -127,39 +155,10 @@
             this.dataGridViewTextBoxColumn3.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.dataGridViewTextBoxColumn3.Visible = false;
             // 
-            // colAcctAccount
-            // 
-            this.colAcctAccount.DataPropertyName = "Name";
-            this.colAcctAccount.HeaderText = "Description";
-            this.colAcctAccount.MaxInputLength = 255;
-            this.colAcctAccount.Name = "colAcctAccount";
-            this.colAcctAccount.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAcctAccount.Width = 165;
-            // 
-            // colAccTaxRate
-            // 
-            this.colAccTaxRate.DataPropertyName = "TaxRate";
-            dataGridViewCellStyle1.Format = "#0.00\'%\'";
-            this.colAccTaxRate.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colAccTaxRate.HeaderText = "Tax Rate %";
-            this.colAccTaxRate.MaxInputLength = 14;
-            this.colAccTaxRate.Name = "colAccTaxRate";
-            this.colAccTaxRate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAccTaxRate.Width = 90;
-            // 
-            // colAcctID
-            // 
-            this.colAcctID.DataPropertyName = "ID";
-            this.colAcctID.HeaderText = "ID";
-            this.colAcctID.Name = "colAcctID";
-            this.colAcctID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAcctID.Visible = false;
-            // 
             // frmAccounts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.CancelButton = this.btnCancel;
             this.ClientSize = new System.Drawing.Size(330, 301);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);

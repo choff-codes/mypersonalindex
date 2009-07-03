@@ -1,7 +1,7 @@
 [Setup]
 AppId={{5B21E6C6-04C8-4131-8556-08CC6CCE1DE0}
 AppName=MyPersonalIndex
-AppVerName=MyPersonalIndex 1.1.0
+AppVerName=MyPersonalIndex 2.0.0
 AppPublisher=Matthew Wikler
 AppPublisherURL=http://code.google.com/p/mypersonalindex/
 AppSupportURL=http://code.google.com/p/mypersonalindex/

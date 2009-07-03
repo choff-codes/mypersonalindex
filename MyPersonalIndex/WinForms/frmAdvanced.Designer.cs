@@ -42,13 +42,15 @@
             this.ts = new System.Windows.Forms.ToolStrip();
             this.lblReport = new System.Windows.Forms.ToolStripLabel();
             this.cmb = new System.Windows.Forms.ToolStripComboBox();
-            this.btnRefresh = new System.Windows.Forms.ToolStripSplitButton();
-            this.btnTickerDiv = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnStat = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnRefresh = new System.Windows.Forms.ToolStripButton();
             this.s1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            this.btnTickerDiv = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnStat = new System.Windows.Forms.ToolStripMenuItem();
+            this.s3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.cmdOk = new System.Windows.Forms.Button();
             this.pnl.SuspendLayout();
@@ -129,7 +131,7 @@
             this.pnl.Controls.Add(this.ts);
             this.pnl.Location = new System.Drawing.Point(186, 7);
             this.pnl.Name = "pnl";
-            this.pnl.Size = new System.Drawing.Size(574, 481);
+            this.pnl.Size = new System.Drawing.Size(647, 481);
             this.pnl.TabIndex = 6;
             // 
             // dg
@@ -153,8 +155,8 @@
             this.dg.Name = "dg";
             this.dg.ReadOnly = true;
             this.dg.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
-            this.dg.Size = new System.Drawing.Size(574, 456);
-            this.dg.TabIndex = 5;
+            this.dg.Size = new System.Drawing.Size(647, 456);
+            this.dg.TabIndex = 2;
             this.dg.Visible = false;
             this.dg.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dg_CellFormatting);
             // 
@@ -170,8 +172,8 @@
             this.zed.ScrollMinX = 0;
             this.zed.ScrollMinY = 0;
             this.zed.ScrollMinY2 = 0;
-            this.zed.Size = new System.Drawing.Size(574, 456);
-            this.zed.TabIndex = 3;
+            this.zed.Size = new System.Drawing.Size(647, 456);
+            this.zed.TabIndex = 1;
             this.zed.Visible = false;
             // 
             // ts
@@ -185,11 +187,13 @@
             this.btnStartDate,
             this.btnEndDate,
             this.s2,
+            this.btnOptions,
+            this.s3,
             this.btnExport});
             this.ts.Location = new System.Drawing.Point(0, 0);
             this.ts.Name = "ts";
-            this.ts.Size = new System.Drawing.Size(574, 25);
-            this.ts.TabIndex = 2;
+            this.ts.Size = new System.Drawing.Size(647, 25);
+            this.ts.TabIndex = 0;
             // 
             // lblReport
             // 
@@ -204,35 +208,18 @@
             this.cmb.Items.AddRange(new object[] {
             "Chart",
             "Correlation",
-            "Statistics (P Only)"});
+            "Statistics (Portfolios)"});
             this.cmb.Name = "cmb";
-            this.cmb.Size = new System.Drawing.Size(110, 25);
+            this.cmb.Size = new System.Drawing.Size(120, 25);
             // 
             // btnRefresh
             // 
-            this.btnRefresh.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnTickerDiv,
-            this.btnStat});
             this.btnRefresh.Image = global::MyPersonalIndex.Properties.Resources.refresh_48;
             this.btnRefresh.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnRefresh.Name = "btnRefresh";
-            this.btnRefresh.Size = new System.Drawing.Size(77, 22);
+            this.btnRefresh.Size = new System.Drawing.Size(65, 22);
             this.btnRefresh.Text = "Refresh";
-            this.btnRefresh.ButtonClick += new System.EventHandler(this.btnRefresh_ButtonClick);
-            // 
-            // btnTickerDiv
-            // 
-            this.btnTickerDiv.Name = "btnTickerDiv";
-            this.btnTickerDiv.Size = new System.Drawing.Size(294, 22);
-            this.btnTickerDiv.Text = "Chart: Include Dividends for Individual Tickers";
-            this.btnTickerDiv.Click += new System.EventHandler(this.btnTickerDiv_Click);
-            // 
-            // btnStat
-            // 
-            this.btnStat.Name = "btnStat";
-            this.btnStat.Size = new System.Drawing.Size(294, 22);
-            this.btnStat.Text = "Statistics: Set Portfolio Statistics...";
-            this.btnStat.Click += new System.EventHandler(this.btnStat_Click);
+            this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
             // s1
             // 
@@ -260,6 +247,36 @@
             this.s2.Name = "s2";
             this.s2.Size = new System.Drawing.Size(6, 25);
             // 
+            // btnOptions
+            // 
+            this.btnOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnTickerDiv,
+            this.btnStat});
+            this.btnOptions.Image = global::MyPersonalIndex.Properties.Resources.spanner_48;
+            this.btnOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOptions.Name = "btnOptions";
+            this.btnOptions.Size = new System.Drawing.Size(73, 22);
+            this.btnOptions.Text = "Options";
+            // 
+            // btnTickerDiv
+            // 
+            this.btnTickerDiv.Name = "btnTickerDiv";
+            this.btnTickerDiv.Size = new System.Drawing.Size(194, 22);
+            this.btnTickerDiv.Text = "Tickers Include Dividends";
+            this.btnTickerDiv.Click += new System.EventHandler(this.btnTickerDiv_Click);
+            // 
+            // btnStat
+            // 
+            this.btnStat.Name = "btnStat";
+            this.btnStat.Size = new System.Drawing.Size(194, 22);
+            this.btnStat.Text = "Set Portfolio Statistics...";
+            this.btnStat.Click += new System.EventHandler(this.btnStat_Click);
+            // 
+            // s3
+            // 
+            this.s3.Name = "s3";
+            this.s3.Size = new System.Drawing.Size(6, 25);
+            // 
             // btnExport
             // 
             this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -273,7 +290,7 @@
             // 
             this.cmdOk.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.cmdOk.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.cmdOk.Location = new System.Drawing.Point(685, 494);
+            this.cmdOk.Location = new System.Drawing.Point(758, 494);
             this.cmdOk.Name = "cmdOk";
             this.cmdOk.Size = new System.Drawing.Size(75, 23);
             this.cmdOk.TabIndex = 6;
@@ -286,7 +303,7 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.CancelButton = this.cmdOk;
-            this.ClientSize = new System.Drawing.Size(772, 524);
+            this.ClientSize = new System.Drawing.Size(845, 524);
             this.Controls.Add(this.cmdOk);
             this.Controls.Add(this.pnl);
             this.Controls.Add(this.line);
@@ -332,9 +349,11 @@
         private ZedGraph.ZedGraphControl zed;
         private System.Windows.Forms.DataGridView dg;
         private System.Windows.Forms.Button cmdOk;
-        private System.Windows.Forms.ToolStripSplitButton btnRefresh;
+        private System.Windows.Forms.ToolStripDropDownButton btnOptions;
         private System.Windows.Forms.ToolStripMenuItem btnTickerDiv;
         private System.Windows.Forms.ToolStripMenuItem btnStat;
+        private System.Windows.Forms.ToolStripButton btnRefresh;
+        private System.Windows.Forms.ToolStripSeparator s3;
 
     }
 }

@@ -18,12 +18,39 @@ namespace MyPersonalIndex
         private int StatisticID;
         private UserStatRetValues _UserStatReturnValues = new UserStatRetValues();
 
-        public frmUserStatistics(int Statistic, string Description)
+        /************************* Functions ***********************************/
+
+        private bool GetErrors()
         {
-            InitializeComponent();
-            StatisticID = Statistic;
-            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(Description) ? "New Statistic" : Description);
+            if (string.IsNullOrEmpty(txtDesc.Text))
+            {
+                MessageBox.Show("Please set a description!");
+                return false;
+            }
+
+            if (string.IsNullOrEmpty(txtSQL.Text))
+            {
+                MessageBox.Show("Please set a SQL query!");
+                return false;
+            }
+
+            return true;
         }
+
+        private void LoadUserStat()
+        {
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID)))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+
+                    txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
+                    txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
+                    cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
+                }
+        }
+
+        /************************* Event Handlers ***********************************/
 
         private void AddMenuParameter(object sender, EventArgs e)
         {
@@ -55,62 +82,20 @@ namespace MyPersonalIndex
             mnuParameters.Show(cmdAddParameter, 0, cmdAddParameter.Height);
         }
 
-        private void frmUserStatistics_Load(object sender, EventArgs e)
+        private void btnCancel_Click(object sender, EventArgs e)
         {
-            if (SQL.Connection == ConnectionState.Closed)
-            {
-                DialogResult = DialogResult.Cancel;
-                return;
-            }
-
-            cmbFormat.SelectedIndex = cmbFormat.Items.Count - 1;
-            LoadUserStat();
-        }
-
-        private void LoadUserStat()
-        {
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(UserStatQueries.GetStat(StatisticID)))
-                if (rs.HasRows)
-                {
-                    rs.ReadFirst();
-
-                    txtDesc.Text = rs.GetString((int)UserStatQueries.eGetStat.Description);
-                    txtSQL.Text = rs.GetString((int)UserStatQueries.eGetStat.SQL);
-                    cmbFormat.SelectedIndex = rs.GetInt32((int)UserStatQueries.eGetStat.Format);
-               }
-        }
-
-        private void frmUserStatistics_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SQL.Dispose();
-        }
-
-        private bool GetErrors()
-        {
-            if (string.IsNullOrEmpty(txtDesc.Text))
-            {
-                MessageBox.Show("Please set a description!");
-                return false;
-            }
-
-            if (string.IsNullOrEmpty(txtSQL.Text))
-            {
-                MessageBox.Show("Please set a SQL query!");
-                return false;
-            }
-
-            return true;
+            DialogResult = DialogResult.Cancel;
         }
 
         private void btnOK_Click(object sender, EventArgs e)
         {
             if (!GetErrors())
                 return;
-            
+
             if (StatisticID == -1) // add new
             {
                 SQL.ExecuteNonQuery(UserStatQueries.InsertStat(txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
-                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
+                StatisticID = Convert.ToInt32(SQL.ExecuteScalar(UserStatQueries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(UserStatQueries.UpdateStat(StatisticID, txtDesc.Text, txtSQL.Text, cmbFormat.SelectedIndex));
@@ -120,9 +105,29 @@ namespace MyPersonalIndex
             DialogResult = DialogResult.OK;
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        public frmUserStatistics(int Statistic, string Description)
         {
-            DialogResult = DialogResult.Cancel;
+            InitializeComponent();
+            StatisticID = Statistic;
+            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(Description) ? "New Statistic" : Description);
+        }
+
+        private void frmUserStatistics_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SQL.Dispose();
+        }
+
+        private void frmUserStatistics_Load(object sender, EventArgs e)
+        {
+            if (SQL.Connection == ConnectionState.Closed)
+            {
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            cmbFormat.SelectedIndex = cmbFormat.Items.Count - 1;
+            if (StatisticID != -1)
+                LoadUserStat();
         }
     }
 }

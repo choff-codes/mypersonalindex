@@ -20,7 +20,7 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
 
-            string[] dates = When.Split('|');
+            string[] dates = When.Split(Constants.DateSeperatorChar);
             foreach (string s in dates)
             {
                 if (string.IsNullOrEmpty(s))
@@ -29,6 +29,13 @@ namespace MyPersonalIndex
                 SelDates.Add(Convert.ToDateTime(s));
                 lst.Items.Add(s);
             }
+        }
+
+        private void calendar_DateSelected(object sender, DateRangeEventArgs e)
+        {
+            SelDates.Add(calendar.SelectionStart);
+            SelDates.Sort();
+            lst.Items.Insert(SelDates.IndexOf(calendar.SelectionStart), calendar.SelectionStart.ToShortDateString());
         }
 
         private void cmdCancel_Click(object sender, EventArgs e)
@@ -63,13 +70,6 @@ namespace MyPersonalIndex
                 lst.SelectedIndex = StartIndex;
         }
 
-        private void calendar_DateSelected(object sender, DateRangeEventArgs e)
-        {
-            SelDates.Add(calendar.SelectionStart);
-            SelDates.Sort();
-            lst.Items.Insert(SelDates.IndexOf(calendar.SelectionStart), calendar.SelectionStart.ToShortDateString());
-        }
-
         private void cmdOK_Click(object sender, EventArgs e)
         {
             string[] s = new string[SelDates.Count];
@@ -77,7 +77,7 @@ namespace MyPersonalIndex
             for (int i = 0; i < SelDates.Count; i++)
                 s[i] = SelDates[i].ToShortDateString();
 
-            _DateReturnValues.When = string.Join("|", s);
+            _DateReturnValues.When = string.Join(Constants.DateSeperatorString, s);
             DialogResult = DialogResult.OK;
         }
 

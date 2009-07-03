@@ -31,63 +31,13 @@ namespace MyPersonalIndex
             dsAA.AcceptChanges();  // set all records = clean
         }
 
-        private bool CheckValidPasteItem(string s, AAQueries.eGetAA Column)
-        {
-            if (Column == AAQueries.eGetAA.AA)
-                return !string.IsNullOrEmpty(s);
-            else  // AAQueries.eGetAA.Target
-                return Functions.StringIsDecimal(s, false);
-        }
-
-        private bool CheckValidPasteItem(string s, string s2)
-        {
-            return (!string.IsNullOrEmpty(s)) && Functions.StringIsDecimal(s2, false);
-        }
-
         private void dgAA_KeyDown(object sender, KeyEventArgs e)
         {
             if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
             Pasted = true;  // there have been changes
-
-            string[] lines = Functions.GetClipboardText();
-            int row = dgAA.CurrentCell.RowIndex;
-            int origrow = dgAA.CurrentCell.RowIndex;
-            int col = dgAA.CurrentCell.ColumnIndex;
-
-            dgAA.CancelEdit();
-            dsAA.AcceptChanges();
-
-            foreach (string line in lines)
-            {
-                if (string.IsNullOrEmpty(line))
-                    continue;
-
-                string[] cells = line.Split('\t');  // tab seperated values
-
-                if (row >= dgAA.Rows.Count - 1 && col == 0 && cells.Length == dgAA.Columns.Count - 1)  // -1 since there is a hidden column
-                    if (CheckValidPasteItem(cells[(int)AAQueries.eGetAA.AA], cells[(int)AAQueries.eGetAA.Target].Replace("%", "")))
-                    {
-                        dsAA.Tables[0].Rows.Add(cells[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(cells[(int)AAQueries.eGetAA.Target].Replace("%", "")), 0);
-                        dsAA.AcceptChanges();
-                        row++;
-                        continue;
-                    }
-
-                if (row >= dgAA.Rows.Count - 1)
-                    continue;
-
-                for (int i = col; i <= dgAA.Columns.Count - 2 && i < col + cells.Length; i++)  // -2 since there is a hidden ID column
-                    if (i == (int)AAQueries.eGetAA.AA && CheckValidPasteItem(cells[i - col], AAQueries.eGetAA.AA))
-                            dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.AA] = cells[i - col];
-                    else if (i == (int)AAQueries.eGetAA.Target && CheckValidPasteItem(cells[i - col].Replace("%", ""), AAQueries.eGetAA.Target))
-                            dsAA.Tables[0].Rows[row][(int)AAQueries.eGetAA.Target] = Convert.ToDecimal(cells[i - col].Replace("%", ""));
-
-                    dsAA.AcceptChanges();
-                    row++;
-            }
-            dgAA.CurrentCell = dgAA[col, origrow];
+            Functions.PasteItems(dgAA, dsAA, Constants.PasteDatagrid.dgAA, 1);
         }
 
         private void dgAA_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)

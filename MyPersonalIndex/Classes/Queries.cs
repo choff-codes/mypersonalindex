@@ -34,7 +34,7 @@ namespace MyPersonalIndex
             public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
             public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value };
         }
-        
+
         private SqlCeConnection cn;
 
         public Queries()
@@ -57,7 +57,7 @@ namespace MyPersonalIndex
             {
                 if (cn.State == ConnectionState.Open)
                     cn.Close();
-                
+
                 cn.Dispose();
                 cn = null;
             }
@@ -121,41 +121,6 @@ namespace MyPersonalIndex
             return dt;
         }
 
-        public static string GetNAV(int Portfolio, DateTime Date)
-        {
-            return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
-        }
-
-        public static string GetPreviousDay(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
-        }
-
-        public static string GetCurrentDayOrPrevious(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
-        }
-
-        public static string GetCurrentDayOrNext(DateTime Date)
-        {
-            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
-        }
-
-        public static string GetDaysNowAndBefore(DateTime Date)
-        {
-            return string.Format("SELECT COUNT(*) FROM (SELECT DISTINCT Date FROM ClosingPrices WHERE Date <= '{0}') a", Date.ToShortDateString());
-        }
-
-        public static string GetSecondDay()
-        {
-            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM ClosingPrices ORDER BY Date) a ORDER BY Date DESC";
-        }
-
-        public static string DeleteTickerTrades(int Portfolio, int Ticker, bool Custom)
-        {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}{2}", Portfolio, Ticker, Custom ? "" : " AND Custom IS NULL");
-        }
-
         public enum eGetAA { AA, Target, ID };
         public static string GetAA(int Portfolio)
         {
@@ -166,6 +131,65 @@ namespace MyPersonalIndex
         public static string GetAcct(int Portfolio)
         {
             return string.Format("SELECT Name, TaxRate, ID FROM Accounts WHERE Portfolio = {0} ORDER BY Name", Portfolio);
+        }
+
+        public static string GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
+        {
+            // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ] 
+
+            bool Ticker1Portfolio = Ticker1.Contains(Constants.SignifyPortfolio);
+            bool Ticker2Portfolio = Ticker2.Contains(Constants.SignifyPortfolio);
+            if (Ticker1Portfolio)
+                Ticker1 = Functions.StripSignifyPortfolio(Ticker1);
+            if (Ticker2Portfolio)
+                Ticker2 = Functions.StripSignifyPortfolio(Ticker2); ;
+
+            return string.Format(
+                "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" +
+                        " Sqrt((Ticker1Square - Power(Ticker1Sum,2) / TotalDays) * (Ticker2Square - Power(Ticker2Sum,2) / TotalDays)) * 100" +
+                " FROM   (SELECT SUM(a.Change) AS Ticker1Sum," +
+                            " SUM(b.Change) AS Ticker2Sum," +
+                            " SUM(a.Change * a.Change) AS Ticker1Square," +
+                            " SUM(b.Change * b.Change) AS Ticker2Square," +
+                            " SUM(a.Change * b.Change) AS ProductSquare," +
+                            " COUNT(*) AS TotalDays" +
+                        " FROM " +
+                                (Ticker1Portfolio ?
+                                    " (SELECT Date, Change FROM NAV WHERE Portfolio = {0}" :
+                                    " (SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{0}'") +
+                                " AND Date BETWEEN '{2}' AND '{3}') AS a" +
+                        " INNER JOIN " +
+                                (Ticker2Portfolio ?
+                                    "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
+                                    "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
+                                " AND Date BETWEEN '{2}' AND '{3}') AS b" +
+                        " ON a.DATE = b.DATE) Correl",
+                Functions.SQLCleanString(Ticker1), Functions.SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
+        }
+
+        public static string GetCurrentDayOrNext(DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date >= '{0}' ORDER BY Date", Date.ToShortDateString());
+        }
+
+        public static string GetCurrentDayOrPrevious(DateTime Date)
+        {
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date <= '{0}' ORDER BY Date DESC", Date.ToShortDateString());
+        }
+
+        public static string GetDaysNowAndBefore(DateTime Date)
+        {
+            return string.Format("SELECT COUNT(*) FROM (SELECT DISTINCT Date FROM ClosingPrices WHERE Date <= '{0}') a", Date.ToShortDateString());
+        }
+
+        public static string GetIdentity()
+        {
+            return "SELECT @@IDENTITY";
+        }
+
+        public static string GetNAV(int Portfolio, DateTime Date)
+        {
+            return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
         }
 
         public enum eGetPortfolioAttributes
@@ -183,49 +207,14 @@ namespace MyPersonalIndex
                 " FROM Portfolios WHERE ID = {0}", Portfolio);
         }
 
-        public static string GetIdentity()
+        public static string GetPreviousDay(DateTime Date)
         {
-            return "SELECT @@IDENTITY";
+            return string.Format("SELECT TOP (1) Date FROM ClosingPrices WHERE Date < '{0}' ORDER BY Date DESC", Date.ToShortDateString());
         }
 
-        public static string GetCorrelation(string Ticker1, string Ticker2, DateTime StartDate, DateTime EndDate)
+        public static string GetSecondDay()
         {
-            bool Ticker1Portfolio = Ticker1.Contains(Constants.SignifyPortfolio);
-            bool Ticker2Portfolio = Ticker2.Contains(Constants.SignifyPortfolio);
-            if (Ticker1Portfolio)
-                Ticker1 = Functions.StripSignifyPortfolio(Ticker1);
-            if (Ticker2Portfolio)
-                Ticker2 = Functions.StripSignifyPortfolio(Ticker2); ;
-
-            return string.Format(
-                "SELECT (ProductSquare - (Ticker1Sum * Ticker2Sum / TotalDays)) /" + 
-                        " Sqrt((Ticker1Square - Power(Ticker1Sum,2) / TotalDays) * (Ticker2Square - Power(Ticker2Sum,2) / TotalDays)) * 100" +
-                " FROM   (SELECT SUM(a.Change) AS Ticker1Sum," +
-                            " SUM(b.Change) AS Ticker2Sum," +
-                            " SUM(a.Change * a.Change) AS Ticker1Square," +
-                            " SUM(b.Change * b.Change) AS Ticker2Square," +
-                            " SUM(a.Change * b.Change) AS ProductSquare," +
-                            " COUNT(*) AS TotalDays" +
-                        " FROM " +
-                                (Ticker1Portfolio ? 
-                                    " (SELECT Date, Change FROM NAV WHERE Portfolio = {0}" :
-                                    " (SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{0}'") +
-                                " AND Date BETWEEN '{2}' AND '{3}') AS a" +
-                        " INNER JOIN " +
-                                (Ticker2Portfolio ? 
-                                    "(SELECT Date, Change FROM NAV WHERE Portfolio = {1}" :
-                                    "(SELECT Date, Change FROM ClosingPrices WHERE Ticker = '{1}'") +
-                                " AND Date BETWEEN '{2}' AND '{3}') AS b" +
-                        " ON a.DATE = b.DATE) Correl",
-                Functions.SQLCleanString(Ticker1), Functions.SQLCleanString(Ticker2), StartDate.ToShortDateString(), EndDate.ToShortDateString());
-        }
-
-        //=(1/n)*(sum(x^2))-((SUM(X)/N)^2)
-        //SQRT((SUM(POWER(Change,2))-POWER(SUM(Change)/COUNT(*),2)) / COUNT(*))
-
-        public static string UpdateDataStartDate(DateTime Date)
-        {
-            return string.Format("UPDATE Settings SET DataStartDate = '{0}'", Date.ToShortDateString());
+            return "SELECT TOP(1) Date FROM (SELECT TOP(2) Date FROM (SELECT DISTINCT Date FROM ClosingPrices) a ORDER BY Date) a ORDER BY Date DESC";
         }
 
         public enum eGetStats { ID, SQL, Format, Description };

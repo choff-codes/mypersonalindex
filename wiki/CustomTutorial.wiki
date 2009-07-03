@@ -21,7 +21,6 @@
     * Enter the ticker information (pick the correct asset allocation, this will be important later).  You do not need to enter any trades for a dynamic portfolio.
     [http://mypersonalindex.googlecode.com/svn/wiki/ticker.png]
 
-    * Click OK.  Now click on the ticker in the Holdings tab and select "Edit..."  You cannot add custom trades until the ticker is saved.
     * Select "Custom..." in the bottom right corner.
     * First, create an initial purchase:
     [http://mypersonalindex.googlecode.com/svn/wiki/custom1.png]

@@ -21,7 +21,7 @@
     * Enter the ticker information (pick the correct asset allocation, this will be important later).  You do not need to enter any trades for a dynamic portfolio.
     [http://mypersonalindex.googlecode.com/svn/wiki/ticker.png]
 
-    * Select "Custom..." in the bottom right corner.
+    * Select "Custom..." in the bottom left corner.
     * First, create an initial purchase:
     [http://mypersonalindex.googlecode.com/svn/wiki/custom1.png]
 

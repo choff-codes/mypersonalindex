@@ -1,0 +1,14 @@
+#summary Add a cash position to a portfolio.
+#labels Featured
+
+= Cash Position =
+
+  * Open My Personal Index.
+  * Choose the portfolio (from the top drop-down) you want to add a cash position.
+  * Under the "Holdings" tab, click Add...
+  * For the symbol, simply enter "$".  An example is below:
+    [http://mypersonalindex.googlecode.com/svn/wiki/cash.png]
+
+  * If desired, add purchases and sales in the activity section, or choose custom trades.
+    * Note that cash always has a share price of $1.00.
+  * Click OK.  That's it!

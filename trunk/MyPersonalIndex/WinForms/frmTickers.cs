@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlServerCe;
 using System.Windows.Forms;
@@ -10,73 +11,86 @@ namespace MyPersonalIndex
         public struct TickerRetValues
         {
             public DateTime MinDate;
-            public bool Changed;
+            public bool Changed; // true if trades have been changed
+            public bool Active; // track original "Include in Calculation" value - NAV recalc required when changed
+            public int AA; // track original "AA" value - if changed will effect custom trades
+            public List<Constants.DynamicTrade> CustomTrades;  // starting custom trades
         }
 
         public TickerRetValues TickerReturnValues { get { return _TickerReturnValues; } }
 
-        private enum CloseButton { Cancel, OK };
         private TickerQueries SQL = new TickerQueries();
         // starting width of form
         private const int OriginalWidth = 336;
         // width of form when historical prices is opened
         private const int ExpandedWidth = 679;
-        private const int DateColumn = 0;
 
         private int PortfolioID;
         private int TickerID;
         private bool Pasted = false; // for changes outside of the datagrid
-        private bool ActiveFlag; // track original "Include in Calculation" value
-        private CloseButton btn = CloseButton.Cancel;
+        private List<Constants.DynamicTrade> CustomTrades = new List<Constants.DynamicTrade>();
         private TickerRetValues _TickerReturnValues = new TickerRetValues();
 
-        public frmTickers(int Portfolio, int Ticker, string sTicker)
-        { 
-            InitializeComponent();
-            this.Width = OriginalWidth;
-            PortfolioID = Portfolio;
-            TickerID = Ticker;
-            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker);
-            txtSymbol.Text = sTicker;
-            gbActivity.Text = string.Format("{0} Activity", sTicker);
+        /************************* Functions ***********************************/
+
+        private bool GetErrors()
+        {
+            if (string.IsNullOrEmpty(txtSymbol.Text))
+            {
+                MessageBox.Show("Set a symbol before saving!");
+                return false;
+            }
+            return true;
         }
 
-        private void frmTickers_Load(object sender, EventArgs e)
+        private void LoadAADropDown()
         {
-            if (SQL.Connection == ConnectionState.Closed)
-            {
-                DialogResult = DialogResult.Cancel;
-                return;
-            }
+            DataTable t = new DataTable();
+            t.Columns.Add("Display");
+            t.Columns.Add("Value");
+            t.Rows.Add("(Blank)", -1);
 
-            cmbHis.SelectedIndex = 0;
-            cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAA(PortfolioID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAA.AA), rec.GetInt32((int)TickerQueries.eGetAA.ID));
 
-            LoadAADropDown();
-            LoadAcctDropDown();
-            LoadTicker();
+            cmbAA.DisplayMember = "Display";
+            cmbAA.ValueMember = "Value";
+            cmbAA.DataSource = t;
+            cmbAA.SelectedValue = -1;
+        }
 
-            // use a DataSet instead of Datatable to have the ability to check for underlying changes
-            dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTrades(PortfolioID, TickerID)));
-            dgTickers.DataSource = dsTicker.Tables[0];
-            dsTicker.AcceptChanges();
+        private void LoadAcctDropDown()
+        {
+            DataTable t = new DataTable();
+            t.Columns.Add("Display");
+            t.Columns.Add("Value");
+            t.Rows.Add("(Blank)", -1);
 
-            if (TickerID == -1)
-            {
-                // allow ticker symbol to be set, but disable historical prices and custom trades
-                txtSymbol.Enabled = true;
-                btnHistorical.Visible = false;
-                btnCustom.Enabled = false;
-            }
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAcct(PortfolioID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
 
-            ActiveFlag = chkCalc.Checked;
-            _TickerReturnValues.MinDate = DateTime.Today;
-            _TickerReturnValues.Changed = false;
-            // find the earliest date that currently exists in the trades
-            foreach (DataRow dr in dsTicker.Tables[0].Rows)
-                if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < _TickerReturnValues.MinDate)
-                    _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
+            cmbAcct.DisplayMember = "Display";
+            cmbAcct.ValueMember = "Value";
+            cmbAcct.DataSource = t;
+            cmbAcct.SelectedValue = -1;
+        }
 
+        private void LoadCustomTrades()
+        {
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetCustomTrades(TickerID)))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                {
+                    Constants.DynamicTrade dt = new Constants.DynamicTrade();
+
+                    dt.Frequency = (Constants.DynamicTradeFreq)rec.GetInt32((int)TickerQueries.eGetCustomTrades.Frequency);
+                    dt.TradeType = (Constants.DynamicTradeType)rec.GetInt32((int)TickerQueries.eGetCustomTrades.TradeType);
+                    dt.When = rec.GetString((int)TickerQueries.eGetCustomTrades.Dates);
+                    dt.Value = (double)(rec.GetDecimal((int)TickerQueries.eGetCustomTrades.Value));
+
+                    CustomTrades.Add(dt);
+                }
         }
 
         private void LoadTicker()
@@ -96,117 +110,177 @@ namespace MyPersonalIndex
                 }
         }
 
-        private void LoadAADropDown()
+        private void SaveCustomTrades()
         {
-            DataTable t = new DataTable();
-            t.Columns.Add("Display");
-            t.Columns.Add("Value");
-            t.Rows.Add("(Blank)", -1);
+            // check for changes to the custom trades list
+            bool CustomTradeChanges = false;
 
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAA(PortfolioID)))
-                foreach (SqlCeUpdatableRecord rec in rs)
-                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAA.AA), rec.GetInt32((int)TickerQueries.eGetAA.ID));
+            if (_TickerReturnValues.CustomTrades.Count != CustomTrades.Count)
+                CustomTradeChanges = true;
+            else
+                for (int i = 0; i < CustomTrades.Count; i++)
+                    if (!CustomTrades[i].Equals(_TickerReturnValues.CustomTrades[i]))
+                        CustomTradeChanges = true;
 
-            cmbAA.DisplayMember = "Display";
-            cmbAA.ValueMember = "Value";
-            cmbAA.DataSource = t;
-            cmbAA.SelectedValue = -1;
-        }
-
-        private void LoadAcctDropDown()
-        {
-            DataTable t = new DataTable();
-            t.Columns.Add("Display");
-            t.Columns.Add("Value");
-            t.Rows.Add("(Blank)", -1);
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Queries.GetAcct(PortfolioID)))
-                foreach(SqlCeUpdatableRecord rec in rs)
-                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
-
-            cmbAcct.DisplayMember = "Display";
-            cmbAcct.ValueMember = "Value";
-            cmbAcct.DataSource = t;
-            cmbAcct.SelectedValue = -1;
-        }
-
-        private void dgTickers_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
-        {
-            // default new row value, does not include time portion
-            e.Row.Cells[0].Value = DateTime.Today;
-        }
-
-        private bool CheckValidPasteItem(string s, TickerQueries.eGetTrades Column)
-        {
-            if (Column == TickerQueries.eGetTrades.Date)
-                return Functions.StringIsDateTime(s);
-            else if (Column == TickerQueries.eGetTrades.Shares)
-                return Functions.StringIsDecimal(s, false);
-            else // TickerQueries.eGetTrades.Price
-                return Functions.StringIsDecimal(s, true);
-        }
-
-        private bool CheckValidPasteItem(string s, string s2, string s3)
-        {
-            return Functions.StringIsDateTime(s) && Functions.StringIsDecimal(s2, false) && Functions.StringIsDecimal(s3, true); 
-        }
-
-        private void dgTickers_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (!(e.Control && e.KeyCode == Keys.V))
+            if (!CustomTradeChanges)
                 return;
 
-            Pasted = true;  // there have been changes outside of the datatable
+            _TickerReturnValues.MinDate = DateTime.MinValue; // will need to recalcuate all dates
+            _TickerReturnValues.Changed = true;
+            SQL.ExecuteNonQuery(TickerQueries.DeleteCustomTrades(TickerID));
 
-            string[] lines = Functions.GetClipboardText();
-            int row = dgTickers.CurrentCell.RowIndex;
-            int origrow = dgTickers.CurrentCell.RowIndex;
-            int col = dgTickers.CurrentCell.ColumnIndex;
-
-            dgTickers.CancelEdit();
-            dsTicker.AcceptChanges();
-
-            foreach (string line in lines)
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.CustomTrades))
             {
-                if (string.IsNullOrEmpty(line))
-                    continue;
+                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+                foreach (Constants.DynamicTrade dt in CustomTrades)
+                {
+                    newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.TickerID, TickerID);
+                    newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.Portfolio, PortfolioID);
+                    newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
+                    newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
+                    newRecord.SetString((int)TickerQueries.Tables.eCustomTrades.Dates, dt.When ?? String.Empty);
+                    newRecord.SetDecimal((int)TickerQueries.Tables.eCustomTrades.Value, Convert.ToDecimal(dt.Value));
 
-                string[] cells = line.Split('\t');  // tab seperated values
-
-                if (row >= dgTickers.Rows.Count - 1 && col == 0 && cells.Length == dgTickers.Columns.Count)
-                    if (CheckValidPasteItem(cells[(int)TickerQueries.eGetTrades.Date], cells[(int)TickerQueries.eGetTrades.Shares], cells[(int)TickerQueries.eGetTrades.Price]))
-                    {
-                        dsTicker.Tables[0].Rows.Add(cells[(int)TickerQueries.eGetTrades.Date], Convert.ToDecimal(cells[(int)TickerQueries.eGetTrades.Shares]), Functions.ConvertFromCurrency(cells[(int)TickerQueries.eGetTrades.Price]));
-                        dsTicker.AcceptChanges();
-                        row++;
-                        continue;
-                    }
-
-                if (row >= dgTickers.Rows.Count - 1)
-                    continue;
-
-                for (int i = col; i <= dgTickers.Columns.Count - 1 && i < col + cells.Length; i++)
-                    if (i == (int)TickerQueries.eGetTrades.Date && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Date))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Date] = cells[i - col];
-                    else if (i == (int)TickerQueries.eGetTrades.Shares && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Shares))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Shares] = Convert.ToDecimal(cells[i - col]);
-                    else if (i == (int)TickerQueries.eGetTrades.Price && CheckValidPasteItem(cells[i - col], TickerQueries.eGetTrades.Price))
-                        dsTicker.Tables[0].Rows[row][(int)TickerQueries.eGetTrades.Price] = Functions.ConvertFromCurrency(cells[i - col]);
-
-                dsTicker.AcceptChanges();
-                row++;
+                    rs.Insert(newRecord);
+                }
             }
-            dgTickers.CurrentCell = dgTickers[col, origrow];
         }
 
-        private bool GetErrors()
+        private void SaveOriginalValues()
         {
-            if (string.IsNullOrEmpty(txtSymbol.Text))
+            // copy custom trades so we can compare if there are any changes at the end
+            _TickerReturnValues.CustomTrades = new List<Constants.DynamicTrade>();
+            foreach (Constants.DynamicTrade dt in CustomTrades)
+                _TickerReturnValues.CustomTrades.Add(dt.Copy());
+
+            _TickerReturnValues.MinDate = DateTime.Today;
+            // find the earliest date that currently exists in the trades
+            foreach (DataRow dr in dsTicker.Tables[0].Rows)
+                if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < _TickerReturnValues.MinDate)
+                    _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
+
+            _TickerReturnValues.AA = Convert.ToInt32(cmbAA.SelectedValue);
+            _TickerReturnValues.Active = chkCalc.Checked;
+            _TickerReturnValues.Changed = false;
+        }
+
+        private void SaveTrades()
+        {
+            if (dsTicker.HasChanges() == false && Pasted == false)  // no changes
+                return;
+
+            // delete existing trades (excluding custom) and reinsert all trades
+            SQL.ExecuteNonQuery(TickerQueries.DeleteTickerTrades(PortfolioID, TickerID));
+
+            _TickerReturnValues.Changed = true;
+            dsTicker.AcceptChanges(); // do this here to prevent HasChanges being reset in above check
+
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades))
             {
-                MessageBox.Show("Set a symbol before saving!");
-                return false;
+                SqlCeUpdatableRecord newRecord = rs.CreateRecord();
+                int i = 0;
+
+                foreach (DataRow dr in dsTicker.Tables[0].Rows)
+                {
+                    DateTime TradeDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
+
+                    newRecord.SetDateTime((int)TickerQueries.Tables.eTrades.Date, TradeDate);
+                    newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Shares, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Shares]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Shares]));
+                    newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Price, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Price]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Price]));
+                    newRecord.SetInt32((int)TickerQueries.Tables.eTrades.Portfolio, PortfolioID);
+                    newRecord.SetInt32((int)TickerQueries.Tables.eTrades.TickerID, TickerID);
+                    newRecord.SetInt32((int)TickerQueries.Tables.eTrades.ID, i);
+                    newRecord.SetString((int)TickerQueries.Tables.eTrades.Ticker, txtSymbol.Text);
+                    rs.Insert(newRecord);
+
+                    // find new earliest trade date
+                    if (TradeDate < TickerReturnValues.MinDate)
+                        _TickerReturnValues.MinDate = TradeDate;
+                    i++;
+                }
             }
-            return true;
+        }
+
+        /************************* Event Handlers ***********************************/
+
+        public frmTickers(int Portfolio, int Ticker, string sTicker)
+        {
+            InitializeComponent();
+            this.Width = OriginalWidth;
+            PortfolioID = Portfolio;
+            TickerID = Ticker;
+            this.Text = string.Format("{0} Properties", string.IsNullOrEmpty(sTicker) ? "New Ticker" : sTicker);
+            txtSymbol.Text = sTicker;
+            gbActivity.Text = string.Format("{0} Activity", sTicker);
+        }
+
+        private void frmTickers_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            SQL.Dispose();
+        }
+
+        private void frmTickers_Load(object sender, EventArgs e)
+        {
+            if (SQL.Connection == ConnectionState.Closed)
+            {
+                DialogResult = DialogResult.Cancel;
+                return;
+            }
+
+            cmbHis.SelectedIndex = 0;
+            cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
+
+            LoadAADropDown();
+            LoadAcctDropDown();
+            LoadTicker();
+            if (TickerID != -1) // not adding a new ticker
+                LoadCustomTrades();
+
+            // use a DataSet instead of Datatable to have the ability to check for underlying changes
+            dsTicker.Tables.Add(SQL.ExecuteDataset(TickerQueries.GetTrades(PortfolioID, TickerID)));
+            dgTickers.DataSource = dsTicker.Tables[0];
+            dsTicker.AcceptChanges();
+
+            SaveOriginalValues();
+
+            if (TickerID == -1)
+            {
+                // allow ticker symbol to be set, but disable historical prices
+                txtSymbol.Enabled = true;
+                btnHistorical.Visible = false;
+            }
+        }
+
+        private void btnCancel_Click(object sender, EventArgs e)
+        {
+            DialogResult = DialogResult.Cancel;
+        }
+
+        private void btnClose_Click(object sender, EventArgs e)
+        {
+            this.Width = 336;
+            this.Left = this.Left + ((ExpandedWidth - OriginalWidth) / 2);
+            dgHistory.DataSource = null;
+            gbHistorical.Enabled = false; // keep controls out of tab order
+        }
+
+        private void btnCustom_Click(object sender, EventArgs e)
+        {
+            using (frmTrades f = new frmTrades(txtSymbol.Text, CustomTrades))
+                if (f.ShowDialog() == DialogResult.OK)
+                    CustomTrades = f.TradeReturnValues.CustomTrades;
+        }
+
+        private void btnHistorical_Click(object sender, EventArgs e)
+        {
+            if (gbHistorical.Enabled)
+                return;
+
+            this.Width = ExpandedWidth;
+            this.Left = this.Left - ((ExpandedWidth - OriginalWidth) / 2);
+            gbHistorical.Enabled = true;
+            // load automatically without selection
+            cmbHis_SelectedIndexChanged(null, null);
         }
 
         private void btnOK_Click(object sender, EventArgs e)
@@ -216,78 +290,31 @@ namespace MyPersonalIndex
 
             if (TickerID == -1) // add new ticker
             {
-                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue), 
+                SQL.ExecuteNonQuery(TickerQueries.InsertNewTicker(PortfolioID, txtSymbol.Text, Convert.ToInt32(cmbAA.SelectedValue),
                     Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
-                TickerID = Convert.ToInt32(SQL.ExecuteScalar(Queries.GetIdentity()));
+                TickerID = Convert.ToInt32(SQL.ExecuteScalar(TickerQueries.GetIdentity()));
             }
             else
                 SQL.ExecuteNonQuery(TickerQueries.UpdateTicker(PortfolioID, TickerID, Convert.ToInt32(cmbAA.SelectedValue),
                     Convert.ToInt32(cmbAcct.SelectedValue), chkHide.Checked, chkCalc.Checked));
 
-            if (dsTicker.HasChanges() || Pasted) // delete existing trades (excluding custom) and reinsert all trades
-            {
-                SQL.ExecuteNonQuery(Queries.DeleteTickerTrades(PortfolioID, TickerID, false));
+            SaveTrades();
+            SaveCustomTrades();
 
+            // if active flag is changed or AA changed and the ticker has custom trades, need to recalc NAV from beginning
+            if (_TickerReturnValues.Active != chkCalc.Checked ||
+                (CustomTrades.Count != 0 && _TickerReturnValues.AA != Convert.ToInt32(cmbAA.SelectedValue)))
+            {
+                _TickerReturnValues.MinDate = DateTime.MinValue;
                 _TickerReturnValues.Changed = true;
-                dsTicker.AcceptChanges(); // do this here since HasChanges is set to false when this function runs
-
-                using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(TickerQueries.Tables.Trades))
-                {
-                    SqlCeUpdatableRecord newRecord = rs.CreateRecord();
-                    int i = 0;
-
-                    foreach (DataRow dr in dsTicker.Tables[0].Rows)
-                    {
-                        newRecord.SetDateTime((int)TickerQueries.Tables.eTrades.Date, Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]));
-                        newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Shares, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Shares]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Shares]));
-                        newRecord.SetDecimal((int)TickerQueries.Tables.eTrades.Price, Convert.IsDBNull(dr[(int)TickerQueries.eGetTrades.Price]) ? 0 : Convert.ToDecimal(dr[(int)TickerQueries.eGetTrades.Price]));
-                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.Portfolio, PortfolioID);
-                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.TickerID, TickerID);
-                        newRecord.SetInt32((int)TickerQueries.Tables.eTrades.ID, i);
-                        newRecord.SetString((int)TickerQueries.Tables.eTrades.Ticker, txtSymbol.Text);
-                        rs.Insert(newRecord);
-                        
-                        // find new earliest trade date
-                        if (Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]) < TickerReturnValues.MinDate)
-                            _TickerReturnValues.MinDate = Convert.ToDateTime(dr[(int)TickerQueries.eGetTrades.Date]);
-                        i++;
-                    }
-                }
             }
-            btn = CloseButton.OK;
-            Close();
+
+            DialogResult = DialogResult.OK;
         }
 
-        private void btnCancel_Click(object sender, EventArgs e)
+        private void chkSort_CheckedChanged(object sender, EventArgs e)
         {
-            Close();
-        }
-
-        private void frmTickers_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            SQL.Dispose();
-
-            // true if custom trades were modified or OK was clicked
-            if (_TickerReturnValues.MinDate == DateTime.MinValue || btn == CloseButton.OK)
-            {
-                if (_TickerReturnValues.MinDate == DateTime.MinValue) // custom trades were modified
-                    _TickerReturnValues.Changed = true;
-
-                if (ActiveFlag != chkCalc.Checked) // active flag was changed
-                {
-                    _TickerReturnValues.MinDate = DateTime.MinValue; // use MinValue because if there any custom trades, we need to redo all NAV
-                    _TickerReturnValues.Changed = true;
-                }
-
-                DialogResult = DialogResult.OK;
-            }
-            else
-                DialogResult = DialogResult.Cancel;
-        }
-
-        private void dgTickers_DataError(object sender, DataGridViewDataErrorEventArgs e)
-        {
-            MessageBox.Show("Invalid format, must be a number!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            cmbHis_SelectedIndexChanged(null, null);
         }
 
         private void cmbHis_SelectedIndexChanged(object sender, EventArgs e)
@@ -350,36 +377,24 @@ namespace MyPersonalIndex
             dgHistory.DataSource = SQL.ExecuteDataset(TickerQueries.GetHistorical(txtSymbol.Text, TickerID, cmbHis.SelectedIndex, chkSort.Checked));
         }
 
-        private void btnHistorical_Click(object sender, EventArgs e)
+        private void dgTickers_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
-            if (gbHistorical.Enabled)
+            MessageBox.Show("Invalid format, must be a number!", "Invalid Data", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+
+        private void dgTickers_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
+        {
+            // default new row value, does not include time portion
+            e.Row.Cells[0].Value = DateTime.Today;
+        }
+
+        private void dgTickers_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!(e.Control && e.KeyCode == Keys.V))
                 return;
 
-            this.Width = ExpandedWidth;
-            this.Left = this.Left - ((ExpandedWidth - OriginalWidth) / 2);
-            gbHistorical.Enabled = true;
-            // load automatically without selection
-            cmbHis_SelectedIndexChanged(null, null);
-        }
-
-        private void btnClose_Click(object sender, EventArgs e)
-        {
-            this.Width = 336;
-            this.Left = this.Left + ((ExpandedWidth - OriginalWidth) / 2);
-            dgHistory.DataSource = null;
-            gbHistorical.Enabled = false; // keep controls out of tab order
-        }
-
-        private void chkSort_CheckedChanged(object sender, EventArgs e)
-        {
-            cmbHis_SelectedIndexChanged(null, null);
-        }
-
-        private void btnCustom_Click(object sender, EventArgs e)
-        {
-            using (frmTrades f = new frmTrades(PortfolioID, TickerID, txtSymbol.Text))
-                if (f.ShowDialog() == DialogResult.OK)
-                    _TickerReturnValues.MinDate = DateTime.MinValue; // will need to recalcuate all dates
+            Pasted = true;  // there have been changes outside of the datatable
+            Functions.PasteItems(dgTickers, dsTicker, Constants.PasteDatagrid.dgTicker, 0);
         }
     }
 }

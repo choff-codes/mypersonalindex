@@ -36,6 +36,5 @@
   [http://mypersonalindex.googlecode.com/svn/wiki/custom5.png]
 
   * *Update prices from the main toolbar, and you now have a monthly, rebalanced 50/50 portfolio!*
-    * Note that on 11/22/2001, Yahoo Finance is missing data for 2 of the mutual funds, which shows a weird dip in the chart.
 
   [http://mypersonalindex.googlecode.com/svn/wiki/window.png]

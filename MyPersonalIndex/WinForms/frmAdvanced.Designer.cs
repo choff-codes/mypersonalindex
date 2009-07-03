@@ -43,16 +43,16 @@
             this.lblReport = new System.Windows.Forms.ToolStripLabel();
             this.cmb = new System.Windows.Forms.ToolStripComboBox();
             this.btnRefresh = new System.Windows.Forms.ToolStripButton();
-            this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
-            this.btnTickerDiv = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnStat = new System.Windows.Forms.ToolStripMenuItem();
             this.s1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnStartDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnEndDate = new System.Windows.Forms.ToolStripDropDownButton();
             this.s2 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
+            this.btnTickerDiv = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnStat = new System.Windows.Forms.ToolStripMenuItem();
+            this.s3 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExport = new System.Windows.Forms.ToolStripButton();
             this.cmdOk = new System.Windows.Forms.Button();
-            this.s3 = new System.Windows.Forms.ToolStripSeparator();
             this.pnl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dg)).BeginInit();
             this.ts.SuspendLayout();
@@ -156,7 +156,7 @@
             this.dg.ReadOnly = true;
             this.dg.RowHeadersWidthSizeMode = System.Windows.Forms.DataGridViewRowHeadersWidthSizeMode.AutoSizeToAllHeaders;
             this.dg.Size = new System.Drawing.Size(647, 456);
-            this.dg.TabIndex = 5;
+            this.dg.TabIndex = 2;
             this.dg.Visible = false;
             this.dg.CellFormatting += new System.Windows.Forms.DataGridViewCellFormattingEventHandler(this.dg_CellFormatting);
             // 
@@ -173,7 +173,7 @@
             this.zed.ScrollMinY = 0;
             this.zed.ScrollMinY2 = 0;
             this.zed.Size = new System.Drawing.Size(647, 456);
-            this.zed.TabIndex = 3;
+            this.zed.TabIndex = 1;
             this.zed.Visible = false;
             // 
             // ts
@@ -193,7 +193,7 @@
             this.ts.Location = new System.Drawing.Point(0, 0);
             this.ts.Name = "ts";
             this.ts.Size = new System.Drawing.Size(647, 25);
-            this.ts.TabIndex = 2;
+            this.ts.TabIndex = 0;
             // 
             // lblReport
             // 
@@ -221,31 +221,6 @@
             this.btnRefresh.Text = "Refresh";
             this.btnRefresh.Click += new System.EventHandler(this.btnRefresh_Click);
             // 
-            // btnOptions
-            // 
-            this.btnOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnTickerDiv,
-            this.btnStat});
-            this.btnOptions.Image = global::MyPersonalIndex.Properties.Resources.spanner_48;
-            this.btnOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnOptions.Name = "btnOptions";
-            this.btnOptions.Size = new System.Drawing.Size(73, 22);
-            this.btnOptions.Text = "Options";
-            // 
-            // btnTickerDiv
-            // 
-            this.btnTickerDiv.Name = "btnTickerDiv";
-            this.btnTickerDiv.Size = new System.Drawing.Size(194, 22);
-            this.btnTickerDiv.Text = "Tickers Include Dividends";
-            this.btnTickerDiv.Click += new System.EventHandler(this.btnTickerDiv_Click);
-            // 
-            // btnStat
-            // 
-            this.btnStat.Name = "btnStat";
-            this.btnStat.Size = new System.Drawing.Size(194, 22);
-            this.btnStat.Text = "Set Portfolio Statistics...";
-            this.btnStat.Click += new System.EventHandler(this.btnStat_Click);
-            // 
             // s1
             // 
             this.s1.Name = "s1";
@@ -272,6 +247,36 @@
             this.s2.Name = "s2";
             this.s2.Size = new System.Drawing.Size(6, 25);
             // 
+            // btnOptions
+            // 
+            this.btnOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.btnTickerDiv,
+            this.btnStat});
+            this.btnOptions.Image = global::MyPersonalIndex.Properties.Resources.spanner_48;
+            this.btnOptions.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOptions.Name = "btnOptions";
+            this.btnOptions.Size = new System.Drawing.Size(73, 22);
+            this.btnOptions.Text = "Options";
+            // 
+            // btnTickerDiv
+            // 
+            this.btnTickerDiv.Name = "btnTickerDiv";
+            this.btnTickerDiv.Size = new System.Drawing.Size(194, 22);
+            this.btnTickerDiv.Text = "Tickers Include Dividends";
+            this.btnTickerDiv.Click += new System.EventHandler(this.btnTickerDiv_Click);
+            // 
+            // btnStat
+            // 
+            this.btnStat.Name = "btnStat";
+            this.btnStat.Size = new System.Drawing.Size(194, 22);
+            this.btnStat.Text = "Set Portfolio Statistics...";
+            this.btnStat.Click += new System.EventHandler(this.btnStat_Click);
+            // 
+            // s3
+            // 
+            this.s3.Name = "s3";
+            this.s3.Size = new System.Drawing.Size(6, 25);
+            // 
             // btnExport
             // 
             this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -292,11 +297,6 @@
             this.cmdOk.Text = "OK";
             this.cmdOk.UseVisualStyleBackColor = true;
             this.cmdOk.Click += new System.EventHandler(this.cmdOk_Click);
-            // 
-            // s3
-            // 
-            this.s3.Name = "s3";
-            this.s3.Size = new System.Drawing.Size(6, 25);
             // 
             // frmAdvanced
             // 

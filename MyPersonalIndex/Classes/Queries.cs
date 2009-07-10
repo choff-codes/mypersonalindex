@@ -9,6 +9,18 @@ namespace MyPersonalIndex
     {
         public ConnectionState Connection { get { return cn.State; } }
 
+        public class QueryInfo
+        {
+            public string Query;
+            public SqlCeParameter[] Params;
+
+            public QueryInfo(string Query, SqlCeParameter[] Params)
+            {
+                this.Query = Query;
+                this.Params = Params;
+            }
+        }
+
         public struct Tables
         {
             public const string AA = "AA";
@@ -63,11 +75,28 @@ namespace MyPersonalIndex
             }
         }
 
+        public static SqlCeParameter AddParam(string Name, SqlDbType Type, object Value)
+        {
+            SqlCeParameter s = new SqlCeParameter(Name, Type);
+            s.Value = Value;
+            return s;
+        }
+
         public void ExecuteNonQuery(string sql)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
             {
                 cmd.CommandType = CommandType.Text;
+                cmd.ExecuteNonQuery();
+            }
+        }
+
+        public void ExecuteNonQuery(QueryInfo Q)
+        {
+            using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
+            {
+                foreach (SqlCeParameter p in Q.Params)
+                    cmd.Parameters.Add(p);
                 cmd.ExecuteNonQuery();
             }
         }
@@ -91,11 +120,42 @@ namespace MyPersonalIndex
             }
         }
 
+        public object ExecuteScalar(QueryInfo Q)
+        {
+            using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
+            {
+                foreach (SqlCeParameter p in Q.Params)
+                    cmd.Parameters.Add(p);
+                return cmd.ExecuteScalar();
+            }
+        }
+
+        public object ExecuteScalar(QueryInfo Q, object NullValue)
+        {
+            using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
+            {
+                foreach (SqlCeParameter p in Q.Params)
+                    cmd.Parameters.Add(p);
+                object result = cmd.ExecuteScalar();
+                return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+            }
+        }
+
         public SqlCeResultSet ExecuteResultSet(string sql)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
             {
                 cmd.CommandType = CommandType.Text;
+                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+            }
+        }
+
+        public SqlCeResultSet ExecuteResultSet(QueryInfo Q)
+        {
+            using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
+            {
+                foreach (SqlCeParameter p in Q.Params)
+                    cmd.Parameters.Add(p);
                 return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
             }
         }
@@ -121,10 +181,23 @@ namespace MyPersonalIndex
             return dt;
         }
 
+        public DataTable ExecuteDataset(QueryInfo Q)
+        {
+            DataTable dt = new DataTable();
+            using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
+            {
+                foreach (SqlCeParameter p in Q.Params)
+                    cmd.Parameters.Add(p);
+                using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
+                    da.Fill(dt);
+            }
+            return dt;
+        }
+
         public enum eGetAA { AA, Target, ID };
         public static string GetAA(int Portfolio)
         {
-            return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio);
+            return string.Format("SELECT AA, Target, ID FROM AA WHERE Portfolio = {0} ORDER BY AA", Portfolio );
         }
 
         public enum eGetAcct { Name, TaxRate, ID };

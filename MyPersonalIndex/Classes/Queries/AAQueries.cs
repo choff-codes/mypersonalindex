@@ -1,25 +1,45 @@
 ﻿using System;
+using System.Data;
+using System.Data.SqlServerCe;
 
 namespace MyPersonalIndex
 {
     class AAQueries : Queries
     {
-        public static string DeleteAA(int Portfolio, string AAin)
+        public static QueryInfo DeleteAA(int Portfolio, string AAin)
         {
-            if (string.IsNullOrEmpty(AAin))
-                return string.Format("DELETE FROM AA WHERE Portfolio = {0}", Portfolio, AAin);
-            else
-                return string.Format("DELETE FROM AA WHERE Portfolio = {0} AND ID NOT IN ({1})", Portfolio, AAin);
+            return new QueryInfo(
+                string.IsNullOrEmpty(AAin) ?
+                   "DELETE FROM AA WHERE Portfolio = @Portfolio" :
+                    string.Format("DELETE FROM AA WHERE Portfolio = @Portfolio AND ID NOT IN ({0})", AAin),
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string InsertAA(int Portfolio, string AA, double? Target)
+        public static QueryInfo InsertAA(int Portfolio, string AA, double? Target)
         {
-            return string.Format("INSERT INTO AA (Portfolio, AA, Target) VALUES ({0}, '{1}', {2})", Portfolio, Functions.SQLCleanString(AA), Target == null ? "NULL" : Target.ToString());
+            return new QueryInfo(
+                "INSERT INTO AA (Portfolio, AA, Target) VALUES (@Portfolio, @AA, @Target)",
+                new SqlCeParameter[] {
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@AA", SqlDbType.NVarChar, AA),
+                    AddParam("@Target", SqlDbType.Decimal, Target.HasValue ? Target : (object)System.DBNull.Value)
+                }
+            );
         }
 
-        public static string UpdateAA(int ID, string AA, double? Target)
+        public static QueryInfo UpdateAA(int ID, string AA, double? Target)
         {
-            return string.Format("UPDATE AA SET AA = '{0}', Target = {1} WHERE ID = {2}", Functions.SQLCleanString(AA), Target == null ? "NULL" : Target.ToString(), ID);
+            return new QueryInfo(
+                "UPDATE AA SET AA = @AA, Target = @Target WHERE ID = @ID",
+                new SqlCeParameter[] {
+                    AddParam("@ID", SqlDbType.Int, ID),
+                    AddParam("@AA", SqlDbType.NVarChar, AA),
+                    AddParam("@Target", SqlDbType.Decimal, Target.HasValue ? Target : (object)System.DBNull.Value)
+                }
+            );
         }
     }
 }

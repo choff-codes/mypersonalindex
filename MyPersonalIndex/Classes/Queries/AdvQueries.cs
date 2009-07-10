@@ -1,75 +1,128 @@
 ﻿using System;
+using System.Data;
+using System.Data.SqlServerCe;
 
 namespace MyPersonalIndex
 {
     class AdvQueries: Queries
     {
         public enum eGetChartPortfolio { Date, Gain };
-        public static string GetChartPortfolio(string Ticker, double StartValue, DateTime StartDate, DateTime EndDate)
+        public static QueryInfo GetChartPortfolio(string Portfolio, double StartValue, DateTime StartDate, DateTime EndDate)
         {
-            return string.Format("SELECT Date, 100 * ((NAV / {0}) - 1) AS Gain FROM NAV WHERE Portfolio = {1} AND Date BETWEEN '{2}' AND '{3}' ORDER BY Date",
-                    StartValue == 0 ? 1 : StartValue, Ticker, StartDate.ToShortDateString(), EndDate.ToShortDateString());
+            return new QueryInfo(
+                "SELECT Date, 100 * ((NAV / @StartValue) - 1) AS Gain " +
+                " FROM NAV " + 
+                " WHERE Portfolio = @Portfolio AND Date BETWEEN @StartDate AND @EndDate" +
+                " ORDER BY Date",
+                new SqlCeParameter[] { 
+                    AddParam("@StartValue", SqlDbType.Decimal, StartValue == 0 ? 1 : StartValue),
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@StartDate", SqlDbType.DateTime, StartDate),
+                    AddParam("@EndDate", SqlDbType.DateTime, EndDate)
+                }
+            );
         }
 
         public enum eGetChartTicker { Date, Price, Dividend, Split };
-        public static string GetChartTicker(string Ticker, DateTime StartDate, DateTime EndDate)
+        public static QueryInfo GetChartTicker(string Ticker, DateTime StartDate, DateTime EndDate)
         {
-            return string.Format(
+            return new QueryInfo(
                 "SELECT a.Date, a.Price, COALESCE(b.Amount, 0) AS Dividend, COALESCE(c.Ratio, 1) AS Split" +
                 " FROM ClosingPrices a" +
                 " LEFT JOIN Dividends b" +
-                " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
+                    " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
                 " LEFT JOIN Splits c" +
-                " ON a.Ticker = c.Ticker AND a.Date = c.Date" +
-                " WHERE a.Ticker = '{0}' AND a.Date BETWEEN '{1}' AND '{2}'" +
+                    " ON a.Ticker = c.Ticker AND a.Date = c.Date" +
+                " WHERE a.Ticker = @Ticker AND a.Date BETWEEN @StartDate AND @EndDate" +
                 " ORDER BY a.Date",
-                Functions.SQLCleanString(Ticker), StartDate.ToShortDateString(), EndDate.ToShortDateString());
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.NVarChar, Ticker),
+                    AddParam("@StartDate", SqlDbType.DateTime, StartDate),
+                    AddParam("@EndDate", SqlDbType.DateTime, EndDate)
+                }
+            );
         }
 
-        public static string GetIncludeDividends()
+        public static QueryInfo GetIncludeDividends()
         {
-            return "SELECT TickerDiv FROM Settings";
+            return new QueryInfo(
+                "SELECT TickerDiv FROM Settings",
+                new SqlCeParameter[]{}
+            );
         }
 
         public enum eGetPortfolio { Name, StartDate, TotalValue };
-        public static string GetPortfolio(string Portfolio, DateTime EndDate)
+        public static QueryInfo GetPortfolio(string Portfolio, DateTime EndDate)
         {
-            return string.Format(
+            return new QueryInfo(
                 "SELECT a.Name, a.StartDate, COALESCE(b.TotalValue, 0)" +
                 " FROM Portfolios a" +
                 " LEFT JOIN NAV b" +
-                " ON b.Date = '{0}' and b.Portfolio = {1}" +
-                " WHERE a.ID = {1}", EndDate.ToShortDateString(), Portfolio);
+                    " ON b.Date = @EndDate and b.Portfolio = a.ID" +
+                " WHERE a.ID = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@EndDate", SqlDbType.DateTime, EndDate),
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string GetPortfolioStart(string Portfolio)
+        public static QueryInfo GetPortfolioStart(string Portfolio)
         {
-            return string.Format("SELECT StartDate FROM Portfolios WHERE ID = {0}", Portfolio);
+            return new QueryInfo(
+                "SELECT StartDate FROM Portfolios WHERE ID = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string GetPreviousPortfolioDay(string Portfolio, DateTime Date)
+        public static QueryInfo GetPreviousPortfolioDay(string Portfolio, DateTime Date)
         {
-            return string.Format("SELECT TOP (1) Date FROM NAV WHERE Portfolio = {0} AND Date < '{1}' ORDER BY Date DESC", Portfolio, Date.ToShortDateString());
+            return new QueryInfo(
+                "SELECT TOP (1) Date FROM NAV WHERE Portfolio = @Portfolio AND Date < @Date ORDER BY Date DESC",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
         public enum eGetTickerList { Name, ID };
-        public static string GetTickerList()
+        public static QueryInfo GetTickerList()
         {
-            return string.Format(
-                "SELECT Name, '{0}' + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
-                " UNION ALL " +
-                " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices WHERE Ticker <> '$') a",
-                Constants.SignifyPortfolio);
+            return new QueryInfo(
+                string.Format(
+                    "SELECT Name, @SignifyPortfolio + CAST(ID AS NVARCHAR(15)) AS ID FROM Portfolios" +
+                    " UNION ALL " +
+                    " SELECT Ticker AS Name, Ticker AS ID FROM (SELECT DISTINCT Ticker FROM ClosingPrices WHERE Ticker <> @Cash) a", 
+                    Constants.SignifyPortfolio
+                ),
+                new SqlCeParameter[] {
+                    AddParam("@SignifyPortfolio", SqlDbType.NVarChar, Constants.SignifyPortfolio),
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
-        public static string GetTickerStart(string Ticker)
+        public static QueryInfo GetTickerStart(string Ticker)
         {
-            return string.Format("SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = '{0}'", Functions.SQLCleanString(Ticker));
+            return new QueryInfo(
+                "SELECT MIN(Date) FROM ClosingPrices WHERE Ticker = @Ticker",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.NVarChar, Ticker)
+                }
+            );
         }
 
-        public static string UpdateIncludeDividends(bool TickerDiv)
+        public static QueryInfo UpdateIncludeDividends(bool TickerDiv)
         {
-            return string.Format("UPDATE Settings SET TickerDiv = {0}", Convert.ToByte(TickerDiv));
+            return new QueryInfo(
+                "UPDATE Settings SET TickerDiv = @TickerDiv",
+                new SqlCeParameter[] { 
+                    AddParam("@TickerDiv", SqlDbType.Bit, TickerDiv)
+                }
+            );
         }
     }
 }

@@ -12,11 +12,6 @@ namespace MyPersonalIndex
 {
     class Functions
     {
-        public static string SQLCleanString(string s)
-        {
-            return s.Replace("'", "''");
-        }
-
         public static string StripSignifyPortfolio(string Ticker)
         {
             return Functions.RemoveDelimiter(Constants.SignifyPortfolio, Ticker);

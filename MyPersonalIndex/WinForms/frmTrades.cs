@@ -19,13 +19,13 @@ namespace MyPersonalIndex
 
         /************************* Functions ***********************************/
 
-        private string GetDateText(string s, bool NoDate) // if no date, return "No Date" for empty date, other "Date" for empty date
+        private string GetDateText(List<DateTime> d, bool NoDate) // if no date, return "No Date" for empty date, other "Date" for empty date
         {
             string EmptyDate = "Date";
             if (NoDate)
                 EmptyDate = "No " + EmptyDate;
 
-            return (s.Contains(Constants.DateSeperatorString) ? "Multiple Dates" : (string.IsNullOrEmpty(s) ? EmptyDate : s));
+            return (d.Count == 0 ? EmptyDate : d.Count == 1 ? d[0].ToShortDateString() : "Multiple Dates");
         }
 
         private bool GetErrors()
@@ -37,7 +37,7 @@ namespace MyPersonalIndex
                 return false;
             }
 
-            if ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex == Constants.DynamicTradeFreq.Once && (btnOnce.Tag == null ? true : string.IsNullOrEmpty(btnOnce.Tag.ToString())))
+            if ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex == Constants.DynamicTradeFreq.Once && ((List<DateTime>)btnOnce.Tag).Count == 0)
             {
                 MessageBox.Show("Please set a date!");
                 lst.SelectedIndex = CurrentItem;
@@ -65,7 +65,7 @@ namespace MyPersonalIndex
                     s = s + "Everyday";
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    s = s + GetDateText(dt.When, true);
+                    s = s + GetDateText(Functions.ExtractDates(dt.When), true);
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
                     s = s + Enum.GetName(typeof(DayOfWeek), (DayOfWeek)Convert.ToInt32(dt.When));
@@ -74,7 +74,7 @@ namespace MyPersonalIndex
                     s = s + "Day " + dt.When;
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    s = s + (new DateTime(Constants.NonLeapYear, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("MM/dd");
+                    s = s + (new DateTime(Constants.NonLeapYear, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("dd MMM");
                     break;
             }
 
@@ -96,7 +96,7 @@ namespace MyPersonalIndex
                     Trades[CurrentItem].When = String.Empty;
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    Trades[CurrentItem].When = (string)btnOnce.Tag;
+                    Trades[CurrentItem].When = Functions.InsertDates((List<DateTime>)btnOnce.Tag);
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
                     Trades[CurrentItem].When = (cmbWeekly.SelectedIndex + 1).ToString(); // day of week enum starts sunday, but list starts at monday, so +1
@@ -116,7 +116,7 @@ namespace MyPersonalIndex
 
         private void ShowMultipleDatesForm()
         {
-            using (frmDates f = new frmDates(btnOnce.Tag.ToString()))
+            using (frmDates f = new frmDates((List<DateTime>)btnOnce.Tag))
             {
                 f.Location = gpAttributes.PointToScreen(btnOnce.Location);
                 f.Top = f.Top + btnOnce.Height;
@@ -137,12 +137,14 @@ namespace MyPersonalIndex
 
         private void btnOnce_Click(object sender, EventArgs e)
         {
-            if (btnOnce.Tag.ToString().Contains(Constants.DateSeperatorString))
+            List<DateTime> When = (List<DateTime>)btnOnce.Tag;
+
+            if (When.Count > 1)
                 ShowMultipleDatesForm();
             else
             {
-                if (!string.IsNullOrEmpty(btnOnce.Tag.ToString()))
-                    DailyCalendar.SelectionStart = Convert.ToDateTime(btnOnce.Tag.ToString());
+                if (When.Count == 1)
+                    DailyCalendar.SelectionStart = When[0];
                 mnuDate.Show(btnOnce, 0, btnOnce.Height);
             }
         }
@@ -155,7 +157,7 @@ namespace MyPersonalIndex
             cmbMonth.Visible = false;
             cmbYear.Visible = false;
             btnOnce.Text = "Date";
-            btnOnce.Tag = String.Empty;
+            //btnOnce.Tag = new List<DateTime>();
 
             switch ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex)
             {
@@ -167,6 +169,7 @@ namespace MyPersonalIndex
                     break;
                 case Constants.DynamicTradeFreq.Once:
                     btnOnce.Visible = true;
+                    btnOnce.Text = GetDateText((List<DateTime>)btnOnce.Tag, false);
                     lblWhen.Text = "When:";
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
@@ -192,7 +195,7 @@ namespace MyPersonalIndex
                     lblShares.Text = "% of Target AA:";
                     break;
                 case Constants.DynamicTradeType.Fixed:
-                    lblShares.Text = "Amount($):";
+                    lblShares.Text = string.Format("Amount({0}):", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol);
                     break;
                 case Constants.DynamicTradeType.Shares:
                     lblShares.Text = "Shares";
@@ -255,7 +258,7 @@ namespace MyPersonalIndex
         private void Date_Change(object sender, DateRangeEventArgs e)
         {
             mnuDate.Close();
-            btnOnce.Tag = DailyCalendar.SelectionStart.ToShortDateString(); // store date
+            btnOnce.Tag = new List<DateTime> { DailyCalendar.SelectionStart }; // store date
             btnOnce.Text = DailyCalendar.SelectionStart.ToShortDateString();
         }
 
@@ -302,6 +305,7 @@ namespace MyPersonalIndex
                     return;
 
             gpAttributes.Enabled = true;
+            btnOnce.Tag = new List<DateTime>();
             CurrentItem = lst.SelectedIndex;
             cmbYear.Value = DateTime.Today;
             cmbMonth.SelectedIndex = 0;
@@ -317,8 +321,9 @@ namespace MyPersonalIndex
                 case Constants.DynamicTradeFreq.Daily: // nothing necessary
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    btnOnce.Text = GetDateText(Trades[CurrentItem].When, false);
-                    btnOnce.Tag = Trades[CurrentItem].When ?? String.Empty;
+                    List<DateTime> Dates = Functions.ExtractDates(Trades[CurrentItem].When);
+                    btnOnce.Text = GetDateText(Dates, false);
+                    btnOnce.Tag = Dates;
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
                     cmbWeekly.SelectedIndex = Convert.ToInt32(Trades[CurrentItem].When) - 1; // day of week enum starts sunday, but list starts at monday, so -1

@@ -45,27 +45,13 @@ namespace MyPersonalIndex
                     StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
         }
 
-        private string CleanStatString(string SQL)
-        {
-            Dictionary<Constants.StatVariables, string> d = new Dictionary<Constants.StatVariables, string>();
-
-            d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
-            d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
-            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(MainQueries.GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
-            d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
-            d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
-            d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
-
-            return Functions.CleanStatString(SQL, d);
-        }
-
         private bool DeleteTicker(int Ticker, string sTicker)
         {
             if (MessageBox.Show(string.Format("Are you sure you want to delete {0}?", sTicker), "Delete?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrade(Ticker));
-                SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
-                SQL.ExecuteNonQuery(MainQueries.DeleteTicker(MPI.Portfolio.ID, Ticker));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(Ticker));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTicker(Ticker));
                 return true;
             }
             return false;
@@ -109,6 +95,22 @@ namespace MyPersonalIndex
             return Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValue(MPI.Portfolio.ID, Date), 0));
         }
 
+        private Queries.QueryInfo PrepareStatString()
+        {
+            return new Queries.QueryInfo(
+                "",
+                new SqlCeParameter[] {
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.Portfolio.ToString()), SqlDbType.Int, MPI.Portfolio.ID),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.PortfolioName.ToString()), SqlDbType.NVarChar, MPI.Portfolio.Name),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.PreviousDay.ToString()), SqlDbType.DateTime, 
+                        Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate))),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.StartDate.ToString()), SqlDbType.DateTime, MPI.Stat.BeginDate),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.EndDate.ToString()), SqlDbType.DateTime, MPI.Stat.EndDate),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.TotalValue.ToString()), SqlDbType.Decimal, MPI.Stat.TotalValue)
+                }
+            );
+        }
+
         private void RefreshNonTradeChanges()
         {
             LoadHoldings(MPI.Holdings.SelDate);
@@ -119,7 +121,7 @@ namespace MyPersonalIndex
         private void ResetLastDate()
         {
             MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
-            stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+            stbLastUpdated.Text = string.Format("Last Updated: {0}", MPI.LastDate == MPI.Settings.DataStartDate ? "Never" : MPI.LastDate.ToShortDateString());
         }
 
         private void ResetSortDropDown(ToolStripComboBox t, string Sort, EventHandler eh)

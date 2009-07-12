@@ -305,11 +305,11 @@ namespace MyPersonalIndex
         private List<DateTime> GetSpecificDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
+            List<DateTime> Dates = Functions.ExtractDates(When);
 
-            string[] s = When.Split(Constants.DateSeperatorChar);
-            foreach (string date in s)
+            foreach (DateTime day in Dates)
             {
-                DateTime d = Convert.ToDateTime(date);
+                DateTime d = day;
                 if (d >= MinDate && d <= MaxDate)
                     if (GetCurrentDateOrNext(ref d, MarketDays))
                         TradeDates.Add(d);

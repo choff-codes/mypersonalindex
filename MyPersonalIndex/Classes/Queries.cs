@@ -45,6 +45,7 @@ namespace MyPersonalIndex
             public enum eStats { Portfolio, Statistic, Location };
             public enum eTrades { Date, Portfolio, TickerID, Ticker, Shares, Price, ID, Custom }
             public enum eCustomTrades { TickerID, Portfolio, TradeType, Frequency, Dates, Value };
+            public enum eUserStatistics { ID, SQL, Description, Format }
         }
 
         private SqlCeConnection cn;
@@ -85,79 +86,64 @@ namespace MyPersonalIndex
         public void ExecuteNonQuery(string sql)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
-            {
-                cmd.CommandType = CommandType.Text;
                 cmd.ExecuteNonQuery();
-            }
         }
 
         public void ExecuteNonQuery(QueryInfo Q)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
-            {
-                foreach (SqlCeParameter p in Q.Params)
-                    cmd.Parameters.Add(p);
-                cmd.ExecuteNonQuery();
-            }
-        }
-
-        public object ExecuteScalar(string sql)
-        {
-            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
-            {
-                cmd.CommandType = CommandType.Text;
-                return cmd.ExecuteScalar();
-            }
-        }
-
-        public object ExecuteScalar(string sql, object NullValue)
-        {
-            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
-            {
-                cmd.CommandType = CommandType.Text;
-                object result = cmd.ExecuteScalar();
-                return (result == null || Convert.IsDBNull(result) ? NullValue : result);
-            }
+                try
+                {
+                    cmd.Parameters.AddRange(Q.Params);
+                    cmd.ExecuteNonQuery();
+                }
+                finally
+                {
+                    cmd.Parameters.Clear();
+                }
         }
 
         public object ExecuteScalar(QueryInfo Q)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
-            {
-                foreach (SqlCeParameter p in Q.Params)
-                    cmd.Parameters.Add(p);
-                return cmd.ExecuteScalar();
-            }
+                try
+                {
+                    cmd.Parameters.AddRange(Q.Params);
+                    return cmd.ExecuteScalar();
+                }
+                finally
+                {
+                    cmd.Parameters.Clear();
+                }
         }
 
         public object ExecuteScalar(QueryInfo Q, object NullValue)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
-            {
-                foreach (SqlCeParameter p in Q.Params)
-                    cmd.Parameters.Add(p);
-                object result = cmd.ExecuteScalar();
-                return (result == null || Convert.IsDBNull(result) ? NullValue : result);
-            }
-        }
-
-        public SqlCeResultSet ExecuteResultSet(string sql)
-        {
-            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
-            {
-                cmd.CommandType = CommandType.Text;
-                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
-            }
+                try
+                {
+                    cmd.Parameters.AddRange(Q.Params);
+                    object result = cmd.ExecuteScalar();
+                    return (result == null || Convert.IsDBNull(result) ? NullValue : result);
+                }
+                finally
+                {
+                    cmd.Parameters.Clear();
+                }
         }
 
         public SqlCeResultSet ExecuteResultSet(QueryInfo Q)
         {
             using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
-            {
-                foreach (SqlCeParameter p in Q.Params)
-                    cmd.Parameters.Add(p);
-                return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
-            }
+                try
+                {
+                    cmd.Parameters.AddRange(Q.Params);
+                    return cmd.ExecuteResultSet(ResultSetOptions.Scrollable);
+                }
+                finally
+                {
+                    cmd.Parameters.Clear();
+                }
         }
 
         public SqlCeResultSet ExecuteTableUpdate(string table)
@@ -169,29 +155,22 @@ namespace MyPersonalIndex
             }
         }
 
-        public DataTable ExecuteDataset(string sql)
-        {
-            DataTable dt = new DataTable();
-            using (SqlCeCommand cmd = new SqlCeCommand(sql, cn))
-            {
-                cmd.CommandType = CommandType.Text;
-                using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
-                    da.Fill(dt);
-            }
-            return dt;
-        }
-
         public DataTable ExecuteDataset(QueryInfo Q)
         {
             DataTable dt = new DataTable();
             using (SqlCeCommand cmd = new SqlCeCommand(Q.Query, cn))
-            {
-                foreach (SqlCeParameter p in Q.Params)
-                    cmd.Parameters.Add(p);
-                using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
-                    da.Fill(dt);
-            }
-            return dt;
+                try
+                {
+                    cmd.Parameters.AddRange(Q.Params);
+                    using (SqlCeDataAdapter da = new SqlCeDataAdapter(cmd))
+                        da.Fill(dt);
+                    return dt;
+                }
+                finally
+                {
+                    cmd.Parameters.Clear();
+                }
+            
         }
 
         public enum eGetAA { AA, Target, ID };

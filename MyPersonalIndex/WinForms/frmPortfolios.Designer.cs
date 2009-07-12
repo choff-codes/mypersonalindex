@@ -104,7 +104,6 @@
             this.txtValue.Name = "txtValue";
             this.txtValue.Size = new System.Drawing.Size(96, 21);
             this.txtValue.TabIndex = 3;
-            this.txtValue.Text = "$100.00";
             this.txtValue.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
             this.txtValue.Leave += new System.EventHandler(this.txtValue_Leave);
             this.txtValue.Enter += new System.EventHandler(this.txtValue_Enter);

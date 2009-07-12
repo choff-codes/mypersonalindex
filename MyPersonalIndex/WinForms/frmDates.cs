@@ -8,7 +8,7 @@ namespace MyPersonalIndex
     {
         public struct DateRetValues
         {
-            public string When;
+            public List<DateTime> When;
         }
 
         public DateRetValues DateReturnValues { get { return _DateReturnValues; } }
@@ -16,23 +16,25 @@ namespace MyPersonalIndex
         private List<DateTime> SelDates = new List<DateTime>();
         private DateRetValues _DateReturnValues = new DateRetValues();
 
-        public frmDates(string When)
+        public frmDates(List<DateTime> When)
         {
             InitializeComponent();
 
-            string[] dates = When.Split(Constants.DateSeperatorChar);
-            foreach (string s in dates)
+            foreach (DateTime d in When)
             {
-                if (string.IsNullOrEmpty(s))
-                    continue;
-
-                SelDates.Add(Convert.ToDateTime(s));
-                lst.Items.Add(s);
+                SelDates.Add(d);
+                lst.Items.Add(d.ToShortDateString());
             }
         }
 
         private void calendar_DateSelected(object sender, DateRangeEventArgs e)
         {
+            if (lst.Items.Count == 440)
+            {
+                MessageBox.Show("Cannot add more than 440 dates!");
+                return;
+            }
+            
             SelDates.Add(calendar.SelectionStart);
             SelDates.Sort();
             lst.Items.Insert(SelDates.IndexOf(calendar.SelectionStart), calendar.SelectionStart.ToShortDateString());
@@ -72,12 +74,7 @@ namespace MyPersonalIndex
 
         private void cmdOK_Click(object sender, EventArgs e)
         {
-            string[] s = new string[SelDates.Count];
-
-            for (int i = 0; i < SelDates.Count; i++)
-                s[i] = SelDates[i].ToShortDateString();
-
-            _DateReturnValues.When = string.Join(Constants.DateSeperatorString, s);
+            _DateReturnValues.When = SelDates;
             DialogResult = DialogResult.OK;
         }
 

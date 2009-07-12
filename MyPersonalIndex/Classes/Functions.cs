@@ -73,17 +73,6 @@ namespace MyPersonalIndex
             }
         }
 
-        public static string CleanStatString(string SQL, Dictionary<Constants.StatVariables, string> d)
-        {
-            //if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
-            //    throw new ArgumentOutOfRangeException("Dictionary must be correct length");
-
-            foreach (KeyValuePair<Constants.StatVariables, string> p in d)
-                SQL = SQL.Replace(string.Format("%{0}%", Enum.GetName(typeof(Constants.StatVariables), p.Key)), p.Value);
-
-            return SQL;
-        }
-
         public static bool IsInternetConnection()
         {
             HttpWebRequest httpRequest;
@@ -397,6 +386,31 @@ namespace MyPersonalIndex
                     break;
             }
             return null;
+        }
+
+        public static List<DateTime> ExtractDates(string When)
+        {
+            List<DateTime> Values = new List<DateTime>();
+
+            if (!string.IsNullOrEmpty(When))
+            {
+                string[] Dates = When.Split(Constants.DateSeperatorChar);
+
+                foreach (string s in Dates)
+                    Values.Add(new DateTime(Convert.ToInt32(s.Substring(0, 4)), Convert.ToInt32(s.Substring(4, 2)), Convert.ToInt32(s.Substring(6, 2))));
+            }
+
+            return Values;
+        }
+
+        public static string InsertDates(List<DateTime> When)
+        {
+            string[] Dates = new string[When.Count];
+
+            for(int i = 0; i < When.Count; i++)
+                Dates[i] = string.Format("{0}{1}{2}", When[i].ToString("yyyy"), When[i].ToString("MM"), When[i].ToString("dd"));
+
+            return string.Join(Constants.DateSeperatorString, Dates);
         }
     }
 }

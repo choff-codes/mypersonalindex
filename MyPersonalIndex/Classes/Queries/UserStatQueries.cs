@@ -10,7 +10,7 @@ namespace MyPersonalIndex
         public static QueryInfo GetStat(int ID)
         {
             return new QueryInfo(
-                "SELECT ID, SQL, Description, Format FROM UserStatistics WHERE ID = @ID",
+                    "SELECT ID, SQL, Description, Format FROM UserStatistics WHERE ID = @ID",
                 new SqlCeParameter[] { 
                     AddParam("@ID", SqlDbType.Int, ID)
                 }

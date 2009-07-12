@@ -60,9 +60,9 @@ namespace MyPersonalIndex
                             "SELECT a.Date, a.Price, a.Change, b.Amount AS Dividend, c.Ratio AS Split" +
                             " FROM ClosingPrices a" +
                             " LEFT JOIN Dividends b" +
-                            " ON a.Date = b.Date AND a.Ticker = b.Ticker" +
+                                " ON a.Date = b.Date AND a.Ticker = b.Ticker" +
                             " LEFT JOIN Splits c" +
-                            " ON a.Date = c.Date AND a.Ticker = c.Ticker" +
+                                " ON a.Date = c.Date AND a.Ticker = c.Ticker" +
                             " WHERE a.Ticker = @Ticker" +
                             " ORDER BY a.Date{0}", Desc ? " Desc" : String.Empty),
                         new SqlCeParameter[] { 

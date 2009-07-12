@@ -43,13 +43,9 @@ namespace MyPersonalIndex
                                        " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                                 " GROUP BY TickerID) AS b" +
                         " ON a.ID = b.TickerID" +
-                    " LEFT JOIN (SELECT Ticker, Price" +
-                                " FROM ClosingPrices" +
-                                " WHERE DATE = @Date) AS c" +
-                        " ON a.Ticker = c.Ticker" +
-                    " LEFT JOIN (SELECT ID, AA, Target" +
-                                " FROM AA" +
-                                " WHERE Portfolio = @Portfolio) AS d" +
+                    " LEFT JOIN ClosingPrices AS c" +
+                        " ON a.Ticker = c.Ticker AND c.Date = @Date" +
+                    " LEFT JOIN AA AS d" +
                         " ON a.AA = d.ID" +
                     " WHERE a.Portfolio = @Portfolio AND a.Active = 1{0}" +
                     " GROUP BY d.ID, d.AA, d.Target{1}",
@@ -97,18 +93,13 @@ namespace MyPersonalIndex
                                        " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                                 " GROUP BY TickerID) AS b" +
                         " ON a.ID = b.TickerID" +
-                    " LEFT JOIN (SELECT Ticker, Price" +
-                                " FROM ClosingPrices" +
-                                " WHERE Date = @Date) AS c" +
-                        " ON a.Ticker = c.Ticker" +
-                    " LEFT JOIN (SELECT Ticker, Price" +
-                                " FROM AvgPricePerShare) AS d" +
+                    " LEFT JOIN ClosingPrices AS c" +
+                        " ON a.Ticker = c.Ticker AND c.Date = @Date" +
+                    " LEFT JOIN AvgPricePerShare AS d" +
                         " ON a.ID = d.Ticker" +
-                    " LEFT JOIN (SELECT ID, Name, TaxRate" +
-                                " FROM Accounts" +
-                                " WHERE Portfolio = @Portfolio) AS e" +
+                    " LEFT JOIN Accounts AS e" +
                         " ON a.Acct = e.ID" +
-                    " WHERE Portfolio = @Portfolio AND a.Active = 1{0}" +
+                    " WHERE a.Portfolio = @Portfolio AND a.Active = 1{0}" +
                     " GROUP BY e.ID, e.Name, e.TaxRate{1}",
                     ShowBlank ? String.Empty : " AND e.ID IS NOT NULL", string.IsNullOrEmpty(Sort) ? String.Empty : string.Format(" ORDER BY {0}", Sort)),
                 new SqlCeParameter[] { 
@@ -126,7 +117,7 @@ namespace MyPersonalIndex
                     "SELECT Date, TotalValue, NAV, Change, (CASE WHEN Change IS NOT NULL THEN 100 * ((NAV / @StartValue) - 1) END) AS Gain" +
                     " FROM NAV" +
                     " WHERE Portfolio = @Portfolio" +
-                    " ORDER BY Date {0}", Desc ? " DESC" : String.Empty),
+                    " ORDER BY Date{0}", Desc ? " DESC" : String.Empty),
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio),
                     AddParam("@StartValue", SqlDbType.Decimal, StartValue)
@@ -172,7 +163,7 @@ namespace MyPersonalIndex
         {
             return new QueryInfo(
                 string.Format(
-                    "SELECT DISTINCT Ticker from Tickers WHERE Portfolio = @Portfolio {0}", 
+                    "SELECT DISTINCT Ticker from Tickers WHERE Portfolio = @Portfolio{0}", 
                     Hidden ? String.Empty : " AND Hide = 0"),
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio)
@@ -204,8 +195,8 @@ namespace MyPersonalIndex
                 "SELECT SUM(Price * Shares)" +
                 " FROM Trades a" +
                 " INNER JOIN Tickers b" +
-                " ON a.TickerID = b.ID AND b.Active = 1" +
-                " WHERE a.Portfolio = @Portfolio AND  a.Date = @Date",
+                    " ON a.TickerID = b.ID AND b.Active = 1" +
+                " WHERE a.Portfolio = @Portfolio AND a.Date = @Date",
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio),
                     AddParam("@Date", SqlDbType.DateTime, Date)
@@ -240,20 +231,19 @@ namespace MyPersonalIndex
         {
             return new QueryInfo(
                 "SELECT SUM(a.Amount * b.Shares) AS TotalValue" +
-                " FROM   (SELECT Ticker, Amount" +
-                        " FROM Dividends" +
-                        " WHERE Date = @Date) a" +
+                " FROM Dividends AS a" +
                 " INNER JOIN (SELECT Ticker, SUM(Shares) as Shares" +
                              " FROM (SELECT a.Ticker, a.Shares * CAST(COALESCE(EXP(SUM(LOG(c.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
                                    " FROM Trades a" +
                                    " INNER JOIN Tickers b" +
-                                       " ON b.Portfolio = @Portfolio AND b.Active = 1 AND b.ID = a.TickerID" +
+                                       " ON b.Active = 1 AND b.ID = a.TickerID" +
                                    " LEFT JOIN Splits c" +
                                        " ON a.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND @Date" +
                                    " WHERE a.Portfolio = @Portfolio AND a.Date <= @Date" +
                                    " GROUP BY a.ID, a.Custom, a.Ticker, a.Shares) AllTrades" +
                             " GROUP BY Ticker) AS b" +
-                " ON a.Ticker = b.Ticker",
+                    " ON a.Ticker = b.Ticker" +
+                " WHERE a.Date = @Date",
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio),
                     AddParam("@Date", SqlDbType.DateTime, Date)
@@ -296,18 +286,13 @@ namespace MyPersonalIndex
                                     " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                              " GROUP BY TickerID) AS b" +
                      " ON a.ID = b.TickerID" +
-                " LEFT JOIN (SELECT Ticker, Price" +
-                            " FROM AvgPricePerShare) AS c" +
+                " LEFT JOIN AvgPricePerShare AS c" +
                     " ON a.ID = c.Ticker" +
-                " LEFT JOIN (SELECT Ticker, Price" +
-                            " FROM ClosingPrices" +
-                            " WHERE DATE = @Date) AS d" +
-                    " ON a.Ticker = d.Ticker" +
-                " LEFT JOIN (SELECT ID, Name, TaxRate" +
-                            " FROM Accounts" +
-                            " WHERE Portfolio = @Portfolio) AS e" +
+                " LEFT JOIN ClosingPrices AS d" +
+                    " ON a.Ticker = d.Ticker AND d.Date = @Date" +
+                " LEFT JOIN Accounts AS e" +
                     " ON a.Acct = e.ID" +
-                " WHERE a.Active = 1 AND Portfolio = @Portfolio",
+                " WHERE a.Active = 1 AND a.Portfolio = @Portfolio",
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio),
                     AddParam("@Date", SqlDbType.DateTime, Date)
@@ -338,22 +323,15 @@ namespace MyPersonalIndex
                                        " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                                 " GROUP BY TickerID) AS b" +
                         " ON a.ID = b.TickerID" +
-                    " LEFT JOIN (SELECT Ticker, Price" +
-                                " FROM ClosingPrices" +
-                                " WHERE Date = @Date) AS c" +
-                        " ON a.Ticker = c.Ticker" +
-                    " LEFT JOIN (SELECT Ticker, Price" +
-                                " FROM AvgPricePerShare) AS d" +
+                    " LEFT JOIN ClosingPrices AS c" +
+                        " ON a.Ticker = c.Ticker AND c.Date = @Date" +
+                    " LEFT JOIN AvgPricePerShare AS d" +
                         " ON a.ID = d.Ticker" +
-                    " LEFT JOIN (SELECT ID, AA" +
-                                " FROM AA" +
-                                " WHERE Portfolio = @Portfolio) AS e" +
+                    " LEFT JOIN AA AS e" +
                         " ON a.AA = e.ID" +
-                    " LEFT JOIN (SELECT ID, Name, TaxRate" +
-                                " FROM Accounts" +
-                                " WHERE Portfolio = @Portfolio) AS f" +
+                    " LEFT JOIN Accounts AS f" +
                         " ON a.Acct = f.ID" +
-                    " WHERE  Portfolio = @Portfolio{0}{1}",
+                    " WHERE a.Portfolio = @Portfolio{0}{1}",
                     Hidden ? String.Empty : " AND Hide = 0", string.IsNullOrEmpty(Sort) ? String.Empty : string.Format(" ORDER BY {0}", Sort)),
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio),
@@ -396,12 +374,14 @@ namespace MyPersonalIndex
         {
             return new QueryInfo(
                 "SELECT a.Ticker, b.Date" +
-                " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices WHERE Ticker <> '$' GROUP BY Ticker ) a" +
+                " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices WHERE Ticker <> @Cash GROUP BY Ticker ) a" +
                 " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b" +
                 " LEFT JOIN ClosingPrices c" +
-                " ON a.Ticker = c.Ticker and b.Date = c.Date" +
+                    " ON a.Ticker = c.Ticker and b.Date = c.Date" +
                 " WHERE b.Date BETWEEN a.MinDate AND a.MaxDate AND c.Ticker IS NULL",
-                new SqlCeParameter[] {}
+                new SqlCeParameter[] {
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
             );
         }
 
@@ -447,92 +427,131 @@ namespace MyPersonalIndex
             );
         }
 
-        public static string GetPreviousTickerClose(string Ticker, DateTime Date)
+        public static QueryInfo GetPreviousTickerClose(string Ticker, DateTime Date)
         {
-            return string.Format("SELECT TOP (1) Price FROM ClosingPrices WHERE Ticker = '{0}' AND Date < '{1}' ORDER BY Date DESC", Ticker, Date.ToShortDateString());
+            return new QueryInfo(
+                "SELECT TOP (1) Price FROM ClosingPrices WHERE Ticker = @Ticker AND Date < @Date ORDER BY Date DESC",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.NVarChar, Ticker),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
         public enum eGetSettings { DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits };
-        public static string GetSettings()
+        public static QueryInfo GetSettings()
         {
-            return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings";
+            return new QueryInfo(
+                "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string GetSpecificNav(int Portfolio, DateTime Date)
+        public static QueryInfo GetSpecificNav(int Portfolio, DateTime Date)
         {
-            return string.Format("SELECT NAV FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
+            return new QueryInfo(
+                "SELECT NAV FROM NAV WHERE Portfolio = @Portfolio AND Date = @Date",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
-        public static string GetSplit(string Ticker, DateTime Date)
+        public static QueryInfo GetSplit(string Ticker, DateTime Date)
         {
-            return string.Format("SELECT Ratio FROM Splits WHERE Ticker = '{0}' AND Date = '{1}'", Ticker, Date.ToShortDateString());
+            return new QueryInfo(
+                "SELECT Ratio FROM Splits WHERE Ticker = @Ticker AND Date = @Date",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.NVarChar, Ticker),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
         public enum eGetTickerValue { TotalValue, Price, Ticker, Ratio };
-        public static string GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
+        public static QueryInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
         {
-            return string.Format(
+            return new QueryInfo(
                 "SELECT COALESCE(SUM(c.Price * b.Shares), 0) AS TotalValue, c.Price, a.Ticker, d.Ratio" +
                 " FROM Tickers AS a" +
                 " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                             " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
                                    " FROM Trades a" +
                                    " LEFT JOIN Splits b" +
-                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND '{1}'" +
-                                   " WHERE a.TickerID = {0} AND a.Date <= '{1}'" +
+                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @YDay" +
+                                   " WHERE a.TickerID = @TickerID AND a.Date <= @YDay" +
                                    " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
                             " GROUP BY TickerID) AS b" +
                     " ON a.ID = b.TickerID" +
-                " LEFT JOIN (SELECT Ticker, Price" +
-                            " FROM ClosingPrices" +
-                            " WHERE DATE = '{1}' ) AS c" +
-                    " ON a.Ticker = c.Ticker" +
+                " LEFT JOIN ClosingPrices AS c" +
+                    " ON a.Ticker = c.Ticker AND c.Date = @YDay" +
                 " LEFT JOIN Splits d" +
-                    " ON a.Ticker = d.Ticker and d.Date = '{2}'" + // need yesterday's price, but split today if necessary
-                " WHERE a.ID = {0} AND a.Active = 1" +
-                " GROUP BY c.Price, a.Ticker, d.Ratio", TickerID, YDay.ToShortDateString(), Date.ToShortDateString());
+                    " ON a.Ticker = d.Ticker and d.Date = @Date" + // need yesterday's price, but split today if necessary
+                " WHERE a.ID = @TickerID AND a.Active = 1" +
+                " GROUP BY c.Price, a.Ticker, d.Ratio",
+                new SqlCeParameter[] { 
+                    AddParam("@TickerID", SqlDbType.Int, TickerID),
+                    AddParam("@Date", SqlDbType.DateTime, Date),
+                    AddParam("@YDay", SqlDbType.DateTime, YDay)
+                }
+            );
         }
 
-        public static string GetTotalValue(int Portfolio, DateTime Date)
+        public static QueryInfo GetTotalValue(int Portfolio, DateTime Date)
         {
-            return string.Format("SELECT TotalValue FROM NAV WHERE Portfolio = {0} AND Date = '{1}'", Portfolio, Date.ToShortDateString());
+            return new QueryInfo(
+                "SELECT TotalValue FROM NAV WHERE Portfolio = @Portfolio AND Date = @Date",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
-        public static string GetTotalValueNew(int Portfolio, DateTime Date)
+        public static QueryInfo GetTotalValueNew(int Portfolio, DateTime Date)
         {
-            return string.Format(
+            return new QueryInfo(
                 "SELECT SUM(a.Price * b.Shares) AS TotalValue" +
-                " FROM (SELECT Ticker, Price" +
-                        " FROM ClosingPrices" +
-                        " WHERE  Date = '{0}') a" +
+                " FROM ClosingPrices AS a" +
                 " INNER JOIN (SELECT Ticker, SUM(Shares) as Shares" +
                              " FROM (SELECT a.Ticker, a.Shares * CAST(COALESCE(EXP(SUM(LOG(c.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
                                    " FROM Trades a" +
                                    " INNER JOIN Tickers b" +
-                                       " ON b.Portfolio = {1} AND b.Active = 1 AND b.ID = a.TickerID" +
+                                       " ON b.Active = 1 AND b.ID = a.TickerID" +
                                    " LEFT JOIN Splits c" +
-                                       " ON a.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND '{0}'" +
-                                   " WHERE a.Portfolio = {1} AND a.Date <= '{0}'" +
+                                       " ON a.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND @Date" +
+                                   " WHERE a.Portfolio = @Portfolio AND a.Date <= @Date" +
                                    " GROUP BY a.ID, a.Custom, a.Ticker, a.Shares) AllTrades" +
                             " GROUP BY Ticker) AS b" +
-                " ON a.Ticker = b.Ticker",
-                Date.ToShortDateString(), Portfolio);
+                    " ON a.Ticker = b.Ticker" +
+                " WHERE a.Date = @Date",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
         public enum eGetUpdateDistinctTickers { Ticker };
-        public static string GetUpdateDistinctTickers()
+        public static QueryInfo GetUpdateDistinctTickers()
         {
-            return "SELECT DISTINCT Ticker FROM Tickers WHERE Ticker <> '$'";
+            return new QueryInfo(
+                "SELECT DISTINCT Ticker FROM Tickers WHERE Ticker <> @Cash",
+                new SqlCeParameter[] { 
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
         public enum eGetUpdateLastRunDates { Ticker, Date, Price, Type };
-        public static string GetUpdateLastRunDates()
+        public static QueryInfo GetUpdateLastRunDates()
         {
-            return
+            return new QueryInfo(
                     "SELECT a.Ticker, b.Date, b.Price, 'C' AS Type" +
                     " FROM (SELECT Ticker, MAX(Date) as Date" +
                           " FROM ClosingPrices" +
-                          " WHERE Ticker <> '$'" +
+                          " WHERE Ticker <> @Cash" +
                           " GROUP BY Ticker) a" +
                     " INNER JOIN ClosingPrices b" +
                     " ON a.Ticker = b.Ticker AND a.Date = b.Date" +
@@ -543,183 +562,313 @@ namespace MyPersonalIndex
                 " UNION ALL" +
                     " SELECT Ticker, MAX(Date) as Date, 0, 'S'" +
                     " FROM Splits" +
-                    " GROUP BY Ticker";
+                    " GROUP BY Ticker",
+                new SqlCeParameter[] { 
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
-        public static string GetVersion()
+        public static QueryInfo GetVersion()
         {
-            return "SELECT Version FROM Settings";
+            return new QueryInfo(
+                "SELECT Version FROM Settings",
+                new SqlCeParameter[] {}
+            );
         }
 
         /************************* Deletes ***********************************/
 
-        public static string DeleteAA(int Portfolio)
+        public static QueryInfo DeleteAA(int Portfolio)
         {
-            return string.Format("DELETE FROM AA WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM AA WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteAccount(int Portfolio)
+        public static QueryInfo DeleteAccount(int Portfolio)
         {
-            return string.Format("DELETE FROM Accounts WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM Accounts WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteAvgPrices()
+        public static QueryInfo DeleteAvgPrices()
         {
-            return "DELETE FROM AvgPricePerShare";
+            return new QueryInfo(
+                "DELETE FROM AvgPricePerShare",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string DeleteClosingPrices()
+        public static QueryInfo DeleteClosingPrices()
         {
-            return "DELETE FROM ClosingPrices";
+            return new QueryInfo(
+                "DELETE FROM ClosingPrices",
+                new SqlCeParameter[] { }
+            );
         }
 
-        public static string DeleteCustomTrade(int Ticker)
+        public static QueryInfo DeleteCustomTrade(int Ticker)
         {
-            return string.Format("DELETE FROM CustomTrades WHERE TickerID = {0}", Ticker);
+            return new QueryInfo(
+                "DELETE FROM CustomTrades WHERE TickerID = @Ticker",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.Int, Ticker)
+                }
+            );
         }
 
-        public static string DeleteCustomTrades()
+        public static QueryInfo DeleteCustomTrades()
         {
-            return "DELETE FROM Trades WHERE Custom IS NOT NULL";
+            return new QueryInfo(
+                "DELETE FROM Trades WHERE Custom IS NOT NULL",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string DeleteCustomTrades(int Portfolio)
+        public static QueryInfo DeleteCustomTrades(int Portfolio)
         {
-            return string.Format("DELETE FROM CustomTrades WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM CustomTrades WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteCustomTrades(int Portfolio, DateTime MinDate)
+        public static QueryInfo DeleteCustomTrades(int Portfolio, DateTime MinDate)
         {
-            return string.Format(
-                "DELETE FROM Trades WHERE Portfolio = {0} AND Date >= '{1}' AND Custom IS NOT NULL", Portfolio, MinDate.ToShortDateString());
+            return new QueryInfo(
+                "DELETE FROM Trades WHERE Portfolio = @Portfolio AND Date >= @MinDate AND Custom IS NOT NULL",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@MinDate", SqlDbType.DateTime, MinDate)
+                }
+            );
         }
 
-        public static string DeleteDividends()
+        public static QueryInfo DeleteDividends()
         {
-            return "DELETE FROM Dividends";
+            return new QueryInfo(
+                "DELETE FROM Dividends",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string DeleteNAV()
+        public static QueryInfo DeleteNAV()
         {
-            return "DELETE FROM NAV";
+            return new QueryInfo(
+                "DELETE FROM AA",
+                new SqlCeParameter[] { }
+            );
         }
 
-        public static string DeleteNAVPrices(int Portfolio, DateTime MinDate)
+        public static QueryInfo DeleteNAVPrices(int Portfolio, DateTime MinDate)
         {
-            return string.Format(
-                "DELETE FROM NAV WHERE Portfolio = {0} AND Date >= '{1}'", Portfolio, MinDate.ToShortDateString());
+            return new QueryInfo(
+                "DELETE FROM NAV WHERE Portfolio = @Portfolio AND Date >= @MinDate",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@MinDate", SqlDbType.DateTime, MinDate)
+                }
+            );
         }
 
-        public static string DeletePortfolio(int Portfolio)
+        public static QueryInfo DeletePortfolio(int Portfolio)
         {
-            return string.Format("DELETE FROM Portfolios WHERE ID = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM Portfolios WHERE ID = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteSplits()
+        public static QueryInfo DeleteSplits()
         {
-            return "DELETE FROM Splits";
+            return new QueryInfo(
+               "DELETE FROM Splits",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string DeleteStatistics(int Portfolio)
+        public static QueryInfo DeleteStatistics(int Portfolio)
         {
-            return string.Format("DELETE FROM Stats WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM Stats WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteTicker(int Portfolio, int Ticker)
+        public static QueryInfo DeleteTicker(int Ticker)
         {
-            return string.Format("DELETE FROM Tickers WHERE Portfolio = {0} AND ID = {1}", Portfolio, Ticker);
+            return new QueryInfo(
+                "DELETE FROM Tickers WHERE ID = @Ticker",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.Int, Ticker)
+                }
+            );
         }
 
-        public static string DeleteTickers(int Portfolio)
+        public static QueryInfo DeleteTickers(int Portfolio)
         {
-            return string.Format("DELETE FROM Tickers WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM Tickers WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteTickerTrades(int Portfolio, int Ticker)
+        public static QueryInfo DeleteTickerTrades(int Ticker)
         {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0} AND TickerID = {1}", Portfolio, Ticker);
+            return new QueryInfo(
+                "DELETE FROM Trades WHERE TickerID = @Ticker",
+                new SqlCeParameter[] { 
+                    AddParam("@Ticker", SqlDbType.Int, Ticker)
+                }
+            );
         }
 
-        public static string DeleteTrades(int Portfolio)
+        public static QueryInfo DeleteTrades(int Portfolio)
         {
-            return string.Format("DELETE FROM Trades WHERE Portfolio = {0}", Portfolio);
+            return new QueryInfo(
+                "DELETE FROM Trades WHERE Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string DeleteUnusedCashPrices()
+        public static QueryInfo DeleteUnusedCashPrices()
         {
-            return "DELETE FROM ClosingPrices" +
-                    " WHERE Ticker = '$'" +
+            return new QueryInfo(
+                "DELETE FROM ClosingPrices" +
+                    " WHERE Ticker = @Cash" +
                     " AND NOT EXISTS" +
                         " (SELECT TOP (1) 1" +
                         " FROM ClosingPrices AS a" +
-                        " WHERE a.Ticker <> '$' AND a.Date = ClosingPrices.Date)";
+                        " WHERE a.Ticker <> @Cash AND a.Date = ClosingPrices.Date)",
+                new SqlCeParameter[] { 
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
-        public static string DeleteUnusedClosingPrices()
+        public static QueryInfo DeleteUnusedClosingPrices()
         {
-            return
+            return new QueryInfo(
                 "DELETE FROM ClosingPrices" +
                 " WHERE Ticker IN (SELECT a.Ticker" +
                                 " FROM (SELECT DISTINCT Ticker FROM ClosingPrices) a" +
                                 " LEFT JOIN Tickers b" +
                                 " ON a.Ticker = b.Ticker" +
-                                " WHERE b.Ticker IS NULL AND a.Ticker <> '$' )";
+                                " WHERE b.Ticker IS NULL AND a.Ticker <> @Cash )",
+                new SqlCeParameter[] { 
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
-        public static string DeleteUnusedDividends()
+        public static QueryInfo DeleteUnusedDividends()
         {
-            return
+            return new QueryInfo(
                 "DELETE FROM Dividends" +
                 " WHERE Ticker IN (SELECT a.Ticker" +
                                 " FROM (SELECT DISTINCT Ticker FROM Dividends) a" +
                                 " LEFT JOIN Tickers b" +
                                 " ON a.Ticker = b.Ticker" +
-                                " WHERE b.Ticker IS NULL )";
+                                " WHERE b.Ticker IS NULL )",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string DeleteUnusedSplits()
+        public static QueryInfo DeleteUnusedSplits()
         {
-            return
+            return new QueryInfo(
                 "DELETE FROM Splits" +
                 " WHERE Ticker IN (SELECT a.Ticker" +
                                 " FROM (SELECT DISTINCT Ticker FROM Splits) a" +
                                 " LEFT JOIN Tickers b" +
                                 " ON a.Ticker = b.Ticker" +
-                                " WHERE b.Ticker IS NULL )";
+                                " WHERE b.Ticker IS NULL )",
+                new SqlCeParameter[] {}
+            );
         }
 
         /************************* Updates ***********************************/
 
-        public static string UpdatePortfolioAttributes(int Portfolio, bool HoldingsShowHidden, bool NAVSort,
+        public static QueryInfo UpdatePortfolioAttributes(int Portfolio, bool HoldingsShowHidden, bool NAVSort,
             bool ShowAABlank, string HoldingsSort, string AASort, bool CorrelationShowHidden, bool ShowAcctBlank, string AcctSort)
         {
-            return string.Format("UPDATE Portfolios SET HoldingsShowHidden = {0}, NAVSort = {1}, AAShowBlank = {2}, HoldingsSort = '{3}'," +
-                " AASort = '{4}', CorrelationShowHidden = {5}, AcctShowBlank = {6}, AcctSort = '{7}' WHERE ID = {8}",
-                Convert.ToByte(HoldingsShowHidden), Convert.ToByte(NAVSort), Convert.ToByte(ShowAABlank), HoldingsSort,
-                AASort, Convert.ToByte(CorrelationShowHidden), Convert.ToByte(ShowAcctBlank), AcctSort, Portfolio);
+            return new QueryInfo(
+                "UPDATE Portfolios SET HoldingsShowHidden = @HoldingsShowHidden, NAVSort = @NAVSort, AAShowBlank = @ShowAABlank," +
+                " HoldingsSort = @HoldingsSort, AASort = @AASort, CorrelationShowHidden = @CorrelationShowHidden, AcctShowBlank = @ShowAcctBlank," +
+                " AcctSort = @AcctSort WHERE ID = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@HoldingsShowHidden", SqlDbType.Bit, HoldingsShowHidden),
+                    AddParam("@NAVSort", SqlDbType.Bit, NAVSort),
+                    AddParam("@ShowAABlank", SqlDbType.Bit, ShowAABlank),
+                    AddParam("@HoldingsSort", SqlDbType.NVarChar, HoldingsSort),
+                    AddParam("@AASort", SqlDbType.NVarChar, AASort),
+                    AddParam("@CorrelationShowHidden", SqlDbType.Bit, CorrelationShowHidden),
+                    AddParam("@ShowAcctBlank", SqlDbType.Bit, ShowAcctBlank),
+                    AddParam("@AcctSort", SqlDbType.NVarChar, AcctSort),
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
         }
 
-        public static string UpdatePortfolioStartDates(DateTime MinDate)
+        public static QueryInfo UpdatePortfolioStartDates(DateTime MinDate)
         {
-            return string.Format("UPDATE Portfolios SET StartDate = '{0}' WHERE StartDate < '{0}'", MinDate.ToShortDateString());
+            return new QueryInfo(
+                "UPDATE Portfolios SET StartDate = @MinDate WHERE StartDate < @MinDate",
+                new SqlCeParameter[] { 
+                    AddParam("@MinDate", SqlDbType.DateTime, MinDate)
+                }
+            );
         }
 
-        public static string UpdateSettings(int? LastPortfolio, Rectangle WindowPosition, FormWindowState f)
+        public static QueryInfo UpdateSettings(int? LastPortfolio, Rectangle WindowPosition, FormWindowState f)
         {
-            return string.Format("UPDATE Settings SET LastPortfolio = {0}, WindowX = {1}, WindowY = {2}, WindowHeight = {3}, WindowWidth = {4}, WindowState = {5}",
-                LastPortfolio == null ? "NULL" : LastPortfolio.ToString(), WindowPosition.X, WindowPosition.Y, WindowPosition.Height, WindowPosition.Width, (int)f);
+            return new QueryInfo(
+                "UPDATE Settings SET LastPortfolio = @LastPortfolio, WindowX = @WindowX, WindowY = @WindowY, WindowHeight = @WindowHeight," +
+                " WindowWidth = @WindowWidth, WindowState = @WindowState",
+                new SqlCeParameter[] { 
+                    AddParam("@LastPortfolio", SqlDbType.Int, LastPortfolio == null ? (object)System.DBNull.Value : LastPortfolio),
+                    AddParam("@WindowX", SqlDbType.Int, WindowPosition.X),
+                    AddParam("@WindowY", SqlDbType.Int, WindowPosition.Y),
+                    AddParam("@WindowHeight", SqlDbType.Int, WindowPosition.Height),
+                    AddParam("@WindowWidth", SqlDbType.Int, WindowPosition.Width),
+                    AddParam("@WindowState", SqlDbType.Int, (int)f)
+                }
+            );
         }
 
         /************************* Inserts ***********************************/
 
-        public static string InsertCashPrices()
+        public static QueryInfo InsertCashPrices()
         {
-            return "INSERT INTO ClosingPrices" +
-                    " SELECT a.Date, '$', 1, 0" +
+            return new QueryInfo(
+                "INSERT INTO ClosingPrices" +
+                    " SELECT a.Date, @Cash, 1, 0" +
                     " FROM (SELECT DISTINCT Date FROM ClosingPrices) a" +
                     " LEFT JOIN ClosingPrices b" +
-                    " ON b.Ticker = '$' and a.Date = b.Date" +
-                    " WHERE b.Ticker IS NULL";
+                        " ON b.Ticker = @Cash and a.Date = b.Date" +
+                    " WHERE b.Ticker IS NULL",
+                new SqlCeParameter[] {
+                    AddParam("@Cash", SqlDbType.NVarChar, Constants.Cash)
+                }
+            );
         }
 
     }

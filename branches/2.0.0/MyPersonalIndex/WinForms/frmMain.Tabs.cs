@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlServerCe;
 using System.Data.SqlTypes;
 using System.Drawing;
@@ -18,7 +19,7 @@ namespace MyPersonalIndex
 
             LoadGainLossInfo(dgAcct, Date, (int)Constants.MPIAccount.CostBasisColumn, (int)Constants.MPIAccount.GainLossColumn,
                 (int)Constants.MPIAccount.TaxLiabilityColumn, true, true, true);
-            dgAcct.Columns[Constants.MPIAccount.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Account.TotalValue);
+            dgAcct.Columns[Constants.MPIAccount.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.Account.TotalValue);
         }
 
         private void LoadAssetAllocation(DateTime Date)
@@ -26,7 +27,7 @@ namespace MyPersonalIndex
             MPI.AA.TotalValue = GetTotalValue(Date);
             dgAA.DataSource = SQL.ExecuteDataset(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
 
-            dgAA.Columns[Constants.MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.AA.TotalValue);
+            dgAA.Columns[Constants.MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.AA.TotalValue);
         }
 
         private void LoadCorrelations(DateTime StartDate, DateTime EndDate)
@@ -100,18 +101,13 @@ namespace MyPersonalIndex
                 }
 
             if (bCostBasis)
-                dg.Columns[CostBasisCol].HeaderCell.Value = "Cost Basis (" + String.Format("{0:C})", CostBasis);
+                dg.Columns[CostBasisCol].HeaderCell.Value = string.Format("Cost Basis\n[{0:C}]", CostBasis);
 
             if (bTax)
-                dg.Columns[TaxCol].HeaderCell.Value = "Tax Liability (" + String.Format("{0:C})", TaxLiability);
+                dg.Columns[TaxCol].HeaderCell.Value = string.Format("Tax Liability\n[{0:C}]", TaxLiability);
 
             if (bGainLoss)
-            {
-                string sGainLoss = String.Format("{0:C})", GainLoss);
-                if (GainLoss < 0)
-                    sGainLoss = "-" + sGainLoss.Replace("(", String.Empty).Replace(")", String.Empty) + ")";
-                dg.Columns[GainLossCol].HeaderCell.Value = "Gain/Loss (" + sGainLoss;
-            }
+                dg.Columns[GainLossCol].HeaderCell.Value = string.Format("Gain/Loss\n[{0:C}]", GainLoss); 
         }
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
@@ -153,7 +149,7 @@ namespace MyPersonalIndex
 
             LoadGainLossInfo(dgHoldings, Date, (int)Constants.MPIHoldings.CostBasisColumn, (int)Constants.MPIHoldings.GainLossColumn,
                 0, true, true, false);
-            dgHoldings.Columns[Constants.MPIHoldings.TotalValueColumn].HeaderCell.Value = "Total Value (" + String.Format("{0:C})", MPI.Holdings.TotalValue);
+            dgHoldings.Columns[Constants.MPIHoldings.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.Holdings.TotalValue);
         }
 
         private void LoadNAV()
@@ -169,6 +165,7 @@ namespace MyPersonalIndex
                 dgStats.Rows.Clear();
             MPI.Stat.TotalValue = GetTotalValue(EndDate);
 
+            Queries.QueryInfo Q = PrepareStatString();
             int i = -1;
             using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetStats(MPI.Portfolio.ID)))
                 foreach (SqlCeUpdatableRecord rec in rs)
@@ -181,7 +178,8 @@ namespace MyPersonalIndex
                     try
                     {
                         dgStats.Rows[i].HeaderCell.Value = rec.GetString((int)MainQueries.eGetStats.Description);
-                        dgStats[0, i].Value = Functions.FormatStatString(SQL.ExecuteScalar(CleanStatString(rec.GetString((int)MainQueries.eGetStats.SQL))),
+                        Q.Query = rec.GetString((int)MainQueries.eGetStats.SQL);
+                        dgStats[0, i].Value = Functions.FormatStatString(SQL.ExecuteScalar(Q),
                             (Constants.OutputFormat)rec.GetInt32((int)MainQueries.eGetStats.Format));
                     }
                     catch (SqlCeException)

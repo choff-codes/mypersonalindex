@@ -39,7 +39,7 @@ namespace MyPersonalIndex
 
             if (string.IsNullOrEmpty(txtValue.Text))
             {
-                MessageBox.Show("NAV Start Value must be number!");
+                MessageBox.Show("Index Start Value must be number!");
                 return false;
             }
 
@@ -47,13 +47,13 @@ namespace MyPersonalIndex
             {
                 if (Functions.ConvertFromCurrency(txtValue.Text) <= 0)
                 {
-                    MessageBox.Show("NAV Start Value must be greater than 0!");
+                    MessageBox.Show("Index Start Value must be greater than 0!");
                     return false;
                 }
             }
             catch (FormatException)
             {
-                MessageBox.Show("NAV Start Value must be number!");
+                MessageBox.Show("Index Start Value must be number!");
                 return false;
             }
 
@@ -146,6 +146,7 @@ namespace MyPersonalIndex
             }
 
             cmbCost.SelectedIndex = 0;
+            txtValue.Text = Functions.ConvertToCurrency(100);
 
             ToolStripControlHost host = new ToolStripControlHost(IndexDate);
             mnuDate.Items.Insert(0, host);

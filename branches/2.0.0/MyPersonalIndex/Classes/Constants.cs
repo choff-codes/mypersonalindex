@@ -8,8 +8,8 @@ namespace MyPersonalIndex
     public class Constants
     {
         public const string SignifyPortfolio = "~|";
-        public const string DateSeperatorString = "|";
         public const char DateSeperatorChar = '|';
+        public const string DateSeperatorString = "|";
         public const char Cash = '$';
         public const int NonLeapYear = 2009;
         public enum AvgShareCalc { FIFO, LIFO, AVG };
@@ -196,18 +196,6 @@ namespace MyPersonalIndex
                 ClosingDate = MinDate;
                 DividendDate = MinDate;
                 SplitDate = MinDate;
-            }
-        }
-
-        public struct QueryInfo
-        {
-            public string Param;
-            public SqlDbType Field;
-
-            public QueryInfo(string Param, SqlDbType Field)
-            {
-                this.Param = Param;
-                this.Field = Field;
             }
         }
     }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data.SqlServerCe;
+using System.Collections.Generic;
 using System.IO;
 using System.Windows.Forms;
 
@@ -81,5 +83,52 @@ namespace MyPersonalIndex
             // update version number
             SQL.ExecuteNonQuery("UPDATE Settings SET Version = 2.0");
         }
+
+        private void Version201()
+        {
+            string[] Replacements = new string[] { "Portfolio", "PortfolioName", "StartDate", "EndDate", "TotalValue", "PreviousDay" };
+
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.UserStatistics))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    do
+                    {
+                        string sql = rs.GetString((int)MainQueries.Tables.eUserStatistics.SQL);
+                        foreach (string s in Replacements)
+                        {
+                            sql = sql.Replace(string.Format("'%{0}%'", s), string.Format("@{0}", s));
+                            sql = sql.Replace(string.Format("%{0}%", s), string.Format("@{0}", s));
+                        }
+                        rs.SetString((int)MainQueries.Tables.eUserStatistics.SQL, sql);
+                        rs.Update();
+                    }
+                    while (rs.Read());
+                }
+
+            using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.CustomTrades))
+                if (rs.HasRows)
+                {
+                    rs.ReadFirst();
+                    do
+                    {
+                        if ((Constants.DynamicTradeFreq)rs.GetInt32((int)MainQueries.Tables.eCustomTrades.Frequency) == Constants.DynamicTradeFreq.Once)
+                        {
+                            List<DateTime> NewDates = new List<DateTime>();
+                            string[] When = rs.GetString((int)MainQueries.Tables.eCustomTrades.Dates).Split(Constants.DateSeperatorChar);
+
+                            foreach (string s in When)
+                                NewDates.Add(Convert.ToDateTime(s, System.Globalization.CultureInfo.InvariantCulture));
+
+                            rs.SetString((int)MainQueries.Tables.eCustomTrades.Dates, Functions.InsertDates(NewDates));
+                            rs.Update();
+                        }
+                    }
+                    while (rs.Read());
+                }
+
+            // update version number
+            SQL.ExecuteNonQuery("UPDATE Settings SET Version = 2.01");
+        } 
     }
 }

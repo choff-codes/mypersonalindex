@@ -118,7 +118,7 @@ namespace MyPersonalIndex
                             string[] When = rs.GetString((int)MainQueries.Tables.eCustomTrades.Dates).Split(Constants.DateSeperatorChar);
 
                             foreach (string s in When)
-                                NewDates.Add(Convert.ToDateTime(s, System.Globalization.CultureInfo.InvariantCulture));
+                                NewDates.Add(Convert.ToDateTime(s));
 
                             rs.SetString((int)MainQueries.Tables.eCustomTrades.Dates, Functions.InsertDates(NewDates));
                             rs.Update();

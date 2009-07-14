@@ -6,14 +6,12 @@ namespace MyPersonalIndex
 {
     class AAQueries : Queries
     {
-        public static QueryInfo DeleteAA(int Portfolio, string AAin)
+        public static QueryInfo DeleteAA(int ID)
         {
             return new QueryInfo(
-                string.IsNullOrEmpty(AAin) ?
-                   "DELETE FROM AA WHERE Portfolio = @Portfolio" :
-                    string.Format("DELETE FROM AA WHERE Portfolio = @Portfolio AND ID NOT IN ({0})", AAin),
+                   "DELETE FROM AA WHERE ID = @ID",
                 new SqlCeParameter[] { 
-                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                    AddParam("@ID", SqlDbType.Int, ID)
                 }
             );
         }

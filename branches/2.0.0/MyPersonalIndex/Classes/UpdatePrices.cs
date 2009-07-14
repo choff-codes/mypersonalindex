@@ -131,7 +131,7 @@ namespace MyPersonalIndex
 
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.ClosingPrices))
             // add a day to mindate since we already have data for mindate
-            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.MPIHoldings.StockPrices)))
+            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.StockPrices)))
             using (StreamReader sr = new StreamReader(s))
             {
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();
@@ -250,7 +250,7 @@ namespace MyPersonalIndex
 
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Dividends))
             // add a day to mindate since we already have data for mindate
-            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.MPIHoldings.Dividends)))
+            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.Dividends)))
             using (StreamReader sr = new StreamReader(s))
             {
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();

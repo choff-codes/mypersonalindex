@@ -181,7 +181,7 @@ namespace MyPersonalIndex
         {
             decimal tmp;
             if (Currency)
-                return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat, out tmp);
+                return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out tmp);
             else
                 return decimal.TryParse(s, out tmp);
         }

@@ -6,14 +6,12 @@ namespace MyPersonalIndex
 {
     class AcctQueries: Queries
     {
-        public static QueryInfo DeleteAcct(int Portfolio, string AcctIn)
+        public static QueryInfo DeleteAcct(int ID)
         {
             return new QueryInfo(
-                string.IsNullOrEmpty(AcctIn) ?
-                   "DELETE FROM Accounts WHERE Portfolio = @Portfolio" :
-                    string.Format("DELETE FROM Accounts WHERE Portfolio = @Portfolio AND ID NOT IN ({0})", AcctIn),
+                "DELETE FROM Accounts WHERE ID = @ID",
                 new SqlCeParameter[] { 
-                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                    AddParam("@ID", SqlDbType.Int, ID)
                 }
             );
         }

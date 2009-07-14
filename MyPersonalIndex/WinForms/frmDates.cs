@@ -20,11 +20,10 @@ namespace MyPersonalIndex
         {
             InitializeComponent();
 
-            foreach (DateTime d in When)
-            {
-                SelDates.Add(d);
+            SelDates.AddRange(When);
+            foreach (DateTime d in SelDates)
                 lst.Items.Add(d.ToShortDateString());
-            }
+
         }
 
         private void calendar_DateSelected(object sender, DateRangeEventArgs e)

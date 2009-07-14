@@ -38,6 +38,7 @@ namespace MyPersonalIndex
 
         private void ChangeVisibility(Control ShowVisible)
         {
+            dg.CellFormatting -= dg_CellFormatting;
             if (ShowVisible != dg)
                 dg.Visible = false;
             if (ShowVisible != zed)
@@ -45,6 +46,7 @@ namespace MyPersonalIndex
             dg.Rows.Clear();
             dg.Columns.Clear();
             ShowVisible.Visible = true;
+            dg.CellFormatting += new DataGridViewCellFormattingEventHandler(dg_CellFormatting);
         }
 
         private DateTime CheckStartDate(DateTime StartDate, DateTime LastDate)
@@ -119,10 +121,8 @@ namespace MyPersonalIndex
             using (SqlCeResultSet rs = this.SQL.ExecuteResultSet(AdvQueries.GetPortfolio(Portfolio, EndDate)))
             {
                 if (!rs.HasRows)
-                    return new Queries.QueryInfo(
-                        "",
-                        new SqlCeParameter[] {}
-                    );
+                    return new Queries.QueryInfo("", new SqlCeParameter[] {} );
+                
                 rs.ReadFirst();
 
                 // if the start date is before the portfolio begins, use the portfolio start date instead
@@ -324,18 +324,17 @@ namespace MyPersonalIndex
                 foreach (int i in lst.CheckedIndices)
                 {
                     CorrelationItems.Add(dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString());
-                    dg.Columns.Add("Col" + i.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString());
+                    dg.Columns[
+                        dg.Columns.Add(i.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString())
+                    ].SortMode = DataGridViewColumnSortMode.NotSortable;
                 }
-
-                foreach (DataGridViewColumn d in dg.Columns)
-                    d.SortMode = DataGridViewColumnSortMode.NotSortable;
 
                 dg.Rows.Add(CorrelationItems.Count);
                 for (int i = 0; i < CorrelationItems.Count; i++)
+                {
                     dg.Rows[i].HeaderCell.Value = dg.Columns[i].HeaderText;
-
-                for (int i = 0; i < CorrelationItems.Count; i++)
                     for (int x = i; x < CorrelationItems.Count; x++)
+                    {
                         if (x == i)
                             dg[i, x].Value = 100.0;
                         else
@@ -349,6 +348,9 @@ namespace MyPersonalIndex
                                 dg[i, x].Value = 0;
                                 dg[x, i].Value = 0;
                             }
+                    }
+                }
+
             }
             finally
             {
@@ -375,16 +377,14 @@ namespace MyPersonalIndex
                     {
                         if (!dt.Rows[i][(int)AdvQueries.eGetTickerList.ID].ToString().Contains(Constants.SignifyPortfolio))
                             continue;
-
-                        dg.Columns.Add(Col.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString());
+                        dg.Columns[
+                            dg.Columns.Add(Col.ToString(), dt.Rows[i][(int)AdvQueries.eGetTickerList.Name].ToString())
+                        ].SortMode = DataGridViewColumnSortMode.NotSortable;
                         Col++;
                     }
 
                     if (dg.Columns.Count == 0)
                         return;
-
-                    foreach (DataGridViewColumn d in dg.Columns)
-                        d.SortMode = DataGridViewColumnSortMode.NotSortable;
 
                     foreach (SqlCeUpdatableRecord rec in rs)
                         dg.Rows[dg.Rows.Add()].HeaderCell.Value = rec.GetString((int)AdvQueries.eGetStats.Description);
@@ -397,7 +397,6 @@ namespace MyPersonalIndex
                         if (!Ticker.Contains(Constants.SignifyPortfolio))
                             continue;
                         Ticker = Functions.StripSignifyPortfolio(Ticker);
-
                         Queries.QueryInfo Q = PrepareStatString(Ticker, StartDate, EndDate);
 
                         int Row = 0;

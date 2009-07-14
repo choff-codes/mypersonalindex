@@ -10,6 +10,8 @@ namespace MyPersonalIndex
         public const string SignifyPortfolio = "~|";
         public const char DateSeperatorChar = '|';
         public const string DateSeperatorString = "|";
+        public const string StockPrices = "d";
+        public const string Dividends = "v";
         public const char Cash = '$';
         public const int NonLeapYear = 2009;
         public enum AvgShareCalc { FIFO, LIFO, AVG };
@@ -59,8 +61,6 @@ namespace MyPersonalIndex
             public const byte CostBasisColumn = 5;
             public const byte TickerIDColumn = 12;
             public const byte TickerStringColumn = 1;
-            public const string StockPrices = "d";
-            public const string Dividends = "v";
             public double TotalValue;
             public DateTime SelDate;
             public MonthCalendar Calendar;

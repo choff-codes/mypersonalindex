@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlTypes;
 using System.Windows.Forms;
 
 namespace MyPersonalIndex
@@ -15,16 +16,13 @@ namespace MyPersonalIndex
         private TradeRetValues _TradeReturnValues = new TradeRetValues();
         private MonthCalendar DailyCalendar;
         private List<Constants.DynamicTrade> Trades = new List<Constants.DynamicTrade>();
-        private int CurrentItem;
+        private int CurrentItem; // track the currently selected item, if another item is clicked in the list, this is the item to save
 
         /************************* Functions ***********************************/
 
-        private string GetDateText(List<DateTime> d, bool NoDate) // if no date, return "No Date" for empty date, other "Date" for empty date
+        private string GetDateText(List<DateTime> d, bool NoDate) // if no date, return "No Date" for empty date, otherwise "Date" for empty date
         {
-            string EmptyDate = "Date";
-            if (NoDate)
-                EmptyDate = "No " + EmptyDate;
-
+            string EmptyDate = NoDate ? "No Date" : "Date";
             return (d.Count == 0 ? EmptyDate : d.Count == 1 ? d[0].ToShortDateString() : "Multiple Dates");
         }
 
@@ -56,29 +54,29 @@ namespace MyPersonalIndex
 
         private string GetSummary(Constants.DynamicTrade dt) // converts a Dynamic trade into a string
         {
-            string s = Enum.GetName(typeof(Constants.DynamicTradeType), dt.TradeType) +
-                    " - " + Enum.GetName(typeof(Constants.DynamicTradeFreq), dt.Frequency) + " - ";
+            string Freq = String.Empty;
 
             switch (dt.Frequency)
             {
                 case Constants.DynamicTradeFreq.Daily:
-                    s = s + "Everyday";
+                    Freq = "Everyday";
                     break;
                 case Constants.DynamicTradeFreq.Once:
-                    s = s + GetDateText(Functions.ExtractDates(dt.When), true);
+                    Freq = GetDateText(Functions.ExtractDates(dt.When), true);
                     break;
                 case Constants.DynamicTradeFreq.Weekly:
-                    s = s + Enum.GetName(typeof(DayOfWeek), (DayOfWeek)Convert.ToInt32(dt.When));
+                    Freq = Enum.GetName(typeof(DayOfWeek), (DayOfWeek)Convert.ToInt32(dt.When));
                     break;
                 case Constants.DynamicTradeFreq.Monthly:
-                    s = s + "Day " + dt.When;
+                    Freq = string.Format("Day {0}", dt.When);
                     break;
                 case Constants.DynamicTradeFreq.Yearly:
-                    s = s + (new DateTime(Constants.NonLeapYear, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("dd MMM");
+                    Freq = (new DateTime(Constants.NonLeapYear, 1, 1).AddDays(Convert.ToInt32(dt.When) - 1)).ToString("dd MMM");
                     break;
             }
 
-            return s;
+            return string.Format("{0} - {1} - {2}", Enum.GetName(typeof(Constants.DynamicTradeType), dt.TradeType),
+                Enum.GetName(typeof(Constants.DynamicTradeFreq), dt.Frequency), Freq);
         }
 
         private bool SaveItem()
@@ -157,7 +155,6 @@ namespace MyPersonalIndex
             cmbMonth.Visible = false;
             cmbYear.Visible = false;
             btnOnce.Text = "Date";
-            //btnOnce.Tag = new List<DateTime>();
 
             switch ((Constants.DynamicTradeFreq)cmbFreq.SelectedIndex)
             {
@@ -235,7 +232,7 @@ namespace MyPersonalIndex
             int tmp = CurrentItem; // figure out how to select the next in line item
 
             Trades.RemoveAt(CurrentItem);
-            lst.Items.RemoveAt(CurrentItem);
+            lst.Items.RemoveAt(CurrentItem); // current item gets overwritten when this is called
 
             if (lst.Items.Count != 0)
                 if (lst.Items.Count == tmp) // the last item was deleted
@@ -251,7 +248,6 @@ namespace MyPersonalIndex
                     return;
 
             _TradeReturnValues.CustomTrades = Trades;
-
             DialogResult = DialogResult.OK;
         }
 
@@ -274,7 +270,10 @@ namespace MyPersonalIndex
 
         private void frmTrades_Load(object sender, EventArgs e)
         {
-            DailyCalendar = new MonthCalendar { MaxSelectionCount = 1 };
+            DailyCalendar = new MonthCalendar { 
+                MaxSelectionCount = 1,
+                MinDate = SqlDateTime.MinValue.Value
+            };
             ToolStripControlHost host = new ToolStripControlHost(DailyCalendar);
             mnuDate.Items.Insert(0, host);
             DailyCalendar.DateSelected += new DateRangeEventHandler(Date_Change);

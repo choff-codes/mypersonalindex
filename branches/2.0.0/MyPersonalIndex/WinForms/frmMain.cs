@@ -22,7 +22,7 @@ namespace MyPersonalIndex
 
         private void CheckForInvalidStartDates(bool ReloadPortfolio)
         {
-            // This check is necessary in the case that after tickers are deleted, closing prices table now starts at a later
+            // This check is necessary in the case that after tickers are deleted, the closing prices table now starts at a later
             // time than before.  If this happens, other portfolios may need their start date moved up, which recalculating the NAV will handle
             DateTime MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetFirstDate(), DateTime.Today.AddDays(1)));
             bool RecalcAll = false;
@@ -417,7 +417,11 @@ namespace MyPersonalIndex
                 if (f.ShowDialog() != DialogResult.OK)
                     return;
 
-                RefreshNonTradeChanges();
+                if (SQL.ExecuteScalar(MainQueries.GetPortfolioHasCustomTrades(MPI.Portfolio.ID)) == null)
+                    RefreshNonTradeChanges();
+                else
+                    StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);                
+                    
             }
         }
 

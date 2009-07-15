@@ -189,6 +189,20 @@ namespace MyPersonalIndex
             );
         }
 
+        public static QueryInfo GetPortfolioHasCustomTrades(int Portfolio)
+        {
+            return new QueryInfo(
+                "SELECT 1" +
+                " FROM CustomTrades a " +
+                " INNER JOIN Tickers b" +
+                    " ON a.TickerID = b.ID" +
+                " WHERE b.Active = 1 AND a.Portfolio = @Portfolio",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
+        }
+
         public static QueryInfo GetDailyActivity(int Portfolio, DateTime Date)
         {
             return new QueryInfo(

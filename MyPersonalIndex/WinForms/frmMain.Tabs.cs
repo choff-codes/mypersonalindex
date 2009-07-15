@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Data.SqlServerCe;
 using System.Data.SqlTypes;
 using System.Drawing;
@@ -19,7 +18,7 @@ namespace MyPersonalIndex
 
             LoadGainLossInfo(dgAcct, Date, (int)Constants.MPIAccount.CostBasisColumn, (int)Constants.MPIAccount.GainLossColumn,
                 (int)Constants.MPIAccount.TaxLiabilityColumn, true, true, true);
-            dgAcct.Columns[Constants.MPIAccount.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.Account.TotalValue);
+            LoadTotalValue(dgAcct, Constants.MPIAccount.TotalValueColumn, MPI.Account.TotalValue);
         }
 
         private void LoadAssetAllocation(DateTime Date)
@@ -27,7 +26,7 @@ namespace MyPersonalIndex
             MPI.AA.TotalValue = GetTotalValue(Date);
             dgAA.DataSource = SQL.ExecuteDataset(MainQueries.GetAA(MPI.Portfolio.ID, Date, MPI.AA.TotalValue, MPI.AA.Sort, btnAAShowBlank.Checked));
 
-            dgAA.Columns[Constants.MPIAssetAllocation.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.AA.TotalValue);
+            LoadTotalValue(dgAA, Constants.MPIAssetAllocation.TotalValueColumn, MPI.AA.TotalValue);
         }
 
         private void LoadCorrelations(DateTime StartDate, DateTime EndDate)
@@ -39,6 +38,7 @@ namespace MyPersonalIndex
             {
                 this.Cursor = Cursors.WaitCursor;
                 List<string> CorrelationItems = new List<string>();
+                // add current portfolio
                 CorrelationItems.Add(Constants.SignifyPortfolio + MPI.Portfolio.ID.ToString());
 
                 using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetCorrelationDistinctTickers(MPI.Portfolio.ID, btnCorrelationHidden.Checked)))
@@ -46,9 +46,7 @@ namespace MyPersonalIndex
                         CorrelationItems.Add(rec.GetString((int)MainQueries.eGetCorrelationDistinctTickers.Ticker));
 
                 foreach (string s in CorrelationItems)
-                    dgCorrelation.Columns.Add(s, s);
-                foreach (DataGridViewColumn d in dgCorrelation.Columns)
-                    d.SortMode = DataGridViewColumnSortMode.NotSortable;
+                    dgCorrelation.Columns[dgCorrelation.Columns.Add(s, s)].SortMode = DataGridViewColumnSortMode.NotSortable;
 
                 dgCorrelation.Rows.Add(CorrelationItems.Count);
                 for (int i = 0; i < CorrelationItems.Count; i++)
@@ -149,7 +147,7 @@ namespace MyPersonalIndex
 
             LoadGainLossInfo(dgHoldings, Date, (int)Constants.MPIHoldings.CostBasisColumn, (int)Constants.MPIHoldings.GainLossColumn,
                 0, true, true, false);
-            dgHoldings.Columns[Constants.MPIHoldings.TotalValueColumn].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", MPI.Holdings.TotalValue);
+            LoadTotalValue(dgHoldings, Constants.MPIHoldings.TotalValueColumn, MPI.Holdings.TotalValue);
         }
 
         private void LoadNAV()
@@ -171,13 +169,15 @@ namespace MyPersonalIndex
                 foreach (SqlCeUpdatableRecord rec in rs)
                 {
                     if (!DateChange)
+                    {
                         i = dgStats.Rows.Add();
+                        dgStats.Rows[i].HeaderCell.Value = rec.GetString((int)MainQueries.eGetStats.Description);
+                    }
                     else
                         i++;
 
                     try
                     {
-                        dgStats.Rows[i].HeaderCell.Value = rec.GetString((int)MainQueries.eGetStats.Description);
                         Q.Query = rec.GetString((int)MainQueries.eGetStats.SQL);
                         dgStats[0, i].Value = Functions.FormatStatString(SQL.ExecuteScalar(Q),
                             (Constants.OutputFormat)rec.GetInt32((int)MainQueries.eGetStats.Format));
@@ -191,6 +191,11 @@ namespace MyPersonalIndex
                         dgStats[0, i].Value = "Error";
                     }
                 }
+        }
+
+        private void LoadTotalValue(DataGridView dg, int Col, double val)
+        {
+            dg.Columns[Col].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", val);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Data.SqlServerCe;
 using System.Collections.Generic;
+using System.Data.SqlServerCe;
 using System.IO;
 using System.Windows.Forms;
 
@@ -25,6 +25,9 @@ namespace MyPersonalIndex
 
                 if (databaseVersion < 2)
                     Version200();
+
+                if (databaseVersion < 2.01)
+                    Version201();
             }
         }
 

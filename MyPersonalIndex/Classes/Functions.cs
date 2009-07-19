@@ -177,8 +177,19 @@ namespace MyPersonalIndex
             return string.Format("{0:C}", d);
         }
 
-        public static bool StringIsDecimal(string s, bool Currency)
+        public static object ConvertToDecimal(string s)
         {
+            if (string.IsNullOrEmpty(s))
+                return System.DBNull.Value;
+            else
+                return Convert.ToDecimal(s);
+        }
+
+        public static bool StringIsDecimal(string s, bool Currency, bool AllowNull)
+        {
+            if (string.IsNullOrEmpty(s) && AllowNull)
+                return true;
+
             decimal tmp;
             if (Currency)
                 return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out tmp);
@@ -190,6 +201,12 @@ namespace MyPersonalIndex
         {
             DateTime tmp;
             return DateTime.TryParse(s, out tmp);
+        }
+
+        public static bool StringIsBoolean(string s)
+        {
+            bool tmp;
+            return bool.TryParse(s, out tmp);
         }
 
         public static void LoadGraphSettings(ZedGraphControl zedChart, string Title, bool ShowLegend)
@@ -303,9 +320,9 @@ namespace MyPersonalIndex
                             break;
                         case (int)AAQueries.eGetAA.Target:
                             s = s.Replace("%", String.Empty);
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, true);
                             if (Success)
-                                return Convert.ToDecimal(s);
+                                return Functions.ConvertToDecimal(s);
                             break;
                     }
                     break;
@@ -320,9 +337,14 @@ namespace MyPersonalIndex
                             break;
                         case (int)AcctQueries.eGetAcct.TaxRate:
                             s = s.Replace("%", String.Empty);
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, true);
                             if (Success)
-                                return Convert.ToDecimal(s);
+                                return Functions.ConvertToDecimal(s);
+                            break;
+                        case (int)AcctQueries.eGetAcct.OnlyGain:
+                            Success = Functions.StringIsBoolean(s) || string.IsNullOrEmpty(s);
+                            if (Success)
+                                return string.IsNullOrEmpty(s) ? true : Convert.ToBoolean(s);
                             break;
                     }
                     break;
@@ -336,12 +358,12 @@ namespace MyPersonalIndex
                                 return s;
                             break;
                         case (int)TickerQueries.eGetTrades.Shares:
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, false);
                             if (Success)
                                 return Convert.ToDecimal(s);
                             break;
                         case (int)TickerQueries.eGetTrades.Price:
-                            Success = Functions.StringIsDecimal(s, true);
+                            Success = Functions.StringIsDecimal(s, true, false);
                             if (Success)
                                 return Functions.ConvertFromCurrency(s);
                             break;
@@ -359,24 +381,27 @@ namespace MyPersonalIndex
                 case Constants.PasteDatagrid.dgAA:
 
                     s[(int)AAQueries.eGetAA.Target] = s[(int)AAQueries.eGetAA.Target].Replace("%", String.Empty);
-                    Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false);
+                    Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false, true);
                     if (Success)
-                        return new object[3] { s[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
+                        return new object[3] { s[(int)AAQueries.eGetAA.AA], Functions.ConvertToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
                     break;
 
                 case Constants.PasteDatagrid.dgAcct:
 
                     s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", String.Empty);
-                    Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false);
+                    Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) 
+                        && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false, true)
+                        && (Functions.StringIsBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]) || string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.OnlyGain]));
                     if (Success)
-                        return new object[3] { s[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]), 0 };
+                        return new object[4] { s[(int)AcctQueries.eGetAcct.Name], Functions.ConvertToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]),
+                            string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.OnlyGain]) ? true : Convert.ToBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]), 0 };
                     break;
 
                 case Constants.PasteDatagrid.dgTicker:
 
                     Success = Functions.StringIsDateTime(s[(int)TickerQueries.eGetTrades.Date])
-                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Shares], false)
-                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Price], true);
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Shares], false, false)
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Price], true, false);
                     if (Success)
                         return new object[3] {
                             s[(int)TickerQueries.eGetTrades.Date], 

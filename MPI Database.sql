@@ -151,8 +151,7 @@ LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares
                     GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades 
             GROUP BY TickerID) AS b 
     ON a.ID = b.TickerID 
-LEFT JOIN (SELECT Ticker, Price 
-            FROM AvgPricePerShare) AS c 
+LEFT JOIN AvgPricePerShare AS c 
     ON a.ID = c.Ticker 
 WHERE a.Active = 1 AND Portfolio = @Portfolio',N'Cost Basis',0);
 GO
@@ -195,7 +194,7 @@ FROM NAV
 WHERE Portfolio = @Portfolio
 AND Date BETWEEN @StartDate AND @EndDate',N'Days Invested',3);
 GO
-Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (10,N'SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END)) AS GainLoss
+Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (10,N'SELECT SUM((d.Price - c.Price) * b.Shares) AS GainLoss
 FROM Tickers AS a 
 LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares 
             FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares 
@@ -206,17 +205,10 @@ LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares
                     GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades 
             GROUP BY TickerID) AS b 
     ON a.ID = b.TickerID 
- LEFT JOIN (SELECT Ticker, Price 
-            FROM AvgPricePerShare) AS c 
+LEFT JOIN AvgPricePerShare AS c 
     ON a.ID = c.Ticker 
-LEFT JOIN (SELECT Ticker, Price 
-            FROM ClosingPrices 
-            WHERE DATE = @EndDate) AS d 
-    ON a.Ticker = d.Ticker 
-LEFT JOIN (SELECT ID, Name, TaxRate 
-            FROM Accounts 
-            WHERE Portfolio = @Portfolio) AS e 
-    ON a.Acct = e.ID 
+LEFT JOIN ClosingPrices AS d
+    ON a.Ticker = d.Ticker AND Date = @EndDate
 WHERE a.Active = 1 AND Portfolio = @Portfolio',N'Gain/Loss',0);
 GO
 Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (11,N'SELECT (CASE WHEN Days = 0 THEN 0
@@ -399,7 +391,9 @@ FROM (SELECT (CASE WHEN YearlyGain / StdDev >= 0 THEN 1.0 / ( 1.0 + 0.2316419 * 
 			AND Date = @EndDate) b
 ) Calcs',N'Probability Of Yearly Loss',1);
 GO
-Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (30,N'SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability
+Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (30,N'SELECT SUM((CASE WHEN e.OnlyGain = 0 THEN d.Price * b.Shares * Coalesce(e.TaxRate/100, 0.0) 
+	ELSE (d.Price - c.Price) * b.Shares * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)
+	END)) AS TaxLiability
 FROM Tickers AS a 
 LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares 
             FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares 
@@ -410,18 +404,13 @@ LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares
                     GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades 
             GROUP BY TickerID) AS b 
     ON a.ID = b.TickerID 
- LEFT JOIN (SELECT Ticker, Price 
-            FROM AvgPricePerShare) AS c 
+LEFT JOIN AvgPricePerShare AS c 
     ON a.ID = c.Ticker 
-LEFT JOIN (SELECT Ticker, Price 
-            FROM ClosingPrices 
-            WHERE DATE = @EndDate) AS d 
-    ON a.Ticker = d.Ticker 
-LEFT JOIN (SELECT ID, Name, TaxRate 
-            FROM Accounts 
-            WHERE Portfolio = @Portfolio) AS e 
+LEFT JOIN ClosingPrices AS d
+    ON a.Ticker = d.Ticker AND Date = @EndDate
+LEFT JOIN Accounts AS e
     ON a.Acct = e.ID 
-WHERE a.Active = 1 AND Portfolio = @Portfolio',N'Tax Liabliity',0);
+WHERE a.Active = 1 AND a.Portfolio = @Portfolio',N'Tax Liability',0);
 GO
 Insert Into [UserStatistics] ([ID],[SQL],[Description],[Format]) Values (31,N'SELECT (CASE WHEN DATEDIFF(day, @StartDate, @EndDate) / 365 = 0 THEN a.NAV / b.NAV - 1
               ELSE POWER(a.NAV / b.NAV, 1.0 / (DATEDIFF(day, @StartDate, @EndDate) / 365)) - 1 END) * 100 AS YearlyReturn

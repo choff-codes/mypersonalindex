@@ -59,23 +59,10 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery("CREATE INDEX [TickerPortfolio] ON [CustomTrades] ([TickerID] Asc,[Portfolio] Asc)");
             SQL.ExecuteNonQuery("ALTER TABLE [Trades] ADD [Custom] bit NULL");
 
-            // 3 new user statistics
-            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(c.Price * b.Shares) AS CostBasis  FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
-                " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND" +
-                " ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN" +
-                " (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker WHERE a.Active = 1 AND Portfolio = %Portfolio%', 'Cost Basis', 0)");
-            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0)" +
-                " ELSE 1.0 END)) AS GainLoss FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
-                " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
-                " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
-                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE a.Active = 1 AND Portfolio = %Portfolio%'" +
-                ", 'Gain/Loss', 0)");
-            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('SELECT SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability" +
-                " FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4))" +
-                " as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND ''%EndDate%'' WHERE a.Portfolio = %Portfolio% AND a.Date <= ''%EndDate%'' GROUP BY a.ID, a.Custom," +
-                " a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN (SELECT Ticker, Price FROM AvgPricePerShare) AS c ON a.ID = c.Ticker LEFT JOIN (SELECT Ticker, Price FROM" +
-                " ClosingPrices WHERE DATE = ''%EndDate%'') AS d  ON a.Ticker = d.Ticker LEFT JOIN (SELECT ID, Name, TaxRate FROM Accounts WHERE Portfolio = %Portfolio%) AS e ON a.Acct = e.ID WHERE a.Active = 1 AND Portfolio = %Portfolio%'" +
-                ", 'Tax Liabliity', 0)");
+            // 3 new user statistics (Updated in version 2.01)
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('', 'Cost Basis', 0)");
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('', 'Gain/Loss', 0)");
+            SQL.ExecuteNonQuery("INSERT INTO UserStatistics (SQL, Description, Format) VALUES ('', 'Tax Liabliity', 0)");
 
             // update version number
             SQL.ExecuteNonQuery("UPDATE Settings SET Version = 1.1");
@@ -129,6 +116,27 @@ namespace MyPersonalIndex
                     }
                     while (rs.Read());
                 }
+
+            SQL.ExecuteNonQuery("ALTER TABLE [Accounts] ADD [OnlyGain] bit NULL");
+            SQL.ExecuteNonQuery("UPDATE Accounts SET OnlyGain = 1");
+
+            SQL.ExecuteNonQuery("UPDATE UserStatistics SET SQL = 'SELECT SUM(c.Price * b.Shares) AS CostBasis FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker" +
+                " AND b.Date BETWEEN a.Date AND @EndDate WHERE a.Portfolio = @Portfolio AND a.Date <= @EndDate GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
+                " GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN AvgPricePerShare AS c ON a.ID = c.Ticker WHERE a.Active = 1 AND Portfolio = @Portfolio'" +
+                " WHERE Description = 'Cost Basis'");
+            SQL.ExecuteNonQuery("UPDATE UserStatistics SET SQL = 'SELECT SUM((d.Price - c.Price) * b.Shares) AS GainLoss FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker" +
+                " AND b.Date BETWEEN a.Date AND @EndDate WHERE a.Portfolio = @Portfolio AND a.Date <= @EndDate GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" + 
+                " GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN AvgPricePerShare AS c ON a.ID = c.Ticker LEFT JOIN ClosingPrices AS d ON a.Ticker = d.Ticker" +
+                " AND Date = @EndDate WHERE a.Active = 1 AND Portfolio = @Portfolio' WHERE Description = 'Gain/Loss'");
+            SQL.ExecuteNonQuery("UPDATE UserStatistics SET SQL = 'SELECT SUM((CASE WHEN e.OnlyGain = 0 THEN d.Price * b.Shares * Coalesce(e.TaxRate/100, 0.0)" +
+	            " ELSE (d.Price - c.Price) * b.Shares * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END) END)) AS TaxLiability" +
+                " FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                " FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @EndDate WHERE a.Portfolio = @Portfolio AND a.Date <= @EndDate" + 
+                " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades GROUP BY TickerID) AS b ON a.ID = b.TickerID LEFT JOIN AvgPricePerShare AS c ON a.ID = c.Ticker" +
+                " LEFT JOIN ClosingPrices AS d ON a.Ticker = d.Ticker AND Date = @EndDate LEFT JOIN Accounts AS e ON a.Acct = e.ID WHERE a.Active = 1 AND a.Portfolio = @Portfolio'," +
+                " Description = 'Tax Liability' WHERE Description = 'Tax Liabliity'");
 
             // update version number
             SQL.ExecuteNonQuery("UPDATE Settings SET Version = 2.01");

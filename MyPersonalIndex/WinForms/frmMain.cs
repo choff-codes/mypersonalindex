@@ -559,7 +559,7 @@ namespace MyPersonalIndex
 
         private void dgAA_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIAssetAllocation.OffsetColumn || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgAA.Columns[Constants.MPIAssetAllocation.OffsetColumn].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < -1 * MPI.Portfolio.AAThreshold)
@@ -572,7 +572,7 @@ namespace MyPersonalIndex
 
         private void dgAcct_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIAccount.GainLossColumnP || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgAcct.Columns[Constants.MPIAccount.GainLossColumnP].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < 0)
@@ -592,7 +592,7 @@ namespace MyPersonalIndex
 
         private void dgHoldings_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIHoldings.GainLossColumnP || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgHoldings.Columns[Constants.MPIHoldings.GainLossColumnP].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < 0)

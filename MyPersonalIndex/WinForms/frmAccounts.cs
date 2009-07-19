@@ -60,10 +60,10 @@ namespace MyPersonalIndex
                         TaxRate = Convert.ToDouble(dr[(int)AcctQueries.eGetAcct.TaxRate]);
 
                     if (ID == 0) // all new rows have a 0 ID
-                        SQL.ExecuteNonQuery(AcctQueries.InsertAcct(PortfolioID, (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate));
+                        SQL.ExecuteNonQuery(AcctQueries.InsertAcct(PortfolioID, (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate, (bool)dr[(int)AcctQueries.eGetAcct.OnlyGain]));
                     else
                     {
-                        SQL.ExecuteNonQuery(AcctQueries.UpdateAcct(ID, (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate));
+                        SQL.ExecuteNonQuery(AcctQueries.UpdateAcct(ID, (string)dr[(int)AcctQueries.eGetAcct.Name], TaxRate, (bool)dr[(int)AcctQueries.eGetAcct.OnlyGain]));
                         UpdatedAcct.Add(ID); // get a list of existing Accts not deleted
                     }
                 }
@@ -86,6 +86,7 @@ namespace MyPersonalIndex
         private void dgAcct_DefaultValuesNeeded(object sender, DataGridViewRowEventArgs e)
         {
             e.Row.Cells[(int)AcctQueries.eGetAcct.ID].Value = 0;
+            e.Row.Cells[(int)AcctQueries.eGetAcct.OnlyGain].Value = true;
         }
 
         private void dgAcct_KeyDown(object sender, KeyEventArgs e)

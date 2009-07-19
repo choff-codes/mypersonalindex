@@ -28,7 +28,7 @@ namespace MyPersonalIndex
 
         private bool GetErrors()
         {
-            if (!Functions.StringIsDecimal(txtShares.Text, false))
+            if (!Functions.StringIsDecimal(txtShares.Text, false, false))
             {
                 MessageBox.Show("Invalid number format entered!");
                 lst.SelectedIndex = CurrentItem;

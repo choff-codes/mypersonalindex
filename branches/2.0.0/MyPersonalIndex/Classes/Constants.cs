@@ -54,12 +54,12 @@ namespace MyPersonalIndex
 
         public class MPIHoldings
         {
-            public const byte GainLossColumn = 6;
-            public const byte GainLossColumnP = 7;
-            public const byte TotalValueColumn = 8;
-            public const byte CostBasisColumn = 5;
-            public const byte TickerIDColumn = 12;
-            public const byte TickerStringColumn = 1;
+            public const string GainLossColumn = "colHoldingsGainLoss";
+            public const string GainLossColumnP = "colHoldingsGainLossP";
+            public const string TotalValueColumn = "colHoldingsTotalValue";
+            public const string CostBasisColumn = "colHoldingsCostBasis";
+            public const string TickerIDColumn = "colHoldingsID";
+            public const string TickerStringColumn = "colHoldingsTicker";
             public double TotalValue;
             public DateTime SelDate;
             public MonthCalendar Calendar;
@@ -68,8 +68,8 @@ namespace MyPersonalIndex
 
         public class MPIAssetAllocation
         {
-            public const byte OffsetColumn = 4;
-            public const byte TotalValueColumn = 2;
+            public const string OffsetColumn = "colAAOffset";
+            public const string TotalValueColumn = "colAATotalValue";
             public double TotalValue;
             public DateTime SelDate;
             public MonthCalendar Calendar;
@@ -78,11 +78,12 @@ namespace MyPersonalIndex
 
         public class MPIAccount
         {
-            public const byte GainLossColumn = 5;
-            public const byte GainLossColumnP = 6;
-            public const byte TotalValueColumn = 2;
-            public const byte CostBasisColumn = 1;
-            public const byte TaxLiabilityColumn = 4;
+            public const string GainLossColumn = "colAcctGainLoss";
+            public const string GainLossColumnP = "colAcctGainLossP";
+            public const string TotalValueColumn = "colAcctTotalValue";
+            public const string CostBasisColumn = "colAcctCostBasis";
+            public const string TaxLiabilityColumn = "colAcctTaxLiability";
+            public const string NetValueColumn = "colAcctNetValue";
             public double TotalValue;
             public DateTime SelDate;
             public MonthCalendar Calendar;

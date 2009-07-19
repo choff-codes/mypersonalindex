@@ -76,12 +76,19 @@ namespace MyPersonalIndex
                     "SELECT COALESCE(e.Name, '(Blank)') AS fName," +
                             " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price * b.Shares END)) AS fCostBasis," +
                             " SUM(c.Price * b.Shares) AS fTotalValue," +
-                            " e.TaxRate AS fTaxRate," +
-                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(e.TaxRate/100, 0) ELSE 0 END) END)) AS fTaxLiability," +
-                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END)) AS fGain," +
-                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END) END))" +
-                                " / (CASE WHEN SUM(d.Price * b.Shares) <> 0 THEN SUM(d.Price * b.Shares) END) * 100 AS fGainLossP," +
                             " (CASE WHEN @TotalValue <> 0 THEN SUM(c.Price * b.Shares) / @TotalValue * 100 END) AS fPercentage," +
+                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN (c.Price - d.Price) * b.Shares END)) AS fGain," +
+                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN ((c.Price - d.Price) * b.Shares) END))" +
+                                " / (CASE WHEN SUM(d.Price * b.Shares) <> 0 THEN SUM(d.Price * b.Shares) END) * 100 AS fGainLossP," +
+                            " e.TaxRate AS fTaxRate," +
+                            " SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN" +
+                                " (CASE WHEN e.OnlyGain = 0 THEN c.Price * b.Shares * Coalesce(e.TaxRate/100, 0)" +
+                                " ELSE (c.Price - d.Price) * b.Shares * (CASE WHEN c.Price > d.Price THEN Coalesce(e.TaxRate/100, 0) ELSE 0 END) END)" +
+                                " END)) AS fTaxLiability," +
+                            " SUM(c.Price * b.Shares) - SUM((CASE WHEN Coalesce(b.Shares,0) <> 0 THEN" +
+                                " (CASE WHEN e.OnlyGain = 0 THEN c.Price * b.Shares * Coalesce(e.TaxRate/100, 0)" +
+                                " ELSE (c.Price - d.Price) * b.Shares * (CASE WHEN c.Price > d.Price THEN Coalesce(e.TaxRate/100, 0) ELSE 0 END) END)" +
+                                " END)) AS fNetValue," +
                             " COUNT(*) AS fHoldings" +
                     " FROM Tickers AS a" +
                     " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
@@ -288,8 +295,9 @@ namespace MyPersonalIndex
         {
             return new QueryInfo(
                 "SELECT SUM(c.Price * b.Shares) AS CostBasis," +
-                    " SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(1 - (e.TaxRate/100), 1.0) ELSE 1.0 END)) AS GainLoss," +
-                    " SUM(((d.Price - c.Price) * b.Shares) * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END)) AS TaxLiability" +
+                    " SUM((d.Price - c.Price) * b.Shares) AS GainLoss," +
+                    " SUM(CASE WHEN e.OnlyGain = 0 THEN d.Price * b.Shares * Coalesce(e.TaxRate / 100, 0.0)" +
+                        " ELSE (d.Price - c.Price) * b.Shares * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END) END) AS TaxLiability" +
                 " FROM Tickers AS a" +
                 " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                              " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
@@ -322,8 +330,8 @@ namespace MyPersonalIndex
                             " Coalesce(b.Shares,0) AS fShares," +
                             " (CASE WHEN Coalesce(b.Shares,0) <> 0 THEN d.Price END) AS fAverage," +
                             " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN d.Price * b.Shares END) AS fCostBasis," +
-                            " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN ((c.Price - d.Price) * b.Shares) * (CASE WHEN c.Price > d.Price THEN Coalesce(1 - (f.TaxRate/100), 1.0) ELSE 1.0 END) END) AS fGain," +
-                            " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 AND d.Price <> 0 THEN (100 - (CASE WHEN c.Price > d.Price THEN Coalesce(f.TaxRate, 0) ELSE 1.0 END)) * ((c.Price / d.Price) - 1) END) AS fGainP," +
+                            " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 THEN (c.Price - d.Price) * b.Shares END) AS fGain," +
+                            " (CASE WHEN Coalesce(b.Shares,0) <> 0 AND a.Active = 1 AND d.Price <> 0 THEN ((c.Price / d.Price) - 1) * 100 END) AS fGainP," +
                             " (CASE WHEN a.Active = 1 THEN c.Price * b.Shares END) AS fTotalValue," +
                             " (CASE WHEN @TotalValue <> 0 AND a.Active = 1 THEN c.Price * b.Shares / @TotalValue * 100 END) AS fTotalValueP," +
                             " f.Name AS fAcct, e.AA AS fAA, a.ID as fID" +

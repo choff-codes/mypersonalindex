@@ -24,6 +24,7 @@ namespace MyPersonalIndex
         public struct Tables
         {
             public const string AA = "AA";
+            public const string Acct = "Accounts";
             public const string AvgPricePerShare = "AvgPricePerShare";
             public const string ClosingPrices = "ClosingPrices";
             public const string Dividends = "Dividends";
@@ -184,11 +185,11 @@ namespace MyPersonalIndex
             );
         }
 
-        public enum eGetAcct { Name, TaxRate, ID };
+        public enum eGetAcct { Name, TaxRate, OnlyGain, ID };
         public static QueryInfo GetAcct(int Portfolio)
         {
             return new QueryInfo(
-                "SELECT Name, TaxRate, ID FROM Accounts WHERE Portfolio = @Portfolio ORDER BY Name",
+                "SELECT Name, TaxRate, OnlyGain, ID FROM Accounts WHERE Portfolio = @Portfolio ORDER BY Name",
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio)
                 }

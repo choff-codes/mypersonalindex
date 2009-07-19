@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyTitle("MyPersonalIndex")]
-[assembly: AssemblyDescription("Create personal indexes and perform analysis to make better investing decisions.")]
+[assembly: AssemblyDescription("Create personal indexes and perform analysis to make better investing decisions.  http://code.google.com/p/mypersonalindex/")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("By Matthew Wikler")]
 [assembly: AssemblyProduct("MyPersonalIndex")]

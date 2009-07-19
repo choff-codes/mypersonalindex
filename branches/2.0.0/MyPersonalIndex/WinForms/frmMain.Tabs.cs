@@ -16,8 +16,8 @@ namespace MyPersonalIndex
             MPI.Account.TotalValue = GetTotalValue(Date);
             dgAcct.DataSource = SQL.ExecuteDataset(MainQueries.GetAcct(MPI.Portfolio.ID, Date, MPI.Account.TotalValue, MPI.Account.Sort, btnAcctShowBlank.Checked));
 
-            LoadGainLossInfo(dgAcct, Date, (int)Constants.MPIAccount.CostBasisColumn, (int)Constants.MPIAccount.GainLossColumn,
-                (int)Constants.MPIAccount.TaxLiabilityColumn, true, true, true);
+            LoadGainLossInfo(dgAcct, Date, Constants.MPIAccount.CostBasisColumn, Constants.MPIAccount.GainLossColumn,
+                Constants.MPIAccount.TaxLiabilityColumn, Constants.MPIAccount.NetValueColumn, true, true, true, true, MPI.Account.TotalValue);
             LoadTotalValue(dgAcct, Constants.MPIAccount.TotalValueColumn, MPI.Account.TotalValue);
         }
 
@@ -80,7 +80,9 @@ namespace MyPersonalIndex
             }
         }
 
-        private void LoadGainLossInfo(DataGridView dg, DateTime Date, int CostBasisCol, int GainLossCol, int TaxCol, bool bCostBasis, bool bGainLoss, bool bTax)
+        private void LoadGainLossInfo(DataGridView dg, DateTime Date,
+            string CostBasisCol, string GainLossCol, string TaxCol, string NetCol, 
+            bool bCostBasis, bool bGainLoss, bool bTax, bool bNet, double TotalValue)
         {
             double CostBasis = 0;
             double GainLoss = 0;
@@ -106,6 +108,9 @@ namespace MyPersonalIndex
 
             if (bGainLoss)
                 dg.Columns[GainLossCol].HeaderCell.Value = string.Format("Gain/Loss\n[{0:C}]", GainLoss); 
+
+            if (bNet)
+                dg.Columns[NetCol].HeaderCell.Value = string.Format("Net Value\n[{0:C}]", TotalValue - TaxLiability); 
         }
 
         private void LoadGraph(DateTime StartDate, DateTime EndDate)
@@ -145,8 +150,8 @@ namespace MyPersonalIndex
             MPI.Holdings.TotalValue = GetTotalValue(Date);
             dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort));
 
-            LoadGainLossInfo(dgHoldings, Date, (int)Constants.MPIHoldings.CostBasisColumn, (int)Constants.MPIHoldings.GainLossColumn,
-                0, true, true, false);
+            LoadGainLossInfo(dgHoldings, Date, Constants.MPIHoldings.CostBasisColumn, Constants.MPIHoldings.GainLossColumn,
+                String.Empty, String.Empty, true, true, false, false, 0);
             LoadTotalValue(dgHoldings, Constants.MPIHoldings.TotalValueColumn, MPI.Holdings.TotalValue);
         }
 
@@ -193,7 +198,7 @@ namespace MyPersonalIndex
                 }
         }
 
-        private void LoadTotalValue(DataGridView dg, int Col, double val)
+        private void LoadTotalValue(DataGridView dg, string Col, double val)
         {
             dg.Columns[Col].HeaderCell.Value = string.Format("Total Value\n[{0:C}]", val);
         }

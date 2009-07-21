@@ -311,7 +311,7 @@ namespace MyPersonalIndex
             dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgHistory.Columns[i].DataPropertyName = "Date";
 
-            if (cmbHis.SelectedIndex == 0) // price only shown when all items is selected
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All) // price only shown when all items is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -319,7 +319,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Price";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 1) // change shown on all items or % Change
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Change) // change shown on all items or % Change
             {
                 i = dgHistory.Columns.Add("colHisChange", "Change");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "#0.00'%'";
@@ -327,7 +328,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Change";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 2) // dividends shown on all items or dividends
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Dividends) // dividends shown on all items or dividends
             {
                 i = dgHistory.Columns.Add("colHisDividend", "Dividend");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -335,7 +337,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Dividend";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 3) // splits shown on all items or splits
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Splits) // splits shown on all items or splits
             {
                 i = dgHistory.Columns.Add("colHisSplit", "Split");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -343,7 +346,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Split";
             }
 
-            if (cmbHis.SelectedIndex == 4) // trades only appear when trades is selected
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Trades) // trades only appear when trades is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";

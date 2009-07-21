@@ -52,9 +52,9 @@ namespace MyPersonalIndex
 
         public static QueryInfo GetHistorical(string Ticker, int TickerID, int Selected, bool Desc)
         {
-            switch (Selected)
+            switch ((Constants.TickerHistoryChoice)Selected)
             {
-                case 0:
+                case Constants.TickerHistoryChoice.All:
                     return new QueryInfo(
                         string.Format(
                             "SELECT a.Date, a.Price, a.Change, b.Amount AS Dividend, c.Ratio AS Split" +
@@ -69,7 +69,7 @@ namespace MyPersonalIndex
                             AddParam("@Ticker", SqlDbType.NVarChar, Ticker)
                         }
                     );
-                case 1:
+                case Constants.TickerHistoryChoice.Change:
                     return new QueryInfo(
                         string.Format(
                             "SELECT Date, Change" +
@@ -80,7 +80,7 @@ namespace MyPersonalIndex
                             AddParam("@Ticker", SqlDbType.NVarChar, Ticker)
                         }
                     );
-                case 2:
+                case Constants.TickerHistoryChoice.Dividends:
                     return new QueryInfo(
                         string.Format(
                             "SELECT Date, Amount AS Dividend" +
@@ -91,7 +91,7 @@ namespace MyPersonalIndex
                             AddParam("@Ticker", SqlDbType.NVarChar, Ticker)
                         }
                     );
-                case 3:
+                case Constants.TickerHistoryChoice.Splits:
                     return new QueryInfo(
                         string.Format(
                            "SELECT Date, Ratio AS Split" +
@@ -102,7 +102,7 @@ namespace MyPersonalIndex
                             AddParam("@Ticker", SqlDbType.NVarChar, Ticker)
                         }
                     );
-                default:
+                default:  // Constants.TickerHistoryChoice.Trades
                     return new QueryInfo(
                         string.Format(
                            "SELECT Date, Price, Shares" +

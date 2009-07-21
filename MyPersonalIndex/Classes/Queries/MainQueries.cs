@@ -196,20 +196,6 @@ namespace MyPersonalIndex
             );
         }
 
-        public static QueryInfo GetPortfolioHasCustomTrades(int Portfolio)
-        {
-            return new QueryInfo(
-                "SELECT 1" +
-                " FROM CustomTrades a " +
-                " INNER JOIN Tickers b" +
-                    " ON a.TickerID = b.ID" +
-                " WHERE b.Active = 1 AND a.Portfolio = @Portfolio",
-                new SqlCeParameter[] { 
-                    AddParam("@Portfolio", SqlDbType.Int, Portfolio)
-                }
-            );
-        }
-
         public static QueryInfo GetDailyActivity(int Portfolio, DateTime Date)
         {
             return new QueryInfo(
@@ -426,6 +412,21 @@ namespace MyPersonalIndex
                 "SELECT ID FROM Portfolios WHERE ID = @Portfolio",
                 new SqlCeParameter[] { 
                     AddParam("@Portfolio", SqlDbType.Int, Portfolio)
+                }
+            );
+        }
+
+        public static QueryInfo GetPortfolioHasCustomAATrades(int Portfolio)
+        {
+            return new QueryInfo(
+                "SELECT 1" +
+                " FROM CustomTrades a " +
+                " INNER JOIN Tickers b" +
+                    " ON a.TickerID = b.ID" +
+                " WHERE b.Active = 1 AND a.Portfolio = @Portfolio AND TradeType = @AAType",
+                new SqlCeParameter[] { 
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@AAType", SqlDbType.Int, (int)Constants.DynamicTradeType.AA)
                 }
             );
         }
@@ -687,7 +688,7 @@ namespace MyPersonalIndex
         public static QueryInfo DeleteNAV()
         {
             return new QueryInfo(
-                "DELETE FROM AA",
+                "DELETE FROM NAV",
                 new SqlCeParameter[] { }
             );
         }

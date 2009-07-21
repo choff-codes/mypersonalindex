@@ -185,6 +185,14 @@ namespace MyPersonalIndex
                 return Convert.ToDecimal(s);
         }
 
+        public static bool ConvertToBoolean(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return true;
+            else
+                return Convert.ToBoolean(s);
+        }
+
         public static bool StringIsDecimal(string s, bool Currency, bool AllowNull)
         {
             if (string.IsNullOrEmpty(s) && AllowNull)
@@ -203,8 +211,11 @@ namespace MyPersonalIndex
             return DateTime.TryParse(s, out tmp);
         }
 
-        public static bool StringIsBoolean(string s)
+        public static bool StringIsBoolean(string s, bool AllowNull)
         {
+            if (string.IsNullOrEmpty(s) && AllowNull)
+                return true;
+
             bool tmp;
             return bool.TryParse(s, out tmp);
         }
@@ -212,6 +223,7 @@ namespace MyPersonalIndex
         public static void LoadGraphSettings(ZedGraphControl zedChart, string Title, bool ShowLegend)
         {
             GraphPane g = zedChart.GraphPane;
+            string ChartFont = "Tahoma";
 
             g.CurveList.Clear();
             g.XAxis.Scale.MaxAuto = true;
@@ -221,18 +233,18 @@ namespace MyPersonalIndex
 
             // Set the Titles
             g.Title.Text = Title;
-            g.Title.FontSpec.Family = "Tahoma";
+            g.Title.FontSpec.Family = ChartFont;
             g.XAxis.Title.Text = "Date";
-            g.XAxis.Title.FontSpec.Family = "Tahoma";
+            g.XAxis.Title.FontSpec.Family = ChartFont;
             g.YAxis.MajorGrid.IsVisible = true;
             g.YAxis.Title.Text = "Percent";
-            g.YAxis.Title.FontSpec.Family = "Tahoma";
+            g.YAxis.Title.FontSpec.Family = ChartFont;
             g.XAxis.Type = AxisType.Date;
             g.YAxis.Scale.Format = "0.00'%'";
             g.XAxis.Scale.FontSpec.Size = 8;
-            g.XAxis.Scale.FontSpec.Family = "Tahoma";
+            g.XAxis.Scale.FontSpec.Family = ChartFont;
             g.YAxis.Scale.FontSpec.Size = 8;
-            g.YAxis.Scale.FontSpec.Family = "Tahoma";
+            g.YAxis.Scale.FontSpec.Family = ChartFont;
             g.Legend.FontSpec.Size = 8;
             g.XAxis.Title.FontSpec.Size = 11;
             g.YAxis.Title.FontSpec.Size = 11;
@@ -342,9 +354,9 @@ namespace MyPersonalIndex
                                 return Functions.ConvertToDecimal(s);
                             break;
                         case (int)AcctQueries.eGetAcct.OnlyGain:
-                            Success = Functions.StringIsBoolean(s) || string.IsNullOrEmpty(s);
+                            Success = Functions.StringIsBoolean(s, true);
                             if (Success)
-                                return string.IsNullOrEmpty(s) ? true : Convert.ToBoolean(s);
+                                return Functions.ConvertToBoolean(s);
                             break;
                     }
                     break;
@@ -391,10 +403,10 @@ namespace MyPersonalIndex
                     s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", String.Empty);
                     Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) 
                         && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false, true)
-                        && (Functions.StringIsBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]) || string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.OnlyGain]));
+                        && Functions.StringIsBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain], true);
                     if (Success)
                         return new object[4] { s[(int)AcctQueries.eGetAcct.Name], Functions.ConvertToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]),
-                            string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.OnlyGain]) ? true : Convert.ToBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]), 0 };
+                            Functions.ConvertToBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]), 0 };
                     break;
 
                 case Constants.PasteDatagrid.dgTicker:
@@ -417,13 +429,12 @@ namespace MyPersonalIndex
         {
             List<DateTime> Values = new List<DateTime>();
 
-            if (!string.IsNullOrEmpty(When))
-            {
-                string[] Dates = When.Split(Constants.DateSeperatorChar);
+            if (string.IsNullOrEmpty(When))
+                return Values;
 
-                foreach (string s in Dates)
-                    Values.Add(new DateTime(Convert.ToInt32(s.Substring(0, 4)), Convert.ToInt32(s.Substring(4, 2)), Convert.ToInt32(s.Substring(6, 2))));
-            }
+            string[] Dates = When.Split(Constants.DateSeperatorChar);
+            foreach (string s in Dates)
+                Values.Add(new DateTime(Convert.ToInt32(s.Substring(0, 4)), Convert.ToInt32(s.Substring(4, 2)), Convert.ToInt32(s.Substring(6, 2))));
 
             return Values;
         }

@@ -417,7 +417,7 @@ namespace MyPersonalIndex
                 if (f.ShowDialog() != DialogResult.OK)
                     return;
 
-                if (SQL.ExecuteScalar(MainQueries.GetPortfolioHasCustomTrades(MPI.Portfolio.ID)) == null)
+                if (SQL.ExecuteScalar(MainQueries.GetPortfolioHasCustomAATrades(MPI.Portfolio.ID)) == null)
                     RefreshNonTradeChanges();
                 else
                     StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);                

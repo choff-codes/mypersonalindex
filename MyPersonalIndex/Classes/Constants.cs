@@ -19,6 +19,7 @@ namespace MyPersonalIndex
         public enum DynamicTradeType { Shares, Fixed, TotalValue, AA };
         public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
         public enum PasteDatagrid { dgAA, dgAcct, dgTicker };
+        public enum TickerHistoryChoice { All, Change, Dividends, Splits, Trades };
 
         public class DynamicTrade
         {
@@ -42,6 +43,9 @@ namespace MyPersonalIndex
 
             public bool Equals(DynamicTrade dt)
             {
+                if (dt == null)
+                    return false;
+
                 return dt.TradeType == this.TradeType && dt.Frequency == this.Frequency && dt.When == this.When && dt.Value == this.Value;
             }
         }

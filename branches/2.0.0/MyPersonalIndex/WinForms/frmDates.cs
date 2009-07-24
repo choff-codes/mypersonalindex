@@ -28,7 +28,7 @@ namespace MyPersonalIndex
 
         private void calendar_DateSelected(object sender, DateRangeEventArgs e)
         {
-            if (lst.Items.Count == 440)
+            if (lst.Items.Count == 440)  // varchar cannot hold more than 4000 characters in database
             {
                 MessageBox.Show("Cannot add more than 440 dates!");
                 return;

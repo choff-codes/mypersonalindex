@@ -76,8 +76,8 @@ namespace MyPersonalIndex
 
         private void Version201()
         {
+            // replace old style parameters (%Portfolio%) with new style (@Portfolio)
             string[] Replacements = new string[] { "Portfolio", "PortfolioName", "StartDate", "EndDate", "TotalValue", "PreviousDay" };
-
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.UserStatistics))
                 if (rs.HasRows)
                 {
@@ -96,13 +96,14 @@ namespace MyPersonalIndex
                     while (rs.Read());
                 }
 
+            // change format of custom trades multiple date string from 1/1/2000 to 01012000 for international support
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.CustomTrades))
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
                     do
                     {
-                        if ((Constants.DynamicTradeFreq)rs.GetInt32((int)MainQueries.Tables.eCustomTrades.Frequency) == Constants.DynamicTradeFreq.Once)
+                        if (rs.GetInt32((int)MainQueries.Tables.eCustomTrades.Frequency) == (int)Constants.DynamicTradeFreq.Once)
                         {
                             List<DateTime> NewDates = new List<DateTime>();
                             string[] When = rs.GetString((int)MainQueries.Tables.eCustomTrades.Dates).Split(Constants.DateSeperatorChar);
@@ -120,6 +121,7 @@ namespace MyPersonalIndex
             SQL.ExecuteNonQuery("ALTER TABLE [Accounts] ADD [OnlyGain] bit NULL");
             SQL.ExecuteNonQuery("UPDATE Accounts SET OnlyGain = 1");
 
+            // tweaks to gain/loss calculations, so update the user statistic if it exists
             SQL.ExecuteNonQuery("UPDATE UserStatistics SET SQL = 'SELECT SUM(c.Price * b.Shares) AS CostBasis FROM Tickers AS a LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
                 " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares FROM Trades a LEFT JOIN Splits b ON a.Ticker = b.Ticker" +
                 " AND b.Date BETWEEN a.Date AND @EndDate WHERE a.Portfolio = @Portfolio AND a.Date <= @EndDate GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +

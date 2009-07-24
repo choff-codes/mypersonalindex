@@ -12,8 +12,6 @@ namespace MyPersonalIndex
         private bool Pasted = false;
         private List<int> BeginningAA = new List<int>();
 
-
-
         public frmAA(int Portfolio, string PortfolioName)
         {
             InitializeComponent();
@@ -58,7 +56,7 @@ namespace MyPersonalIndex
                 {
                     int ID = (int)dr[(int)AAQueries.eGetAA.ID];
                     double? Target = null;  // store blank targets as null
-                    if (dr[(int)AAQueries.eGetAA.Target] != System.DBNull.Value)
+                    if (!Convert.IsDBNull(dr[(int)AAQueries.eGetAA.Target]))
                         Target = Convert.ToDouble(dr[(int)AAQueries.eGetAA.Target]);
 
                     if (ID == 0) // all new rows have a 0 ID

@@ -276,36 +276,57 @@ namespace MyPersonalIndex
             );
         }
 
-        public enum eGetGainLossInfo { CostBasis, GainLoss, TaxLiability };
-        public static QueryInfo GetGainLossInfo(int Portfolio, DateTime Date)
+        public enum eGetGainLossInfo { CostBasis, TaxLiability };
+        public static QueryInfo GetGainLossInfo(int Portfolio, DateTime Date, bool TaxLiability)
         {
-            return new QueryInfo(
-                "SELECT SUM(c.Price * b.Shares) AS CostBasis," +
-                    " SUM((d.Price - c.Price) * b.Shares) AS GainLoss," +
-                    " SUM(CASE WHEN e.OnlyGain = 0 THEN d.Price * b.Shares * Coalesce(e.TaxRate / 100, 0.0)" +
-                        " ELSE (d.Price - c.Price) * b.Shares * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END) END) AS TaxLiability" +
-                " FROM Tickers AS a" +
-                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
-                             " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
-                                    " FROM Trades a" +
-                                    " LEFT JOIN Splits b" +
-                                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @Date" +
-                                    " WHERE a.Portfolio = @Portfolio AND a.Date <= @Date" +
-                                    " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
-                             " GROUP BY TickerID) AS b" +
-                     " ON a.ID = b.TickerID" +
-                " LEFT JOIN AvgPricePerShare AS c" +
-                    " ON a.ID = c.Ticker" +
-                " LEFT JOIN ClosingPrices AS d" +
-                    " ON a.Ticker = d.Ticker AND d.Date = @Date" +
-                " LEFT JOIN Accounts AS e" +
-                    " ON a.Acct = e.ID" +
-                " WHERE a.Active = 1 AND a.Portfolio = @Portfolio",
-                new SqlCeParameter[] { 
-                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
-                    AddParam("@Date", SqlDbType.DateTime, Date)
-                }
-            );
+            if (TaxLiability)
+                return new QueryInfo(
+                    "SELECT SUM(c.Price * b.Shares) AS CostBasis," +
+                        " SUM(CASE WHEN e.OnlyGain = 0 THEN d.Price * b.Shares * Coalesce(e.TaxRate / 100, 0.0)" +
+                            " ELSE (d.Price - c.Price) * b.Shares * (CASE WHEN d.Price > c.Price THEN Coalesce(e.TaxRate/100, 0.0) ELSE 0.0 END) END) AS TaxLiability" +
+                    " FROM Tickers AS a" +
+                    " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                                 " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                                        " FROM Trades a" +
+                                        " LEFT JOIN Splits b" +
+                                            " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @Date" +
+                                        " WHERE a.Portfolio = @Portfolio AND a.Date <= @Date" +
+                                        " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
+                                 " GROUP BY TickerID) AS b" +
+                         " ON a.ID = b.TickerID" +
+                    " LEFT JOIN AvgPricePerShare AS c" +
+                        " ON a.ID = c.Ticker" +
+                    " LEFT JOIN ClosingPrices AS d" +
+                        " ON a.Ticker = d.Ticker AND d.Date = @Date" +
+                    " LEFT JOIN Accounts AS e" +
+                        " ON a.Acct = e.ID" +
+                    " WHERE a.Active = 1 AND a.Portfolio = @Portfolio",
+                    new SqlCeParameter[] { 
+                        AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                        AddParam("@Date", SqlDbType.DateTime, Date)
+                    }
+                );
+            else
+                return new QueryInfo(
+                      "SELECT SUM(c.Price * b.Shares) AS CostBasis, 0 AS TaxLiability" +
+                      " FROM Tickers AS a" +
+                      " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                                   " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                                          " FROM Trades a" +
+                                          " LEFT JOIN Splits b" +
+                                              " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @Date" +
+                                          " WHERE a.Portfolio = @Portfolio AND a.Date <= @Date" +
+                                          " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
+                                   " GROUP BY TickerID) AS b" +
+                           " ON a.ID = b.TickerID" +
+                      " LEFT JOIN AvgPricePerShare AS c" +
+                          " ON a.ID = c.Ticker" +
+                      " WHERE a.Active = 1 AND a.Portfolio = @Portfolio",
+                      new SqlCeParameter[] { 
+                        AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                        AddParam("@Date", SqlDbType.DateTime, Date)
+                    }
+                );
         }
 
         public static QueryInfo GetHoldings(int Portfolio, DateTime Date, double TotalValue, bool Hidden, string Sort)
@@ -493,26 +514,42 @@ namespace MyPersonalIndex
         }
 
         public enum eGetTickerValue { TotalValue, Price, Ticker, Ratio };
-        public static QueryInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
+        public static QueryInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay, bool AATrade)
         {
-            return new QueryInfo(
-                "SELECT COALESCE(SUM(c.Price * b.Shares), 0) AS TotalValue, c.Price, a.Ticker, d.Ratio" +
+            if (AATrade) // only AA trade needs total value of security, otherwise just return 0 since it's discarded
+                return new QueryInfo(
+                    "SELECT COALESCE(SUM(c.Price * b.Shares), 0) AS TotalValue, c.Price, a.Ticker, d.Ratio" +
+                    " FROM Tickers AS a" +
+                    " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
+                                " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
+                                       " FROM Trades a" +
+                                       " LEFT JOIN Splits b" +
+                                           " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @YDay" +
+                                       " WHERE a.TickerID = @TickerID AND a.Date <= @YDay" +
+                                       " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
+                                " GROUP BY TickerID) AS b" +
+                        " ON a.ID = b.TickerID" +
+                    " LEFT JOIN ClosingPrices AS c" +
+                        " ON a.Ticker = c.Ticker AND c.Date = @YDay" +
+                    " LEFT JOIN Splits d" +
+                        " ON a.Ticker = d.Ticker and d.Date = @Date" + // need yesterday's price, but split today if necessary
+                    " WHERE a.ID = @TickerID AND a.Active = 1" +
+                    " GROUP BY c.Price, a.Ticker, d.Ratio",
+                    new SqlCeParameter[] { 
+                        AddParam("@TickerID", SqlDbType.Int, TickerID),
+                        AddParam("@Date", SqlDbType.DateTime, Date),
+                        AddParam("@YDay", SqlDbType.DateTime, YDay)
+                    }
+                );
+            else
+                return new QueryInfo(
+                "SELECT 0.0 AS TotalValue, c.Price, a.Ticker, d.Ratio" +
                 " FROM Tickers AS a" +
-                " LEFT JOIN (SELECT TickerID, SUM(Shares) AS Shares" +
-                            " FROM (SELECT a.TickerID, a.Shares * CAST(COALESCE(EXP(SUM(LOG(b.Ratio))), 1.0) AS DECIMAL(18,4)) as Shares" +
-                                   " FROM Trades a" +
-                                   " LEFT JOIN Splits b" +
-                                       " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND @YDay" +
-                                   " WHERE a.TickerID = @TickerID AND a.Date <= @YDay" +
-                                   " GROUP BY a.ID, a.Custom, a.TickerID, a.Shares) AllTrades" +
-                            " GROUP BY TickerID) AS b" +
-                    " ON a.ID = b.TickerID" +
                 " LEFT JOIN ClosingPrices AS c" +
                     " ON a.Ticker = c.Ticker AND c.Date = @YDay" +
                 " LEFT JOIN Splits d" +
                     " ON a.Ticker = d.Ticker and d.Date = @Date" + // need yesterday's price, but split today if necessary
-                " WHERE a.ID = @TickerID AND a.Active = 1" +
-                " GROUP BY c.Price, a.Ticker, d.Ratio",
+                " WHERE a.ID = @TickerID AND a.Active = 1",
                 new SqlCeParameter[] { 
                     AddParam("@TickerID", SqlDbType.Int, TickerID),
                     AddParam("@Date", SqlDbType.DateTime, Date),
@@ -648,14 +685,6 @@ namespace MyPersonalIndex
             );
         }
 
-        public static QueryInfo DeleteCustomTrades()
-        {
-            return new QueryInfo(
-                "DELETE FROM Trades WHERE Custom IS NOT NULL",
-                new SqlCeParameter[] {}
-            );
-        }
-
         public static QueryInfo DeleteCustomTrades(int Portfolio)
         {
             return new QueryInfo(
@@ -666,7 +695,15 @@ namespace MyPersonalIndex
             );
         }
 
-        public static QueryInfo DeleteCustomTrades(int Portfolio, DateTime MinDate)
+        public static QueryInfo DeleteCustomTradesFromTrades()
+        {
+            return new QueryInfo(
+                "DELETE FROM Trades WHERE Custom IS NOT NULL",
+                new SqlCeParameter[] { }
+            );
+        }
+
+        public static QueryInfo DeleteCustomTradesFromTrades(int Portfolio, DateTime MinDate)
         {
             return new QueryInfo(
                 "DELETE FROM Trades WHERE Portfolio = @Portfolio AND Date >= @MinDate AND Custom IS NOT NULL",

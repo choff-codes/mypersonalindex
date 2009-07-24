@@ -285,7 +285,7 @@ namespace MyPersonalIndex
                 MPI.Settings.Splits = f.OptionReturnValues.Splits;
                 MPI.Settings.DataStartDate = f.OptionReturnValues.DataStartDate;
                 SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioStartDates(MPI.Settings.DataStartDate));
-                SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades());
+                SQL.ExecuteNonQuery(MainQueries.DeleteCustomTradesFromTrades());
                 SQL.ExecuteNonQuery(MainQueries.DeleteNAV());
                 SQL.ExecuteNonQuery(MainQueries.DeleteSplits());
                 SQL.ExecuteNonQuery(MainQueries.DeleteClosingPrices());

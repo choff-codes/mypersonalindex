@@ -85,29 +85,26 @@ namespace MyPersonalIndex
             bool bCostBasis, bool bGainLoss, bool bTax, bool bNet, double TotalValue)
         {
             double CostBasis = 0;
-            double GainLoss = 0;
             double TaxLiability = 0;
 
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date)))
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetGainLossInfo(MPI.Portfolio.ID, Date, bTax)))
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();
                     if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.CostBasis)))
                         CostBasis = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.CostBasis);
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.GainLoss)))
-                        GainLoss = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.GainLoss);
-                    if (!Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)))
+                    if (bTax && !Convert.IsDBNull(rs.GetValue((int)MainQueries.eGetGainLossInfo.TaxLiability)))
                         TaxLiability = (double)rs.GetDecimal((int)MainQueries.eGetGainLossInfo.TaxLiability);
                 }
 
             if (bCostBasis)
                 dg.Columns[CostBasisCol].HeaderCell.Value = string.Format("Cost Basis\n[{0:C}]", CostBasis);
 
+            if (bGainLoss)
+                dg.Columns[GainLossCol].HeaderCell.Value = string.Format("Gain/Loss\n[{0:C}]", TotalValue - CostBasis); 
+
             if (bTax)
                 dg.Columns[TaxCol].HeaderCell.Value = string.Format("Tax Liability\n[{0:C}]", TaxLiability);
-
-            if (bGainLoss)
-                dg.Columns[GainLossCol].HeaderCell.Value = string.Format("Gain/Loss\n[{0:C}]", GainLoss); 
 
             if (bNet)
                 dg.Columns[NetCol].HeaderCell.Value = string.Format("Net Value\n[{0:C}]", TotalValue - TaxLiability); 
@@ -151,7 +148,7 @@ namespace MyPersonalIndex
             dgHoldings.DataSource = SQL.ExecuteDataset(MainQueries.GetHoldings(MPI.Portfolio.ID, Date, MPI.Holdings.TotalValue, btnHoldingsHidden.Checked, MPI.Holdings.Sort));
 
             LoadGainLossInfo(dgHoldings, Date, Constants.MPIHoldings.CostBasisColumn, Constants.MPIHoldings.GainLossColumn,
-                String.Empty, String.Empty, true, true, false, false, 0);
+                String.Empty, String.Empty, true, true, false, false, MPI.Holdings.TotalValue);
             LoadTotalValue(dgHoldings, Constants.MPIHoldings.TotalValueColumn, MPI.Holdings.TotalValue);
         }
 

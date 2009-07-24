@@ -221,7 +221,7 @@ namespace MyPersonalIndex
                     // split[1] = ratio
                     string[] split = p.Split(' ');
                     // if split is less than mindate, don't add unless this is the first time run for the ticker
-                    if (Convert.ToDateTime(split[0]) <= MinDate && MinDate >= Settings.DataStartDate)
+                    if (Convert.ToDateTime(split[0], C) <= MinDate && MinDate >= Settings.DataStartDate)
                         continue;
 
                     // ratio looks like [2:1], so strip off the brackets

@@ -55,7 +55,7 @@ namespace MyPersonalIndex
         {
             try
             {
-                cn = new SqlCeConnection("Data Source=" + Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\MyPersonalIndex\\MPI.sdf");
+                cn = new SqlCeConnection(string.Format("Data Source={0}\\MyPersonalIndex\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 if (cn.State == ConnectionState.Closed)
                     cn.Open();
             }

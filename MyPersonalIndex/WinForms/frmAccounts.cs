@@ -56,7 +56,7 @@ namespace MyPersonalIndex
                 {
                     int ID = (int)dr[(int)AcctQueries.eGetAcct.ID];
                     double? TaxRate = null;  // store blank taxrates as null
-                    if (dr[(int)AcctQueries.eGetAcct.TaxRate] != System.DBNull.Value)
+                    if (!Convert.IsDBNull(dr[(int)AcctQueries.eGetAcct.TaxRate]))
                         TaxRate = Convert.ToDouble(dr[(int)AcctQueries.eGetAcct.TaxRate]);
 
                     if (ID == 0) // all new rows have a 0 ID

@@ -189,7 +189,7 @@ namespace MyPersonalIndex
             switch ((Constants.DynamicTradeType)cmbType.SelectedIndex)
             {
                 case Constants.DynamicTradeType.AA:
-                    lblShares.Text = "% of Target AA:";
+                    lblShares.Text = "% of AA Target:";
                     break;
                 case Constants.DynamicTradeType.Fixed:
                     lblShares.Text = string.Format("Amount({0}):", System.Globalization.CultureInfo.CurrentCulture.NumberFormat.CurrencySymbol);

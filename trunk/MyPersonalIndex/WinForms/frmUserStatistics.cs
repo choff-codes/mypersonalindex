@@ -57,22 +57,22 @@ namespace MyPersonalIndex
             switch (((ToolStripMenuItem)sender).Text)
             {
                 case "Portfolio ID":
-                    txtSQL.SelectedText = "%Portfolio%";
+                    txtSQL.SelectedText = "@Portfolio";
                     break;
                 case "Portfolio Name":
-                    txtSQL.SelectedText = "%PortfolioName%";
+                    txtSQL.SelectedText = "@PortfolioName";
                     break;
                 case "Start Date":
-                    txtSQL.SelectedText = "%StartDate%";
+                    txtSQL.SelectedText = "@StartDate";
                     break;
                 case "End Date":
-                    txtSQL.SelectedText = "%EndDate%";
+                    txtSQL.SelectedText = "@EndDate";
                     break;
                 case "Total Value":
-                    txtSQL.SelectedText = "%TotalValue%";
+                    txtSQL.SelectedText = "@TotalValue";
                     break;
                 case "Previous Day":
-                    txtSQL.SelectedText = "%PreviousDay%";
+                    txtSQL.SelectedText = "@PreviousDay";
                     break;
             }
         }

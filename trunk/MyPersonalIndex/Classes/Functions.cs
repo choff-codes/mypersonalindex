@@ -12,11 +12,6 @@ namespace MyPersonalIndex
 {
     class Functions
     {
-        public static string SQLCleanString(string s)
-        {
-            return s.Replace("'", "''");
-        }
-
         public static string StripSignifyPortfolio(string Ticker)
         {
             return Functions.RemoveDelimiter(Constants.SignifyPortfolio, Ticker);
@@ -76,17 +71,6 @@ namespace MyPersonalIndex
             {
                 return Convert.ToString(s);
             }
-        }
-
-        public static string CleanStatString(string SQL, Dictionary<Constants.StatVariables, string> d)
-        {
-            //if (Enum.GetValues(typeof(Constants.StatVariables)).Length != d.Count)
-            //    throw new ArgumentOutOfRangeException("Dictionary must be correct length");
-
-            foreach (KeyValuePair<Constants.StatVariables, string> p in d)
-                SQL = SQL.Replace(string.Format("%{0}%", Enum.GetName(typeof(Constants.StatVariables), p.Key)), p.Value);
-
-            return SQL;
         }
 
         public static bool IsInternetConnection()
@@ -157,7 +141,7 @@ namespace MyPersonalIndex
 
                 // write out column headers
                 for (int x = 0; x < columnCount; x++)
-                    line.Add(Functions.RemoveDelimiter(delimiter, dg.Columns[x].HeaderText));
+                    line.Add(Functions.RemoveDelimiter(delimiter, dg.Columns[x].HeaderText).Replace("\n", ""));
 
                 lines.Add(string.Join(delimiter, line.ToArray()));
 
@@ -193,11 +177,30 @@ namespace MyPersonalIndex
             return string.Format("{0:C}", d);
         }
 
-        public static bool StringIsDecimal(string s, bool Currency)
+        public static object ConvertToDecimal(string s)
         {
+            if (string.IsNullOrEmpty(s))
+                return System.DBNull.Value;
+            else
+                return Convert.ToDecimal(s);
+        }
+
+        public static bool ConvertToBoolean(string s)
+        {
+            if (string.IsNullOrEmpty(s))
+                return true;
+            else
+                return Convert.ToBoolean(s);
+        }
+
+        public static bool StringIsDecimal(string s, bool Currency, bool AllowNull)
+        {
+            if (string.IsNullOrEmpty(s) && AllowNull)
+                return true;
+
             decimal tmp;
             if (Currency)
-                return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Threading.Thread.CurrentThread.CurrentCulture.NumberFormat, out tmp);
+                return decimal.TryParse(s, System.Globalization.NumberStyles.Currency, System.Globalization.CultureInfo.CurrentCulture, out tmp);
             else
                 return decimal.TryParse(s, out tmp);
         }
@@ -208,9 +211,19 @@ namespace MyPersonalIndex
             return DateTime.TryParse(s, out tmp);
         }
 
+        public static bool StringIsBoolean(string s, bool AllowNull)
+        {
+            if (string.IsNullOrEmpty(s) && AllowNull)
+                return true;
+
+            bool tmp;
+            return bool.TryParse(s, out tmp);
+        }
+
         public static void LoadGraphSettings(ZedGraphControl zedChart, string Title, bool ShowLegend)
         {
             GraphPane g = zedChart.GraphPane;
+            string ChartFont = "Tahoma";
 
             g.CurveList.Clear();
             g.XAxis.Scale.MaxAuto = true;
@@ -220,18 +233,18 @@ namespace MyPersonalIndex
 
             // Set the Titles
             g.Title.Text = Title;
-            g.Title.FontSpec.Family = "Tahoma";
+            g.Title.FontSpec.Family = ChartFont;
             g.XAxis.Title.Text = "Date";
-            g.XAxis.Title.FontSpec.Family = "Tahoma";
+            g.XAxis.Title.FontSpec.Family = ChartFont;
             g.YAxis.MajorGrid.IsVisible = true;
             g.YAxis.Title.Text = "Percent";
-            g.YAxis.Title.FontSpec.Family = "Tahoma";
+            g.YAxis.Title.FontSpec.Family = ChartFont;
             g.XAxis.Type = AxisType.Date;
             g.YAxis.Scale.Format = "0.00'%'";
             g.XAxis.Scale.FontSpec.Size = 8;
-            g.XAxis.Scale.FontSpec.Family = "Tahoma";
+            g.XAxis.Scale.FontSpec.Family = ChartFont;
             g.YAxis.Scale.FontSpec.Size = 8;
-            g.YAxis.Scale.FontSpec.Family = "Tahoma";
+            g.YAxis.Scale.FontSpec.Family = ChartFont;
             g.Legend.FontSpec.Size = 8;
             g.XAxis.Title.FontSpec.Size = 11;
             g.YAxis.Title.FontSpec.Size = 11;
@@ -319,9 +332,9 @@ namespace MyPersonalIndex
                             break;
                         case (int)AAQueries.eGetAA.Target:
                             s = s.Replace("%", String.Empty);
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, true);
                             if (Success)
-                                return Convert.ToDecimal(s);
+                                return Functions.ConvertToDecimal(s);
                             break;
                     }
                     break;
@@ -336,9 +349,14 @@ namespace MyPersonalIndex
                             break;
                         case (int)AcctQueries.eGetAcct.TaxRate:
                             s = s.Replace("%", String.Empty);
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, true);
                             if (Success)
-                                return Convert.ToDecimal(s);
+                                return Functions.ConvertToDecimal(s);
+                            break;
+                        case (int)AcctQueries.eGetAcct.OnlyGain:
+                            Success = Functions.StringIsBoolean(s, true);
+                            if (Success)
+                                return Functions.ConvertToBoolean(s);
                             break;
                     }
                     break;
@@ -352,12 +370,12 @@ namespace MyPersonalIndex
                                 return s;
                             break;
                         case (int)TickerQueries.eGetTrades.Shares:
-                            Success = Functions.StringIsDecimal(s, false);
+                            Success = Functions.StringIsDecimal(s, false, false);
                             if (Success)
                                 return Convert.ToDecimal(s);
                             break;
                         case (int)TickerQueries.eGetTrades.Price:
-                            Success = Functions.StringIsDecimal(s, true);
+                            Success = Functions.StringIsDecimal(s, true, false);
                             if (Success)
                                 return Functions.ConvertFromCurrency(s);
                             break;
@@ -375,24 +393,27 @@ namespace MyPersonalIndex
                 case Constants.PasteDatagrid.dgAA:
 
                     s[(int)AAQueries.eGetAA.Target] = s[(int)AAQueries.eGetAA.Target].Replace("%", String.Empty);
-                    Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false);
+                    Success = (!string.IsNullOrEmpty(s[(int)AAQueries.eGetAA.AA])) && Functions.StringIsDecimal(s[(int)AAQueries.eGetAA.Target], false, true);
                     if (Success)
-                        return new object[3] { s[(int)AAQueries.eGetAA.AA], Convert.ToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
+                        return new object[3] { s[(int)AAQueries.eGetAA.AA], Functions.ConvertToDecimal(s[(int)AAQueries.eGetAA.Target]), 0 };
                     break;
 
                 case Constants.PasteDatagrid.dgAcct:
 
                     s[(int)AcctQueries.eGetAcct.TaxRate] = s[(int)AcctQueries.eGetAcct.TaxRate].Replace("%", String.Empty);
-                    Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false);
+                    Success = (!string.IsNullOrEmpty(s[(int)AcctQueries.eGetAcct.Name])) 
+                        && Functions.StringIsDecimal(s[(int)AcctQueries.eGetAcct.TaxRate], false, true)
+                        && Functions.StringIsBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain], true);
                     if (Success)
-                        return new object[3] { s[(int)AcctQueries.eGetAcct.Name], Convert.ToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]), 0 };
+                        return new object[4] { s[(int)AcctQueries.eGetAcct.Name], Functions.ConvertToDecimal(s[(int)AcctQueries.eGetAcct.TaxRate]),
+                            Functions.ConvertToBoolean(s[(int)AcctQueries.eGetAcct.OnlyGain]), 0 };
                     break;
 
                 case Constants.PasteDatagrid.dgTicker:
 
                     Success = Functions.StringIsDateTime(s[(int)TickerQueries.eGetTrades.Date])
-                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Shares], false)
-                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Price], true);
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Shares], false, false)
+                        && Functions.StringIsDecimal(s[(int)TickerQueries.eGetTrades.Price], true, false);
                     if (Success)
                         return new object[3] {
                             s[(int)TickerQueries.eGetTrades.Date], 
@@ -402,6 +423,30 @@ namespace MyPersonalIndex
                     break;
             }
             return null;
+        }
+
+        public static List<DateTime> ExtractDates(string When)
+        {
+            List<DateTime> Values = new List<DateTime>();
+
+            if (string.IsNullOrEmpty(When))
+                return Values;
+
+            string[] Dates = When.Split(Constants.DateSeperatorChar);
+            foreach (string s in Dates)
+                Values.Add(new DateTime(Convert.ToInt32(s.Substring(0, 4)), Convert.ToInt32(s.Substring(4, 2)), Convert.ToInt32(s.Substring(6, 2))));
+
+            return Values;
+        }
+
+        public static string InsertDates(List<DateTime> When)
+        {
+            string[] Dates = new string[When.Count];
+
+            for(int i = 0; i < When.Count; i++)
+                Dates[i] = string.Format("{0}{1}{2}", When[i].ToString("yyyy"), When[i].ToString("MM"), When[i].ToString("dd"));
+
+            return string.Join(Constants.DateSeperatorString, Dates);
         }
     }
 }

@@ -22,7 +22,7 @@ namespace MyPersonalIndex
 
         private void CheckForInvalidStartDates(bool ReloadPortfolio)
         {
-            // This check is necessary in the case that after tickers are deleted, closing prices table now starts at a later
+            // This check is necessary in the case that after tickers are deleted, the closing prices table now starts at a later
             // time than before.  If this happens, other portfolios may need their start date moved up, which recalculating the NAV will handle
             DateTime MinDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetFirstDate(), DateTime.Today.AddDays(1)));
             bool RecalcAll = false;
@@ -45,27 +45,13 @@ namespace MyPersonalIndex
                     StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);
         }
 
-        private string CleanStatString(string SQL)
-        {
-            Dictionary<Constants.StatVariables, string> d = new Dictionary<Constants.StatVariables, string>();
-
-            d.Add(Constants.StatVariables.Portfolio, MPI.Portfolio.ID.ToString());
-            d.Add(Constants.StatVariables.PortfolioName, MPI.Portfolio.Name);
-            d.Add(Constants.StatVariables.PreviousDay, Convert.ToDateTime(this.SQL.ExecuteScalar(MainQueries.GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate)).ToShortDateString());
-            d.Add(Constants.StatVariables.StartDate, MPI.Stat.BeginDate.ToShortDateString());
-            d.Add(Constants.StatVariables.EndDate, MPI.Stat.EndDate.ToShortDateString());
-            d.Add(Constants.StatVariables.TotalValue, MPI.Stat.TotalValue.ToString());
-
-            return Functions.CleanStatString(SQL, d);
-        }
-
         private bool DeleteTicker(int Ticker, string sTicker)
         {
             if (MessageBox.Show(string.Format("Are you sure you want to delete {0}?", sTicker), "Delete?", MessageBoxButtons.YesNo) == DialogResult.Yes)
             {
                 SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrade(Ticker));
-                SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(MPI.Portfolio.ID, Ticker));
-                SQL.ExecuteNonQuery(MainQueries.DeleteTicker(MPI.Portfolio.ID, Ticker));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTickerTrades(Ticker));
+                SQL.ExecuteNonQuery(MainQueries.DeleteTicker(Ticker));
                 return true;
             }
             return false;
@@ -109,6 +95,22 @@ namespace MyPersonalIndex
             return Convert.ToDouble(SQL.ExecuteScalar(MainQueries.GetTotalValue(MPI.Portfolio.ID, Date), 0));
         }
 
+        private Queries.QueryInfo PrepareStatString()
+        {
+            return new Queries.QueryInfo(
+                "",
+                new SqlCeParameter[] {
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.Portfolio.ToString()), SqlDbType.Int, MPI.Portfolio.ID),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.PortfolioName.ToString()), SqlDbType.NVarChar, MPI.Portfolio.Name),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.PreviousDay.ToString()), SqlDbType.DateTime, 
+                        Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetPreviousDay(MPI.Stat.BeginDate), MPI.Portfolio.StartDate))),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.StartDate.ToString()), SqlDbType.DateTime, MPI.Stat.BeginDate),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.EndDate.ToString()), SqlDbType.DateTime, MPI.Stat.EndDate),
+                    Queries.AddParam(string.Format("@{0}", Constants.StatVariables.TotalValue.ToString()), SqlDbType.Decimal, MPI.Stat.TotalValue)
+                }
+            );
+        }
+
         private void RefreshNonTradeChanges()
         {
             LoadHoldings(MPI.Holdings.SelDate);
@@ -119,7 +121,7 @@ namespace MyPersonalIndex
         private void ResetLastDate()
         {
             MPI.LastDate = Convert.ToDateTime(SQL.ExecuteScalar(MainQueries.GetLastDate(), MPI.Settings.DataStartDate));
-            stbLastUpdated.Text = "Last Updated:" + ((MPI.LastDate == MPI.Settings.DataStartDate) ? " Never" : " " + MPI.LastDate.ToShortDateString());
+            stbLastUpdated.Text = string.Format("Last Updated: {0}", MPI.LastDate == MPI.Settings.DataStartDate ? "Never" : MPI.LastDate.ToShortDateString());
         }
 
         private void ResetSortDropDown(ToolStripComboBox t, string Sort, EventHandler eh)
@@ -283,7 +285,7 @@ namespace MyPersonalIndex
                 MPI.Settings.Splits = f.OptionReturnValues.Splits;
                 MPI.Settings.DataStartDate = f.OptionReturnValues.DataStartDate;
                 SQL.ExecuteNonQuery(MainQueries.UpdatePortfolioStartDates(MPI.Settings.DataStartDate));
-                SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades());
+                SQL.ExecuteNonQuery(MainQueries.DeleteCustomTradesFromTrades());
                 SQL.ExecuteNonQuery(MainQueries.DeleteNAV());
                 SQL.ExecuteNonQuery(MainQueries.DeleteSplits());
                 SQL.ExecuteNonQuery(MainQueries.DeleteClosingPrices());
@@ -415,7 +417,11 @@ namespace MyPersonalIndex
                 if (f.ShowDialog() != DialogResult.OK)
                     return;
 
-                RefreshNonTradeChanges();
+                if (SQL.ExecuteScalar(MainQueries.GetPortfolioHasCustomAATrades(MPI.Portfolio.ID)) == null)
+                    RefreshNonTradeChanges();
+                else
+                    StartNAV(MPIBackgroundWorker.MPIUpdateType.NAV, MPI.Portfolio.StartDate, MPI.Portfolio.ID);                
+                    
             }
         }
 
@@ -553,7 +559,7 @@ namespace MyPersonalIndex
 
         private void dgAA_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIAssetAllocation.OffsetColumn || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgAA.Columns[Constants.MPIAssetAllocation.OffsetColumn].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < -1 * MPI.Portfolio.AAThreshold)
@@ -566,7 +572,7 @@ namespace MyPersonalIndex
 
         private void dgAcct_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIAccount.GainLossColumnP || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgAcct.Columns[Constants.MPIAccount.GainLossColumnP].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < 0)
@@ -586,7 +592,7 @@ namespace MyPersonalIndex
 
         private void dgHoldings_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
-            if (e.ColumnIndex != Constants.MPIHoldings.GainLossColumnP || Convert.IsDBNull(e.Value))
+            if (e.ColumnIndex != dgHoldings.Columns[Constants.MPIHoldings.GainLossColumnP].Index || Convert.IsDBNull(e.Value))
                 return;
 
             if (Convert.ToDouble(e.Value) < 0)

@@ -141,7 +141,7 @@ namespace MyPersonalIndex
 
                 // write out column headers
                 for (int x = 0; x < columnCount; x++)
-                    line.Add(Functions.RemoveDelimiter(delimiter, dg.Columns[x].HeaderText));
+                    line.Add(Functions.RemoveDelimiter(delimiter, dg.Columns[x].HeaderText).Replace("\n", ""));
 
                 lines.Add(string.Join(delimiter, line.ToArray()));
 

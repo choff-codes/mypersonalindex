@@ -164,7 +164,7 @@
             // 
             // cmbYear
             // 
-            this.cmbYear.CustomFormat = "MM/dd";
+            this.cmbYear.CustomFormat = "dd MMM";
             this.cmbYear.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.cmbYear.Location = new System.Drawing.Point(74, 102);
             this.cmbYear.Name = "cmbYear";

@@ -28,19 +28,20 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOK = new System.Windows.Forms.Button();
             this.gbAccount = new System.Windows.Forms.GroupBox();
             this.dgAcct = new System.Windows.Forms.DataGridView();
-            this.colAcctAccount = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAccTaxRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.colAcctID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dsAcct = new System.Data.DataSet();
             this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAcctAccount = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colAccTaxRate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.colOnlyGain = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.colAcctID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.gbAccount.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgAcct)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dsAcct)).BeginInit();
@@ -50,7 +51,7 @@
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(258, 268);
+            this.btnCancel.Location = new System.Drawing.Point(334, 268);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 25);
             this.btnCancel.TabIndex = 5;
@@ -61,7 +62,7 @@
             // btnOK
             // 
             this.btnOK.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(190, 268);
+            this.btnOK.Location = new System.Drawing.Point(266, 268);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(62, 25);
             this.btnOK.TabIndex = 4;
@@ -74,7 +75,7 @@
             this.gbAccount.Controls.Add(this.dgAcct);
             this.gbAccount.Location = new System.Drawing.Point(10, 7);
             this.gbAccount.Name = "gbAccount";
-            this.gbAccount.Size = new System.Drawing.Size(310, 255);
+            this.gbAccount.Size = new System.Drawing.Size(386, 255);
             this.gbAccount.TabIndex = 3;
             this.gbAccount.TabStop = false;
             this.gbAccount.Text = "Account List";
@@ -86,42 +87,15 @@
             this.dgAcct.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.colAcctAccount,
             this.colAccTaxRate,
+            this.colOnlyGain,
             this.colAcctID});
             this.dgAcct.Location = new System.Drawing.Point(5, 18);
             this.dgAcct.Name = "dgAcct";
-            this.dgAcct.Size = new System.Drawing.Size(299, 231);
+            this.dgAcct.Size = new System.Drawing.Size(375, 231);
             this.dgAcct.TabIndex = 0;
             this.dgAcct.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgAcct_DefaultValuesNeeded);
             this.dgAcct.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgAcct_DataError);
             this.dgAcct.KeyDown += new System.Windows.Forms.KeyEventHandler(this.dgAcct_KeyDown);
-            // 
-            // colAcctAccount
-            // 
-            this.colAcctAccount.DataPropertyName = "Name";
-            this.colAcctAccount.HeaderText = "Description";
-            this.colAcctAccount.MaxInputLength = 255;
-            this.colAcctAccount.Name = "colAcctAccount";
-            this.colAcctAccount.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAcctAccount.Width = 165;
-            // 
-            // colAccTaxRate
-            // 
-            this.colAccTaxRate.DataPropertyName = "TaxRate";
-            dataGridViewCellStyle1.Format = "#0.00\'%\'";
-            this.colAccTaxRate.DefaultCellStyle = dataGridViewCellStyle1;
-            this.colAccTaxRate.HeaderText = "Tax Rate %";
-            this.colAccTaxRate.MaxInputLength = 14;
-            this.colAccTaxRate.Name = "colAccTaxRate";
-            this.colAccTaxRate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAccTaxRate.Width = 90;
-            // 
-            // colAcctID
-            // 
-            this.colAcctID.DataPropertyName = "ID";
-            this.colAcctID.HeaderText = "ID";
-            this.colAcctID.Name = "colAcctID";
-            this.colAcctID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
-            this.colAcctID.Visible = false;
             // 
             // dsAcct
             // 
@@ -155,11 +129,46 @@
             this.dataGridViewTextBoxColumn3.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
             this.dataGridViewTextBoxColumn3.Visible = false;
             // 
+            // colAcctAccount
+            // 
+            this.colAcctAccount.DataPropertyName = "Name";
+            this.colAcctAccount.HeaderText = "Description";
+            this.colAcctAccount.MaxInputLength = 255;
+            this.colAcctAccount.Name = "colAcctAccount";
+            this.colAcctAccount.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctAccount.Width = 150;
+            // 
+            // colAccTaxRate
+            // 
+            this.colAccTaxRate.DataPropertyName = "TaxRate";
+            dataGridViewCellStyle1.Format = "#0.00\'%\'";
+            this.colAccTaxRate.DefaultCellStyle = dataGridViewCellStyle1;
+            this.colAccTaxRate.HeaderText = "Tax Rate %";
+            this.colAccTaxRate.MaxInputLength = 14;
+            this.colAccTaxRate.Name = "colAccTaxRate";
+            this.colAccTaxRate.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAccTaxRate.Width = 75;
+            // 
+            // colOnlyGain
+            // 
+            this.colOnlyGain.DataPropertyName = "OnlyGain";
+            this.colOnlyGain.HeaderText = "Tax Gains Only?";
+            this.colOnlyGain.Name = "colOnlyGain";
+            this.colOnlyGain.Width = 90;
+            // 
+            // colAcctID
+            // 
+            this.colAcctID.DataPropertyName = "ID";
+            this.colAcctID.HeaderText = "ID";
+            this.colAcctID.Name = "colAcctID";
+            this.colAcctID.SortMode = System.Windows.Forms.DataGridViewColumnSortMode.NotSortable;
+            this.colAcctID.Visible = false;
+            // 
             // frmAccounts
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(330, 301);
+            this.ClientSize = new System.Drawing.Size(408, 301);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.gbAccount);
@@ -187,11 +196,12 @@
         private System.Windows.Forms.GroupBox gbAccount;
         private System.Windows.Forms.DataGridView dgAcct;
         private System.Data.DataSet dsAcct;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctAccount;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAccTaxRate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctID;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctAccount;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAccTaxRate;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn colOnlyGain;
+        private System.Windows.Forms.DataGridViewTextBoxColumn colAcctID;
     }
 }

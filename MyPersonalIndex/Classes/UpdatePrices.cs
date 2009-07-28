@@ -119,6 +119,9 @@ namespace MyPersonalIndex
 
         private void GetPrices(string Ticker, DateTime MinDate, double LastPrice)
         {
+            // Yahoo! Finance will always use US format
+            System.Globalization.CultureInfo C = System.Globalization.CultureInfo.InvariantCulture;
+
             if (MinDate == DateTime.Today)
                 return;
 
@@ -128,7 +131,7 @@ namespace MyPersonalIndex
 
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.ClosingPrices))
             // add a day to mindate since we already have data for mindate
-            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.MPIHoldings.StockPrices)))
+            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.StockPrices)))
             using (StreamReader sr = new StreamReader(s))
             {
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();
@@ -143,8 +146,8 @@ namespace MyPersonalIndex
                 // columns[4] = Close Price
                 do
                 {
-                    DateTime Day = Convert.ToDateTime(columns[0]);
-                    double Price = Convert.ToDouble(columns[4]);
+                    DateTime Day = Convert.ToDateTime(columns[0], C);
+                    double Price = Convert.ToDouble(columns[4], C);
 
                     newRecord.SetDateTime((int)MainQueries.Tables.eClosingPrices.Date, Day);
                     newRecord.SetString((int)MainQueries.Tables.eClosingPrices.Ticker, Ticker);
@@ -160,7 +163,7 @@ namespace MyPersonalIndex
                     if (line != null)
                     {
                         columns = line.Split(',');
-                        newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / Convert.ToDouble(columns[4])) - 1) * 100));
+                        newRecord.SetDecimal((int)MainQueries.Tables.eClosingPrices.Change, (decimal)(((Price / Convert.ToDouble(columns[4], C)) - 1) * 100));
                     }
                     else // use last price that is passed in as a parameter
                     {
@@ -178,6 +181,9 @@ namespace MyPersonalIndex
 
         private void GetSplits(string Ticker, DateTime MinDate)
         {
+            // Yahoo! Finance will always use US format
+            System.Globalization.CultureInfo C = System.Globalization.CultureInfo.InvariantCulture;
+
             if (MinDate == DateTime.Today)
                 return;
 
@@ -215,7 +221,7 @@ namespace MyPersonalIndex
                     // split[1] = ratio
                     string[] split = p.Split(' ');
                     // if split is less than mindate, don't add unless this is the first time run for the ticker
-                    if (Convert.ToDateTime(split[0]) <= MinDate && MinDate >= Settings.DataStartDate)
+                    if (Convert.ToDateTime(split[0], C) <= MinDate && MinDate >= Settings.DataStartDate)
                         continue;
 
                     // ratio looks like [2:1], so strip off the brackets
@@ -223,8 +229,8 @@ namespace MyPersonalIndex
                     string[] divisor = split[1].Split(':');
 
                     newRecord.SetString((int)MainQueries.Tables.eSplits.Ticker, Ticker);
-                    newRecord.SetDateTime((int)MainQueries.Tables.eSplits.Date, Convert.ToDateTime(split[0]));
-                    newRecord.SetDecimal((int)MainQueries.Tables.eSplits.Ratio, Convert.ToDecimal(divisor[0]) / Convert.ToDecimal(divisor[1]));
+                    newRecord.SetDateTime((int)MainQueries.Tables.eSplits.Date, Convert.ToDateTime(split[0], C));
+                    newRecord.SetDecimal((int)MainQueries.Tables.eSplits.Ratio, Convert.ToDecimal(divisor[0], C) / Convert.ToDecimal(divisor[1], C));
                     rs.Insert(newRecord);
                 }
             }
@@ -232,6 +238,9 @@ namespace MyPersonalIndex
 
         private void GetDividends(string Ticker, DateTime MinDate)
         {
+            // Yahoo! Finance will always use US format
+            System.Globalization.CultureInfo C = System.Globalization.CultureInfo.InvariantCulture;
+
             if (MinDate == DateTime.Today)
                 return;
 
@@ -241,7 +250,7 @@ namespace MyPersonalIndex
 
             using (SqlCeResultSet rs = SQL.ExecuteTableUpdate(MainQueries.Tables.Dividends))
             // add a day to mindate since we already have data for mindate
-            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.MPIHoldings.Dividends)))
+            using (Stream s = Client.OpenRead(MainQueries.GetCSVAddress(Ticker, MinDate.AddDays(1), DateTime.Now, Constants.Dividends)))
             using (StreamReader sr = new StreamReader(s))
             {
                 SqlCeUpdatableRecord newRecord = rs.CreateRecord();
@@ -253,9 +262,9 @@ namespace MyPersonalIndex
                     columns = line.Split(',');
                     // columns[0] = Date
                     // columns[1] = Dividend
-                    newRecord.SetDateTime((int)MainQueries.Tables.eDividends.Date, Convert.ToDateTime(columns[0]));
+                    newRecord.SetDateTime((int)MainQueries.Tables.eDividends.Date, Convert.ToDateTime(columns[0], C));
                     newRecord.SetString((int)MainQueries.Tables.eDividends.Ticker, Ticker);
-                    newRecord.SetDecimal((int)MainQueries.Tables.eDividends.Amount, Convert.ToDecimal(columns[1]));
+                    newRecord.SetDecimal((int)MainQueries.Tables.eDividends.Amount, Convert.ToDecimal(columns[1], C));
 
                     rs.Insert(newRecord);
 

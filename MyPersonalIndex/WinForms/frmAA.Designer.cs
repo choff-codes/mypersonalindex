@@ -50,7 +50,7 @@
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCancel.Location = new System.Drawing.Point(260, 270);
+            this.btnCancel.Location = new System.Drawing.Point(276, 270);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(62, 25);
             this.btnCancel.TabIndex = 2;
@@ -61,7 +61,7 @@
             // btnOK
             // 
             this.btnOK.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnOK.Location = new System.Drawing.Point(192, 270);
+            this.btnOK.Location = new System.Drawing.Point(208, 270);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(62, 25);
             this.btnOK.TabIndex = 1;
@@ -74,7 +74,7 @@
             this.gbAA.Controls.Add(this.dgAA);
             this.gbAA.Location = new System.Drawing.Point(12, 9);
             this.gbAA.Name = "gbAA";
-            this.gbAA.Size = new System.Drawing.Size(310, 255);
+            this.gbAA.Size = new System.Drawing.Size(326, 255);
             this.gbAA.TabIndex = 0;
             this.gbAA.TabStop = false;
             this.gbAA.Text = "Desired Allocation";
@@ -89,7 +89,7 @@
             this.colAAID});
             this.dgAA.Location = new System.Drawing.Point(5, 18);
             this.dgAA.Name = "dgAA";
-            this.dgAA.Size = new System.Drawing.Size(299, 231);
+            this.dgAA.Size = new System.Drawing.Size(315, 231);
             this.dgAA.TabIndex = 0;
             this.dgAA.DefaultValuesNeeded += new System.Windows.Forms.DataGridViewRowEventHandler(this.dgAA_DefaultValuesNeeded);
             this.dgAA.DataError += new System.Windows.Forms.DataGridViewDataErrorEventHandler(this.dgAA_DataError);
@@ -156,7 +156,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(332, 303);
+            this.ClientSize = new System.Drawing.Size(350, 303);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnOK);
             this.Controls.Add(this.gbAA);

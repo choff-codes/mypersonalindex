@@ -83,7 +83,7 @@ namespace MyPersonalIndex
             // remove NAV prices that are to be recalculated
             SQL.ExecuteNonQuery(MainQueries.DeleteNAVPrices(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
             // remove custom trades that are to be recalculated
-            SQL.ExecuteNonQuery(MainQueries.DeleteCustomTrades(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
+            SQL.ExecuteNonQuery(MainQueries.DeleteCustomTradesFromTrades(Portfolio, PortfolioStartDate ? SqlDateTime.MinValue.Value : MinDate));
 
             List<DateTime> Dates = GetDistinctDates(MinDate);
             if (Dates.Count == 0)
@@ -305,11 +305,11 @@ namespace MyPersonalIndex
         private List<DateTime> GetSpecificDynamicDates(List<DateTime> MarketDays, string When, DateTime MinDate, DateTime MaxDate)
         {
             List<DateTime> TradeDates = new List<DateTime>();
+            List<DateTime> Dates = Functions.ExtractDates(When);
 
-            string[] s = When.Split(Constants.DateSeperatorChar);
-            foreach (string date in s)
+            foreach (DateTime day in Dates)
             {
-                DateTime d = Convert.ToDateTime(date);
+                DateTime d = day;
                 if (d >= MinDate && d <= MaxDate)
                     if (GetCurrentDateOrNext(ref d, MarketDays))
                         TradeDates.Add(d);
@@ -352,9 +352,14 @@ namespace MyPersonalIndex
                 foreach (KeyValuePair<Constants.Symbol, List<Constants.DynamicTrade>> i in Trades)
                 {
                     int TickerID = i.Key.TickerID;
-                    Constants.TickerInfo Info = GetTickerValue(TickerID, Date, YDay);
+                    bool AATrade = false;
+                    foreach (Constants.DynamicTrade dt in i.Value)
+                        if (dt.TradeType == Constants.DynamicTradeType.AA)
+                            AATrade = true;  // only AA trade needs total value of security, otherwise shorten the query
+                    
+                    Constants.TickerInfo Info = GetTickerValue(TickerID, Date, YDay, AATrade);
 
-                    if (Info.Price == 0 || Info.SplitRatio == 0)
+                    if ((Info.Price == 0 && AATrade) || Info.SplitRatio == 0)  // divide by 0 issues
                         continue;
 
                     int Counter = Convert.ToInt32(SQL.ExecuteScalar(MainQueries.GetLastTickerID(TickerID), -1)) + 1;
@@ -395,11 +400,11 @@ namespace MyPersonalIndex
             }
         }
 
-        private Constants.TickerInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay)
+        private Constants.TickerInfo GetTickerValue(int TickerID, DateTime Date, DateTime YDay, bool AATrade)
         {
             Constants.TickerInfo Info = new Constants.TickerInfo();
 
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetTickerValue(TickerID, Date, YDay)))
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(MainQueries.GetTickerValue(TickerID, Date, YDay, AATrade)))
                 if (rs.HasRows)
                 {
                     rs.ReadFirst();

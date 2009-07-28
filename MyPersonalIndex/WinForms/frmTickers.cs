@@ -43,40 +43,6 @@ namespace MyPersonalIndex
             return true;
         }
 
-        private void LoadAADropDown()
-        {
-            DataTable t = new DataTable();
-            t.Columns.Add("Display");
-            t.Columns.Add("Value");
-            t.Rows.Add("(Blank)", -1);
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAA(PortfolioID)))
-                foreach (SqlCeUpdatableRecord rec in rs)
-                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAA.AA), rec.GetInt32((int)TickerQueries.eGetAA.ID));
-
-            cmbAA.DisplayMember = "Display";
-            cmbAA.ValueMember = "Value";
-            cmbAA.DataSource = t;
-            cmbAA.SelectedValue = -1;
-        }
-
-        private void LoadAcctDropDown()
-        {
-            DataTable t = new DataTable();
-            t.Columns.Add("Display");
-            t.Columns.Add("Value");
-            t.Rows.Add("(Blank)", -1);
-
-            using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetAcct(PortfolioID)))
-                foreach (SqlCeUpdatableRecord rec in rs)
-                    t.Rows.Add(rec.GetString((int)TickerQueries.eGetAcct.Name), rec.GetInt32((int)TickerQueries.eGetAcct.ID));
-
-            cmbAcct.DisplayMember = "Display";
-            cmbAcct.ValueMember = "Value";
-            cmbAcct.DataSource = t;
-            cmbAcct.SelectedValue = -1;
-        }
-
         private void LoadCustomTrades()
         {
             using (SqlCeResultSet rs = SQL.ExecuteResultSet(TickerQueries.GetCustomTrades(TickerID)))
@@ -91,6 +57,23 @@ namespace MyPersonalIndex
 
                     CustomTrades.Add(dt);
                 }
+        }
+
+        private void LoadDropDown(ComboBox c, Queries.QueryInfo Q, int Display, int Value)
+        {
+            DataTable t = new DataTable();
+            t.Columns.Add("Display");
+            t.Columns.Add("Value");
+            t.Rows.Add("(Blank)", -1);
+
+            using (SqlCeResultSet rs = SQL.ExecuteResultSet(Q))
+                foreach (SqlCeUpdatableRecord rec in rs)
+                    t.Rows.Add(rec.GetString(Display), rec.GetInt32(Value));
+
+            c.DisplayMember = "Display";
+            c.ValueMember = "Value";
+            c.DataSource = t;
+            c.SelectedValue = -1;
         }
 
         private void LoadTicker()
@@ -139,7 +122,7 @@ namespace MyPersonalIndex
                     newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.TradeType, (int)dt.TradeType);
                     newRecord.SetInt32((int)TickerQueries.Tables.eCustomTrades.Frequency, (int)dt.Frequency);
                     newRecord.SetString((int)TickerQueries.Tables.eCustomTrades.Dates, dt.When ?? String.Empty);
-                    newRecord.SetDecimal((int)TickerQueries.Tables.eCustomTrades.Value, Convert.ToDecimal(dt.Value));
+                    newRecord.SetDecimal((int)TickerQueries.Tables.eCustomTrades.Value, (decimal)dt.Value);
 
                     rs.Insert(newRecord);
                 }
@@ -230,8 +213,8 @@ namespace MyPersonalIndex
             cmbHis.SelectedIndex = 0;
             cmbHis.SelectedIndexChanged += new EventHandler(cmbHis_SelectedIndexChanged);
 
-            LoadAADropDown();
-            LoadAcctDropDown();
+            LoadDropDown(cmbAA, TickerQueries.GetAA(PortfolioID), (int)TickerQueries.eGetAA.AA, (int)TickerQueries.eGetAA.ID);
+            LoadDropDown(cmbAcct, TickerQueries.GetAcct(PortfolioID), (int)TickerQueries.eGetAcct.Name, (int)TickerQueries.eGetAcct.ID);
             LoadTicker();
             if (TickerID != -1) // not adding a new ticker
                 LoadCustomTrades();
@@ -328,7 +311,7 @@ namespace MyPersonalIndex
             dgHistory.Columns[i].SortMode = DataGridViewColumnSortMode.NotSortable;
             dgHistory.Columns[i].DataPropertyName = "Date";
 
-            if (cmbHis.SelectedIndex == 0) // price only shown when all items is selected
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All) // price only shown when all items is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -336,7 +319,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Price";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 1) // change shown on all items or % Change
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Change) // change shown on all items or % Change
             {
                 i = dgHistory.Columns.Add("colHisChange", "Change");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "#0.00'%'";
@@ -344,7 +328,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Change";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 2) // dividends shown on all items or dividends
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Dividends) // dividends shown on all items or dividends
             {
                 i = dgHistory.Columns.Add("colHisDividend", "Dividend");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -352,7 +337,8 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Dividend";
             }
 
-            if (cmbHis.SelectedIndex == 0 || cmbHis.SelectedIndex == 3) // splits shown on all items or splits
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.All ||
+                cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Splits) // splits shown on all items or splits
             {
                 i = dgHistory.Columns.Add("colHisSplit", "Split");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";
@@ -360,7 +346,7 @@ namespace MyPersonalIndex
                 dgHistory.Columns[i].DataPropertyName = "Split";
             }
 
-            if (cmbHis.SelectedIndex == 4) // trades only appear when trades is selected
+            if (cmbHis.SelectedIndex == (int)Constants.TickerHistoryChoice.Trades) // trades only appear when trades is selected
             {
                 i = dgHistory.Columns.Add("colHisPrice", "Price");
                 dgHistory.Columns[i].DefaultCellStyle.Format = "N2";

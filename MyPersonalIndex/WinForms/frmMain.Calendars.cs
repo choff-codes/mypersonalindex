@@ -52,7 +52,7 @@ namespace MyPersonalIndex
             d = MPI.LastDate < MPI.Portfolio.StartDate ? MPI.Portfolio.StartDate : MPI.LastDate;
             m.MinDate = MPI.Portfolio.StartDate;
             m.SetDate(d);
-            t.Text = "Date: " + d.ToShortDateString();
+            t.Text = string.Format("Date: {0}", d.ToShortDateString());
         }
 
         private void ResetCalendar(MonthCalendar m1, MonthCalendar m2, ToolStripDropDownButton t1, ToolStripDropDownButton t2, out DateTime d1, out DateTime d2)
@@ -61,10 +61,10 @@ namespace MyPersonalIndex
             d1 = MPI.Portfolio.StartDate;
             m1.MinDate = MPI.Portfolio.StartDate;
             m1.SetDate(MPI.Portfolio.StartDate);
-            t1.Text = "Start Date: " + MPI.Portfolio.StartDate.ToShortDateString();
+            t1.Text = string.Format("Start Date: {0}", MPI.Portfolio.StartDate.ToShortDateString());
             m2.MinDate = MPI.Portfolio.StartDate;
             m2.SetDate(d2);
-            t2.Text = "End Date: " + d2.ToShortDateString();
+            t2.Text = string.Format("End Date: {0}", d2.ToShortDateString());
         }
 
         /************************* Calendar date change ***********************************/

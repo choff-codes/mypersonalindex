@@ -1,27 +1,44 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Data;
+using System.Data.SqlServerCe;
 
 namespace MyPersonalIndex
 {
     class AcctQueries: Queries
     {
-        public static string DeleteAcct(int Portfolio, string AcctIn)
+        public static QueryInfo DeleteAcct(int ID)
         {
-            if (string.IsNullOrEmpty(AcctIn))
-                return string.Format("DELETE FROM Accounts WHERE Portfolio = {0}", Portfolio, AcctIn);
-            else
-                return string.Format("DELETE FROM Accounts WHERE Portfolio = {0} AND ID NOT IN ({1})", Portfolio, AcctIn);
+            return new QueryInfo(
+                "DELETE FROM Accounts WHERE ID = @ID",
+                new SqlCeParameter[] { 
+                    AddParam("@ID", SqlDbType.Int, ID)
+                }
+            );
         }
 
-        public static string InsertAcct(int Portfolio, string Name, double? TaxRate)
+        public static QueryInfo InsertAcct(int Portfolio, string Name, double? TaxRate, bool OnlyGain)
         {
-            return string.Format("INSERT INTO Accounts (Portfolio, Name, TaxRate) VALUES ({0}, '{1}', {2})", Portfolio, Functions.SQLCleanString(Name), TaxRate == null ? "NULL" : TaxRate.ToString());
+            return new QueryInfo(
+                "INSERT INTO Accounts (Portfolio, Name, TaxRate, OnlyGain) VALUES (@Portfolio, @Name, @TaxRate, @OnlyGain)",
+                new SqlCeParameter[] {
+                    AddParam("@Portfolio", SqlDbType.Int, Portfolio),
+                    AddParam("@Name", SqlDbType.NVarChar, Name),
+                    AddParam("@TaxRate", SqlDbType.Decimal, TaxRate.HasValue ? TaxRate : (object)System.DBNull.Value),
+                    AddParam("@OnlyGain", SqlDbType.Bit, OnlyGain)
+                }
+            );
         }
 
-        public static string UpdateAcct(int ID, string Name, double? TaxRate)
+        public static QueryInfo UpdateAcct(int ID, string Name, double? TaxRate, bool OnlyGain)
         {
-            return string.Format("UPDATE Accounts SET Name = '{0}', TaxRate = {1} WHERE ID = {2}", Functions.SQLCleanString(Name), TaxRate == null ? "NULL" : TaxRate.ToString(), ID);
+            return new QueryInfo(
+                   "UPDATE Accounts SET Name = @Name, TaxRate = @TaxRate, OnlyGain = @OnlyGain WHERE ID = @ID",
+                   new SqlCeParameter[] {
+                    AddParam("@ID", SqlDbType.Int, ID),
+                    AddParam("@Name", SqlDbType.NVarChar, Name),
+                    AddParam("@TaxRate", SqlDbType.Decimal, TaxRate.HasValue ? TaxRate : (object)System.DBNull.Value),
+                    AddParam("@OnlyGain", SqlDbType.Bit, OnlyGain)
+                }
+            );
         }
     }
 }

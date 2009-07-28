@@ -1,22 +1,37 @@
 ﻿using System;
+using System.Data;
+using System.Data.SqlServerCe;
 
 namespace MyPersonalIndex
 {
     class OptionQueries: Queries
     {
-        public static string GetPortfoliosMinDate()
+        public static QueryInfo GetPortfoliosMinDate()
         {
-            return "SELECT MIN(StartDate) FROM Portfolios";
+            return new QueryInfo(
+                "SELECT MIN(StartDate) FROM Portfolios",
+                new SqlCeParameter[] {}
+            );
         }
 
-        public static string UpdateDataStartDate(DateTime Date)
+        public static QueryInfo UpdateDataStartDate(DateTime Date)
         {
-            return string.Format("UPDATE Settings SET DataStartDate = '{0}'", Date.ToShortDateString());
+            return new QueryInfo(
+                "UPDATE Settings SET DataStartDate = @Date",
+                new SqlCeParameter[] { 
+                    AddParam("@Date", SqlDbType.DateTime, Date)
+                }
+            );
         }
 
-        public static string UpdateSplits(bool Splits)
+        public static QueryInfo UpdateSplits(bool Splits)
         {
-            return string.Format("UPDATE Settings SET Splits = {0}", Convert.ToByte(Splits));
+            return new QueryInfo(
+                "UPDATE Settings SET Splits = @Splits",
+                new SqlCeParameter[] { 
+                    AddParam("@Splits", SqlDbType.Bit, Splits)
+                }
+            );
         }
     }
 }

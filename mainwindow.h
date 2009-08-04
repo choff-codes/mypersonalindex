@@ -16,8 +16,11 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
+private slots:
+    void checked(bool checked);
 private:
     Ui::MainWindow *m_ui;
+    QToolBar *holdings_bar;
 };
 
 #endif // MAINWINDOW_H

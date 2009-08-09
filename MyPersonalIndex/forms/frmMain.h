@@ -8,13 +8,20 @@
 class frmMain : public QMainWindow
 {
     Q_OBJECT
+
 public:
     frmMain(QWidget *parent = 0);
+
 private:    
     frmMain_UI ui;
+    mpiToolButton * m_mpiButtonPressed;
+
+    void setDateDropDownText(mpiToolButton*);
+    void connectDateButton(mpiToolButton*, const QDate&);
+
 private slots:
-    void holdingsDateChanged(QDate);
-    void pressed();
+    void dateChanged(QDate);
+    void dateButtonPressed();
 };
 
 #endif // FRMMAIN_H

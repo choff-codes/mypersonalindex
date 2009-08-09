@@ -11,6 +11,8 @@ public:
     static const QString INDEX_START_TEXT;
     static const QString STATUS_TEXT;
     static const QString DATE;
+    static const QString START_DATE;
+    static const QString END_DATE;
 
     QWidget *centralwidget;
     QHBoxLayout *centralgrid;
@@ -30,7 +32,7 @@ public:
     QCalendarWidget *DateCalendar;
     QWidgetAction *DateAction;
 
-    QVBoxLayout *holdingsgrid;
+    QVBoxLayout *holdingsGrid;
     QToolBar *holdingsToolbar;
     QAction *holdingsAdd;
     QAction *holdingsEdit;
@@ -38,10 +40,59 @@ public:
     QAction *holdingsShowHidden;
     QAction *holdingsExport;
     mpiToolButton *holdingsDateDropDown;
-
     QLabel *holdingsSortLabel;
     QComboBox *holdingsSortCombo;
     QTableView *holdings;
+
+    QVBoxLayout *statGrid;
+    QToolBar *statToolbar;
+    QAction *statAddEdit;
+    QAction *statExport;
+    mpiToolButton *statStartDateDropDown;
+    mpiToolButton *statEndDateDropDown;
+    QTableView *stat;
+
+    QVBoxLayout *chartGrid;
+    QToolBar *chartToolbar;
+    QAction *chartExport;
+    mpiToolButton *chartStartDateDropDown;
+    mpiToolButton *chartEndDateDropDown;
+    QTableView *chart;
+
+    QVBoxLayout *performanceGrid;
+    QToolBar *performanceToolbar;
+    QAction *performanceSortDesc;
+    QAction *performanceExport;
+    QTableView *performance;
+
+    QVBoxLayout *correlationsGrid;
+    QToolBar *correlationsToolbar;
+    QAction *correlationsCalculate;
+    QAction *correlationsShowHidden;
+    QAction *correlationsExport;
+    mpiToolButton *correlationsStartDateDropDown;
+    mpiToolButton *correlationsEndDateDropDown;
+    QTableView *correlations;
+
+    QVBoxLayout *accountsGrid;
+    QToolBar *accountsToolbar;
+    QAction *accountsEdit;
+    QAction *accountsShowBlank;
+    QAction *accountsExport;
+    mpiToolButton *accountsDateDropDown;
+    QLabel *accountsSortLabel;
+    QComboBox *accountsSortCombo;
+    QTableView *accounts;
+
+    QVBoxLayout *aaGrid;
+    QToolBar *aaToolbar;
+    QAction *aaEdit;
+    QAction *aaShowBlank;
+    QAction *aaExport;
+    mpiToolButton *aaDateDropDown;
+    QLabel *aaSortLabel;
+    QComboBox *aaSortCombo;
+    QTableView *aa;
 
     QTabWidget *tab;
     QWidget *tab_holdings;

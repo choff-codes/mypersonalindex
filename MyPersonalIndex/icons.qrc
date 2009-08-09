@@ -9,5 +9,6 @@
         <file>icons/refresh.png</file>
         <file>icons/report.png</file>
         <file>icons/table.png</file>
+        <file>icons/MPI.ico</file>
     </qresource>
 </RCC>

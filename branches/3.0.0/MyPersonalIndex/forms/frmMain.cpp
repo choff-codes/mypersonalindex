@@ -1,5 +1,4 @@
 #include "frmMain.h"
-#include "frmMain_UI.h"
 #include <QtGui>
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)

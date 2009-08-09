@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include "frmMain_UI.h"
-#include "usercontrols/mpiToolButton.h"
+#include "mpiToolButton.h"
 
 class frmMain : public QMainWindow
 {

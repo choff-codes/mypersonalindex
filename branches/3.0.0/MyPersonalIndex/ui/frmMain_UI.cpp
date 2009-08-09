@@ -1,11 +1,11 @@
 #include "frmMain_UI.h"
-#include <QtGui>
-#include <QObject>
 
 const QString frmMain_UI::LAST_UPDATED_TEXT = QString(" Last Updated: ");
 const QString frmMain_UI::INDEX_START_TEXT = QString(" Index Start Date: ");
 const QString frmMain_UI::STATUS_TEXT = QString("Status: ");
 const QString frmMain_UI::DATE = QString("Date: ");
+const QString frmMain_UI::START_DATE = QString("Start Date: ");
+const QString frmMain_UI::END_DATE = QString("End Date: ");
 
 void frmMain_UI::setupUI(QMainWindow *MainWindow)
 {
@@ -79,13 +79,13 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     DateMenu = new QMenu(tab);
     DateMenu->addAction(DateAction);
 
-    holdingsgrid = new QVBoxLayout(tab_holdings);
-    holdingsgrid->setSpacing(0);
-    holdingsgrid->setMargin(1);
+    holdingsGrid = new QVBoxLayout(tab_holdings);
+    holdingsGrid->setSpacing(0);
+    holdingsGrid->setMargin(1);
     holdingsToolbar = new QToolBar(tab_holdings);
-    holdings =  new QTableView(tab_holdings);
-    holdingsgrid->addWidget(holdingsToolbar);
-    holdingsgrid->addWidget(holdings);
+    holdings = new QTableView(tab_holdings);
+    holdingsGrid->addWidget(holdingsToolbar);
+    holdingsGrid->addWidget(holdings);
 
     holdingsAdd = new QAction("Add...", tab_holdings);
     holdingsAdd->setIconText("Add...");
@@ -96,9 +96,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsShowHidden->setCheckable(true);
     holdingsExport = new QAction("Export...", tab_holdings);
     holdingsExport->setIconText("Export...");
-    holdingsDateDropDown = new mpiToolButton(tab_holdings);
+    holdingsDateDropDown = new mpiToolButton(tab_holdings, mpiToolButton::SingleDate);
     holdingsDateDropDown->setMenu(DateMenu);
-    holdingsDateDropDown->setPopupMode(QToolButton::InstantPopup);
     holdingsSortLabel = new QLabel(" Sort By: ", tab_holdings);
     holdingsSortCombo = new QComboBox(tab_holdings);
     holdingsSortCombo->setMinimumSize(QSize(100, 0));
@@ -115,6 +114,159 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsToolbar->addAction(holdingsShowHidden);
     holdingsToolbar->addSeparator();
     holdingsToolbar->addAction(holdingsExport);
+
+    statGrid = new QVBoxLayout(tab_stat);
+    statGrid->setSpacing(0);
+    statGrid->setMargin(1);
+    statToolbar = new QToolBar(tab_stat);
+    stat = new QTableView(tab_stat);
+    statGrid->addWidget(statToolbar);
+    statGrid->addWidget(stat);
+
+    statAddEdit = new QAction("Add/Edit Statistics...", tab_stat);
+    statAddEdit->setIconText("Add/Edit Statistics...");
+    statExport = new QAction("Export...", tab_stat);
+    statExport->setIconText("Export...");
+    statStartDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::StartDate);
+    statStartDateDropDown->setMenu(DateMenu);
+    statEndDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::EndDate);
+    statEndDateDropDown->setMenu(DateMenu);
+
+    statToolbar->addAction(statAddEdit);
+    statToolbar->addSeparator();
+    statToolbar->addWidget(statStartDateDropDown);
+    statToolbar->addWidget(statEndDateDropDown);
+    statToolbar->addSeparator();
+    statToolbar->addAction(statExport);
+
+    chartGrid = new QVBoxLayout(tab_chart);
+    chartGrid->setSpacing(0);
+    chartGrid->setMargin(1);
+    chartToolbar = new QToolBar(tab_chart);
+    chart = new QTableView(tab_chart);
+    chartGrid->addWidget(chartToolbar);
+    chartGrid->addWidget(chart);
+
+    chartExport = new QAction("Export...", tab_chart);
+    chartExport->setIconText("Export...");
+    chartStartDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::StartDate);
+    chartStartDateDropDown->setMenu(DateMenu);
+    chartEndDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::EndDate);
+    chartEndDateDropDown->setMenu(DateMenu);
+
+    chartToolbar->addWidget(chartStartDateDropDown);
+    chartToolbar->addWidget(chartEndDateDropDown);
+    chartToolbar->addSeparator();
+    chartToolbar->addAction(chartExport);
+
+    performanceGrid = new QVBoxLayout(tab_performance);
+    performanceGrid->setSpacing(0);
+    performanceGrid->setMargin(1);
+    performanceToolbar = new QToolBar(tab_performance);
+    performance = new QTableView(tab_performance);
+    performanceGrid->addWidget(performanceToolbar);
+    performanceGrid->addWidget(performance);
+
+    performanceSortDesc = new QAction("Sort Descending", tab_performance);
+    performanceSortDesc->setCheckable(true);
+    performanceExport = new QAction("Export...", tab_performance);
+    performanceExport->setIconText("Export...");
+
+    performanceToolbar->addAction(performanceSortDesc);
+    performanceToolbar->addSeparator();
+    performanceToolbar->addAction(performanceExport);
+
+    correlationsGrid = new QVBoxLayout(tab_correlations);
+    correlationsGrid->setSpacing(0);
+    correlationsGrid->setMargin(1);
+    correlationsToolbar = new QToolBar(tab_correlations);
+    correlations = new QTableView(tab_correlations);
+    correlationsGrid->addWidget(correlationsToolbar);
+    correlationsGrid->addWidget(correlations);
+
+    correlationsCalculate = new QAction("Calculate", tab_correlations);
+    QFont f(correlationsCalculate->font());
+    f.setBold(true);
+    correlationsCalculate->setFont(f);
+    correlationsShowHidden = new QAction("Show Hidden", tab_correlations);
+    correlationsShowHidden->setCheckable(true);
+    correlationsExport = new QAction("Export...", tab_correlations);
+    correlationsExport->setIconText("Export...");
+    correlationsStartDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::StartDate);
+    correlationsStartDateDropDown->setMenu(DateMenu);
+    correlationsEndDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::EndDate);
+    correlationsEndDateDropDown->setMenu(DateMenu);
+
+    correlationsToolbar->addAction(correlationsCalculate);
+    correlationsToolbar->addSeparator();
+    correlationsToolbar->addWidget(correlationsStartDateDropDown);
+    correlationsToolbar->addWidget(correlationsEndDateDropDown);
+    correlationsToolbar->addSeparator();
+    correlationsToolbar->addAction(correlationsShowHidden);
+    correlationsToolbar->addSeparator();
+    correlationsToolbar->addAction(correlationsExport);
+
+    accountsGrid = new QVBoxLayout(tab_accounts);
+    accountsGrid->setSpacing(0);
+    accountsGrid->setMargin(1);
+    accountsToolbar = new QToolBar(tab_accounts);
+    accounts = new QTableView(tab_accounts);
+    accountsGrid->addWidget(accountsToolbar);
+    accountsGrid->addWidget(accounts);
+
+    accountsEdit = new QAction("Edit Accounts...", tab_accounts);
+    accountsEdit->setIconText("Edit Accounts...");
+    accountsShowBlank = new QAction("Show (Blank)", tab_accounts);
+    accountsShowBlank->setCheckable(true);
+    accountsExport = new QAction("Export...", tab_accounts);
+    accountsExport->setIconText("Export...");
+    accountsDateDropDown = new mpiToolButton(tab_accounts, mpiToolButton::SingleDate);
+    accountsDateDropDown->setMenu(DateMenu);
+    accountsSortLabel = new QLabel(" Sort By: ", tab_accounts);
+    accountsSortCombo = new QComboBox(tab_accounts);
+    accountsSortCombo->setMinimumSize(QSize(100, 0));
+    accountsSortCombo->setMaximumSize(QSize(100, 16777215));
+
+    accountsToolbar->addAction(accountsEdit);
+    accountsToolbar->addSeparator();
+    accountsToolbar->addWidget(accountsDateDropDown);
+    accountsToolbar->addSeparator();
+    accountsToolbar->addWidget(accountsSortLabel);
+    accountsToolbar->addWidget(accountsSortCombo);
+    accountsToolbar->addAction(accountsShowBlank);
+    accountsToolbar->addSeparator();
+    accountsToolbar->addAction(accountsExport);
+
+    aaGrid = new QVBoxLayout(tab_aa);
+    aaGrid->setSpacing(0);
+    aaGrid->setMargin(1);
+    aaToolbar = new QToolBar(tab_aa);
+    aa = new QTableView(tab_aa);
+    aaGrid->addWidget(aaToolbar);
+    aaGrid->addWidget(aa);
+
+    aaEdit = new QAction("Edit Asset Allocation...", tab_aa);
+    aaEdit->setIconText("Edit Asset Allocation...");
+    aaShowBlank = new QAction("Show (Blank)", tab_aa);
+    aaShowBlank->setCheckable(true);
+    aaExport = new QAction("Export...", tab_aa);
+    aaExport->setIconText("Export...");
+    aaDateDropDown = new mpiToolButton(tab_aa, mpiToolButton::SingleDate);
+    aaDateDropDown->setMenu(DateMenu);
+    aaSortLabel = new QLabel(" Sort By: ", tab_aa);
+    aaSortCombo = new QComboBox(tab_aa);
+    aaSortCombo->setMinimumSize(QSize(100, 0));
+    aaSortCombo->setMaximumSize(QSize(100, 16777215));
+
+    aaToolbar->addAction(aaEdit);
+    aaToolbar->addSeparator();
+    aaToolbar->addWidget(aaDateDropDown);
+    aaToolbar->addSeparator();
+    aaToolbar->addWidget(aaSortLabel);
+    aaToolbar->addWidget(aaSortCombo);
+    aaToolbar->addAction(aaShowBlank);
+    aaToolbar->addSeparator();
+    aaToolbar->addAction(aaExport);
 
     status = new QStatusBar(MainWindow);
     MainWindow->setStatusBar(status);

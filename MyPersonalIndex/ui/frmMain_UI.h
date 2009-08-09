@@ -2,7 +2,7 @@
 #define FRMMAIN_UI_H
 
 #include <QtGui>
-#include "usercontrols/mpiToolButton.h"
+#include "mpiToolButton.h"
 
 class frmMain_UI
 {

@@ -10,7 +10,7 @@ const QString frmMain_UI::DATE = QString("Date: ");
 void frmMain_UI::setupUI(QMainWindow *MainWindow)
 {
     MainWindow->setWindowTitle("My Personal Index");
-    MainWindow->setWindowIcon(QIcon(":/icons/icons/MPI.ico"));
+    MainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
     MainWindow->resize(800, 600);
     MainWindow->setContextMenuPolicy(Qt::NoContextMenu);
     MainWindow->setIconSize(QSize(16, 16));
@@ -26,14 +26,14 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     centralgrid = new QHBoxLayout(centralwidget);
     centralgrid->setMargin(2);
 
-    mainUpdatePrices = new QAction(QIcon(":/icons/icons/refresh.png"), "Update Prices", MainWindow);
-    mainCompare = new QAction(QIcon(":/icons/icons/chart.png"), "Compare...", MainWindow);
+    mainUpdatePrices = new QAction(QIcon(":/icons/refresh.png"), "Update Prices", MainWindow);
+    mainCompare = new QAction(QIcon(":/icons/chart.png"), "Compare...", MainWindow);
     mainCompare->setIconText("Compare...");
-    mainEdit = new QAction(QIcon(":/icons/icons/edit.png"), "Edit", MainWindow);
-    mainDelete = new QAction(QIcon(":/icons/icons/delete.png"), "Delete", MainWindow);
-    mainAdd_Portfolio = new QAction(QIcon(":/icons/icons/add.png"), "Add Portfolio", MainWindow);
-    mainOptions = new QAction(QIcon(":/icons/icons/options.png"), "Options", MainWindow);
-    mainAbout = new QAction(QIcon(":/icons/icons/about.png"), "About", MainWindow);
+    mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit", MainWindow);
+    mainDelete = new QAction(QIcon(":/icons/delete.png"), "Delete", MainWindow);
+    mainAdd_Portfolio = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", MainWindow);
+    mainOptions = new QAction(QIcon(":/icons/options.png"), "Options", MainWindow);
+    mainAbout = new QAction(QIcon(":/icons/about.png"), "About", MainWindow);
     mainPortfolioLabel = new QLabel("Portfolio: ", MainWindow);
     mainPortfolioCombo = new QComboBox(MainWindow);
     mainPortfolioCombo->setMinimumSize(QSize(100, 0));

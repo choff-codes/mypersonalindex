@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include "frmMain_UI.h"
 #include "mpiToolButton.h"
+#include "queries.h"
 
 class frmMain : public QMainWindow
 {
@@ -11,10 +12,12 @@ class frmMain : public QMainWindow
 
 public:
     frmMain(QWidget *parent = 0);
+    ~frmMain() { delete m_sql; }
 
 private:    
     frmMain_UI ui;
-    mpiToolButton * m_mpiButtonPressed;
+    mpiToolButton *m_mpiButtonPressed;
+    queries *m_sql;
 
     void setDateDropDownText(mpiToolButton*);
     void connectDateButton(mpiToolButton*, const QDate&);

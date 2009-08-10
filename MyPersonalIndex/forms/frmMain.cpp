@@ -2,7 +2,13 @@
 #include <QtGui>
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
-{
+{    
+    QSettings cfg(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI");
+    QString appDir = QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
+    if (!QFile::exists(appDir))
+        if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), appDir))
+            QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
+
     ui.setupUI(this);
     ui.stbLastUpdated->setText(QString(ui.LAST_UPDATED_TEXT).append("1/2/2009"));
 
@@ -16,6 +22,8 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     connectDateButton(ui.accountsDateDropDown, QDate(2009, 8, 9));
     connectDateButton(ui.aaDateDropDown, QDate(2009, 8, 9));
     connect(ui.DateCalendar, SIGNAL(clicked(QDate)), this, SLOT(dateChanged(QDate)));
+
+    m_sql = new queries();
 }
 
 void frmMain::connectDateButton(mpiToolButton *t, const QDate &date)

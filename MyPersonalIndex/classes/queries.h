@@ -14,23 +14,46 @@ public:
         QVariant value;
 
         parameter();
-        parameter(QString Name, QVariant Value): name(Name), value(Value) {}
+        parameter(const QString &p_name, const QVariant &p_value): name(p_name), value(p_value) {}
     };
 
     struct queryInfo
     {
         QString sql;
-        QList<parameter*> parameters;
+        QList<parameter> parameters;
+
+        queryInfo(const QString &p_sql, const QList<parameter> &p_parameters): sql(p_sql), parameters(p_parameters) {}
     };
 
+    static const QString table_AA;
+    static const QString table_Acct;
+    static const QString table_AvgPricePerShare;
+    static const QString table_ClosingPrices;
+    static const QString table_Dividends;
+    static const QString table_NAV;
+    static const QString table_Portfolios;
+    static const QString table_Settings;
+    static const QString table_Splits;
+    static const QString table_Stats;
+    static const QString table_Tickers;
+    static const QString table_Trades;
+    static const QString table_UserStatistics;
+    static const QString table_CustomTrades;
+
+    static const QStringList closingPricesColumns;
+    enum closingPrices { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
 
     queries();
+    static QString getDatabaseLocation();
     bool isOpen() const { return db.isOpen(); }
-    QSqlQuery* prepareQuery(queryInfo&);
-    QSqlQuery* executeNonQuery(queryInfo&);
-    QVariant executeScalar(queryInfo&, const QVariant & = QVariant());
 
-private:
+    void executeNonQuery(QSqlQuery*);
+    void executeTableUpdate(const QString&, const QMap<QString, QVariantList>&);
+    QSqlQuery* executeResultSet(queryInfo*);
+    QVariant executeScalar(QSqlQuery*, const QVariant & = QVariant());
+    queryInfo* temp(int);
+
+protected:
     QSqlDatabase db;
 };
 

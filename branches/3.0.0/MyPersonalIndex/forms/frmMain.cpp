@@ -1,17 +1,18 @@
 #include "frmMain.h"
 #include <QtGui>
 #include <QtSql>
+#include "queries.h"
+
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
-    QSettings cfg(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI");
-    QString appDir = QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
-    if (!QFile::exists(appDir))
-        if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), appDir))
+    QString location = queries::getDatabaseLocation();
+    if (!QFile::exists(location))
+        if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
             QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
 
-    m_sql = new queries();
-    if (!m_sql->isOpen())
+    sql = new queries();
+    if (!sql->isOpen())
     {
         QMessageBox::critical(this, "Error", "Cannot read user settings folder!", QMessageBox::Ok);
         this->close();
@@ -20,7 +21,15 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 
     ui.setupUI(this);
     ui.stbLastUpdated->setText(QString(ui.LAST_UPDATED_TEXT).append("1/2/2009"));
+    connectSlots();
 
+    QString s(globals::stockPrices);
+    updatePrices::updatePrices u;
+    u.getPrices("VTI", QDate(2009, 1, 1), 0);
+}
+
+void frmMain::connectSlots()
+{
     connectDateButton(ui.holdingsDateDropDown, QDate(2009, 8, 9));
     connectDateButton(ui.statStartDateDropDown, QDate(2009, 8, 9));
     connectDateButton(ui.statEndDateDropDown, QDate(2009, 8, 9));
@@ -31,8 +40,6 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     connectDateButton(ui.accountsDateDropDown, QDate(2009, 8, 9));
     connectDateButton(ui.aaDateDropDown, QDate(2009, 8, 9));
     connect(ui.DateCalendar, SIGNAL(clicked(QDate)), this, SLOT(dateChanged(QDate)));
-
-
 }
 
 void frmMain::connectDateButton(mpiToolButton *t, const QDate &date)
@@ -62,12 +69,12 @@ void frmMain::setDateDropDownText(mpiToolButton *t)
         return;
 
     QString str;
-    switch(t->Type())
+    switch(t->type())
     {
-        case mpiToolButton::StartDate:
+        case mpiToolButton::startDate:
             str = ui.START_DATE;
             break;
-        case mpiToolButton::EndDate:
+        case mpiToolButton::endDate:
             str = ui.END_DATE;
             break;
         default:

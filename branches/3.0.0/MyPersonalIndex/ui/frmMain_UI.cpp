@@ -96,7 +96,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsShowHidden->setCheckable(true);
     holdingsExport = new QAction("Export...", tab_holdings);
     holdingsExport->setIconText("Export...");
-    holdingsDateDropDown = new mpiToolButton(tab_holdings, mpiToolButton::SingleDate);
+    holdingsDateDropDown = new mpiToolButton(tab_holdings, mpiToolButton::singleDate);
     holdingsDateDropDown->setMenu(DateMenu);
     holdingsSortLabel = new QLabel(" Sort By: ", tab_holdings);
     holdingsSortCombo = new QComboBox(tab_holdings);
@@ -127,9 +127,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statAddEdit->setIconText("Add/Edit Statistics...");
     statExport = new QAction("Export...", tab_stat);
     statExport->setIconText("Export...");
-    statStartDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::StartDate);
+    statStartDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::startDate);
     statStartDateDropDown->setMenu(DateMenu);
-    statEndDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::EndDate);
+    statEndDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::endDate);
     statEndDateDropDown->setMenu(DateMenu);
 
     statToolbar->addAction(statAddEdit);
@@ -149,9 +149,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
 
     chartExport = new QAction("Export...", tab_chart);
     chartExport->setIconText("Export...");
-    chartStartDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::StartDate);
+    chartStartDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::startDate);
     chartStartDateDropDown->setMenu(DateMenu);
-    chartEndDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::EndDate);
+    chartEndDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::endDate);
     chartEndDateDropDown->setMenu(DateMenu);
 
     chartToolbar->addWidget(chartStartDateDropDown);
@@ -192,9 +192,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsShowHidden->setCheckable(true);
     correlationsExport = new QAction("Export...", tab_correlations);
     correlationsExport->setIconText("Export...");
-    correlationsStartDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::StartDate);
+    correlationsStartDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::startDate);
     correlationsStartDateDropDown->setMenu(DateMenu);
-    correlationsEndDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::EndDate);
+    correlationsEndDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::endDate);
     correlationsEndDateDropDown->setMenu(DateMenu);
 
     correlationsToolbar->addAction(correlationsCalculate);
@@ -220,7 +220,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsShowBlank->setCheckable(true);
     accountsExport = new QAction("Export...", tab_accounts);
     accountsExport->setIconText("Export...");
-    accountsDateDropDown = new mpiToolButton(tab_accounts, mpiToolButton::SingleDate);
+    accountsDateDropDown = new mpiToolButton(tab_accounts, mpiToolButton::singleDate);
     accountsDateDropDown->setMenu(DateMenu);
     accountsSortLabel = new QLabel(" Sort By: ", tab_accounts);
     accountsSortCombo = new QComboBox(tab_accounts);
@@ -251,7 +251,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaShowBlank->setCheckable(true);
     aaExport = new QAction("Export...", tab_aa);
     aaExport->setIconText("Export...");
-    aaDateDropDown = new mpiToolButton(tab_aa, mpiToolButton::SingleDate);
+    aaDateDropDown = new mpiToolButton(tab_aa, mpiToolButton::singleDate);
     aaDateDropDown->setMenu(DateMenu);
     aaSortLabel = new QLabel(" Sort By: ", tab_aa);
     aaSortCombo = new QComboBox(tab_aa);

@@ -24,8 +24,9 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     connectSlots();
 
     QString s(globals::stockPrices);
-    updatePrices::updatePrices u;
-    u.getPrices("VTI", QDate(2009, 1, 1), 0);
+    updatePrices u(sql);
+    bool temp = u.isInternetConnection();
+    u.getSplits("VTI", QDate(2008, 1, 1));
 }
 
 void frmMain::connectSlots()

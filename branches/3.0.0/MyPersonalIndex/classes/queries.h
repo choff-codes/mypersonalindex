@@ -41,7 +41,13 @@ public:
     static const QString table_CustomTrades;
 
     static const QStringList closingPricesColumns;
-    enum closingPrices { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
+    static const QStringList dividendsColumns;
+    static const QStringList splitsColumns;
+
+    // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
+    enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
+    enum { dividends_Date, dividends_Ticker, dividends_Amount };
+    enum { splits_Date, splits_Ticker, splits_Ratio };
 
     queries();
     static QString getDatabaseLocation();

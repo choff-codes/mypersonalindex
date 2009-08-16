@@ -17,3 +17,5 @@ INCLUDEPATH += forms \
     usercontrols \
     ui \
     classes
+
+VERSION = 3.0.0

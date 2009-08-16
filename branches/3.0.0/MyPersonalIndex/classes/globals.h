@@ -9,7 +9,7 @@ public:
     static const char signifyPortfolio[]; // see cpp
     static const char dateSeperator = '|';
     static const char stockPrices = 'd';
-    static const char dividends = 'v';
+    static const char stockDividends = 'v';
     static const char cash = '$';
     static const int nonLeapYear = 2009;
     enum avgShareCalc { calc_FIFO, calc_LIFO, calc_AVG };

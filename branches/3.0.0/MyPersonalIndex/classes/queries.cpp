@@ -1,7 +1,13 @@
 #include "queries.h"
 
-//enum closingPrices { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change }
+//enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
 const QStringList queries::closingPricesColumns = QStringList() << "Date" << "Ticker" << "Price" << "Change";
+
+//enum { splits_Date, splits_Ticker, splits_Ratio };
+const QStringList queries::splitsColumns = QStringList() << "Date" << "Ticker" << "Ratio";
+
+//enum { dividends_Date, dividends_Ticker, dividends_Amount };
+const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker" << "Amount";
 
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
@@ -52,24 +58,38 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString, Q
     if (tableName.isEmpty() || values.isEmpty())
         return;
 
+    db.transaction();
+
     QSqlQuery query(db);
-    QStringList parameters;
-    QStringList columns;
+    QStringList parameters, columns;
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
     QMap<QString, QVariantList>::const_iterator i;
     for (i = values.begin(); i != values.end(); ++i)
     {
-         parameters.append(":" + i.key());
+         parameters.append("?");
          columns.append(i.key());
      }
 
     query.prepare(sql.arg(tableName, columns.join(","), parameters.join(",")));
 
-    for (i = values.begin(); i != values.end(); ++i)
-        query.bindValue(":" + i.key(), i.value());
+    QList<QVariantList> binds = values.values();
+    int count = binds.at(0).count();
+    for (int x = 1; x < binds.count(); x++)
+        if (binds.at(x).count() != count) // all the lists must be the same size
+        {
+            db.commit();
+            return;
+        }
 
-    query.execBatch();
+    for (int i = 0; i < count; i++)
+    {
+        for (int x = 0; x < binds.count(); x++)
+            query.addBindValue(binds.at(x).at(i));
+        query.exec();
+    }
+
+    db.commit();
 }
 
 QSqlQuery* queries::executeResultSet(queryInfo *q)
@@ -108,11 +128,7 @@ QVariant queries::executeScalar(QSqlQuery *q, const QVariant &nullValue)
     }
 
     delete q;
-
-    if (nullValue.isValid())
-        return nullValue;
-    else
-        return QVariant();
+    return nullValue;
 }
 
 queries::queryInfo* queries::temp(int number)

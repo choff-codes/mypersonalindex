@@ -1,6 +1,8 @@
 #ifndef FRMMAIN_H
 #define FRMMAIN_H
 
+#define VERSION 300 // UPDATE EACH RELEASE
+
 #include <QMainWindow>
 #include "frmMain_UI.h"
 #include "mpiToolButton.h"
@@ -16,18 +18,26 @@ public:
     frmMain(QWidget *parent = 0);
     ~frmMain() { delete sql; }
 
-private:    
+private:
     frmMain_UI ui;
     queries *sql;
+    globals::myPersonalIndex mpi;
     mpiToolButton *m_mpiButtonPressed;
 
     void setDateDropDownText(mpiToolButton*);
     void connectDateButton(mpiToolButton*, const QDate&);
     void connectSlots();
+    void loadSettings();
+    void resetLastDate();
+    void checkVersion();
+    void saveSettings();
 
 private slots:
     void dateChanged(QDate);
     void dateButtonPressed();
+
+protected:
+    void closeEvent(QCloseEvent *event);
 };
 
 #endif // FRMMAIN_H

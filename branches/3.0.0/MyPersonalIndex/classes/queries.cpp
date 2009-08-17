@@ -44,12 +44,18 @@ QString queries::getDatabaseLocation()
     return QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
 }
 
-void queries::executeNonQuery(QSqlQuery *q)
+void queries::executeNonQuery(queryInfo *q)
 {
     if (!q)
         return;
 
-    q->exec();
+    QSqlQuery query(db);
+    query.prepare(q->sql);
+    foreach(const parameter &p, q->parameters)
+        query.bindValue(p.name, p.value);
+
+    query.exec();
+
     delete q;
 }
 
@@ -107,22 +113,28 @@ QSqlQuery* queries::executeResultSet(queryInfo *q)
 
     delete q;
 
-    if (query->isActive())
+    if (query->isActive() && query->first())
         return query;
 
     return 0;
 }
 
-QVariant queries::executeScalar(QSqlQuery *q, const QVariant &nullValue)
+QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
 {
     if (!q)
         return QVariant();
 
-    q->exec();
+    QSqlQuery query(db);
+    query.setForwardOnly(true);
+    query.prepare(q->sql);
+    foreach(const parameter &p, q->parameters)
+        query.bindValue(p.name, p.value);
 
-    if (q->isActive() && q->next())
+    query.exec();
+
+    if (query.isActive() && query.first())
     {
-        QVariant retValue = q->value(0);
+        QVariant retValue = query.value(0);
         delete q;
         return retValue;
     }
@@ -135,4 +147,51 @@ queries::queryInfo* queries::temp(int number)
 {
     return new queryInfo("SELECT SQRT(:number)",
         QList<parameter>() << parameter(":number", number));
+}
+
+queries::queryInfo* queries::getSettings()
+{
+    return new queryInfo(
+        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getLastDate()
+{
+    return new queryInfo(
+         "SELECT MAX(Date) from ClosingPrices",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getVersion()
+{
+    return new queryInfo(
+         "SELECT Version FROM Settings",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state)
+{
+    if (state)  // non-normal state, ignore size
+        return new queryInfo(
+            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowState = :WindowState",
+            QList<parameter>()
+                << parameter(":LastPortfolio", lastPortfolio)
+                << parameter(":WindowState", state)
+        );
+    else
+        return new queryInfo(
+            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight,"
+                " WindowWidth = :WindowWidth, WindowState = :WindowState",
+            QList<parameter>()
+                << parameter(":LastPortfolio", lastPortfolio)
+                << parameter(":WindowX", windowLocation.x())
+                << parameter(":WindowY", windowLocation.y())
+                << parameter(":WindowHeight", windowSize.height())
+                << parameter(":WindowWidth", windowSize.width())
+                << parameter(":WindowState", state)
+        );
 }

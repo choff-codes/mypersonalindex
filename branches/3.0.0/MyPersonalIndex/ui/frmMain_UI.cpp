@@ -1,7 +1,7 @@
 #include "frmMain_UI.h"
 
-const QString frmMain_UI::LAST_UPDATED_TEXT = QString(" Last Updated: ");
-const QString frmMain_UI::INDEX_START_TEXT = QString(" Index Start Date: ");
+const QString frmMain_UI::LAST_UPDATED_TEXT = QString("Last Updated: ");
+const QString frmMain_UI::INDEX_START_TEXT = QString("Index Start Date: ");
 const QString frmMain_UI::STATUS_TEXT = QString("Status: ");
 const QString frmMain_UI::DATE = QString("Date: ");
 const QString frmMain_UI::START_DATE = QString("Start Date: ");

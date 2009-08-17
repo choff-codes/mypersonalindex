@@ -49,15 +49,27 @@ public:
     enum { dividends_Date, dividends_Ticker, dividends_Amount };
     enum { splits_Date, splits_Ticker, splits_Ratio };
 
+
+
+    enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
+           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits };
+
+
+
+
     queries();
     static QString getDatabaseLocation();
     bool isOpen() const { return db.isOpen(); }
 
-    void executeNonQuery(QSqlQuery*);
+    void executeNonQuery(queryInfo*);
     void executeTableUpdate(const QString&, const QMap<QString, QVariantList>&);
     QSqlQuery* executeResultSet(queryInfo*);
-    QVariant executeScalar(QSqlQuery*, const QVariant & = QVariant());
+    QVariant executeScalar(queryInfo*, const QVariant& = QVariant());
     queryInfo* temp(int);
+    queryInfo* getSettings();
+    queryInfo* getLastDate();
+    queryInfo* getVersion();
+    queryInfo* updateSettings(const QVariant&, const QSize&, const QPoint&, const int&);
 
 protected:
     QSqlDatabase db;

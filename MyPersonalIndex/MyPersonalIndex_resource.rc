@@ -21,10 +21,10 @@ VS_VERSION_INFO VERSIONINFO
 		BEGIN
 			BLOCK "040904B0"
 			BEGIN
-				VALUE "CompanyName", "\0"
-				VALUE "FileDescription", "\0"
+				VALUE "CompanyName", "By Matthew Wikler\0"
+				VALUE "FileDescription", "Create personal indexes and perform analysis to make better investing decisions.\0"
 				VALUE "FileVersion", "3.0.0.0\0"
-				VALUE "LegalCopyright", "\0"
+				VALUE "LegalCopyright", "Copyright © 2009\0"
 				VALUE "OriginalFilename", "MyPersonalIndex.exe\0"
 				VALUE "ProductName", "MyPersonalIndex\0"
 			END

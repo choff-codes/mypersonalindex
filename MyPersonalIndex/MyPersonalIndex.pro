@@ -18,4 +18,4 @@ INCLUDEPATH += forms \
     ui \
     classes
 
-VERSION = 3.0.0
+RC_FILE = MyPersonalIndex_resource.rc

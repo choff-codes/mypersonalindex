@@ -8,7 +8,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
     QString location = queries::getDatabaseLocation();
     if (!QFile::exists(location))
-        if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
+        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()) || !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
             QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
 
     sql = new queries();
@@ -20,13 +20,21 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     }
 
     ui.setupUI(this);
-    ui.stbLastUpdated->setText(QString(ui.LAST_UPDATED_TEXT).append("1/2/2009"));
     connectSlots();
 
-    QString s(globals::stockPrices);
-    updatePrices u(sql);
-    bool temp = u.isInternetConnection();
-    u.getSplits("VTI", QDate(2008, 1, 1));
+    loadSettings();
+
+    //updatePrices u(sql);
+    //bool temp = u.isInternetConnection();
+    //u.getSplits("VTI", QDate(2008, 1, 1));
+}
+
+void frmMain::closeEvent(QCloseEvent *event)
+{
+    saveSettings();
+    event->accept();
+
+    //event->ignore();
 }
 
 void frmMain::connectSlots()
@@ -89,3 +97,67 @@ void frmMain::dateButtonPressed()
     m_mpiButtonPressed = static_cast<mpiToolButton*>(sender());
     ui.DateCalendar->setSelectedDate(m_mpiButtonPressed->date());
 }
+
+void frmMain::loadSettings()
+{
+    checkVersion();
+
+    QSqlQuery *q = sql->executeResultSet(sql->getSettings());
+    if (q)
+    {
+        int x = q->value(queries::getSettings_DataStartDate).toInt();
+        mpi.settings.dataStartDate = QDate::fromJulianDay(x);
+        mpi.settings.splits = q->value(queries::getSettings_Splits).toBool();
+        if (!q->value(queries::getSettings_WindowState).isNull())
+        {
+            resize(QSize(q->value(queries::getSettings_WindowWidth).toInt(),
+                         q->value(queries::getSettings_WindowHeight).toInt()));
+            move(QPoint(q->value(queries::getSettings_WindowX).toInt(),
+                        q->value(queries::getSettings_WindowY).toInt()));
+            int state = q->value(queries::getSettings_WindowState).toInt();
+            if (state)
+            {
+                Qt::WindowState w = state == 1 ? Qt::WindowMaximized : Qt::WindowMinimized;
+                this->setWindowState(this->windowState() | w);
+            }
+        }
+        else
+        {
+            QString welcomeMessage = "Welcome to My Personal Index!\n\nThere is no documentation yet, but I recommend starting in the following way:\n\n1. Set the start date under options (on the top toolbar).\n2. Add a new Portfolio\n3. Set your asset allocation \n4. Set your accounts\n5. Add holdings\n6. Add relevant portfolio statistics\n7. Update prices!\n\nThis text has been copied to the clipboard for your convenience.";
+            QApplication::clipboard()->setText(welcomeMessage);
+            QMessageBox::information(this, "My Personal Index", welcomeMessage);
+        }
+        if (!q->value(queries::getSettings_LastPortfolio).isNull())
+            mpi.portfolio.id = q->value(queries::getSettings_LastPortfolio).toInt();
+        else
+            mpi.portfolio.id = -1;
+    }
+
+    resetLastDate();
+}
+
+void frmMain::resetLastDate()
+{
+    mpi.lastDate = QDate::fromJulianDay(sql->executeScalar(sql->getLastDate(), mpi.settings.dataStartDate.toJulianDay()).toInt());
+    ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
+                mpi.lastDate == mpi.settings.dataStartDate ?
+                "Never" :
+                mpi.lastDate.toString(Qt::SystemLocaleShortDate)));
+}
+
+void frmMain::checkVersion()
+{
+    int databaseVersion = sql->executeScalar(sql->getVersion()).toInt();
+
+    if (databaseVersion == VERSION)
+        return;
+}
+
+void frmMain::saveSettings()
+{
+//    int? Portfolio = null;
+//    if (SavePortfolio())
+//        Portfolio = MPI.Portfolio.ID;
+    sql->executeNonQuery(sql->updateSettings(QVariant(QVariant::Int), this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
+}
+

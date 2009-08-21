@@ -31,6 +31,11 @@ private:
     void resetLastDate();
     void checkVersion();
     void saveSettings();
+    void loadPortfolioDropDown();
+    void loadPortfolio();
+    bool loadPortfolioSettings();
+    bool savePortfolio();
+    void disableItems(bool disabled);
 
 private slots:
     void dateChanged(QDate);

@@ -102,6 +102,7 @@ public:
     QWidget *tab_correlations;
     QWidget *tab_accounts;
     QWidget *tab_aa;
+
     QStatusBar *status;
     QLabel *stbLastUpdated;
     QLabel *stbStartDate;

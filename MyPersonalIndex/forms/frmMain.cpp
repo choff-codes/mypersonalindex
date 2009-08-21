@@ -20,9 +20,12 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     }
 
     ui.setupUI(this);
-    connectSlots();
+
 
     loadSettings();
+    loadPortfolioDropDown();
+    loadPortfolio();
+    connectSlots();
 
     //updatePrices u(sql);
     //bool temp = u.isInternetConnection();
@@ -39,15 +42,15 @@ void frmMain::closeEvent(QCloseEvent *event)
 
 void frmMain::connectSlots()
 {
-    connectDateButton(ui.holdingsDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.statStartDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.statEndDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.chartStartDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.chartEndDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.correlationsStartDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.correlationsEndDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.accountsDateDropDown, QDate(2009, 8, 9));
-    connectDateButton(ui.aaDateDropDown, QDate(2009, 8, 9));
+    connectDateButton(ui.holdingsDateDropDown, mpi.lastDate);
+    connectDateButton(ui.statStartDateDropDown, mpi.lastDate);
+    connectDateButton(ui.statEndDateDropDown, mpi.lastDate);
+    connectDateButton(ui.chartStartDateDropDown, mpi.lastDate);
+    connectDateButton(ui.chartEndDateDropDown, mpi.lastDate);
+    connectDateButton(ui.correlationsStartDateDropDown, mpi.lastDate);
+    connectDateButton(ui.correlationsEndDateDropDown, mpi.lastDate);
+    connectDateButton(ui.accountsDateDropDown, mpi.lastDate);
+    connectDateButton(ui.aaDateDropDown, mpi.lastDate);
     connect(ui.DateCalendar, SIGNAL(clicked(QDate)), this, SLOT(dateChanged(QDate)));
 }
 
@@ -155,9 +158,111 @@ void frmMain::checkVersion()
 
 void frmMain::saveSettings()
 {
-//    int? Portfolio = null;
-//    if (SavePortfolio())
-//        Portfolio = MPI.Portfolio.ID;
-    sql->executeNonQuery(sql->updateSettings(QVariant(QVariant::Int), this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
+    QVariant portfolio(QVariant::Int);
+    if (savePortfolio())
+        portfolio = mpi.portfolio.id;
+    sql->executeNonQuery(sql->updateSettings(portfolio, this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
 }
 
+void frmMain::loadPortfolioDropDown()
+{
+    //ui.mainPortfolioCombo->blockSignals(true);
+    QSqlQueryModel *dataset = sql->executeDataSet(sql->getPortfolios());
+    if (dataset)
+    {
+        ui.mainPortfolioCombo->setModel(dataset);
+        if (dataset->rowCount() != 0)
+        {
+            QModelIndexList result = dataset->match(dataset->index(0, 1), Qt::EditRole, mpi.portfolio.id, 1, Qt::MatchExactly);
+            int row = result.value(0).row();
+            if (row == -1)
+                ui.mainPortfolioCombo->setCurrentIndex(0);
+            else
+                ui.mainPortfolioCombo->setCurrentIndex(row);
+        }
+    }
+    //ui.mainPortfolioCombo->blockSignals(false);
+}
+
+void frmMain::disableItems(bool disabled)
+{
+    disabled = !disabled;
+
+    // todo
+}
+
+void frmMain::loadPortfolio()
+{
+    if (ui.mainPortfolioCombo->count() == 0) // no portfolios to load
+        disableItems(true);
+    else
+    {
+        if (this->isVisible())
+            savePortfolio(); // save currently loaded portfolio
+        disableItems(false);
+
+        QAbstractItemModel *dataset = ui.mainPortfolioCombo->model();
+        int row = ui.mainPortfolioCombo->currentIndex();
+        mpi.portfolio.id = dataset->data(dataset->index(row, 1)).toInt();
+        mpi.portfolio.name = dataset->data(dataset->index(row, 0)).toString();
+
+        if (!loadPortfolioSettings())
+        {
+            QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
+            disableItems(true);
+            return;
+        }
+
+        // resetCalendars();
+        // todo
+    }
+}
+
+bool frmMain::loadPortfolioSettings()
+{
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioAttributes(mpi.portfolio.id));
+    if (!q)
+        return false;
+
+    // set start date equal to earliest data day possible (may be after start date)
+
+    //CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate));
+    // todo ^
+    mpi.portfolio.startDate = QDate::fromJulianDay(q->value(queries::getPortfolioAttributes_StartDate).toInt());
+    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, mpi.portfolio.startDate.toString(Qt::SystemLocaleShortDate)));
+    mpi.portfolio.dividends = q->value(queries::getPortfolioAttributes_Dividends).toBool();
+    mpi.portfolio.costCalc = (globals::avgShareCalc)q->value(queries::getPortfolioAttributes_CostCalc).toInt();
+    mpi.portfolio.navStart = q->value(queries::getPortfolioAttributes_NAVStartValue).toDouble();
+    mpi.portfolio.aaThreshold = q->value(queries::getPortfolioAttributes_AAThreshold).toInt();
+    ui.holdingsShowHidden->setChecked(q->value(queries::getPortfolioAttributes_HoldingsShowHidden).toBool());
+    ui.performanceSortDesc->setChecked(q->value(queries::getPortfolioAttributes_NAVSort).toBool());
+    ui.aaShowBlank->setChecked(q->value(queries::getPortfolioAttributes_AAShowBlank).toBool());
+    ui.correlationsShowHidden->setChecked(q->value(queries::getPortfolioAttributes_CorrelationShowHidden).toBool());
+    ui.accountsShowBlank->setChecked(q->value(queries::getPortfolioAttributes_AcctShowBlank).toBool());
+
+    mpi.holdings.sort = q->value(queries::getPortfolioAttributes_HoldingsSort).toString();
+    // todo
+    //ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
+
+    mpi.aa.sort = q->value(queries::getPortfolioAttributes_AASort).toString();
+    // todo
+    //ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
+
+    mpi.account.sort = q->value(queries::getPortfolioAttributes_AcctSort).toString();
+    // todo
+    //ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort, new EventHandler(cmbAcctSortBy_SelectedIndexChanged));
+
+    delete q;
+    return true;
+}
+
+bool frmMain::savePortfolio()
+{
+    if (!sql->executeScalar(sql->getPortfolioExists(mpi.portfolio.id)).isValid())
+        return false;
+
+    sql->executeNonQuery(sql->updatePortfolioAttributes(mpi.portfolio.id, ui.holdingsShowHidden->isChecked(),
+        ui.performanceSortDesc->isChecked(), ui.aaShowBlank->isChecked(), mpi.holdings.sort, mpi.aa.sort,
+        ui.correlationsShowHidden->isChecked(), ui.accountsShowBlank->isChecked(), mpi.account.sort));
+    return true;
+}

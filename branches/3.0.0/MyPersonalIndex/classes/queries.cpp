@@ -59,6 +59,31 @@ void queries::executeNonQuery(queryInfo *q)
     delete q;
 }
 
+QSqlQueryModel* queries::executeDataSet(queryInfo *q)
+{
+    if (!q)
+        return 0;
+
+    QSqlQuery query(db);
+    query.prepare(q->sql);
+    foreach(const parameter &p, q->parameters)
+        query.bindValue(p.name, p.value);
+
+    query.exec();
+
+    if(!query.isActive())
+    {
+        delete q;
+        return 0;
+    }
+
+    QSqlQueryModel *dataset = new QSqlQueryModel();
+    dataset->setQuery(query);
+
+    delete q;
+    return dataset;
+}
+
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values)
 {
     if (tableName.isEmpty() || values.isEmpty())
@@ -143,12 +168,6 @@ QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
     return nullValue;
 }
 
-queries::queryInfo* queries::temp(int number)
-{
-    return new queryInfo("SELECT SQRT(:number)",
-        QList<parameter>() << parameter(":number", number));
-}
-
 queries::queryInfo* queries::getSettings()
 {
     return new queryInfo(
@@ -194,4 +213,55 @@ queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const
                 << parameter(":WindowWidth", windowSize.width())
                 << parameter(":WindowState", state)
         );
+}
+
+queries::queryInfo* queries::getPortfolios()
+{
+    return new queryInfo(
+        "SELECT Name, ID FROM Portfolios",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getPortfolioExists(const int &portfolio)
+{
+    return new queryInfo(
+        "SELECT ID FROM Portfolios WHERE ID = :Portfolio",
+        QList<parameter>()
+            << parameter(":Portfolio", portfolio)
+    );
+}
+
+queries::queryInfo* queries::updatePortfolioAttributes(
+            const int &portfolio, const bool &holdingsShowHidden, const bool &navSort,
+            const bool &showAABlank, const QString &holdingsSort, const QString &aaSort,
+            const bool &correlationShowHidden, const bool &showAcctBlank, const QString &acctSort)
+{
+    return new queryInfo(
+        "UPDATE Portfolios SET HoldingsShowHidden = :HoldingsShowHidden, NAVSort = :NAVSort, AAShowBlank = :ShowAABlank,"
+        " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank,"
+        " AcctSort = :AcctSort WHERE ID = :Portfolio",
+        QList<parameter>()
+            << parameter(":HoldingsShowHidden", holdingsShowHidden)
+            << parameter(":NAVSort", navSort)
+            << parameter(":ShowAABlank", showAABlank)
+            << parameter(":HoldingsSort", holdingsSort)
+            << parameter(":AASort", aaSort)
+            << parameter(":CorrelationShowHidden", correlationShowHidden)
+            << parameter(":ShowAcctBlank", showAcctBlank)
+            << parameter(":AcctSort", acctSort)
+            << parameter(":Portfolio", portfolio)
+    );
+}
+
+queries::queryInfo* queries::getPortfolioAttributes(const int &portfolio)
+{
+    return new queryInfo(
+        "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,"
+            " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden,"
+            " AcctSort, AcctShowBlank "
+            " FROM Portfolios WHERE ID = :Portfolio",
+        QList<parameter>()
+            << parameter(":Portfolio", portfolio)
+    );
 }

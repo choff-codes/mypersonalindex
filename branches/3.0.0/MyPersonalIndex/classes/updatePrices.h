@@ -9,13 +9,13 @@ class updatePrices
 {
 public:
     updatePrices(queries *p_sql): sql(p_sql) {}
-    void getPrices(const QString &, const QDate &);
-    void getDividends(const QString&, const QDate&);
+    void getPrices(const QString &ticker, const QDate &minDate);
+    void getDividends(const QString&ticker, const QDate &minDate);
     void getSplits(const QString &ticker, const QDate &minDate);
     bool isInternetConnection();
 private:
-    QString getCSVAddress(const QString&, const QDate&, const QDate&, const QString&);
-    QString getSplitAddress(const QString&);
+    QString getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type);
+    QString getSplitAddress(const QString &ticker);
     QList<QByteArray>* downloadFile(const QUrl&);
     queries *sql;
 };

@@ -2,7 +2,6 @@
 #define FRMMAIN_UI_H
 
 #include <QtGui>
-#include "mpiToolButton.h"
 
 class frmMain_UI
 {
@@ -28,10 +27,6 @@ public:
     QLabel *mainPortfolioLabel;
     QComboBox *mainPortfolioCombo;
 
-    QMenu *DateMenu;
-    QCalendarWidget *DateCalendar;
-    QWidgetAction *DateAction;
-
     QVBoxLayout *holdingsGrid;
     QToolBar *holdingsToolbar;
     QAction *holdingsAdd;
@@ -39,7 +34,8 @@ public:
     QAction *holdingsDelete;
     QAction *holdingsShowHidden;
     QAction *holdingsExport;
-    mpiToolButton *holdingsDateDropDown;
+    QLabel *holdingsDate;
+    QDateEdit *holdingsDateDropDown;
     QLabel *holdingsSortLabel;
     QComboBox *holdingsSortCombo;
     QTableView *holdings;
@@ -48,15 +44,19 @@ public:
     QToolBar *statToolbar;
     QAction *statAddEdit;
     QAction *statExport;
-    mpiToolButton *statStartDateDropDown;
-    mpiToolButton *statEndDateDropDown;
+    QLabel *statStartDate;
+    QDateEdit *statStartDateDropDown;
+    QLabel *statEndDate;
+    QDateEdit *statEndDateDropDown;
     QTableView *stat;
 
     QVBoxLayout *chartGrid;
     QToolBar *chartToolbar;
     QAction *chartExport;
-    mpiToolButton *chartStartDateDropDown;
-    mpiToolButton *chartEndDateDropDown;
+    QLabel *chartStartDate;
+    QDateEdit *chartStartDateDropDown;
+    QLabel *chartEndDate;
+    QDateEdit *chartEndDateDropDown;
     QTableView *chart;
 
     QVBoxLayout *performanceGrid;
@@ -70,8 +70,10 @@ public:
     QAction *correlationsCalculate;
     QAction *correlationsShowHidden;
     QAction *correlationsExport;
-    mpiToolButton *correlationsStartDateDropDown;
-    mpiToolButton *correlationsEndDateDropDown;
+    QLabel *correlationsStartDate;
+    QDateEdit *correlationsStartDateDropDown;
+    QLabel *correlationsEndDate;
+    QDateEdit *correlationsEndDateDropDown;
     QTableView *correlations;
 
     QVBoxLayout *accountsGrid;
@@ -79,7 +81,8 @@ public:
     QAction *accountsEdit;
     QAction *accountsShowBlank;
     QAction *accountsExport;
-    mpiToolButton *accountsDateDropDown;
+    QLabel *accountsDate;
+    QDateEdit *accountsDateDropDown;
     QLabel *accountsSortLabel;
     QComboBox *accountsSortCombo;
     QTableView *accounts;
@@ -89,7 +92,8 @@ public:
     QAction *aaEdit;
     QAction *aaShowBlank;
     QAction *aaExport;
-    mpiToolButton *aaDateDropDown;
+    QLabel *aaDate;
+    QDateEdit *aaDateDropDown;
     QLabel *aaSortLabel;
     QComboBox *aaSortCombo;
     QTableView *aa;

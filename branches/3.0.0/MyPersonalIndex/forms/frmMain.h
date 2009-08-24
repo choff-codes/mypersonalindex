@@ -5,8 +5,7 @@
 
 #include <QMainWindow>
 #include "frmMain_UI.h"
-#include "mpiToolButton.h"
-#include "queries.h"
+#include "mainQueries.h"
 #include "globals.h"
 #include "updatePrices.h"
 
@@ -20,12 +19,9 @@ public:
 
 private:
     frmMain_UI ui;
-    queries *sql;
+    mainQueries *sql;
     globals::myPersonalIndex mpi;
-    mpiToolButton *m_mpiButtonPressed;
 
-    void setDateDropDownText(mpiToolButton*);
-    void connectDateButton(mpiToolButton*, const QDate&);
     void connectSlots();
     void loadSettings();
     void resetLastDate();
@@ -39,7 +35,7 @@ private:
 
 private slots:
     void dateChanged(QDate);
-    void dateButtonPressed();
+    void addPortfolio();
 
 protected:
     void closeEvent(QCloseEvent *event);

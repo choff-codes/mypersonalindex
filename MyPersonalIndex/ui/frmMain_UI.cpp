@@ -1,14 +1,17 @@
 #include "frmMain_UI.h"
+#include "functions.h"
 
-const QString frmMain_UI::LAST_UPDATED_TEXT = QString("Last Updated: ");
-const QString frmMain_UI::INDEX_START_TEXT = QString("Index Start Date: ");
-const QString frmMain_UI::STATUS_TEXT = QString("Status: ");
-const QString frmMain_UI::DATE = QString("Date: ");
-const QString frmMain_UI::START_DATE = QString("Start Date: ");
-const QString frmMain_UI::END_DATE = QString("End Date: ");
+const QString frmMain_UI::LAST_UPDATED_TEXT = "Last Updated: ";
+const QString frmMain_UI::INDEX_START_TEXT = "Index Start Date: ";
+const QString frmMain_UI::STATUS_TEXT = "Status: ";
+const QString frmMain_UI::DATE = "Date: ";
+const QString frmMain_UI::START_DATE = "Start Date: ";
+const QString frmMain_UI::END_DATE = "End Date: ";
 
 void frmMain_UI::setupUI(QMainWindow *MainWindow)
 {
+    QString shortDate = QLocale().dateFormat(QLocale::ShortFormat);
+
     MainWindow->setWindowTitle("My Personal Index");
     MainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
     MainWindow->resize(800, 600);
@@ -73,12 +76,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
 
     centralgrid->addWidget(tab);
 
-    DateCalendar = new QCalendarWidget(tab);
-    DateAction = new QWidgetAction(tab);
-    DateAction->setDefaultWidget(DateCalendar);
-    DateMenu = new QMenu(tab);
-    DateMenu->addAction(DateAction);
-
     holdingsGrid = new QVBoxLayout(tab_holdings);
     holdingsGrid->setSpacing(0);
     holdingsGrid->setMargin(1);
@@ -96,8 +93,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsShowHidden->setCheckable(true);
     holdingsExport = new QAction("Export...", tab_holdings);
     holdingsExport->setIconText("Export...");
-    holdingsDateDropDown = new mpiToolButton(tab_holdings, mpiToolButton::singleDate);
-    holdingsDateDropDown->setMenu(DateMenu);
+    holdingsDate = new QLabel(" Date: ", tab_holdings);
+    holdingsDateDropDown = functions::createDateEdit(tab_holdings);
     holdingsSortLabel = new QLabel(" Sort By: ", tab_holdings);
     holdingsSortCombo = new QComboBox(tab_holdings);
     holdingsSortCombo->setMinimumSize(QSize(100, 0));
@@ -107,6 +104,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsToolbar->addAction(holdingsEdit);
     holdingsToolbar->addAction(holdingsDelete);
     holdingsToolbar->addSeparator();
+    holdingsToolbar->addWidget(holdingsDate);
     holdingsToolbar->addWidget(holdingsDateDropDown);
     holdingsToolbar->addSeparator();
     holdingsToolbar->addWidget(holdingsSortLabel);
@@ -127,14 +125,15 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statAddEdit->setIconText("Add/Edit Statistics...");
     statExport = new QAction("Export...", tab_stat);
     statExport->setIconText("Export...");
-    statStartDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::startDate);
-    statStartDateDropDown->setMenu(DateMenu);
-    statEndDateDropDown = new mpiToolButton(tab_stat, mpiToolButton::endDate);
-    statEndDateDropDown->setMenu(DateMenu);
-
+    statStartDate = new QLabel(" Start Date: ", tab_stat);
+    statStartDateDropDown = functions::createDateEdit(tab_stat);
+    statEndDate = new QLabel(" End Date: ", tab_stat);
+    statEndDateDropDown = functions::createDateEdit(tab_stat);
     statToolbar->addAction(statAddEdit);
     statToolbar->addSeparator();
+    statToolbar->addWidget(statStartDate);
     statToolbar->addWidget(statStartDateDropDown);
+    statToolbar->addWidget(statEndDate);
     statToolbar->addWidget(statEndDateDropDown);
     statToolbar->addSeparator();
     statToolbar->addAction(statExport);
@@ -149,12 +148,14 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
 
     chartExport = new QAction("Export...", tab_chart);
     chartExport->setIconText("Export...");
-    chartStartDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::startDate);
-    chartStartDateDropDown->setMenu(DateMenu);
-    chartEndDateDropDown = new mpiToolButton(tab_chart, mpiToolButton::endDate);
-    chartEndDateDropDown->setMenu(DateMenu);
+    chartStartDate = new QLabel(" Start Date: ", tab_chart);
+    chartStartDateDropDown = functions::createDateEdit(tab_chart);
+    chartEndDate = new QLabel(" End Date: ", tab_chart);
+    chartEndDateDropDown = functions::createDateEdit(tab_chart);
 
+    chartToolbar->addWidget(chartStartDate);
     chartToolbar->addWidget(chartStartDateDropDown);
+    chartToolbar->addWidget(chartEndDate);
     chartToolbar->addWidget(chartEndDateDropDown);
     chartToolbar->addSeparator();
     chartToolbar->addAction(chartExport);
@@ -192,14 +193,16 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsShowHidden->setCheckable(true);
     correlationsExport = new QAction("Export...", tab_correlations);
     correlationsExport->setIconText("Export...");
-    correlationsStartDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::startDate);
-    correlationsStartDateDropDown->setMenu(DateMenu);
-    correlationsEndDateDropDown = new mpiToolButton(tab_correlations, mpiToolButton::endDate);
-    correlationsEndDateDropDown->setMenu(DateMenu);
+    correlationsStartDate = new QLabel(" Start Date: ", tab_correlations);
+    correlationsStartDateDropDown = functions::createDateEdit(tab_correlations);
+    correlationsEndDate = new QLabel(" End Date: ", tab_correlations);
+    correlationsEndDateDropDown = functions::createDateEdit(tab_correlations);
 
     correlationsToolbar->addAction(correlationsCalculate);
     correlationsToolbar->addSeparator();
+    correlationsToolbar->addWidget(correlationsStartDate);
     correlationsToolbar->addWidget(correlationsStartDateDropDown);
+    correlationsToolbar->addWidget(correlationsEndDate);
     correlationsToolbar->addWidget(correlationsEndDateDropDown);
     correlationsToolbar->addSeparator();
     correlationsToolbar->addAction(correlationsShowHidden);
@@ -220,8 +223,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsShowBlank->setCheckable(true);
     accountsExport = new QAction("Export...", tab_accounts);
     accountsExport->setIconText("Export...");
-    accountsDateDropDown = new mpiToolButton(tab_accounts, mpiToolButton::singleDate);
-    accountsDateDropDown->setMenu(DateMenu);
+    accountsDate = new QLabel(" Date: ", tab_accounts);
+    accountsDateDropDown = functions::createDateEdit(tab_accounts);
     accountsSortLabel = new QLabel(" Sort By: ", tab_accounts);
     accountsSortCombo = new QComboBox(tab_accounts);
     accountsSortCombo->setMinimumSize(QSize(100, 0));
@@ -229,6 +232,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
 
     accountsToolbar->addAction(accountsEdit);
     accountsToolbar->addSeparator();
+    accountsToolbar->addWidget(accountsDate);
     accountsToolbar->addWidget(accountsDateDropDown);
     accountsToolbar->addSeparator();
     accountsToolbar->addWidget(accountsSortLabel);
@@ -251,8 +255,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaShowBlank->setCheckable(true);
     aaExport = new QAction("Export...", tab_aa);
     aaExport->setIconText("Export...");
-    aaDateDropDown = new mpiToolButton(tab_aa, mpiToolButton::singleDate);
-    aaDateDropDown->setMenu(DateMenu);
+    aaDate = new QLabel(" Date: ", tab_aa);
+    aaDateDropDown = functions::createDateEdit(tab_aa);
     aaSortLabel = new QLabel(" Sort By: ", tab_aa);
     aaSortCombo = new QComboBox(tab_aa);
     aaSortCombo->setMinimumSize(QSize(100, 0));
@@ -260,6 +264,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
 
     aaToolbar->addAction(aaEdit);
     aaToolbar->addSeparator();
+    aaToolbar->addWidget(aaDate);
     aaToolbar->addWidget(aaDateDropDown);
     aaToolbar->addSeparator();
     aaToolbar->addWidget(aaSortLabel);

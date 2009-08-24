@@ -6,6 +6,7 @@
 class globals
 {
 public:
+    static const QString shortDateFormat; // see cpp
     static const char signifyPortfolio[]; // see cpp
     static const char dateSeperator = '|';
     static const char stockPrices = 'd';

@@ -2,16 +2,17 @@
 #include <QtGui>
 #include <QtSql>
 #include "queries.h"
+#include "frmPortfolio.h"
 
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
-    QString location = queries::getDatabaseLocation();
+    QString location = mainQueries::getDatabaseLocation();
     if (!QFile::exists(location))
         if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()) || !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
             QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
 
-    sql = new queries();
+    sql = new mainQueries();
     if (!sql->isOpen())
     {
         QMessageBox::critical(this, "Error", "Cannot read user settings folder!", QMessageBox::Ok);
@@ -42,63 +43,21 @@ void frmMain::closeEvent(QCloseEvent *event)
 
 void frmMain::connectSlots()
 {
-    connectDateButton(ui.holdingsDateDropDown, mpi.lastDate);
-    connectDateButton(ui.statStartDateDropDown, mpi.lastDate);
-    connectDateButton(ui.statEndDateDropDown, mpi.lastDate);
-    connectDateButton(ui.chartStartDateDropDown, mpi.lastDate);
-    connectDateButton(ui.chartEndDateDropDown, mpi.lastDate);
-    connectDateButton(ui.correlationsStartDateDropDown, mpi.lastDate);
-    connectDateButton(ui.correlationsEndDateDropDown, mpi.lastDate);
-    connectDateButton(ui.accountsDateDropDown, mpi.lastDate);
-    connectDateButton(ui.aaDateDropDown, mpi.lastDate);
-    connect(ui.DateCalendar, SIGNAL(clicked(QDate)), this, SLOT(dateChanged(QDate)));
-}
-
-void frmMain::connectDateButton(mpiToolButton *t, const QDate &date)
-{
-    t->setDate(date);
-    setDateDropDownText(t);
-    connect(t, SIGNAL(pressDown()), this, SLOT(dateButtonPressed()));
+//    connectDateButton(ui.holdingsDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.statStartDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.statEndDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.chartStartDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.chartEndDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.correlationsStartDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.correlationsEndDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.accountsDateDropDown, mpi.lastDate);
+//    connectDateButton(ui.aaDateDropDown, mpi.lastDate);
+    connect(ui.mainAdd_Portfolio, SIGNAL(triggered()), this, SLOT(addPortfolio()));
 }
 
 void frmMain::dateChanged(QDate d)
 {
-    if (!ui.DateMenu->isVisible())
-        return;
 
-    ui.DateMenu->hide();
-
-    if (!m_mpiButtonPressed || !d.isValid())
-        return;
-
-    m_mpiButtonPressed->setDate(d);
-    setDateDropDownText(m_mpiButtonPressed);
-}
-
-void frmMain::setDateDropDownText(mpiToolButton *t)
-{
-    if (!t)
-        return;
-
-    QString str;
-    switch(t->type())
-    {
-        case mpiToolButton::startDate:
-            str = ui.START_DATE;
-            break;
-        case mpiToolButton::endDate:
-            str = ui.END_DATE;
-            break;
-        default:
-            str = ui.DATE;
-    }
-    t->setText(str.append(t->date().toString(Qt::SystemLocaleShortDate)).append(" "));
-}
-
-void frmMain::dateButtonPressed()
-{
-    m_mpiButtonPressed = static_cast<mpiToolButton*>(sender());
-    ui.DateCalendar->setSelectedDate(m_mpiButtonPressed->date());
 }
 
 void frmMain::loadSettings()
@@ -108,16 +67,16 @@ void frmMain::loadSettings()
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
     if (q)
     {
-        int x = q->value(queries::getSettings_DataStartDate).toInt();
+        int x = q->value(mainQueries::getSettings_DataStartDate).toInt();
         mpi.settings.dataStartDate = QDate::fromJulianDay(x);
-        mpi.settings.splits = q->value(queries::getSettings_Splits).toBool();
-        if (!q->value(queries::getSettings_WindowState).isNull())
+        mpi.settings.splits = q->value(mainQueries::getSettings_Splits).toBool();
+        if (!q->value(mainQueries::getSettings_WindowState).isNull())
         {
-            resize(QSize(q->value(queries::getSettings_WindowWidth).toInt(),
-                         q->value(queries::getSettings_WindowHeight).toInt()));
-            move(QPoint(q->value(queries::getSettings_WindowX).toInt(),
-                        q->value(queries::getSettings_WindowY).toInt()));
-            int state = q->value(queries::getSettings_WindowState).toInt();
+            resize(QSize(q->value(mainQueries::getSettings_WindowWidth).toInt(),
+                         q->value(mainQueries::getSettings_WindowHeight).toInt()));
+            move(QPoint(q->value(mainQueries::getSettings_WindowX).toInt(),
+                        q->value(mainQueries::getSettings_WindowY).toInt()));
+            int state = q->value(mainQueries::getSettings_WindowState).toInt();
             if (state)
             {
                 Qt::WindowState w = state == 1 ? Qt::WindowMaximized : Qt::WindowMinimized;
@@ -130,8 +89,8 @@ void frmMain::loadSettings()
             QApplication::clipboard()->setText(welcomeMessage);
             QMessageBox::information(this, "My Personal Index", welcomeMessage);
         }
-        if (!q->value(queries::getSettings_LastPortfolio).isNull())
-            mpi.portfolio.id = q->value(queries::getSettings_LastPortfolio).toInt();
+        if (!q->value(mainQueries::getSettings_LastPortfolio).isNull())
+            mpi.portfolio.id = q->value(mainQueries::getSettings_LastPortfolio).toInt();
         else
             mpi.portfolio.id = -1;
     }
@@ -228,27 +187,27 @@ bool frmMain::loadPortfolioSettings()
 
     //CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate));
     // todo ^
-    mpi.portfolio.startDate = QDate::fromJulianDay(q->value(queries::getPortfolioAttributes_StartDate).toInt());
+    mpi.portfolio.startDate = QDate::fromJulianDay(q->value(mainQueries::getPortfolioAttributes_StartDate).toInt());
     ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, mpi.portfolio.startDate.toString(Qt::SystemLocaleShortDate)));
-    mpi.portfolio.dividends = q->value(queries::getPortfolioAttributes_Dividends).toBool();
-    mpi.portfolio.costCalc = (globals::avgShareCalc)q->value(queries::getPortfolioAttributes_CostCalc).toInt();
-    mpi.portfolio.navStart = q->value(queries::getPortfolioAttributes_NAVStartValue).toDouble();
-    mpi.portfolio.aaThreshold = q->value(queries::getPortfolioAttributes_AAThreshold).toInt();
-    ui.holdingsShowHidden->setChecked(q->value(queries::getPortfolioAttributes_HoldingsShowHidden).toBool());
-    ui.performanceSortDesc->setChecked(q->value(queries::getPortfolioAttributes_NAVSort).toBool());
-    ui.aaShowBlank->setChecked(q->value(queries::getPortfolioAttributes_AAShowBlank).toBool());
-    ui.correlationsShowHidden->setChecked(q->value(queries::getPortfolioAttributes_CorrelationShowHidden).toBool());
-    ui.accountsShowBlank->setChecked(q->value(queries::getPortfolioAttributes_AcctShowBlank).toBool());
+    mpi.portfolio.dividends = q->value(mainQueries::getPortfolioAttributes_Dividends).toBool();
+    mpi.portfolio.costCalc = (globals::avgShareCalc)q->value(mainQueries::getPortfolioAttributes_CostCalc).toInt();
+    mpi.portfolio.navStart = q->value(mainQueries::getPortfolioAttributes_NAVStartValue).toDouble();
+    mpi.portfolio.aaThreshold = q->value(mainQueries::getPortfolioAttributes_AAThreshold).toInt();
+    ui.holdingsShowHidden->setChecked(q->value(mainQueries::getPortfolioAttributes_HoldingsShowHidden).toBool());
+    ui.performanceSortDesc->setChecked(q->value(mainQueries::getPortfolioAttributes_NAVSort).toBool());
+    ui.aaShowBlank->setChecked(q->value(mainQueries::getPortfolioAttributes_AAShowBlank).toBool());
+    ui.correlationsShowHidden->setChecked(q->value(mainQueries::getPortfolioAttributes_CorrelationShowHidden).toBool());
+    ui.accountsShowBlank->setChecked(q->value(mainQueries::getPortfolioAttributes_AcctShowBlank).toBool());
 
-    mpi.holdings.sort = q->value(queries::getPortfolioAttributes_HoldingsSort).toString();
+    mpi.holdings.sort = q->value(mainQueries::getPortfolioAttributes_HoldingsSort).toString();
     // todo
     //ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
 
-    mpi.aa.sort = q->value(queries::getPortfolioAttributes_AASort).toString();
+    mpi.aa.sort = q->value(mainQueries::getPortfolioAttributes_AASort).toString();
     // todo
     //ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
 
-    mpi.account.sort = q->value(queries::getPortfolioAttributes_AcctSort).toString();
+    mpi.account.sort = q->value(mainQueries::getPortfolioAttributes_AcctSort).toString();
     // todo
     //ResetSortDropDown(cmbAcctSortBy, MPI.Account.Sort, new EventHandler(cmbAcctSortBy_SelectedIndexChanged));
 
@@ -265,4 +224,11 @@ bool frmMain::savePortfolio()
         ui.performanceSortDesc->isChecked(), ui.aaShowBlank->isChecked(), mpi.holdings.sort, mpi.aa.sort,
         ui.correlationsShowHidden->isChecked(), ui.accountsShowBlank->isChecked(), mpi.account.sort));
     return true;
+}
+
+void frmMain::addPortfolio()
+{
+    frmPortfolio f(this, mpi.portfolio.startDate);
+    //frmPortfolio f(this, mpi.portfolio.startDate, mpi.portfolio.id, mpi.portfolio.name);
+    f.exec();
 }

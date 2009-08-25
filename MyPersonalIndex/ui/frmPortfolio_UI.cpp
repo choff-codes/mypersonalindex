@@ -1,5 +1,6 @@
 #include "frmPortfolio_UI.h"
 #include "functions.h"
+#include "mpiDoubleValidator.h"
 
 void frmPortfolio_UI::setupUI(QDialog *dialog)
 {
@@ -26,7 +27,8 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     layout->setWidget(1, QFormLayout::LabelRole, startValue);
 
     txtStartValue = new QLineEdit(dialog);
-    dvalidator = new QDoubleValidator(1, 1000000, 4, dialog);
+    txtStartValue->setText("100");
+    dvalidator = new mpiDoubleValidator(1, 1000000, 4, dialog);
     dvalidator->setNotation(QDoubleValidator::StandardNotation);
     txtStartValue->setValidator(dvalidator);
     layout->setWidget(1, QFormLayout::FieldRole, txtStartValue);
@@ -38,6 +40,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     sbAAThreshold = new QSpinBox(dialog);
     sbAAThreshold->setMaximum(100);
     sbAAThreshold->setSuffix("%");
+    sbAAThreshold->setValue(5);
     layout->setWidget(2, QFormLayout::FieldRole, sbAAThreshold);
 
     costBasis = new QLabel(dialog);
@@ -55,10 +58,12 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     layout->setWidget(4, QFormLayout::LabelRole, startDate);
 
     dateStartDate = functions::createDateEdit(dialog);
+    dateStartDate->setDate(QDate::currentDate());
     layout->setWidget(4, QFormLayout::FieldRole, dateStartDate);
 
     chkIncludeDiv = new QCheckBox(dialog);
     chkIncludeDiv->setText("Include &Dividends");
+    chkIncludeDiv->setChecked(true);
     layout->setWidget(5, QFormLayout::FieldRole, chkIncludeDiv);
 
     vlayout->addLayout(layout);

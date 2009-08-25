@@ -21,7 +21,7 @@ public:
     QAction *mainCompare;
     QAction *mainEdit;
     QAction *mainDelete;
-    QAction *mainAdd_Portfolio;
+    QAction *mainAdd;
     QAction *mainOptions;
     QAction *mainAbout;
     QLabel *mainPortfolioLabel;

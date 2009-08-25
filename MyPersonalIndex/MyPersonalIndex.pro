@@ -21,7 +21,8 @@ HEADERS += frmMain_UI.h \
     ui/frmPortfolio_UI.h \
     classes/queries/mainQueries.h \
     classes/queries/portfolioQueries.h \
-    classes/functions.h
+    classes/functions.h \
+    usercontrols/mpiDoubleValidator.h
 INCLUDEPATH += forms \
     usercontrols \
     ui \

@@ -2,6 +2,7 @@
 #define FRMMAIN_H
 
 #define VERSION 300 // UPDATE EACH RELEASE
+#define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
 
 #include <QMainWindow>
 #include "frmMain_UI.h"
@@ -36,6 +37,8 @@ private:
 private slots:
     void dateChanged(QDate);
     void addPortfolio();
+    void editPortfolio();
+    void about();
 
 protected:
     void closeEvent(QCloseEvent *event);

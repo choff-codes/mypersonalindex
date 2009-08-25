@@ -34,7 +34,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     mainCompare->setIconText("Compare...");
     mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit", MainWindow);
     mainDelete = new QAction(QIcon(":/icons/delete.png"), "Delete", MainWindow);
-    mainAdd_Portfolio = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", MainWindow);
+    mainAdd = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", MainWindow);
     mainOptions = new QAction(QIcon(":/icons/options.png"), "Options", MainWindow);
     mainAbout = new QAction(QIcon(":/icons/about.png"), "About", MainWindow);
     mainPortfolioLabel = new QLabel("Portfolio: ", MainWindow);
@@ -52,7 +52,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     mainToolbar->addAction(mainEdit);
     mainToolbar->addAction(mainDelete);
     mainToolbar->addSeparator();
-    mainToolbar->addAction(mainAdd_Portfolio);
+    mainToolbar->addAction(mainAdd);
     mainToolbar->addSeparator();
     mainToolbar->addAction(mainOptions);
     mainToolbar->addAction(mainAbout);

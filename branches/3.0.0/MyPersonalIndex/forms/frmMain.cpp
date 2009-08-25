@@ -52,7 +52,9 @@ void frmMain::connectSlots()
 //    connectDateButton(ui.correlationsEndDateDropDown, mpi.lastDate);
 //    connectDateButton(ui.accountsDateDropDown, mpi.lastDate);
 //    connectDateButton(ui.aaDateDropDown, mpi.lastDate);
-    connect(ui.mainAdd_Portfolio, SIGNAL(triggered()), this, SLOT(addPortfolio()));
+    connect(ui.mainAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
+    connect(ui.mainEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
+    connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
 }
 
 void frmMain::dateChanged(QDate d)
@@ -229,6 +231,29 @@ bool frmMain::savePortfolio()
 void frmMain::addPortfolio()
 {
     frmPortfolio f(this, mpi.portfolio.startDate);
-    //frmPortfolio f(this, mpi.portfolio.startDate, mpi.portfolio.id, mpi.portfolio.name);
-    f.exec();
+    if (f.exec())
+    {
+        mpi.portfolio.id = f.getReturnValues().id;
+        loadPortfolioDropDown();
+    };
+}
+
+void frmMain::editPortfolio()
+{
+    frmPortfolio f(this, mpi.portfolio.startDate, mpi.portfolio.id, mpi.portfolio.name);
+    if (f.exec())
+    {
+        frmPortfolio::portfolioReturn p = f.getReturnValues();
+        loadPortfolioDropDown();
+    }
+}
+
+void frmMain::about()
+{
+    QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString(VERSIONTEXT) + "</h2>"
+               "<p>Copyright &copy; 2009"
+               "<p>By Matthew Wikler"
+               "<p>Create personal indexes and perform analysis to make better investing decisions."
+               "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>"
+    );
 }

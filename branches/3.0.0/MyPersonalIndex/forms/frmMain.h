@@ -39,6 +39,7 @@ private slots:
     void addPortfolio();
     void editPortfolio();
     void about();
+    void addTicker();
 
 protected:
     void closeEvent(QCloseEvent *event);

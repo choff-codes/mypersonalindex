@@ -43,18 +43,22 @@ public:
     static const QStringList closingPricesColumns;
     static const QStringList dividendsColumns;
     static const QStringList splitsColumns;
+    static const QStringList tradesColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
     enum { dividends_Date, dividends_Ticker, dividends_Amount };
     enum { splits_Date, splits_Ticker, splits_Ratio };
+    enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
 
     queries();
     static QString getDatabaseLocation();
     bool isOpen() const { return db.isOpen(); }
+    QSqlDatabase getDatabase() const { return db; }
 
     void executeNonQuery(queryInfo*);
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
+    bool executeTableSelect(QSqlTableModel *model = 0, const QString &tableName = "", const int &sort = -1, const QString &filter = "");
     QSqlQueryModel* executeDataSet(queryInfo *q);
     QSqlQuery* executeResultSet(queryInfo*);
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant());

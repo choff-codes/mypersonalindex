@@ -15,26 +15,22 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     layout = new QFormLayout();
     layout->setVerticalSpacing(8);
 
-    desc = new QLabel(dialog);
-    desc->setText("&Description:");
+    desc = new QLabel("&Description:", dialog);
     layout->setWidget(0, QFormLayout::LabelRole, desc);
 
     txtDesc = new QLineEdit(dialog);
     layout->setWidget(0, QFormLayout::FieldRole, txtDesc);
 
-    startValue = new QLabel(dialog);
-    startValue->setText("&Index Start Value:");
+    startValue = new QLabel("&Index Start Value:", dialog);
     layout->setWidget(1, QFormLayout::LabelRole, startValue);
 
-    txtStartValue = new QLineEdit(dialog);
-    txtStartValue->setText("100");
+    txtStartValue = new QLineEdit("100", dialog);
     dvalidator = new mpiDoubleValidator(1, 1000000, 4, dialog);
     dvalidator->setNotation(QDoubleValidator::StandardNotation);
     txtStartValue->setValidator(dvalidator);
     layout->setWidget(1, QFormLayout::FieldRole, txtStartValue);
 
-    aaThreshold = new QLabel(dialog);
-    aaThreshold->setText("&AA Threshold:");
+    aaThreshold = new QLabel("&AA Threshold:", dialog);
     layout->setWidget(2, QFormLayout::LabelRole, aaThreshold);
 
     sbAAThreshold = new QSpinBox(dialog);
@@ -43,8 +39,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     sbAAThreshold->setValue(5);
     layout->setWidget(2, QFormLayout::FieldRole, sbAAThreshold);
 
-    costBasis = new QLabel(dialog);
-    costBasis->setText("&Cost Basis Method:");
+    costBasis = new QLabel("&Cost Basis Method:", dialog);
     layout->setWidget(3, QFormLayout::LabelRole, costBasis);
 
     cmbCostBasis = new QComboBox(dialog);
@@ -53,16 +48,14 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     cmbCostBasis->addItem("Average");
     layout->setWidget(3, QFormLayout::FieldRole, cmbCostBasis);
 
-    startDate = new QLabel(dialog);
-    startDate->setText("&Start Date:");
+    startDate = new QLabel("&Start Date:", dialog);
     layout->setWidget(4, QFormLayout::LabelRole, startDate);
 
     dateStartDate = functions::createDateEdit(dialog);
     dateStartDate->setDate(QDate::currentDate());
     layout->setWidget(4, QFormLayout::FieldRole, dateStartDate);
 
-    chkIncludeDiv = new QCheckBox(dialog);
-    chkIncludeDiv->setText("Include &Dividends");
+    chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
     chkIncludeDiv->setChecked(true);
     layout->setWidget(5, QFormLayout::FieldRole, chkIncludeDiv);
 

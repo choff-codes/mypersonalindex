@@ -9,6 +9,10 @@ const QStringList queries::splitsColumns = QStringList() << "Date" << "Ticker" <
 //enum { dividends_Date, dividends_Ticker, dividends_Amount };
 const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker" << "Amount";
 
+//enum { dividends_Date, dividends_Ticker, dividends_Amount };
+const QStringList queries::tradesColumns = QStringList() << "ID" << "Portfolio" << "TickerID" << "Ticker"
+    << "Date" << "Shares" << "Price" << "Custom";
+
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
 const QString queries::table_AvgPricePerShare = "AvgPricePerShare";
@@ -82,6 +86,21 @@ QSqlQueryModel* queries::executeDataSet(queryInfo *q)
 
     delete q;
     return dataset;
+}
+
+bool queries::executeTableSelect(QSqlTableModel *model, const QString &tableName, const int &sort, const QString &filter)
+{
+    if (!model)
+        return false;
+
+    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+    model->setTable(tableName);
+    if (!filter.isEmpty())
+        model->setFilter(filter);
+    if (sort != -1)
+        model->setSort(sort, Qt::AscendingOrder);
+
+    return model->select();
 }
 
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values)
@@ -167,8 +186,6 @@ QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
     delete q;
     return nullValue;
 }
-
-
 
 queries::queryInfo* queries::getLastDate()
 {

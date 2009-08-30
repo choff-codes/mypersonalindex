@@ -1,9 +1,9 @@
 #include "frmMain.h"
 #include <QtGui>
 #include <QtSql>
-#include "queries.h"
+#include "mainQueries.h"
 #include "frmPortfolio.h"
-
+#include "frmTicker.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
@@ -55,6 +55,7 @@ void frmMain::connectSlots()
     connect(ui.mainAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui.mainEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
+    connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
 }
 
 void frmMain::dateChanged(QDate d)
@@ -132,6 +133,7 @@ void frmMain::loadPortfolioDropDown()
     if (dataset)
     {
         ui.mainPortfolioCombo->setModel(dataset);
+
         if (dataset->rowCount() != 0)
         {
             QModelIndexList result = dataset->match(dataset->index(0, 1), Qt::EditRole, mpi.portfolio.id, 1, Qt::MatchExactly);
@@ -256,4 +258,10 @@ void frmMain::about()
                "<p>Create personal indexes and perform analysis to make better investing decisions."
                "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>"
     );
+}
+
+void frmMain::addTicker()
+{
+    frmTicker f(this);
+    f.exec();
 }

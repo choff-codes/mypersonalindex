@@ -1,5 +1,6 @@
-#include "UpdatePrices.h"
+#include "updatePrices.h"
 #include "queries.h"
+#include <QtNetwork>
 
 QString updatePrices::getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type)
 {

@@ -150,7 +150,7 @@ public:
         double price;
         double shares;
 
-        tradeInfo(const double &p_shares, const double &p_price): price(p_shares), shares(p_shares) {}
+        tradeInfo(const double &p_shares, const double &p_price): price(p_price), shares(p_shares) {}
     };
 
     struct updateInfo

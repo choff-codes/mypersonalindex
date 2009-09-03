@@ -10,7 +10,7 @@ public:
 
     mpiDoubleValidator(double bottom, double top, int decimals, QObject *parent = 0) : QDoubleValidator(bottom, top, decimals, parent) {}
 
-    QValidator::State mpiDoubleValidator::validate(QString &input, int &pos) const
+    QValidator::State validate(QString &input, int &pos) const
     {
         if (input.isEmpty())
             return QValidator::Intermediate;

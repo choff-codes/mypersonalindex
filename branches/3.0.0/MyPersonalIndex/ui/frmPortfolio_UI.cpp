@@ -55,12 +55,16 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     dateStartDate->setDate(QDate::currentDate());
     layout->setWidget(4, QFormLayout::FieldRole, dateStartDate);
 
+    QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing
+    layout->setWidget(5, QFormLayout::LabelRole, tmp);
+
     chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
     chkIncludeDiv->setChecked(true);
     layout->setWidget(5, QFormLayout::FieldRole, chkIncludeDiv);
 
     vlayout->addLayout(layout);
     vlayout->addWidget(btnOkCancel);
+    vlayout->setSizeConstraint(QLayout::SetFixedSize);
 
     desc->setBuddy(txtDesc);
     startValue->setBuddy(txtStartValue);

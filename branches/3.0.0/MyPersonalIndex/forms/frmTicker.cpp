@@ -1,10 +1,10 @@
-#include <QDialog>
 #include <QtGui>
 #include <QtSql>
 #include "queries.h"
 #include "frmTicker.h"
 #include "frmTicker_UI.h"
 #include "dateEditDelegate.h"
+#include "frmTrade.h"
 
 frmTicker::frmTicker(QWidget *parent): QDialog(parent)
 {
@@ -38,6 +38,7 @@ frmTicker::frmTicker(QWidget *parent): QDialog(parent)
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(ui.btnTradesAdd, SIGNAL(clicked()), this, SLOT(addTrade()));
 }
 
 void frmTicker::accept()
@@ -73,4 +74,10 @@ void frmTicker::accept()
 //    }
 
     QDialog::accept();
+}
+
+void frmTicker::addTrade()
+{
+    frmTrade f(this);
+    f.exec();
 }

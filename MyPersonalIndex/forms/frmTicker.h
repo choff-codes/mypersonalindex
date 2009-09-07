@@ -1,7 +1,6 @@
 #ifndef FRMTICKER_H
 #define FRMTICKER_H
 
-#include <QDialog>
 #include <QtGui>
 #include "frmTicker_UI.h"
 #include "globals.h"
@@ -23,6 +22,7 @@ private:
 
 private slots:
     void accept();
+    void addTrade();
 };
 
 //class tradesSqlQueryModel: public QSqlTableModel

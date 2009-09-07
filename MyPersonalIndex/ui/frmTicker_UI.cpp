@@ -67,6 +67,13 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
     aa->setSelectionBehavior(QAbstractItemView::SelectRows);
     aa->setAlternatingRowColors(true);
+    aa->horizontalHeader()->hide();
+    aa->verticalHeader()->hide();
+    QSpinBox sbTmp(dialog);
+    sbTmp.setSuffix("%");
+    sbTmp.setMaximum(100);
+    aa->verticalHeader()->setDefaultSectionSize(sbTmp.sizeHint().height());
+
     aaLayoutBottom = new QGridLayout();
     cmbAA = new QComboBox(gpAA);
     btnAAAdd = new QPushButton("Add", gpAA);
@@ -74,9 +81,14 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     aaLayoutBottom->addWidget(cmbAA, 0, 0, 1, 2);
     aaLayoutBottom->addWidget(btnAAAdd, 1, 0);
     aaLayoutBottom->addWidget(btnAADelete, 1, 1);
-    aaLayout->addWidget(aa, 1);
-    aaLayout->addLayout(aaLayoutBottom);
+    aaLayout->addWidget(aa);
+    aaLayout->addLayout(aaLayoutBottom, 1);
 
+    // make the aa tableView a bit smaller, since there shouldn't be more than 1-2 entries
+    // this will make it just small enough so it matches the security layout on the left
+    aa->setMaximumHeight(securityLayout->sizeHint().height() -
+                         aaLayoutBottom->sizeHint().height() -
+                         aaLayout->margin() * 3);  // top, in between layout, and bottom
     topSectionLayout->addWidget(gpSecurity);
     topSectionLayout->addWidget(gpAA, 1);
 
@@ -86,6 +98,15 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     trades->setSelectionMode(QAbstractItemView::ExtendedSelection);
     trades->setSelectionBehavior(QAbstractItemView::SelectRows);
     trades->setAlternatingRowColors(true);
+    trades->horizontalHeader()->setHighlightSections(false);
+    int fntHeight = trades->fontMetrics().height() + 2; // add small buffer
+    trades->verticalHeader()->setDefaultSectionSize(fntHeight);
+    trades->horizontalHeader()->setFixedHeight(fntHeight);
+    trades->setMaximumHeight(fntHeight * 6);
+    trades->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
+    trades->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    trades->verticalHeader()->hide();
+
     tradesLayoutButtons = new QHBoxLayout();
     btnTradesAdd = new QPushButton("Add New", gpTrades);
     btnTradesCopy = new QPushButton("Add Copy", gpTrades);;
@@ -126,8 +147,8 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     mainLayout->addWidget(gpTrades, 1, 0);
     mainLayout->addWidget(btnOkCancel, 2, 0);
     mainLayout->addWidget(gpHistorical, 0, 1, 2, 1);
-//
-//    symbol->setBuddy(txtSymbol);
-//    aa->setBuddy(cmbAA);
-//    acct->setBuddy(cmbAcct);
+
+    symbol->setBuddy(txtSymbol);
+    acct->setBuddy(cmbAcct);
+    expense->setBuddy(sbExpense);
 }

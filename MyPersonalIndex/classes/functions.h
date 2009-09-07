@@ -10,11 +10,11 @@ public:
     static QDateEdit* createDateEdit(QWidget* parent)
     {
         QDateEdit *d = new QDateEdit(parent);
+        d->setDate(QDate::currentDate());
         d->setCalendarPopup(true);
         d->setDisplayFormat(globals::shortDateFormat);
         //d->setButtonSymbols(QAbstractSpinBox::NoButtons);
         return d;
-
     }
 };
 

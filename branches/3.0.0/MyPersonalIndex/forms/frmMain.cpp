@@ -58,7 +58,7 @@ void frmMain::connectSlots()
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
 }
 
-void frmMain::dateChanged(QDate d)
+void frmMain::dateChanged(QDate)
 {
 
 }
@@ -66,6 +66,7 @@ void frmMain::dateChanged(QDate d)
 void frmMain::loadSettings()
 {
     checkVersion();
+    resetLastDate();
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
     if (q)
@@ -97,8 +98,6 @@ void frmMain::loadSettings()
         else
             mpi.portfolio.id = -1;
     }
-
-    resetLastDate();
 }
 
 void frmMain::resetLastDate()

@@ -17,6 +17,8 @@ public:
     mpiDoubleValidator *dvalidator;
     QLabel *aaThreshold;
     QSpinBox *sbAAThreshold;
+    QLabel *aaMethod;
+    QComboBox *cmbAAMethod;
     QLabel *costBasis;
     QComboBox *cmbCostBasis;
     QLabel *startDate;

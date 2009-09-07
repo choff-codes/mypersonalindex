@@ -276,7 +276,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     status = new QStatusBar(MainWindow);
     MainWindow->setStatusBar(status);
     stbLastUpdated = new QLabel(LAST_UPDATED_TEXT, MainWindow);
-    stbStartDate = new QLabel(INDEX_START_TEXT, MainWindow);
+    stbStartDate = new QLabel(/*INDEX_START_TEXT,*/ MainWindow);
     stbStatus = new QLabel(STATUS_TEXT, MainWindow);
     stbStatus->setAlignment(Qt::AlignRight);
     stbProgress = new QProgressBar(MainWindow);

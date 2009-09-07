@@ -39,28 +39,36 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     sbAAThreshold->setValue(5);
     layout->setWidget(2, QFormLayout::FieldRole, sbAAThreshold);
 
+    aaMethod = new QLabel("&Threshold Band:", dialog);
+    layout->setWidget(3, QFormLayout::LabelRole, aaMethod);
+
+    cmbAAMethod = new QComboBox(dialog);
+    cmbAAMethod->addItem("Portfolio Value");
+    cmbAAMethod->addItem("AA Value");
+    layout->setWidget(3, QFormLayout::FieldRole, cmbAAMethod);
+
     costBasis = new QLabel("&Cost Basis Method:", dialog);
-    layout->setWidget(3, QFormLayout::LabelRole, costBasis);
+    layout->setWidget(4, QFormLayout::LabelRole, costBasis);
 
     cmbCostBasis = new QComboBox(dialog);
     cmbCostBasis->addItem("FIFO");
     cmbCostBasis->addItem("LIFO");
     cmbCostBasis->addItem("Average");
-    layout->setWidget(3, QFormLayout::FieldRole, cmbCostBasis);
+    layout->setWidget(4, QFormLayout::FieldRole, cmbCostBasis);
 
     startDate = new QLabel("&Start Date:", dialog);
-    layout->setWidget(4, QFormLayout::LabelRole, startDate);
+    layout->setWidget(5, QFormLayout::LabelRole, startDate);
 
     dateStartDate = functions::createDateEdit(dialog);
     dateStartDate->setDate(QDate::currentDate());
-    layout->setWidget(4, QFormLayout::FieldRole, dateStartDate);
+    layout->setWidget(5, QFormLayout::FieldRole, dateStartDate);
 
     QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing
-    layout->setWidget(5, QFormLayout::LabelRole, tmp);
+    layout->setWidget(6, QFormLayout::LabelRole, tmp);
 
     chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
     chkIncludeDiv->setChecked(true);
-    layout->setWidget(5, QFormLayout::FieldRole, chkIncludeDiv);
+    layout->setWidget(6, QFormLayout::FieldRole, chkIncludeDiv);
 
     vlayout->addLayout(layout);
     vlayout->addWidget(btnOkCancel);
@@ -69,6 +77,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     desc->setBuddy(txtDesc);
     startValue->setBuddy(txtStartValue);
     aaThreshold->setBuddy(sbAAThreshold);
+    aaMethod->setBuddy(cmbAAMethod);
     costBasis->setBuddy(cmbCostBasis);
     startDate->setBuddy(dateStartDate);
 }

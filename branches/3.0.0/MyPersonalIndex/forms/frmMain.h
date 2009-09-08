@@ -28,8 +28,7 @@ private:
     void resetLastDate();
     void checkVersion();
     void saveSettings();
-    void loadPortfolioDropDown();
-    void loadPortfolio();
+    void loadPortfolioDropDown(const int &portfolioID);
     bool loadPortfolioSettings();
     bool savePortfolio();
     void disableItems(bool disabled);
@@ -38,6 +37,7 @@ private slots:
     void dateChanged(QDate);
     void addPortfolio();
     void editPortfolio();
+    void loadPortfolio();
     void about();
     void addTicker();
 

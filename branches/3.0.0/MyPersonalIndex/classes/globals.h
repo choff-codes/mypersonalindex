@@ -52,6 +52,7 @@ public:
 
     struct security
     {
+        int id;
         QString symbol;
         int account;
         double expense;
@@ -61,6 +62,9 @@ public:
         bool hide;
         QList<QPair<int, double> > aa;
         QList<dynamicTrade> trades;
+
+        security(): id(-1), account(0), expense(-0.01), divReinvest(false), cashAccount(false),
+            includeInCalc(true), hide(false) {}
 
         bool operator==(const security &other) const {
             return this->symbol == other.symbol
@@ -83,6 +87,25 @@ public:
     {
         QList<QDate> dates;
         dynamicTrade trade;
+    };
+
+    struct assetAllocation
+    {
+        int id;
+        QString name;
+        double target;
+
+        assetAllocation(): id(-1), target(-1) {}
+    };
+
+    struct account
+    {
+        int id;
+        QString name;
+        double taxRate;
+        bool taxDeferred;
+
+        account(): id(-1), taxRate(-1), taxDeferred(false) {}
     };
 
     struct mpiSettings
@@ -137,6 +160,14 @@ public:
             origStartDate(QDate::currentDate()) {}
     };
 
+    struct mpiPortfolioData
+    {
+        QList<QDate> dates;
+        QMap<int, security> tickers;
+        QMap<int, assetAllocation> aa;
+        QMap<int, account> acct;
+    };
+
     struct mpiChart
     {
         QDate beginDate;
@@ -153,6 +184,7 @@ public:
     {
         QDate lastDate;
         mpiPortfolio portfolio;
+        mpiPortfolioData portfolioData;
         mpiSettings settings;
         mpiHoldings holdings;
         mpiAssetAllocation aa;

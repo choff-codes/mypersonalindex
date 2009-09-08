@@ -1,3 +1,3 @@
 INCLUDEPATH += $$PWD
-HEADERS += $$PWD/mpiDoubleValidator.h \
+HEADERS += $$PWD/mpiValidator.h \
     $$PWD/dateEditDelegate.h

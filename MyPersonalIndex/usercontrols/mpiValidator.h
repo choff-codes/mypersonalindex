@@ -1,5 +1,5 @@
-#ifndef MPIDOUBLEVALIDATOR_H
-#define MPIDOUBLEVALIDATOR_H
+#ifndef MPIVALIDATOR_H
+#define MPIVALIDATOR_H
 
 #include <QtGui>
 
@@ -24,4 +24,24 @@ public:
 
 };
 
-#endif // MPIDOUBLEVALIDATOR_H
+class mpiIntValidator: public QIntValidator
+{
+
+public:
+
+    mpiIntValidator(double bottom, double top, QObject *parent = 0) : QIntValidator(bottom, top, parent) {}
+
+    QValidator::State validate(QString &input, int &pos) const
+    {
+        if (input.isEmpty())
+            return QValidator::Intermediate;
+
+        if ( QIntValidator::validate(input, pos) != QValidator::Acceptable)
+            return QValidator::Invalid;
+
+        return QValidator::Acceptable;
+    }
+
+};
+
+#endif // MPIVALIDATOR_H

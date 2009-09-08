@@ -24,13 +24,9 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     ui.setupUI(this);
 
     loadSettings();
-    loadPortfolioDropDown();
+    loadPortfolioDropDown(mpi.portfolio.id);
     loadPortfolio();
     connectSlots();
-
-    //updatePrices u(sql);
-    //bool temp = u.isInternetConnection();
-    //u.getSplits("VTI", QDate(2008, 1, 1));
 }
 
 void frmMain::closeEvent(QCloseEvent *event)
@@ -56,6 +52,8 @@ void frmMain::connectSlots()
     connect(ui.mainEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
+
+    connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
 }
 
 void frmMain::dateChanged(QDate)
@@ -123,9 +121,9 @@ void frmMain::saveSettings()
     sql->executeNonQuery(sql->updateSettings(portfolio, this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
 }
 
-void frmMain::loadPortfolioDropDown()
+void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
 {
-    //ui.mainPortfolioCombo->blockSignals(true);
+    ui.mainPortfolioCombo->blockSignals(true);
     QSqlQueryModel *dataset = sql->executeDataSet(sql->getPortfolios());
     if (dataset)
     {
@@ -133,7 +131,7 @@ void frmMain::loadPortfolioDropDown()
 
         if (dataset->rowCount() != 0)
         {
-            QModelIndexList result = dataset->match(dataset->index(0, 1), Qt::EditRole, mpi.portfolio.id, 1, Qt::MatchExactly);
+            QModelIndexList result = dataset->match(dataset->index(0, 1), Qt::EditRole, portfolioID, 1, Qt::MatchExactly);
             int row = result.value(0).row();
             if (row == -1)
                 ui.mainPortfolioCombo->setCurrentIndex(0);
@@ -141,7 +139,7 @@ void frmMain::loadPortfolioDropDown()
                 ui.mainPortfolioCombo->setCurrentIndex(row);
         }
     }
-    //ui.mainPortfolioCombo->blockSignals(false);
+    ui.mainPortfolioCombo->blockSignals(false);
 }
 
 void frmMain::disableItems(bool disabled)
@@ -158,7 +156,7 @@ void frmMain::loadPortfolio()
     else
     {
         if (this->isVisible())
-            savePortfolio(); // save currently loaded portfolio
+            savePortfolio(); // save currently loaded portfolio except on initial load
         disableItems(false);
 
         QAbstractItemModel *dataset = ui.mainPortfolioCombo->model();
@@ -234,8 +232,8 @@ void frmMain::addPortfolio()
     frmPortfolio f(this, mpi.settings.dataStartDate);
     if (f.exec())
     {
-        globals::mpiPortfolio returnPortfolio = f.getReturnValues();
-        loadPortfolioDropDown();
+        loadPortfolioDropDown(f.getReturnValues().id);
+        loadPortfolio();
     };
 }
 
@@ -245,7 +243,10 @@ void frmMain::editPortfolio()
     if (f.exec())
     {
         globals::mpiPortfolio returnPortfolio = f.getReturnValues();
-        loadPortfolioDropDown();
+
+        // toDo
+
+        loadPortfolioDropDown(mpi.portfolio.id);
     }
 }
 

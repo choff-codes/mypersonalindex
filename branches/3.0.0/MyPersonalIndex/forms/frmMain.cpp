@@ -9,8 +9,9 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
     QString location = mainQueries::getDatabaseLocation();
     if (!QFile::exists(location))
-        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()) || !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
-            QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
+        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()))
+            if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
+                QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
 
     sql = new mainQueries();
     if (!sql->isOpen())
@@ -21,7 +22,6 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
     }
 
     ui.setupUI(this);
-
 
     loadSettings();
     loadPortfolioDropDown();
@@ -95,8 +95,6 @@ void frmMain::loadSettings()
         }
         if (!q->value(mainQueries::getSettings_LastPortfolio).isNull())
             mpi.portfolio.id = q->value(mainQueries::getSettings_LastPortfolio).toInt();
-        else
-            mpi.portfolio.id = -1;
     }
 }
 
@@ -166,7 +164,7 @@ void frmMain::loadPortfolio()
         QAbstractItemModel *dataset = ui.mainPortfolioCombo->model();
         int row = ui.mainPortfolioCombo->currentIndex();
         mpi.portfolio.id = dataset->data(dataset->index(row, 1)).toInt();
-        mpi.portfolio.name = dataset->data(dataset->index(row, 0)).toString();
+        mpi.portfolio.description = dataset->data(dataset->index(row, 0)).toString();
 
         if (!loadPortfolioSettings())
         {
@@ -190,12 +188,14 @@ bool frmMain::loadPortfolioSettings()
 
     //CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate));
     // todo ^
-    mpi.portfolio.startDate = QDate::fromJulianDay(q->value(mainQueries::getPortfolioAttributes_StartDate).toInt());
+    mpi.portfolio.origStartDate = QDate::fromJulianDay(q->value(mainQueries::getPortfolioAttributes_StartDate).toInt());
+    mpi.portfolio.startDate = mpi.portfolio.origStartDate;
     ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, mpi.portfolio.startDate.toString(Qt::SystemLocaleShortDate)));
     mpi.portfolio.dividends = q->value(mainQueries::getPortfolioAttributes_Dividends).toBool();
     mpi.portfolio.costCalc = (globals::avgShareCalc)q->value(mainQueries::getPortfolioAttributes_CostCalc).toInt();
-    mpi.portfolio.navStart = q->value(mainQueries::getPortfolioAttributes_NAVStartValue).toDouble();
+    mpi.portfolio.startValue = q->value(mainQueries::getPortfolioAttributes_StartValue).toInt();
     mpi.portfolio.aaThreshold = q->value(mainQueries::getPortfolioAttributes_AAThreshold).toInt();
+    mpi.portfolio.aaThresholdValue = (globals::thesholdValue)q->value(mainQueries::getPortfolioAttributes_AAThresholdValue).toInt();
     ui.holdingsShowHidden->setChecked(q->value(mainQueries::getPortfolioAttributes_HoldingsShowHidden).toBool());
     ui.performanceSortDesc->setChecked(q->value(mainQueries::getPortfolioAttributes_NAVSort).toBool());
     ui.aaShowBlank->setChecked(q->value(mainQueries::getPortfolioAttributes_AAShowBlank).toBool());
@@ -231,20 +231,20 @@ bool frmMain::savePortfolio()
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(this, mpi.portfolio.startDate);
+    frmPortfolio f(this, mpi.settings.dataStartDate);
     if (f.exec())
     {
-        mpi.portfolio.id = f.getReturnValues().id;
+        globals::mpiPortfolio returnPortfolio = f.getReturnValues();
         loadPortfolioDropDown();
     };
 }
 
 void frmMain::editPortfolio()
 {
-    frmPortfolio f(this, mpi.portfolio.startDate, mpi.portfolio.id, mpi.portfolio.name);
+    frmPortfolio f(this,  mpi.settings.dataStartDate, mpi.portfolio);
     if (f.exec())
     {
-        frmPortfolio::portfolioReturn p = f.getReturnValues();
+        globals::mpiPortfolio returnPortfolio = f.getReturnValues();
         loadPortfolioDropDown();
     }
 }

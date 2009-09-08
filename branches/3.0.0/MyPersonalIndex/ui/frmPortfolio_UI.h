@@ -2,7 +2,7 @@
 #define FRMPORTFOLIO_UI_H
 
 #include <QtGui>
-#include "mpiDoubleValidator.h"
+#include "mpiValidator.h"
 
 class frmPortfolio_UI
 {
@@ -14,11 +14,11 @@ public:
     QLineEdit *txtDesc;
     QLabel *startValue;
     QLineEdit *txtStartValue;
-    mpiDoubleValidator *dvalidator;
+    mpiIntValidator *ivalidator;
     QLabel *aaThreshold;
     QSpinBox *sbAAThreshold;
-    QLabel *aaMethod;
-    QComboBox *cmbAAMethod;
+    QLabel *aaThresholdValue;
+    QComboBox *cmbAAThresholdValue;
     QLabel *costBasis;
     QComboBox *cmbCostBasis;
     QLabel *startDate;

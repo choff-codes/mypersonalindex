@@ -13,28 +13,15 @@ class frmPortfolio : public QDialog
 
 public:
 
-    struct portfolioReturn
-    {
-        int id;
-        QString name;
-        bool dividends;
-        double navStart;
-        int aaThreshold;
-        QDate startDate;
-        QDate origStartDate;
-        globals::avgShareCalc costCalc;
-    };
+    const globals::mpiPortfolio& getReturnValues() const { return m_portfolio; }
 
-    const portfolioReturn& getReturnValues() const { return m_returnValues; }
-
-    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), const int &portfolio = -1, const QString &name = "");
+    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), globals::mpiPortfolio portfolio = globals::mpiPortfolio());
 
 private:
 
     frmPortfolio_UI ui;
     portfolioQueries sql;
-    portfolioReturn m_returnValues;
-    int m_id;
+    globals::mpiPortfolio m_portfolio;
 
     void loadPortfolioAttributes();
     bool getErrors();

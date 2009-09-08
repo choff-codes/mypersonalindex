@@ -36,9 +36,11 @@ public:
     static const QString table_Splits;
     static const QString table_Stats;
     static const QString table_Tickers;
+    static const QString table_TickersAA;
+    static const QString table_TickersTrades;
     static const QString table_Trades;
     static const QString table_UserStatistics;
-    static const QString table_CustomTrades;
+
 
     static const QStringList closingPricesColumns;
     static const QStringList dividendsColumns;

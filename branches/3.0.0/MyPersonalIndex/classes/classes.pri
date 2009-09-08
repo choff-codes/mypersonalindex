@@ -5,4 +5,5 @@ SOURCES += $$PWD/updatePrices.cpp \
 HEADERS += $$PWD\updatePrices.h \
     $$PWD/queries.h \
     $$PWD/globals.h \
-    $$PWD/functions.h
+    $$PWD/functions.h \
+    $$PWD/updatePrices.h

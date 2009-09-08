@@ -24,9 +24,10 @@ const QString queries::table_Settings = "Settings";
 const QString queries::table_Splits = "Splits";
 const QString queries::table_Stats = "Stats";
 const QString queries::table_Tickers = "Tickers";
+const QString table_TickersAA = "TickersAA";
+const QString table_TickersTrades = "TickersTrades";
 const QString queries::table_Trades = "Trades";
 const QString queries::table_UserStatistics = "UserStatistics";
-const QString queries::table_CustomTrades = "CustomTrades";
 
 queries::queries()
 {
@@ -154,7 +155,6 @@ QSqlQuery* queries::executeResultSet(queryInfo *q)
         query->bindValue(p.name, p.value);
 
     query->exec();
-
     delete q;
 
     if (query->isActive() && query->first())
@@ -229,7 +229,7 @@ queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const
 queries::queryInfo* queries::getPortfolios()
 {
     return new queryInfo(
-        "SELECT Name, ID FROM Portfolios",
+        "SELECT Description, PortfolioID FROM Portfolios",
         QList<parameter>()
     );
 }
@@ -237,7 +237,7 @@ queries::queryInfo* queries::getPortfolios()
 queries::queryInfo* queries::getPortfolioExists(const int &portfolio)
 {
     return new queryInfo(
-        "SELECT ID FROM Portfolios WHERE ID = :Portfolio",
+        "SELECT PortfolioID FROM Portfolios WHERE PortfolioID = :Portfolio",
         QList<parameter>()
             << parameter(":Portfolio", portfolio)
     );

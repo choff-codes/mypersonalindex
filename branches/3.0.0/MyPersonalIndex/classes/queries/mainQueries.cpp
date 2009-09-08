@@ -17,7 +17,7 @@ queries::queryInfo* mainQueries::updatePortfolioAttributes(
     return new queryInfo(
         "UPDATE Portfolios SET HoldingsShowHidden = :HoldingsShowHidden, NAVSort = :NAVSort, AAShowBlank = :ShowAABlank,"
         " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank,"
-        " AcctSort = :AcctSort WHERE ID = :Portfolio",
+        " AcctSort = :AcctSort WHERE PortfolioID = :PortfolioID",
         QList<parameter>()
             << parameter(":HoldingsShowHidden", holdingsShowHidden)
             << parameter(":NAVSort", navSort)
@@ -27,18 +27,18 @@ queries::queryInfo* mainQueries::updatePortfolioAttributes(
             << parameter(":CorrelationShowHidden", correlationShowHidden)
             << parameter(":ShowAcctBlank", showAcctBlank)
             << parameter(":AcctSort", acctSort)
-            << parameter(":Portfolio", portfolio)
+            << parameter(":PortfolioID", portfolio)
     );
 }
 
 queries::queryInfo* mainQueries::getPortfolioAttributes(const int &portfolio)
 {
     return new queryInfo(
-        "SELECT ID, Name, Dividends, HoldingsShowHidden, NAVSort, NAVStartValue,"
-            " CostCalc, AAThreshold, StartDate, HoldingsSort, AASort, AAShowBlank, CorrelationShowHidden,"
-            " AcctSort, AcctShowBlank "
-            " FROM Portfolios WHERE ID = :Portfolio",
+        "SELECT PortfolioID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdValue,"
+            " StartDate, HoldingsShowHidden, HoldingsSort, NAVSort, AASort, AAShowBlank,"
+            " CorrelationShowHidden, AcctSort, AcctShowBlank "
+            " FROM Portfolios WHERE PortfolioID = :PortfolioID",
         QList<parameter>()
-            << parameter(":Portfolio", portfolio)
+            << parameter(":PortfolioID", portfolio)
     );
 }

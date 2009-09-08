@@ -1,6 +1,6 @@
 #include "frmPortfolio_UI.h"
 #include "functions.h"
-#include "mpiDoubleValidator.h"
+#include "mpiValidator.h"
 
 void frmPortfolio_UI::setupUI(QDialog *dialog)
 {
@@ -24,10 +24,9 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     startValue = new QLabel("&Index Start Value:", dialog);
     layout->setWidget(1, QFormLayout::LabelRole, startValue);
 
-    txtStartValue = new QLineEdit("100", dialog);
-    dvalidator = new mpiDoubleValidator(1, 1000000, 4, dialog);
-    dvalidator->setNotation(QDoubleValidator::StandardNotation);
-    txtStartValue->setValidator(dvalidator);
+    txtStartValue = new QLineEdit(dialog);
+    ivalidator = new mpiIntValidator(1, 1000000, dialog);
+    txtStartValue->setValidator(ivalidator);
     layout->setWidget(1, QFormLayout::FieldRole, txtStartValue);
 
     aaThreshold = new QLabel("&AA Threshold:", dialog);
@@ -36,16 +35,15 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     sbAAThreshold = new QSpinBox(dialog);
     sbAAThreshold->setMaximum(100);
     sbAAThreshold->setSuffix("%");
-    sbAAThreshold->setValue(5);
     layout->setWidget(2, QFormLayout::FieldRole, sbAAThreshold);
 
-    aaMethod = new QLabel("&Threshold Band:", dialog);
-    layout->setWidget(3, QFormLayout::LabelRole, aaMethod);
+    aaThresholdValue = new QLabel("&Threshold Method:", dialog);
+    layout->setWidget(3, QFormLayout::LabelRole, aaThresholdValue);
 
-    cmbAAMethod = new QComboBox(dialog);
-    cmbAAMethod->addItem("Portfolio Value");
-    cmbAAMethod->addItem("AA Value");
-    layout->setWidget(3, QFormLayout::FieldRole, cmbAAMethod);
+    cmbAAThresholdValue = new QComboBox(dialog);
+    cmbAAThresholdValue->addItem("Portfolio Value");
+    cmbAAThresholdValue->addItem("AA Value");
+    layout->setWidget(3, QFormLayout::FieldRole, cmbAAThresholdValue);
 
     costBasis = new QLabel("&Cost Basis Method:", dialog);
     layout->setWidget(4, QFormLayout::LabelRole, costBasis);
@@ -60,14 +58,12 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     layout->setWidget(5, QFormLayout::LabelRole, startDate);
 
     dateStartDate = functions::createDateEdit(dialog);
-    dateStartDate->setDate(QDate::currentDate());
     layout->setWidget(5, QFormLayout::FieldRole, dateStartDate);
 
     QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing
     layout->setWidget(6, QFormLayout::LabelRole, tmp);
 
     chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
-    chkIncludeDiv->setChecked(true);
     layout->setWidget(6, QFormLayout::FieldRole, chkIncludeDiv);
 
     vlayout->addLayout(layout);
@@ -77,7 +73,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     desc->setBuddy(txtDesc);
     startValue->setBuddy(txtStartValue);
     aaThreshold->setBuddy(sbAAThreshold);
-    aaMethod->setBuddy(cmbAAMethod);
+    aaThresholdValue->setBuddy(cmbAAThresholdValue);
     costBasis->setBuddy(cmbCostBasis);
     startDate->setBuddy(dateStartDate);
 }

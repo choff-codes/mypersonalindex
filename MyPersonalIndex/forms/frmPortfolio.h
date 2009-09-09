@@ -15,7 +15,7 @@ public:
 
     const globals::mpiPortfolio& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), globals::mpiPortfolio portfolio = globals::mpiPortfolio());
+    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), const globals::mpiPortfolio& portfolio = globals::mpiPortfolio());
 
 private:
 

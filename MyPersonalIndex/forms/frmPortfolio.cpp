@@ -4,7 +4,7 @@
 #include "frmPortfolio_UI.h"
 #include "globals.h"
 
-frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, globals::mpiPortfolio portfolio): QDialog(parent), m_portfolio(portfolio)
+frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const globals::mpiPortfolio &portfolio): QDialog(parent), m_portfolio(portfolio)
 {
     if (!sql.isOpen())
     {

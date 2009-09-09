@@ -50,6 +50,32 @@ public:
         }
     };
 
+    struct portfolio
+    {
+        int id;
+        QString description;
+        bool dividends;
+        avgShareCalc costCalc;
+        int startValue;
+        int aaThreshold;
+        thesholdValue aaThresholdValue;
+        QDate startDate;
+        // start date may be updated if it is a non-market day, but the original dates also needs to be tracked
+        QDate origStartDate;
+        bool holdingsShowHidden;
+        bool navSort;
+        bool aaShowBlank;
+        bool correlationShowHidden;
+        bool acctShowBlank;
+        QString holdingsSort;
+        QString aaSort;
+        QString acctSort;
+
+        portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
+            aaThreshold(5), aaThresholdValue(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
+            holdingsShowHidden (true), navSort(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
+    };
+
     struct security
     {
         int id;
@@ -108,6 +134,8 @@ public:
         account(): id(-1), taxRate(-1), taxDeferred(false) {}
     };
 
+    typedef portfolio mpiPortfolio;
+
     struct mpiSettings
     {
         QDate dataStartDate;
@@ -142,27 +170,8 @@ public:
         double totalValue;
     };
 
-    struct mpiPortfolio
-    {
-        int id;
-        QString description;
-        bool dividends;
-        avgShareCalc costCalc;
-        int startValue;
-        int aaThreshold;
-        thesholdValue aaThresholdValue;
-        QDate startDate;
-        // start date may be updated if it is a non-market day, but the original dates also needs to be tracked
-        QDate origStartDate;
-
-        mpiPortfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
-            aaThreshold(5), aaThresholdValue(threshold_Portfolio), startDate(QDate::currentDate()),
-            origStartDate(QDate::currentDate()) {}
-    };
-
     struct mpiPortfolioData
     {
-        QList<QDate> dates;
         QMap<int, security> tickers;
         QMap<int, assetAllocation> aa;
         QMap<int, account> acct;
@@ -183,8 +192,10 @@ public:
     struct myPersonalIndex
     {
         QDate lastDate;
-        mpiPortfolio portfolio;
+        QList<QDate> dates;
+        QMap<int, portfolio> portfolios;
         mpiPortfolioData portfolioData;
+        mpiPortfolio currentPortfolio;
         mpiSettings settings;
         mpiHoldings holdings;
         mpiAssetAllocation aa;

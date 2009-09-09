@@ -67,9 +67,6 @@ public:
 
     queryInfo* getLastDate();
     queryInfo* getVersion();
-    queryInfo* updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state);
-    queryInfo* getPortfolios();
-    queryInfo* getPortfolioExists(const int &portfolio);  
     queryInfo* getIdentity();
 
 protected:

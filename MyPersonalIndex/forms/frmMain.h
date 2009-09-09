@@ -29,14 +29,17 @@ private:
     void checkVersion();
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
-    bool loadPortfolioSettings();
-    bool savePortfolio();
+    void loadPortfolios();
+    void loadPortfolioSettings();
+    void savePortfolio();
+    void savePortfolios();
     void disableItems(bool disabled);
 
 private slots:
     void dateChanged(QDate);
     void addPortfolio();
     void editPortfolio();
+    void deletePortfolio();
     void loadPortfolio();
     void about();
     void addTicker();

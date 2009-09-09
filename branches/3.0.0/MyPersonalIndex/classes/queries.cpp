@@ -203,46 +203,6 @@ queries::queryInfo* queries::getVersion()
     );
 }
 
-queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state)
-{
-    if (state)  // non-normal state, ignore size
-        return new queryInfo(
-            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowState = :WindowState",
-            QList<parameter>()
-                << parameter(":LastPortfolio", lastPortfolio)
-                << parameter(":WindowState", state)
-        );
-    else
-        return new queryInfo(
-            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight,"
-                " WindowWidth = :WindowWidth, WindowState = :WindowState",
-            QList<parameter>()
-                << parameter(":LastPortfolio", lastPortfolio)
-                << parameter(":WindowX", windowLocation.x())
-                << parameter(":WindowY", windowLocation.y())
-                << parameter(":WindowHeight", windowSize.height())
-                << parameter(":WindowWidth", windowSize.width())
-                << parameter(":WindowState", state)
-        );
-}
-
-queries::queryInfo* queries::getPortfolios()
-{
-    return new queryInfo(
-        "SELECT Description, PortfolioID FROM Portfolios",
-        QList<parameter>()
-    );
-}
-
-queries::queryInfo* queries::getPortfolioExists(const int &portfolio)
-{
-    return new queryInfo(
-        "SELECT PortfolioID FROM Portfolios WHERE PortfolioID = :Portfolio",
-        QList<parameter>()
-            << parameter(":Portfolio", portfolio)
-    );
-}
-
 queries::queryInfo* queries::getIdentity()
 {
     return new queryInfo(

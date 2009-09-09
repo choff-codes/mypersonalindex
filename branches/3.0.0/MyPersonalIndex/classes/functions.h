@@ -16,6 +16,29 @@ public:
         //d->setButtonSymbols(QAbstractSpinBox::NoButtons);
         return d;
     }
+
+    static QList<QPair<QString, int> >* qMapToList(QMap<int, globals::assetAllocation>* aa)
+    {
+        QList<QPair<QString, int> > * returnValue = new QList<QPair<QString, int> >();
+        foreach (const globals::assetAllocation &value, aa)
+            returnValue->append(QPair(value.name, value.id));
+
+        return returnValue;
+    }
+
+    static QList<QPair<QString, int> >* qMapToList(QMap<int, globals::account>* acct)
+    {
+        QList<QPair<QString, int> > * returnValue = new QList<QPair<QString, int> >();
+        foreach (const globals::account &value, acct)
+            returnValue->append(QPair(value.name, value.id));
+
+        return returnValue;
+    }
+
+    static QStandardModel* qPairListToModel(QList<QPair<QString, int> >* list)
+    {
+
+    }
 };
 
 #endif // FUNCTIONS_H

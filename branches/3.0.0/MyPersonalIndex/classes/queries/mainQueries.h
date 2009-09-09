@@ -2,6 +2,7 @@
 #define MAINQUERIES_H
 
 #include "queries.h"
+#include "globals.h"
 
 class mainQueries : public queries
 {
@@ -16,10 +17,10 @@ public:
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits };
 
     queryInfo* getSettings();
-    queryInfo* updatePortfolioAttributes(const int &portfolio, const bool &holdingsShowHidden, const bool &navSort,
-            const bool &showAABlank, const QString &holdingsSort, const QString &aaSort,
-            const bool &correlationShowHidden, const bool &showAcctBlank, const QString &acctSort);
-    queryInfo* getPortfolioAttributes(const int &portfolio);
+    queryInfo* updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state);
+    queryInfo* updatePortfolioAttributes(const globals::portfolio &p);
+    queryInfo* getPortfolioAttributes();
+    queryInfo* deletePortfolio(const int &portfolio);
 };
 
 #endif // MAINQUERIES_H

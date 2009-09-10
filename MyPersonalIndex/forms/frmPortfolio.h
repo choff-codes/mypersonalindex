@@ -1,7 +1,6 @@
 #ifndef FRMPORTFOLIO_H
 #define FRMPORTFOLIO_H
 
-#include <QDialog>
 #include <QtGui>
 #include "frmPortfolio_UI.h"
 #include "portfolioQueries.h"

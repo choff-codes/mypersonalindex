@@ -12,14 +12,14 @@ class frmTicker : public QDialog
 
 public:
 
-    frmTicker(QWidget *parent = 0, const globals::security& = globals::security(), QMap<int, globals::assetAllocation>* = 0, QMap<int, globals::account>* = 0);;
+    const globals::security& getReturnValues() const { return m_security; }
+
+    frmTicker(QWidget *parent = 0, QMap<int, globals::assetAllocation>* acct = 0, QMap<int, globals::account>* aa = 0, const globals::security& security = globals::security());
 
 private:
 
     frmTicker_UI ui;
     globals::security m_security;
-    QMap<int, globals::assetAllocation> *m_assetallocation;
-    QMap<int, globals::account> *m_account;
     queries sql;
     //tradesSqlQueryModel *model;
 

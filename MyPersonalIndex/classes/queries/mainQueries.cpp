@@ -10,6 +10,14 @@ queries::queryInfo* mainQueries::getSettings()
     );
 }
 
+queries::queryInfo* mainQueries::getDates()
+{
+    return new queryInfo(
+        "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
+        QList<parameter>()
+    );
+}
+
 queries::queryInfo* mainQueries::updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state)
 {
     if (state)  // non-normal state, ignore size
@@ -36,12 +44,12 @@ queries::queryInfo* mainQueries::updateSettings(const QVariant &lastPortfolio, c
 queries::queryInfo* mainQueries::updatePortfolioAttributes(const globals::portfolio &p)
 {
     return new queryInfo(
-        "UPDATE Portfolios SET HoldingsShowHidden = :HoldingsShowHidden, NAVSort = :NAVSort, AAShowBlank = :ShowAABlank,"
+        "UPDATE Portfolios SET HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :ShowAABlank,"
         " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank,"
         " AcctSort = :AcctSort WHERE PortfolioID = :PortfolioID",
         QList<parameter>()
             << parameter(":HoldingsShowHidden", p.holdingsShowHidden)
-            << parameter(":NAVSort", p.navSort)
+            << parameter(":NAVSortDesc", p.navSortDesc)
             << parameter(":ShowAABlank", p.aaShowBlank)
             << parameter(":HoldingsSort", p.holdingsSort)
             << parameter(":AASort", p.aaSort)
@@ -56,7 +64,7 @@ queries::queryInfo* mainQueries::getPortfolioAttributes()
 {
     return new queryInfo(
         "SELECT PortfolioID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdValue,"
-            " StartDate, HoldingsShowHidden, HoldingsSort, NAVSort, AASort, AAShowBlank,"
+            " StartDate, HoldingsShowHidden, HoldingsSort, NAVSortDesc, AASort, AAShowBlank,"
             " CorrelationShowHidden, AcctSort, AcctShowBlank "
             " FROM Portfolios",
         QList<parameter>()

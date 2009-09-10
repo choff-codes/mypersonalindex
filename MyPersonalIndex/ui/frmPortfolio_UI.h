@@ -7,7 +7,7 @@
 class frmPortfolio_UI
 {
 public:
-    QVBoxLayout *vlayout;
+    QVBoxLayout *mainLayout;
     QDialogButtonBox *btnOkCancel;
     QFormLayout *layout;
     QLabel *desc;

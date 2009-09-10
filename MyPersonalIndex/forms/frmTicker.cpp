@@ -6,8 +6,8 @@
 #include "frmTicker_UI.h"
 #include "frmTrade.h"
 
-frmTicker::frmTicker(QWidget *parent, const globals::security &security, QMap<int, globals::assetAllocation> *aa, QMap<int, globals::account> *acct):
-        QDialog(parent), m_security(security), m_assetallocation(aa), m_account(acct)
+frmTicker::frmTicker(QWidget *parent, QMap<int, globals::assetAllocation> *aa, QMap<int, globals::account> *acct, const globals::security &security):
+        QDialog(parent), m_security(security)
 {
     ui.setupUI(this);
     connect(ui.btnHistorical, SIGNAL(toggled(bool)), ui.gpHistorical, SLOT(setVisible(bool)));
@@ -15,7 +15,23 @@ frmTicker::frmTicker(QWidget *parent, const globals::security &security, QMap<in
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.btnTradesAdd, SIGNAL(clicked()), this, SLOT(addTrade()));
 
+    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : security.symbol));
 
+    if (aa)
+    {
+        foreach(const globals::assetAllocation &value, (*aa))
+            ui.cmbAA->addItem(value.name, value.id);
+
+        ui.cmbAA->model()->sort(0);
+    }
+
+    if (acct)
+    {
+        foreach(const globals::account &value, (*acct))
+            ui.cmbAcct->addItem(value.name, value.id);
+
+        ui.cmbAcct->model()->sort(0);
+    }
 
 //    dateEditDelegate *dateEdit = new dateEditDelegate(ui.activity);
 //    model = new tradesSqlQueryModel(ui.activity, sql.getDatabase());
@@ -47,7 +63,10 @@ frmTicker::frmTicker(QWidget *parent, const globals::security &security, QMap<in
 
 void frmTicker::accept()
 {
-//    if (model)
+
+    QDialog::accept();
+
+    //    if (model)
 //    {
 //        for(int i = 0; i < model->rowCount(); i++)
 //        {
@@ -77,7 +96,6 @@ void frmTicker::accept()
 //        }
 //    }
 
-    QDialog::accept();
 }
 
 void frmTicker::addTrade()

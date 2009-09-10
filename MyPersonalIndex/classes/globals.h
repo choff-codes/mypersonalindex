@@ -63,7 +63,7 @@ public:
         // start date may be updated if it is a non-market day, but the original dates also needs to be tracked
         QDate origStartDate;
         bool holdingsShowHidden;
-        bool navSort;
+        bool navSortDesc;
         bool aaShowBlank;
         bool correlationShowHidden;
         bool acctShowBlank;
@@ -73,7 +73,7 @@ public:
 
         portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
             aaThreshold(5), aaThresholdValue(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
-            holdingsShowHidden (true), navSort(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
+            holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
     };
 
     struct security
@@ -140,6 +140,8 @@ public:
     {
         QDate dataStartDate;
         bool splits;
+
+        mpiSettings(): dataStartDate(QDate(2008, 1, 2)), splits(true) {}
     };
 
     struct mpiHoldings
@@ -192,8 +194,7 @@ public:
     struct myPersonalIndex
     {
         QDate lastDate;
-        QList<QDate> dates;
-        QMap<int, portfolio> portfolios;
+        QList<int> dates;
         mpiPortfolioData portfolioData;
         mpiPortfolio currentPortfolio;
         mpiSettings settings;

@@ -11,9 +11,9 @@ queries::queryInfo* portfolioQueries::updatePortfolio(globals::portfolio* const 
     {
         return new queryInfo(
             "INSERT INTO Portfolios (Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdValue, StartDate, HoldingsShowHidden,"
-                " HoldingsSort, AASort, AAShowBlank, NAVSort, CorrelationShowHidden, AcctSort, AcctShowBlank)"
+                " HoldingsSort, AASort, AAShowBlank, NAVSortDesc, CorrelationShowHidden, AcctSort, AcctShowBlank)"
             " VALUES (:Description, :Dividends, :StartValue, :CostCalc, :AAThreshold, :ThresholdValue, :StartDate, :HoldingsShowHidden,"
-                " :HoldingsSort, :AASort, :AAShowBlank, :NAVSort, :CorrelationShowHidden, :AcctSort, :AcctShowBlank)",
+                " :HoldingsSort, :AASort, :AAShowBlank, :NAVSortDesc, :CorrelationShowHidden, :AcctSort, :AcctShowBlank)",
             QList<parameter>()
                 << parameter(":Description", p->description)
                 << parameter(":Dividends", p->dividends)
@@ -22,14 +22,14 @@ queries::queryInfo* portfolioQueries::updatePortfolio(globals::portfolio* const 
                 << parameter(":AAThreshold", p->aaThreshold)
                 << parameter(":ThresholdValue", (int)p->aaThresholdValue)
                 << parameter(":StartDate", p->origStartDate.toJulianDay())
-                << parameter(":HoldingsShowHidden", p->holdingsShowHidden)
+                << parameter(":HoldingsShowHidden", (int)p->holdingsShowHidden)
                 << parameter(":HoldingsSort", p->holdingsSort)
                 << parameter(":AASort", p->aaSort)
-                << parameter(":AAShowBlank", p->aaShowBlank)
-                << parameter(":NAVSort", p->navSort)
-                << parameter(":CorrelationShowHidden", p->correlationShowHidden)
+                << parameter(":AAShowBlank", (int)p->aaShowBlank)
+                << parameter(":NAVSortDesc", (int)p->navSortDesc)
+                << parameter(":CorrelationShowHidden", (int)p->correlationShowHidden)
                 << parameter(":AcctSort", p->acctSort)
-                << parameter(":AcctShowBlank", p->acctShowBlank)
+                << parameter(":AcctShowBlank", (int)p->acctShowBlank)
         );
     }
     else // update

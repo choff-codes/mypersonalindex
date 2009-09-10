@@ -9,8 +9,8 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     btnOkCancel = new QDialogButtonBox(dialog);
     btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-    vlayout = new QVBoxLayout(dialog);
-    vlayout->setSpacing(15);
+    mainLayout = new QVBoxLayout(dialog);
+    mainLayout->setSpacing(15);
 
     layout = new QFormLayout();
     layout->setVerticalSpacing(8);
@@ -66,9 +66,9 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
     layout->setWidget(6, QFormLayout::FieldRole, chkIncludeDiv);
 
-    vlayout->addLayout(layout);
-    vlayout->addWidget(btnOkCancel);
-    vlayout->setSizeConstraint(QLayout::SetFixedSize);
+    mainLayout->addLayout(layout);
+    mainLayout->addWidget(btnOkCancel);
+    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 
     desc->setBuddy(txtDesc);
     startValue->setBuddy(txtStartValue);

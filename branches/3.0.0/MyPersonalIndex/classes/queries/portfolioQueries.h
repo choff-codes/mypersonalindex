@@ -7,7 +7,7 @@
 class portfolioQueries : public queries
 {
 public:
-    queryInfo* updatePortfolio(globals::portfolio* const portfolio);
+    queryInfo* updatePortfolio(globals::portfolio* const p);
 };
 
 #endif // PORTFOLIOQUERIES_H

@@ -22,6 +22,7 @@ private:
     frmMain_UI ui;
     mainQueries *sql;
     globals::myPersonalIndex mpi;
+    QMap<int, globals::portfolio>  m_portfolios;
 
     void connectSlots();
     void loadSettings();
@@ -30,6 +31,7 @@ private:
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
     void loadPortfolios();
+    void loadDates();
     void loadPortfolioSettings();
     void savePortfolio();
     void savePortfolios();
@@ -43,6 +45,7 @@ private slots:
     void loadPortfolio();
     void about();
     void addTicker();
+    void optons();
 
 protected:
     void closeEvent(QCloseEvent *event);

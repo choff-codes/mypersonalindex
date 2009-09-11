@@ -6,6 +6,7 @@
 #include "functions.h"
 #include "frmTicker.h"
 #include "frmOptions.h"
+#include "frmAA.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 {    
@@ -57,7 +58,8 @@ void frmMain::connectSlots()
     connect(ui.mainDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
-    connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(optons()));
+    connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
+    connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
 
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
 }
@@ -340,8 +342,14 @@ void frmMain::addTicker()
     f.exec();
 }
 
-void frmMain::optons()
+void frmMain::options()
 {
     frmOptions f(this);
+    f.exec();
+}
+
+void frmMain::aa()
+{
+    frmAA f(this);
     f.exec();
 }

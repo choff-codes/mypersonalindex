@@ -3,9 +3,11 @@ SOURCES += $$PWD/frmTicker.cpp \
     $$PWD/frmPortfolio.cpp \
     $$PWD/frmMain.cpp \
     $$PWD/frmTrade.cpp \
-    $$PWD/frmOptions.cpp
+    $$PWD/frmOptions.cpp \
+    $$PWD/frmAA.cpp
 HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmMain.h \
     $$PWD/frmTicker.h \
     $$PWD/frmTrade.h \
-    $$PWD/frmOptions.h
+    $$PWD/frmOptions.h \
+    $$PWD/frmAA.h

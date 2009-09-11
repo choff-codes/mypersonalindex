@@ -76,6 +76,27 @@ public:
             holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
     };
 
+    struct statistic
+    {
+        int id;
+        QString description;
+        QString sql;
+        outputFormat format;
+
+        statistic(): id(-1), format(format_None) {}
+
+        bool operator==(const statistic &other) const {
+            return this->id == other.id
+                    && this->description == other.description
+                    && this->sql == other.sql
+                    && this->format == other.format;
+        }
+
+        bool operator!=(const statistic &other) const {
+            return !(*this == other);
+        }
+    };
+
     struct security
     {
         int id;
@@ -93,7 +114,8 @@ public:
             includeInCalc(true), hide(false) {}
 
         bool operator==(const security &other) const {
-            return this->symbol == other.symbol
+            return this->id == other.id
+                    && this->symbol == other.symbol
                     && this->account == other.account
                     && this->expense == other.expense
                     && this->divReinvest == other.divReinvest
@@ -122,6 +144,16 @@ public:
         double target;
 
         assetAllocation(): id(-1), target(-1) {}
+
+        bool operator==(const assetAllocation &other) const {
+            return this->id == other.id
+                    && this->name == other.name
+                    && this->target == other.target;
+        }
+
+        bool operator!=(const assetAllocation &other) const {
+            return !(*this == other);
+        }
     };
 
     struct account
@@ -132,6 +164,17 @@ public:
         bool taxDeferred;
 
         account(): id(-1), taxRate(-1), taxDeferred(false) {}
+
+        bool operator==(const account &other) const {
+            return this->id == other.id
+                    && this->name == other.name
+                    && this->taxRate == other.taxRate
+                    && this->taxDeferred == other.taxDeferred;
+        }
+
+        bool operator!=(const account &other) const {
+            return !(*this == other);
+        }
     };
 
     typedef portfolio mpiPortfolio;
@@ -177,6 +220,7 @@ public:
         QMap<int, security> tickers;
         QMap<int, assetAllocation> aa;
         QMap<int, account> acct;
+        QList<int> stats;
     };
 
     struct mpiChart

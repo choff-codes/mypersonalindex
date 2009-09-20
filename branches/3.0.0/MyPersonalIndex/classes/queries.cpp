@@ -60,7 +60,6 @@ void queries::executeNonQuery(queryInfo *q)
         query.bindValue(p.name, p.value);
 
     query.exec();
-
     delete q;
 }
 
@@ -191,14 +190,6 @@ queries::queryInfo* queries::getLastDate()
 {
     return new queryInfo(
          "SELECT MAX(Date) from ClosingPrices",
-        QList<parameter>()
-    );
-}
-
-queries::queryInfo* queries::getVersion()
-{
-    return new queryInfo(
-         "SELECT Version FROM Settings",
         QList<parameter>()
     );
 }

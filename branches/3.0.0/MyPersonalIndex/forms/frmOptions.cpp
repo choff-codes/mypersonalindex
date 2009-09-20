@@ -1,6 +1,6 @@
 #include "frmOptions.h"
 
-frmOptions::frmOptions(QWidget *parent, const globals::mpiSettings& settings): QDialog(parent), m_settings(settings)
+frmOptions::frmOptions(QWidget *parent, const globals::settings& s): QDialog(parent), m_settings(s)
 {
     if (!sql.isOpen())
     {

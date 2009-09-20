@@ -7,7 +7,7 @@
 class optionsQueries : public queries
 {
 public:
-    queryInfo* updateSettings(globals::mpiSettings* const s);
+    queryInfo* updateSettings(globals::settings* const s);
 };
 
 #endif // OPTIONSQUERIES_H

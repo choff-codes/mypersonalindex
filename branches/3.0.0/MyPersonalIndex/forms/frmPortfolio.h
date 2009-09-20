@@ -12,15 +12,15 @@ class frmPortfolio : public QDialog
 
 public:
 
-    const globals::mpiPortfolio& getReturnValues() const { return m_portfolio; }
+    const globals::portfolio& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), const globals::mpiPortfolio& portfolio = globals::mpiPortfolio());
+    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), const globals::portfolio& p = globals::portfolio());
 
 private:
 
     frmPortfolio_UI ui;
     portfolioQueries sql;
-    globals::mpiPortfolio m_portfolio;
+    globals::portfolio m_portfolio;
 
     void loadPortfolioAttributes();
     bool getErrors();

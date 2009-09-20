@@ -5,7 +5,7 @@
 queries::queryInfo* mainQueries::getSettings()
 {
     return new queryInfo(
-        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits FROM Settings",
+        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, Version FROM Settings",
         QList<parameter>()
     );
 }
@@ -46,7 +46,7 @@ queries::queryInfo* mainQueries::updatePortfolioAttributes(const globals::portfo
     return new queryInfo(
         "UPDATE Portfolios SET HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :ShowAABlank,"
         " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank,"
-        " AcctSort = :AcctSort WHERE PortfolioID = :PortfolioID",
+        " AcctSort = :AcctSort WHERE ID = :PortfolioID",
         QList<parameter>()
             << parameter(":HoldingsShowHidden", p.holdingsShowHidden)
             << parameter(":NAVSortDesc", p.navSortDesc)
@@ -63,7 +63,7 @@ queries::queryInfo* mainQueries::updatePortfolioAttributes(const globals::portfo
 queries::queryInfo* mainQueries::getPortfolioAttributes()
 {
     return new queryInfo(
-        "SELECT PortfolioID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdValue,"
+        "SELECT ID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdMethod,"
             " StartDate, HoldingsShowHidden, HoldingsSort, NAVSortDesc, AASort, AAShowBlank,"
             " CorrelationShowHidden, AcctSort, AcctShowBlank "
             " FROM Portfolios",
@@ -74,7 +74,7 @@ queries::queryInfo* mainQueries::getPortfolioAttributes()
 queries::queryInfo* mainQueries::deletePortfolio(const int &portfolio)
 {
     return new queryInfo(
-        "DELETE FROM Portfolios WHERE PortfolioID = :PortfolioID",
+        "DELETE FROM Portfolios WHERE ID = :PortfolioID",
         QList<parameter>()
             << parameter(":PortfolioID", portfolio)
     );

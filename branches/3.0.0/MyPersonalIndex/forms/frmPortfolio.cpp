@@ -4,7 +4,7 @@
 #include "frmPortfolio_UI.h"
 #include "globals.h"
 
-frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const globals::mpiPortfolio &portfolio): QDialog(parent), m_portfolio(portfolio)
+frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const globals::portfolio &p): QDialog(parent), m_portfolio(p)
 {
     if (!sql.isOpen())
     {
@@ -13,7 +13,7 @@ frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const gl
     }
 
     ui.setupUI(this);    
-    this->setWindowTitle(QString("%1 Properties").arg(portfolio.description.isEmpty() ? "New Portfolio" : portfolio.description));
+    this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
     ui.dateStartDate->setMinimumDate(dataStartDate);
     ui.dateStartDate->setDate(dataStartDate);
     loadPortfolioAttributes();
@@ -31,7 +31,7 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.chkIncludeDiv->setChecked(m_portfolio.dividends);
     ui.txtStartValue->setText(QString::number(m_portfolio.startValue));
     ui.sbAAThreshold->setValue(m_portfolio.aaThreshold);
-    ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdValue);
+    ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdMethod);
     ui.cmbCostBasis->setCurrentIndex((int)m_portfolio.costCalc);
     if (m_portfolio.id != -1)
         ui.dateStartDate->setDate(m_portfolio.origStartDate);
@@ -76,7 +76,7 @@ void frmPortfolio::accept()
     m_portfolio.description = ui.txtDesc->text();
     m_portfolio.dividends = ui.chkIncludeDiv->isChecked();
     m_portfolio.aaThreshold = ui.sbAAThreshold->value();
-    m_portfolio.aaThresholdValue = (globals::thesholdValue)ui.cmbAAThresholdValue->currentIndex();
+    m_portfolio.aaThresholdMethod = (globals::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
     m_portfolio.costCalc = (globals::avgShareCalc)ui.cmbCostBasis->currentIndex();
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.origStartDate = ui.dateStartDate->date();

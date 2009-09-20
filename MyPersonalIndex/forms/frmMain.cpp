@@ -8,13 +8,15 @@
 #include "frmOptions.h"
 #include "frmAA.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
-{    
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
+{
     QString location = mainQueries::getDatabaseLocation();
     if (!QFile::exists(location))
-        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()))
-            if (!QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
-                QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
+        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()) ||
+            !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
+        {
+            QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
+        }
 
     sql = new mainQueries();
     if (!sql->isOpen())
@@ -26,9 +28,9 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent)
 
     ui.setupUI(this);
 
-    loadSettings();
     loadPortfolios();
-    loadPortfolioDropDown(mpi.currentPortfolio.id);
+    loadSettings();
+    loadPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
     loadPortfolio();
     connectSlots();
 }
@@ -73,13 +75,16 @@ void frmMain::loadSettings()
 {
     checkVersion();
     resetLastDate();
+    loadStats();
+    loadDates();
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
     if (q)
     {
         int x = q->value(mainQueries::getSettings_DataStartDate).toInt();
-        mpi.settings.dataStartDate = QDate::fromJulianDay(x);
-        mpi.settings.splits = q->value(mainQueries::getSettings_Splits).toBool();
+        m_settings.dataStartDate = QDate::fromJulianDay(x);
+        m_settings.splits = q->value(mainQueries::getSettings_Splits).toBool();
+        m_settings.version = q->value(mainQueries::getSettings_Version).toInt();
         if (!q->value(mainQueries::getSettings_WindowState).isNull())
         {
             resize(QSize(q->value(mainQueries::getSettings_WindowWidth).toInt(),
@@ -97,10 +102,15 @@ void frmMain::loadSettings()
             functions::showWelcomeMessage(this);
 
         if (!q->value(mainQueries::getSettings_LastPortfolio).isNull())
-            mpi.currentPortfolio.id = q->value(mainQueries::getSettings_LastPortfolio).toInt();
+            m_currentPortfolio = m_portfolios.value(q->value(mainQueries::getSettings_LastPortfolio).toInt());
     }
 
     delete q;
+}
+
+void frmMain::loadStats()
+{
+    // to do
 }
 
 void frmMain::loadDates()
@@ -110,7 +120,7 @@ void frmMain::loadDates()
     {
         do
         {
-            mpi.dates.append(q->value(mainQueries::getDates_Date).toInt());
+            m_dates.append(q->value(mainQueries::getDates_Date).toInt());
         }
         while (q->next());
     }
@@ -121,18 +131,16 @@ void frmMain::loadDates()
 
 void frmMain::resetLastDate()
 {
-    mpi.lastDate = QDate::fromJulianDay(sql->executeScalar(sql->getLastDate(), mpi.settings.dataStartDate.toJulianDay()).toInt());
+    m_lastDate = QDate::fromJulianDay(sql->executeScalar(sql->getLastDate(), m_settings.dataStartDate.toJulianDay()).toInt());
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
-                mpi.lastDate == mpi.settings.dataStartDate ?
+                m_lastDate == m_settings.dataStartDate ?
                 "Never" :
-                mpi.lastDate.toString(Qt::SystemLocaleShortDate)));
+                m_lastDate.toString(Qt::SystemLocaleShortDate)));
 }
 
 void frmMain::checkVersion()
 {
-    int databaseVersion = sql->executeScalar(sql->getVersion()).toInt();
-
-    if (databaseVersion == VERSION)
+    if (m_settings.version == VERSION)
         return;
 }
 
@@ -140,8 +148,8 @@ void frmMain::saveSettings()
 {
     savePortfolios();
     QVariant portfolio(QVariant::Int);
-    if (mpi.currentPortfolio.id != -1)
-        portfolio = mpi.currentPortfolio.id;
+    if (m_currentPortfolio)
+        portfolio = m_currentPortfolio->info.id;
     sql->executeNonQuery(sql->updateSettings(portfolio, this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
 }
 
@@ -151,10 +159,10 @@ void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
     ui.mainPortfolioCombo->setUpdatesEnabled(false);
     ui.mainPortfolioCombo->clear();
 
-    foreach(const globals::portfolio &p, m_portfolios)
-        ui.mainPortfolioCombo->addItem(p.description, p.id);
+    foreach(globals::myPersonalIndex *p, m_portfolios)
+        ui.mainPortfolioCombo->addItem(p->info.description, p->info.id);
 
-    int row = ui.mainPortfolioCombo->findData(portfolioID);
+    int row = portfolioID == -1 ? -1 : ui.mainPortfolioCombo->findData(portfolioID);
     if (row == -1)
         ui.mainPortfolioCombo->setCurrentIndex(0);
     else
@@ -166,9 +174,7 @@ void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
 
 void frmMain::disableItems(bool disabled)
 {
-    disabled = !disabled;
-
-    // todo
+    ui.tab->setDisabled(disabled);
 }
 
 void frmMain::loadPortfolio()
@@ -181,9 +187,9 @@ void frmMain::loadPortfolio()
             savePortfolio(); // save currently loaded portfolio except on initial load
         disableItems(false);
 
-        mpi.currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
+        m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
 
-        if (mpi.currentPortfolio.id == -1)
+        if (!m_currentPortfolio)
         {
             QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
             disableItems(true);
@@ -201,12 +207,12 @@ void frmMain::loadPortfolioSettings()
     //CheckPortfolioStartDate(rs.GetDateTime((int)MainQueries.eGetPortfolioAttributes.StartDate));
     // todo ^
 
-    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, mpi.currentPortfolio.startDate.toString(Qt::SystemLocaleShortDate)));
-    ui.holdingsShowHidden->setChecked(mpi.currentPortfolio.holdingsShowHidden);
-    ui.performanceSortDesc->setChecked(mpi.currentPortfolio.navSortDesc);
-    ui.aaShowBlank->setChecked(mpi.currentPortfolio.aaShowBlank);
-    ui.correlationsShowHidden->setChecked(mpi.currentPortfolio.correlationShowHidden);
-    ui.accountsShowBlank->setChecked(mpi.currentPortfolio.acctShowBlank);
+    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, m_currentPortfolio->info.startDate.toString(Qt::SystemLocaleShortDate)));
+    ui.holdingsShowHidden->setChecked(m_currentPortfolio->info.holdingsShowHidden);
+    ui.performanceSortDesc->setChecked(m_currentPortfolio->info.navSortDesc);
+    ui.aaShowBlank->setChecked(m_currentPortfolio->info.aaShowBlank);
+    ui.correlationsShowHidden->setChecked(m_currentPortfolio->info.correlationShowHidden);
+    ui.accountsShowBlank->setChecked(m_currentPortfolio->info.acctShowBlank);
 
     // todo
     //ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
@@ -216,6 +222,11 @@ void frmMain::loadPortfolioSettings()
 }
 
 void frmMain::loadPortfolios()
+{
+    loadPortfoliosInfo();
+}
+
+void frmMain::loadPortfoliosInfo()
 {
     QSqlQuery *q = sql->executeResultSet(sql->getPortfolioAttributes());
 
@@ -234,7 +245,7 @@ void frmMain::loadPortfolios()
         p.costCalc = (globals::avgShareCalc)q->value(mainQueries::getPortfolioAttributes_CostCalc).toInt();
         p.startValue = q->value(mainQueries::getPortfolioAttributes_StartValue).toInt();
         p.aaThreshold = q->value(mainQueries::getPortfolioAttributes_AAThreshold).toInt();
-        p.aaThresholdValue = (globals::thesholdValue)q->value(mainQueries::getPortfolioAttributes_AAThresholdValue).toInt();
+        p.aaThresholdMethod = (globals::thesholdMethod)q->value(mainQueries::getPortfolioAttributes_AAThresholdMethod).toInt();
         p.holdingsShowHidden = q->value(mainQueries::getPortfolioAttributes_HoldingsShowHidden).toBool();
         p.navSortDesc = q->value(mainQueries::getPortfolioAttributes_NAVSortDesc).toBool();
         p.aaShowBlank = q->value(mainQueries::getPortfolioAttributes_AAShowBlank).toBool();
@@ -244,46 +255,65 @@ void frmMain::loadPortfolios()
         p.aaSort = q->value(mainQueries::getPortfolioAttributes_AASort).toString();
         p.acctSort = q->value(mainQueries::getPortfolioAttributes_AcctSort).toString();
 
-        m_portfolios.insert(p.id, p);
+        m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
     }
     while(q->next());
 
     delete q;
 }
 
+void frmMain::loadPortfoliosTickers()
+{
+}
+
+void frmMain::loadPortfoliosTickersAA()
+{
+}
+
+void frmMain::loadPortfoliosTickersTrades()
+{
+}
+
+void frmMain::loadPortfoliosAA()
+{
+}
+
+void frmMain::loadPortfoliosAcct()
+{
+}
+
+void frmMain::loadPortfoliosStat()
+{
+}
+
 void frmMain::savePortfolio()
 {
-    if (!m_portfolios.contains(mpi.currentPortfolio.id))
+    if (!m_currentPortfolio)
         return;
 
-    mpi.currentPortfolio.holdingsShowHidden = ui.holdingsShowHidden->isChecked();
-    mpi.currentPortfolio.navSortDesc = ui.performanceSortDesc->isChecked();
-    mpi.currentPortfolio.aaShowBlank = ui.aaShowBlank->isChecked();
-    mpi.currentPortfolio.correlationShowHidden = ui.correlationsShowHidden->isChecked();
-    mpi.currentPortfolio.acctShowBlank = ui.accountsShowBlank->isChecked();
-    mpi.currentPortfolio.holdingsSort = mpi.holdings.sort;
-    mpi.currentPortfolio.aaSort = mpi.aa.sort;
-    mpi.currentPortfolio.acctSort = mpi.account.sort;
-
-    m_portfolios[mpi.currentPortfolio.id] = mpi.currentPortfolio;
+    m_currentPortfolio->info.holdingsShowHidden = ui.holdingsShowHidden->isChecked();
+    m_currentPortfolio->info.navSortDesc = ui.performanceSortDesc->isChecked();
+    m_currentPortfolio->info.aaShowBlank = ui.aaShowBlank->isChecked();
+    m_currentPortfolio->info.correlationShowHidden = ui.correlationsShowHidden->isChecked();
+    m_currentPortfolio->info.acctShowBlank = ui.accountsShowBlank->isChecked();
 }
 
 void frmMain::savePortfolios()
 {
     sql->getDatabase().transaction();
-    foreach(const globals::portfolio &p, m_portfolios)
-        sql->executeNonQuery(sql->updatePortfolioAttributes(p));
+    foreach(globals::myPersonalIndex *p, m_portfolios)
+        sql->executeNonQuery(sql->updatePortfolioAttributes(p->info));
     sql->getDatabase().commit();
 }
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(this, mpi.settings.dataStartDate);
+    frmPortfolio f(this, m_settings.dataStartDate);
     if (f.exec())
     {
         globals::portfolio p = f.getReturnValues();
 
-        m_portfolios.insert(p.id, p);
+        m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
         loadPortfolioDropDown(p.id);
         loadPortfolio();
     };
@@ -291,30 +321,32 @@ void frmMain::addPortfolio()
 
 void frmMain::editPortfolio()
 {
-    if (mpi.currentPortfolio.id == -1)
+    if (!m_currentPortfolio)
         return;
 
-    frmPortfolio f(this,  mpi.settings.dataStartDate, mpi.currentPortfolio);
+    frmPortfolio f(this,  m_settings.dataStartDate, m_currentPortfolio->info);
     if (f.exec())
     {
-        globals::mpiPortfolio returnPortfolio = f.getReturnValues();
+        m_currentPortfolio->info = f.getReturnValues();
 
         // toDo
 
-        loadPortfolioDropDown(mpi.currentPortfolio.id);
+        loadPortfolioDropDown(m_currentPortfolio->info.id);
     }
 }
 
 void frmMain::deletePortfolio()
 {
-    if (mpi.currentPortfolio.id == -1)
+    if (!m_currentPortfolio)
         return;
 
-    if (QMessageBox::question(this, "Delete Portfolio?", QString("Are you sure you want to delete %1?").arg(mpi.currentPortfolio.description),
+    if (QMessageBox::question(this, "Delete Portfolio?", QString("Are you sure you want to delete %1?").arg(m_currentPortfolio->info.description),
             QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
     {
-        m_portfolios.remove(mpi.currentPortfolio.id);
-        sql->executeNonQuery(sql->deletePortfolio(mpi.currentPortfolio.id));
+        int i = m_currentPortfolio->info.id;
+
+        m_portfolios.remove(i);
+        sql->executeNonQuery(sql->deletePortfolio(i));
 
         int row = ui.mainPortfolioCombo->currentIndex();
         if (m_portfolios.count() == row)
@@ -338,7 +370,7 @@ void frmMain::about()
 
 void frmMain::addTicker()
 {
-    frmTicker f(this, &mpi.portfolioData.aa, &mpi.portfolioData.acct);
+    frmTicker f(this, &m_currentPortfolio->data.aa, &m_currentPortfolio->data.acct);
     f.exec();
 }
 
@@ -350,6 +382,6 @@ void frmMain::options()
 
 void frmMain::aa()
 {
-    frmAA f(this);
+    frmAA f(m_currentPortfolio->info.id, this);
     f.exec();
 }

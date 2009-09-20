@@ -19,9 +19,10 @@ public:
     QPushButton *btnAdd;
     QPushButton *btnEdit;
     QPushButton *btnDelete;
+    QPushButton *btnPaste;
     QDialogButtonBox *btnOkCancel;
 
-    void setupUI(QDialog* dialog, const QString &groupBoxText, const bool &showRightSideButtons = false);
+    void setupUI(QDialog* dialog, const QString &groupBoxText, const bool &showPasteButton = false, const bool &showRightSideButtons = false);
 };
 
 #endif // FRMTABLEVIEWBASE_UI_H

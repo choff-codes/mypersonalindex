@@ -2,7 +2,7 @@
 #include "queries.h"
 #include "globals.h"
 
-queries::queryInfo* optionsQueries::updateSettings(globals::mpiSettings* const s)
+queries::queryInfo* optionsQueries::updateSettings(globals::settings* const s)
 {
     if (!s)
         return 0;

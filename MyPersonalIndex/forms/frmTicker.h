@@ -54,4 +54,20 @@ private slots:
 //    }
 //};
 
+//class tickerAAModel: public QStandardItemModel
+//{
+//public:
+//
+//    tickerAAModel(const int &rows = 0, const int &cols = 0, QWidget *parent = 0): QStandardItemModel(rows, cols, parent) {}
+//
+//    Qt::ItemFlags flags(const QModelIndex &index) const
+//    {
+//        Qt::ItemFlags flags = QStandardItemModel::flags(index);
+//        if (index.column() == 0)
+//                flags = flags & (~Qt::ItemIsEditable);
+//
+//        return flags;
+//    }
+//};
+
 #endif // FRMTICKER_H

@@ -17,7 +17,7 @@ public:
     enum dynamicTradeType { tradeType_Purchase, tradeType_Sale, tradeType_DivReinvest, tradeType_Interest, tradeType_Fixed, tradeType_TotalValue, tradeType_AA };
     enum dynamicTradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly };
     enum tickerHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
-    enum thesholdValue { threshold_Portfolio, theshold_AA };
+    enum thesholdMethod { threshold_Portfolio, theshold_AA };
 
     struct dynamicTrade
     {
@@ -58,7 +58,7 @@ public:
         avgShareCalc costCalc;
         int startValue;
         int aaThreshold;
-        thesholdValue aaThresholdValue;
+        thesholdMethod aaThresholdMethod;
         QDate startDate;
         // start date may be updated if it is a non-market day, but the original dates also needs to be tracked
         QDate origStartDate;
@@ -72,7 +72,7 @@ public:
         QString acctSort;
 
         portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
-            aaThreshold(5), aaThresholdValue(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
+            aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
             holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
     };
 
@@ -140,14 +140,14 @@ public:
     struct assetAllocation
     {
         int id;
-        QString name;
+        QString description;
         double target;
 
         assetAllocation(): id(-1), target(-1) {}
 
         bool operator==(const assetAllocation &other) const {
             return this->id == other.id
-                    && this->name == other.name
+                    && this->description == other.description
                     && this->target == other.target;
         }
 
@@ -159,7 +159,7 @@ public:
     struct account
     {
         int id;
-        QString name;
+        QString description;
         double taxRate;
         bool taxDeferred;
 
@@ -167,7 +167,7 @@ public:
 
         bool operator==(const account &other) const {
             return this->id == other.id
-                    && this->name == other.name
+                    && this->description == other.description
                     && this->taxRate == other.taxRate
                     && this->taxDeferred == other.taxDeferred;
         }
@@ -177,45 +177,16 @@ public:
         }
     };
 
-    typedef portfolio mpiPortfolio;
-
-    struct mpiSettings
+    struct settings
     {
         QDate dataStartDate;
         bool splits;
+        int version;
 
-        mpiSettings(): dataStartDate(QDate(2008, 1, 2)), splits(true) {}
+        settings(): dataStartDate(QDate(2008, 1, 2)), splits(true), version(0) {}
     };
 
-    struct mpiHoldings
-    {
-        double totalValue;
-        QDate selDate;
-        QString sort;
-    };
-
-    struct mpiAssetAllocation
-    {
-        double totalValue;
-        QDate selDate;
-        QString sort;
-    };
-
-    struct mpiAccount
-    {
-        double totalValue;
-        QDate selDate;
-        QString sort;
-    };
-
-    struct mpiStat
-    {
-        QDate beginDate;
-        QDate endDate;
-        double totalValue;
-    };
-
-    struct mpiPortfolioData
+    struct portfolioData
     {
         QMap<int, security> tickers;
         QMap<int, assetAllocation> aa;
@@ -223,31 +194,12 @@ public:
         QList<int> stats;
     };
 
-    struct mpiChart
-    {
-        QDate beginDate;
-        QDate endDate;
-    };
-
-    struct mpiCorrelation
-    {
-        QDate beginDate;
-        QDate endDate;
-    };
-
     struct myPersonalIndex
     {
-        QDate lastDate;
-        QList<int> dates;
-        mpiPortfolioData portfolioData;
-        mpiPortfolio currentPortfolio;
-        mpiSettings settings;
-        mpiHoldings holdings;
-        mpiAssetAllocation aa;
-        mpiAccount account;
-        mpiCorrelation correlation;
-        mpiChart chart;
-        mpiStat stat;
+        portfolioData data;
+        portfolio info;
+
+        myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
 
     struct symbol

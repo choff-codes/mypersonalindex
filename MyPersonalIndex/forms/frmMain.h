@@ -16,13 +16,16 @@ class frmMain : public QMainWindow
 
 public:
     frmMain(QWidget *parent = 0);
-    ~frmMain() { delete sql; }
+    ~frmMain() { delete sql; qDeleteAll(m_portfolios); }
 
 private:
     frmMain_UI ui;
     mainQueries *sql;
-    globals::myPersonalIndex mpi;
-    QMap<int, globals::portfolio> m_portfolios;
+    QMap<int, globals::myPersonalIndex*> m_portfolios;
+    globals::myPersonalIndex *m_currentPortfolio;
+    QDate m_lastDate;
+    globals::settings m_settings;
+    QList<int> m_dates;
     QMap<int, globals::statistic> m_statistics;
 
     void connectSlots();
@@ -32,7 +35,15 @@ private:
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
     void loadPortfolios();
+    void loadPortfoliosInfo();
+    void loadPortfoliosTickers();
+    void loadPortfoliosTickersAA();
+    void loadPortfoliosTickersTrades();
+    void loadPortfoliosAA();
+    void loadPortfoliosAcct();
+    void loadPortfoliosStat();
     void loadDates();
+    void loadStats();
     void loadPortfolioSettings();
     void savePortfolio();
     void savePortfolios();

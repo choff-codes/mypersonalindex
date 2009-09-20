@@ -15,12 +15,12 @@ frmTicker::frmTicker(QWidget *parent, QMap<int, globals::assetAllocation> *aa, Q
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.btnTradesAdd, SIGNAL(clicked()), this, SLOT(addTrade()));
 
-    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : security.symbol));
+    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.symbol));
 
     if (aa)
     {
         foreach(const globals::assetAllocation &value, (*aa))
-            ui.cmbAA->addItem(value.name, value.id);
+            ui.cmbAA->addItem(value.description, value.id);
 
         ui.cmbAA->model()->sort(0);
     }
@@ -28,7 +28,7 @@ frmTicker::frmTicker(QWidget *parent, QMap<int, globals::assetAllocation> *aa, Q
     if (acct)
     {
         foreach(const globals::account &value, (*acct))
-            ui.cmbAcct->addItem(value.name, value.id);
+            ui.cmbAcct->addItem(value.description, value.id);
 
         ui.cmbAcct->model()->sort(0);
     }

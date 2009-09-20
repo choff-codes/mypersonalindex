@@ -11,14 +11,14 @@ class frmOptions : public QDialog
     Q_OBJECT
 
 public:
-    const globals::mpiSettings& getReturnValues() const { return m_settings; }
+    const globals::settings& getReturnValues() const { return m_settings; }
 
-    frmOptions(QWidget *parent = 0, const globals::mpiSettings& settings = globals::mpiSettings());
+    frmOptions(QWidget *parent = 0, const globals::settings& s = globals::settings());
 
 private:
     frmOptions_UI ui;
     optionsQueries sql;
-    globals::mpiSettings m_settings;
+    globals::settings m_settings;
 
 private slots:
     void accept();

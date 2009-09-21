@@ -41,7 +41,10 @@ void frmAA::updateList(const globals::assetAllocation &aa, const int &row)
     int i = row == -1 ? m_model->rowCount() : row;
 
     QStandardItem *desc = new QStandardItem(aa.description);
-    QStandardItem *target = new QStandardItem(QLocale().toString(aa.target, 'f', 2).append("%"));
+    QStandardItem *target = new QStandardItem(
+            aa.target < 0 ? "None" :
+            QLocale().toString(aa.target, 'f', 2).append("%")
+        );
     m_model->setItem(i, 0, desc);
     m_model->setItem(i, 1, target);
 }
@@ -50,7 +53,8 @@ void frmAA::updateHeader()
 {
     double d = 0;
     foreach(const globals::assetAllocation &aa, m_aa)
-        d += aa.target;
+        if (aa.target >= 0)
+            d += aa.target;
 
     m_model->setHeaderData(0, Qt::Horizontal, "Description");
     m_model->setHeaderData(1, Qt::Horizontal, QString("Target (%L1%)").arg(d, 0, 'f', 2));
@@ -60,6 +64,8 @@ void frmAA::accept()
 {
     QMap<int, globals::assetAllocation> toReturn;
     bool changes = false;
+
+    sql->getDatabase().transaction();
 
     for(int i = 0; i < m_aa.count(); i++)
     {
@@ -79,6 +85,8 @@ void frmAA::accept()
             changes = true;
             sql->executeNonQuery(sql->deleteAA(aa.id));
         }
+
+    sql->getDatabase().commit();
 
     if (changes)
     {

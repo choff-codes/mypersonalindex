@@ -79,3 +79,11 @@ queries::queryInfo* mainQueries::deletePortfolio(const int &portfolio)
             << parameter(":PortfolioID", portfolio)
     );
 }
+
+queries::queryInfo* mainQueries::getAA()
+{
+    return new queryInfo(
+        "SELECT ID, PortfolioID, Description, Target FROM AA",
+        QList<parameter>()
+    );
+}

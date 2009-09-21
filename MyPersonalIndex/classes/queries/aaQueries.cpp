@@ -8,7 +8,7 @@ queries::queryInfo* aaQueries::updateAA(globals::assetAllocation* const aa)
         return 0;
 
     QVariant target(QVariant::Double);
-    if (target != -1)
+    if (aa->target >= 0)
         target = aa->target;
 
     if(aa->id == -1) // insert new

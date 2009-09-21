@@ -5,11 +5,13 @@ SOURCES += $$PWD/frmTicker_UI.cpp \
     $$PWD/frmTrade_UI.cpp \
     $$PWD/frmOptions_UI.cpp \
     $$PWD/frmTableViewBase_UI.cpp \
-    $$PWD/frmAAEdit_UI.cpp
+    $$PWD/frmAAEdit_UI.cpp \
+    $$PWD/frmAcctEdit_UI.cpp
 HEADERS += $$PWD/frmPortfolio_UI.h \
     $$PWD/frmMain_UI.h \
     $$PWD/frmTicker_UI.h \
     $$PWD/frmTrade_UI.h \
     $$PWD/frmOptions_UI.h \
     $$PWD/frmTableViewBase_UI.h \
-    $$PWD/frmAAEdit_UI.h
+    $$PWD/frmAAEdit_UI.h \
+    $$PWD/frmAcctEdit_UI.h

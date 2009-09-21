@@ -19,7 +19,7 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     target = new QLabel("Target:", dialog);
     formLayout->setWidget(1, QFormLayout::LabelRole, target);
 
-    sbTarget = new QDoubleSpinBox();
+    sbTarget = new QDoubleSpinBox(dialog);
     sbTarget->setDecimals(2);
     sbTarget->setMinimum(-1);
     sbTarget->setMaximum(100);
@@ -31,4 +31,5 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
 
     mainLayout->addLayout(formLayout);
     mainLayout->addWidget(btnOkCancel);
+    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 }

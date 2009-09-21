@@ -5,11 +5,15 @@ SOURCES += $$PWD/frmTicker.cpp \
     $$PWD/frmTrade.cpp \
     $$PWD/frmOptions.cpp \
     $$PWD/frmAA.cpp \
-    $$PWD/frmAAEdit.cpp
+    $$PWD/frmAAEdit.cpp \
+    $$PWD/frmAcct.cpp \
+    $$PWD/frmAcctEdit.cpp
 HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmMain.h \
     $$PWD/frmTicker.h \
     $$PWD/frmTrade.h \
     $$PWD/frmOptions.h \
     $$PWD/frmAA.h \
-    $$PWD/frmAAEdit.h
+    $$PWD/frmAAEdit.h \
+    $$PWD/frmAcct.h \
+    $$PWD/frmAcctEdit.h

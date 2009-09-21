@@ -59,6 +59,7 @@ private slots:
     void addTicker();
     void options();
     void aa();
+    void acct();
 
 protected:
     void closeEvent(QCloseEvent *event);

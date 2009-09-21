@@ -7,6 +7,7 @@
 #include "frmTicker.h"
 #include "frmOptions.h"
 #include "frmAA.h"
+#include "frmAcct.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -62,6 +63,7 @@ void frmMain::connectSlots()
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
+    connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
 
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
 }
@@ -411,11 +413,20 @@ void frmMain::options()
 
 void frmMain::aa()
 {
-    ui.holdingsDateDropDown->calendarWidget()->showToday();
     frmAA f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.aa);
     if (f.exec())
     {
         m_currentPortfolio->data.aa = f.getReturnValues();
+    }
+
+}
+
+void frmMain::acct()
+{
+    frmAcct f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.acct);
+    if (f.exec())
+    {
+        m_currentPortfolio->data.acct = f.getReturnValues();
     }
 
 }

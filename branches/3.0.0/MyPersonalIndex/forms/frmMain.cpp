@@ -128,7 +128,6 @@ void frmMain::loadDates()
     delete q;
 }
 
-
 void frmMain::resetLastDate()
 {
     m_lastDate = QDate::fromJulianDay(sql->executeScalar(sql->getLastDate(), m_settings.dataStartDate.toJulianDay()).toInt());
@@ -224,6 +223,7 @@ void frmMain::loadPortfolioSettings()
 void frmMain::loadPortfolios()
 {
     loadPortfoliosInfo();
+    loadPortfoliosAA();
 }
 
 void frmMain::loadPortfoliosInfo()
@@ -276,6 +276,35 @@ void frmMain::loadPortfoliosTickersTrades()
 
 void frmMain::loadPortfoliosAA()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getAA());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::assetAllocation aa;
+
+        aa.id = q->value(mainQueries::getAA_ID).toInt();
+        aa.description = q->value(mainQueries::getAA_Description).toString();
+        if (!q->value(mainQueries::getAA_Target).isNull())
+            aa.target = q->value(mainQueries::getAA_Target).toDouble();
+
+        int portfolioID = q->value(mainQueries::getAA_PortfolioID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+
+       p->data.aa.insert(aa.id, aa);
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::loadPortfoliosAcct()
@@ -382,6 +411,11 @@ void frmMain::options()
 
 void frmMain::aa()
 {
-    frmAA f(m_currentPortfolio->info.id, this);
-    f.exec();
+    ui.holdingsDateDropDown->calendarWidget()->showToday();
+    frmAA f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.aa);
+    if (f.exec())
+    {
+        m_currentPortfolio->data.aa = f.getReturnValues();
+    }
+
 }

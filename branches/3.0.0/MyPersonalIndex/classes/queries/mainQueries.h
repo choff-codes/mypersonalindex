@@ -18,8 +18,11 @@ public:
 
     enum { getDates_Date };
 
+    enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
+
     queryInfo* getSettings();
     queryInfo* getDates();
+    queryInfo* getAA();
     queryInfo* updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state);
     queryInfo* updatePortfolioAttributes(const globals::portfolio &p);
     queryInfo* getPortfolioAttributes();

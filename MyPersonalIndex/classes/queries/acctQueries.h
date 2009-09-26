@@ -7,7 +7,7 @@
 class acctQueries : public queries
 {
 public:
-    queryInfo* updateAcct(globals::account* const acct);
+    queryInfo* updateAcct(const globals::account &acct);
     queryInfo* deleteAcct(const int &acctID);
 
     acctQueries(const int &portfolioID): queries(), m_portfolioID(portfolioID) {}

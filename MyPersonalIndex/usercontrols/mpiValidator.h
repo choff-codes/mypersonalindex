@@ -29,7 +29,7 @@ class mpiIntValidator: public QIntValidator
 
 public:
 
-    mpiIntValidator(double bottom, double top, QObject *parent = 0) : QIntValidator(bottom, top, parent) {}
+    mpiIntValidator(int bottom, int top, QObject *parent = 0) : QIntValidator(bottom, top, parent) {}
 
     QValidator::State validate(QString &input, int &pos) const
     {

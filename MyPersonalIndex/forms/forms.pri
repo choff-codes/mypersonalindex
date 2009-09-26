@@ -16,4 +16,5 @@ HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmAA.h \
     $$PWD/frmAAEdit.h \
     $$PWD/frmAcct.h \
-    $$PWD/frmAcctEdit.h
+    $$PWD/frmAcctEdit.h \
+    $$PWD/frmTableViewBase.h

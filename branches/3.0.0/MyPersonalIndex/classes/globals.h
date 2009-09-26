@@ -11,6 +11,7 @@ public:
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';
     static const int nonLeapYear = 2009;
+
     enum avgShareCalc { calc_FIFO, calc_LIFO, calc_AVG };
     enum outputFormat { format_Currency, format_Percentage, format_Decimal, format_Integer, format_ShortDate, format_LongDate, format_None };
     enum statVariables { stat_Portfolio, stat_PortfolioName, stat_StartDate, stat_EndDate, stat_PreviousDay, stat_TotalValue };
@@ -31,7 +32,7 @@ public:
         QDate startDate;
         QDate endDate;
 
-        dynamicTrade(): tradeType(tradeType_Purchase), value(0), price(-1), commission(0), cashAccount(0), frequency(tradeFreq_Once) {}
+        dynamicTrade(): tradeType(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once) {}
 
         bool operator==(const dynamicTrade &other) const {
             return this->tradeType == other.tradeType
@@ -60,7 +61,7 @@ public:
         int aaThreshold;
         thesholdMethod aaThresholdMethod;
         QDate startDate;
-        // start date may be updated if it is a non-market day, but the original dates also needs to be tracked
+        // start date may be updated if it is a non-market day, but the original date also needs to be tracked
         QDate origStartDate;
         bool holdingsShowHidden;
         bool navSortDesc;
@@ -74,6 +75,30 @@ public:
         portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
             aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
             holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
+
+        bool operator==(const portfolio &other) const {
+            return this->id == other.id
+                    && this->description == other.description
+                    && this->dividends == other.dividends
+                    && this->costCalc == other.costCalc
+                    && this->startValue == other.startValue
+                    && this->aaThreshold == other.aaThreshold
+                    && this->aaThresholdMethod == other.aaThresholdMethod
+                    // exclude startDate
+                    && this->origStartDate == other.origStartDate
+                    && this->holdingsShowHidden == other.holdingsShowHidden
+                    && this->navSortDesc == other.navSortDesc
+                    && this->aaShowBlank == other.aaShowBlank
+                    && this->correlationShowHidden == other.correlationShowHidden
+                    && this->acctShowBlank == other.acctShowBlank
+                    && this->holdingsSort == other.holdingsSort
+                    && this->aaSort == other.aaSort
+                    && this->acctSort == other.acctSort;
+        }
+
+        bool operator!=(const portfolio &other) const {
+            return !(*this == other);
+        }
     };
 
     struct statistic
@@ -110,7 +135,7 @@ public:
         QList<QPair<int, double> > aa;
         QList<dynamicTrade> trades;
 
-        security(): id(-1), account(0), expense(-0.01), divReinvest(false), cashAccount(false),
+        security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),
             includeInCalc(true), hide(false) {}
 
         bool operator==(const security &other) const {
@@ -129,12 +154,6 @@ public:
         bool operator!=(const security &other) const {
             return !(*this == other);
         }
-    };
-
-    struct dynamicTrades
-    {
-        QList<QDate> dates;
-        dynamicTrade trade;
     };
 
     struct assetAllocation
@@ -202,48 +221,48 @@ public:
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
 
-    struct symbol
-    {
-        int tickerID;
-        int aa;
-
-        symbol(const int &p_tickerID, const int &p_aa): tickerID(p_tickerID), aa(p_aa) {}
-    };
-
-    struct tickerInfo
-    {
-        double price;
-        double totalValue;
-        double splitRatio;
-        QString ticker;
-
-        tickerInfo(): price(0), totalValue(0), splitRatio(1) {}
-    };
-
-    struct missingPriceInfo
-    {
-        double previousClose;
-        QDate date;
-        QString ticker;
-    };
-
-    struct tradeInfo
-    {
-        double price;
-        double shares;
-
-        tradeInfo(const double &p_shares, const double &p_price): price(p_price), shares(p_shares) {}
-    };
-
-    struct updateInfo
-    {
-        double price;
-        QDate closingDate;
-        QDate dividendDate;
-        QDate splitDate;
-
-        updateInfo(const QDate &minDate): price(0.0), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
-    };
+//    struct symbol
+//    {
+//        int tickerID;
+//        int aa;
+//
+//        symbol(const int &p_tickerID, const int &p_aa): tickerID(p_tickerID), aa(p_aa) {}
+//    };
+//
+//    struct tickerInfo
+//    {
+//        double price;
+//        double totalValue;
+//        double splitRatio;
+//        QString ticker;
+//
+//        tickerInfo(): price(-1), totalValue(-1), splitRatio(1) {}
+//    };
+//
+//    struct missingPriceInfo
+//    {
+//        double previousClose;
+//        QDate date;
+//        QString ticker;
+//    };
+//
+//    struct tradeInfo
+//    {
+//        double price;
+//        double shares;
+//
+//        tradeInfo(const double &p_shares, const double &p_price): price(p_price), shares(p_shares) {}
+//    };
+//
+//    struct updateInfo
+//    {
+//        double price;
+//        QDate closingDate;
+//        QDate dividendDate;
+//        QDate splitDate;
+//
+//        updateInfo(const QDate &minDate): price(0.0), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
+//    };
 };
 
 #endif // GLOBALS_H

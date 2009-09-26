@@ -3,7 +3,7 @@
 
 #include <QtGui>
 #include "frmPortfolio_UI.h"
-#include "portfolioQueries.h"
+#include "queries.h"
 #include "globals.h"
 
 class frmPortfolio : public QDialog
@@ -14,12 +14,12 @@ public:
 
     const globals::portfolio& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(QWidget *parent = 0, const QDate &dataStartDate = QDate(), const globals::portfolio& p = globals::portfolio());
+    frmPortfolio(QWidget *parent = 0, queries *sql = 0, const QDate &dataStartDate = QDate(), const globals::portfolio& p = globals::portfolio());
 
 private:
 
     frmPortfolio_UI ui;
-    portfolioQueries sql;
+    queries *m_sql;
     globals::portfolio m_portfolio;
 
     void loadPortfolioAttributes();

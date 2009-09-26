@@ -6,7 +6,7 @@
 
 #include <QMainWindow>
 #include "frmMain_UI.h"
-#include "mainQueries.h"
+#include "queries.h"
 #include "globals.h"
 #include "updatePrices.h"
 
@@ -20,7 +20,7 @@ public:
 
 private:
     frmMain_UI ui;
-    mainQueries *sql;
+    queries *sql;
     QMap<int, globals::myPersonalIndex*> m_portfolios;
     globals::myPersonalIndex *m_currentPortfolio;
     QDate m_lastDate;

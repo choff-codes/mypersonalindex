@@ -3,6 +3,7 @@
 
 #include <QtSql>
 #include <QtGui>
+#include "globals.h"
 
 class queries
 {
@@ -60,14 +61,45 @@ public:
 
     void executeNonQuery(queryInfo*);
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    bool executeTableSelect(QSqlTableModel *model = 0, const QString &tableName = "", const int &sort = -1, const QString &filter = "");
-    QSqlQueryModel* executeDataSet(queryInfo *q);
+    //bool executeTableSelect(QSqlTableModel *model = 0, const QString &tableName = "", const int &sort = -1, const QString &filter = "");
+    //QSqlQueryModel* executeDataSet(queryInfo *q);
     QSqlQuery* executeResultSet(queryInfo*);
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant());
 
+    queryInfo* deleteItem(const QString &table, const int &id);
+
     queryInfo* getLastDate();
+
     queryInfo* getVersion();
+
     queryInfo* getIdentity();
+
+    enum { getDates_Date };
+    queryInfo* getDates();
+
+    enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
+           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_Version };
+    queryInfo* getSettings();
+
+    queryInfo* updateSettings(const globals::settings&);
+    queryInfo* updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state);
+
+    enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
+    queryInfo* getAA();
+
+    queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&);
+
+    queryInfo* updateAcct(const int &portfolioID, const globals::account&);
+
+
+    enum { getPortfolioAttributes_PortfolioID, getPortfolioAttributes_Description, getPortfolioAttributes_Dividends, getPortfolioAttributes_StartValue,
+           getPortfolioAttributes_CostCalc, getPortfolioAttributes_AAThreshold, getPortfolioAttributes_AAThresholdMethod,
+           getPortfolioAttributes_StartDate, getPortfolioAttributes_HoldingsShowHidden, getPortfolioAttributes_HoldingsSort,
+           getPortfolioAttributes_NAVSortDesc, getPortfolioAttributes_AASort, getPortfolioAttributes_AAShowBlank,
+           getPortfolioAttributes_CorrelationShowHidden, getPortfolioAttributes_AcctSort, getPortfolioAttributes_AcctShowBlank };
+    queryInfo* getPortfolioAttributes();
+
+    queryInfo* updatePortfolio(const globals::portfolio&);
 
 protected:
     QSqlDatabase db;

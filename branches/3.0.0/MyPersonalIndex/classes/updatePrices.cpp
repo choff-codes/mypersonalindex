@@ -121,61 +121,61 @@ void updatePrices::getSplits(const QString &ticker, const QDate &minDate)
 {
     if (minDate == QDate::currentDate())
         return;
+
     const QString htmlSplitStart = "<br><center>Splits:<nobr>";  // text starting splits
     const QString htmlSplitNone = "<br><center>Splits:none</center>"; // same line, but signifying no splits
     QList<QByteArray> *lines = downloadFile(QUrl(getSplitAddress(ticker)));
 
-    if (lines)
+    if (!lines)
+        return;
+
+    QString splitLine;
+    foreach(const QByteArray &s, *lines)
     {
-        QString splitLine;
-        foreach(const QByteArray &s, *lines)
+        QString line(s);
+        if (line.contains(htmlSplitStart, Qt::CaseInsensitive) || line.contains(htmlSplitNone, Qt::CaseInsensitive))
         {
-            QString line(s);
-            if (line.contains(htmlSplitStart, Qt::CaseInsensitive) || line.contains(htmlSplitNone, Qt::CaseInsensitive))
-            {
-                splitLine = s;
-                break;
-            }
+            splitLine = s;
+            break;
         }
-
-        if (splitLine.isEmpty() || splitLine.contains(htmlSplitNone, Qt::CaseInsensitive))
-            return;
-
-        int i = splitLine.indexOf(htmlSplitStart, 0, Qt::CaseInsensitive) + htmlSplitStart.length();
-        splitLine = splitLine.mid(i, splitLine.indexOf("</center>", i, Qt::CaseInsensitive) - i); // read up to </center> tag
-        QStringList splits = splitLine.split("</nobr>, <nobr>");
-        //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
-        splits.append(splits.takeLast().replace("</nobr>", ""));
-
-        QVariantList dates, tickers, ratios;
-
-        foreach(const QString &s, splits)
-        {
-            QStringList split = s.split(' ');
-            QDate q = QDate::fromString(split.first(), "dd-MMM-yy");
-            if (q.year() - 1900 <= QDate::currentDate().year() - 2000) // defaults to 19xx
-                q = q.addYears(100);
-
-            if (q <= minDate) //&& minDate >= DataStartDate)
-                continue;
-
-            // ratio looks like [2:1], so strip off the brackets
-            split[1] = QString(split.at(1).mid(1, split.at(1).length() - 2));
-            QStringList divisor = split.at(1).split(':');
-
-            dates.append(q.toJulianDay());
-            tickers.append(ticker);
-            ratios.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
-        }
-
-        QMap<QString, QVariantList> tableValues;
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Date), dates);
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Ticker), tickers);
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Ratio), ratios);
-
-        if (dates.count() != 0)
-            sql->executeTableUpdate(queries::table_Splits, tableValues);
     }
+
+    if (splitLine.isEmpty() || splitLine.contains(htmlSplitNone, Qt::CaseInsensitive))
+        return;
+
+    int i = splitLine.indexOf(htmlSplitStart, 0, Qt::CaseInsensitive) + htmlSplitStart.length();
+    splitLine = splitLine.mid(i, splitLine.indexOf("</center>", i, Qt::CaseInsensitive) - i); // read up to </center> tag
+    QStringList splits = splitLine.split("</nobr>, <nobr>");
+    //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
+    splits.append(splits.takeLast().replace("</nobr>", ""));
+
+    QVariantList dates, tickers, ratios;
+    foreach(const QString &s, splits)
+    {
+        QStringList split = s.split(' ');
+        QDate q = QDate::fromString(split.first(), "dd-MMM-yy");
+        if (q.year() - 1900 <= QDate::currentDate().year() - 2000) // defaults to 19xx
+            q = q.addYears(100);
+
+        if (q <= minDate) //&& minDate >= DataStartDate)
+            continue;
+
+        // ratio looks like [2:1], so strip off the brackets
+        QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');
+
+        dates.append(q.toJulianDay());
+        tickers.append(ticker);
+        ratios.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
+    }
+
+    if (dates.count() == 0)
+        return;
+
+    QMap<QString, QVariantList> tableValues;
+    tableValues.insert(queries::splitsColumns.at(queries::splits_Date), dates);
+    tableValues.insert(queries::splitsColumns.at(queries::splits_Ticker), tickers);
+    tableValues.insert(queries::splitsColumns.at(queries::splits_Ratio), ratios);
+    sql->executeTableUpdate(queries::table_Splits, tableValues);
 
     delete lines;
 }

@@ -5,15 +5,15 @@
 #include "frmTableViewBase.h"
 #include "globals.h"
 #include "modelWithNoEdit.h"
-#include "acctQueries.h"
+#include "queries.h"
 #include "frmAcctEdit.h"
 
-class frmAcct : public frmTableViewBase<globals::account, frmAcctEdit, acctQueries>
+class frmAcct : public frmTableViewBase<globals::account, frmAcctEdit>
 {
     Q_OBJECT
 
 public:
-    frmAcct(const int &portfolioID, QWidget *parent = 0, const QMap<int, globals::account> &acct = (QMap<int, globals::account>()));
+    frmAcct(const int &portfolioID, QWidget *parent = 0, queries *sql = 0, const QMap<int, globals::account> &acct = (QMap<int, globals::account>()));
 
 private:
     void updateList(const globals::account &acct, const int &row = -1);

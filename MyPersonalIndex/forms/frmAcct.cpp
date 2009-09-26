@@ -1,9 +1,15 @@
 #include "frmAcct.h"
 #include "frmAcctEdit.h"
 
-frmAcct::frmAcct(const int &portfolioID, QWidget *parent, const QMap<int, globals::account> &acct):
-    frmTableViewBase<globals::account, frmAcctEdit, acctQueries>(portfolioID, parent, acct, false, "Edit Accounts", 3)
+frmAcct::frmAcct(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::account> &acct):
+    frmTableViewBase<globals::account, frmAcctEdit>(portfolioID, parent, sql, acct, false, "Edit Accounts", 3)
 {
+    if(!m_sql || !m_sql->isOpen())
+    {
+        reject();
+        return;
+    }
+
     this->setWindowTitle("Edit Accounts");
     m_model->setHeaderData(0, Qt::Horizontal, "Description");
     m_model->setHeaderData(1, Qt::Horizontal, "Tax Rate");
@@ -23,7 +29,7 @@ void frmAcct::connectSlots()
 
 void frmAcct::updateList(const globals::account &acct, const int &row)
 {
-    int i = row == -1 ? m_model->rowCount() : row;
+    int i = row == -1 ? m_model->rowCount() : row; // -1 is an insert
 
     QStandardItem *desc = new QStandardItem(acct.description);
     QStandardItem *taxRate = new QStandardItem(
@@ -38,17 +44,17 @@ void frmAcct::updateList(const globals::account &acct, const int &row)
 
 void frmAcct::deleteItem(const globals::account &acct)
 {
-    sql->executeNonQuery(sql->deleteAcct(acct.id));
+    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_Acct, acct.id));
 }
 
 void frmAcct::saveItem(const globals::account &acct)
 {
-    sql->executeNonQuery(sql->updateAcct(acct));
+    m_sql->executeNonQuery(m_sql->updateAcct(m_portfolioID, acct));
 }
 
 void frmAcct::accept()
 {
-    frmTableViewBase<globals::account, frmAcctEdit, acctQueries>::accept();
+    frmTableViewBase<globals::account, frmAcctEdit>::accept();
 }
 
 void frmAcct::addAcct()

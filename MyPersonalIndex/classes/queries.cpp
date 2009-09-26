@@ -1,4 +1,6 @@
 #include "queries.h"
+#include "globals.h"
+#include "functions.h"
 
 //enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
 const QStringList queries::closingPricesColumns = QStringList() << "Date" << "Ticker" << "Price" << "Change";
@@ -63,47 +65,47 @@ void queries::executeNonQuery(queryInfo *q)
     delete q;
 }
 
-QSqlQueryModel* queries::executeDataSet(queryInfo *q)
-{
-    if (!q)
-        return 0;
+//QSqlQueryModel* queries::executeDataSet(queryInfo *q)
+//{
+//    if (!q)
+//        return 0;
+//
+//    QSqlQuery query(db);
+//    query.prepare(q->sql);
+//    foreach(const parameter &p, q->parameters)
+//        query.bindValue(p.name, p.value);
+//
+//    query.exec();
+//
+//    if(!query.isActive())
+//    {
+//        delete q;
+//        return 0;
+//    }
+//
+//    QSqlQueryModel *dataset = new QSqlQueryModel();
+//    dataset->setQuery(query);
+//
+//    delete q;
+//    return dataset;
+//}
 
-    QSqlQuery query(db);
-    query.prepare(q->sql);
-    foreach(const parameter &p, q->parameters)
-        query.bindValue(p.name, p.value);
+//bool queries::executeTableSelect(QSqlTableModel *model, const QString &tableName, const int &sort, const QString &filter)
+//{
+//    if (!model)
+//        return false;
+//
+//    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
+//    model->setTable(tableName);
+//    if (!filter.isEmpty())
+//        model->setFilter(filter);
+//    if (sort != -1)
+//        model->setSort(sort, Qt::AscendingOrder);
+//
+//    return model->select();
+//}
 
-    query.exec();
-
-    if(!query.isActive())
-    {
-        delete q;
-        return 0;
-    }
-
-    QSqlQueryModel *dataset = new QSqlQueryModel();
-    dataset->setQuery(query);
-
-    delete q;
-    return dataset;
-}
-
-bool queries::executeTableSelect(QSqlTableModel *model, const QString &tableName, const int &sort, const QString &filter)
-{
-    if (!model)
-        return false;
-
-    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-    model->setTable(tableName);
-    if (!filter.isEmpty())
-        model->setFilter(filter);
-    if (sort != -1)
-        model->setSort(sort, Qt::AscendingOrder);
-
-    return model->select();
-}
-
-void queries::executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values)
+void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
 {
     if (tableName.isEmpty() || values.isEmpty())
         return;
@@ -112,29 +114,28 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString, Q
 
     QSqlQuery query(db);
     QStringList parameters, columns;
+    QList<QVariantList> binds = values.values();
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
-    QMap<QString, QVariantList>::const_iterator i;
-    for (i = values.begin(); i != values.end(); ++i)
+    foreach(const QString &column, values.keys())
     {
-         parameters.append("?");
-         columns.append(i.key());
-     }
+        parameters.append("?");
+        columns.append(column);
+    }
 
     query.prepare(sql.arg(tableName, columns.join(","), parameters.join(",")));
 
-    QList<QVariantList> binds = values.values();
     int count = binds.at(0).count();
-    for (int x = 1; x < binds.count(); x++)
-        if (binds.at(x).count() != count) // all the lists must be the same size
+    for (int i = 1; i < binds.count(); ++i)
+        if (binds.at(i).count() != count) // all the lists must be the same size
         {
             db.commit();
             return;
         }
 
-    for (int i = 0; i < count; i++)
+    for (int i = 0; i < count; ++i)
     {
-        for (int x = 0; x < binds.count(); x++)
+        for (int x = 0; x < binds.count(); ++x)
             query.addBindValue(binds.at(x).at(i));
         query.exec();
     }
@@ -186,6 +187,15 @@ QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
     return nullValue;
 }
 
+queries::queryInfo* queries::deleteItem(const QString &table, const int &id)
+{
+    return new queryInfo(
+        QString("DELETE FROM %1 WHERE ID = :ID").arg(table),
+        QList<parameter>()
+            << parameter(":ID", id)
+    );
+}
+
 queries::queryInfo* queries::getLastDate()
 {
     return new queryInfo(
@@ -202,3 +212,166 @@ queries::queryInfo* queries::getIdentity()
     );
 }
 
+queries::queryInfo* queries::getDates()
+{
+    return new queryInfo(
+        "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateSettings(const globals::settings &s)
+{
+    return new queryInfo(
+        "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate",
+        QList<parameter>()
+            << parameter(":Splits", (int)s.splits)
+            << parameter(":DataStartDate", s.dataStartDate.toJulianDay())
+    );
+}
+
+queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state)
+{
+    if (state)  // non-normal state, ignore size
+        return new queryInfo(
+            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowState = :WindowState",
+            QList<parameter>()
+                << parameter(":LastPortfolio", lastPortfolio)
+                << parameter(":WindowState", state) // 1 = maximized, 2 = minimized
+        );
+    else
+        return new queryInfo(
+            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight,"
+                " WindowWidth = :WindowWidth, WindowState = :WindowState",
+            QList<parameter>()
+                << parameter(":LastPortfolio", lastPortfolio)
+                << parameter(":WindowX", windowLocation.x())
+                << parameter(":WindowY", windowLocation.y())
+                << parameter(":WindowHeight", windowSize.height())
+                << parameter(":WindowWidth", windowSize.width())
+                << parameter(":WindowState", state)
+        );
+}
+
+queries::queryInfo* queries::getSettings()
+{
+    return new queryInfo(
+        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, Version FROM Settings",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getAA()
+{
+    return new queryInfo(
+        "SELECT ID, PortfolioID, Description, Target FROM AA",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::assetAllocation &aa)
+{
+    if(aa.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO AA (PortfolioID, Description, Target)"
+            " VALUES (:PortfolioID, :Description, :Target)",
+            QList<parameter>()
+                << parameter(":PortfolioID", portfolioID)
+                << parameter(":Description", aa.description)
+                << parameter(":Target", functions::doubleToNull(aa.target))
+        );
+    }
+    else // update
+    {
+        return new queryInfo(
+            "UPDATE AA SET Description = :Description, Target = :Target WHERE ID = :AAID",
+            QList<parameter>()
+                << parameter(":Description", aa.description)
+                << parameter(":Target", functions::doubleToNull(aa.target))
+                << parameter(":AAID", aa.id)
+        );
+    }
+}
+
+
+queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::account &acct)
+{
+    if(acct.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO Acct (PortfolioID, Description, TaxRate, TaxDeferred)"
+            " VALUES (:PortfolioID, :Description, :TaxRate, :TaxDeferred)",
+            QList<parameter>()
+                << parameter(":PortfolioID", portfolioID)
+                << parameter(":Description", acct.description)
+                << parameter(":TaxRate", functions::doubleToNull(acct.taxRate))
+                << parameter(":TaxDeferred", (int)acct.taxDeferred)
+        );
+    }
+    else // update
+    {
+        return new queryInfo(
+            "UPDATE Acct SET Description = :Description, TaxRate = :TaxRate, TaxDeferred = :TaxDeferred WHERE ID = :AcctID",
+            QList<parameter>()
+                << parameter(":Description", acct.description)
+                << parameter(":TaxRate", functions::doubleToNull(acct.taxRate))
+                << parameter(":TaxDeferred", acct.taxDeferred)
+                << parameter(":AcctID", acct.id)
+        );
+    }
+}
+
+queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
+{
+    QList<parameter> params;
+    params
+        << parameter(":Description", p.description)
+        << parameter(":StartValue", p.startValue)
+        << parameter(":AAThreshold", p.aaThreshold)
+        << parameter(":ThresholdMethod", (int)p.aaThresholdMethod)
+        << parameter(":CostCalc", (int)p.costCalc)
+        << parameter(":StartDate", p.origStartDate.toJulianDay())
+        << parameter(":Dividends", (int)p.dividends)
+        << parameter(":HoldingsShowHidden", (int)p.holdingsShowHidden)
+        << parameter(":HoldingsSort", p.holdingsSort)
+        << parameter(":AAShowBlank", (int)p.aaShowBlank)
+        << parameter(":AASort", p.aaSort)
+        << parameter(":CorrelationShowHidden", (int)p.correlationShowHidden)
+        << parameter(":AcctShowBlank", (int)p.acctShowBlank)
+        << parameter(":AcctSort", p.acctSort)
+        << parameter(":NAVSortDesc", (int)p.navSortDesc)
+        << parameter(":PortfolioID", p.id);
+
+    if(p.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO Portfolios (Description, StartValue, AAThreshold, ThresholdMethod, CostCalc, StartDate, Dividends, HoldingsShowHidden,"
+                " HoldingsSort, AAShowBlank, AASort, CorrelationShowHidden, AcctShowBlank, AcctSort, NAVSortDesc)"
+            " VALUES (:Description, :StartValue, :AAThreshold, :ThresholdMethod, :CostCalc, :StartDate, :Dividends, :HoldingsShowHidden,"
+                " :HoldingsSort, :AAShowBlank, :AASort, :CorrelationShowHidden, :AcctShowBlank, :AcctSort, :NAVSortDesc)",
+            params
+        );
+    }
+    else // update
+    {
+        return new queryInfo(
+            "UPDATE Portfolios SET Description = :Description, Dividends = :Dividends, StartValue = :StartValue, CostCalc = :CostCalc, AAThreshold = :AAThreshold,"
+                " ThresholdMethod = :ThresholdMethod, StartDate = :StartDate, HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :ShowAABlank,"
+                " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank, AcctSort = :AcctSort"
+                " WHERE ID = :PortfolioID",
+            params
+        );
+    }
+}
+
+queries::queryInfo* queries::getPortfolioAttributes()
+{
+    return new queryInfo(
+        "SELECT ID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdMethod,"
+            " StartDate, HoldingsShowHidden, HoldingsSort, NAVSortDesc, AASort, AAShowBlank,"
+            " CorrelationShowHidden, AcctSort, AcctShowBlank "
+            " FROM Portfolios",
+        QList<parameter>()
+    );
+}

@@ -3,7 +3,7 @@
 
 #include <QtGui>
 #include "frmOptions_UI.h"
-#include "optionsQueries.h"
+#include "queries.h"
 #include "globals.h"
 
 class frmOptions : public QDialog
@@ -13,11 +13,11 @@ class frmOptions : public QDialog
 public:
     const globals::settings& getReturnValues() const { return m_settings; }
 
-    frmOptions(QWidget *parent = 0, const globals::settings& s = globals::settings());
+    frmOptions(QWidget *parent = 0, queries *sql = 0, const globals::settings& s = globals::settings());
 
 private:
     frmOptions_UI ui;
-    optionsQueries sql;
+    queries *m_sql;
     globals::settings m_settings;
 
 private slots:

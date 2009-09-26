@@ -7,13 +7,12 @@
 class functions
 {
 public:
-    static QDateEdit* createDateEdit(QWidget* parent)
+    static QDateEdit* createDateEdit(QWidget* parent = 0)
     {
         QDateEdit *d = new QDateEdit(parent);
         d->setDate(QDate::currentDate());
         d->setCalendarPopup(true);
         d->setDisplayFormat(globals::shortDateFormat);
-        //d->setButtonSymbols(QAbstractSpinBox::NoButtons);
         return d;
     }
 
@@ -32,23 +31,10 @@ public:
             QApplication::clipboard()->setText(welcomeMessage);
     }
 
-//    static QList<QPair<QString, int> >* qMapToList(QMap<int, globals::assetAllocation>* aa)
-//    {
-//        QList<QPair<QString, int> > *returnValue = new QList<QPair<QString, int> >();
-//        foreach (const globals::assetAllocation &value, aa)
-//            returnValue->append(QPair(value.name, value.id));
-//
-//        return returnValue;
-//    }
-//
-//    static QList<QPair<QString, int> >* qMapToList(QMap<int, globals::account>* acct)
-//    {
-//        QList<QPair<QString, int> > *returnValue = new QList<QPair<QString, int> >();
-//        foreach (const globals::account &value, acct)
-//            returnValue->append(QPair(value.name, value.id));
-//
-//        return returnValue;
-//    }
+    static QVariant doubleToNull(const double &value)
+    {
+        return value < 0 ? QVariant(QVariant::Double) : value;
+    }
 };
 
 #endif // FUNCTIONS_H

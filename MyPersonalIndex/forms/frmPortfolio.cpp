@@ -1,12 +1,10 @@
-#include <QDialog>
 #include <QtGui>
 #include "frmPortfolio.h"
-#include "frmPortfolio_UI.h"
 #include "globals.h"
 
-frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const globals::portfolio &p): QDialog(parent), m_portfolio(p)
+frmPortfolio::frmPortfolio(QWidget *parent, queries *sql, const QDate &dataStartDate, const globals::portfolio &p): QDialog(parent), m_sql(sql), m_portfolio(p)
 {
-    if (!sql.isOpen())
+    if (!m_sql || !m_sql->isOpen())
     {
         this->reject();
         return;
@@ -16,11 +14,11 @@ frmPortfolio::frmPortfolio(QWidget *parent, const QDate &dataStartDate, const gl
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
     ui.dateStartDate->setMinimumDate(dataStartDate);
     ui.dateStartDate->setDate(dataStartDate);
-    loadPortfolioAttributes();
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
 
+    loadPortfolioAttributes();
     ui.txtDesc->setFocus();
     ui.txtDesc->selectAll();
 }
@@ -81,9 +79,9 @@ void frmPortfolio::accept()
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.origStartDate = ui.dateStartDate->date();
 
-    sql.executeNonQuery(sql.updatePortfolio(&m_portfolio));
+    m_sql->executeNonQuery(m_sql->updatePortfolio(m_portfolio));
     if (m_portfolio.id == -1)
-        m_portfolio.id = sql.executeScalar(sql.getIdentity(), 0).toInt();
+        m_portfolio.id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
 
     QDialog::accept();
 }

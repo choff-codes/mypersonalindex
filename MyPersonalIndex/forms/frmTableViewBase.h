@@ -7,56 +7,51 @@
 #include "modelWithNoEdit.h"
 #include "queries.h"
 
-template<class T, class editForm, class queryClass>
+template<class T, class editForm>
 class frmTableViewBase : public QDialog
 {
 public:
     const QMap<int, T>& getReturnValues() const { return m_map; }
 
-    frmTableViewBase(const int &portfolioID, QWidget *parent = 0, const QMap<int, T> &map = QMap<int, T>(),
-                     const bool &showRightSideButtons = false, const QString &groupText = "", const int &columns = 0):
-                     QDialog(parent), m_map(map), m_portfolioID(portfolioID)
+    frmTableViewBase(const int &portfolioID, QWidget *parent = 0, queries *sql = 0, const QMap<int, T> &map = (QMap<int, T>()),
+        const bool &showRightSideButtons = false, const QString &groupText = "", const int &columns = 0):
+        QDialog(parent), m_portfolioID(portfolioID), m_sql(sql), m_map(map)
     {
-        sql = new queryClass(m_portfolioID);
-
         ui.setupUI(this, groupText, showRightSideButtons);
         ui.table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
         m_list = m_map.values();
         m_model = new modelWithNoEdit(m_list.count(), columns, ui.table);
-        ui.table->setModel(m_model);
+        ui.table->setModel(m_model); 
+        // derived class must call load items in their load method
     }
-
-    ~frmTableViewBase() { delete sql; }
 
 protected:
     frmTableViewBase_UI ui;
-    QMap<int, T> m_map;
+    int m_portfolioID;
+    queries *m_sql;
+    QMap<int, T> m_map; // stores original values to check for changes at end
     QList<T> m_list;
     modelWithNoEdit *m_model;
-    int m_portfolioID;
-    queryClass *sql;
-
 
     virtual void updateList(const T &item, const int &row = -1) = 0;
     virtual void saveItem(const T &item) = 0;
     virtual void deleteItem(const T &item) = 0;
-    virtual void updateHeader() { }
+    virtual void updateHeader() { /* not required */ }
 
     void loadItems()
     {
-        int i = 0;
-        foreach(const T &item, m_list)
-        {
-            updateList(item, i);
-            i++;
-        }
+        for(int i = 0; i < m_list.count(); ++i)
+            updateList(m_list.at(i), i);
+
         updateHeader();
     }
 
     void editItem()
     {
         QModelIndexList il = ui.table->selectionModel()->selectedRows();
+        if(il.count() == 0)
+            return;
 
         foreach(const QModelIndex &q, il)
         {
@@ -90,52 +85,53 @@ protected:
     void removeItem()
     {
         QModelIndexList il = ui.table->selectionModel()->selectedRows();
+        if(il.count() == 0)
+            return;
+
         QList<int> indexes;
         foreach(const QModelIndex &q, il)
             indexes.append(q.row());
         qSort(indexes);
 
-        for(int i = indexes.count() - 1; i >= 0; i--)
+        for(int i = indexes.count() - 1; i >= 0; --i)
         {
             m_list.removeAt(indexes.at(i));
             m_model->removeRow(indexes.at(i));
         }
+        updateHeader();
     }
 
     void accept()
     {
-        if(!sql)
-            return;
-
         QMap<int, T> toReturn;
         bool changes = false;
 
-        sql->getDatabase().transaction();
+        m_sql->getDatabase().transaction();
 
-        for(int i = 0; i < m_list.count(); i++)
+        foreach(T item, m_list) // save all items
         {
-            if (m_list[i].id == -1 || m_map.value(m_list[i].id) != m_list[i])
+            if (item.id == -1 || m_map.value(item.id) != item)
             {
                 changes = true;
-                saveItem(m_list[i]);
-                if (m_list[i].id == -1)
-                    m_list[i].id = sql->executeScalar(sql->getIdentity()).toInt();
+                saveItem(item);
+                if (item.id == -1)
+                    item.id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
             }
-            toReturn.insert(m_list[i].id, m_list[i]);
+            toReturn.insert(item.id, item);
         }
 
-        foreach(const T &item, m_map)
+        foreach(const T &item, m_map) // delete items that have been removed
             if(!toReturn.contains(item.id))
             {
                 changes = true;
                 deleteItem(item);
             }
 
-        sql->getDatabase().commit();
+        m_sql->getDatabase().commit();
 
         if (changes)
         {
-            m_map = toReturn;
+            m_map = toReturn; // update with saved values
             QDialog::accept();
         }
         else

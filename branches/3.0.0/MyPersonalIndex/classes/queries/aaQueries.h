@@ -7,7 +7,7 @@
 class aaQueries : public queries
 {
 public:
-    queryInfo* updateAA(globals::assetAllocation* const aa);
+    queryInfo* updateAA(const globals::assetAllocation &aa);
     queryInfo* deleteAA(const int &aaID);
 
     aaQueries(const int &portfolioID): queries(), m_portfolioID(portfolioID) {}

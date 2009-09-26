@@ -2,39 +2,31 @@
 #define FRMAA_H
 
 #include <QtGui>
-#include "frmTableViewBase_UI.h"
+#include "frmTableViewBase.h"
 #include "globals.h"
 #include "modelWithNoEdit.h"
 #include "aaQueries.h"
+#include "frmAAEdit.h"
 
-class frmAA : public QDialog
+class frmAA : public frmTableViewBase<globals::assetAllocation, frmAAEdit, aaQueries>
 {
     Q_OBJECT
 
 public:
-    const QMap<int, globals::assetAllocation>& getReturnValues() const { return m_aaMap; }
-
-    frmAA(const int &portfolioID, QWidget *parent = 0, const QMap<int, globals::assetAllocation> &aa = QMap<int, globals::assetAllocation>());
-    ~frmAA() { delete sql; }
+    frmAA(const int &portfolioID, QWidget *parent = 0, const QMap<int, globals::assetAllocation> &aa = (QMap<int, globals::assetAllocation>()));
 
 private:
-    frmTableViewBase_UI ui;
-    aaQueries *sql;
-    QMap<int, globals::assetAllocation> m_aaMap;
-    QList<globals::assetAllocation> m_aa;
-    modelWithNoEdit *m_model;
-    int m_portfolioID;
-
     void updateList(const globals::assetAllocation &aa, const int &row = -1);
     void updateHeader();
-    void loadAA();
     void connectSlots();
+    void saveItem(const globals::assetAllocation &aa);
+    void deleteItem(const globals::assetAllocation &aa);
 
 private slots:
     void accept();
     void addAA();
     void editAA();
-    void deleteAA();
+    void removeAA();
 };
 
 #endif // FRMAA_H

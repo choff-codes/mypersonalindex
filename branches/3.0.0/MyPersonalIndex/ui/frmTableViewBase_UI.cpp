@@ -1,6 +1,6 @@
 #include "frmTableViewBase_UI.h"
 
-void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, const bool &showPasteButton, const bool &showRightSideButtons)
+void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, const bool &showRightSideButtons)
 {
     dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
 
@@ -47,11 +47,8 @@ void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, 
     groupLayoutBottom->addWidget(btnAdd);
     groupLayoutBottom->addWidget(btnEdit);
     groupLayoutBottom->addWidget(btnDelete);
-    if (showPasteButton)
-    {
-        btnPaste = new QPushButton("Paste", gpMain);
-        groupLayoutBottom->addWidget(btnPaste);
-    }
+    btnPaste = new QPushButton("Paste", gpMain);
+    groupLayoutBottom->addWidget(btnPaste);
 
     groupLayout->addLayout(groupLayoutBottom, 1, 0);
 

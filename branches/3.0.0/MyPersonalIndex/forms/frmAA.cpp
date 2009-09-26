@@ -1,37 +1,19 @@
 #include "frmAA.h"
 #include "frmAAEdit.h"
 
-frmAA::frmAA(const int &portfolioID, QWidget *parent, const QMap<int, globals::assetAllocation> &aa): QDialog(parent), m_aaMap(aa), m_portfolioID(portfolioID)
+frmAA::frmAA(const int &portfolioID, QWidget *parent, const QMap<int, globals::assetAllocation> &aa):
+    frmTableViewBase<globals::assetAllocation, frmAAEdit, aaQueries>(portfolioID, parent, aa, false, "Asset Allocation", 2)
 {
-    sql = new aaQueries(m_portfolioID);
-
-    ui.setupUI(this, "Desired Allocation", true, false);
-    ui.table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     this->setWindowTitle("Edit Asset Allocation");
     connectSlots();
-
-    m_aa = m_aaMap.values();
-    m_model = new modelWithNoEdit(m_aa.count(), 2, ui.table);
-    loadAA();
-    ui.table->setModel(m_model);
-}
-
-void frmAA::loadAA()
-{
-    int i = 0;
-    foreach(const globals::assetAllocation &aa, m_aa)
-    {
-        updateList(aa, i);
-        i++;
-    }
-    updateHeader();
+    loadItems();
 }
 
 void frmAA::connectSlots()
 {
     connect(ui.btnAdd, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui.btnEdit, SIGNAL(clicked()), this, SLOT(editAA()));
-    connect(ui.btnDelete, SIGNAL(clicked()), this, SLOT(deleteAA()));
+    connect(ui.btnDelete, SIGNAL(clicked()), this, SLOT(removeAA()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
 }
@@ -52,7 +34,7 @@ void frmAA::updateList(const globals::assetAllocation &aa, const int &row)
 void frmAA::updateHeader()
 {
     double d = 0;
-    foreach(const globals::assetAllocation &aa, m_aa)
+    foreach(const globals::assetAllocation &aa, m_list)
         if (aa.target >= 0)
             d += aa.target;
 
@@ -62,86 +44,30 @@ void frmAA::updateHeader()
 
 void frmAA::accept()
 {
-    QMap<int, globals::assetAllocation> toReturn;
-    bool changes = false;
+    frmTableViewBase<globals::assetAllocation, frmAAEdit, aaQueries>::accept();
+}
 
-    sql->getDatabase().transaction();
+void frmAA::saveItem(const globals::assetAllocation &aa)
+{
+    sql->executeNonQuery(sql->updateAA(aa));
+}
 
-    for(int i = 0; i < m_aa.count(); i++)
-    {
-        if (m_aa[i].id == -1 || m_aaMap.value(m_aa[i].id) != m_aa[i])
-        {
-            changes = true;
-            sql->executeNonQuery(sql->updateAA(&m_aa[i]));
-            if (m_aa[i].id == -1)
-                m_aa[i].id = sql->executeScalar(sql->getIdentity()).toInt();
-        }
-        toReturn.insert(m_aa[i].id, m_aa[i]);
-    }
-
-    foreach(const globals::assetAllocation &aa, m_aaMap)
-        if(!toReturn.contains(aa.id))
-        {
-            changes = true;
-            sql->executeNonQuery(sql->deleteAA(aa.id));
-        }
-
-    sql->getDatabase().commit();
-
-    if (changes)
-    {
-        m_aaMap = toReturn;
-        QDialog::accept();
-    }
-    else
-        QDialog::reject();
+void frmAA::deleteItem(const globals::assetAllocation &aa)
+{
+    sql->executeNonQuery(sql->deleteAA(aa.id));
 }
 
 void frmAA::addAA()
 {
-    frmAAEdit f(this);
-
-    if (f.exec())
-    {
-        globals::assetAllocation aa = f.getReturnValues();
-        m_aa.append(aa);
-        updateList(aa);
-        updateHeader();
-    }
+    addItem();
 }
 
 void frmAA::editAA()
 {
-    QModelIndexList il = ui.table->selectionModel()->selectedRows();
-
-    foreach(const QModelIndex &q, il)
-    {
-        int i = q.row();
-        frmAAEdit f(this, m_aa.at(i));
-
-        if (f.exec())
-        {
-            globals::assetAllocation aa = f.getReturnValues();
-            m_aa[i] = aa;
-            updateList(aa, i);
-        }
-        ui.table->selectionModel()->setCurrentIndex(q, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
-    updateHeader();
+    editItem();
 }
 
-void frmAA::deleteAA()
+void frmAA::removeAA()
 {
-    QModelIndexList il = ui.table->selectionModel()->selectedRows();
-    QList<int> indexes;
-    foreach(const QModelIndex &q, il)
-        indexes.append(q.row());
-    qSort(indexes);
-
-    for(int i = indexes.count() - 1; i >= 0; i--)
-    {
-        m_aa.removeAt(indexes.at(i));
-        m_model->removeRow(indexes.at(i));
-    }
-    updateHeader();
+    removeItem();
 }

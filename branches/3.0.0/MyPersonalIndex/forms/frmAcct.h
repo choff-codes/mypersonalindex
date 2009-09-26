@@ -2,38 +2,30 @@
 #define FRMACCT_H
 
 #include <QtGui>
-#include "frmTableViewBase_UI.h"
+#include "frmTableViewBase.h"
 #include "globals.h"
 #include "modelWithNoEdit.h"
 #include "acctQueries.h"
+#include "frmAcctEdit.h"
 
-class frmAcct : public QDialog
+class frmAcct : public frmTableViewBase<globals::account, frmAcctEdit, acctQueries>
 {
     Q_OBJECT
 
 public:
-    const QMap<int, globals::account>& getReturnValues() const { return m_acctMap; }
-
-    frmAcct(const int &portfolioID, QWidget *parent = 0, const QMap<int, globals::account> &acct = QMap<int, globals::account>());
-    ~frmAcct() { delete sql; }
+    frmAcct(const int &portfolioID, QWidget *parent = 0, const QMap<int, globals::account> &acct = (QMap<int, globals::account>()));
 
 private:
-    frmTableViewBase_UI ui;
-    acctQueries *sql;
-    QMap<int, globals::account> m_acctMap;
-    QList<globals::account> m_acct;
-    modelWithNoEdit *m_model;
-    int m_portfolioID;
-
     void updateList(const globals::account &acct, const int &row = -1);
-    void loadAcct();
     void connectSlots();
+    void saveItem(const globals::account &acct);
+    void deleteItem(const globals::account &acct);
 
 private slots:
     void accept();
     void addAcct();
     void editAcct();
-    void deleteAcct();
+    void removeAcct();
 };
 
 #endif // FRMACCT_H

@@ -222,41 +222,33 @@ queries::queryInfo* queries::getDates()
 
 queries::queryInfo* queries::updateSettings(const globals::settings &s)
 {
-    return new queryInfo(
-        "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate",
-        QList<parameter>()
-            << parameter(":Splits", (int)s.splits)
+    QString sql = "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate, TickersIncludeDividends = :TickersIncludeDividends,"
+            " LastPortfolio = :LastPortfolio, Version = :Version, WindowState = :WindowState";
+    QList<parameter> params;
+    params  << parameter(":Splits", (int)s.splits)
             << parameter(":DataStartDate", s.dataStartDate.toJulianDay())
-    );
-}
+            << parameter(":TickersIncludeDividends", (int)s.tickersIncludeDividends)
+            << parameter(":LastPortfolio", s.lastPortfolio)
+            << parameter(":WindowState", (int)s.state)
+            << parameter(":Version", s.version);
 
-queries::queryInfo* queries::updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state)
-{
-    if (state)  // non-normal state, ignore size
-        return new queryInfo(
-            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowState = :WindowState",
-            QList<parameter>()
-                << parameter(":LastPortfolio", lastPortfolio)
-                << parameter(":WindowState", state) // 1 = maximized, 2 = minimized
-        );
-    else
-        return new queryInfo(
-            "UPDATE Settings SET LastPortfolio = :LastPortfolio, WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight,"
-                " WindowWidth = :WindowWidth, WindowState = :WindowState",
-            QList<parameter>()
-                << parameter(":LastPortfolio", lastPortfolio)
-                << parameter(":WindowX", windowLocation.x())
-                << parameter(":WindowY", windowLocation.y())
-                << parameter(":WindowHeight", windowSize.height())
-                << parameter(":WindowWidth", windowSize.width())
-                << parameter(":WindowState", state)
-        );
+    if (s.state == Qt::WindowNoState) // only save size and position if the window is in normal state
+    {
+        sql.append(", WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight, WindowWidth = :WindowWidth");
+        params  << parameter(":WindowX", s.windowLocation.x())
+                << parameter(":WindowY", s.windowLocation.y())
+                << parameter(":WindowHeight", s.windowSize.height())
+                << parameter(":WindowWidth", s.windowSize.width());
+    }
+
+    return new queryInfo(sql, params);
 }
 
 queries::queryInfo* queries::getSettings()
 {
     return new queryInfo(
-        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState, Splits, Version FROM Settings",
+        "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState,"
+            " Splits, TickersIncludeDividends, Version FROM Settings",
         QList<parameter>()
     );
 }
@@ -264,7 +256,7 @@ queries::queryInfo* queries::getSettings()
 queries::queryInfo* queries::getAA()
 {
     return new queryInfo(
-        "SELECT ID, PortfolioID, Description, Target FROM AA",
+        "SELECT ID, PortfolioID, Description, Target FROM AA ORDER BY PortfolioID",
         QList<parameter>()
     );
 }
@@ -294,6 +286,13 @@ queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::ass
     }
 }
 
+queries::queryInfo* queries::getAcct()
+{
+    return new queryInfo(
+        "SELECT ID, PortfolioID, Description, TaxRate, TaxDeferred FROM Acct ORDER BY PortfolioID",
+        QList<parameter>()
+    );
+}
 
 queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::account &acct)
 {
@@ -340,8 +339,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
         << parameter(":CorrelationShowHidden", (int)p.correlationShowHidden)
         << parameter(":AcctShowBlank", (int)p.acctShowBlank)
         << parameter(":AcctSort", p.acctSort)
-        << parameter(":NAVSortDesc", (int)p.navSortDesc)
-        << parameter(":PortfolioID", p.id);
+        << parameter(":NAVSortDesc", (int)p.navSortDesc);
 
     if(p.id == -1) // insert new
     {
@@ -355,6 +353,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
     }
     else // update
     {
+        params << parameter(":PortfolioID", p.id);
         return new queryInfo(
             "UPDATE Portfolios SET Description = :Description, Dividends = :Dividends, StartValue = :StartValue, CostCalc = :CostCalc, AAThreshold = :AAThreshold,"
                 " ThresholdMethod = :ThresholdMethod, StartDate = :StartDate, HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :ShowAABlank,"
@@ -365,7 +364,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
     }
 }
 
-queries::queryInfo* queries::getPortfolioAttributes()
+queries::queryInfo* queries::getPortfolio()
 {
     return new queryInfo(
         "SELECT ID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdMethod,"

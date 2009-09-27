@@ -8,6 +8,7 @@
 #include "frmOptions.h"
 #include "frmAA.h"
 #include "frmAcct.h"
+#include "frmStat.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -64,6 +65,7 @@ void frmMain::connectSlots()
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
+    connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(stat()));
 
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
 }
@@ -86,25 +88,28 @@ void frmMain::loadSettings()
         int x = q->value(queries::getSettings_DataStartDate).toInt();
         m_settings.dataStartDate = QDate::fromJulianDay(x);
         m_settings.splits = q->value(queries::getSettings_Splits).toBool();
+        m_settings.tickersIncludeDividends = q->value(queries::getSettings_TickersIncludeDividends).toBool();
         m_settings.version = q->value(queries::getSettings_Version).toInt();
         if (!q->value(queries::getSettings_WindowState).isNull())
         {
-            resize(QSize(q->value(queries::getSettings_WindowWidth).toInt(),
-                         q->value(queries::getSettings_WindowHeight).toInt()));
-            move(QPoint(q->value(queries::getSettings_WindowX).toInt(),
-                        q->value(queries::getSettings_WindowY).toInt()));
-            int state = q->value(queries::getSettings_WindowState).toInt();
-            if (state)
-            {
-                Qt::WindowState w = state == 1 ? Qt::WindowMaximized : Qt::WindowMinimized;
-                this->setWindowState(this->windowState() | w);
-            }
+            m_settings.windowSize = QSize(q->value(queries::getSettings_WindowWidth).toInt(),
+                q->value(queries::getSettings_WindowHeight).toInt());
+            resize(m_settings.windowSize);
+            m_settings.windowLocation = QPoint(q->value(queries::getSettings_WindowX).toInt(),
+                        q->value(queries::getSettings_WindowY).toInt());
+            move(m_settings.windowLocation);
+            m_settings.state = (Qt::WindowState)q->value(queries::getSettings_WindowState).toInt();
+            if (m_settings.state != Qt::WindowNoState)
+                this->setWindowState(this->windowState() | m_settings.state);
         }
         else
-            functions::showWelcomeMessage(this);
+            functions::showWelcomeMessage(this); // first time being run
 
         if (!q->value(queries::getSettings_LastPortfolio).isNull())
-            m_currentPortfolio = m_portfolios.value(q->value(queries::getSettings_LastPortfolio).toInt());
+        {
+            m_settings.lastPortfolio = q->value(queries::getSettings_LastPortfolio).toInt();
+            m_currentPortfolio = m_portfolios.value(m_settings.lastPortfolio.toInt());
+        }
     }
 
     delete q;
@@ -151,7 +156,12 @@ void frmMain::saveSettings()
     QVariant portfolio(QVariant::Int);
     if (m_currentPortfolio)
         portfolio = m_currentPortfolio->info.id;
-    sql->executeNonQuery(sql->updateSettings(portfolio, this->size(), this->pos(), this->isMaximized() ? 1 : this->isMinimized() ? 2 : 0));
+
+    m_settings.lastPortfolio = portfolio;
+    m_settings.windowSize = size();
+    m_settings.windowLocation = pos();
+    m_settings.state = isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState;
+    sql->executeNonQuery(sql->updateSettings(m_settings));
 }
 
 void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
@@ -205,7 +215,7 @@ void frmMain::loadPortfolio()
 void frmMain::loadPortfolioSettings()
 {
     // set start date equal to earliest data day possible (may be after start date)
-    //CheckPortfolioStartDate(rs.GetDateTime((int)queries.eGetPortfolioAttributes.StartDate));
+    //CheckPortfolioStartDate(rs.GetDateTime((int)queries.egetPortfolio.StartDate));
     // todo ^
 
     ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, m_currentPortfolio->info.startDate.toString(Qt::SystemLocaleShortDate)));
@@ -219,18 +229,19 @@ void frmMain::loadPortfolioSettings()
     //ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
     // todo
     //ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
-    //mpi.account.sort = q->value(queries::getPortfolioAttributes_AcctSort).toString();
+    //mpi.account.sort = q->value(queries::getPortfolio_AcctSort).toString();
 }
 
 void frmMain::loadPortfolios()
 {
     loadPortfoliosInfo();
     loadPortfoliosAA();
+    loadPortfoliosAcct();
 }
 
 void frmMain::loadPortfoliosInfo()
 {
-    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioAttributes());
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolio());
 
     if (!q)
         return;
@@ -239,23 +250,23 @@ void frmMain::loadPortfoliosInfo()
     {
         globals::portfolio p;
 
-        p.id = q->value(queries::getPortfolioAttributes_PortfolioID).toInt();
-        p.description = q->value(queries::getPortfolioAttributes_Description).toString();
-        p.origStartDate = QDate::fromJulianDay(q->value(queries::getPortfolioAttributes_StartDate).toInt());
+        p.id = q->value(queries::getPortfolio_PortfolioID).toInt();
+        p.description = q->value(queries::getPortfolio_Description).toString();
+        p.origStartDate = QDate::fromJulianDay(q->value(queries::getPortfolio_StartDate).toInt());
         p.startDate = p.origStartDate;
-        p.dividends = q->value(queries::getPortfolioAttributes_Dividends).toBool();
-        p.costCalc = (globals::avgShareCalc)q->value(queries::getPortfolioAttributes_CostCalc).toInt();
-        p.startValue = q->value(queries::getPortfolioAttributes_StartValue).toInt();
-        p.aaThreshold = q->value(queries::getPortfolioAttributes_AAThreshold).toInt();
-        p.aaThresholdMethod = (globals::thesholdMethod)q->value(queries::getPortfolioAttributes_AAThresholdMethod).toInt();
-        p.holdingsShowHidden = q->value(queries::getPortfolioAttributes_HoldingsShowHidden).toBool();
-        p.navSortDesc = q->value(queries::getPortfolioAttributes_NAVSortDesc).toBool();
-        p.aaShowBlank = q->value(queries::getPortfolioAttributes_AAShowBlank).toBool();
-        p.correlationShowHidden = q->value(queries::getPortfolioAttributes_CorrelationShowHidden).toBool();
-        p.acctShowBlank = q->value(queries::getPortfolioAttributes_AcctShowBlank).toBool();
-        p.holdingsSort = q->value(queries::getPortfolioAttributes_HoldingsSort).toString();
-        p.aaSort = q->value(queries::getPortfolioAttributes_AASort).toString();
-        p.acctSort = q->value(queries::getPortfolioAttributes_AcctSort).toString();
+        p.dividends = q->value(queries::getPortfolio_Dividends).toBool();
+        p.costCalc = (globals::avgShareCalc)q->value(queries::getPortfolio_CostCalc).toInt();
+        p.startValue = q->value(queries::getPortfolio_StartValue).toInt();
+        p.aaThreshold = q->value(queries::getPortfolio_AAThreshold).toInt();
+        p.aaThresholdMethod = (globals::thesholdMethod)q->value(queries::getPortfolio_AAThresholdMethod).toInt();
+        p.holdingsShowHidden = q->value(queries::getPortfolio_HoldingsShowHidden).toBool();
+        p.navSortDesc = q->value(queries::getPortfolio_NAVSortDesc).toBool();
+        p.aaShowBlank = q->value(queries::getPortfolio_AAShowBlank).toBool();
+        p.correlationShowHidden = q->value(queries::getPortfolio_CorrelationShowHidden).toBool();
+        p.acctShowBlank = q->value(queries::getPortfolio_AcctShowBlank).toBool();
+        p.holdingsSort = q->value(queries::getPortfolio_HoldingsSort).toString();
+        p.aaSort = q->value(queries::getPortfolio_AASort).toString();
+        p.acctSort = q->value(queries::getPortfolio_AcctSort).toString();
 
         m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
     }
@@ -311,6 +322,36 @@ void frmMain::loadPortfoliosAA()
 
 void frmMain::loadPortfoliosAcct()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getAcct());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::account acct;
+
+        acct.id = q->value(queries::getAcct_ID).toInt();
+        acct.description = q->value(queries::getAcct_Description).toString();
+        if (!q->value(queries::getAcct_TaxRate).isNull())
+            acct.taxRate = q->value(queries::getAcct_TaxRate).toDouble();
+        acct.taxDeferred = q->value(queries::getAcct_TaxDeferred).toBool();
+
+        int portfolioID = q->value(queries::getAcct_PortfolioID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+
+       p->data.acct.insert(acct.id, acct);
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::loadPortfoliosStat()
@@ -407,8 +448,9 @@ void frmMain::addTicker()
 
 void frmMain::options()
 {
-    frmOptions f(this);
-    f.exec();
+    frmOptions f(this, sql, m_settings);
+    if (f.exec())
+        m_settings = f.getReturnValues();
 }
 
 void frmMain::aa()
@@ -427,6 +469,16 @@ void frmMain::acct()
     if (f.exec())
     {
         m_currentPortfolio->data.acct = f.getReturnValues();
+    }
+
+}
+
+void frmMain::stat()
+{
+    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics);
+    if (f.exec())
+    {
+        m_statistics = f.getReturnValues();
     }
 
 }

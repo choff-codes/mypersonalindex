@@ -201,8 +201,13 @@ public:
         QDate dataStartDate;
         bool splits;
         int version;
+        bool tickersIncludeDividends;
+        QVariant lastPortfolio;
+        QSize windowSize;
+        QPoint windowLocation;
+        Qt::WindowState state;
 
-        settings(): dataStartDate(QDate(2008, 1, 2)), splits(true), version(0) {}
+        settings(): version(0), lastPortfolio(QVariant(QVariant::Int)) {}
     };
 
     struct portfolioData

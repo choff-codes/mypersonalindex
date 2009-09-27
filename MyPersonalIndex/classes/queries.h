@@ -78,26 +78,28 @@ public:
     queryInfo* getDates();
 
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
-           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_Version };
+           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
     queryInfo* getSettings();
 
     queryInfo* updateSettings(const globals::settings&);
-    queryInfo* updateSettings(const QVariant &lastPortfolio, const QSize &windowSize, const QPoint &windowLocation, const int &state);
 
     enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
     queryInfo* getAA();
 
     queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&);
 
+    enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
+    queryInfo* getAcct();
+
     queryInfo* updateAcct(const int &portfolioID, const globals::account&);
 
 
-    enum { getPortfolioAttributes_PortfolioID, getPortfolioAttributes_Description, getPortfolioAttributes_Dividends, getPortfolioAttributes_StartValue,
-           getPortfolioAttributes_CostCalc, getPortfolioAttributes_AAThreshold, getPortfolioAttributes_AAThresholdMethod,
-           getPortfolioAttributes_StartDate, getPortfolioAttributes_HoldingsShowHidden, getPortfolioAttributes_HoldingsSort,
-           getPortfolioAttributes_NAVSortDesc, getPortfolioAttributes_AASort, getPortfolioAttributes_AAShowBlank,
-           getPortfolioAttributes_CorrelationShowHidden, getPortfolioAttributes_AcctSort, getPortfolioAttributes_AcctShowBlank };
-    queryInfo* getPortfolioAttributes();
+    enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
+           getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
+           getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
+           getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
+           getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
+    queryInfo* getPortfolio();
 
     queryInfo* updatePortfolio(const globals::portfolio&);
 

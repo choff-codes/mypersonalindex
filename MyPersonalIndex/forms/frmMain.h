@@ -4,7 +4,7 @@
 #define VERSION 300 // UPDATE EACH RELEASE
 #define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
 
-#include <QMainWindow>
+#include <QtGui>
 #include "frmMain_UI.h"
 #include "queries.h"
 #include "globals.h"
@@ -60,6 +60,7 @@ private slots:
     void options();
     void aa();
     void acct();
+    void stat();
 
 protected:
     void closeEvent(QCloseEvent *event);

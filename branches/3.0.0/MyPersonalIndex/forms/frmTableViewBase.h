@@ -5,6 +5,7 @@
 #include "frmTableViewBase_UI.h"
 #include "globals.h"
 #include "modelWithNoEdit.h"
+#include "functions.h"
 #include "queries.h"
 
 template<class T, class editForm>
@@ -64,7 +65,7 @@ protected:
                 m_list[i] = item;
                 updateList(item, i);
             }
-            ui.table->selectionModel()->setCurrentIndex(q, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            selectItem(q);
         }
         updateHeader();
     }
@@ -84,14 +85,9 @@ protected:
 
     void removeItem()
     {
-        QModelIndexList il = ui.table->selectionModel()->selectedRows();
-        if(il.count() == 0)
+        QList<int> indexes = functions::getSelectedRows(ui.table->selectionModel()->selectedRows());
+        if(indexes.count() == 0)
             return;
-
-        QList<int> indexes;
-        foreach(const QModelIndex &q, il)
-            indexes.append(q.row());
-        qSort(indexes);
 
         for(int i = indexes.count() - 1; i >= 0; --i)
         {
@@ -136,6 +132,74 @@ protected:
         }
         else
             QDialog::reject();
+    }
+
+    void selectAll()
+    {
+        for(int i = 0; i < m_model->rowCount(); ++i)
+            m_model->item(i, 0)->setCheckState(Qt::Checked);
+        updateHeader();
+    }
+
+    void clearAll()
+    {
+        for(int i = 0; i < m_model->rowCount(); ++i)
+            m_model->item(i, 0)->setCheckState(Qt::Unchecked);
+        updateHeader();
+    }
+
+    void moveUp()
+    {
+        QList<int> indexes = functions::getSelectedRows(ui.table->selectionModel()->selectedRows());
+        if(indexes.count() == 0)
+            return;
+
+        if (functions::isContiguous(indexes, true, m_model->rowCount()))
+            return;
+
+        for(int i = 0; i < indexes.count(); ++i)
+        {
+            int row = indexes.value(i);
+            if (row == 0)
+                continue;
+
+            QList<QStandardItem*> list = m_model->takeRow(row);
+            m_model->insertRow(row-1, list);
+            m_list.swap(row, row-1);
+
+            selectItem(m_model->index(row-1, 0));
+        }
+        updateHeader();
+    }
+
+    void moveDown()
+    {
+        QList<int> indexes = functions::getSelectedRows(ui.table->selectionModel()->selectedRows());
+        if(indexes.count() == 0)
+            return;
+
+        int rowCount = m_model->rowCount();
+        if (functions::isContiguous(indexes, false, rowCount))
+            return;
+
+        for(int i = indexes.count() - 1; i >= 0; --i)
+        {
+            int row = indexes.value(i);
+            if (row == rowCount - 1)
+                continue;
+
+            QList<QStandardItem*> list = m_model->takeRow(row);
+            m_model->insertRow(row+1, list);
+            m_list.swap(row, row+1);
+
+            selectItem(m_model->index(row+1, 0));
+        }
+        updateHeader();
+    }
+
+    void selectItem(const QModelIndex &index)
+    {
+        ui.table->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 };
 

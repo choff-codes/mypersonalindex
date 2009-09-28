@@ -120,6 +120,10 @@ public:
         bool operator!=(const statistic &other) const {
             return !(*this == other);
         }
+
+        bool operator<(const statistic &other) const {
+            return this->description < other.description;
+        }
     };
 
     struct security

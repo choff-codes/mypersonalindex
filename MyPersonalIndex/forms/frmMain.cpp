@@ -475,7 +475,7 @@ void frmMain::acct()
 
 void frmMain::stat()
 {
-    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics);
+    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics, &m_currentPortfolio->data.stats);
     if (f.exec())
     {
         m_statistics = f.getReturnValues();

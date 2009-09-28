@@ -7,7 +7,7 @@ RESOURCES += icons/icons.qrc
 QT += sql \
     network
 SOURCES += main.cpp
-RC_FILE = MyPersonalIndex_resource.rc
+win32:RC_FILE = MyPersonalIndex_resource.rc
 unix { 
     # in debug mode...
     CONFIG(debug, debug|release):DESTDIR = debug

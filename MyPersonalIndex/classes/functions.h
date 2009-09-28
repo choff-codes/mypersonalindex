@@ -35,6 +35,45 @@ public:
     {
         return value < 0 ? QVariant(QVariant::Double) : value;
     }
+
+    static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count)
+    {
+        int x = ascending ? 0 : count - 1;
+        bool contiguous = true;
+
+        if (ascending)
+        {
+            for(int i = 0; i < values.count(); ++i, ++x)
+                if (values.value(i) != x)
+                {
+                    contiguous = false;
+                    break;
+                }
+        }
+        else
+        {
+            for(int i = values.count() - 1; i >= 0; --i, --x)
+                if (values.value(i) != x)
+                {
+                    contiguous = false;
+                    break;
+                }
+        }
+        return contiguous;
+    }
+
+    static QList<int> getSelectedRows(const QModelIndexList &model)
+    {
+        QList<int> indexes;
+        if (model.count() == 0)
+            return indexes;
+
+        foreach(const QModelIndex &q, model)
+            indexes.append(q.row());
+        qSort(indexes);
+
+        return indexes;
+    }
 };
 
 #endif // FUNCTIONS_H

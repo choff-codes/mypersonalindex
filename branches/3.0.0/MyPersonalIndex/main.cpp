@@ -1,6 +1,4 @@
-#include <QApplication>
-
-#include "forms/frmMain.h"
+#include "frmMain.h"
 #include "qtsingleapplication.h"
 
 int main(int argc, char *argv[])

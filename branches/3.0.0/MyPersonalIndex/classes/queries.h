@@ -35,23 +35,25 @@ public:
     static const QString table_Portfolios;
     static const QString table_Settings;
     static const QString table_Splits;
-    static const QString table_Stats;
+    static const QString table_Stat;
+    static const QString table_StatMapping;
     static const QString table_Tickers;
     static const QString table_TickersAA;
     static const QString table_TickersTrades;
-    static const QString table_Trades;
-    static const QString table_UserStatistics;
+    static const QString table_Trades; 
 
 
     static const QStringList closingPricesColumns;
     static const QStringList dividendsColumns;
     static const QStringList splitsColumns;
+    static const QStringList statMappingColumns;
     static const QStringList tradesColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
     enum { dividends_Date, dividends_Ticker, dividends_Amount };
     enum { splits_Date, splits_Ticker, splits_Ratio };
+    enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
     enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
 
     queries();
@@ -67,6 +69,7 @@ public:
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant());
 
     queryInfo* deleteItem(const QString &table, const int &id);
+    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID);
 
     queryInfo* getLastDate();
 
@@ -102,6 +105,8 @@ public:
     queryInfo* getPortfolio();
 
     queryInfo* updatePortfolio(const globals::portfolio&);
+
+    queryInfo* updateStat(const globals::statistic&);
 
 protected:
     QSqlDatabase db;

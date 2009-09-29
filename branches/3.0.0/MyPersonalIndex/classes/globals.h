@@ -122,7 +122,7 @@ public:
         }
 
         bool operator<(const statistic &other) const {
-            return this->description < other.description;
+            return this->description.toUpper() < other.description.toUpper();
         }
     };
 

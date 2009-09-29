@@ -58,17 +58,57 @@ void frmStat::updateList(const globals::statistic &stat, const int &row)
 
 void frmStat::accept()
 {
-    frmTableViewBase<globals::statistic, frmStatEdit>::accept();
+    // have to first check for changes to the sequence
+    // however, do not use these IDs yet, since the IDs have not been updated for new items
+    QList<int> toReturn;
+
+    for(int i = 0; i < m_model->rowCount(); ++i)
+        if (m_model->item(i, 0)->checkState() == Qt::Checked)
+            toReturn.append(m_list.value(i).id);
+
+    bool changes = (*m_statList) != toReturn;
+
+    frmTableViewBase<globals::statistic, frmStatEdit>::accept(changes);
+
+    if (!changes)
+        return;
+
+    QVariantList portfolio, stat, sequence;
+    int sequenceID = 0;
+
+    toReturn.clear(); // reset to account for new IDs
+    for(int i = 0; i < m_model->rowCount(); ++i)
+    {
+        if (m_model->item(i, 0)->checkState() == Qt::Unchecked)
+            continue;
+
+        portfolio.append(m_portfolioID);
+        stat.append(m_list.value(i).id);
+        toReturn.append(m_list.value(i).id);
+        sequence.append(sequenceID);
+        ++sequenceID;
+    }
+
+    QMap<QString, QVariantList> tableValues;
+    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_PortfolioID), portfolio);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_StatID), stat);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_Sequence), sequence);
+
+    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_StatMapping, m_portfolioID));
+    if (stat.count() != 0)
+        m_sql->executeTableUpdate(queries::table_StatMapping, tableValues);
+
+    (*m_statList) = toReturn;
 }
 
 void frmStat::saveItem(const globals::statistic &stat)
 {
-    //m_sql->executeNonQuery(m_sql->updateAA(m_portfolioID, aa));
+    m_sql->executeNonQuery(m_sql->updateStat(stat));
 }
 
 void frmStat::deleteItem(const globals::statistic &stat)
 {
-    //m_sql->executeNonQuery(m_sql->deleteItem(queries::table_AA, aa.id));
+    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_Stat, stat.id));
 }
 
 void frmStat::addStat()

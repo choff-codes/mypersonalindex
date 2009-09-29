@@ -97,21 +97,23 @@ protected:
         updateHeader();
     }
 
-    void accept()
+    void accept(bool changes = false)
     {
         QMap<int, T> toReturn;
-        bool changes = false;
-
         m_sql->getDatabase().transaction();
 
-        foreach(T item, m_list) // save all items
+        for(int i = 0; i < m_list.count(); ++i) // save all items
         {
+            T item = m_list.value(i);
             if (item.id == -1 || m_map.value(item.id) != item)
             {
                 changes = true;
                 saveItem(item);
                 if (item.id == -1)
+                {
                     item.id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+                    m_list[i].id = item.id;
+                }
             }
             toReturn.insert(item.id, item);
         }

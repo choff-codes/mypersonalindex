@@ -11,6 +11,9 @@ const QStringList queries::splitsColumns = QStringList() << "Date" << "Ticker" <
 //enum { dividends_Date, dividends_Ticker, dividends_Amount };
 const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker" << "Amount";
 
+//enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
+const QStringList queries::statMappingColumns = QStringList() << "PortfolioID" << "StatID" << "Sequence";
+
 //enum { dividends_Date, dividends_Ticker, dividends_Amount };
 const QStringList queries::tradesColumns = QStringList() << "ID" << "Portfolio" << "TickerID" << "Ticker"
     << "Date" << "Shares" << "Price" << "Custom";
@@ -24,12 +27,12 @@ const QString queries::table_NAV = "NAV";
 const QString queries::table_Portfolios = "Portfolios";
 const QString queries::table_Settings = "Settings";
 const QString queries::table_Splits = "Splits";
-const QString queries::table_Stats = "Stats";
+const QString queries::table_Stat = "Stat";
+const QString queries::table_StatMapping = "StatMapping";
 const QString queries::table_Tickers = "Tickers";
 const QString table_TickersAA = "TickersAA";
 const QString table_TickersTrades = "TickersTrades";
 const QString queries::table_Trades = "Trades";
-const QString queries::table_UserStatistics = "UserStatistics";
 
 queries::queries()
 {
@@ -193,6 +196,15 @@ queries::queryInfo* queries::deleteItem(const QString &table, const int &id)
         QString("DELETE FROM %1 WHERE ID = :ID").arg(table),
         QList<parameter>()
             << parameter(":ID", id)
+    );
+}
+
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID)
+{
+    return new queryInfo(
+        QString("DELETE FROM %1 WHERE PortfolioID = :ID").arg(table),
+        QList<parameter>()
+            << parameter(":ID", portfolioID)
     );
 }
 
@@ -373,4 +385,30 @@ queries::queryInfo* queries::getPortfolio()
             " FROM Portfolios",
         QList<parameter>()
     );
+}
+
+queries::queryInfo* queries::updateStat(const globals::statistic &stat)
+{
+    if(stat.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO Stat (Description, SQL, Format)"
+            " VALUES (:Description, :SQL, :Format)",
+            QList<parameter>()
+                << parameter(":Description", stat.description)
+                << parameter(":SQL", stat.sql)
+                << parameter(":Format", (int)stat.format)
+        );
+    }
+    else // update
+    {
+        return new queryInfo(
+            "UPDATE Stat SET Description = :Description, SQL = :SQL, Format = :Format WHERE ID = :StatID",
+            QList<parameter>()
+                << parameter(":Description", stat.description)
+                << parameter(":SQL", stat.sql)
+                << parameter(":Format", stat.format)
+                << parameter(":StatID", stat.id)
+        );
+    }
 }

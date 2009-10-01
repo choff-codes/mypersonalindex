@@ -412,3 +412,19 @@ queries::queryInfo* queries::updateStat(const globals::statistic &stat)
         );
     }
 }
+
+queries::queryInfo* queries::getStat()
+{
+    return new queryInfo(
+        "SELECT ID, Description, SQL, Format FROM Stat",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getStatMapping()
+{
+    return new queryInfo(
+        "SELECT PortfolioID, StatID FROM StatMapping ORDER BY PortfolioID, Sequence",
+        QList<parameter>()
+    );
+}

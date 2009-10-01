@@ -18,8 +18,6 @@ frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QM
     for(int i = 0; i < statList->count(); ++i)
         m_list.move(m_list.indexOf(m_map.value(statList->value(i))), i);
 
-       // m_list.move(m_list.indexOf(m_map.value(statList->value(i))), i);
-
     loadItems();
 
     for(int i = 0; i < m_model->rowCount(); ++i)
@@ -67,7 +65,6 @@ void frmStat::accept()
             toReturn.append(m_list.value(i).id);
 
     bool changes = (*m_statList) != toReturn;
-
     frmTableViewBase<globals::statistic, frmStatEdit>::accept(changes);
 
     if (!changes)
@@ -82,9 +79,10 @@ void frmStat::accept()
         if (m_model->item(i, 0)->checkState() == Qt::Unchecked)
             continue;
 
+        int id = m_list.value(i).id;
+        stat.append(id);
+        toReturn.append(id);
         portfolio.append(m_portfolioID);
-        stat.append(m_list.value(i).id);
-        toReturn.append(m_list.value(i).id);
         sequence.append(sequenceID);
         ++sequenceID;
     }

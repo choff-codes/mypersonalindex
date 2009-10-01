@@ -106,6 +106,12 @@ public:
 
     queryInfo* updatePortfolio(const globals::portfolio&);
 
+    enum { getStat_ID, getStat_Description, getStat_SQL, getStat_Format };
+    queryInfo* getStat();
+
+    enum { getStatMapping_PortfolioID, getStatMapping_StatID };
+    queryInfo* getStatMapping();
+
     queryInfo* updateStat(const globals::statistic&);
 
 protected:

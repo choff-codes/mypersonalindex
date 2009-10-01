@@ -117,12 +117,28 @@ void frmMain::loadSettings()
 
 void frmMain::loadStats()
 {
-    // to do
+    QSqlQuery *q = sql->executeResultSet(sql->getStat());
+    if (q)
+    {
+        do
+        {
+            globals::statistic stat;
+            stat.id = q->value(queries::getStat_ID).toInt();
+            stat.description = q->value(queries::getStat_Description).toString();
+            stat.sql = q->value(queries::getStat_SQL).toString();
+            stat.format = (globals::outputFormat)q->value(queries::getStat_Format).toInt();
+
+            m_statistics.insert(stat.id, stat);
+        }
+        while (q->next());
+    }
+
+    delete q;
 }
 
 void frmMain::loadDates()
 {
-    QSqlQuery *q = sql->executeResultSet(sql->getSettings());
+    QSqlQuery *q = sql->executeResultSet(sql->getDates());
     if (q)
     {
         do
@@ -237,6 +253,10 @@ void frmMain::loadPortfolios()
     loadPortfoliosInfo();
     loadPortfoliosAA();
     loadPortfoliosAcct();
+    loadPortfoliosStat();
+    loadPortfoliosTickers();
+    loadPortfoliosTickersAA();
+    loadPortfoliosTickersTrades();
 }
 
 void frmMain::loadPortfoliosInfo()
@@ -356,6 +376,28 @@ void frmMain::loadPortfoliosAcct()
 
 void frmMain::loadPortfoliosStat()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getStatMapping());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        int portfolioID = q->value(queries::getStatMapping_PortfolioID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+
+       p->data.stats.append(q->value(queries::getStatMapping_StatID).toInt());
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::savePortfolio()

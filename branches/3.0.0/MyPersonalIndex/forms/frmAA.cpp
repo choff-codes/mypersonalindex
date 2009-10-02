@@ -22,6 +22,7 @@ void frmAA::connectSlots()
     connect(ui.btnDelete, SIGNAL(clicked()), this, SLOT(removeAA()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(ui.table, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editAA()));
 }
 
 void frmAA::updateList(const globals::assetAllocation &aa, const int &row)

@@ -21,6 +21,7 @@ private:
     frmPortfolio_UI ui;
     queries *m_sql;
     globals::portfolio m_portfolio;
+    globals::portfolio m_portfolioOriginal;
 
     void loadPortfolioAttributes();
     bool getErrors();

@@ -212,6 +212,16 @@ public:
         Qt::WindowState state;
 
         settings(): version(0), lastPortfolio(QVariant(QVariant::Int)) {}
+
+        bool operator==(const settings &other) const {
+            // these are the only static properties, the other properties cannot be edited by the user
+            return this->dataStartDate == other.dataStartDate
+                    && this->splits == other.splits;
+        }
+
+        bool operator!=(const settings &other) const {
+            return !(*this == other);
+        }
     };
 
     struct portfolioData

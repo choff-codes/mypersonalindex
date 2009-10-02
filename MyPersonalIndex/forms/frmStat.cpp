@@ -16,7 +16,7 @@ frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QM
 
     qSort(m_list);
     for(int i = 0; i < statList->count(); ++i)
-        m_list.move(m_list.indexOf(m_map.value(statList->value(i))), i);
+        m_list.move(m_list.indexOf(m_mapOriginal.value(statList->value(i))), i);
 
     loadItems();
 
@@ -38,6 +38,7 @@ void frmStat::connectSlots()
     connect(ui.btnClear, SIGNAL(clicked()), this, SLOT(clearAll()));
     connect(ui.btnMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
     connect(ui.btnMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
+    connect(ui.table, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editStat()));
 }
 
 void frmStat::updateList(const globals::statistic &stat, const int &row)
@@ -58,13 +59,13 @@ void frmStat::accept()
 {
     // have to first check for changes to the sequence
     // however, do not use these IDs yet, since the IDs have not been updated for new items
-    QList<int> toReturn;
+    QList<int> returnList;
 
     for(int i = 0; i < m_model->rowCount(); ++i)
         if (m_model->item(i, 0)->checkState() == Qt::Checked)
-            toReturn.append(m_list.value(i).id);
+            returnList.append(m_list.value(i).id);
 
-    bool changes = (*m_statList) != toReturn;
+    bool changes = (*m_statList) != returnList;
     frmTableViewBase<globals::statistic, frmStatEdit>::accept(changes);
 
     if (!changes)
@@ -73,7 +74,7 @@ void frmStat::accept()
     QVariantList portfolio, stat, sequence;
     int sequenceID = 0;
 
-    toReturn.clear(); // reset to account for new IDs
+    returnList.clear(); // reset to account for new IDs
     for(int i = 0; i < m_model->rowCount(); ++i)
     {
         if (m_model->item(i, 0)->checkState() == Qt::Unchecked)
@@ -81,7 +82,7 @@ void frmStat::accept()
 
         int id = m_list.value(i).id;
         stat.append(id);
-        toReturn.append(id);
+        returnList.append(id);
         portfolio.append(m_portfolioID);
         sequence.append(sequenceID);
         ++sequenceID;
@@ -96,7 +97,7 @@ void frmStat::accept()
     if (stat.count() != 0)
         m_sql->executeTableUpdate(queries::table_StatMapping, tableValues);
 
-    (*m_statList) = toReturn;
+    (*m_statList) = returnList;
 }
 
 void frmStat::saveItem(const globals::statistic &stat)

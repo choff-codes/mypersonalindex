@@ -5,6 +5,7 @@
 #include "frmTicker_UI.h"
 #include "globals.h"
 #include "queries.h"
+#include "modelWithNoEdit.h"
 
 class frmTicker : public QDialog
 {
@@ -14,45 +15,23 @@ public:
 
     const globals::security& getReturnValues() const { return m_security; }
 
-    frmTicker(QWidget *parent = 0, QMap<int, globals::assetAllocation>* acct = 0, QMap<int, globals::account>* aa = 0, const globals::security& security = globals::security());
+    frmTicker(QWidget *parent = 0, queries *sql = 0, QMap<int, globals::assetAllocation>* acct = 0, QMap<int, globals::account>* aa = 0, const globals::security& security = globals::security());
 
 private:
 
     frmTicker_UI ui;
-    globals::security m_security;
-    queries sql;
-    //tradesSqlQueryModel *model;
+    queries *m_sql;
+    globals::security m_security;    
+    modelWithNoEdit *m_modelTrade;
+
+    void connectSlots();
+    void loadSecurity();
 
 private slots:
     void accept();
     void addTrade();
+    void resetExpense();
 };
-
-//class tradesSqlQueryModel: public QSqlTableModel
-//{
-//public:
-//
-//    tradesSqlQueryModel(QWidget *parent = 0, QSqlDatabase db = QSqlDatabase()): QSqlTableModel(parent, db) {}
-//
-//    QVariant data(const QModelIndex &index, int role) const
-//    {
-//        if (index.column() == queries::trades_Date && role == Qt::DisplayRole)
-//        {
-//            QVariant value = QSqlTableModel::data(index, role);
-//            return QDate::fromJulianDay(value.toInt()).toString(globals::shortDateFormat);
-//        }
-//        else
-//            return QSqlTableModel::data(index, role);
-//    }
-//
-//    QVariant headerData(int section, Qt::Orientation orientation, int role) const
-//    {
-//        if (orientation == Qt::Vertical && role == Qt::DisplayRole )
-//            return ">>";
-//        else
-//            return QSqlTableModel::headerData(section, orientation, role);
-//    }
-//};
 
 //class tickerAAModel: public QStandardItemModel
 //{

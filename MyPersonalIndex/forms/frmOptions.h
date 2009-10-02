@@ -19,6 +19,7 @@ private:
     frmOptions_UI ui;
     queries *m_sql;
     globals::settings m_settings;
+    globals::settings m_settingsOriginal;
 
 private slots:
     void accept();

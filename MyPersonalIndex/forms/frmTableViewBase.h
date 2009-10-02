@@ -16,14 +16,15 @@ public:
 
     frmTableViewBase(const int &portfolioID, QWidget *parent = 0, queries *sql = 0, const QMap<int, T> &map = (QMap<int, T>()),
         const bool &showRightSideButtons = false, const QString &groupText = "", const int &columns = 0):
-        QDialog(parent), m_portfolioID(portfolioID), m_sql(sql), m_map(map)
+        QDialog(parent), m_portfolioID(portfolioID), m_sql(sql),  m_mapOriginal(map)
     {
         ui.setupUI(this, groupText, showRightSideButtons);
         ui.table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
-        m_list = m_map.values();
+        m_list = m_mapOriginal.values();
         m_model = new modelWithNoEdit(m_list.count(), columns, ui.table);
         ui.table->setModel(m_model); 
+
         // derived class must call load items in their load method
     }
 
@@ -31,8 +32,9 @@ protected:
     frmTableViewBase_UI ui;
     int m_portfolioID;
     queries *m_sql;
-    QMap<int, T> m_map; // stores original values to check for changes at end
-    QList<T> m_list;
+    QMap<int, T> m_map; // stores final values, not modified until closing
+    QMap<int, T> m_mapOriginal; // stores original values
+    QList<T> m_list; // **use this, updated as user adds/edits items
     modelWithNoEdit *m_model;
 
     virtual void updateList(const T &item, const int &row = -1) = 0;
@@ -99,13 +101,12 @@ protected:
 
     void accept(bool changes = false)
     {
-        QMap<int, T> toReturn;
         m_sql->getDatabase().transaction();
 
         for(int i = 0; i < m_list.count(); ++i) // save all items
         {
             T item = m_list.value(i);
-            if (item.id == -1 || m_map.value(item.id) != item)
+            if (item.id == -1 || m_mapOriginal.value(item.id) != item)
             {
                 changes = true;
                 saveItem(item);
@@ -115,11 +116,11 @@ protected:
                     m_list[i].id = item.id;
                 }
             }
-            toReturn.insert(item.id, item);
+            m_map.insert(item.id, item);
         }
 
-        foreach(const T &item, m_map) // delete items that have been removed
-            if(!toReturn.contains(item.id))
+        foreach(const T &item, m_mapOriginal) // delete items that have been removed
+            if(!m_map.contains(item.id))
             {
                 changes = true;
                 deleteItem(item);
@@ -128,10 +129,7 @@ protected:
         m_sql->getDatabase().commit();
 
         if (changes)
-        {
-            m_map = toReturn; // update with saved values
             QDialog::accept();
-        }
         else
             QDialog::reject();
     }
@@ -165,8 +163,7 @@ protected:
             if (row == 0)
                 continue;
 
-            QList<QStandardItem*> list = m_model->takeRow(row);
-            m_model->insertRow(row-1, list);
+            m_model->insertRow(row-1, m_model->takeRow(row));
             m_list.swap(row, row-1);
 
             selectItem(m_model->index(row-1, 0));
@@ -190,8 +187,7 @@ protected:
             if (row == rowCount - 1)
                 continue;
 
-            QList<QStandardItem*> list = m_model->takeRow(row);
-            m_model->insertRow(row+1, list);
+            m_model->insertRow(row+1, m_model->takeRow(row));
             m_list.swap(row, row+1);
 
             selectItem(m_model->index(row+1, 0));

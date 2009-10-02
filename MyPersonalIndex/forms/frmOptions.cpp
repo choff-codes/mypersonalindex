@@ -1,6 +1,6 @@
 #include "frmOptions.h"
 
-frmOptions::frmOptions(QWidget *parent, queries *sql, const globals::settings& s): QDialog(parent), m_sql(sql), m_settings(s)
+frmOptions::frmOptions(QWidget *parent, queries *sql, const globals::settings& s): QDialog(parent), m_sql(sql), m_settings(s), m_settingsOriginal(s)
 {
     if (!m_sql || !m_sql->isOpen())
     {
@@ -21,7 +21,12 @@ void frmOptions::accept()
     m_settings.dataStartDate = ui.deDownloadDate->date();
     m_settings.splits = ui.chkSplits->isChecked();
 
-    m_sql->executeNonQuery(m_sql->updateSettings(m_settings));
+    if (m_settings == m_settingsOriginal)
+    {
+        QDialog::reject();
+        return;
+    }
 
+    m_sql->executeNonQuery(m_sql->updateSettings(m_settings));
     QDialog::accept();
 }

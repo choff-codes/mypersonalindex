@@ -1,4 +1,4 @@
 INCLUDEPATH += $$PWD
 HEADERS += $$PWD/mpiValidator.h \
-    $$PWD/dateEditDelegate.h \
+    $$PWD/viewDelegates.h \
     $$PWD/modelWithNoEdit.h

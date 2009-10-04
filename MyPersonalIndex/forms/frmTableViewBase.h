@@ -19,7 +19,6 @@ public:
         QDialog(parent), m_portfolioID(portfolioID), m_sql(sql),  m_mapOriginal(map)
     {
         ui.setupUI(this, groupText, showRightSideButtons);
-        ui.table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 
         m_list = m_mapOriginal.values();
         m_model = new modelWithNoEdit(m_list.count(), columns, ui.table);

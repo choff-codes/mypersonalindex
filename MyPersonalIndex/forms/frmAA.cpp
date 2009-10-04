@@ -46,7 +46,7 @@ void frmAA::updateHeader()
             d += aa.target;
 
     m_model->setHeaderData(0, Qt::Horizontal, "Description");
-    m_model->setHeaderData(1, Qt::Horizontal, QString("Target (%L1%)").arg(d, 0, 'f', 2));
+    m_model->setHeaderData(1, Qt::Horizontal, QString("Target (%1)").arg(functions::doubleToPercentage(d)));
 }
 
 void frmAA::accept()

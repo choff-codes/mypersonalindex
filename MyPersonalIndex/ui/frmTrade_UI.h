@@ -2,6 +2,7 @@
 #define FRMTRADE_UI_H
 
 #include <QtGui>
+#include "mpiValidator.h"
 
 class frmTrade_UI
 {
@@ -11,10 +12,11 @@ public:
     QFormLayout *tradeLayout;
     QLabel *type;
     QComboBox *cmbType;
+    mpiDoubleValidator *validator;
     QLabel *shares;
     QLineEdit *txtShares;
     QCheckBox *chkPrice;
-    QLineEdit *txtPrice;
+    QLineEdit *txtPrice;;
     QLabel *commission;
     QLineEdit *txtCommission;
     QLabel *cash;

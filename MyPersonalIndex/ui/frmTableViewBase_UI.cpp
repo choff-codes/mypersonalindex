@@ -20,7 +20,7 @@ void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, 
     table->verticalHeader()->setDefaultSectionSize(fntHeight);
     table->horizontalHeader()->setFixedHeight(fntHeight);
     table->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
-    table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     table->verticalHeader()->hide();
     groupLayout->addWidget(table, 0, 0);
 

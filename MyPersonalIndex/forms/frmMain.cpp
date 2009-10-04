@@ -484,7 +484,7 @@ void frmMain::about()
 
 void frmMain::addTicker()
 {
-    frmTicker f(this, sql, &m_currentPortfolio->data.aa, &m_currentPortfolio->data.acct);
+    frmTicker f(this, sql, &m_currentPortfolio->data);
     f.exec();
 }
 

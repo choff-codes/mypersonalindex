@@ -12,21 +12,32 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     gpTrade = new QGroupBox("Trade", dialog);
     tradeLayout = new QFormLayout(gpTrade);
 
+    validator = new mpiDoubleValidator(0, 100000000, 4, dialog);
     type = new QLabel("Type:", gpTrade);
     cmbType = new QComboBox(gpTrade);
+    cmbType->addItem("Purchase");
+    cmbType->addItem("Sale");
+    cmbType->addItem("Reinvestment");
+    cmbType->addItem("Interest");
+    cmbType->addItem("Fixed Amount");
+    cmbType->addItem("% of Portfolio");
+    cmbType->addItem("% of AA Target");
     tradeLayout->setWidget(0, QFormLayout::LabelRole, type);
     tradeLayout->setWidget(0, QFormLayout::FieldRole, cmbType);
     shares = new QLabel("Shares:", gpTrade);
     txtShares = new QLineEdit(gpTrade);
+    txtShares->setValidator(validator);
     tradeLayout->setWidget(1, QFormLayout::LabelRole, shares);
     tradeLayout->setWidget(1, QFormLayout::FieldRole, txtShares);
     chkPrice = new QCheckBox("Price:", gpTrade);
-    txtPrice = new QLineEdit("Check to input", gpTrade);
-    txtPrice->setEnabled(false);
+    txtPrice = new QLineEdit("Previous Close", gpTrade);
+    txtPrice->setEnabled(false);  
+    txtPrice->setValidator(validator);
     tradeLayout->setWidget(2, QFormLayout::LabelRole, chkPrice);
     tradeLayout->setWidget(2, QFormLayout::FieldRole, txtPrice);
     commission = new QLabel("Commission:", gpTrade);
     txtCommission = new QLineEdit(gpTrade);
+    txtCommission->setValidator(validator);
     tradeLayout->setWidget(3, QFormLayout::LabelRole, commission);
     tradeLayout->setWidget(3, QFormLayout::FieldRole, txtCommission);
     cash = new QLabel("To/From Cash:", gpTrade);
@@ -39,6 +50,11 @@ void frmTrade_UI::setupUI(QDialog *dialog)
 
     freq = new QLabel("Frequency:", gpDate);
     cmbFreq = new QComboBox(gpDate);
+    cmbFreq->addItem("Once");
+    cmbFreq->addItem("Daily");
+    cmbFreq->addItem("Weekly");
+    cmbFreq->addItem("Monthly");
+    cmbFreq->addItem("Yearly");
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, cmbFreq);
     date = new QLabel("Date:", gpDate);

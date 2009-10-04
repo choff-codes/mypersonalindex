@@ -2,7 +2,7 @@
 #define FUNCTIONS_H
 
 #include <QtGui>
-#include <globals.h>
+#include "globals.h"
 
 class functions
 {
@@ -34,6 +34,11 @@ public:
     static QVariant doubleToNull(const double &value)
     {
         return value < 0 ? QVariant(QVariant::Double) : value;
+    }
+
+    static QVariant intToNull(const int &value)
+    {
+        return value < 0 ? QVariant(QVariant::Int) : value;
     }
 
     static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count)
@@ -73,6 +78,16 @@ public:
         qSort(indexes);
 
         return indexes;
+    }
+
+    static QString doubleToCurrency(const double &value)
+    {
+        return QString("$%L1").arg(value, 0, 'f', 2);
+    }
+
+    static QString doubleToPercentage(const double &value)
+    {
+        return QString("%L1%").arg(value, 0, 'f', 2);
     }
 };
 

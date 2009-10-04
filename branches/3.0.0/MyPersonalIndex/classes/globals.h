@@ -49,6 +49,70 @@ public:
         bool operator!=(const dynamicTrade &other) const {
             return !(*this == other);
         }
+
+        QString tradeTypeToString() const
+        {
+            switch (this->tradeType)
+            {
+                case tradeType_Purchase:
+                    return "Purchase";
+                case tradeType_Sale:
+                    return "Sale";
+                case tradeType_DivReinvest:
+                    return "Reinvestment";
+                case tradeType_Interest:
+                    return "Interest";
+                case tradeType_Fixed:
+                    return "Fixed Amount";
+                case tradeType_TotalValue:
+                    return "% of Portfolio";
+                case tradeType_AA:
+                    return "% of AA Target";
+                default:
+                    return "";
+            }
+        }
+
+        QString frequencyToString() const
+        {
+            switch (this->frequency)
+            {
+                case tradeFreq_Once:
+                    return "Once";
+                case tradeFreq_Daily:
+                    return "Daily";
+                case tradeFreq_Weekly:
+                    return "Weekly";
+                case tradeFreq_Monthly:
+                    return "Monthly";
+                case tradeFreq_Yearly:
+                    return "Yearly";
+                default:
+                    return "";
+            }
+        }
+
+        QString valueToString() const
+        {
+            if (this->value < 0)
+                return "";
+
+            switch (this->tradeType)
+            {
+                case tradeType_Purchase:
+                case tradeType_Sale:
+                case tradeType_DivReinvest:
+                    return QString("%L1").arg(this->value, 0, 'f', 2);
+                case tradeType_Interest:
+                case tradeType_Fixed:
+                    return QString("$%L1").arg(this->value, 0, 'f', 2);
+                case tradeType_TotalValue:
+                case tradeType_AA:
+                    return QString("%L1%").arg(this->value, 0, 'f', 2);
+                default:
+                    return "";
+            }
+        }
     };
 
     struct portfolio
@@ -126,6 +190,42 @@ public:
         }
     };
 
+    struct intdoublePair
+    {
+        int key;
+        double value;
+
+        intdoublePair(): key(-1), value(-1) {}
+        intdoublePair(const int &pkey, const double &pvalue): key(pkey), value(pvalue) {}
+
+        bool operator==(const intdoublePair &other) const {
+            return this->key == other.key
+                    && this->value == other.value;
+        }
+
+        bool operator!=(const intdoublePair &other) const {
+            return !(*this == other);
+        }
+    };
+
+    struct intintPair
+    {
+        int key;
+        int value;
+
+        intintPair(): key(-1), value(-1) {}
+        intintPair(const int &pkey, const int &pvalue): key(pkey), value(pvalue) {}
+
+        bool operator==(const intintPair &other) const {
+            return this->key == other.key
+                    && this->value == other.value;
+        }
+
+        bool operator!=(const intintPair &other) const {
+            return !(*this == other);
+        }
+    };
+
     struct security
     {
         int id;
@@ -136,7 +236,7 @@ public:
         bool cashAccount;
         bool includeInCalc;
         bool hide;
-        QList<QPair<int, double> > aa;
+        QList<intdoublePair> aa;
         QList<dynamicTrade> trades;
 
         security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),

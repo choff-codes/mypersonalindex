@@ -69,10 +69,6 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     aa->setAlternatingRowColors(true);
     aa->horizontalHeader()->hide();
     aa->verticalHeader()->hide();
-    QSpinBox sbTmp(dialog);
-    sbTmp.setSuffix("%");
-    sbTmp.setMaximum(100);
-    aa->verticalHeader()->setDefaultSectionSize(sbTmp.sizeHint().height());
 
     aaLayoutBottom = new QGridLayout();
     cmbAA = new QComboBox(gpAA);
@@ -104,7 +100,7 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     trades->horizontalHeader()->setFixedHeight(fntHeight);
     trades->setMaximumHeight(fntHeight * 6);
     trades->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
-    trades->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    trades->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     trades->verticalHeader()->hide();
 
     tradesLayoutButtons = new QHBoxLayout();

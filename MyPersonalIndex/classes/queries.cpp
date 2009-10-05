@@ -15,8 +15,11 @@ const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker
 const QStringList queries::statMappingColumns = QStringList() << "PortfolioID" << "StatID" << "Sequence";
 
 //enum { dividends_Date, dividends_Ticker, dividends_Amount };
-const QStringList queries::tradesColumns = QStringList() << "ID" << "Portfolio" << "TickerID" << "Ticker"
-    << "Date" << "Shares" << "Price" << "Custom";
+//const QStringList queries::tradesColumns = QStringList() << "ID" << "Portfolio" << "TickerID" << "Ticker"
+//    << "Date" << "Shares" << "Price" << "Custom";
+
+//enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
+const QStringList queries::tickersAAColumns = QStringList() << "TickerID" << "AAID" << "Percent";
 
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
@@ -30,8 +33,8 @@ const QString queries::table_Splits = "Splits";
 const QString queries::table_Stat = "Stat";
 const QString queries::table_StatMapping = "StatMapping";
 const QString queries::table_Tickers = "Tickers";
-const QString table_TickersAA = "TickersAA";
-const QString table_TickersTrades = "TickersTrades";
+const QString queries::table_TickersAA = "TickersAA";
+const QString queries::table_TickersTrades = "TickersTrades";
 const QString queries::table_Trades = "Trades";
 
 queries::queries()
@@ -91,21 +94,6 @@ void queries::executeNonQuery(queryInfo *q)
 //
 //    delete q;
 //    return dataset;
-//}
-
-//bool queries::executeTableSelect(QSqlTableModel *model, const QString &tableName, const int &sort, const QString &filter)
-//{
-//    if (!model)
-//        return false;
-//
-//    model->setEditStrategy(QSqlTableModel::OnManualSubmit);
-//    model->setTable(tableName);
-//    if (!filter.isEmpty())
-//        model->setFilter(filter);
-//    if (sort != -1)
-//        model->setSort(sort, Qt::AscendingOrder);
-//
-//    return model->select();
 //}
 
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
@@ -205,6 +193,15 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
         QString("DELETE FROM %1 WHERE PortfolioID = :ID").arg(table),
         QList<parameter>()
             << parameter(":ID", portfolioID)
+    );
+}
+
+queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &tickerID)
+{
+    return new queryInfo(
+        QString("DELETE FROM %1 WHERE TickerID = :ID").arg(table),
+        QList<parameter>()
+            << parameter(":ID", tickerID)
     );
 }
 
@@ -425,6 +422,106 @@ queries::queryInfo* queries::getStatMapping()
 {
     return new queryInfo(
         "SELECT PortfolioID, StatID FROM StatMapping ORDER BY PortfolioID, Sequence",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateSecurity(const int &portfolioID, const globals::security& sec)
+{
+    QList<parameter> params;
+    params  << parameter(":PortfolioID", portfolioID)
+            << parameter(":Symbol", sec.symbol)
+            << parameter(":Account", sec.account)
+            << parameter(":Expense", functions::doubleToNull(sec.expense))
+            << parameter(":DivReinvest", (int)sec.divReinvest)
+            << parameter(":CashAccount", (int)sec.cashAccount)
+            << parameter(":IncludeInCalc", (int)sec.includeInCalc)
+            << parameter(":Hide", (int)sec.hide);
+
+    if(sec.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO Tickers (PortfolioID, Symbol, Account, Expense, DivReinvest, CashAccount, IncludeInCalc, Hide)"
+            " VALUES (:PortfolioID, :Symbol, :Account, :Expense, :DivReinvest, :CashAccount, :IncludeInCalc, :Hide)",
+            params
+        );
+    }
+    else // update
+    {
+        params << parameter(":SecurityID", sec.id);
+        return new queryInfo(
+            "UPDATE Tickers SET PortfolioID = :PortfolioID, Symbol = :Symbol, Account = :Account, Expense = :Expense,"
+                " DivReinvest = :DivReinvest, CashAccount = :CashAccount, IncludeInCalc = :IncludeInCalc, Hide = :Hide"
+                " WHERE ID = :SecurityID",
+            params
+        );
+    }
+}
+
+queries::queryInfo* queries::getSecurity()
+{
+    return new queryInfo(
+        "SELECT ID, PortfolioID, Symbol, Account, Expense, DivReinvest, CashAccount,"
+            " IncludeInCalc, Hide FROM Tickers ORDER BY PortfolioID",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const globals::dynamicTrade& trade)
+{
+    QList<parameter> params;
+    params  << parameter(":TickerID", tickerID)
+            << parameter(":Type", (int)trade.tradeType)
+            << parameter(":Value", trade.value)
+            << parameter(":Price", functions::doubleToNull(trade.price))
+            << parameter(":Commission", functions::doubleToNull(trade.commission))
+            << parameter(":CashAccountID", functions::intToNull(trade.cashAccount))
+            << parameter(":Frequency", (int)trade.frequency)
+            << parameter(":Date", functions::dateToNull(trade.date))
+            << parameter(":StartDate", functions::dateToNull(trade.startDate))
+            << parameter(":EndDate", functions::dateToNull(trade.endDate));
+
+    if(trade.id == -1) // insert new
+    {
+        return new queryInfo(
+            "INSERT INTO TickersTrades (TickerID, Type, Value, Price, Commission, CashAccountID, Frequency, Date, StartDate, EndDate)"
+            " VALUES (:TickerID, :Type, :Value, :Price, :Commission, :CashAccountID, :Frequency, :Date, :StartDate, :EndDate)",
+            params
+        );
+    }
+    else // update
+    {
+        params << parameter(":TradeID", trade.id);
+        return new queryInfo(
+            "UPDATE TickersTrades SET TickerID = :TickerID, Type = :Type, Value = :Value, Price = :Price,"
+                " Commission = :Commission, CashAccountID = :CashAccountID, Frequency = :Frequency, Date = :Date"
+                " StartDate = :StartDate, EndDate = :EndDate WHERE ID = :TradeID",
+            params
+        );
+    }
+}
+
+queries::queryInfo* queries::getSecurityTrade()
+{
+    return new queryInfo(
+        "SELECT a.ID, b.PortfolioID, a.TickerID, a.Type, a.Value, a.Price, a.Commission,"
+            " a.CashAccountID, a.Frequency, a.Date, a.StartDate, a.EndDate"
+        " FROM TickersTrades a"
+        " INNER JOIN Tickers b"
+            " ON a.TickerID = b.ID"
+        " ORDER BY b.PortfolioID, a.TickerID",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getSecurityAA()
+{
+    return new queryInfo(
+        "SELECT b.PortfolioID, a.TickerID, a.AAID, a.Percent"
+        " FROM TickersAA a"
+        " INNER JOIN Tickers b"
+            " ON a.TickerID = b.ID"
+        " ORDER BY b.PortfolioID, a.TickerID",
         QList<parameter>()
     );
 }

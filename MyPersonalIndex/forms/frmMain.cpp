@@ -297,14 +297,115 @@ void frmMain::loadPortfoliosInfo()
 
 void frmMain::loadPortfoliosTickers()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getSecurity());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::security sec;
+
+        sec.id = q->value(queries::getSecurity_ID).toInt();
+        sec.symbol = q->value(queries::getSecurity_Symbol).toString();
+        sec.account = q->value(queries::getSecurity_Account).toInt();
+        if (!q->value(queries::getSecurity_Expense).isNull())
+            sec.expense = q->value(queries::getSecurity_Expense).toDouble();
+        sec.divReinvest = q->value(queries::getSecurity_DivReinvest).toBool();
+        sec.cashAccount = q->value(queries::getSecurity_CashAccount).toBool();
+        sec.includeInCalc = q->value(queries::getSecurity_IncludeInCalc).toBool();
+        sec.hide = q->value(queries::getSecurity_Hide).toBool();
+
+        int portfolioID = q->value(queries::getSecurity_PortfolioID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+
+       p->data.tickers.insert(sec.id, sec);
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::loadPortfoliosTickersAA()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getSecurityAA());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::intdoublePair pair;
+
+        pair.key = q->value(queries::getSecurityAA_AAID).toInt();
+        pair.value = q->value(queries::getSecurityAA_Percent).toDouble();
+
+        int portfolioID = q->value(queries::getSecurityAA_PortfolioID).toInt();
+        int tickerID = q->value(queries::getSecurityAA_TickerID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+        p->data.tickers[tickerID].aa.append(pair);
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::loadPortfoliosTickersTrades()
 {
+    QSqlQuery *q = sql->executeResultSet(sql->getSecurityTrade());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::dynamicTrade trade;
+
+        trade.tradeType = (globals::dynamicTradeType)q->value(queries::getSecurityTrade_Type).toInt();
+        trade.value = q->value(queries::getSecurityTrade_Value).toDouble();
+        if (!q->value(queries::getSecurityTrade_Price).isNull())
+            trade.price = q->value(queries::getSecurityTrade_Price).toDouble();
+        if (!q->value(queries::getSecurityTrade_Commission).isNull())
+            trade.commission = q->value(queries::getSecurityTrade_Commission).toDouble();
+        if (!q->value(queries::getSecurityTrade_CashAccountID).isNull())
+            trade.cashAccount = q->value(queries::getSecurityTrade_CashAccountID).toInt();
+        trade.frequency = (globals::dynamicTradeFreq)q->value(queries::getSecurityTrade_Frequency).toInt();
+        if (!q->value(queries::getSecurityTrade_Date).isNull())
+            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_Date).toInt());
+        if (!q->value(queries::getSecurityTrade_StartDate).isNull())
+            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_StartDate).toInt());
+        if (!q->value(queries::getSecurityTrade_EndDate).isNull())
+            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_EndDate).toInt());
+
+        int portfolioID = q->value(queries::getSecurityTrade_PortfolioID).toInt();
+        int tickerID = q->value(queries::getSecurityTrade_TickerID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+        p->data.tickers[tickerID].trades.append(trade);
+    }
+    while(q->next());
+
+    delete q;
 }
 
 void frmMain::loadPortfoliosAA()
@@ -484,7 +585,7 @@ void frmMain::about()
 
 void frmMain::addTicker()
 {
-    frmTicker f(this, sql, &m_currentPortfolio->data);
+    frmTicker f(this, sql, m_currentPortfolio->info.id, &m_currentPortfolio->data);
     f.exec();
 }
 

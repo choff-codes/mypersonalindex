@@ -16,14 +16,16 @@ public:
 
     const globals::security& getReturnValues() const { return m_security; }
 
-    frmTicker(QWidget *parent = 0, queries *sql = 0, const globals::portfolioData *data = 0, const globals::security& security = globals::security());
+    frmTicker(QWidget *parent = 0, queries *sql = 0, const int &portfolioID = 0, const globals::portfolioData *data = 0, const globals::security& security = globals::security());
 
 private:
 
     frmTicker_UI ui;
     queries *m_sql;
+    int m_portfolioID;
     const globals::portfolioData *m_data;
     globals::security m_security;
+    globals::security m_securityOriginal;
     modelWithNoEdit *m_modelTrade;
     tickerAAModel *m_modelAA;
 
@@ -38,11 +40,13 @@ private:
 
 private slots:
     void accept();
-    void addTrade();
     void resetExpense();
     void addAA();
     void deleteAA();
+    void aaListChange(QStandardItem*);
+    void addTrade();
     void editTrade();
+    void deleteTrades();
 };
 
 class tickerAAModel: public QStandardItemModel

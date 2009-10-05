@@ -41,6 +41,11 @@ public:
         return value < 0 ? QVariant(QVariant::Int) : value;
     }
 
+    static QVariant dateToNull(const QDate &value)
+    {
+        return value.isValid() ? QVariant(QVariant::Date) : value;
+    }
+
     static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count)
     {
         int x = ascending ? 0 : count - 1;

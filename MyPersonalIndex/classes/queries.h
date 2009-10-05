@@ -47,14 +47,16 @@ public:
     static const QStringList dividendsColumns;
     static const QStringList splitsColumns;
     static const QStringList statMappingColumns;
-    static const QStringList tradesColumns;
+    //static const QStringList tradesColumns;
+    static const QStringList tickersAAColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
     enum { dividends_Date, dividends_Ticker, dividends_Amount };
     enum { splits_Date, splits_Ticker, splits_Ratio };
     enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
-    enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
+    //enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
+    enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
 
     queries();
     static QString getDatabaseLocation();
@@ -63,12 +65,12 @@ public:
 
     void executeNonQuery(queryInfo*);
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    //bool executeTableSelect(QSqlTableModel *model = 0, const QString &tableName = "", const int &sort = -1, const QString &filter = "");
     //QSqlQueryModel* executeDataSet(queryInfo *q);
     QSqlQuery* executeResultSet(queryInfo*);
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant());
 
     queryInfo* deleteItem(const QString &table, const int &id);
+    queryInfo* deleteTickerItems(const QString &table, const int &tickerID);
     queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID);
 
     queryInfo* getLastDate();
@@ -113,6 +115,22 @@ public:
     queryInfo* getStatMapping();
 
     queryInfo* updateStat(const globals::statistic&);
+
+    enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Symbol, getSecurity_Account,
+           getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
+           getSecurity_IncludeInCalc, getSecurity_Hide };
+    queryInfo* getSecurity();
+
+    enum { getSecurityTrade_ID, getSecurityTrade_PortfolioID, getSecurityTrade_TickerID, getSecurityTrade_Type,
+           getSecurityTrade_Value, getSecurityTrade_Price, getSecurityTrade_Commission, getSecurityTrade_CashAccountID,
+           getSecurityTrade_Frequency, getSecurityTrade_Date, getSecurityTrade_StartDate, getSecurityTrade_EndDate };
+    queryInfo* getSecurityTrade();
+
+    enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
+    queryInfo* getSecurityAA();
+
+    queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
+    queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
 
 protected:
     QSqlDatabase db;

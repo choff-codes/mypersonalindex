@@ -3,7 +3,7 @@
 frmAAEdit::frmAAEdit(QWidget *parent, const globals::assetAllocation &aa): QDialog(parent), m_aa(aa)
 {
     ui.setupUI(this);
-    this->setWindowTitle(m_aa.id == -1 ? "Add AA" : "Edit AA");
+    this->setWindowTitle("Edit AA");
 
     ui.txtDesc->setText(m_aa.description);
     ui.sbTarget->setValue(m_aa.target);

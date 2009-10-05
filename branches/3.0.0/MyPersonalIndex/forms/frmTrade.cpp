@@ -22,6 +22,8 @@ void frmTrade::connectSlots()
     connect(ui.chkStarting, SIGNAL(toggled(bool)), ui.deStarting, SLOT(setEnabled(bool)));
     connect(ui.chkEnding, SIGNAL(toggled(bool)), ui.deEnding, SLOT(setEnabled(bool)));
     connect(ui.chkPrice, SIGNAL(toggled(bool)), this, SLOT(togglePrice(bool)));
+    connect(ui.cmbFreq, SIGNAL(currentIndexChanged(int)), this, SLOT(freqChange(int)));
+    connect(ui.cmbType, SIGNAL(currentIndexChanged(int)), this, SLOT(typeChange(int)));
 }
 
 void frmTrade::loadTrade()
@@ -83,4 +85,71 @@ void frmTrade::accept()
     m_trade.endDate = ui.deStarting->isEnabled() ? ui.deStarting->date() : QDate();
 
     QDialog::accept();
+}
+
+void frmTrade::freqChange(int index)
+{
+    ui.deDate->setEnabled(true);
+    switch ((globals::dynamicTradeFreq)index)
+    {
+        case globals::tradeFreq_Daily:
+            ui.deDate->setDisabled(true);
+            break;
+        case globals::tradeFreq_Monthly:
+            ui.deDate->setDisplayFormat("MMMM");
+            ui.deDate->setMinimumDate(QDate(2009, 1, 1));
+            ui.deDate->setMaximumDate(QDate(2009, 12, 31));
+            ui.deDate->setCalendarPopup(false);
+            ui.deDate->setDate(QDate(2009, 1, 1));
+            break;
+        case globals::tradeFreq_Once:
+            ui.deDate->setDisplayFormat(globals::shortDateFormat);
+            ui.deDate->clearMaximumDate();
+            ui.deDate->clearMaximumDate();
+            ui.deDate->setCalendarPopup(true);
+            ui.deDate->setDate(QDate::currentDate());
+            break;
+        case globals::tradeFreq_Weekly:
+            ui.deDate->setDisplayFormat("dddd");
+            ui.deDate->setMinimumDate(QDate(2009, 1, 5));
+            ui.deDate->setMaximumDate(QDate(2009, 1, 9));
+            ui.deDate->setCalendarPopup(false);
+            ui.deDate->setDate(QDate(2009, 1, 5));
+            break;
+        case globals::tradeFreq_Yearly:
+            ui.deDate->setDisplayFormat("dd MMM");
+            ui.deDate->setMinimumDate(QDate(2009, 1, 1));
+            ui.deDate->setMaximumDate(QDate(2009, 12, 31));
+            ui.deDate->setCalendarPopup(false);
+            ui.deDate->setDate(QDate(2009, 1, 1));
+            break;
+    }
+}
+
+void frmTrade::typeChange(int index)
+{
+    switch ((globals::dynamicTradeType)index)
+    {
+        case globals::tradeType_Purchase:
+            ui.shares->setText("Shares:");
+            break;
+        case globals::tradeType_Sale:
+            ui.shares->setText("Shares:");
+            break;
+        case globals::tradeType_DivReinvest:
+            ui.shares->setText("Shares:");
+            break;
+        case globals::tradeType_Interest:
+            ui.shares->setText("Amount ($):");
+            break;
+        case globals::tradeType_Fixed:
+            ui.shares->setText("Amount ($):");
+            break;
+        case globals::tradeType_TotalValue:
+            ui.shares->setText("% of Value:");
+            break;
+        case globals::tradeType_AA:
+            ui.shares->setText("% of Target:");
+            break;
+    }
 }

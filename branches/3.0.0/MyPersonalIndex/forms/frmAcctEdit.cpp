@@ -3,7 +3,7 @@
 frmAcctEdit::frmAcctEdit(QWidget *parent, const globals::account &acct): QDialog(parent), m_acct(acct)
 {
     ui.setupUI(this);
-    this->setWindowTitle(m_acct.id == -1 ? "Add Account" : "Edit Account");
+    this->setWindowTitle("Edit Account");
 
     ui.txtDesc->setText(m_acct.description);
     ui.sbTaxRate->setValue(m_acct.taxRate);

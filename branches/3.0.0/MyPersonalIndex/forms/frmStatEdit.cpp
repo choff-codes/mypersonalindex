@@ -3,7 +3,7 @@
 frmStatEdit::frmStatEdit(QWidget *parent, const globals::statistic &stat): QDialog(parent), m_stat(stat)
 {
     ui.setupUI(this);
-    this->setWindowTitle(m_stat.id == -1 ? "Add Statistic" : "Edit Statistic");
+    this->setWindowTitle("Edit Statistic");
 
     ui.txtDesc->setText(m_stat.description);
     ui.txtSql->setPlainText(m_stat.sql);

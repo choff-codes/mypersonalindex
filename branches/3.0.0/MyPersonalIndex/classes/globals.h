@@ -20,8 +20,45 @@ public:
     enum tickerHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
 
+    struct intdoublePair
+    {
+        int key;
+        double value;
+
+        intdoublePair(): key(-1), value(-1) {}
+        intdoublePair(const int &pkey, const double &pvalue): key(pkey), value(pvalue) {}
+
+        bool operator==(const intdoublePair &other) const {
+            return this->key == other.key
+                    && this->value == other.value;
+        }
+
+        bool operator!=(const intdoublePair &other) const {
+            return !(*this == other);
+        }
+    };
+
+    struct intintPair
+    {
+        int key;
+        int value;
+
+        intintPair(): key(-1), value(-1) {}
+        intintPair(const int &pkey, const int &pvalue): key(pkey), value(pvalue) {}
+
+        bool operator==(const intintPair &other) const {
+            return this->key == other.key
+                    && this->value == other.value;
+        }
+
+        bool operator!=(const intintPair &other) const {
+            return !(*this == other);
+        }
+    };
+
     struct dynamicTrade
     {
+        int id;
         dynamicTradeType tradeType;
         double value;
         double price;
@@ -32,7 +69,7 @@ public:
         QDate startDate;
         QDate endDate;
 
-        dynamicTrade(): tradeType(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once) {}
+        dynamicTrade(): id(-1), tradeType(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once) {}
 
         bool operator==(const dynamicTrade &other) const {
             return this->tradeType == other.tradeType
@@ -113,6 +150,25 @@ public:
                     return "";
             }
         }
+
+        QString dateToString() const
+        {
+            switch (this->frequency)
+            {
+                case tradeFreq_Once:
+                    return this->date.isValid() ? date.toString(shortDateFormat) : "";
+                case tradeFreq_Daily:
+                    return "Market Days";
+                case tradeFreq_Weekly:
+                    return this->date.isValid() ? date.toString("dddd") : "";
+                case tradeFreq_Monthly:
+                    return this->date.isValid() ? date.toString("MMMM") : "";
+                case tradeFreq_Yearly:
+                    return this->date.isValid() ? date.toString("dd MMM") : "";
+                default:
+                    return "";
+            }
+        }
     };
 
     struct portfolio
@@ -187,42 +243,6 @@ public:
 
         bool operator<(const statistic &other) const {
             return this->description.toUpper() < other.description.toUpper();
-        }
-    };
-
-    struct intdoublePair
-    {
-        int key;
-        double value;
-
-        intdoublePair(): key(-1), value(-1) {}
-        intdoublePair(const int &pkey, const double &pvalue): key(pkey), value(pvalue) {}
-
-        bool operator==(const intdoublePair &other) const {
-            return this->key == other.key
-                    && this->value == other.value;
-        }
-
-        bool operator!=(const intdoublePair &other) const {
-            return !(*this == other);
-        }
-    };
-
-    struct intintPair
-    {
-        int key;
-        int value;
-
-        intintPair(): key(-1), value(-1) {}
-        intintPair(const int &pkey, const int &pvalue): key(pkey), value(pvalue) {}
-
-        bool operator==(const intintPair &other) const {
-            return this->key == other.key
-                    && this->value == other.value;
-        }
-
-        bool operator!=(const intintPair &other) const {
-            return !(*this == other);
         }
     };
 

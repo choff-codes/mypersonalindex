@@ -25,8 +25,10 @@ private:
     void loadTrade();
 
 private slots:
-    void togglePrice(bool checked);
+    void togglePrice(bool);
     void accept();
+    void freqChange(int);
+    void typeChange(int);
 };
 
 #endif // FRMTRADE_H

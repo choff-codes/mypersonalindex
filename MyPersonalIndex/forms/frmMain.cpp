@@ -346,7 +346,6 @@ void frmMain::loadPortfoliosTickersAA()
     do
     {
         globals::intdoublePair pair;
-
         pair.key = q->value(queries::getSecurityAA_AAID).toInt();
         pair.value = q->value(queries::getSecurityAA_Percent).toDouble();
 
@@ -378,6 +377,7 @@ void frmMain::loadPortfoliosTickersTrades()
     {
         globals::dynamicTrade trade;
 
+        trade.id = q->value(queries::getSecurityTrade_ID).toInt();
         trade.tradeType = (globals::dynamicTradeType)q->value(queries::getSecurityTrade_Type).toInt();
         trade.value = q->value(queries::getSecurityTrade_Value).toDouble();
         if (!q->value(queries::getSecurityTrade_Price).isNull())
@@ -401,7 +401,7 @@ void frmMain::loadPortfoliosTickersTrades()
             p = m_portfolios.value(portfolioID);
             current = portfolioID;
         }
-        p->data.tickers[tickerID].trades.append(trade);
+        p->data.tickers[tickerID].trades.insert(trade.id, trade);
     }
     while(q->next());
 
@@ -618,10 +618,11 @@ void frmMain::acct()
 
 void frmMain::stat()
 {
-    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics, &m_currentPortfolio->data.stats);
+    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics, m_currentPortfolio->data.stats);
     if (f.exec())
     {
-        m_statistics = f.getReturnValues();
+        m_statistics = f.getReturnValues_Map();
+        m_currentPortfolio->data.stats = f.getReturnValues_Selected();
     }
 
 }

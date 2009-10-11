@@ -257,7 +257,7 @@ public:
         bool includeInCalc;
         bool hide;
         QList<intdoublePair> aa;
-        QList<dynamicTrade> trades;
+        QMap<int, dynamicTrade> trades;
 
         security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),
             includeInCalc(true), hide(false) {}

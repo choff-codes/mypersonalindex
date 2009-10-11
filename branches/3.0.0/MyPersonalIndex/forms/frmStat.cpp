@@ -1,8 +1,8 @@
 #include "frmStat.h"
 #include "frmStatEdit.h"
 
-frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::statistic> &stat, QList<int> *statList):
-    frmTableViewBase<globals::statistic, frmStatEdit>(portfolioID, parent, sql, stat, true, "Choose Statistics", 1), m_statList(statList)
+frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::statistic> &stat, const QList<int> &statList):
+    QDialog(parent), m_sql(sql), m_map(stat), m_portfolio(portfolioID), m_selected(statList)
 {
     if(!m_sql || !m_sql->isOpen())
     {
@@ -10,82 +10,48 @@ frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QM
         return;
     }
 
+    ui.setupUI(this, "Statistics", true);
     this->setWindowTitle("Edit Statistics");
-    m_model->setHeaderData(0, Qt::Horizontal, "Statistic");
+
+    m_model = new statModel(m_map.values(), m_selected, 1, ui.table, this);
+    ui.table->setModel(m_model);
+
     connectSlots();
-
-    qSort(m_list);
-    for(int i = 0; i < statList->count(); ++i)
-        m_list.move(m_list.indexOf(m_mapOriginal.value(statList->value(i))), i);
-
-    loadItems();
-
-    for(int i = 0; i < m_model->rowCount(); ++i)
-    {
-        m_model->item(i, 0)->setCheckable(true);
-        m_model->item(i, 0)->setCheckState(statList->contains(m_list.value(i).id) ? Qt::Checked : Qt::Unchecked);
-    }
 }
 
 void frmStat::connectSlots()
 {
-    connect(ui.btnAdd, SIGNAL(clicked()), this, SLOT(addStat()));
-    connect(ui.btnEdit, SIGNAL(clicked()), this, SLOT(editStat()));
-    connect(ui.btnDelete, SIGNAL(clicked()), this, SLOT(removeStat()));
+    connect(ui.btnAdd, SIGNAL(clicked()), m_model, SLOT(addNew()));
+    connect(ui.btnEdit, SIGNAL(clicked()), m_model, SLOT(editSelected()));
+    connect(ui.table, SIGNAL(doubleClicked(QModelIndex)), m_model, SLOT(editSelected()));
+    connect(ui.btnDelete, SIGNAL(clicked()), m_model, SLOT(deleteSelected()));
+    connect(ui.btnSelectAll, SIGNAL(clicked()), m_model, SLOT(selectAll()));
+    connect(ui.btnClear, SIGNAL(clicked()), m_model, SLOT(clearAll()));
+    connect(ui.btnMoveUp, SIGNAL(clicked()), m_model, SLOT(moveSelectedUp()));
+    connect(ui.btnMoveDown, SIGNAL(clicked()), m_model, SLOT(moveSelectedDown()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(ui.btnSelectAll, SIGNAL(clicked()), this, SLOT(selectAll()));
-    connect(ui.btnClear, SIGNAL(clicked()), this, SLOT(clearAll()));
-    connect(ui.btnMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
-    connect(ui.btnMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
-    connect(ui.table, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editStat()));
-}
-
-void frmStat::updateList(const globals::statistic &stat, const int &row)
-{
-    int i = row == -1 ? m_model->rowCount() : row; // -1 is an insert
-
-    Qt::CheckState state = Qt::Unchecked;
-    if (row != -1 && m_model->item(row, 0))
-        state = m_model->item(row, 0)->checkState();
-
-    QStandardItem *desc = new QStandardItem(stat.description);
-    desc->setCheckable(true);
-    desc->setCheckState(state);
-    m_model->setItem(i, 0, desc);
+    connect(m_model, SIGNAL(saveItem(globals::statistic*)), this, SLOT(saveItem(globals::statistic*)));
+    connect(m_model, SIGNAL(deleteItem(globals::statistic)), this, SLOT(deleteItem(globals::statistic)));
 }
 
 void frmStat::accept()
 {
-    // have to first check for changes to the sequence
-    // however, do not use these IDs yet, since the IDs have not been updated for new items
-    QList<int> returnList;
+    QMap<int, globals::statistic> returnValues = m_model->saveList(m_map);
+    QList<int> returnValuesSelected = m_model->getSelected();
 
-    for(int i = 0; i < m_model->rowCount(); ++i)
-        if (m_model->item(i, 0)->checkState() == Qt::Checked)
-            returnList.append(m_list.value(i).id);
-
-    bool changes = (*m_statList) != returnList;
-    frmTableViewBase<globals::statistic, frmStatEdit>::accept(changes);
-
-    if (!changes)
+    if (returnValues == m_map && returnValuesSelected == m_selected)
+    {
+        QDialog::reject();
         return;
+    }
 
     QVariantList portfolio, stat, sequence;
-    int sequenceID = 0;
-
-    returnList.clear(); // reset to account for new IDs
-    for(int i = 0; i < m_model->rowCount(); ++i)
+    for (int i = 0; i < returnValuesSelected.count(); ++i)
     {
-        if (m_model->item(i, 0)->checkState() == Qt::Unchecked)
-            continue;
-
-        int id = m_list.value(i).id;
-        stat.append(id);
-        returnList.append(id);
-        portfolio.append(m_portfolioID);
-        sequence.append(sequenceID);
-        ++sequenceID;
+        stat.append(returnValuesSelected.at(i));
+        portfolio.append(m_portfolio);
+        sequence.append(i);
     }
 
     QMap<QString, QVariantList> tableValues;
@@ -93,54 +59,23 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMapping_StatID), stat);
     tableValues.insert(queries::statMappingColumns.at(queries::statMapping_Sequence), sequence);
 
-    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_StatMapping, m_portfolioID));
+    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_StatMapping, m_portfolio));
     if (stat.count() != 0)
         m_sql->executeTableUpdate(queries::table_StatMapping, tableValues);
 
-    (*m_statList) = returnList;
+    m_map = returnValues;
+    m_selected = returnValuesSelected;
+    QDialog::accept();
 }
 
-void frmStat::saveItem(const globals::statistic &stat)
+void frmStat::saveItem(globals::statistic *stat)
 {
-    m_sql->executeNonQuery(m_sql->updateStat(stat));
+    m_sql->executeNonQuery(m_sql->updateStat((*stat)));
+    if (stat->id == -1)
+        stat->id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
 }
 
 void frmStat::deleteItem(const globals::statistic &stat)
 {
     m_sql->executeNonQuery(m_sql->deleteItem(queries::table_Stat, stat.id));
-}
-
-void frmStat::addStat()
-{
-    addItem();
-}
-
-void frmStat::editStat()
-{
-    editItem();
-}
-
-void frmStat::removeStat()
-{
-    removeItem();
-}
-
-void frmStat::selectAll()
-{
-    frmTableViewBase<globals::statistic, frmStatEdit>::selectAll();
-}
-
-void frmStat::clearAll()
-{
-    frmTableViewBase<globals::statistic, frmStatEdit>::clearAll();
-}
-
-void frmStat::moveUp()
-{
-    frmTableViewBase<globals::statistic, frmStatEdit>::moveUp();
-}
-
-void frmStat::moveDown()
-{
-    frmTableViewBase<globals::statistic, frmStatEdit>::moveDown();
 }

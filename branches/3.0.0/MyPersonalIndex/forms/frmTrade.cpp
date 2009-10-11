@@ -1,14 +1,17 @@
 #include "frmTrade.h"
 #include "frmTrade_UI.h"
+#include "frmTicker.h"
 #include <QtGui>
 
-frmTrade::frmTrade(QWidget *parent, const QMap<int, globals::security> *securities, const int &tickerID, const globals::dynamicTrade &trade): QDialog(parent), m_trade(trade)
+frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog(parent), m_trade(trade)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Trade");
     ui.cmbCash->addItem("(None)", -1);
-    foreach(const globals::security &sec, (*securities))
-        if (sec.cashAccount && sec.id != tickerID)
+
+    int id = static_cast<frmTicker*>(parent)->getTickerID();
+    foreach(const globals::security &sec, *static_cast<frmTicker*>(parent)->getCashAccounts())
+        if (sec.cashAccount && sec.id != id)
             ui.cmbCash->addItem(sec.symbol, sec.id);
 
     connectSlots();

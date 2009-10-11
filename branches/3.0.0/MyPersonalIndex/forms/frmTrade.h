@@ -13,7 +13,7 @@ public:
 
     const globals::dynamicTrade& getReturnValues() const { return m_trade; }
 
-    frmTrade(QWidget *parent = 0, const QMap<int, globals::security> *securities = 0, const int &tickerID = -1, const globals::dynamicTrade &trade = globals::dynamicTrade());
+    frmTrade(QWidget *parent = 0, const globals::dynamicTrade &trade = globals::dynamicTrade());
 
 private:
 

@@ -22,8 +22,6 @@ frmTicker::frmTicker(QWidget *parent, queries *sql, const int &portfolioID, cons
     loadDropDowns();
     loadSecurity();
     connectSlots();
-
-    // ui.activity->openPersistentEditor(dataset->index(0, queries::trades_Date));
 }
 
 void frmTicker::loadDropDowns()
@@ -41,13 +39,16 @@ void frmTicker::connectSlots()
     connect(ui.btnHistorical, SIGNAL(toggled(bool)), ui.gpHistorical, SLOT(setVisible(bool)));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(ui.btnTradesAdd, SIGNAL(clicked()), this, SLOT(addTrade()));
-    connect(ui.btnTradesEdit, SIGNAL(clicked()), this, SLOT(editTrade()));
-    connect(ui.btnTradesDelete, SIGNAL(clicked()), this, SLOT(deleteTrades()));
-    connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editTrade()));
+    connect(ui.btnTradesAdd, SIGNAL(clicked()), m_modelTrade, SLOT(addNew()));
+    connect(ui.btnTradesEdit, SIGNAL(clicked()), m_modelTrade, SLOT(editSelected()));
+    connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), m_modelTrade, SLOT(editSelected()));
+    connect(ui.btnTradesDelete, SIGNAL(clicked()), m_modelTrade, SLOT(deleteSelected()));
     connect(ui.btnExpenseClear, SIGNAL(clicked()), this, SLOT(resetExpense()));
     connect(ui.btnAAAdd, SIGNAL(clicked()), this, SLOT(addAA()));
-    connect(ui.btnAADelete, SIGNAL(clicked()), this, SLOT(deleteAA()));
+    connect(ui.btnAADelete, SIGNAL(clicked()), m_modelAA, SLOT(deleteSelected()));
+    connect(m_modelAA, SIGNAL(updateHeader()), this, SLOT(updateAAPercentage()));
+    connect(m_modelTrade, SIGNAL(saveItem(globals::dynamicTrade*)), this, SLOT(saveItem(globals::dynamicTrade*)));
+    connect(m_modelTrade, SIGNAL(deleteItem(globals::dynamicTrade)), this, SLOT(deleteItem(globals::dynamicTrade)));
 }
 
 void frmTicker::loadSecurity()
@@ -61,104 +62,25 @@ void frmTicker::loadSecurity()
     ui.chkInclude->setChecked(m_security.includeInCalc);
     ui.btnHistorical->setDisabled(m_security.id == -1);
 
-    m_modelAA = new tickerAAModel(0 , 2, this);
-    foreach(const globals::intdoublePair &value, m_security.aa)
-        updateAAList(value);
-
+    m_modelAA = new tickerAAModel(m_security.aa, &m_data->aa, 2, ui.aa);
     installAAModel();
 
-    m_modelTrade  = new modelWithNoEdit(0, 9, this);
-    foreach(const globals::dynamicTrade &trade, m_security.trades)
-        updateTradeList(trade);
-
-    installTradeModel();
+    m_modelTrade = new tickerTradeModel(m_security.trades.values(), &m_data->tickers, 9, ui.trades, this);
+    ui.trades->setModel(m_modelTrade);
 }
 
-void frmTicker::aaListChange(QStandardItem* item)
+void frmTicker::updateAAPercentage()
 {
-    if (item && item->column() != 1) // wait until percentage column changes
-        return;
-
-    if (item) // delete passes null pointer
-    {
-        QString value = item->data(Qt::DisplayRole).toString();
-        value.chop(1);
-        m_security.aa[item->row()].value = value.toDouble();
-    }
-
-    ui.gpAA->setTitle(QString("Asset Allocation (%L1%)").arg(aaListTotal(), 0, 'f', 2));
+    ui.gpAA->setTitle(QString("Asset Allocation (%L1%)").arg(m_modelAA->totalPercentage(), 0, 'f', 2));
 }
 
-double frmTicker::aaListTotal()
-{
-    double total = 0;
-
-    foreach(const globals::intdoublePair &pair, m_security.aa)
-        total += pair.value;
-
-    return total;
-}
 
 void frmTicker::addAA()
 {
     if (ui.cmbAA->currentIndex() == -1)
         return;
 
-    double total = aaListTotal();
-    globals::intdoublePair newRow(ui.cmbAA->itemData(ui.cmbAA->currentIndex()).toInt(), total >= 100 ? 0 : 100 - total);
-    m_security.aa.append(newRow);
-    updateAAList(newRow);
-}
-
-void frmTicker::deleteAA()
-{
-    QList<int> indexes = functions::getSelectedRows(ui.aa->selectionModel()->selectedRows());
-    if(indexes.count() == 0)
-        return;
-
-    for(int i = indexes.count() - 1; i >= 0; --i)
-    {
-        m_modelAA->removeRow(indexes.at(i));
-        m_security.aa.removeAt(indexes.at(i));
-    }
-    aaListChange(0);
-}
-
-void frmTicker::updateAAList(const globals::intdoublePair &aa, const int &row)
-{
-     int i = row == -1 ? m_modelAA->rowCount() : row; // -1 is an insert
-
-    if (!m_data->aa.contains(aa.key))
-        return;
-
-    QStandardItem *desc = new QStandardItem(m_data->aa.value(aa.key).description);
-    QStandardItem *target = new QStandardItem(QLocale().toString(aa.value, 'f', 2).append("%"));
-    m_modelAA->setItem(i, 0, desc);
-    m_modelAA->setItem(i, 1, target);
-}
-
-void frmTicker::updateTradeList(const globals::dynamicTrade &trade, const int &row)
-{
-     int i = row == -1 ? m_modelTrade->rowCount() : row; // -1 is an insert
-
-    QStandardItem *type = new QStandardItem(trade.tradeTypeToString());
-    QStandardItem *value = new QStandardItem(trade.valueToString());
-    QStandardItem *price = new QStandardItem(trade.price < 0 ? "Prev Close" : functions::doubleToCurrency(trade.price));
-    QStandardItem *commission = new QStandardItem(trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission));
-    QStandardItem *cashaccount = new QStandardItem(m_data->tickers.contains(trade.cashAccount) ? m_data->tickers.value(trade.cashAccount).symbol : "");
-    QStandardItem *frequency = new QStandardItem(trade.frequencyToString());
-    QStandardItem *date = new QStandardItem(trade.dateToString());
-    QStandardItem *startdate = new QStandardItem(trade.startDate.isValid() ? trade.startDate.toString(Qt::SystemLocaleShortDate) : "");
-    QStandardItem *enddate = new QStandardItem(trade.endDate.isValid() ? trade.endDate.toString(Qt::SystemLocaleShortDate) : "");
-    m_modelTrade->setItem(i, 0, type);
-    m_modelTrade->setItem(i, 1, value);
-    m_modelTrade->setItem(i, 2, price);
-    m_modelTrade->setItem(i, 3, commission);
-    m_modelTrade->setItem(i, 4, cashaccount);
-    m_modelTrade->setItem(i, 5, frequency);
-    m_modelTrade->setItem(i, 6, date);
-    m_modelTrade->setItem(i, 7, startdate);
-    m_modelTrade->setItem(i, 8, enddate);
+    m_modelAA->addNew(ui.cmbAA->itemData(ui.cmbAA->currentIndex()).toInt());
 }
 
 void frmTicker::installAAModel()
@@ -175,22 +97,6 @@ void frmTicker::installAAModel()
 
     ui.aa->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
     ui.aa->setColumnWidth(1, sbTmp.sizeHint().width());
-    connect(m_modelAA, SIGNAL(itemChanged(QStandardItem*)), this, SLOT(aaListChange(QStandardItem*)));
-    aaListChange(0);
-}
-
-void frmTicker::installTradeModel()
-{
-    m_modelTrade->setHeaderData(0, Qt::Horizontal, "Type");
-    m_modelTrade->setHeaderData(1, Qt::Horizontal, "Value");
-    m_modelTrade->setHeaderData(2, Qt::Horizontal, "Price");
-    m_modelTrade->setHeaderData(3, Qt::Horizontal, "Comm.");
-    m_modelTrade->setHeaderData(4, Qt::Horizontal, "$ Acct");
-    m_modelTrade->setHeaderData(5, Qt::Horizontal, "Freq.");
-    m_modelTrade->setHeaderData(6, Qt::Horizontal, "Date");
-    m_modelTrade->setHeaderData(7, Qt::Horizontal, "Start");
-    m_modelTrade->setHeaderData(8, Qt::Horizontal, "End");
-    ui.trades->setModel(m_modelTrade);
 }
 
 void frmTicker::accept()
@@ -202,6 +108,8 @@ void frmTicker::accept()
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
     m_security.hide = ui.chkHide->isChecked();
+    m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
+    m_security.aa = m_modelAA->getList();
 
     if (m_security == m_securityOriginal)
     {
@@ -213,11 +121,10 @@ void frmTicker::accept()
     if (m_security.id == -1)
         m_security.id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
 
-    for(int i = 0; i < m_security.trades.count(); ++i)
+    if(m_security.aa == m_securityOriginal.aa)
     {
-        m_sql->executeNonQuery(m_sql->updateSecurityTrade(m_security.id, m_security.trades.at(i)));
-        if (m_security.trades.at(i).id == -1)
-            m_security.trades[i].id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+        QDialog::accept();
+        return;
     }
 
     QVariantList tickerID, aaID, percent;
@@ -240,48 +147,19 @@ void frmTicker::accept()
     QDialog::accept();
 }
 
-void frmTicker::editTrade()
-{
-    QModelIndexList il = ui.trades->selectionModel()->selectedRows();
-    if(il.count() == 0)
-        return;
-
-    foreach(const QModelIndex &q, il)
-    {
-        int i = q.row();
-        frmTrade f(this, &m_data->tickers, m_security.id, m_security.trades.value(i));
-        if (f.exec())
-        {
-            updateTradeList(f.getReturnValues(), i);
-            m_security.trades[i] = f.getReturnValues();
-        }
-    }
-}
-
-void frmTicker::addTrade()
-{
-    frmTrade f(this, &m_data->tickers, m_security.id);
-    if (f.exec())
-    {
-        updateTradeList(f.getReturnValues());
-        m_security.trades.append(f.getReturnValues());
-    }
-}
-
-void frmTicker::deleteTrades()
-{
-    QList<int> indexes = functions::getSelectedRows(ui.trades->selectionModel()->selectedRows());
-    if(indexes.count() == 0)
-        return;
-
-    for(int i = indexes.count() - 1; i >= 0; --i)
-    {
-        m_modelTrade->removeRow(indexes.at(i));
-        m_security.trades.removeAt(indexes.at(i));
-    }
-}
-
 void frmTicker::resetExpense()
 {
     ui.sbExpense->setValue(-1);
+}
+
+void frmTicker::saveItem(globals::dynamicTrade *trade)
+{
+    m_sql->executeNonQuery(m_sql->updateSecurityTrade(m_security.id, (*trade)));
+    if (trade->id == -1)
+        trade->id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+}
+
+void frmTicker::deleteItem(const globals::dynamicTrade &trade)
+{
+    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_TickersTrades, trade.id));
 }

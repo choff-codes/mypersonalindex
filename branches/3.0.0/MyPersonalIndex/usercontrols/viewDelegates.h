@@ -65,9 +65,7 @@ public:
             return;
 
         QDoubleSpinBox *s = static_cast<QDoubleSpinBox*>(editor);
-        QString value = index.model()->data(index, Qt::DisplayRole).toString();
-        value.chop(1);
-        s->setValue(value.toDouble());
+        s->setValue(index.model()->data(index, Qt::EditRole).toDouble());
     }
 
     void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
@@ -76,7 +74,7 @@ public:
             return;
 
         QDoubleSpinBox *s = static_cast<QDoubleSpinBox*>(editor);
-        model->setData(index, QLocale().toString(s->value(), 'f', 2).append("%"));
+        model->setData(index, s->value(), Qt::EditRole);
     }
 
     void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex&) const

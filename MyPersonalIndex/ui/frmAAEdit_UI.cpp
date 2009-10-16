@@ -19,6 +19,7 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     target = new QLabel("Target:", dialog);
     formLayout->setWidget(1, QFormLayout::LabelRole, target);
 
+    targetLayout = new QHBoxLayout();
     sbTarget = new QDoubleSpinBox(dialog);
     sbTarget->setDecimals(2);
     sbTarget->setMinimum(-1);
@@ -27,7 +28,13 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     sbTarget->setSuffix("%");
     sbTarget->setSpecialValueText("None");
     sbTarget->setValue(-1);
-    formLayout->setWidget(1, QFormLayout::FieldRole, sbTarget);
+    btnClearTarget = new QToolButton(dialog);
+    btnClearTarget->setText("Clear");
+
+    targetLayout->addWidget(sbTarget, 1);
+    targetLayout->addWidget(btnClearTarget);
+
+    formLayout->setLayout(1, QFormLayout::FieldRole, targetLayout);
 
     mainLayout->addLayout(formLayout);
     mainLayout->addWidget(btnOkCancel);

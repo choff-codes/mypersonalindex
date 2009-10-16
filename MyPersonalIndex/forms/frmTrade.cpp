@@ -33,14 +33,14 @@ void frmTrade::loadTrade()
 {
     ui.cmbType->setCurrentIndex((int)m_trade.tradeType);
     if (m_trade.value >= 0)
-        ui.txtShares->setText(QString("%L1").arg(m_trade.value, 0, 'f', 4));
+        ui.txtShares->setText(QString::number(m_trade.value, 'f', 4));
     if (m_trade.price >= 0)
     {
         ui.chkPrice->setChecked(true);
-        ui.txtPrice->setText(QString("%L1").arg(m_trade.price, 0, 'f', 4));
+        ui.txtPrice->setText(QString::number(m_trade.price, 'f', 4));
     }
     if (m_trade.commission >= 0)
-        ui.txtCommission->setText(QString("%L1").arg(m_trade.commission, 0, 'f', 4));
+        ui.txtCommission->setText(QString::number(m_trade.commission, 'f', 4));
     if (m_trade.cashAccount > 0)
         for(int i = 0; i < ui.cmbCash->count(); ++i)
             if (ui.cmbCash->itemData(i).toInt() == m_trade.cashAccount)

@@ -5,7 +5,7 @@
 #include "frmTicker_UI.h"
 #include "globals.h"
 #include "queries.h"
-#include "modelWithNoEdit.h"
+#include "mpiModelBase.h"
 #include "frmTrade.h"
 #include "functions.h"
 
@@ -173,13 +173,13 @@ private:
     QList<globals::intdoublePair> m_list;
 };
 
-class tickerTradeModel : public modelWithNoEdit<globals::dynamicTrade, frmTrade>
+class tickerTradeModel : public mpiModelBase<globals::dynamicTrade, frmTrade>
 {
     Q_OBJECT
 
 public:
     tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> *cashAccounts = 0, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
-            modelWithNoEdit<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
+            mpiModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {
@@ -269,9 +269,9 @@ public:
     }
 
 public slots:
-    inline void addNew() { addItem(); }
-    inline void editSelected() { editItems(); }
-    inline void deleteSelected() { removeItems(); }
+    inline void addNew() { addItem(); autoResize(); }
+    inline void editSelected() { editItems(); autoResize(); }
+    inline void deleteSelected() { removeItems(); autoResize(); }
 
 signals:
     void saveItem(globals::dynamicTrade *trade);
@@ -279,6 +279,14 @@ signals:
 
 private:
     const QMap<int, globals::security> *m_cashAccounts;
+
+    void autoResize()
+    {
+        if (m_list.count() == 0)
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        else
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    }
 };
 
 #endif // FRMTICKER_H

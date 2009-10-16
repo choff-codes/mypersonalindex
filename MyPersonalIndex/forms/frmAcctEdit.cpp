@@ -13,6 +13,7 @@ frmAcctEdit::frmAcctEdit(QWidget *parent, const globals::account &acct): QDialog
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.sbTaxRate, SIGNAL(valueChanged(double)), this, SLOT(adjustSpinBox(double)));
+    connect(ui.btnClearTaxRate, SIGNAL(clicked()), this, SLOT(resetSpinBox()));
 }
 
 void frmAcctEdit::accept()
@@ -28,4 +29,9 @@ void frmAcctEdit::adjustSpinBox(double d)
 {
     if (d < 0 && d != -1)
         ui.sbTaxRate->setValue(-1);
+}
+
+void frmAcctEdit::resetSpinBox()
+{
+    ui.sbTaxRate->setValue(-1);
 }

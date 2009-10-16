@@ -12,6 +12,7 @@ frmAAEdit::frmAAEdit(QWidget *parent, const globals::assetAllocation &aa): QDial
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.sbTarget, SIGNAL(valueChanged(double)), this, SLOT(adjustSpinBox(double)));
+    connect(ui.btnClearTarget, SIGNAL(clicked()), this, SLOT(resetSpinBox()));
 }
 
 void frmAAEdit::accept()
@@ -26,4 +27,9 @@ void frmAAEdit::adjustSpinBox(double d)
 {
     if (d < 0 && d != -1)
         ui.sbTarget->setValue(-1);
+}
+
+void frmAAEdit::resetSpinBox()
+{
+    ui.sbTarget->setValue(-1);
 }

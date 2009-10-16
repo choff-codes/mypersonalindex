@@ -4,7 +4,7 @@
 #include <QtGui>
 #include "frmTableViewBase_UI.h"
 #include "globals.h"
-#include "modelWithNoEdit.h"
+#include "mpiModelBase.h"
 #include "queries.h"
 #include "frmAcctEdit.h"
 
@@ -36,13 +36,13 @@ private slots:
     void deleteItem(const globals::account &acct);
 };
 
-class acctModel : public modelWithNoEdit<globals::account, frmAcctEdit>
+class acctModel : public mpiModelBase<globals::account, frmAcctEdit>
 {
     Q_OBJECT
 
 public:
     acctModel(const QList<globals::account> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
-            modelWithNoEdit<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
+            mpiModelBase<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {

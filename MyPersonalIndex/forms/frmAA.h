@@ -5,7 +5,7 @@
 #include "functions.h"
 #include "frmTableViewBase_UI.h"
 #include "globals.h"
-#include "modelWithNoEdit.h"
+#include "mpiModelBase.h"
 #include "queries.h"
 #include "frmAAEdit.h"
 
@@ -36,13 +36,13 @@ private slots:
     void deleteItem(const globals::assetAllocation &aa);
 };
 
-class aaModel : public modelWithNoEdit<globals::assetAllocation, frmAAEdit>
+class aaModel : public mpiModelBase<globals::assetAllocation, frmAAEdit>
 {
     Q_OBJECT
 
 public:
     aaModel(const QList<globals::assetAllocation> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
-            modelWithNoEdit<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
+            mpiModelBase<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {

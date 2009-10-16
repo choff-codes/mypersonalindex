@@ -21,6 +21,7 @@ private:
 private slots:
     void accept();
     void adjustSpinBox(double);
+    void resetSpinBox();
 };
 
 #endif // FRMACCTEDIT_H

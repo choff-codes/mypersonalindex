@@ -1,16 +1,16 @@
-#ifndef MODELWITHNOEDIT_H
-#define MODELWITHNOEDIT_H
+#ifndef MPIMODELBASE_H
+#define MPIMODELBASE_H
 
 #include <QtGui>
 
 template<class T, class editForm>
-class modelWithNoEdit: public QAbstractTableModel
+class mpiModelBase: public QAbstractTableModel
 {    
 public:
 
     QList<T> getList() { return m_list; }
 
-    modelWithNoEdit(const QList<T> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    mpiModelBase(const QList<T> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
             QAbstractTableModel(parent), m_parent(parent), m_dialog(dialog), m_columns(cols), m_list(values)
     {
         insertRows(0, m_list.count());
@@ -105,9 +105,6 @@ public:
     }
 
 private:
-    QTableView *m_parent;
-    QDialog *m_dialog;
-    int m_columns;
 
     QList<int> getSelectedRows()
     {
@@ -155,6 +152,9 @@ private:
     }
 
 protected:
+    QTableView *m_parent;
+    QDialog *m_dialog;
+    int m_columns;
     QList<T> m_list;
 
     virtual void editSelected() = 0;
@@ -218,4 +218,4 @@ protected:
     }
 };
 
-#endif // MODELWITHNOEDIT_H
+#endif // MPIMODELBASE_H

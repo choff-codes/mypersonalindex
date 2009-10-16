@@ -4,7 +4,7 @@
 #include <QtGui>
 #include "frmTableViewBase_UI.h"
 #include "globals.h"
-#include "modelWithNoEdit.h"
+#include "mpiModelBase.h"
 #include "queries.h"
 #include "frmStatEdit.h"
 
@@ -43,13 +43,13 @@ private slots:
     void deleteItem(const globals::statistic &stat);
 };
 
-class statModel : public modelWithNoEdit<globals::statistic, frmStatEdit>
+class statModel : public mpiModelBase<globals::statistic, frmStatEdit>
 {
     Q_OBJECT
 
 public:
     statModel(const QList<globals::statistic> &values, const QList<int> &selected, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
-            modelWithNoEdit<globals::statistic, frmStatEdit>(values, cols, parent, dialog)
+            mpiModelBase<globals::statistic, frmStatEdit>(values, cols, parent, dialog)
     {
         qSort(m_list);
         for(int i = 0; i < selected.count(); ++i)
@@ -76,7 +76,7 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
-        return modelWithNoEdit<globals::statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
+        return mpiModelBase<globals::statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
     }
 
     QVariant data(const QModelIndex &index, int role) const

@@ -11,7 +11,9 @@ public:
     QLabel *desc;
     QLineEdit *txtDesc;
     QLabel *taxrate;
+    QHBoxLayout *taxRateLayout;
     QDoubleSpinBox *sbTaxRate;
+    QToolButton *btnClearTaxRate;
     QCheckBox *chkTaxDeferred;
     QDialogButtonBox *btnOkCancel;
 

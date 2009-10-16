@@ -11,7 +11,9 @@ public:
     QLabel *desc;
     QLineEdit *txtDesc;
     QLabel *target;
+    QHBoxLayout *targetLayout;
     QDoubleSpinBox *sbTarget;
+    QToolButton *btnClearTarget;
     QDialogButtonBox *btnOkCancel;
 
     void setupUI(QDialog* dialog);

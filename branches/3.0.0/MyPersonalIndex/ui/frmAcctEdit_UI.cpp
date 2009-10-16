@@ -19,6 +19,7 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     taxrate = new QLabel("Tax Rate:", dialog);
     formLayout->setWidget(1, QFormLayout::LabelRole, taxrate);
 
+    taxRateLayout = new QHBoxLayout();
     sbTaxRate = new QDoubleSpinBox(dialog);
     sbTaxRate->setDecimals(2);
     sbTaxRate->setMinimum(-1);
@@ -27,7 +28,12 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     sbTaxRate->setSuffix("%");
     sbTaxRate->setSpecialValueText("None");
     sbTaxRate->setValue(-1);
-    formLayout->setWidget(1, QFormLayout::FieldRole, sbTaxRate);
+    btnClearTaxRate = new QToolButton(dialog);
+    btnClearTaxRate->setText("Clear");
+
+    taxRateLayout->addWidget(sbTaxRate, 1);
+    taxRateLayout->addWidget(btnClearTaxRate);
+    formLayout->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
 
     formLayout->setWidget(2, QFormLayout::LabelRole, new QLabel(dialog));
 

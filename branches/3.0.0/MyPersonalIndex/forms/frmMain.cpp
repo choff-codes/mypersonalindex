@@ -9,6 +9,7 @@
 #include "frmAA.h"
 #include "frmAcct.h"
 #include "frmStat.h"
+#include "updatePrices.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -20,7 +21,9 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
             QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
         }
 
-    sql = new queries();
+    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "main");
+    db.setDatabaseName(location);
+    sql = new queries(db);
     if (!sql->isOpen())
     {
         QMessageBox::critical(this, "Error", "Cannot read user settings folder!", QMessageBox::Ok);
@@ -66,6 +69,7 @@ void frmMain::connectSlots()
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
     connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(stat()));
+    connect(ui.mainUpdatePrices, SIGNAL(triggered()), this, SLOT(beginUpdate()));
 
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
 }
@@ -625,4 +629,25 @@ void frmMain::stat()
         m_currentPortfolio->data.stats = f.getReturnValues_Selected();
     }
 
+}
+
+void frmMain::beginUpdate()
+{
+    ui.stbProgress->setMaximum(0);
+    m_updateThread = new updatePrices(&m_portfolios, m_settings.splits, m_settings.dataStartDate, m_lastDate, this);
+    qRegisterMetaType<QStringList>("QStringList");
+    connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
+    m_updateThread->start();
+}
+
+void frmMain::finishUpdate(const QStringList &invalidSymbols)
+{
+    if (invalidSymbols.count() != 0)
+        QMessageBox::information(this,
+            "Update Error", "The following tickers were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
+            invalidSymbols.join(", "));
+
+    m_updateThread->disconnect();
+    delete m_updateThread;
+    ui.stbProgress->setMaximum(100);
 }

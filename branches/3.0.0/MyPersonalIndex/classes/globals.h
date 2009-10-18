@@ -393,15 +393,22 @@ public:
 //        tradeInfo(const double &p_shares, const double &p_price): price(p_price), shares(p_shares) {}
 //    };
 //
-//    struct updateInfo
-//    {
-//        double price;
-//        QDate closingDate;
-//        QDate dividendDate;
-//        QDate splitDate;
-//
-//        updateInfo(const QDate &minDate): price(0.0), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
-//    };
+    struct updateInfo
+    {
+        QString symbol;
+        QDate closingDate;
+        QDate dividendDate;
+        QDate splitDate;
+
+        updateInfo() {}
+        updateInfo(const QString &p_symbol, const QDate &minDate): symbol(p_symbol), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
+        QDate getMininumDate() const
+        {
+            return  dividendDate < closingDate ?
+                    dividendDate < splitDate ? dividendDate : splitDate :
+                    closingDate < splitDate ? closingDate : splitDate;
+        }
+    };
 };
 
 #endif // GLOBALS_H

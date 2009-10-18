@@ -37,18 +37,20 @@ const QString queries::table_TickersAA = "TickersAA";
 const QString queries::table_TickersTrades = "TickersTrades";
 const QString queries::table_Trades = "Trades";
 
-queries::queries()
+queries::queries(QSqlDatabase database): db(database)
 {
-    QString location = getDatabaseLocation();
-    if (QSqlDatabase::contains(location))
-        db = QSqlDatabase::database(location);
-    else
-    {
-        db = QSqlDatabase::addDatabase("QSQLITE", location);
-        db.setDatabaseName(location);
-        db.open();
-        QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
-    }
+    db.open();
+    QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
+
+//    QString location = getDatabaseLocation();
+//    if (QSqlDatabase::contains(location))
+//        db = QSqlDatabase::database(location);
+//    else
+//    {
+//        db = QSqlDatabase::addDatabase("QSQLITE", location);
+//        db.setDatabaseName(location);
+//
+//    }
 }
 
 QString queries::getDatabaseLocation()
@@ -129,6 +131,8 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
         for (int x = 0; x < binds.count(); ++x)
             query.addBindValue(binds.at(x).at(i));
         query.exec();
+        QString s= query.lastError().text();
+        s.append(" ");
     }
 
     db.commit();
@@ -525,3 +529,40 @@ queries::queryInfo* queries::getSecurityAA()
         QList<parameter>()
     );
 }
+
+queries::queryInfo* queries::getUpdateInfo()
+{
+    return new queryInfo(
+            "SELECT Ticker, MAX(Date) AS Date, 'C' AS Type"
+            " FROM ClosingPrices"
+            " GROUP BY Ticker"
+        " UNION ALL "
+            " SELECT Ticker, MAX(Date) as Date, 'D'"
+            " FROM Dividends"
+            " GROUP BY Ticker"
+        " UNION ALL"
+            " SELECT Ticker, MAX(Date) as Date, 'S'"
+            " FROM Splits"
+            " GROUP BY Ticker",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::updateMissingPrices()
+{
+    return new queryInfo(
+        "INSERT INTO ClosingPrices"
+        " SELECT a.Ticker, b.Date, d.Price"
+        " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices GROUP BY Ticker ) a"
+        " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b"
+        " LEFT JOIN ClosingPrices c"
+                " ON a.Ticker = c.Ticker"
+                " AND b.Date = c.Date"
+        " LEFT JOIN ClosingPrices d"
+                " ON a.Ticker = d.Ticker"
+                " AND d.date = (SELECT MAX(e.Date) FROM ClosingPrices AS e WHERE e.Ticker = d.Ticker AND e.Date < b.Date)"
+        " WHERE b.Date BETWEEN a.MinDate AND a.MaxDate AND c.Ticker IS NULL",
+        QList<parameter>()
+    );
+}
+

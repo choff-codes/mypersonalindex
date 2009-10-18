@@ -58,7 +58,7 @@ public:
     //enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
 
-    queries();
+    queries(QSqlDatabase database);
     static QString getDatabaseLocation();
     bool isOpen() const { return db.isOpen(); }
     QSqlDatabase getDatabase() const { return db; }
@@ -131,6 +131,10 @@ public:
 
     queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
     queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
+
+    enum { getUpdateInfo_Symbol, getUpdateInfo_Date, getUpdateInfo_Type };
+    queryInfo* getUpdateInfo();
+    queryInfo* updateMissingPrices();
 
 protected:
     QSqlDatabase db;

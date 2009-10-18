@@ -27,6 +27,7 @@ private:
     globals::settings m_settings;
     QList<int> m_dates;
     QMap<int, globals::statistic> m_statistics;
+    updatePrices *m_updateThread;
 
     void connectSlots();
     void loadSettings();
@@ -61,6 +62,8 @@ private slots:
     void aa();
     void acct();
     void stat();
+    void beginUpdate();
+    void finishUpdate(const QStringList &invalidSymbols);
 
 protected:
     void closeEvent(QCloseEvent *event);

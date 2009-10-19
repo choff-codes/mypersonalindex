@@ -24,10 +24,11 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "main");
     db.setDatabaseName(location);
     sql = new queries(db);
-    if (!sql->isOpen())
+    if (!sql->isOpen() || !sql->executeScalar(sql->getVersion()).isValid())
     {
+        delete sql;
+        sql = 0;
         QMessageBox::critical(this, "Error", "Cannot read user settings folder!", QMessageBox::Ok);
-        this->close();
         return;
     }
 
@@ -157,7 +158,7 @@ void frmMain::loadDates()
 
 void frmMain::resetLastDate()
 {
-    m_lastDate = QDate::fromJulianDay(sql->executeScalar(sql->getLastDate(), m_settings.dataStartDate.toJulianDay()).toInt());
+    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : QDate::fromJulianDay(m_dates[m_dates.count()]);
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
                 m_lastDate == m_settings.dataStartDate ?
                 "Never" :
@@ -633,9 +634,14 @@ void frmMain::stat()
 
 void frmMain::beginUpdate()
 {
+    if (!updatePrices::isInternetConnection())
+    {
+        QMessageBox::critical(this, "Update Error", "Cannot contact Yahoo! Finance, please check your internet connection.");
+        return;
+    }
+
     ui.stbProgress->setMaximum(0);
     m_updateThread = new updatePrices(&m_portfolios, m_settings.splits, m_settings.dataStartDate, m_lastDate, this);
-    qRegisterMetaType<QStringList>("QStringList");
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
     m_updateThread->start();
 }
@@ -650,4 +656,5 @@ void frmMain::finishUpdate(const QStringList &invalidSymbols)
     m_updateThread->disconnect();
     delete m_updateThread;
     ui.stbProgress->setMaximum(100);
+    ui.stbProgress->setValue(0);
 }

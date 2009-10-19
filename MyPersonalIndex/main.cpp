@@ -12,6 +12,11 @@ int main(int argc, char *argv[])
 
     app.setActivationWindow(&mainForm);
 
-    mainForm.show();
-    return app.exec();
+    if (mainForm.databaseExists())
+    {
+        mainForm.show();
+        return app.exec();
+    }
+    else
+        QApplication::quit();
 }

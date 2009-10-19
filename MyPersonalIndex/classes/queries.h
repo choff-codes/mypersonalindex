@@ -73,8 +73,6 @@ public:
     queryInfo* deleteTickerItems(const QString &table, const int &tickerID);
     queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID);
 
-    queryInfo* getLastDate();
-
     queryInfo* getVersion();
 
     queryInfo* getIdentity();

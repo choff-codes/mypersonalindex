@@ -18,6 +18,8 @@ public:
     frmMain(QWidget *parent = 0);
     ~frmMain() { delete sql; qDeleteAll(m_portfolios); }
 
+    bool databaseExists() { return sql; }
+
 private:
     frmMain_UI ui;
     queries *sql;

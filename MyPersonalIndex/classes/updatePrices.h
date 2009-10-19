@@ -11,10 +11,16 @@ class updatePrices: public QThread
 
 public:
     updatePrices(QMap<int, globals::myPersonalIndex*> *data, const bool &splits, const QDate &firstDate, const QDate &lastDate, QObject *parent = 0):
-        QThread(parent), m_data(data), m_splits(splits), m_firstDate(firstDate), m_lastDate(lastDate) { m_firstDate = m_firstDate.addDays(-6); }
+        QThread(parent), m_data(data), m_splits(splits), m_firstDate(firstDate), m_lastDate(lastDate)
+    {
+        m_firstDate = m_firstDate.addDays(-6);
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
+        db.setDatabaseName(queries::getDatabaseLocation());
+        m_sql = new queries(db);
+    }
 
     ~updatePrices() { delete m_sql; }
-    bool isInternetConnection();
+    static bool isInternetConnection();
 
 signals:
     void updateFinished(const QStringList invalidSymbols);
@@ -34,9 +40,9 @@ private:
     void getUpdateInfo(QMap<QString, globals::updateInfo> *tickers);
 
     void run();
-    bool getPrices(const QString &ticker, const QDate &minDate);
-    void getDividends(const QString&ticker, const QDate &minDate);
-    void getSplits(const QString &ticker, const QDate &minDate);
+    bool getPrices(const QString &ticker, const QDate &minDate, QDate &earliestUpdate);
+    void getDividends(const QString&ticker, const QDate &minDate, QDate &earliestUpdate);
+    void getSplits(const QString &ticker, const QDate &minDate, QDate &earliestUpdate);
 };
 
 #endif // UPDATEPRICES_H

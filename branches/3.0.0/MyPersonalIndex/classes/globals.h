@@ -402,12 +402,6 @@ public:
 
         updateInfo() {}
         updateInfo(const QString &p_symbol, const QDate &minDate): symbol(p_symbol), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
-        QDate getMininumDate() const
-        {
-            return  dividendDate < closingDate ?
-                    dividendDate < splitDate ? dividendDate : splitDate :
-                    closingDate < splitDate ? closingDate : splitDate;
-        }
     };
 };
 

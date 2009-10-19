@@ -209,18 +209,18 @@ queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &
     );
 }
 
-queries::queryInfo* queries::getLastDate()
-{
-    return new queryInfo(
-         "SELECT MAX(Date) from ClosingPrices",
-        QList<parameter>()
-    );
-}
-
 queries::queryInfo* queries::getIdentity()
 {
     return new queryInfo(
         "SELECT last_insert_rowid()",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getVersion()
+{
+    return new queryInfo(
+        "SELECT Version FROM Settings",
         QList<parameter>()
     );
 }
@@ -551,7 +551,7 @@ queries::queryInfo* queries::getUpdateInfo()
 queries::queryInfo* queries::updateMissingPrices()
 {
     return new queryInfo(
-        "INSERT INTO ClosingPrices"
+        "INSERT INTO ClosingPrices (Ticker, Date, Price)"
         " SELECT a.Ticker, b.Date, d.Price"
         " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices GROUP BY Ticker ) a"
         " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b"
@@ -565,4 +565,3 @@ queries::queryInfo* queries::updateMissingPrices()
         QList<parameter>()
     );
 }
-

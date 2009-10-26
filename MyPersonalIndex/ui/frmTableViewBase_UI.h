@@ -19,8 +19,12 @@ public:
     QPushButton *btnAdd;
     QPushButton *btnEdit;
     QPushButton *btnDelete;
-    QPushButton *btnPaste;
     QDialogButtonBox *btnOkCancel;
+    QMenu *popup;
+    QAction *copy;
+    QShortcut *copyShortcut;
+    QAction *paste;
+    QShortcut *pasteShortcut;
 
     void setupUI(QDialog* dialog, const QString &groupBoxText, const bool &showRightSideButtons = false);
 };

@@ -9,9 +9,14 @@ frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog
     this->setWindowTitle("Edit Trade");
     ui.cmbCash->addItem("(None)", -1);
 
-    int id = static_cast<frmTicker*>(parent)->getTickerID();
+    //int id = static_cast<frmTicker*>(parent)->getTickerID();
+
+    // cannot pass cash accounts in constructor since it does not match the format
+    // of mpiModelBase edit function
     foreach(const globals::security &sec, *static_cast<frmTicker*>(parent)->getCashAccounts())
-        if (sec.cashAccount && sec.id != id)
+        // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
+        // but now will show up as no cash account selected
+        if (sec.cashAccount) // && sec.id != id)
             ui.cmbCash->addItem(sec.symbol, sec.id);
 
     connectSlots();
@@ -56,7 +61,7 @@ void frmTrade::loadTrade()
         ui.chkStarting->setChecked(true);
         ui.deStarting->setDate(m_trade.startDate);
     }
-    if (m_trade.startDate.isValid())
+    if (m_trade.endDate.isValid())
     {
         ui.chkEnding->setChecked(true);
         ui.deEnding->setDate(m_trade.endDate);
@@ -84,8 +89,8 @@ void frmTrade::accept()
     m_trade.cashAccount = ui.cmbCash->itemData(ui.cmbCash->currentIndex()).toInt();
     m_trade.frequency = (globals::dynamicTradeFreq)ui.cmbFreq->currentIndex();
     m_trade.date = ui.deDate->isEnabled() ? ui.deDate->date() : QDate();
-    m_trade.startDate = ui.deEnding->isEnabled() ? ui.deEnding->date() : QDate();
-    m_trade.endDate = ui.deStarting->isEnabled() ? ui.deStarting->date() : QDate();
+    m_trade.startDate = ui.deStarting->isEnabled() ? ui.deStarting->date() : QDate();
+    m_trade.endDate = ui.deEnding->isEnabled() ? ui.deEnding->date() : QDate();
 
     QDialog::accept();
 }
@@ -126,6 +131,8 @@ void frmTrade::freqChange(int index)
             ui.deDate->setCalendarPopup(false);
             ui.deDate->setDate(QDate(2009, 1, 1));
             break;
+        case globals::tradeFreq_Count:
+            break;
     }
 }
 
@@ -153,6 +160,8 @@ void frmTrade::typeChange(int index)
             break;
         case globals::tradeType_AA:
             ui.shares->setText("% of Target:");
+            break;
+        case globals::tradeType_Count:
             break;
     }
 }

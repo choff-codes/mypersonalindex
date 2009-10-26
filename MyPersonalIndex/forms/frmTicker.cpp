@@ -43,6 +43,11 @@ void frmTicker::connectSlots()
     connect(ui.btnTradesEdit, SIGNAL(clicked()), m_modelTrade, SLOT(editSelected()));
     connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), m_modelTrade, SLOT(editSelected()));
     connect(ui.btnTradesDelete, SIGNAL(clicked()), m_modelTrade, SLOT(deleteSelected()));
+    connect(ui.tradesCopy, SIGNAL(triggered()), m_modelTrade, SLOT(copy()));
+    connect(ui.tradesCopyShortcut, SIGNAL(activated()), m_modelTrade, SLOT(copy()));
+    connect(ui.tradesPaste, SIGNAL(triggered()), m_modelTrade, SLOT(paste()));
+    connect(ui.tradesPasteShortcut, SIGNAL(activated()), m_modelTrade, SLOT(paste()));
+    connect(ui.trades, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui.btnExpenseClear, SIGNAL(clicked()), this, SLOT(resetExpense()));
     connect(ui.btnAAAdd, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui.btnAADelete, SIGNAL(clicked()), m_modelAA, SLOT(deleteSelected()));
@@ -162,4 +167,9 @@ void frmTicker::saveItem(globals::dynamicTrade *trade)
 void frmTicker::deleteItem(const globals::dynamicTrade &trade)
 {
     m_sql->executeNonQuery(m_sql->deleteItem(queries::table_TickersTrades, trade.id));
+}
+
+void frmTicker::customContextMenuRequested(const QPoint&)
+{
+    ui.tradesPopup->popup(QCursor::pos());
 }

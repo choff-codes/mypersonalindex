@@ -36,9 +36,13 @@ public:
     QTableView *trades;
     QHBoxLayout *tradesLayoutButtons;
     QPushButton *btnTradesAdd;
-    QPushButton *btnTradesCopy;
     QPushButton *btnTradesEdit;
     QPushButton *btnTradesDelete;
+    QMenu *tradesPopup;
+    QAction *tradesCopy;
+    QShortcut *tradesCopyShortcut;
+    QAction *tradesPaste;
+    QShortcut *tradesPasteShortcut;
     QDialogButtonBox *btnOkCancel;
     QGroupBox *gpHistorical;
     QVBoxLayout *historicalLayout;

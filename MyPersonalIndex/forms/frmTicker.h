@@ -18,7 +18,7 @@ class frmTicker : public QDialog
 public:
 
     const globals::security& getReturnValues() const { return m_security; }
-    const int &getTickerID() const { return m_security.id; }
+    //const int &getTickerID() const { return m_security.id; }
     const QMap<int, globals::security>* getCashAccounts() const { return &m_data->tickers; }
 
     frmTicker(QWidget *parent = 0, queries *sql = 0, const int &portfolioID = 0, const globals::portfolioData *data = 0, const globals::security& security = globals::security());
@@ -46,6 +46,7 @@ private slots:
     void updateAAPercentage();
     void saveItem(globals::dynamicTrade *trade);
     void deleteItem(const globals::dynamicTrade &trade);
+    void customContextMenuRequested(const QPoint&);
 };
 
 class tickerAAModel: public QAbstractTableModel
@@ -181,6 +182,7 @@ public:
     tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> *cashAccounts = 0, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
+private:
     QVariant data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())
@@ -192,41 +194,35 @@ public:
         if (role == Qt::DisplayRole)
         {
             globals::dynamicTrade trade = m_list.at(index.row());
-            if (index.column() == 0)
+            switch(index.column())
             {
-                return trade.tradeTypeToString();
-            }
-            if (index.column() == 1)
-            {
-                return trade.valueToString();
-            }
-            if (index.column() == 2)
-            {
-                return trade.price < 0 ? "Prev Close" : functions::doubleToCurrency(trade.price);
-            }
-            if (index.column() == 3)
-            {
-                return trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission);
-            }
-            if (index.column() == 4)
-            {
-                return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).symbol : "";
-            }
-            if (index.column() == 5)
-            {
-                return trade.frequencyToString();
-            }
-            if (index.column() == 6)
-            {
-                return trade.dateToString();
-            }
-            if (index.column() == 7)
-            {
-                return trade.startDate.isValid() ? trade.startDate.toString(Qt::SystemLocaleShortDate) : "";
-            }
-            if (index.column() == 8)
-            {
-                return trade.endDate.isValid() ? trade.endDate.toString(Qt::SystemLocaleShortDate) : "";
+                case 0:
+                    return trade.tradeTypeToString();
+                    break;
+                case 1:
+                    return trade.valueToString();
+                    break;
+                case 2:
+                    return trade.price < 0 ? "Prev Close" : functions::doubleToCurrency(trade.price);
+                    break;
+                case 3:
+                    return trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission);
+                    break;
+                case 4:
+                    return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).symbol : "";
+                    break;
+                case 5:
+                    return trade.frequencyToString();
+                    break;
+                case 6:
+                    return trade.dateToString();
+                    break;
+                case 7:
+                    return trade.startDate.isValid() ? trade.startDate.toString(Qt::SystemLocaleShortDate) : "";
+                    break;
+                case 8:
+                    return trade.endDate.isValid() ? trade.endDate.toString(Qt::SystemLocaleShortDate) : "";
+                    break;
             }
         }
 
@@ -238,40 +234,100 @@ public:
         if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
             return QVariant();
 
-        if (section == 0)
-            return "Type";
-
-        if (section == 1)
-            return "Value";
-
-        if (section == 2)
-            return "Price";
-
-        if (section == 3)
-            return "Comm.";
-
-        if (section == 4)
-            return "$ Acct";
-
-        if (section == 5)
-            return "Freq.";
-
-        if (section == 6)
-            return "Date";
-
-        if (section == 7)
-            return "Start";
-
-        if (section == 8)
-            return "End";
+        switch(section)
+        {
+            case 0:
+                return "Type";
+                break;
+            case 1:
+                return "Value";
+                break;
+            case 2:
+                return "Price";
+                break;
+            case 3:
+                return "Comm.";
+                break;
+            case 4:
+                return "$ Acct";
+                break;
+            case 5:
+                return "Freq.";
+                break;
+            case 6:
+                return "Date";
+                break;
+            case 7:
+                return "Start";
+                break;
+            case 8:
+                return "End";
+                break;
+        }
 
         return QVariant();
+    }
+
+    QString internalCopy(const globals::dynamicTrade &item)
+    {
+        return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
+               QString::number((int)item.tradeType), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
+               functions::doubleToLocalFormat(item.commission), QString::number(item.cashAccount),
+               QString::number((int)item.frequency), QString::number(item.date.toJulianDay()),
+               QString::number(item.startDate.toJulianDay()), QString::number(item.endDate.toJulianDay()));
+    }
+
+    globals::dynamicTrade internalPaste(const QStringList &value, bool *ok)
+    {
+        globals::dynamicTrade item;
+
+        if (value.count() != 9)
+        {
+            (*ok) = false;
+            return item;
+        }
+
+        int i = value.at(0).toInt(ok);
+        if (*ok && i < globals::tradeType_Count)
+            item.tradeType = (globals::dynamicTradeType)i;
+
+        if (*ok)
+            item.value = value.at(1).toDouble(ok);
+
+        if (*ok)
+            item.price = value.at(2).toDouble(ok);
+
+        if (*ok)
+            item.commission = value.at(3).toDouble(ok);
+
+        if (*ok)
+            item.cashAccount = value.at(4).toInt(ok);
+
+        if (*ok)
+        {
+            int i = value.at(5).toInt(ok);
+            if (*ok && i < globals::tradeFreq_Count)
+                item.frequency = (globals::dynamicTradeFreq)i;
+        }
+
+        if (*ok)
+            item.date = QDate::fromJulianDay(value.at(6).toInt(ok));
+
+        if (*ok)
+            item.startDate = QDate::fromJulianDay(value.at(7).toInt(ok));
+
+        if (*ok)
+            item.endDate = QDate::fromJulianDay(value.at(8).toInt(ok));
+
+        return item;
     }
 
 public slots:
     inline void addNew() { addItem(); autoResize(); }
     inline void editSelected() { editItems(); autoResize(); }
     inline void deleteSelected() { removeItems(); autoResize(); }
+    inline void copy() { beginCopy(); }
+    inline void paste() { beginPaste(); }
 
 signals:
     void saveItem(globals::dynamicTrade *trade);

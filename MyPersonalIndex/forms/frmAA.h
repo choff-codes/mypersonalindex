@@ -34,6 +34,7 @@ private slots:
     void accept();
     void saveItem(globals::assetAllocation *aa);
     void deleteItem(const globals::assetAllocation &aa);
+    void customContextMenuRequested(const QPoint&);
 };
 
 class aaModel : public mpiModelBase<globals::assetAllocation, frmAAEdit>
@@ -44,6 +45,7 @@ public:
     aaModel(const QList<globals::assetAllocation> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
 
+private:
     QVariant data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())
@@ -61,7 +63,7 @@ public:
             if (index.column() == 1)
             {
                 return m_list.at(index.row()).target < 0 ? "None" :
-                    QLocale().toString(m_list.at(index.row()).target, 'f', 2).append("%");
+                    functions::doubleToPercentage(m_list.at(index.row()).target);
             }
         }
 
@@ -89,10 +91,33 @@ public:
         return QVariant();
     }
 
+    QString internalCopy(const globals::assetAllocation &item)
+    {
+        return QString("%1\t%2").arg(item.description, item.target < 0 ? "None" : functions::doubleToPercentage(item.target));
+    }
+
+    globals::assetAllocation internalPaste(const QStringList &value, bool *ok)
+    {
+        globals::assetAllocation item;
+
+        if (value.count() != 2)
+        {
+            (*ok) = false;
+            return item;
+        }
+
+        item.description = value.at(0);
+        item.target = functions::stringToDouble(value.at(1), ok);
+
+        return item;
+    }
+
 public slots:
     inline void addNew() { addItem(); }
     inline void editSelected() { editItems(); }
     inline void deleteSelected() { removeItems(); }
+    inline void copy() { beginCopy(); }
+    inline void paste() { beginPaste(); }
 
 signals:
     void saveItem(globals::assetAllocation *aa);

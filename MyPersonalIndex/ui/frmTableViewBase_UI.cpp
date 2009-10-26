@@ -22,7 +22,18 @@ void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, 
     table->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
     table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     table->verticalHeader()->hide();
+    table->setContextMenuPolicy(Qt::CustomContextMenu);
     groupLayout->addWidget(table, 0, 0);
+
+    popup = new QMenu(table);
+    copy = new QAction("Copy", popup);
+    copy->setShortcut(Qt::CTRL + Qt::Key_C);
+    copyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, table);
+    popup->addAction(copy);
+    paste = new QAction("Paste", popup);
+    paste->setShortcut(Qt::CTRL + Qt::Key_V);
+    popup->addAction(paste);
+    pasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, table);
 
     if (showRightSideButtons)
     {
@@ -47,8 +58,6 @@ void frmTableViewBase_UI::setupUI(QDialog* dialog, const QString &groupBoxText, 
     groupLayoutBottom->addWidget(btnAdd);
     groupLayoutBottom->addWidget(btnEdit);
     groupLayoutBottom->addWidget(btnDelete);
-    btnPaste = new QPushButton("Paste", gpMain);
-    groupLayoutBottom->addWidget(btnPaste);
 
     groupLayout->addLayout(groupLayoutBottom, 1, 0);
 

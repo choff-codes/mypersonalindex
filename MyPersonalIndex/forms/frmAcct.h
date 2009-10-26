@@ -7,6 +7,7 @@
 #include "mpiModelBase.h"
 #include "queries.h"
 #include "frmAcctEdit.h"
+#include "functions.h"
 
 class acctModel;
 class frmAcct : public QDialog
@@ -34,6 +35,7 @@ private slots:
     void accept();
     void saveItem(globals::account *acct);
     void deleteItem(const globals::account &acct);
+    void customContextMenuRequested(const QPoint&);
 };
 
 class acctModel : public mpiModelBase<globals::account, frmAcctEdit>
@@ -44,6 +46,7 @@ public:
     acctModel(const QList<globals::account> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
 
+private:
     QVariant data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())
@@ -61,7 +64,7 @@ public:
             if (index.column() == 1)
             {
                 return m_list.at(index.row()).taxRate < 0 ? "None" :
-                    QLocale().toString(m_list.at(index.row()).taxRate, 'f', 2).append("%");
+                    functions::doubleToPercentage(m_list.at(index.row()).taxRate);
             }
             if (index.column() == 2)
             {
@@ -89,10 +92,39 @@ public:
         return QVariant();
     }
 
+    QString internalCopy(const globals::account &item)
+    {
+        return QString("%1\t%2\t%3").arg(item.description, item.taxRate < 0 ? "None" : functions::doubleToPercentage(item.taxRate), QString(item.taxDeferred ? "Yes": "No"));
+    }
+
+    globals::account internalPaste(const QStringList &value, bool *ok)
+    {
+        globals::account item;
+
+        if (value.count() != 3)
+        {
+            (*ok) = false;
+            return item;
+        }
+
+        item.description = value.at(0);
+        item.taxRate = functions::stringToDouble(value.at(1), ok);
+
+        QString taxDef = value.at(2).toUpper();
+        if (taxDef == "YES" || taxDef == "NO")
+            item.taxDeferred = taxDef == "YES";
+        else
+            (*ok) = false;
+
+        return item;
+    }
+
 public slots:
     inline void addNew() { addItem(); }
     inline void editSelected() { editItems(); }
     inline void deleteSelected() { removeItems(); }
+    inline void copy() { beginCopy(); }
+    inline void paste() { beginPaste(); }
 
 signals:
     void saveItem(globals::account *acct);

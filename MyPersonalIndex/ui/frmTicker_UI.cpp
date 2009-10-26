@@ -102,18 +102,27 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     trades->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
     trades->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     trades->verticalHeader()->hide();
+    trades->setContextMenuPolicy(Qt::CustomContextMenu);
 
     tradesLayoutButtons = new QHBoxLayout();
     btnTradesAdd = new QPushButton("Add New", gpTrades);
-    btnTradesCopy = new QPushButton("Add Copy", gpTrades);;
     btnTradesEdit = new QPushButton("Edit", gpTrades);;
     btnTradesDelete = new QPushButton("Delete", gpTrades);;
     tradesLayoutButtons->addWidget(btnTradesAdd);
-    tradesLayoutButtons->addWidget(btnTradesCopy);
     tradesLayoutButtons->addWidget(btnTradesEdit);
     tradesLayoutButtons->addWidget(btnTradesDelete);
     tradesLayout->addWidget(trades, 1);
     tradesLayout->addLayout(tradesLayoutButtons);
+
+    tradesPopup = new QMenu(trades);
+    tradesCopy = new QAction("Copy", tradesPopup);
+    tradesCopy->setShortcut(Qt::CTRL + Qt::Key_C);
+    tradesCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, trades);
+    tradesPopup->addAction(tradesCopy);
+    tradesPaste = new QAction("Paste", tradesPopup);
+    tradesPaste->setShortcut(Qt::CTRL + Qt::Key_V);
+    tradesPopup->addAction(tradesPaste);
+    tradesPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, trades);
 
     btnOkCancel = new QDialogButtonBox(dialog);
     btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);

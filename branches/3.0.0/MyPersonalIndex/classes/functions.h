@@ -46,45 +46,6 @@ public:
         return value.isValid() ? QVariant(QVariant::Date) : value;
     }
 
-    static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count)
-    {
-        int x = ascending ? 0 : count - 1;
-        bool contiguous = true;
-
-        if (ascending)
-        {
-            for(int i = 0; i < values.count(); ++i, ++x)
-                if (values.value(i) != x)
-                {
-                    contiguous = false;
-                    break;
-                }
-        }
-        else
-        {
-            for(int i = values.count() - 1; i >= 0; --i, --x)
-                if (values.value(i) != x)
-                {
-                    contiguous = false;
-                    break;
-                }
-        }
-        return contiguous;
-    }
-
-    static QList<int> getSelectedRows(const QModelIndexList &model)
-    {
-        QList<int> indexes;
-        if (model.count() == 0)
-            return indexes;
-
-        foreach(const QModelIndex &q, model)
-            indexes.append(q.row());
-        qSort(indexes);
-
-        return indexes;
-    }
-
     static QString doubleToCurrency(const double &value)
     {
         return QString("$%L1").arg(value, 0, 'f', 2);
@@ -93,6 +54,17 @@ public:
     static QString doubleToPercentage(const double &value)
     {
         return QString("%L1%").arg(value, 0, 'f', 2);
+    }
+
+    static QString doubleToLocalFormat(const double &value)
+    {
+        return QString("%L1").arg(value, 0, 'f', 2);
+    }
+
+    static double stringToDouble(const QString &value, bool *ok)
+    {
+        QString s = value;
+        return s.remove('%').replace("None", "-1", Qt::CaseInsensitive).toDouble(ok);
     }
 };
 

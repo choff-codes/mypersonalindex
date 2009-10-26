@@ -74,6 +74,17 @@ public:
         connect(this, SIGNAL(rowsRemoved(const QModelIndex, int, int)), this, SLOT(itemDeleted(QModelIndex,int,int)));
     }
 
+    QList<int> getSelected()
+    {
+        QList<int> returnValues;
+        for(int i = 0; i < m_list.count(); ++i)
+            if (m_selected.value(i))
+                returnValues.append(m_list.at(i).id);
+
+        return returnValues;
+    }
+
+private:
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
         return mpiModelBase<globals::statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
@@ -120,14 +131,16 @@ public:
         return false;
     }
 
-    QList<int> getSelected()
+    QString internalCopy(const globals::statistic&)
     {
-        QList<int> returnValues;
-        for(int i = 0; i < m_list.count(); ++i)
-            if (m_selected.value(i))
-                returnValues.append(m_list.at(i).id);
+        // not used
+        return QString();
+    }
 
-        return returnValues;
+    globals::statistic internalPaste(const QStringList&, bool*)
+    {
+        // not used
+        return globals::statistic();
     }
 
 public slots:

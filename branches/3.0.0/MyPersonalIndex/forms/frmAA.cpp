@@ -25,10 +25,15 @@ void frmAA::connectSlots()
     connect(ui.btnEdit, SIGNAL(clicked()), m_model, SLOT(editSelected()));
     connect(ui.table, SIGNAL(doubleClicked(QModelIndex)), m_model, SLOT(editSelected()));
     connect(ui.btnDelete, SIGNAL(clicked()), m_model, SLOT(deleteSelected()));
+    connect(ui.copy, SIGNAL(triggered()), m_model, SLOT(copy()));
+    connect(ui.copyShortcut, SIGNAL(activated()), m_model, SLOT(copy()));
+    connect(ui.paste, SIGNAL(triggered()), m_model, SLOT(paste()));
+    connect(ui.pasteShortcut, SIGNAL(activated()), m_model, SLOT(paste()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(m_model, SIGNAL(saveItem(globals::assetAllocation*)), this, SLOT(saveItem(globals::assetAllocation*)));
     connect(m_model, SIGNAL(deleteItem(globals::assetAllocation)), this, SLOT(deleteItem(globals::assetAllocation)));
+    connect(ui.table, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
 }
 
 void frmAA::accept()
@@ -54,4 +59,9 @@ void frmAA::saveItem(globals::assetAllocation *aa)
 void frmAA::deleteItem(const globals::assetAllocation &aa)
 {
     m_sql->executeNonQuery(m_sql->deleteItem(queries::table_AA, aa.id));
+}
+
+void frmAA::customContextMenuRequested(const QPoint&)
+{
+    ui.popup->popup(QCursor::pos());
 }

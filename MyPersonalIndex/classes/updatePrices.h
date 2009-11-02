@@ -10,8 +10,8 @@ class updatePrices: public QThread
     Q_OBJECT
 
 public:
-    updatePrices(QMap<int, globals::myPersonalIndex*> *data, const bool &splits, const QDate &firstDate, const QDate &lastDate, QObject *parent = 0):
-        QThread(parent), m_data(data), m_splits(splits), m_firstDate(firstDate), m_lastDate(lastDate)
+    updatePrices(QMap<int, globals::myPersonalIndex*> *data, QList<int> *dates, const bool &splits, const QDate &firstDate, const QDate &lastDate, QObject *parent = 0):
+        QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_firstDate(firstDate), m_lastDate(lastDate)
     {
         m_firstDate = m_firstDate.addDays(-6);
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
@@ -26,9 +26,9 @@ signals:
     void updateFinished(const QStringList invalidSymbols);
 
 private:
-    // warning, make sure the GUI thread will not use the database at the same time!
     queries *m_sql;
     QMap<int, globals::myPersonalIndex*> *m_data;
+    QList<int> *m_dates;
     bool m_splits;
     QDate m_firstDate;
     QDate m_lastDate;

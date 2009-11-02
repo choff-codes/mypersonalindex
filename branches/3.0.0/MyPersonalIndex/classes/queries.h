@@ -134,6 +134,9 @@ public:
     queryInfo* getUpdateInfo();
     queryInfo* updateMissingPrices();
 
+    enum { getPortfolioLastDate_PortfolioID, getPortfolioLastDate_Date, getPortfolioLastDate_TotalValue };
+    queryInfo* getPortfolioLastDate();
+
 protected:
     QSqlDatabase db;
 };

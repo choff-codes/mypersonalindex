@@ -641,7 +641,7 @@ void frmMain::beginUpdate()
     }
 
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(&m_portfolios, m_settings.splits, m_settings.dataStartDate, m_lastDate, this);
+    m_updateThread = new updatePrices(&m_portfolios, &m_dates, m_settings.splits, m_settings.dataStartDate, m_lastDate, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
     m_updateThread->start();
 }

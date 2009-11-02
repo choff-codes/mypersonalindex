@@ -10,9 +10,6 @@
 //    on a.ticker = b.ticker and
 //    b.date = (select max(c.date) from closingprices as c where c.ticker = b.ticker and c.date < a.date)
 
-
-// need to update m_dates in frmMain with new dates
-
 void updatePrices::run()
 {
     QMap<QString, globals::updateInfo> tickers;
@@ -128,7 +125,13 @@ bool updatePrices::getPrices(const QString &ticker, const QDate &minDate, QDate 
             QList<QByteArray> line = s.split(',');
 
             QDate d = QDate::fromString(line.at(0), Qt::ISODate);
-            dates.append(d.toJulianDay());
+            int djulian = d.toJulianDay();
+            dates.append(djulian);
+            // add new date if it doesn't already exist
+            QList<int>::iterator place = qLowerBound(m_dates->begin(), m_dates->end(), djulian);
+            if ((*place) != djulian)
+                m_dates->insert(place, djulian);
+            // update min date
             if (d < earliestUpdate)
                 earliestUpdate = d;
 

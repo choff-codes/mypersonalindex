@@ -14,7 +14,7 @@ public:
 
     const globals::portfolio& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(QWidget *parent = 0, queries *sql = 0, const QDate &dataStartDate = QDate(), const globals::portfolio& p = globals::portfolio());
+    frmPortfolio(QWidget *parent = 0, queries *sql = 0, const int &dataStartDate = 0, const globals::portfolio& p = globals::portfolio());
 
 private:
 

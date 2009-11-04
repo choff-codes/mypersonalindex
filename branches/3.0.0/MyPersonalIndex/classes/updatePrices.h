@@ -10,10 +10,10 @@ class updatePrices: public QThread
     Q_OBJECT
 
 public:
-    updatePrices(QMap<int, globals::myPersonalIndex*> *data, QList<int> *dates, const bool &splits, const QDate &firstDate, const QDate &lastDate, QObject *parent = 0):
+    updatePrices(QMap<int, globals::myPersonalIndex*> *data, QList<int> *dates, const bool &splits, const int &firstDate, const int &lastDate, QObject *parent = 0):
         QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_firstDate(firstDate), m_lastDate(lastDate)
     {
-        m_firstDate = m_firstDate.addDays(-6);
+        m_firstDate = m_firstDate - 6;
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
         db.setDatabaseName(queries::getDatabaseLocation());
         m_sql = new queries(db);
@@ -30,8 +30,8 @@ private:
     QMap<int, globals::myPersonalIndex*> *m_data;
     QList<int> *m_dates;
     bool m_splits;
-    QDate m_firstDate;
-    QDate m_lastDate;
+    int m_firstDate;
+    int m_lastDate;
     QStringList m_updateFailures;
 
     QString getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type);
@@ -40,9 +40,9 @@ private:
     void getUpdateInfo(QMap<QString, globals::updateInfo> *tickers);
 
     void run();
-    bool getPrices(const QString &ticker, const QDate &minDate, QDate &earliestUpdate);
-    void getDividends(const QString&ticker, const QDate &minDate, QDate &earliestUpdate);
-    void getSplits(const QString &ticker, const QDate &minDate, QDate &earliestUpdate);
+    bool getPrices(const QString &ticker, const int &minDate, int &earliestUpdate);
+    void getDividends(const QString&ticker, const int &minDate, int &earliestUpdate);
+    void getSplits(const QString &ticker, const int &minDate, int &earliestUpdate);
 };
 
 #endif // UPDATEPRICES_H

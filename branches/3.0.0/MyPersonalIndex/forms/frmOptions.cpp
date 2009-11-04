@@ -10,7 +10,7 @@ frmOptions::frmOptions(QWidget *parent, queries *sql, const globals::settings& s
 
     ui.setupUI(this);
     ui.chkSplits->setChecked(m_settings.splits);
-    ui.deDownloadDate->setDate(m_settings.dataStartDate);
+    ui.deDownloadDate->setDate(QDate::fromJulianDay(m_settings.dataStartDate));
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
@@ -18,7 +18,7 @@ frmOptions::frmOptions(QWidget *parent, queries *sql, const globals::settings& s
 
 void frmOptions::accept()
 {
-    m_settings.dataStartDate = ui.deDownloadDate->date();
+    m_settings.dataStartDate = ui.deDownloadDate->date().toJulianDay();
     m_settings.splits = ui.chkSplits->isChecked();
 
     if (m_settings == m_settingsOriginal)

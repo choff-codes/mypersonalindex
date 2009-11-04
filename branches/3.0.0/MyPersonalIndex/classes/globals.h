@@ -20,42 +20,6 @@ public:
     enum tickerHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
 
-    struct intdoublePair
-    {
-        int key;
-        double value;
-
-        intdoublePair(): key(-1), value(-1) {}
-        intdoublePair(const int &pkey, const double &pvalue): key(pkey), value(pvalue) {}
-
-        bool operator==(const intdoublePair &other) const {
-            return this->key == other.key
-                    && this->value == other.value;
-        }
-
-        bool operator!=(const intdoublePair &other) const {
-            return !(*this == other);
-        }
-    };
-
-    struct intintPair
-    {
-        int key;
-        int value;
-
-        intintPair(): key(-1), value(-1) {}
-        intintPair(const int &pkey, const int &pvalue): key(pkey), value(pvalue) {}
-
-        bool operator==(const intintPair &other) const {
-            return this->key == other.key
-                    && this->value == other.value;
-        }
-
-        bool operator!=(const intintPair &other) const {
-            return !(*this == other);
-        }
-    };
-
     struct dynamicTrade
     {
         int id;
@@ -65,11 +29,11 @@ public:
         double commission;
         int cashAccount;
         dynamicTradeFreq frequency;
-        QDate date;
-        QDate startDate;
-        QDate endDate;
+        int date;
+        int startDate;
+        int endDate;
 
-        dynamicTrade(): id(-1), tradeType(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once) {}
+        dynamicTrade(): id(-1), tradeType(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once), date(0), startDate(0), endDate(0) {}
 
         bool operator==(const dynamicTrade &other) const {
             return this->tradeType == other.tradeType
@@ -87,9 +51,9 @@ public:
             return !(*this == other);
         }
 
-        QString tradeTypeToString() const
+        static QString tradeTypeToString(const dynamicTradeType &t)
         {
-            switch (this->tradeType)
+            switch (t)
             {
                 case tradeType_Purchase:
                     return "Purchase";
@@ -110,9 +74,9 @@ public:
             }
         }
 
-        QString frequencyToString() const
+        static QString frequencyToString(const dynamicTradeFreq &f)
         {
-            switch (this->frequency)
+            switch (f)
             {
                 case tradeFreq_Once:
                     return "Once";
@@ -129,42 +93,42 @@ public:
             }
         }
 
-        QString valueToString() const
+        static QString valueToString(const dynamicTradeType &t, const double &v)
         {
-            if (this->value < 0)
+            if (v < 0)
                 return "";
 
-            switch (this->tradeType)
+            switch (t)
             {
                 case tradeType_Purchase:
                 case tradeType_Sale:
                 case tradeType_DivReinvest:
-                    return QString("%L1").arg(this->value, 0, 'f', 2);
+                    return QString("%L1").arg(v, 0, 'f', 2);
                 case tradeType_Interest:
                 case tradeType_Fixed:
-                    return QString("$%L1").arg(this->value, 0, 'f', 2);
+                    return QString("$%L1").arg(v, 0, 'f', 2);
                 case tradeType_TotalValue:
                 case tradeType_AA:
-                    return QString("%L1%").arg(this->value, 0, 'f', 2);
+                    return QString("%L1%").arg(v, 0, 'f', 2);
                 default:
                     return "";
             }
         }
 
-        QString dateToString() const
+        static QString dateToString(const dynamicTradeFreq &f, const int &date)
         {
-            switch (this->frequency)
+            switch (f)
             {
                 case tradeFreq_Once:
-                    return this->date.isValid() ? date.toString(shortDateFormat) : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString(shortDateFormat) : "";
                 case tradeFreq_Daily:
                     return "Market Days";
                 case tradeFreq_Weekly:
-                    return this->date.isValid() ? date.toString("dddd") : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString("dddd") : "";
                 case tradeFreq_Monthly:
-                    return this->date.isValid() ? date.toString("MMMM") : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString("MMMM") : "";
                 case tradeFreq_Yearly:
-                    return this->date.isValid() ? date.toString("dd MMM") : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString("dd MMM") : "";
                 default:
                     return "";
             }
@@ -180,9 +144,9 @@ public:
         int startValue;
         int aaThreshold;
         thesholdMethod aaThresholdMethod;
-        QDate startDate;
+        int startDate;
         // start date may be updated if it is a non-market day, but the original date also needs to be tracked
-        QDate origStartDate;
+        int origStartDate;
         bool holdingsShowHidden;
         bool navSortDesc;
         bool aaShowBlank;
@@ -193,7 +157,7 @@ public:
         QString acctSort;
 
         portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
-            aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate()), origStartDate(QDate::currentDate()),
+            aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()), origStartDate(QDate::currentDate().toJulianDay()),
             holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
 
         bool operator==(const portfolio &other) const {
@@ -256,7 +220,7 @@ public:
         bool cashAccount;
         bool includeInCalc;
         bool hide;
-        QList<intdoublePair> aa;
+        QList<QPair<int, double> > aa;
         QMap<int, dynamicTrade> trades;
 
         security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),
@@ -322,7 +286,7 @@ public:
 
     struct settings
     {
-        QDate dataStartDate;
+        int dataStartDate;
         bool splits;
         int version;
         bool tickersIncludeDividends;
@@ -396,12 +360,12 @@ public:
     struct updateInfo
     {
         QString symbol;
-        QDate closingDate;
-        QDate dividendDate;
-        QDate splitDate;
+        int closingDate;
+        int dividendDate;
+        int splitDate;
 
         updateInfo() {}
-        updateInfo(const QString &p_symbol, const QDate &minDate): symbol(p_symbol), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
+        updateInfo(const QString &p_symbol, const int &minDate): symbol(p_symbol), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
     };
 };
 

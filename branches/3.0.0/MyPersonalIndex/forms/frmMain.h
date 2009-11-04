@@ -25,7 +25,7 @@ private:
     queries *sql;
     QMap<int, globals::myPersonalIndex*> m_portfolios;
     globals::myPersonalIndex *m_currentPortfolio;
-    QDate m_lastDate;
+    int m_lastDate;
     globals::settings m_settings;
     QList<int> m_dates;
     QMap<int, globals::statistic> m_statistics;

@@ -200,6 +200,16 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
     );
 }
 
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate)
+{
+    return new queryInfo(
+        QString("DELETE FROM %1 WHERE PortfolioID = :ID AND Date >= :Date").arg(table),
+        QList<parameter>()
+            << parameter(":ID", portfolioID)
+            << parameter(":Date", startingDate)
+    );
+}
+
 queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &tickerID)
 {
     return new queryInfo(
@@ -239,7 +249,7 @@ queries::queryInfo* queries::updateSettings(const globals::settings &s)
             " LastPortfolio = :LastPortfolio, Version = :Version, WindowState = :WindowState";
     QList<parameter> params;
     params  << parameter(":Splits", (int)s.splits)
-            << parameter(":DataStartDate", s.dataStartDate.toJulianDay())
+            << parameter(":DataStartDate", s.dataStartDate)
             << parameter(":TickersIncludeDividends", (int)s.tickersIncludeDividends)
             << parameter(":LastPortfolio", s.lastPortfolio)
             << parameter(":WindowState", (int)s.state)
@@ -343,7 +353,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
         << parameter(":AAThreshold", p.aaThreshold)
         << parameter(":ThresholdMethod", (int)p.aaThresholdMethod)
         << parameter(":CostCalc", (int)p.costCalc)
-        << parameter(":StartDate", p.origStartDate.toJulianDay())
+        << parameter(":StartDate", p.origStartDate)
         << parameter(":Dividends", (int)p.dividends)
         << parameter(":HoldingsShowHidden", (int)p.holdingsShowHidden)
         << parameter(":HoldingsSort", p.holdingsSort)
@@ -577,3 +587,16 @@ queries::queryInfo* queries::getPortfolioLastDate()
         QList<parameter>()
     );
 }
+
+//queries::queryInfo* queries::deleteTrades(const int &portfolioID, const int &startingDate)
+//{
+//    return new queryInfo(
+//            "DELETE FROM Trades"
+//            " WHERE EXISTS"
+//                " (SELECT 1 FROM Tickers WHERE Tickers.ID = Trades.TickerID AND Tickers.PortfolioID = :PortfolioID)"
+//            " AND Date >= :Date",
+//        QList<parameter>()
+//            << parameter(":PortfolioID", portfolioID)
+//            << parameter(":Date", startingDate)
+//    );
+//}

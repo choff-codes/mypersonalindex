@@ -39,7 +39,7 @@ private:
     bool getCurrentDateOrNext(int &date);
     QMap<int, QList<globals::dynamicTrade> > getTrades(const int &portfolioID, const int &minDate);
     QList<int> getOnceTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
-    QList<int> getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate);
+    //QList<int> getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate);
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);

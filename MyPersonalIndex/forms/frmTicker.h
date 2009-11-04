@@ -55,9 +55,9 @@ class tickerAAModel: public QAbstractTableModel
 
 public:
 
-    QList<globals::intdoublePair> getList() { return m_list; }
+    QList<QPair<int, double> > getList() { return m_list; }
 
-    tickerAAModel(const QList<globals::intdoublePair> &values, const QMap<int, globals::assetAllocation> *aaValues = 0, const int &cols = 0, QTableView *parent = 0):
+    tickerAAModel(const QList<QPair<int, double> > &values, const QMap<int, globals::assetAllocation> *aaValues = 0, const int &cols = 0, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     Qt::ItemFlags flags(const QModelIndex &index) const
@@ -83,8 +83,9 @@ public:
     {
         double total = 0;
 
-        foreach(const globals::intdoublePair &pair, m_list)
-            total += pair.value;
+        QList<QPair<int, double> >::const_iterator i;
+        for (i = m_list.constBegin(); i != m_list.constEnd(); ++i)
+             total += (*i).second;
 
         return total;
     }
@@ -100,19 +101,19 @@ public:
         if (role == Qt::DisplayRole)
         {
             if (index.column() == 0 && m_aaValues)
-                return m_aaValues->value(m_list.at(index.row()).key).description;
+                return m_aaValues->value(m_list.at(index.row()).first).description;
 
             if (index.column() == 1)
-                return functions::doubleToPercentage(m_list.at(index.row()).value);
+                return functions::doubleToPercentage(m_list.at(index.row()).second);
         }
 
         if (role == Qt::EditRole)
         {
             if (index.column() == 0 && m_aaValues)
-                return m_aaValues->value(m_list.at(index.row()).key).description;
+                return m_aaValues->value(m_list.at(index.row()).first).description;
 
             if (index.column() == 1)
-                return m_list.at(index.row()).value;
+                return m_list.at(index.row()).second;
         }
 
         return QVariant();
@@ -127,7 +128,7 @@ public:
     {
         if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
         {
-            m_list[index.row()].value = value.toDouble();
+            m_list[index.row()].second = value.toDouble();
             emit updateHeader();
             return true;
         }
@@ -140,7 +141,7 @@ public slots:
     {
         beginInsertRows(QModelIndex(), m_list.count(), m_list.count());
         double total = totalPercentage();
-        m_list.append(globals::intdoublePair(id, total >= 100 ? 0 : 100 - total));
+        m_list.append(QPair<int, double>(id, total >= 100 ? 0 : 100 - total));
         endInsertRows();
         emit updateHeader();
     }
@@ -171,7 +172,7 @@ private:
     const QMap<int, globals::assetAllocation> *m_aaValues;
     QTableView *m_parent;
     int m_columns;
-    QList<globals::intdoublePair> m_list;
+    QList<QPair<int, double> > m_list;
 };
 
 class tickerTradeModel : public mpiModelBase<globals::dynamicTrade, frmTrade>
@@ -197,10 +198,10 @@ private:
             switch(index.column())
             {
                 case 0:
-                    return trade.tradeTypeToString();
+                    return globals::dynamicTrade::tradeTypeToString(trade.tradeType);
                     break;
                 case 1:
-                    return trade.valueToString();
+                    return globals::dynamicTrade::valueToString(trade.tradeType, trade.value);
                     break;
                 case 2:
                     return trade.price < 0 ? "Prev Close" : functions::doubleToCurrency(trade.price);
@@ -212,16 +213,16 @@ private:
                     return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).symbol : "";
                     break;
                 case 5:
-                    return trade.frequencyToString();
+                    return globals::dynamicTrade::frequencyToString(trade.frequency);
                     break;
                 case 6:
-                    return trade.dateToString();
+                    return globals::dynamicTrade::dateToString(trade.frequency, trade.date);
                     break;
                 case 7:
-                    return trade.startDate.isValid() ? trade.startDate.toString(Qt::SystemLocaleShortDate) : "";
+                    return trade.startDate != 0 ? QDate::fromJulianDay(trade.startDate).toString(Qt::SystemLocaleShortDate) : "";
                     break;
                 case 8:
-                    return trade.endDate.isValid() ? trade.endDate.toString(Qt::SystemLocaleShortDate) : "";
+                    return trade.endDate != 0 ? QDate::fromJulianDay(trade.endDate).toString(Qt::SystemLocaleShortDate) : "";
                     break;
             }
         }
@@ -273,8 +274,8 @@ private:
         return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
                QString::number((int)item.tradeType), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
                functions::doubleToLocalFormat(item.commission), QString::number(item.cashAccount),
-               QString::number((int)item.frequency), QString::number(item.date.toJulianDay()),
-               QString::number(item.startDate.toJulianDay()), QString::number(item.endDate.toJulianDay()));
+               QString::number((int)item.frequency), QString::number(item.date),
+               QString::number(item.startDate), QString::number(item.endDate));
     }
 
     globals::dynamicTrade internalPaste(const QStringList &value, bool *ok)
@@ -311,13 +312,13 @@ private:
         }
 
         if (*ok)
-            item.date = QDate::fromJulianDay(value.at(6).toInt(ok));
+            item.date = value.at(6).toInt(ok);
 
         if (*ok)
-            item.startDate = QDate::fromJulianDay(value.at(7).toInt(ok));
+            item.startDate = value.at(7).toInt(ok);
 
         if (*ok)
-            item.endDate = QDate::fromJulianDay(value.at(8).toInt(ok));
+            item.endDate = value.at(8).toInt(ok);
 
         return item;
     }

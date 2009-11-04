@@ -54,17 +54,17 @@ void frmTrade::loadTrade()
                 break;
             }
     ui.cmbFreq->setCurrentIndex((int)m_trade.frequency);
-    if (m_trade.date.isValid())
-        ui.deDate->setDate(m_trade.date);
-    if (m_trade.startDate.isValid())
+    if (m_trade.date != 0)
+        ui.deDate->setDate(QDate::fromJulianDay(m_trade.date));
+    if (m_trade.startDate  != 0)
     {
         ui.chkStarting->setChecked(true);
-        ui.deStarting->setDate(m_trade.startDate);
+        ui.deStarting->setDate(QDate::fromJulianDay(m_trade.startDate));
     }
-    if (m_trade.endDate.isValid())
+    if (m_trade.endDate  != 0)
     {
         ui.chkEnding->setChecked(true);
-        ui.deEnding->setDate(m_trade.endDate);
+        ui.deEnding->setDate(QDate::fromJulianDay(m_trade.endDate));
     }
 }
 
@@ -88,9 +88,9 @@ void frmTrade::accept()
     m_trade.commission = !ui.txtCommission->text().isEmpty() ? ui.txtCommission->text().toDouble() : -1;
     m_trade.cashAccount = ui.cmbCash->itemData(ui.cmbCash->currentIndex()).toInt();
     m_trade.frequency = (globals::dynamicTradeFreq)ui.cmbFreq->currentIndex();
-    m_trade.date = ui.deDate->isEnabled() ? ui.deDate->date() : QDate();
-    m_trade.startDate = ui.deStarting->isEnabled() ? ui.deStarting->date() : QDate();
-    m_trade.endDate = ui.deEnding->isEnabled() ? ui.deEnding->date() : QDate();
+    m_trade.date = ui.deDate->isEnabled() ? ui.deDate->date().toJulianDay() : 0;
+    m_trade.startDate = ui.deStarting->isEnabled() ? ui.deStarting->date().toJulianDay() : 0;
+    m_trade.endDate = ui.deEnding->isEnabled() ? ui.deEnding->date().toJulianDay() : 0;
 
     QDialog::accept();
 }

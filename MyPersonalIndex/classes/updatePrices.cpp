@@ -24,7 +24,7 @@ void updatePrices::run()
 
     getUpdateInfo(&tickers);
 
-    QDate firstUpdate = QDate::currentDate().addDays(1); // track earliest date saved to database for recalc
+    int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
     foreach(const globals::updateInfo &info, tickers)
         if (getPrices(info.symbol, info.closingDate, firstUpdate))  // check if symbol exists
         {
@@ -44,7 +44,7 @@ void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> *tickers)
     {
         do
         {
-            QDate d = QDate::fromJulianDay(q->value(queries::getUpdateInfo_Date).toInt());
+            int d = q->value(queries::getUpdateInfo_Date).toInt();
             QString type = q->value(queries::getUpdateInfo_Type).toString();
             QString ticker = q->value(queries::getUpdateInfo_Symbol).toString();
             if (type == "C")
@@ -101,12 +101,12 @@ QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
     return lines;
 }
 
-bool updatePrices::getPrices(const QString &ticker, const QDate &minDate, QDate &earliestUpdate)
+bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &earliestUpdate)
 {
-    if (minDate == QDate::currentDate())
+    if (minDate == QDate::currentDate().toJulianDay())
         return true;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, minDate.addDays(1), QDate::currentDate(), QString(globals::stockPrices))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(globals::stockPrices))));
     if (!lines)
     {
         m_updateFailures.append(ticker);
@@ -124,16 +124,15 @@ bool updatePrices::getPrices(const QString &ticker, const QDate &minDate, QDate 
         {
             QList<QByteArray> line = s.split(',');
 
-            QDate d = QDate::fromString(line.at(0), Qt::ISODate);
-            int djulian = d.toJulianDay();
+            int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
             dates.append(djulian);
             // add new date if it doesn't already exist
             QList<int>::iterator place = qLowerBound(m_dates->begin(), m_dates->end(), djulian);
             if ((*place) != djulian)
                 m_dates->insert(place, djulian);
             // update min date
-            if (d < earliestUpdate)
-                earliestUpdate = d;
+            if (djulian < earliestUpdate)
+                earliestUpdate = djulian;
 
             tickers.append(ticker);
             prices.append(line.at(4).toDouble());
@@ -153,12 +152,12 @@ bool updatePrices::getPrices(const QString &ticker, const QDate &minDate, QDate 
     return true;
 }
 
-void updatePrices::getDividends(const QString &ticker, const QDate &minDate, QDate &earliestUpdate)
+void updatePrices::getDividends(const QString &ticker, const int &minDate, int &earliestUpdate)
 {
-    if (minDate == QDate::currentDate())
+    if (minDate == QDate::currentDate().toJulianDay())
         return;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, minDate.addDays(1), QDate::currentDate(), QString(globals::stockDividends))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(globals::stockDividends))));
 
     if (lines && lines->count() > 2)
     {
@@ -170,10 +169,10 @@ void updatePrices::getDividends(const QString &ticker, const QDate &minDate, QDa
         {
             QList<QByteArray> line = s.split(',');
 
-            QDate d = QDate::fromString(line.at(0), Qt::ISODate);
-            dates.append(d.toJulianDay());
-            if (d < earliestUpdate)
-                earliestUpdate = d;
+            int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
+            dates.append(djulian);
+            if (djulian < earliestUpdate)
+                earliestUpdate = djulian;
 
             tickers.append(ticker);
             amounts.append(line.at(1).toDouble());
@@ -192,9 +191,9 @@ void updatePrices::getDividends(const QString &ticker, const QDate &minDate, QDa
     delete lines;
 }
 
-void updatePrices::getSplits(const QString &ticker, const QDate &minDate,  QDate &earliestUpdate)
+void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &earliestUpdate)
 {
-    if (minDate == QDate::currentDate())
+    if (minDate == QDate::currentDate().toJulianDay())
         return;
 
     const QString htmlSplitStart = "<br><center>Splits:";  // text starting splits
@@ -230,12 +229,13 @@ void updatePrices::getSplits(const QString &ticker, const QDate &minDate,  QDate
         if (d.year() - 1900 <= QDate::currentDate().year() - 2000) // defaults to 19xx
             d = d.addYears(100);
 
-        if (d <= minDate)
+        int djulian = d.toJulianDay();
+        if (djulian <= minDate)
             continue;
 
-        dates.append(d.toJulianDay());
-        if (d < earliestUpdate)
-            earliestUpdate = d;
+        dates.append(djulian);
+        if (djulian < earliestUpdate)
+            earliestUpdate = djulian;
 
         // ratio looks like [2:1], so strip off the brackets
         QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');

@@ -90,8 +90,7 @@ void frmMain::loadSettings()
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
     if (q)
     {
-        int x = q->value(queries::getSettings_DataStartDate).toInt();
-        m_settings.dataStartDate = QDate::fromJulianDay(x);
+        m_settings.dataStartDate = q->value(queries::getSettings_DataStartDate).toInt();
         m_settings.splits = q->value(queries::getSettings_Splits).toBool();
         m_settings.tickersIncludeDividends = q->value(queries::getSettings_TickersIncludeDividends).toBool();
         m_settings.version = q->value(queries::getSettings_Version).toInt();
@@ -158,11 +157,11 @@ void frmMain::loadDates()
 
 void frmMain::resetLastDate()
 {
-    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : QDate::fromJulianDay(m_dates[m_dates.count()]);
+    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count()];
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
                 m_lastDate == m_settings.dataStartDate ?
                 "Never" :
-                m_lastDate.toString(Qt::SystemLocaleShortDate)));
+                QDate::fromJulianDay(m_lastDate).toString(Qt::SystemLocaleShortDate)));
 }
 
 void frmMain::checkVersion()
@@ -239,7 +238,7 @@ void frmMain::loadPortfolioSettings()
     //CheckPortfolioStartDate(rs.GetDateTime((int)queries.egetPortfolio.StartDate));
     // todo ^
 
-    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, m_currentPortfolio->info.startDate.toString(Qt::SystemLocaleShortDate)));
+    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, QDate::fromJulianDay(m_currentPortfolio->info.startDate).toString(Qt::SystemLocaleShortDate)));
     ui.holdingsShowHidden->setChecked(m_currentPortfolio->info.holdingsShowHidden);
     ui.performanceSortDesc->setChecked(m_currentPortfolio->info.navSortDesc);
     ui.aaShowBlank->setChecked(m_currentPortfolio->info.aaShowBlank);
@@ -277,7 +276,7 @@ void frmMain::loadPortfoliosInfo()
 
         p.id = q->value(queries::getPortfolio_PortfolioID).toInt();
         p.description = q->value(queries::getPortfolio_Description).toString();
-        p.origStartDate = QDate::fromJulianDay(q->value(queries::getPortfolio_StartDate).toInt());
+        p.origStartDate = q->value(queries::getPortfolio_StartDate).toInt();
         p.startDate = p.origStartDate;
         p.dividends = q->value(queries::getPortfolio_Dividends).toBool();
         p.costCalc = (globals::avgShareCalc)q->value(queries::getPortfolio_CostCalc).toInt();
@@ -350,9 +349,9 @@ void frmMain::loadPortfoliosTickersAA()
 
     do
     {
-        globals::intdoublePair pair;
-        pair.key = q->value(queries::getSecurityAA_AAID).toInt();
-        pair.value = q->value(queries::getSecurityAA_Percent).toDouble();
+        QPair<int, double> pair;
+        pair.first = q->value(queries::getSecurityAA_AAID).toInt();
+        pair.second = q->value(queries::getSecurityAA_Percent).toDouble();
 
         int portfolioID = q->value(queries::getSecurityAA_PortfolioID).toInt();
         int tickerID = q->value(queries::getSecurityAA_TickerID).toInt();
@@ -393,11 +392,11 @@ void frmMain::loadPortfoliosTickersTrades()
             trade.cashAccount = q->value(queries::getSecurityTrade_CashAccountID).toInt();
         trade.frequency = (globals::dynamicTradeFreq)q->value(queries::getSecurityTrade_Frequency).toInt();
         if (!q->value(queries::getSecurityTrade_Date).isNull())
-            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_Date).toInt());
+            trade.date = q->value(queries::getSecurityTrade_Date).toInt();
         if (!q->value(queries::getSecurityTrade_StartDate).isNull())
-            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_StartDate).toInt());
+            trade.date = q->value(queries::getSecurityTrade_StartDate).toInt();
         if (!q->value(queries::getSecurityTrade_EndDate).isNull())
-            trade.date = QDate::fromJulianDay(q->value(queries::getSecurityTrade_EndDate).toInt());
+            trade.date = q->value(queries::getSecurityTrade_EndDate).toInt();
 
         int portfolioID = q->value(queries::getSecurityTrade_PortfolioID).toInt();
         int tickerID = q->value(queries::getSecurityTrade_TickerID).toInt();

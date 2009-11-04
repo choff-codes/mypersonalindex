@@ -2,7 +2,7 @@
 #include "frmPortfolio.h"
 #include "globals.h"
 
-frmPortfolio::frmPortfolio(QWidget *parent, queries *sql, const QDate &dataStartDate, const globals::portfolio &p): QDialog(parent), m_sql(sql), m_portfolio(p), m_portfolioOriginal(p)
+frmPortfolio::frmPortfolio(QWidget *parent, queries *sql, const int &dataStartDate, const globals::portfolio &p): QDialog(parent), m_sql(sql), m_portfolio(p), m_portfolioOriginal(p)
 {
     if (!m_sql || !m_sql->isOpen())
     {
@@ -12,8 +12,12 @@ frmPortfolio::frmPortfolio(QWidget *parent, queries *sql, const QDate &dataStart
 
     ui.setupUI(this);    
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
-    ui.dateStartDate->setMinimumDate(dataStartDate);
-    ui.dateStartDate->setDate(dataStartDate);
+    if (dataStartDate != 0)
+    {
+        QDate d = QDate::fromJulianDay(dataStartDate);
+        ui.dateStartDate->setMinimumDate(d);
+        ui.dateStartDate->setDate(d);
+    }
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
@@ -32,7 +36,7 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdMethod);
     ui.cmbCostBasis->setCurrentIndex((int)m_portfolio.costCalc);
     if (m_portfolio.id != -1)
-        ui.dateStartDate->setDate(m_portfolio.origStartDate);
+        ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.origStartDate));
 }
 
 bool frmPortfolio::getErrors()
@@ -77,7 +81,7 @@ void frmPortfolio::accept()
     m_portfolio.aaThresholdMethod = (globals::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
     m_portfolio.costCalc = (globals::avgShareCalc)ui.cmbCostBasis->currentIndex();
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
-    m_portfolio.origStartDate = ui.dateStartDate->date();
+    m_portfolio.origStartDate = ui.dateStartDate->date().toJulianDay();
 
     if (m_portfolio == m_portfolioOriginal)
     {

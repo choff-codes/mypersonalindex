@@ -133,11 +133,13 @@ void frmTicker::accept()
     }
 
     QVariantList tickerID, aaID, percent;
-    foreach(const globals::intdoublePair &pair, m_security.aa)
+
+    QList<QPair<int, double> >::const_iterator i;
+    for (i = m_security.aa.constBegin(); i != m_security.aa.constEnd(); ++i)
     {
         tickerID.append(m_security.id);
-        aaID.append(pair.key);
-        percent.append(pair.value);
+        aaID.append((*i).first);
+        percent.append((*i).second);
     }
 
     QMap<QString, QVariantList> tableValues;

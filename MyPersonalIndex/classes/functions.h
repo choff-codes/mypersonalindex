@@ -41,9 +41,9 @@ public:
         return value < 0 ? QVariant(QVariant::Int) : value;
     }
 
-    static QVariant dateToNull(const QDate &value)
+    static QVariant dateToNull(const int &value)
     {
-        return value.isValid() ? QVariant(QVariant::Date) : value;
+        return value == 0 ? QVariant(QVariant::Int) : value;
     }
 
     static QString doubleToCurrency(const double &value)

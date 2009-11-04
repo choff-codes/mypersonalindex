@@ -77,7 +77,7 @@ int NAV::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
 
     // recalculate portfolio from the start of the 2nd day of pricing
     calcuateFromStartDate = true;
-    return m_dates->count() > 1 ? m_dates->at(1) : m_lastDate.toJulianDay() < calculationDate ? calculationDate : m_lastDate.toJulianDay();
+    return m_dates->count() > 1 ? m_dates->at(1) : qMax(m_lastDate.toJulianDay(), calculationDate);
 }
 
 
@@ -103,11 +103,11 @@ QMap<int, QList<globals::dynamicTrade> > NAV::getTrades(const int &portfolioID, 
         {
             int startDate = minDate;
             if (d.startDate != 0)
-                startDate = minDate < d.startDate ? d.startDate : minDate;
+                startDate = qMax(d.startDate, minDate);
 
             int endDate = lastDate;
             if (d.endDate != 0)
-                endDate = lastDate > d.endDate ? d.endDate : lastDate;
+                endDate = qMin(d.endDate, lastDate);
 
             QList<int> dates;
             switch(d.frequency)
@@ -116,7 +116,7 @@ QMap<int, QList<globals::dynamicTrade> > NAV::getTrades(const int &portfolioID, 
                     dates = getOnceTrades(d, minDate, endDate);
                     break;
                 case globals::tradeFreq_Daily:
-                    dates = getDailyTrades(d, minDate, endDate);
+                    dates = QList<int>() << -1;
                     break;
                 case globals::tradeFreq_Weekly:
                     dates = getWeeklyTrades(d, minDate, endDate);
@@ -148,21 +148,26 @@ QList<int> NAV::getOnceTrades(const globals::dynamicTrade &d, const int &minDate
     return dates;
 }
 
-QList<int> NAV::getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate)
-{
-    QList<int> dates;
-    for (QList<int>::const_iterator i = qLowerBound(*m_dates, minDate); i < m_dates->constEnd(); ++i)
-        if ((*i) >= minDate && (*i) <= maxDate)
-            dates.append(*i);
-
-    return dates;
-}
+//QList<int> NAV::getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate)
+//{
+//    // -1 is every day
+//    QList<int> dates;
+//
+////    for (QList<int>::const_iterator i = qLowerBound(*m_dates, minDate); i < m_dates->constEnd(); ++i)
+////        if ((*i) >= minDate && (*i) <= maxDate)
+////            dates.append(*i);
+//    dates.append(-1);
+//
+//    return dates;
+//}
 
 QList<int> NAV::getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate)
 {
     QList<int> dates;
 
-    int firstWeekDay = (d.date % 7) - (minDate % 7);
+    int firstWeekDay = minDate;
+    while (firstWeekDay % 7 != d.date % 7)
+        firstWeekDay++;
 
     do
     {
@@ -184,15 +189,17 @@ QList<int> NAV::getMonthlyTrades(const globals::dynamicTrade &d, const int &minD
     QDate minQDate = QDate::fromJulianDay(minDate);
     int dayOfMonth = QDate::fromJulianDay(d.date).day();
 
-    int i = 0;
     do
     {
-        QDate monthday = minQDate.addMonths(i);
+        QDate monthday = minQDate;
         if (monthday.day() > dayOfMonth)
             monthday = monthday.addMonths(1);
 
         if (dayOfMonth > monthday.daysInMonth())
-            monthday = QDate(monthday.addMonths(1).year(), monthday.addMonths(1).month(), 1);
+        {
+            monthday = monthday.addMonths(1);
+            monthday = QDate(monthday.year(), monthday.month(), 1);
+        }
         else
             monthday = QDate(monthday.year(), monthday.month(), dayOfMonth);
 
@@ -200,9 +207,10 @@ QList<int> NAV::getMonthlyTrades(const globals::dynamicTrade &d, const int &minD
         if (getCurrentDateOrNext(date))
             if (date >= minDate && date <= maxDate)
                 dates.append(date);
-        i++;
+
+        minQDate = minQDate.addMonths(1);
     }
-    while (minQDate.addMonths(i).toJulianDay() <= maxDate);
+    while (minQDate.toJulianDay() <= maxDate);
 
     return dates;
 }
@@ -214,10 +222,9 @@ QList<int> NAV::getYearlyTrades(const globals::dynamicTrade &d, const int &minDa
     QDate minQDate = QDate::fromJulianDay(minDate);
     int dayOfYear = QDate::fromJulianDay(d.date).dayOfYear();
 
-    int i = 0;
     do
     {
-        QDate yearday = minQDate.addYears(i);
+        QDate yearday = minQDate;
         int leapDayofYear = dayOfYear + (QDate::isLeapYear(yearday.year()) ? 1 : 0);
 
         if (yearday.dayOfYear() > leapDayofYear)
@@ -226,15 +233,14 @@ QList<int> NAV::getYearlyTrades(const globals::dynamicTrade &d, const int &minDa
             leapDayofYear = dayOfYear + (QDate::isLeapYear(yearday.year()) ? 1 : 0);
         }
 
-        yearday = QDate(yearday.year(), 1, 1).addDays(leapDayofYear - 1);
-
-        int date = yearday.toJulianDay();
+        int date = QDate(yearday.year(), 1, 1).toJulianDay() + leapDayofYear - 1;
         if (getCurrentDateOrNext(date))
             if (date >= minDate && date <= maxDate)
                 dates.append(date);
-        i++;
+
+        minQDate = minQDate.addYears(1);
     }
-    while (minQDate.addYears(i).toJulianDay() <= maxDate);
+    while (minQDate.toJulianDay() <= maxDate);
 
     return dates;
 }

@@ -135,8 +135,11 @@ public:
     queryInfo* getUpdateInfo();
     queryInfo* updateMissingPrices();
 
-    enum { getPortfolioLastDate_PortfolioID, getPortfolioLastDate_Date, getPortfolioLastDate_TotalValue };
+    enum { getPortfolioLastDate_PortfolioID, getPortfolioLastDate_Date };
     queryInfo* getPortfolioLastDate();
+
+    enum { getPortfolioNAV_PortfolioID, getPortfolioNAV_TotalValue, getPortfolioNAV_NAV };
+    queryInfo* getPortfolioNAV(const int &portfolioID, const int &date);
 
 protected:
     QSqlDatabase db;

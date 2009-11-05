@@ -579,12 +579,22 @@ queries::queryInfo* queries::updateMissingPrices()
 queries::queryInfo* queries::getPortfolioLastDate()
 {
     return new queryInfo(
-            "SELECT PortfolioID, Date, TotalValue"
-            " FROM NAV AS a"
-            " WHERE Date = (SELECT MAX(Date)"
-                            " FROM NAV AS b"
-                            " WHERE a.PortfolioID = b.PortfolioID)",
+            "SELECT PortfolioID, MAX(Date)"
+            " FROM NAV "
+            " GROUP BY PortfolioID",
         QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &date)
+{
+    return new queryInfo(
+            "SELECT PortfolioID, TotalValue, NAV"
+            " FROM NAV "
+            " WHERE PortfolioID = :PortfolioID AND Date = :Date",
+        QList<parameter>()
+            << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
     );
 }
 

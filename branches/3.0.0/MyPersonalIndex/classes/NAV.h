@@ -27,18 +27,19 @@ private:
     queries *m_sql;
     QMap<int, globals::myPersonalIndex*> *m_data;
     // QPair key is last date and value is the total value
-    QMap<int, QPair<int, double> > m_portfolioInfo;
+    QMap<int, int> m_portfolioLastDates;
     QList<int> *m_dates;
     QDate m_lastDate;
     int m_portfolioID;
 
     void run();
-    void getPortfolioInfo();
+    void getPortfolioLastDates();
+    QPair<double, double> getPortfolioInfo(const int &portfolioID, const int &date);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate);
     void getNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
     bool getCurrentDateOrNext(int &date);
     QMap<int, QList<globals::dynamicTrade> > getTrades(const int &portfolioID, const int &minDate);
-    QList<int> getOnceTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
+    QList<int> getOnceTrades(const globals::dynamicTrade &d);
     //QList<int> getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate);
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);

@@ -15,16 +15,16 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     gpSecurity = new QGroupBox("Security", dialog);
     securityLayout = new QFormLayout(gpSecurity);
 
-    symbol = new QLabel("Symbol:", gpSecurity);
-    symbolLayout = new QHBoxLayout();
-    txtSymbol = new QLineEdit(gpSecurity);
+    ticker = new QLabel("Symbol:", gpSecurity);
+    tickerLayout = new QHBoxLayout();
+    txtTicker = new QLineEdit(gpSecurity);
     btnHistorical = new QToolButton(gpSecurity);
     btnHistorical->setText("History->");
     btnHistorical->setCheckable(true);
-    symbolLayout->addWidget(txtSymbol, 1);
-    symbolLayout->addWidget(btnHistorical);
-    securityLayout->setWidget(0, QFormLayout::LabelRole, symbol);
-    securityLayout->setLayout(0, QFormLayout::FieldRole, symbolLayout);
+    tickerLayout->addWidget(txtTicker, 1);
+    tickerLayout->addWidget(btnHistorical);
+    securityLayout->setWidget(0, QFormLayout::LabelRole, ticker);
+    securityLayout->setLayout(0, QFormLayout::FieldRole, tickerLayout);
     acct = new QLabel("Account:", gpSecurity);
     cmbAcct = new QComboBox(gpSecurity);
     securityLayout->setWidget(1, QFormLayout::LabelRole, acct);
@@ -153,7 +153,7 @@ void frmTicker_UI::setupUI(QDialog *dialog)
     mainLayout->addWidget(btnOkCancel, 2, 0);
     mainLayout->addWidget(gpHistorical, 0, 1, 2, 1);
 
-    symbol->setBuddy(txtSymbol);
+    ticker->setBuddy(txtTicker);
     acct->setBuddy(cmbAcct);
     expense->setBuddy(sbExpense);
 }

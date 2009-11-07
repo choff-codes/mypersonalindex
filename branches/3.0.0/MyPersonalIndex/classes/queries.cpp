@@ -14,12 +14,14 @@ const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker
 //enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
 const QStringList queries::statMappingColumns = QStringList() << "PortfolioID" << "StatID" << "Sequence";
 
-//enum { dividends_Date, dividends_Ticker, dividends_Amount };
-//const QStringList queries::tradesColumns = QStringList() << "ID" << "Portfolio" << "TickerID" << "Ticker"
-//    << "Date" << "Shares" << "Price" << "Custom";
+// enum { trades_Portfolio, trades_TickerID, trades_Date, trades_Shares, trades_Price }
+const QStringList queries::tradesColumns = QStringList() << "PortfolioID" << "TickerID" << "Date" << "Shares" << "Price";
 
 //enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
 const QStringList queries::tickersAAColumns = QStringList() << "TickerID" << "AAID" << "Percent";
+
+//enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV }
+const QStringList queries::navColumns = QStringList() << "PortfolioID" << "Date" << "TotalValue" << "NAV";
 
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
@@ -41,16 +43,6 @@ queries::queries(QSqlDatabase database): db(database)
 {
     db.open();
     QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
-
-//    QString location = getDatabaseLocation();
-//    if (QSqlDatabase::contains(location))
-//        db = QSqlDatabase::database(location);
-//    else
-//    {
-//        db = QSqlDatabase::addDatabase("QSQLITE", location);
-//        db.setDatabaseName(location);
-//
-//    }
 }
 
 QString queries::getDatabaseLocation()
@@ -119,12 +111,13 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     query.prepare(sql.arg(tableName, columns.join(","), parameters.join(",")));
 
     int count = binds.at(0).count();
-    for (int i = 1; i < binds.count(); ++i)
-        if (binds.at(i).count() != count) // all the lists must be the same size
-        {
-            db.commit();
-            return;
-        }
+    // for catching errors
+    // for (int i = 1; i < binds.count(); ++i)
+    //      if (binds.at(i).count() != count) // all the lists must be the same size
+    //      {
+    //          db.commit();
+    //          return;
+    //      }
 
     for (int i = 0; i < count; ++i)
     {
@@ -444,7 +437,7 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
 {
     QList<parameter> params;
     params  << parameter(":PortfolioID", portfolioID)
-            << parameter(":Symbol", sec.symbol)
+            << parameter(":Ticker", sec.ticker)
             << parameter(":Account", sec.account)
             << parameter(":Expense", functions::doubleToNull(sec.expense))
             << parameter(":DivReinvest", (int)sec.divReinvest)
@@ -455,8 +448,8 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
     if(sec.id == -1) // insert new
     {
         return new queryInfo(
-            "INSERT INTO Tickers (PortfolioID, Symbol, Account, Expense, DivReinvest, CashAccount, IncludeInCalc, Hide)"
-            " VALUES (:PortfolioID, :Symbol, :Account, :Expense, :DivReinvest, :CashAccount, :IncludeInCalc, :Hide)",
+            "INSERT INTO Tickers (PortfolioID, Ticker, Account, Expense, DivReinvest, CashAccount, IncludeInCalc, Hide)"
+            " VALUES (:PortfolioID, :Ticker, :Account, :Expense, :DivReinvest, :CashAccount, :IncludeInCalc, :Hide)",
             params
         );
     }
@@ -464,7 +457,7 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
     {
         params << parameter(":SecurityID", sec.id);
         return new queryInfo(
-            "UPDATE Tickers SET PortfolioID = :PortfolioID, Symbol = :Symbol, Account = :Account, Expense = :Expense,"
+            "UPDATE Tickers SET PortfolioID = :PortfolioID, Ticker = :Ticker, Account = :Account, Expense = :Expense,"
                 " DivReinvest = :DivReinvest, CashAccount = :CashAccount, IncludeInCalc = :IncludeInCalc, Hide = :Hide"
                 " WHERE ID = :SecurityID",
             params
@@ -475,7 +468,7 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
 queries::queryInfo* queries::getSecurity()
 {
     return new queryInfo(
-        "SELECT ID, PortfolioID, Symbol, Account, Expense, DivReinvest, CashAccount,"
+        "SELECT ID, PortfolioID, Ticker, Account, Expense, DivReinvest, CashAccount,"
             " IncludeInCalc, Hide FROM Tickers ORDER BY PortfolioID",
         QList<parameter>()
     );
@@ -598,15 +591,40 @@ queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &
     );
 }
 
-//queries::queryInfo* queries::deleteTrades(const int &portfolioID, const int &startingDate)
-//{
-//    return new queryInfo(
-//            "DELETE FROM Trades"
-//            " WHERE EXISTS"
-//                " (SELECT 1 FROM Tickers WHERE Tickers.ID = Trades.TickerID AND Tickers.PortfolioID = :PortfolioID)"
-//            " AND Date >= :Date",
-//        QList<parameter>()
-//            << parameter(":PortfolioID", portfolioID)
-//            << parameter(":Date", startingDate)
-//    );
-//}
+queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, const int &date)
+{
+    return new queryInfo(
+            "SELECT COALESCE(SUM(a.Shares * b.Price), 0) AS TotalValue, COALESCE(SUM(a.Shares * c.Amount), 0) AS Dividends"
+            " FROM (SELECT Ticker, SUM(Shares) as Shares"
+                    " FROM (SELECT b.Ticker, a.Shares * COALESCE(EXP(SUM(LOG(c.Ratio))), 1) as Shares"
+                            " FROM Trades a"
+                            " INNER JOIN Tickers b"
+                                " b.ID = a.TickerID AND b.IncludeInCalc = 1"
+                            " LEFT JOIN Splits c"
+                                " ON b.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND 2455121"
+                            " WHERE b.PortfolioID = :PortfolioID AND a.Date <= :Date"
+                            " GROUP BY a.rowid) Trades"
+                    " GROUP BY Ticker) AS a"
+            " LEFT JOIN ClosingPrices AS b"
+                " ON b.Ticker = a.Ticker AND b.Date = :Date"
+            " LEFT JOIN Dividends AS c"
+                " ON c.Ticker = a.Ticker AND b.Date = :Date",
+        QList<parameter>()
+            << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
+    );
+}
+
+queries::queryInfo* queries::getPortfolioDailyActivity(const int &portfolioID, const int &date)
+{
+    return new queryInfo(
+            "SELECT SUM(Price * Shares)"
+            " FROM Trades a"
+            " INNER JOIN Tickers b"
+                " ON a.TickerID = b.ID AND b.IncludeInCalc = 1"
+            " WHERE b.PortfolioID = :PortfolioID AND a.Date = :Date",
+        QList<parameter>()
+            << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
+    );
+}

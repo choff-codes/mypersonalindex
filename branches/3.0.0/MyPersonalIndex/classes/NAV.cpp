@@ -16,54 +16,79 @@ void NAV::run()
         bool calcuateFromStartDate = false;
         calculationDate = checkCalculationDate(p, calculationDate, calcuateFromStartDate);
 
-        getNAVValues(p, calculationDate, calcuateFromStartDate);
+        getPortfolioNAVValues(p, calculationDate, calcuateFromStartDate);
     }
 }
 
-void NAV::getNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate)
+void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate)
 {
-
     // remove NAV prices that are to be recalculated
     m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_NAV, portfolioID, portfolioStartDate ? 0 : calculationDate));
     // remove custom trades that are to be recalculated
     m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_Trades, portfolioID, portfolioStartDate ? 0 : calculationDate));
 
-    if (m_dates->count() == 0)
+    if (m_dates->count() < 2)  // need at least 2 days of data
         return;
 
-    QMap<int, QList<globals::dynamicTrade> > trades = getTrades(portfolioID, calculationDate);
-
-    QVariantList portfolio, date, totalvalue, nav;
+    QMap<int, QList<globals::dynamicTrade> > trades = getPortfolioTrades(portfolioID, calculationDate);
+    QVariantList portfolio, dates, totalvalue, nav;
     globals::portfolio *currentPortfolio = &m_data->value(portfolioID)->info;
-    QList<int>::const_iterator previousDay = qLowerBound(*m_dates, calculationDate) - 1;
-    double previousTotalValue = 0;
-    double previousNAV = currentPortfolio->startValue;
+    QList<int>::const_iterator currentDate = qLowerBound(*m_dates, calculationDate);
+    double previousTotalValue = 0, previousNAV = currentPortfolio->startValue;
 
     if (portfolioStartDate)
     {
         portfolio.append(portfolioID);
-        date.append(*previousDay);
-        previousTotalValue = m_sql->executeScalar(m_sql->getAA(), 0).toDouble();
+        dates.append(*(currentDate - 1));
+        getPortfolioTotalValue(portfolioID, *(currentDate - 1), &previousTotalValue);
         totalvalue.append(previousTotalValue);
         nav.append(previousNAV);
     }
     else
     {
-        QPair<double, double> info = getPortfolioInfo(portfolioID, *previousDay);
+        QPair<double /* total value */, double /* NAV */> info = getPortfolioNAV(portfolioID, *(currentDate - 1));
         previousTotalValue = info.first;
         previousNAV = info.second;
     }
 
-    for (QList<int>::const_iterator i = previousDay + 1; i != m_dates->constEnd(); ++i)
+    for (QList<int>::const_iterator i = currentDate; i != m_dates->constEnd(); ++i)
     {
-        portfolio.append(portfolioID);
-        date.append(*i);
+        double newTotalValue = 0, newTotalDividends = 0, dailyActivity = 0, newNAV = 0;
 
-        double newTotalValue = m_sql->executeScalar(m_sql->getAA(), 0).toDouble();
+        portfolio.append(portfolioID);
+        dates.append(*i);
+
+        getPortfolioTotalValue(portfolioID, *i, &newTotalValue, &newTotalDividends);
         totalvalue.append(newTotalValue);
+
+        dailyActivity = m_sql->executeScalar(m_sql->getPortfolioDailyActivity(portfolioID, *i), 0).toDouble()
+            - (currentPortfolio->dividends ? newTotalDividends : 0);
+
+        if (dailyActivity < 0)
+            newNAV = (newTotalValue - dailyActivity) / (previousTotalValue / previousNAV);
+        else
+            newNAV = newTotalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+
+        if (isnan(newNAV) || isinf(newNAV))
+            nav.append(previousNAV);
+        else
+        {
+            nav.append(newNAV);
+            previousNAV = newNAV;
+        }
+
+        previousTotalValue = newTotalValue;
     }
 
-    QMap<QString, QVariantList> tableValues;
+    if (dates.count() != 0)
+    {
+        QMap<QString, QVariantList> tableValues;
+        tableValues.insert(queries::navColumns.at(queries::navColumns_PortfolioID), portfolio);
+        tableValues.insert(queries::navColumns.at(queries::navColumns_Date), dates);
+        tableValues.insert(queries::navColumns.at(queries::navColumns_TotalValue), totalvalue);
+        tableValues.insert(queries::navColumns.at(queries::navColumns_NAV), nav);
+        m_sql->executeTableUpdate(queries::table_NAV, tableValues);
+    }
 }
 
 void NAV::getPortfolioLastDates()
@@ -83,7 +108,7 @@ void NAV::getPortfolioLastDates()
     delete q;
 }
 
-QPair<double, double> NAV::getPortfolioInfo(const int &portfolioID, const int &date)
+QPair<double, double> NAV::getPortfolioNAV(const int &portfolioID, const int &date)
 {
     QPair<double, double> info(0, 0);
     QSqlQuery *q = m_sql->executeResultSet(m_sql->getPortfolioNAV(portfolioID, date));
@@ -96,6 +121,20 @@ QPair<double, double> NAV::getPortfolioInfo(const int &portfolioID, const int &d
 
     delete q;
     return info;
+}
+
+
+void NAV::getPortfolioTotalValue(const int &portfolioID, const int &date, double *totalValue, double *dividendValue)
+{
+    QSqlQuery *q = m_sql->executeResultSet(m_sql->getPortfolioTotalValue(portfolioID, date));
+    if (q)
+    {
+        if (totalValue)
+            *totalValue = q->value(queries::getPortfolioTotalValue_TotalValue).toDouble();
+        if (dividendValue)
+            *dividendValue = q->value(queries::getPortfolioTotalValue_TotalDividends).toDouble();
+    }
+    delete q;
 }
 
 int NAV::checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate)
@@ -138,7 +177,7 @@ bool NAV::getCurrentDateOrNext(int &date)
         return false;
 }
 
-QMap<int, QList<globals::dynamicTrade> > NAV::getTrades(const int &portfolioID, const int &minDate)
+QMap<int, QList<globals::dynamicTrade> > NAV::getPortfolioTrades(const int &portfolioID, const int &minDate)
 {
     QMap<int, QList<globals::dynamicTrade> > trades;
     int lastDate = m_dates->last();
@@ -191,19 +230,6 @@ QList<int> NAV::getOnceTrades(const globals::dynamicTrade &d)
 
     return dates;
 }
-
-//QList<int> NAV::getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate)
-//{
-//    // -1 is every day
-//    QList<int> dates;
-//
-////    for (QList<int>::const_iterator i = qLowerBound(*m_dates, minDate); i < m_dates->constEnd(); ++i)
-////        if ((*i) >= minDate && (*i) <= maxDate)
-////            dates.append(*i);
-//    dates.append(-1);
-//
-//    return dates;
-//}
 
 QList<int> NAV::getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate)
 {

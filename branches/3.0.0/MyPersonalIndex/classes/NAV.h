@@ -3,7 +3,6 @@
 
 #include "globals.h"
 #include "queries.h"
-#include <QtNetwork>
 
 class NAV : public QThread
 {
@@ -34,13 +33,13 @@ private:
 
     void run();
     void getPortfolioLastDates();
-    QPair<double, double> getPortfolioInfo(const int &portfolioID, const int &date);
+    QPair<double /* total value */, double /* NAV */> getPortfolioNAV(const int &portfolioID, const int &date);
+    void getPortfolioTotalValue(const int &portfolioID, const int &date, double *totalValue = 0, double *dividendValue = 0);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate);
-    void getNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
+    void getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
     bool getCurrentDateOrNext(int &date);
-    QMap<int, QList<globals::dynamicTrade> > getTrades(const int &portfolioID, const int &minDate);
+    QMap<int, QList<globals::dynamicTrade> > getPortfolioTrades(const int &portfolioID, const int &minDate);
     QList<int> getOnceTrades(const globals::dynamicTrade &d);
-    //QList<int> getDailyTrades(const globals::dynamicTrade&, const int &minDate, const int &maxDate);
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);

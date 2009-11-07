@@ -213,7 +213,7 @@ public:
     struct security
     {
         int id;
-        QString symbol;
+        QString ticker;
         int account;
         double expense;
         bool divReinvest;
@@ -228,7 +228,7 @@ public:
 
         bool operator==(const security &other) const {
             return this->id == other.id
-                    && this->symbol == other.symbol
+                    && this->ticker == other.ticker
                     && this->account == other.account
                     && this->expense == other.expense
                     && this->divReinvest == other.divReinvest
@@ -359,13 +359,13 @@ public:
 //
     struct updateInfo
     {
-        QString symbol;
+        QString ticker;
         int closingDate;
         int dividendDate;
         int splitDate;
 
         updateInfo() {}
-        updateInfo(const QString &p_symbol, const int &minDate): symbol(p_symbol), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
+        updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
     };
 };
 

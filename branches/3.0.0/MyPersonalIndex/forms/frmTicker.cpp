@@ -15,7 +15,7 @@ frmTicker::frmTicker(QWidget *parent, queries *sql, const int &portfolioID, cons
     }
 
     ui.setupUI(this);
-    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.symbol));
+    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.ticker));
 
     //ui.cmbAcct->model()->sort(0);
 
@@ -58,7 +58,7 @@ void frmTicker::connectSlots()
 
 void frmTicker::loadSecurity()
 {
-    ui.txtSymbol->setText(m_security.symbol);
+    ui.txtTicker->setText(m_security.ticker);
     ui.cmbAcct->setCurrentIndex(ui.cmbAcct->findData(m_security.account));
     ui.sbExpense->setValue(m_security.expense);
     ui.chkReinvest->setChecked(m_security.divReinvest);
@@ -106,7 +106,7 @@ void frmTicker::installAAModel()
 
 void frmTicker::accept()
 {
-    m_security.symbol = ui.txtSymbol->text();
+    m_security.ticker = ui.txtTicker->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
     m_security.expense = ui.sbExpense->value();
     m_security.divReinvest = ui.chkReinvest->isChecked();

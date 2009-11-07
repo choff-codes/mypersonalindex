@@ -10,9 +10,9 @@ public:
     QHBoxLayout *topSectionLayout;
     QGroupBox *gpSecurity;
     QFormLayout *securityLayout;
-    QLabel *symbol;
-    QHBoxLayout *symbolLayout;
-    QLineEdit *txtSymbol;
+    QLabel *ticker;
+    QHBoxLayout *tickerLayout;
+    QLineEdit *txtTicker;
     QToolButton *btnHistorical;
     QLabel *acct;
     QComboBox *cmbAcct;

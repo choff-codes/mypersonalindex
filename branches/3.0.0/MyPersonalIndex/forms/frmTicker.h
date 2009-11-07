@@ -210,7 +210,7 @@ private:
                     return trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission);
                     break;
                 case 4:
-                    return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).symbol : "";
+                    return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).ticker : "";
                     break;
                 case 5:
                     return globals::dynamicTrade::frequencyToString(trade.frequency);

@@ -13,3 +13,5 @@ unix {
     CONFIG(debug, debug|release):DESTDIR = debug
     else:DESTDIR = release
 }
+
+CONFIG(debug, debug|release):DEFINES += DEBUG

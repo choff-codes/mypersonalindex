@@ -23,7 +23,7 @@ public:
     static bool isInternetConnection();
 
 signals:
-    void updateFinished(const QStringList invalidSymbols);
+    void updateFinished(const QStringList invalidTickers);
 
 private:
     queries *m_sql;

@@ -314,7 +314,7 @@ void frmMain::loadPortfoliosTickers()
         globals::security sec;
 
         sec.id = q->value(queries::getSecurity_ID).toInt();
-        sec.symbol = q->value(queries::getSecurity_Symbol).toString();
+        sec.ticker = q->value(queries::getSecurity_Ticker).toString();
         sec.account = q->value(queries::getSecurity_Account).toInt();
         if (!q->value(queries::getSecurity_Expense).isNull())
             sec.expense = q->value(queries::getSecurity_Expense).toDouble();
@@ -645,12 +645,12 @@ void frmMain::beginUpdate()
     m_updateThread->start();
 }
 
-void frmMain::finishUpdate(const QStringList &invalidSymbols)
+void frmMain::finishUpdate(const QStringList &invalidTickers)
 {
-    if (invalidSymbols.count() != 0)
+    if (invalidTickers.count() != 0)
         QMessageBox::information(this,
             "Update Error", "The following tickers were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
-            invalidSymbols.join(", "));
+            invalidTickers.join(", "));
 
     m_updateThread->disconnect();
     delete m_updateThread;

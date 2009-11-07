@@ -65,7 +65,7 @@ private slots:
     void acct();
     void stat();
     void beginUpdate();
-    void finishUpdate(const QStringList &invalidSymbols);
+    void finishUpdate(const QStringList &invalidTickers);
 
 protected:
     void closeEvent(QCloseEvent *event);

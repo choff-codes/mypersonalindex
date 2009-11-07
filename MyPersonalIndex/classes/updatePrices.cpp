@@ -19,18 +19,18 @@ void updatePrices::run()
 
     foreach(globals::myPersonalIndex* p, *m_data)
         foreach(const globals::security &sec, p->data.tickers)
-            if (!tickers.contains(sec.symbol) && !sec.cashAccount)
-                tickers.insert(sec.symbol, globals::updateInfo(sec.symbol, m_firstDate));
+            if (!tickers.contains(sec.ticker) && !sec.cashAccount)
+                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_firstDate));
 
     getUpdateInfo(&tickers);
 
     int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
     foreach(const globals::updateInfo &info, tickers)
-        if (getPrices(info.symbol, info.closingDate, firstUpdate))  // check if symbol exists
+        if (getPrices(info.ticker, info.closingDate, firstUpdate))  // check if symbol exists
         {
-            getDividends(info.symbol, info.dividendDate, firstUpdate);
+            getDividends(info.ticker, info.dividendDate, firstUpdate);
             if (m_splits)
-                getSplits(info.symbol, info.splitDate, firstUpdate);
+                getSplits(info.ticker, info.splitDate, firstUpdate);
         }
 
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
@@ -46,7 +46,7 @@ void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> *tickers)
         {
             int d = q->value(queries::getUpdateInfo_Date).toInt();
             QString type = q->value(queries::getUpdateInfo_Type).toString();
-            QString ticker = q->value(queries::getUpdateInfo_Symbol).toString();
+            QString ticker = q->value(queries::getUpdateInfo_Ticker).toString();
             if (type == "C")
             {
                 (*tickers)[ticker].closingDate = d;

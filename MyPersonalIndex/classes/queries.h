@@ -47,16 +47,18 @@ public:
     static const QStringList dividendsColumns;
     static const QStringList splitsColumns;
     static const QStringList statMappingColumns;
-    //static const QStringList tradesColumns;
+    static const QStringList tradesColumns;
     static const QStringList tickersAAColumns;
+    static const QStringList navColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
     enum { dividends_Date, dividends_Ticker, dividends_Amount };
     enum { splits_Date, splits_Ticker, splits_Ratio };
     enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
-    //enum { trades_ID, trades_Portfolio, trades_TickerID, trades_Ticker, trades_Date, trades_Shares, trades_Price, trades_Custom };
+    enum { trades_Portfolio, trades_TickerID, trades_Date, trades_Shares, trades_Price };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
+    enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
 
     queries(QSqlDatabase database);
     static QString getDatabaseLocation();
@@ -115,7 +117,7 @@ public:
 
     queryInfo* updateStat(const globals::statistic&);
 
-    enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Symbol, getSecurity_Account,
+    enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
            getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
            getSecurity_IncludeInCalc, getSecurity_Hide };
     queryInfo* getSecurity();
@@ -131,7 +133,7 @@ public:
     queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
     queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
 
-    enum { getUpdateInfo_Symbol, getUpdateInfo_Date, getUpdateInfo_Type };
+    enum { getUpdateInfo_Ticker, getUpdateInfo_Date, getUpdateInfo_Type };
     queryInfo* getUpdateInfo();
     queryInfo* updateMissingPrices();
 
@@ -140,6 +142,11 @@ public:
 
     enum { getPortfolioNAV_PortfolioID, getPortfolioNAV_TotalValue, getPortfolioNAV_NAV };
     queryInfo* getPortfolioNAV(const int &portfolioID, const int &date);
+
+    enum { getPortfolioTotalValue_TotalValue, getPortfolioTotalValue_TotalDividends };
+    queryInfo* getPortfolioTotalValue(const int &portfolioID, const int &date);
+
+    queryInfo* getPortfolioDailyActivity(const int &portfolioID, const int &date);
 
 protected:
     QSqlDatabase db;

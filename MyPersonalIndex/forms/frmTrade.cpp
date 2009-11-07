@@ -17,7 +17,7 @@ frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog
         // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
         // but now will show up as no cash account selected
         if (sec.cashAccount) // && sec.id != id)
-            ui.cmbCash->addItem(sec.symbol, sec.id);
+            ui.cmbCash->addItem(sec.ticker, sec.id);
 
     connectSlots();
     loadTrade();

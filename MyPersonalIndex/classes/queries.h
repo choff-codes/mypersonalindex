@@ -150,6 +150,7 @@ public:
            getPortfolioTickerInfo_Split, getPortfolioTickerInfo_Activity };
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate);
 
+    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose);
 protected:
     QSqlDatabase db;
 };

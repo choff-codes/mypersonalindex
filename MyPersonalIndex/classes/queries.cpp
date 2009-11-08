@@ -595,16 +595,16 @@ queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, cons
 {
     return new queryInfo(
             "SELECT COALESCE(SUM(a.Shares * CASE WHEN a.CashAccount = 1 THEN 1 ELSE b.Price END), 0) AS TotalValue, COALESCE(SUM(a.Shares * c.Amount), 0) AS Dividends"
-            " FROM (SELECT Ticker, CashAccount, SUM(Shares) as Shares"
-                    " FROM (SELECT b.Ticker, b.CashAccount, a.Shares * COALESCE(EXP(SUM(LOG(c.Ratio))), 1) as Shares"
+            " FROM (SELECT Ticker, MAX(CashAccount) AS CashAccount, SUM(Shares) as Shares"
+                    " FROM (SELECT MAX(b.Ticker) AS Ticker, MAX(b.CashAccount) AS CashAccount, a.Shares * COALESCE(EXP(SUM(LOG(c.Ratio))), 1) as Shares"
                             " FROM Trades a"
                             " INNER JOIN Tickers b"
                                 " b.ID = a.TickerID AND b.IncludeInCalc = 1"
                             " LEFT JOIN Splits c"
-                                " ON b.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND 2455121"
+                                " ON b.Ticker = c.Ticker AND c.Date BETWEEN a.Date AND :Date"
                             " WHERE b.PortfolioID = :PortfolioID AND a.Date <= :Date"
                             " GROUP BY a.rowid) Trades"
-                    " GROUP BY Ticker, CashAccount) AS a"
+                    " GROUP BY Ticker) AS a"
             " LEFT JOIN ClosingPrices AS b"
                 " ON a.CashAccount = 0 AND b.Ticker = a.Ticker AND b.Date = :Date"
             " LEFT JOIN Dividends AS c"
@@ -620,12 +620,12 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
     return new queryInfo(
             "SELECT a.Ticker, COALESCE(CASE WHEN a.CashAccount = 1 THEN 1 ELSE b.Price END, 0) AS Price, COALESCE(c.Amount, 0) AS Dividend,"
                 " COALESCE(d.Ratio, 1) AS Split, a.Activity"
-            " FROM (SELECT a.Ticker, a.CashAccount, COALESCE(SUM(b.Price * b.Shares), 0) AS Activity"
+            " FROM (SELECT a.Ticker, MAX(a.CashAccount), COALESCE(SUM(b.Price * b.Shares), 0) AS Activity"
                     " FROM Tickers AS a"
                     " LEFT JOIN Trades AS b"
                         " ON b.TickerID = a.ID AND b.Date = :Date"
                     " WHERE a.IncludeInCalc = 1 AND a.PortfolioID = :PortfolioID"
-                    " GROUP BY a.Ticker, a.CashAccount) AS a"
+                    " GROUP BY a.Ticker) AS a"
             " LEFT JOIN ClosingPrices AS b"
                 " ON a.CashAccount = 0 AND b.Ticker = a.Ticker AND b.Date = :PreviousDate"
             " LEFT JOIN Dividends AS c"
@@ -635,6 +635,23 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
         QList<parameter>()
             << parameter(":PortfolioID", portfolioID)
             << parameter(":Date", date)
+            << parameter(":PreviousDate", previousDate)
+    );
+}
+
+queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose)
+{
+    return new queryInfo(
+            "SELECT SUM(Shares * :Price) AS Shares"
+            " FROM (SELECT MAX(a.Shares) * COALESCE(EXP(SUM(LOG(b.Ratio))), 1) as Shares"
+                    " FROM Trades a"
+                    " LEFT JOIN Splits b"
+                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND :PreviousDate"
+                    " WHERE a.TickerID = :TickerID AND a.Date <= :PreviousDate"
+                    " GROUP BY a.rowID) AS a",
+        QList<parameter>()
+            << parameter(":TickerID", tickerID)
+            << parameter(":Price", previousClose)
             << parameter(":PreviousDate", previousDate)
     );
 }

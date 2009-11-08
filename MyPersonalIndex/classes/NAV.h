@@ -31,26 +31,28 @@ private:
     int m_lastDate;
     int m_portfolioID;
 
-    typedef QList<QPair<QString, int> > tickerReinvestment;
+    typedef QPair<QString /* ticker */, int /* tickerID */> tickerReinvestment;
+    typedef QList<tickerReinvestment> tickerReinvestmentList;
     typedef QList<globals::dynamicTradeInfo> dynamicTradeList;
     typedef QMap<int, dynamicTradeList> dynamicTrades;
+    typedef QPair<double /* total value */, double /* NAV */> portfolioNAV;
 
     void run();
     void getPortfolioLastDates();
-    QPair<double /* total value */, double /* NAV */> getPortfolioNAV(const int &portfolioID, const int &date);
+    portfolioNAV getPortfolioNAV(const int &portfolioID, const int &date);
     void getPortfolioTotalValue(const int &portfolioID, const int &date, double *totalValue = 0, double *dividendValue = 0);
     QMap<QString, globals::securityInfo> getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDay);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate);
     void getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
     bool getCurrentDateOrNext(int &date);
     dynamicTrades getPortfolioTrades(const int &portfolioID, const int &minDate);
-    tickerReinvestment getPortfolioTickerReinvestment(const int &portfolioID);
+    tickerReinvestmentList getPortfolioTickerReinvestment(const int &portfolioID);
     QList<int> getOnceTrades(const globals::dynamicTrade &d);
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
-    void insertPortfolioTrades(globals::myPersonalIndex *portfolio, const int &date, const double &previousTotalValue,
-        const dynamicTradeList &trades, const QMap<QString, globals::securityInfo> &tickerInfo, const tickerReinvestment &tickerReinvestments);
+    void insertPortfolioTrades(const int &portfolioID, const int &date, const int &previousDate, const double &previousTotalValue,
+        const dynamicTradeList &trades, const QMap<QString, globals::securityInfo> &tickerInfo, const tickerReinvestmentList &tickerReinvestments);
 };
 
 #endif // NAV_H

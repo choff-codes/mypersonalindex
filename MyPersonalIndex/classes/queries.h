@@ -52,11 +52,11 @@ public:
     static const QStringList navColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
-    enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
-    enum { dividends_Date, dividends_Ticker, dividends_Amount };
-    enum { splits_Date, splits_Ticker, splits_Ratio };
-    enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
-    enum { trades_Portfolio, trades_TickerID, trades_Date, trades_Shares, trades_Price };
+    enum { closingPricesColumns_Date, closingPricesColumns_Ticker, closingPricesColumns_Price, closingPricesColumns_Change };
+    enum { dividendsColumns_Date, dividendsColumns_Ticker, dividendsColumns_Amount };
+    enum { splitsColumns_Date, splitsColumns_Ticker, splitsColumns_Ratio };
+    enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence };
+    enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Code };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
 
@@ -146,7 +146,9 @@ public:
     enum { getPortfolioTotalValue_TotalValue, getPortfolioTotalValue_TotalDividends };
     queryInfo* getPortfolioTotalValue(const int &portfolioID, const int &date);
 
-    queryInfo* getPortfolioDailyActivity(const int &portfolioID, const int &date);
+    enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend,
+           getPortfolioTickerInfo_Split, getPortfolioTickerInfo_Activity };
+    queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate);
 
 protected:
     QSqlDatabase db;

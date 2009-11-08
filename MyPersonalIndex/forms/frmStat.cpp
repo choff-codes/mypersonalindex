@@ -55,9 +55,9 @@ void frmStat::accept()
     }
 
     QMap<QString, QVariantList> tableValues;
-    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_PortfolioID), portfolio);
-    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_StatID), stat);
-    tableValues.insert(queries::statMappingColumns.at(queries::statMapping_Sequence), sequence);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_PortfolioID), portfolio);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), stat);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
     m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_StatMapping, m_portfolio));
     if (stat.count() != 0)

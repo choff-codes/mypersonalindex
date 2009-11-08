@@ -88,32 +88,33 @@ void frmMain::loadSettings()
     loadDates();
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
-    if (q)
-    {
-        m_settings.dataStartDate = q->value(queries::getSettings_DataStartDate).toInt();
-        m_settings.splits = q->value(queries::getSettings_Splits).toBool();
-        m_settings.tickersIncludeDividends = q->value(queries::getSettings_TickersIncludeDividends).toBool();
-        m_settings.version = q->value(queries::getSettings_Version).toInt();
-        if (!q->value(queries::getSettings_WindowState).isNull())
-        {
-            m_settings.windowSize = QSize(q->value(queries::getSettings_WindowWidth).toInt(),
-                q->value(queries::getSettings_WindowHeight).toInt());
-            resize(m_settings.windowSize);
-            m_settings.windowLocation = QPoint(q->value(queries::getSettings_WindowX).toInt(),
-                        q->value(queries::getSettings_WindowY).toInt());
-            move(m_settings.windowLocation);
-            m_settings.state = (Qt::WindowState)q->value(queries::getSettings_WindowState).toInt();
-            if (m_settings.state != Qt::WindowNoState)
-                this->setWindowState(this->windowState() | m_settings.state);
-        }
-        else
-            functions::showWelcomeMessage(this); // first time being run
 
-        if (!q->value(queries::getSettings_LastPortfolio).isNull())
-        {
-            m_settings.lastPortfolio = q->value(queries::getSettings_LastPortfolio).toInt();
-            m_currentPortfolio = m_portfolios.value(m_settings.lastPortfolio.toInt());
-        }
+    if (!q)
+        return;
+
+    m_settings.dataStartDate = q->value(queries::getSettings_DataStartDate).toInt();
+    m_settings.splits = q->value(queries::getSettings_Splits).toBool();
+    m_settings.tickersIncludeDividends = q->value(queries::getSettings_TickersIncludeDividends).toBool();
+    m_settings.version = q->value(queries::getSettings_Version).toInt();
+    if (!q->value(queries::getSettings_WindowState).isNull())
+    {
+        m_settings.windowSize = QSize(q->value(queries::getSettings_WindowWidth).toInt(),
+            q->value(queries::getSettings_WindowHeight).toInt());
+        resize(m_settings.windowSize);
+        m_settings.windowLocation = QPoint(q->value(queries::getSettings_WindowX).toInt(),
+                    q->value(queries::getSettings_WindowY).toInt());
+        move(m_settings.windowLocation);
+        m_settings.state = (Qt::WindowState)q->value(queries::getSettings_WindowState).toInt();
+        if (m_settings.state != Qt::WindowNoState)
+            this->setWindowState(this->windowState() | m_settings.state);
+    }
+    else
+        functions::showWelcomeMessage(this); // first time being run
+
+    if (!q->value(queries::getSettings_LastPortfolio).isNull())
+    {
+        m_settings.lastPortfolio = q->value(queries::getSettings_LastPortfolio).toInt();
+        m_currentPortfolio = m_portfolios.value(m_settings.lastPortfolio.toInt());
     }
 
     delete q;
@@ -122,20 +123,21 @@ void frmMain::loadSettings()
 void frmMain::loadStats()
 {
     QSqlQuery *q = sql->executeResultSet(sql->getStat());
-    if (q)
-    {
-        do
-        {
-            globals::statistic stat;
-            stat.id = q->value(queries::getStat_ID).toInt();
-            stat.description = q->value(queries::getStat_Description).toString();
-            stat.sql = q->value(queries::getStat_SQL).toString();
-            stat.format = (globals::outputFormat)q->value(queries::getStat_Format).toInt();
 
-            m_statistics.insert(stat.id, stat);
-        }
-        while (q->next());
+    if (!q)
+        return;
+
+    do
+    {
+        globals::statistic stat;
+        stat.id = q->value(queries::getStat_ID).toInt();
+        stat.description = q->value(queries::getStat_Description).toString();
+        stat.sql = q->value(queries::getStat_SQL).toString();
+        stat.format = (globals::outputFormat)q->value(queries::getStat_Format).toInt();
+
+        m_statistics.insert(stat.id, stat);
     }
+    while (q->next());
 
     delete q;
 }
@@ -143,14 +145,15 @@ void frmMain::loadStats()
 void frmMain::loadDates()
 {
     QSqlQuery *q = sql->executeResultSet(sql->getDates());
-    if (q)
+
+    if (!q)
+        return;
+
+    do
     {
-        do
-        {
-            m_dates.append(q->value(queries::getDates_Date).toInt());
-        }
-        while (q->next());
+        m_dates.append(q->value(queries::getDates_Date).toInt());
     }
+    while (q->next());
 
     delete q;
 }

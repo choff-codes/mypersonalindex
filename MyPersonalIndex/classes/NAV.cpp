@@ -30,11 +30,12 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     if (m_dates->count() < 2)  // need at least 2 days of data
         return;
 
-    QMap<int, QList<globals::dynamicTrade> > trades = getPortfolioTrades(portfolioID, calculationDate);
+    dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate);
+    tickerReinvestment tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
     QVariantList portfolio, dates, totalvalue, nav;
-    globals::portfolio *currentPortfolio = &m_data->value(portfolioID)->info;
+    globals::myPersonalIndex *currentPortfolio = m_data->value(portfolioID);
     QList<int>::const_iterator currentDate = qLowerBound(*m_dates, calculationDate);
-    double previousTotalValue = 0, previousNAV = currentPortfolio->startValue;
+    double previousTotalValue = 0, previousNAV = currentPortfolio->info.startValue;
 
     if (portfolioStartDate)
     {
@@ -54,6 +55,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     for (QList<int>::const_iterator i = currentDate; i != m_dates->constEnd(); ++i)
     {
         double newTotalValue = 0, newTotalDividends = 0, dailyActivity = 0, newNAV = 0;
+        QMap<QString, globals::securityInfo> tickerInfo = getPortfolioTickerInfo(portfolioID, *i, *(i-1));
 
         portfolio.append(portfolioID);
         dates.append(*i);
@@ -61,8 +63,9 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         getPortfolioTotalValue(portfolioID, *i, &newTotalValue, &newTotalDividends);
         totalvalue.append(newTotalValue);
 
-        dailyActivity = m_sql->executeScalar(m_sql->getPortfolioDailyActivity(portfolioID, *i), 0).toDouble()
-            - (currentPortfolio->dividends ? newTotalDividends : 0);
+        foreach(const globals::securityInfo &s, tickerInfo)
+            dailyactivity += s.activity;
+        dailyActivity -= currentPortfolio->info.dividends ? newTotalDividends : 0;
 
         if (dailyActivity < 0)
             newNAV = (newTotalValue - dailyActivity) / (previousTotalValue / previousNAV);
@@ -137,6 +140,42 @@ void NAV::getPortfolioTotalValue(const int &portfolioID, const int &date, double
     delete q;
 }
 
+QMap<QString, globals::securityInfo> NAV::getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDay)
+{
+    QMap<QString, globals::securityInfo> tickerInfo;
+    QSqlQuery *q = m_sql->executeResultSet(m_sql->getPortfolioTickerInfo(portfolioID, date, previousDay));
+
+    if (!q)
+        return tickerInfo;
+
+    do
+    {
+        globals::securityInfo s;
+        s.ticker = q->value(queries::getPortfolioTickerInfo_Ticker).toString();
+        s.previousClose = q->value(queries::getPortfolioTickerInfo_Price).toDouble();
+        s.dividendAmount = q->value(queries::getPortfolioTickerInfo_Dividend).toDouble();
+        s.splitRatio = q->value(queries::getPortfolioTickerInfo_Split).toDouble();
+        s.activity = q->value(queries::getPortfolioTickerInfo_Activity).toDouble();
+
+        tickerInfo.insert(s.ticker, s);
+    }
+    while(q->next());
+
+    delete q;
+    return tickerInfo;
+}
+
+NAV::tickerReinvestment NAV::getPortfolioTickerReinvestment(const int &portfolioID)
+{
+    tickerReinvestment tickers;
+
+    foreach(const globals::security &s, m_data->value(portfolioID)->data.tickers)
+        if (s.divReinvest && (!s.cashAccount))
+            tickers.append(qMakePair(s.ticker, s.id));
+
+    return tickers;
+}
+
 int NAV::checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate)
 {
     // check if the portfolio needs to be recalculated even before the mindate
@@ -177,9 +216,9 @@ bool NAV::getCurrentDateOrNext(int &date)
         return false;
 }
 
-QMap<int, QList<globals::dynamicTrade> > NAV::getPortfolioTrades(const int &portfolioID, const int &minDate)
+NAV::dynamicTrades NAV::getPortfolioTrades(const int &portfolioID, const int &minDate)
 {
-    QMap<int, QList<globals::dynamicTrade> > trades;
+    dynamicTrades trades;
     int lastDate = m_dates->last();
 
     foreach(const globals::security &s, m_data->value(portfolioID)->data.tickers)
@@ -215,7 +254,7 @@ QMap<int, QList<globals::dynamicTrade> > NAV::getPortfolioTrades(const int &port
                     break;
             }
             foreach(const int &i, dates)
-                trades[i].append(d);
+                trades[i].append(globals::dynamicTradeInfo(s.ticker, s.id, d));
         }
 
     return trades;
@@ -313,4 +352,40 @@ QList<int> NAV::getYearlyTrades(const globals::dynamicTrade &d, const int &minDa
     while (minQDate.toJulianDay() <= maxDate);
 
     return dates;
+}
+
+void NAV::insertPortfolioTrades(const int &portfolioID, const int &date, const double &previousTotalValue,
+    const dynamicTradeList &trades, const QMap<QString, globals::securityInfo> &tickerInfo, const tickerReinvestment &tickerReinvestments)
+{
+    QVariantList portfolio, tickerID, dates, shares, price, commission, code;
+
+    // dividend reinvestments
+    for(tickerReinvestment::const_iterator i = tickerReinvestments.constBegin(); i != tickerReinvestments.constEnd(); ++i)
+    {
+        globals::securityInfo s = tickerInfo.value((*i).first);
+        if (s.dividendAmount <= 0 || s.previousClose == 0)
+            continue;
+        portfolio.append(portfolioID);
+        tickerID.append((*i).second);
+        dates.append(date);
+        shares.append(s.dividendAmount / s.previousClose);
+        price.append(s.previousClose / s.splitRatio);
+        commission.append(QVariant(QVariant::Double));
+        code.append("R");
+    }
+
+    for(dynamicTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
+    {
+        globals::dynamicTradeInfo d = *i;
+        globals::securityInfo s = tickerInfo.value(d.ticker);
+        if (s.previousClose == 0)
+            continue;
+        portfolio.append(portfolioID);
+        tickerID.append(d.tickerID);
+        dates.append(date);
+        price.append(d.trade.price >= 0 ? d.trade.price : s.previousClose / s.splitRatio);
+        commission.append(d.trade.commission >= 0 ? d.trade.commission : QVariant(QVariant::Double));
+
+        double sharesToBuy = 0;
+    }
 }

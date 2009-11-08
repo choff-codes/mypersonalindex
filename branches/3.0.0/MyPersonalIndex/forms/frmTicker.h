@@ -55,9 +55,9 @@ class tickerAAModel: public QAbstractTableModel
 
 public:
 
-    QList<QPair<int, double> > getList() { return m_list; }
+    QList<globals::tickerAATarget> getList() { return m_list; }
 
-    tickerAAModel(const QList<QPair<int, double> > &values, const QMap<int, globals::assetAllocation> *aaValues = 0, const int &cols = 0, QTableView *parent = 0):
+    tickerAAModel(const QList<globals::tickerAATarget> &values, const QMap<int, globals::assetAllocation> *aaValues = 0, const int &cols = 0, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     Qt::ItemFlags flags(const QModelIndex &index) const
@@ -83,9 +83,8 @@ public:
     {
         double total = 0;
 
-        QList<QPair<int, double> >::const_iterator i;
-        for (i = m_list.constBegin(); i != m_list.constEnd(); ++i)
-             total += (*i).second;
+        foreach(const globals::tickerAATarget &aa, m_list)
+            total += aa.second;
 
         return total;
     }
@@ -141,7 +140,7 @@ public slots:
     {
         beginInsertRows(QModelIndex(), m_list.count(), m_list.count());
         double total = totalPercentage();
-        m_list.append(QPair<int, double>(id, total >= 100 ? 0 : 100 - total));
+        m_list.append(qMakePair(id, total >= 100 ? 0 : 100 - total));
         endInsertRows();
         emit updateHeader();
     }
@@ -172,7 +171,7 @@ private:
     const QMap<int, globals::assetAllocation> *m_aaValues;
     QTableView *m_parent;
     int m_columns;
-    QList<QPair<int, double> > m_list;
+    QList<globals::tickerAATarget> m_list;
 };
 
 class tickerTradeModel : public mpiModelBase<globals::dynamicTrade, frmTrade>

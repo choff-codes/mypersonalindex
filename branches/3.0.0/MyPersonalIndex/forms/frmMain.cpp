@@ -352,9 +352,10 @@ void frmMain::loadPortfoliosTickersAA()
 
     do
     {
-        QPair<int, double> pair;
-        pair.first = q->value(queries::getSecurityAA_AAID).toInt();
-        pair.second = q->value(queries::getSecurityAA_Percent).toDouble();
+        globals::tickerAATarget pair(
+            q->value(queries::getSecurityAA_AAID).toInt(),
+            q->value(queries::getSecurityAA_Percent).toDouble()
+        );
 
         int portfolioID = q->value(queries::getSecurityAA_PortfolioID).toInt();
         int tickerID = q->value(queries::getSecurityAA_TickerID).toInt();

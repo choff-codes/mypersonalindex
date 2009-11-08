@@ -210,6 +210,8 @@ public:
         }
     };
 
+    typedef QPair<int /* aaID */, double /* target */> tickerAATarget;
+
     struct security
     {
         int id;
@@ -220,7 +222,7 @@ public:
         bool cashAccount;
         bool includeInCalc;
         bool hide;
-        QList<QPair<int, double> > aa;
+        QList<tickerAATarget> aa;
         QMap<int, dynamicTrade> trades;
 
         security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),

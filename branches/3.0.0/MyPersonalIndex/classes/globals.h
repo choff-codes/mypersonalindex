@@ -324,39 +324,27 @@ public:
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
 
-//    struct symbol
-//    {
-//        int tickerID;
-//        int aa;
-//
-//        symbol(const int &p_tickerID, const int &p_aa): tickerID(p_tickerID), aa(p_aa) {}
-//    };
-//
-//    struct tickerInfo
-//    {
-//        double price;
-//        double totalValue;
-//        double splitRatio;
-//        QString ticker;
-//
-//        tickerInfo(): price(-1), totalValue(-1), splitRatio(1) {}
-//    };
-//
-//    struct missingPriceInfo
-//    {
-//        double previousClose;
-//        QDate date;
-//        QString ticker;
-//    };
-//
-//    struct tradeInfo
-//    {
-//        double price;
-//        double shares;
-//
-//        tradeInfo(const double &p_shares, const double &p_price): price(p_price), shares(p_shares) {}
-//    };
-//
+
+    struct securityInfo
+    {
+        double previousClose;
+        double dividendAmount;
+        double activity;
+        double splitRatio;
+        QString ticker;
+
+        securityInfo(): previousClose(0), dividendAmount(0), activity(0), splitRatio(1) {}
+    };
+
+    struct dynamicTradeInfo
+    {
+        QString ticker;
+        int tickerID;
+        dynamicTrade trade;
+
+        dynamicTradeInfo(const QString &p_ticker, const int &p_tickerID, const dynamicTrade &p_trade): ticker(p_ticker), tickerID(p_tickerID), trade(p_trade) {}
+    };
+
     struct updateInfo
     {
         QString ticker;

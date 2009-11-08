@@ -141,9 +141,9 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
         if (dates.count() != 0)
         {
             QMap<QString, QVariantList> tableValues;
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPrices_Date), dates);
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPrices_Ticker), tickers);
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPrices_Price), prices);
+            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Date), dates);
+            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), tickers);
+            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), prices);
             m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
         }
     }
@@ -181,9 +181,9 @@ void updatePrices::getDividends(const QString &ticker, const int &minDate, int &
         if (dates.count() != 0)
         {
             QMap<QString, QVariantList> tableValues;
-            tableValues.insert(queries::dividendsColumns.at(queries::dividends_Date), dates);
-            tableValues.insert(queries::dividendsColumns.at(queries::dividends_Ticker), tickers);
-            tableValues.insert(queries::dividendsColumns.at(queries::dividends_Amount), amounts);
+            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Date), dates);
+            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), tickers);
+            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), amounts);
             m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
         }
     }
@@ -247,9 +247,9 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
     if (dates.count() != 0)
     {
         QMap<QString, QVariantList> tableValues;
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Date), dates);
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Ticker), tickers);
-        tableValues.insert(queries::splitsColumns.at(queries::splits_Ratio), ratios);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Date), dates);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), tickers);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), ratios);
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
     }
 

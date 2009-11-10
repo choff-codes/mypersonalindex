@@ -66,6 +66,7 @@ private slots:
     void stat();
     void beginUpdate();
     void finishUpdate(const QStringList &invalidTickers);
+    void statusUpdate(const QString &message);
 
 protected:
     void closeEvent(QCloseEvent *event);

@@ -644,20 +644,31 @@ void frmMain::beginUpdate()
     }
 
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(&m_portfolios, &m_dates, m_settings.splits, m_settings.dataStartDate, m_lastDate, this);
+    m_updateThread = new updatePrices(&m_portfolios, &m_dates, m_settings.splits, m_settings.dataStartDate, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
+    connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_updateThread->start();
 }
 
 void frmMain::finishUpdate(const QStringList &invalidTickers)
 {
+    ui.stbProgress->setMaximum(100);
+    ui.stbProgress->setValue(0);
+    statusUpdate("");
+
     if (invalidTickers.count() != 0)
         QMessageBox::information(this,
             "Update Error", "The following tickers were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
             invalidTickers.join(", "));
 
+    m_updateThread->quit();
     m_updateThread->disconnect();
     delete m_updateThread;
-    ui.stbProgress->setMaximum(100);
-    ui.stbProgress->setValue(0);
 }
+
+void frmMain::statusUpdate(const QString &message)
+{
+    if (ui.stbProgress->maximum() == 0)
+        ui.stbStatus->setText(QString("Status: ").append(message));
+}
+

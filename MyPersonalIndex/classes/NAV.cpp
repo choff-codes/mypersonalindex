@@ -12,12 +12,14 @@ void NAV::run()
 
     foreach(int p, portfolios)
     {
-        int calculationDate = m_lastDate;
+        int calculationDate = m_calculationDate;
         bool calcuateFromStartDate = false;
         calculationDate = checkCalculationDate(p, calculationDate, calcuateFromStartDate);
 
         getPortfolioNAVValues(p, calculationDate, calcuateFromStartDate);
     }
+
+    emit calculationFinished();
 }
 
 void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate)
@@ -30,10 +32,11 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     if (m_dates->count() < 2)  // need at least 2 days of data
         return;
 
-    dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate);
+    dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate, portfolioStartDate);
     tickerReinvestmentList tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
     QVariantList portfolio, dates, totalvalue, nav;
     globals::myPersonalIndex *currentPortfolio = m_data->value(portfolioID);
+    emit statusUpdate(QString("Calculating '%1'").arg(currentPortfolio->info.description));
     QList<int>::const_iterator previousDate = qLowerBound(*m_dates, calculationDate) - 1;
     double previousTotalValue = 0, previousNAV = currentPortfolio->info.startValue;
 
@@ -57,7 +60,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         double newTotalValue = 0, newTotalDividends = 0, dailyActivity = 0, newNAV = 0;
         QMap<QString, globals::securityInfo> tickerInfo = getPortfolioTickerInfo(portfolioID, *currentDate, *previousDate);
 
-        insertPortfolioTrades(portfolioID, *currentDate, *previousDate, previousTotalValue, trades.value(*currentDate),
+        insertPortfolioTrades(portfolioID, *currentDate, *previousDate, previousTotalValue, trades.value(*currentDate) + trades.value(-1),
             tickerInfo, tickerReinvestments);
 
         portfolio.append(portfolioID);
@@ -205,7 +208,7 @@ int NAV::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
 
     // recalculate portfolio from the start of the 2nd day of pricing
     calcuateFromStartDate = true;
-    return m_dates->count() > 1 ? m_dates->at(1) : qMax(m_lastDate, calculationDate);
+    return m_dates->count() > 1 ? m_dates->at(1) : qMax(m_calculationDate, calculationDate);
 }
 
 
@@ -221,7 +224,7 @@ bool NAV::getCurrentDateOrNext(int &date)
         return false;
 }
 
-NAV::dynamicTrades NAV::getPortfolioTrades(const int &portfolioID, const int &minDate)
+NAV::dynamicTrades NAV::getPortfolioTrades(const int &portfolioID, const int &minDate, const bool &portfolioStartDate)
 {
     dynamicTrades trades;
     int lastDate = m_dates->last();
@@ -241,19 +244,19 @@ NAV::dynamicTrades NAV::getPortfolioTrades(const int &portfolioID, const int &mi
             switch(d.frequency)
             {
                 case globals::tradeFreq_Once:
-                    dates = getOnceTrades(d);
+                    dates = getOnceTrades(d, startDate, endDate, portfolioStartDate);
                     break;
                 case globals::tradeFreq_Daily:
-                    dates = QList<int>() << -1;
+                    dates.append(-1);
                     break;
                 case globals::tradeFreq_Weekly:
-                    dates = getWeeklyTrades(d, minDate, endDate);
+                    dates = getWeeklyTrades(d, startDate, endDate);
                     break;
                 case globals::tradeFreq_Monthly:
-                    dates = getMonthlyTrades(d, minDate, endDate);
+                    dates = getMonthlyTrades(d, startDate, endDate);
                     break;
                 case globals::tradeFreq_Yearly:
-                    dates = getYearlyTrades(d, minDate, endDate);
+                    dates = getYearlyTrades(d, startDate, endDate);
                     break;
                 default:
                     break;
@@ -265,12 +268,13 @@ NAV::dynamicTrades NAV::getPortfolioTrades(const int &portfolioID, const int &mi
     return trades;
 }
 
-QList<int> NAV::getOnceTrades(const globals::dynamicTrade &d)
+QList<int> NAV::getOnceTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate, const bool &portfolioStartDate)
 {
     QList<int> dates;
     int date = d.date;
-    if (getCurrentDateOrNext(date))
-        dates.append(date);
+    if ((date >= minDate || portfolioStartDate) && date <= maxDate)
+        if (getCurrentDateOrNext(date))
+            dates.append(date);
 
     return dates;
 }

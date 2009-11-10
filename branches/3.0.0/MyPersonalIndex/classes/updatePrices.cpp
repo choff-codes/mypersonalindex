@@ -4,7 +4,7 @@
 #include <QtNetwork>
 #include <QtSql>
 
-//    EXPLAIN QUERY PLAN select date(a.date), (a.price / b.price) - 1 AS change
+//    EXPLAIN QUERY PLAN select date(a.date), (a.price / b.prilce) - 1 AS change
 //    from closingprices as a
 //    left join closingprices as b
 //    on a.ticker = b.ticker and
@@ -16,6 +16,8 @@ void updatePrices::run()
 
     if (!m_sql->isOpen() || !m_data)
         return;
+
+    emit statusUpdate("Updating Prices");
 
     foreach(globals::myPersonalIndex* p, *m_data)
         foreach(const globals::security &sec, p->data.tickers)
@@ -34,7 +36,13 @@ void updatePrices::run()
         }
 
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
-    emit updateFinished(m_updateFailures);
+
+    m_nav = new NAV(m_data, m_dates, 0, this, -1);
+    connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
+    connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
+    m_nav->run();
+
+    exec();
 }
 
 void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> *tickers)
@@ -89,7 +97,7 @@ QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
     QEventLoop loop;
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
 
     loop.exec();
 
@@ -264,4 +272,13 @@ bool updatePrices::isInternetConnection()
         return true;
 
     return false;
+}
+
+void updatePrices::calcuationFinished()
+{
+    m_nav->quit();
+    m_nav->disconnect();
+    delete m_nav;
+
+    emit updateFinished(m_updateFailures);
 }

@@ -1,10 +1,10 @@
 #include "frmAA.h"
 #include "frmAAEdit.h"
 
-frmAA::frmAA(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::assetAllocation> &aa):
-    QDialog(parent), m_sql(sql), m_map(aa), m_portfolio(portfolioID)
+frmAA::frmAA(const int &portfolioID, const QMap<int, globals::assetAllocation> &aa, const queries &sql, QWidget *parent):
+    QDialog(parent), m_map(aa), m_sql(sql), m_portfolio(portfolioID)
 {
-    if(!m_sql || !m_sql->isOpen())
+    if(!m_sql.isOpen())
     {
         reject();
         return;
@@ -51,14 +51,14 @@ void frmAA::accept()
 
 void frmAA::saveItem(globals::assetAllocation *aa)
 {
-    m_sql->executeNonQuery(m_sql->updateAA(m_portfolio, (*aa)));
+    m_sql.executeNonQuery(m_sql.updateAA(m_portfolio, (*aa)));
     if (aa->id == -1)
-        aa->id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+        aa->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
 }
 
 void frmAA::deleteItem(const globals::assetAllocation &aa)
 {
-    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_AA, aa.id));
+    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_AA, aa.id));
 }
 
 void frmAA::customContextMenuRequested(const QPoint&)

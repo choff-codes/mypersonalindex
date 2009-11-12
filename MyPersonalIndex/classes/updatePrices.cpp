@@ -14,15 +14,15 @@ void updatePrices::run()
 {
     QMap<QString, globals::updateInfo> tickers;
 
-    if (!m_sql->isOpen() || !m_data)
+    if (!m_sql->isOpen())
         return;
 
     emit statusUpdate("Updating Prices");
 
-    foreach(globals::myPersonalIndex* p, *m_data)
+    foreach(globals::myPersonalIndex* p, m_data)
         foreach(const globals::security &sec, p->data.tickers)
             if (!tickers.contains(sec.ticker) && !sec.cashAccount)
-                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_firstDate));
+                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_dataStartDate));
 
     getUpdateInfo(&tickers);
 
@@ -37,7 +37,7 @@ void updatePrices::run()
 
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, 0, this, -1);
+    m_nav = new NAV(m_data, m_dates, 0, this);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->run();
@@ -135,9 +135,9 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
             int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
             dates.append(djulian);
             // add new date if it doesn't already exist
-            QList<int>::iterator place = qLowerBound(m_dates->begin(), m_dates->end(), djulian);
+            QList<int>::iterator place = qLowerBound(m_dates.begin(), m_dates.end(), djulian);
             if ((*place) != djulian)
-                m_dates->insert(place, djulian);
+                m_dates.insert(place, djulian);
             // update min date
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;

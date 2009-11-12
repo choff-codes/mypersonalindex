@@ -14,14 +14,14 @@ public:
 
     const globals::portfolio& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(QWidget *parent = 0, queries *sql = 0, const int &dataStartDate = 0, const globals::portfolio& p = globals::portfolio());
+    frmPortfolio(const globals::portfolio& p, const int &dataStartDate, const queries &sql, QWidget *parent = 0);
 
 private:
 
     frmPortfolio_UI ui;
-    queries *m_sql;
     globals::portfolio m_portfolio;
     globals::portfolio m_portfolioOriginal;
+    const queries &m_sql;
 
     void loadPortfolioAttributes();
     bool getErrors();

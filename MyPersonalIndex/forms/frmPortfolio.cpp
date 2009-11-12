@@ -2,9 +2,9 @@
 #include "frmPortfolio.h"
 #include "globals.h"
 
-frmPortfolio::frmPortfolio(QWidget *parent, queries *sql, const int &dataStartDate, const globals::portfolio &p): QDialog(parent), m_sql(sql), m_portfolio(p), m_portfolioOriginal(p)
+frmPortfolio::frmPortfolio(const globals::portfolio& p, const int &dataStartDate, const queries &sql, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p), m_sql(sql)
 {
-    if (!m_sql || !m_sql->isOpen())
+    if (!m_sql.isOpen())
     {
         this->reject();
         return;
@@ -89,8 +89,8 @@ void frmPortfolio::accept()
         return;
     }
 
-    m_sql->executeNonQuery(m_sql->updatePortfolio(m_portfolio));
+    m_sql.executeNonQuery(m_sql.updatePortfolio(m_portfolio));
     if (m_portfolio.id == -1)
-        m_portfolio.id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+        m_portfolio.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
     QDialog::accept();
 }

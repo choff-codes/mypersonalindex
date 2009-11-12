@@ -9,7 +9,7 @@ class NAV : public QThread
     Q_OBJECT
 
 public:
-    NAV(QMap<int, globals::myPersonalIndex*> *data, QList<int> *dates, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
+    NAV(const QMap<int, globals::myPersonalIndex*> &data, const QList<int> &dates, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
         QThread(parent), m_data(data), m_dates(dates), m_calculationDate(calculationDate), m_portfolioID(portfolioID)
     {
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "nav");
@@ -26,10 +26,10 @@ signals:
 
 private:
     queries *m_sql;
-    QMap<int, globals::myPersonalIndex*> *m_data;
+    const QMap<int, globals::myPersonalIndex*> &m_data;
     // key is portfolio ID and value islast date calculated
     QMap<int, int> m_portfolioLastDates;
-    QList<int> *m_dates;
+    const QList<int> &m_dates;
     int m_calculationDate;
     int m_portfolioID;
 

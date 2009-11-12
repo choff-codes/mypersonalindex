@@ -531,7 +531,7 @@ void frmMain::savePortfolios()
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(this, sql, m_settings.dataStartDate);
+    frmPortfolio f(globals::portfolio(), m_settings.dataStartDate, *sql, this);
     if (f.exec())
     {
         globals::portfolio p = f.getReturnValues();
@@ -547,7 +547,7 @@ void frmMain::editPortfolio()
     if (!m_currentPortfolio)
         return;
 
-    frmPortfolio f(this, sql, m_settings.dataStartDate, m_currentPortfolio->info);
+    frmPortfolio f(m_currentPortfolio->info, m_settings.dataStartDate, *sql, this);
     if (f.exec())
     {
         m_currentPortfolio->info = f.getReturnValues();
@@ -593,20 +593,20 @@ void frmMain::about()
 
 void frmMain::addTicker()
 {
-    frmTicker f(this, sql, m_currentPortfolio->info.id, &m_currentPortfolio->data);
+    frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, globals::security(), *sql, this);
     f.exec();
 }
 
 void frmMain::options()
 {
-    frmOptions f(this, sql, m_settings);
+    frmOptions f(m_settings, *sql, this);
     if (f.exec())
         m_settings = f.getReturnValues();
 }
 
 void frmMain::aa()
 {
-    frmAA f(m_currentPortfolio->info.id, this, sql, m_currentPortfolio->data.aa);
+    frmAA f(m_currentPortfolio->info.id, m_currentPortfolio->data.aa, *sql, this);
     if (f.exec())
     {
         m_currentPortfolio->data.aa = f.getReturnValues();
@@ -616,7 +616,7 @@ void frmMain::aa()
 
 void frmMain::acct()
 {
-    frmAcct f(m_currentPortfolio->info.id, this, sql, m_currentPortfolio->data.acct);
+    frmAcct f(m_currentPortfolio->info.id, m_currentPortfolio->data.acct, *sql, this);
     if (f.exec())
     {
         m_currentPortfolio->data.acct = f.getReturnValues();
@@ -626,7 +626,7 @@ void frmMain::acct()
 
 void frmMain::stat()
 {
-    frmStat f(m_currentPortfolio->info.id, this, sql, m_statistics, m_currentPortfolio->data.stats);
+    frmStat f(m_currentPortfolio->info.id, m_statistics, m_currentPortfolio->data.stats, *sql, this);
     if (f.exec())
     {
         m_statistics = f.getReturnValues_Map();
@@ -644,7 +644,7 @@ void frmMain::beginUpdate()
     }
 
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(&m_portfolios, &m_dates, m_settings.splits, m_settings.dataStartDate, this);
+    m_updateThread = new updatePrices(m_portfolios, m_dates, m_settings.splits, m_settings.dataStartDate, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
     connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_updateThread->start();

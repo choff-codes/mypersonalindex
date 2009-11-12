@@ -51,7 +51,7 @@ QString queries::getDatabaseLocation()
     return QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
 }
 
-void queries::executeNonQuery(queryInfo *q)
+void queries::executeNonQuery(queryInfo *q) const
 {
     if (!q)
         return;
@@ -131,7 +131,7 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     db.commit();
 }
 
-QSqlQuery* queries::executeResultSet(queryInfo *q)
+QSqlQuery* queries::executeResultSet(queryInfo *q) const
 {
     if (!q)
         return 0;
@@ -157,7 +157,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q)
     return 0;
 }
 
-QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
+QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue) const
 {
     if (!q)
         return QVariant();
@@ -181,7 +181,7 @@ QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue)
     return nullValue;
 }
 
-queries::queryInfo* queries::deleteItem(const QString &table, const int &id)
+queries::queryInfo* queries::deleteItem(const QString &table, const int &id) const
 {
     return new queryInfo(
         QString("DELETE FROM %1 WHERE ID = :ID").arg(table),
@@ -190,7 +190,7 @@ queries::queryInfo* queries::deleteItem(const QString &table, const int &id)
     );
 }
 
-queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID)
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID) const
 {
     return new queryInfo(
         QString("DELETE FROM %1 WHERE PortfolioID = :ID").arg(table),
@@ -199,7 +199,7 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
     );
 }
 
-queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate)
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const
 {
     return new queryInfo(
         QString("DELETE FROM %1 WHERE PortfolioID = :ID AND Date >= :Date").arg(table),
@@ -209,7 +209,7 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
     );
 }
 
-queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &tickerID)
+queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &tickerID) const
 {
     return new queryInfo(
         QString("DELETE FROM %1 WHERE TickerID = :ID").arg(table),
@@ -218,7 +218,7 @@ queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &
     );
 }
 
-queries::queryInfo* queries::getIdentity()
+queries::queryInfo* queries::getIdentity() const
 {
     return new queryInfo(
         "SELECT last_insert_rowid()",
@@ -226,7 +226,7 @@ queries::queryInfo* queries::getIdentity()
     );
 }
 
-queries::queryInfo* queries::getVersion()
+queries::queryInfo* queries::getVersion() const
 {
     return new queryInfo(
         "SELECT Version FROM Settings",
@@ -234,7 +234,7 @@ queries::queryInfo* queries::getVersion()
     );
 }
 
-queries::queryInfo* queries::getDates()
+queries::queryInfo* queries::getDates() const
 {
     return new queryInfo(
         "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
@@ -242,7 +242,7 @@ queries::queryInfo* queries::getDates()
     );
 }
 
-queries::queryInfo* queries::updateSettings(const globals::settings &s)
+queries::queryInfo* queries::updateSettings(const globals::settings &s) const
 {
     QString sql = "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate, TickersIncludeDividends = :TickersIncludeDividends,"
             " LastPortfolio = :LastPortfolio, Version = :Version, WindowState = :WindowState";
@@ -266,7 +266,7 @@ queries::queryInfo* queries::updateSettings(const globals::settings &s)
     return new queryInfo(sql, params);
 }
 
-queries::queryInfo* queries::getSettings()
+queries::queryInfo* queries::getSettings() const
 {
     return new queryInfo(
         "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState,"
@@ -275,7 +275,7 @@ queries::queryInfo* queries::getSettings()
     );
 }
 
-queries::queryInfo* queries::getAA()
+queries::queryInfo* queries::getAA() const
 {
     return new queryInfo(
         "SELECT ID, PortfolioID, Description, Target FROM AA ORDER BY PortfolioID",
@@ -283,7 +283,7 @@ queries::queryInfo* queries::getAA()
     );
 }
 
-queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::assetAllocation &aa)
+queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::assetAllocation &aa) const
 {
     if(aa.id == -1) // insert new
     {
@@ -308,7 +308,7 @@ queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::ass
     }
 }
 
-queries::queryInfo* queries::getAcct()
+queries::queryInfo* queries::getAcct() const
 {
     return new queryInfo(
         "SELECT ID, PortfolioID, Description, TaxRate, TaxDeferred FROM Acct ORDER BY PortfolioID",
@@ -316,7 +316,7 @@ queries::queryInfo* queries::getAcct()
     );
 }
 
-queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::account &acct)
+queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::account &acct) const
 {
     if(acct.id == -1) // insert new
     {
@@ -343,7 +343,7 @@ queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::a
     }
 }
 
-queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
+queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p) const
 {
     QList<parameter> params;
     params
@@ -386,7 +386,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
     }
 }
 
-queries::queryInfo* queries::getPortfolio()
+queries::queryInfo* queries::getPortfolio() const
 {
     return new queryInfo(
         "SELECT ID, Description, Dividends, StartValue, CostCalc, AAThreshold, ThresholdMethod,"
@@ -397,7 +397,7 @@ queries::queryInfo* queries::getPortfolio()
     );
 }
 
-queries::queryInfo* queries::updateStat(const globals::statistic &stat)
+queries::queryInfo* queries::updateStat(const globals::statistic &stat) const
 {
     if(stat.id == -1) // insert new
     {
@@ -423,7 +423,7 @@ queries::queryInfo* queries::updateStat(const globals::statistic &stat)
     }
 }
 
-queries::queryInfo* queries::getStat()
+queries::queryInfo* queries::getStat() const
 {
     return new queryInfo(
         "SELECT ID, Description, SQL, Format FROM Stat",
@@ -431,7 +431,7 @@ queries::queryInfo* queries::getStat()
     );
 }
 
-queries::queryInfo* queries::getStatMapping()
+queries::queryInfo* queries::getStatMapping() const
 {
     return new queryInfo(
         "SELECT PortfolioID, StatID FROM StatMapping ORDER BY PortfolioID, Sequence",
@@ -439,7 +439,7 @@ queries::queryInfo* queries::getStatMapping()
     );
 }
 
-queries::queryInfo* queries::updateSecurity(const int &portfolioID, const globals::security& sec)
+queries::queryInfo* queries::updateSecurity(const int &portfolioID, const globals::security& sec) const
 {
     QList<parameter> params;
     params  << parameter(":PortfolioID", portfolioID)
@@ -471,7 +471,7 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
     }
 }
 
-queries::queryInfo* queries::getSecurity()
+queries::queryInfo* queries::getSecurity() const
 {
     return new queryInfo(
         "SELECT ID, PortfolioID, Ticker, Account, Expense, DivReinvest, CashAccount,"
@@ -480,7 +480,7 @@ queries::queryInfo* queries::getSecurity()
     );
 }
 
-queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const globals::dynamicTrade& trade)
+queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const globals::dynamicTrade& trade) const
 {
     QList<parameter> params;
     params  << parameter(":TickerID", tickerID)
@@ -514,7 +514,7 @@ queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const glob
     }
 }
 
-queries::queryInfo* queries::getSecurityTrade()
+queries::queryInfo* queries::getSecurityTrade() const
 {
     return new queryInfo(
         "SELECT a.ID, b.PortfolioID, a.TickerID, a.Type, a.Value, a.Price, a.Commission,"
@@ -527,7 +527,7 @@ queries::queryInfo* queries::getSecurityTrade()
     );
 }
 
-queries::queryInfo* queries::getSecurityAA()
+queries::queryInfo* queries::getSecurityAA() const
 {
     return new queryInfo(
         "SELECT b.PortfolioID, a.TickerID, a.AAID, a.Percent"
@@ -539,7 +539,7 @@ queries::queryInfo* queries::getSecurityAA()
     );
 }
 
-queries::queryInfo* queries::getUpdateInfo()
+queries::queryInfo* queries::getUpdateInfo() const
 {
     return new queryInfo(
             "SELECT Ticker, MAX(Date) AS Date, 'C' AS Type"
@@ -557,7 +557,7 @@ queries::queryInfo* queries::getUpdateInfo()
     );
 }
 
-queries::queryInfo* queries::updateMissingPrices()
+queries::queryInfo* queries::updateMissingPrices() const
 {
     return new queryInfo(
         "INSERT INTO ClosingPrices (Ticker, Date, Price)"
@@ -575,7 +575,7 @@ queries::queryInfo* queries::updateMissingPrices()
     );
 }
 
-queries::queryInfo* queries::getPortfolioLastDate()
+queries::queryInfo* queries::getPortfolioLastDate() const
 {
     return new queryInfo(
             "SELECT PortfolioID, MAX(Date)"
@@ -585,7 +585,7 @@ queries::queryInfo* queries::getPortfolioLastDate()
     );
 }
 
-queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &date)
+queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &date) const
 {
     return new queryInfo(
             "SELECT PortfolioID, TotalValue, NAV"
@@ -597,7 +597,7 @@ queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &
     );
 }
 
-queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, const int &date)
+queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, const int &date) const
 {
     return new queryInfo(
             "SELECT COALESCE(SUM(e.Shares * CASE WHEN e.CashAccount = 1 THEN 1 ELSE f.Price END), 0) AS TotalValue, COALESCE(SUM(e.Shares * g.Amount), 0) AS Dividends"
@@ -621,7 +621,7 @@ queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, cons
     );
 }
 
-queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate)
+queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate) const
 {
     return new queryInfo(
             "SELECT c.Ticker, COALESCE(CASE WHEN c.CashAccount = 1 THEN 1 ELSE d.Price END, 0) AS Price, COALESCE(e.Amount, 0) AS Dividend,"
@@ -645,7 +645,7 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
     );
 }
 
-queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose)
+queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose) const
 {
     return new queryInfo(
             "SELECT SUM(Shares * :Price) AS Shares"

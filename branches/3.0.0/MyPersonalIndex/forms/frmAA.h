@@ -20,13 +20,13 @@ public:
         return m_map;
     }
 
-    frmAA(const int &portfolioID, QWidget *parent = 0, queries *sql = 0, const QMap<int, globals::assetAllocation> &aa = (QMap<int, globals::assetAllocation>()));
+    frmAA(const int &portfolioID, const QMap<int, globals::assetAllocation> &aa, const queries &sql, QWidget *parent = 0);
 private:
     frmTableViewBase_UI ui;
-    queries *m_sql;
-    aaModel *m_model;
     QMap<int, globals::assetAllocation> m_map;
+    const queries &m_sql;
     int m_portfolio;
+    aaModel *m_model;
 
     void connectSlots();
 
@@ -42,7 +42,7 @@ class aaModel : public mpiModelBase<globals::assetAllocation, frmAAEdit>
     Q_OBJECT
 
 public:
-    aaModel(const QList<globals::assetAllocation> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    aaModel(const QList<globals::assetAllocation> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
 
 private:

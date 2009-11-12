@@ -24,16 +24,16 @@ public:
         return m_selected;
     }
 
-    frmStat(const int &portfolioID, QWidget *parent = 0, queries *sql = 0,
-        const QMap<int, globals::statistic> &stat = (QMap<int, globals::statistic>()), const QList<int> &statList = (QList<int>()));
+    frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent = 0);
 
 private:
     frmTableViewBase_UI ui;
-    queries *m_sql;
+
     statModel *m_model;
-    QMap<int, globals::statistic> m_map;
     int m_portfolio;
+    QMap<int, globals::statistic> m_map;
     QList<int> m_selected;
+    const queries &m_sql;
 
     void connectSlots();
 
@@ -48,7 +48,7 @@ class statModel : public mpiModelBase<globals::statistic, frmStatEdit>
     Q_OBJECT
 
 public:
-    statModel(const QList<globals::statistic> &values, const QList<int> &selected, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    statModel(const QList<globals::statistic> &values, const QList<int> &selected, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::statistic, frmStatEdit>(values, cols, parent, dialog)
     {
         qSort(m_list);

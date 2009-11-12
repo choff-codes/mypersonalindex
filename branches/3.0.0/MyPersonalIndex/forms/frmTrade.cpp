@@ -13,7 +13,7 @@ frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog
 
     // cannot pass cash accounts in constructor since it does not match the format
     // of mpiModelBase edit function
-    foreach(const globals::security &sec, *static_cast<frmTicker*>(parent)->getCashAccounts())
+    foreach(const globals::security &sec, static_cast<frmTicker*>(parent)->getCashAccounts())
         // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
         // but now will show up as no cash account selected
         if (sec.cashAccount) // && sec.id != id)

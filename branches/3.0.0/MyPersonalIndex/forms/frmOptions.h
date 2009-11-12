@@ -13,13 +13,13 @@ class frmOptions : public QDialog
 public:
     const globals::settings& getReturnValues() const { return m_settings; }
 
-    frmOptions(QWidget *parent = 0, queries *sql = 0, const globals::settings& s = globals::settings());
+    frmOptions(const globals::settings &s, const queries &sql, QWidget *parent = 0);
 
 private:
     frmOptions_UI ui;
-    queries *m_sql;
     globals::settings m_settings;
     globals::settings m_settingsOriginal;
+    const queries &m_sql;
 
 private slots:
     void accept();

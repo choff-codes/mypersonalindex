@@ -65,39 +65,39 @@ public:
     bool isOpen() const { return db.isOpen(); }
     QSqlDatabase getDatabase() const { return db; }
 
-    void executeNonQuery(queryInfo*);
+    void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
     //QSqlQueryModel* executeDataSet(queryInfo *q);
-    QSqlQuery* executeResultSet(queryInfo*);
-    QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant());
+    QSqlQuery* executeResultSet(queryInfo*) const;
+    QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant()) const;
 
-    queryInfo* deleteItem(const QString &table, const int &id);
-    queryInfo* deleteTickerItems(const QString &table, const int &tickerID);
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID);
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate);
+    queryInfo* deleteItem(const QString &table, const int &id) const;
+    queryInfo* deleteTickerItems(const QString &table, const int &tickerID) const;
+    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID) const;
+    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const;
 
-    queryInfo* getVersion();
+    queryInfo* getVersion() const;
 
-    queryInfo* getIdentity();
+    queryInfo* getIdentity() const;
 
     enum { getDates_Date };
-    queryInfo* getDates();
+    queryInfo* getDates() const;
 
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
-    queryInfo* getSettings();
+    queryInfo* getSettings() const;
 
-    queryInfo* updateSettings(const globals::settings&);
+    queryInfo* updateSettings(const globals::settings&) const;
 
     enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
-    queryInfo* getAA();
+    queryInfo* getAA() const;
 
-    queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&);
+    queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&) const;
 
     enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
-    queryInfo* getAcct();
+    queryInfo* getAcct() const;
 
-    queryInfo* updateAcct(const int &portfolioID, const globals::account&);
+    queryInfo* updateAcct(const int &portfolioID, const globals::account&) const;
 
 
     enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
@@ -105,52 +105,53 @@ public:
            getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
            getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
            getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
-    queryInfo* getPortfolio();
+    queryInfo* getPortfolio() const;
 
-    queryInfo* updatePortfolio(const globals::portfolio&);
+    queryInfo* updatePortfolio(const globals::portfolio&) const;
 
     enum { getStat_ID, getStat_Description, getStat_SQL, getStat_Format };
-    queryInfo* getStat();
+    queryInfo* getStat() const;
 
     enum { getStatMapping_PortfolioID, getStatMapping_StatID };
-    queryInfo* getStatMapping();
+    queryInfo* getStatMapping() const;
 
-    queryInfo* updateStat(const globals::statistic&);
+    queryInfo* updateStat(const globals::statistic&) const;
 
     enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
            getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
            getSecurity_IncludeInCalc, getSecurity_Hide };
-    queryInfo* getSecurity();
+    queryInfo* getSecurity() const;
 
     enum { getSecurityTrade_ID, getSecurityTrade_PortfolioID, getSecurityTrade_TickerID, getSecurityTrade_Type,
            getSecurityTrade_Value, getSecurityTrade_Price, getSecurityTrade_Commission, getSecurityTrade_CashAccountID,
            getSecurityTrade_Frequency, getSecurityTrade_Date, getSecurityTrade_StartDate, getSecurityTrade_EndDate };
-    queryInfo* getSecurityTrade();
+    queryInfo* getSecurityTrade() const;
 
     enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
-    queryInfo* getSecurityAA();
+    queryInfo* getSecurityAA() const;
 
-    queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
-    queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
+    queryInfo* updateSecurity(const int &portfolioID, const globals::security&) const;
+    queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&) const;
 
     enum { getUpdateInfo_Ticker, getUpdateInfo_Date, getUpdateInfo_Type };
-    queryInfo* getUpdateInfo();
-    queryInfo* updateMissingPrices();
+    queryInfo* getUpdateInfo() const;
+    queryInfo* updateMissingPrices() const;
 
     enum { getPortfolioLastDate_PortfolioID, getPortfolioLastDate_Date };
-    queryInfo* getPortfolioLastDate();
+    queryInfo* getPortfolioLastDate() const;
 
     enum { getPortfolioNAV_PortfolioID, getPortfolioNAV_TotalValue, getPortfolioNAV_NAV };
-    queryInfo* getPortfolioNAV(const int &portfolioID, const int &date);
+    queryInfo* getPortfolioNAV(const int &portfolioID, const int &date) const;
 
     enum { getPortfolioTotalValue_TotalValue, getPortfolioTotalValue_TotalDividends };
-    queryInfo* getPortfolioTotalValue(const int &portfolioID, const int &date);
+    queryInfo* getPortfolioTotalValue(const int &portfolioID, const int &date) const;
 
     enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend,
            getPortfolioTickerInfo_Split, getPortfolioTickerInfo_Activity };
-    queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate);
+    queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate) const;
 
-    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose);
+    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose) const;
+
 protected:
     QSqlDatabase db;
 };

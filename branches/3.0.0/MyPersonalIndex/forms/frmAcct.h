@@ -20,14 +20,14 @@ public:
         return m_map;
     }
 
-    frmAcct(const int &portfolioID, QWidget *parent = 0, queries *sql = 0, const QMap<int, globals::account> &acct = (QMap<int, globals::account>()));
+    frmAcct(const int &portfolioID, const QMap<int, globals::account> &acct, const queries &sql, QWidget *parent = 0);
 
 private:
     frmTableViewBase_UI ui;
-    queries *m_sql;
+    int m_portfolio;
+    const queries &m_sql;
     acctModel *m_model;
     QMap<int, globals::account> m_map;
-    int m_portfolio;
 
     void connectSlots();
 
@@ -43,7 +43,7 @@ class acctModel : public mpiModelBase<globals::account, frmAcctEdit>
     Q_OBJECT
 
 public:
-    acctModel(const QList<globals::account> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    acctModel(const QList<globals::account> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
 
 private:

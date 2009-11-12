@@ -1,10 +1,10 @@
 #include "frmStat.h"
 #include "frmStatEdit.h"
 
-frmStat::frmStat(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::statistic> &stat, const QList<int> &statList):
-    QDialog(parent), m_sql(sql), m_map(stat), m_portfolio(portfolioID), m_selected(statList)
+frmStat::frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent):
+    QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList), m_sql(sql)
 {
-    if(!m_sql || !m_sql->isOpen())
+    if(!m_sql.isOpen())
     {
         reject();
         return;
@@ -59,9 +59,12 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), stat);
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
-    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_StatMapping, m_portfolio));
+    m_sql.executeNonQuery(m_sql.deletePortfolioItems(queries::table_StatMapping, m_portfolio));
     if (stat.count() != 0)
-        m_sql->executeTableUpdate(queries::table_StatMapping, tableValues);
+    {
+        queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
+        tableUpdateQuery.executeTableUpdate(queries::table_StatMapping, tableValues);
+    }
 
     m_map = returnValues;
     m_selected = returnValuesSelected;
@@ -70,12 +73,12 @@ void frmStat::accept()
 
 void frmStat::saveItem(globals::statistic *stat)
 {
-    m_sql->executeNonQuery(m_sql->updateStat((*stat)));
+    m_sql.executeNonQuery(m_sql.updateStat((*stat)));
     if (stat->id == -1)
-        stat->id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+        stat->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
 }
 
 void frmStat::deleteItem(const globals::statistic &stat)
 {
-    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_Stat, stat.id));
+    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_Stat, stat.id));
 }

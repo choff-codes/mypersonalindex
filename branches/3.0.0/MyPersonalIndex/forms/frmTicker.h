@@ -19,18 +19,18 @@ public:
 
     const globals::security& getReturnValues() const { return m_security; }
     //const int &getTickerID() const { return m_security.id; }
-    const QMap<int, globals::security>* getCashAccounts() const { return &m_data->tickers; }
+    const QMap<int, globals::security>& getCashAccounts() const { return m_data.tickers; }
 
-    frmTicker(QWidget *parent = 0, queries *sql = 0, const int &portfolioID = 0, const globals::portfolioData *data = 0, const globals::security& security = globals::security());
+    frmTicker(const int &portfolioID, const globals::portfolioData &data, const globals::security& security, const queries &sql, QWidget *parent = 0);
 
 private:
 
     frmTicker_UI ui;
-    queries *m_sql;
     int m_portfolioID;
-    const globals::portfolioData *m_data;
+    const globals::portfolioData &m_data;
     globals::security m_security;
     globals::security m_securityOriginal;
+    const queries &m_sql;
     tickerTradeModel *m_modelTrade;
     tickerAAModel *m_modelAA;
 
@@ -57,7 +57,7 @@ public:
 
     QList<globals::tickerAATarget> getList() { return m_list; }
 
-    tickerAAModel(const QList<globals::tickerAATarget> &values, const QMap<int, globals::assetAllocation> *aaValues = 0, const int &cols = 0, QTableView *parent = 0):
+    tickerAAModel(const QList<globals::tickerAATarget> &values, const QMap<int, globals::assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     Qt::ItemFlags flags(const QModelIndex &index) const
@@ -99,8 +99,8 @@ public:
 
         if (role == Qt::DisplayRole)
         {
-            if (index.column() == 0 && m_aaValues)
-                return m_aaValues->value(m_list.at(index.row()).first).description;
+            if (index.column() == 0)
+                return m_aaValues.value(m_list.at(index.row()).first).description;
 
             if (index.column() == 1)
                 return functions::doubleToPercentage(m_list.at(index.row()).second);
@@ -108,8 +108,8 @@ public:
 
         if (role == Qt::EditRole)
         {
-            if (index.column() == 0 && m_aaValues)
-                return m_aaValues->value(m_list.at(index.row()).first).description;
+            if (index.column() == 0)
+                return m_aaValues.value(m_list.at(index.row()).first).description;
 
             if (index.column() == 1)
                 return m_list.at(index.row()).second;
@@ -168,7 +168,7 @@ signals:
     void updateHeader();
 
 private:
-    const QMap<int, globals::assetAllocation> *m_aaValues;
+    const QMap<int, globals::assetAllocation> &m_aaValues;
     QTableView *m_parent;
     int m_columns;
     QList<globals::tickerAATarget> m_list;
@@ -179,7 +179,7 @@ class tickerTradeModel : public mpiModelBase<globals::dynamicTrade, frmTrade>
     Q_OBJECT
 
 public:
-    tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> *cashAccounts = 0, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
 private:
@@ -209,7 +209,7 @@ private:
                     return trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission);
                     break;
                 case 4:
-                    return m_cashAccounts && m_cashAccounts->contains(trade.cashAccount) ? m_cashAccounts->value(trade.cashAccount).ticker : "";
+                    return m_cashAccounts.contains(trade.cashAccount) ? m_cashAccounts.value(trade.cashAccount).ticker : "";
                     break;
                 case 5:
                     return globals::dynamicTrade::frequencyToString(trade.frequency);
@@ -334,7 +334,7 @@ signals:
     void deleteItem(const globals::dynamicTrade& trade);
 
 private:
-    const QMap<int, globals::security> *m_cashAccounts;
+    const QMap<int, globals::security> &m_cashAccounts;
 
     void autoResize()
     {

@@ -1,10 +1,10 @@
 #include "frmAcct.h"
 #include "frmAcctEdit.h"
 
-frmAcct::frmAcct(const int &portfolioID, QWidget *parent, queries *sql, const QMap<int, globals::account> &acct):
-    QDialog(parent), m_sql(sql), m_map(acct), m_portfolio(portfolioID)
+frmAcct::frmAcct(const int &portfolioID, const QMap<int, globals::account> &acct, const queries &sql, QWidget *parent):
+    QDialog(parent), m_portfolio(portfolioID), m_sql(sql), m_map(acct)
 {
-    if(!m_sql || !m_sql->isOpen())
+    if(m_sql.isOpen())
     {
         reject();
         return;
@@ -51,14 +51,14 @@ void frmAcct::accept()
 
 void frmAcct::saveItem(globals::account *acct)
 {
-    m_sql->executeNonQuery(m_sql->updateAcct(m_portfolio, (*acct)));
+    m_sql.executeNonQuery(m_sql.updateAcct(m_portfolio, (*acct)));
     if (acct->id == -1)
-        acct->id = m_sql->executeScalar(m_sql->getIdentity()).toInt();
+        acct->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
 }
 
 void frmAcct::deleteItem(const globals::account &acct)
 {
-    m_sql->executeNonQuery(m_sql->deleteItem(queries::table_Acct, acct.id));
+    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_Acct, acct.id));
 }
 
 void frmAcct::customContextMenuRequested(const QPoint&)

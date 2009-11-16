@@ -10,7 +10,7 @@ public:
 
     QList<T> getList() { return m_list; }
 
-    mpiModelBase(const QList<T> &values, const int &cols = 0, QTableView *parent = 0, QDialog *dialog = 0):
+    mpiModelBase(const QList<T> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             QAbstractTableModel(parent), m_parent(parent), m_dialog(dialog), m_columns(cols), m_list(values)
     {
         insertRows(0, m_list.count());
@@ -35,7 +35,14 @@ public:
 
         QStringList lines;
         foreach(int i, indexes)
-            lines.append(internalCopy(m_list.at(i)));
+        {
+            QString s = internalCopy(m_list.at(i));
+            if (!s.isEmpty())
+                lines.append(s);
+        }
+
+        if (lines.count() == 0)
+            return;
 
         QApplication::clipboard()->setText(lines.join("\n"));
     }
@@ -143,39 +150,6 @@ public:
         return returnValues;
     }
 
-private:
-
-    static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count)
-    {
-        int x = ascending ? 0 : count - 1;
-        bool contiguous = true;
-
-        if (ascending)
-        {
-            for(int i = 0; i < values.count(); ++i, ++x)
-                if (values.value(i) != x)
-                {
-                    contiguous = false;
-                    break;
-                }
-        }
-        else
-        {
-            for(int i = values.count() - 1; i >= 0; --i, --x)
-                if (values.value(i) != x)
-                {
-                    contiguous = false;
-                    break;
-                }
-        }
-        return contiguous;
-    }
-
-    void selectItem(const QModelIndex &index)
-    {
-        m_parent->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
-
 protected:
     QTableView *m_parent;
     QDialog *m_dialog;
@@ -201,7 +175,7 @@ protected:
         if(indexes.count() == 0)
             return;
 
-        if (isContiguous(indexes, true, rowCount(QModelIndex())))
+        if (isContiguous(indexes, true))
             return;
 
         m_parent->selectionModel()->clearSelection();
@@ -256,6 +230,39 @@ protected:
         qSort(indexes);
 
         return indexes;
+    }
+
+private:
+
+    static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count = 0)
+    {
+        int x = ascending ? 0 : count - 1;
+        bool contiguous = true;
+
+        if (ascending)
+        {
+            for(int i = 0; i < values.count(); ++i, ++x)
+                if (values.value(i) != x)
+                {
+                    contiguous = false;
+                    break;
+                }
+        }
+        else
+        {
+            for(int i = values.count(); i >= 0; --i, --x)
+                if (values.value(i) != x)
+                {
+                    contiguous = false;
+                    break;
+                }
+        }
+        return contiguous;
+    }
+
+    void selectItem(const QModelIndex &index)
+    {
+        m_parent->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 };
 

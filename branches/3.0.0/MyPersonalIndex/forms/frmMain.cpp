@@ -230,9 +230,28 @@ void frmMain::loadPortfolio()
             return;
         }
         loadPortfolioSettings();
+        loadPortfolioHoldings();
         // resetCalendars();
         // todo
     }
+}
+
+void frmMain::loadPortfolioHoldings()
+{
+    ui.holdings->verticalHeader()->hide();
+    ui.holdings->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    //ui.holdings->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui.holdings->setAlternatingRowColors(true);
+    ui.holdings->horizontalHeader()->setHighlightSections(false);
+    int fntHeight = ui.holdings->fontMetrics().height() + 2; // add small buffer
+    ui.holdings->verticalHeader()->setDefaultSectionSize(fntHeight);
+    ui.holdings->horizontalHeader()->setFixedHeight(fntHeight);
+    ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(m_currentPortfolio->info.id, ui.holdingsDateDropDown->date().toJulianDay(), 0), false);
+    holdingsModel *model = new holdingsModel(q, ui.holdings);
+    ui.holdings->setModel(model);
+    ui.holdings->model()->removeColumns(ui.holdings->model()->columnCount() - 2, 2);
 }
 
 void frmMain::loadPortfolioSettings()
@@ -668,7 +687,6 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
 
 void frmMain::statusUpdate(const QString &message)
 {
-    if (ui.stbProgress->maximum() == 0)
-        ui.stbStatus->setText(QString("Status: ").append(message));
+    ui.stbStatus->setText(QString("Status: ").append(message));
 }
 

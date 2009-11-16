@@ -58,6 +58,7 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void loadPortfolio();
+    void loadPortfolioHoldings();
     void about();
     void addTicker();
     void options();
@@ -73,3 +74,61 @@ protected:
 };
 
 #endif // FRMMAIN_H
+
+
+class holdingsModel: public QSqlQueryModel
+{
+    Q_OBJECT
+
+public:
+
+    holdingsModel(QSqlQuery *query, QObject *parent = 0): QSqlQueryModel(parent), m_query(query)
+    {
+        setQuery(*m_query);
+    }
+
+    ~holdingsModel() { delete m_query; }
+
+    Qt::ItemFlags flags(const QModelIndex &index) const
+    {
+        if (index.column() == queries::getPortfolioHoldings_Symbol)
+                return QSqlQueryModel::flags(index) | Qt::ItemIsUserCheckable;
+
+        return QSqlQueryModel::flags(index);
+    }
+
+    QVariant data(const QModelIndex &index, int role) const
+    {
+        if (!index.isValid())
+            return QVariant();
+
+        if (role == Qt::DisplayRole)
+        {
+            //if (index.column() == 1)
+            //    return functions::doubleToPercentage(m_list.at(index.row()).second);
+
+            return QSqlQueryModel::data(index, role);
+        }
+
+        if (role == Qt::CheckStateRole && index.column() == queries::getPortfolioHoldings_Symbol)
+        {
+            m_query->seek(index.row());
+            return m_query->value(queries::getPortfolioHoldings_Active).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
+        }
+
+        if (role == Qt::TextColorRole)
+        {
+            if (index.column() == queries::getPortfolioHoldings_Shares)
+                return qVariantFromValue(QColor(Qt::red));
+        }
+
+        return QVariant();
+    }
+
+public slots:
+
+signals:
+
+private:
+    QSqlQuery *m_query;
+};

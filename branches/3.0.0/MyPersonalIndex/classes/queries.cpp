@@ -65,30 +65,30 @@ void queries::executeNonQuery(queryInfo *q) const
     delete q;
 }
 
-//QSqlQueryModel* queries::executeDataSet(queryInfo *q)
-//{
-//    if (!q)
-//        return 0;
-//
-//    QSqlQuery query(db);
-//    query.prepare(q->sql);
-//    foreach(const parameter &p, q->parameters)
-//        query.bindValue(p.name, p.value);
-//
-//    query.exec();
-//
-//    if(!query.isActive())
-//    {
-//        delete q;
-//        return 0;
-//    }
-//
-//    QSqlQueryModel *dataset = new QSqlQueryModel();
-//    dataset->setQuery(query);
-//
-//    delete q;
-//    return dataset;
-//}
+QSqlQueryModel* queries::executeDataSet(queryInfo *q)
+{
+    if (!q)
+        return 0;
+
+    QSqlQuery query(db);
+    query.prepare(q->sql);
+    foreach(const parameter &p, q->parameters)
+        query.bindValue(p.name, p.value);
+
+    query.exec();
+
+    if(!query.isActive())
+    {
+        delete q;
+        return 0;
+    }
+
+    QSqlQueryModel *dataset = new QSqlQueryModel();
+    dataset->setQuery(query);
+
+    delete q;
+    return dataset;
+}
 
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
 {
@@ -131,13 +131,14 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     db.commit();
 }
 
-QSqlQuery* queries::executeResultSet(queryInfo *q) const
+QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward) const
 {
     if (!q)
         return 0;
 
     QSqlQuery *query = new QSqlQuery(db);
-    query->setForwardOnly(true);
+    if (setForward)
+        query->setForwardOnly(true);
     query->prepare(q->sql);
     foreach(const parameter &p, q->parameters)
         query->bindValue(p.name, p.value);
@@ -145,11 +146,11 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
     query->exec();
     delete q;
 
-//    if (query->lastError().text() != " ")
-//    {
-//        QString s = query->lastError().text();
-//        int i = 0;
-//    }
+    if (query->lastError().text() != " ")
+    {
+        QString s = query->lastError().text();
+        int i = 0;
+    }
 
     if (query->isActive() && query->first())
         return query;
@@ -616,8 +617,8 @@ queries::queryInfo* queries::getPortfolioTotalValue(const int &portfolioID, cons
             " LEFT JOIN Dividends AS g"
                 " ON e.CashAccount = 0 AND g.Ticker = e.Ticker AND g.Date = :Date",
         QList<parameter>()
-            << parameter(":Date", date)
             << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
     );
 }
 
@@ -661,3 +662,47 @@ queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const 
             << parameter(":PreviousDate", previousDate)
     );
 }
+
+queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue) const
+{
+    return new queryInfo(
+            "SELECT a.Ticker AS Symbol,"
+                " (CASE WHEN a.CashAccount = 1 THEN 'Yes' ELSE 'No' END) AS Cash,"
+                " g.Price,"
+                " Coalesce(f.Shares,0) AS Shares,"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS Average,"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN h.Price * f.Shares END) AS 'Cost Basis',"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN (g.Price - h.Price) * f.Shares END) AS Gain,"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 AND h.Price <> 0 THEN ((g.Price / h.Price) - 1) * 100 END) AS '% Gain',"
+                " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS Value,"
+                " (CASE WHEN :TotalValue <> 0 AND a.IncludeInCalc = 1 THEN g.Price * f.Shares / :TotalValue * 100 END) AS '% Total',"
+                " j.Description AS Account,"
+                " a.ID as ID,"
+                " a.IncludeInCalc"
+            " FROM Tickers AS a"
+            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
+                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
+                                " FROM Trades AS b"
+                                " INNER JOIN Tickers AS c"
+                                " ON c.ID = b.TickerID"
+                                " LEFT JOIN Splits AS d"
+                                " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date"
+                                " WHERE c.PortfolioID = :PortfolioID AND b.Date <= :Date"
+                                " GROUP BY b.rowid) AS e"
+                        " GROUP BY TickerID) AS f"
+                " ON a.ID = f.TickerID"
+            " LEFT JOIN ClosingPrices AS g"
+                " ON a.Ticker = g.Ticker AND g.Date = :Date"
+            " LEFT JOIN AvgPricePerShare AS h"
+                " ON a.ID = h.TickerID"
+            " LEFT JOIN Acct AS j"
+                " ON a.Account = j.ID"
+            " WHERE a.PortfolioID = :PortfolioID",
+        QList<parameter>()
+            << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
+            << parameter(":TotalValue", totalValue)
+    );
+}
+
+

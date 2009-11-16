@@ -67,8 +67,8 @@ public:
 
     void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    //QSqlQueryModel* executeDataSet(queryInfo *q);
-    QSqlQuery* executeResultSet(queryInfo*) const;
+    QSqlQueryModel* executeDataSet(queryInfo *q);
+    QSqlQuery* executeResultSet(queryInfo*, const bool &setForward = false) const;
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant()) const;
 
     queryInfo* deleteItem(const QString &table, const int &id) const;
@@ -151,6 +151,11 @@ public:
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate) const;
 
     queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose) const;
+
+    enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
+           getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
+           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_ID, getPortfolioHoldings_Active };
+    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue) const;
 
 protected:
     QSqlDatabase db;

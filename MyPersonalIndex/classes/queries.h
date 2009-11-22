@@ -81,7 +81,7 @@ public:
     queryInfo* getIdentity() const;
 
     enum { getDates_Date };
-    queryInfo* getDates() const;
+    queryInfo* getDates(const int &dataStartDate) const;
 
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
@@ -154,8 +154,8 @@ public:
 
     enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
            getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
-           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_ID, getPortfolioHoldings_Active };
-    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue) const;
+           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_ID, getPortfolioHoldings_Active };
+    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
 
 protected:
     QSqlDatabase db;

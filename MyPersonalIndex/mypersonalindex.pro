@@ -1,6 +1,7 @@
 include(shared/qtsingleapplication/qtsingleapplication.pri)
 include(forms/forms.pri)
 include(classes/classes.pri)
+include(models/models.pri)
 include(ui/ui.pri)
 include(usercontrols/usercontrols.pri)
 RESOURCES += icons/icons.qrc

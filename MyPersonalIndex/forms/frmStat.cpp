@@ -1,5 +1,4 @@
 #include "frmStat.h"
-#include "frmStatEdit.h"
 
 frmStat::frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList), m_sql(sql)

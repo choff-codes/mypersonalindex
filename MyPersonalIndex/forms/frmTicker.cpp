@@ -1,8 +1,4 @@
-#include <QtGui>
-#include "queries.h"
-#include "globals.h"
 #include "frmTicker.h"
-#include "frmTrade.h"
 #include "viewDelegates.h"
 
 frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data, const globals::security& security, const queries &sql, QWidget *parent):

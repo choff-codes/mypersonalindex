@@ -1,15 +1,12 @@
-#include "frmMain.h"
 #include <QtGui>
-#include <QtSql>
+#include "frmMain.h"
 #include "queries.h"
 #include "frmPortfolio.h"
-#include "functions.h"
 #include "frmTicker.h"
 #include "frmOptions.h"
 #include "frmAA.h"
 #include "frmAcct.h"
 #include "frmStat.h"
-#include "updatePrices.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -66,6 +63,9 @@ void frmMain::connectSlots()
     connect(ui.mainDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
+    connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editTicker()));
+    connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioHoldings(QDate)));
+    connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(holdingsShowHiddenToggle()));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
@@ -83,9 +83,8 @@ void frmMain::dateChanged(QDate)
 void frmMain::loadSettings()
 {
     checkVersion();
-    resetLastDate();
     loadStats();
-    loadDates();
+    loadDates();  
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
 
@@ -118,6 +117,7 @@ void frmMain::loadSettings()
     }
 
     delete q;
+    resetLastDate();
 }
 
 void frmMain::loadStats()
@@ -144,7 +144,7 @@ void frmMain::loadStats()
 
 void frmMain::loadDates()
 {
-    QSqlQuery *q = sql->executeResultSet(sql->getDates());
+    QSqlQuery *q = sql->executeResultSet(sql->getDates(m_settings.dataStartDate));
 
     if (!q)
         return;
@@ -160,7 +160,7 @@ void frmMain::loadDates()
 
 void frmMain::resetLastDate()
 {
-    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count()];
+    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count() - 1];
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
                 m_lastDate == m_settings.dataStartDate ?
                 "Never" :
@@ -230,28 +230,30 @@ void frmMain::loadPortfolio()
             return;
         }
         loadPortfolioSettings();
-        loadPortfolioHoldings();
+        loadPortfolioHoldings(QDate());
         // resetCalendars();
         // todo
     }
 }
 
-void frmMain::loadPortfolioHoldings()
+void frmMain::loadPortfolioHoldings(const QDate &d)
 {
-    ui.holdings->verticalHeader()->hide();
-    ui.holdings->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    //ui.holdings->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui.holdings->setAlternatingRowColors(true);
-    ui.holdings->horizontalHeader()->setHighlightSections(false);
-    int fntHeight = ui.holdings->fontMetrics().height() + 2; // add small buffer
-    ui.holdings->verticalHeader()->setDefaultSectionSize(fntHeight);
-    ui.holdings->horizontalHeader()->setFixedHeight(fntHeight);
-    ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
+            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), ""), false);
+    QList<int> columns;
+    columns << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
 
-    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(m_currentPortfolio->info.id, ui.holdingsDateDropDown->date().toJulianDay(), 0), false);
-    holdingsModel *model = new holdingsModel(q, ui.holdings);
+    QItemSelectionModel *m = ui.holdings->selectionModel();
+    holdingsModel *model = new holdingsModel(q, columns, ui.holdings);
     ui.holdings->setModel(model);
-    ui.holdings->model()->removeColumns(ui.holdings->model()->columnCount() - 2, 2);
+    delete m;
+
+    if (ui.holdingsSortCombo->count() == 0)
+    {
+        loadSortDropDown(model->fieldNames(), ui.holdingsSortCombo);
+        ui.holdingsSortCombo->removeItem(ui.holdingsSortCombo->findText("ID"));
+    }
 }
 
 void frmMain::loadPortfolioSettings()
@@ -616,6 +618,21 @@ void frmMain::addTicker()
     f.exec();
 }
 
+void frmMain::editTicker()
+{
+    bool change = false;
+    foreach(int i, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    {
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(i), *sql, this);
+        if (f.exec())
+        {
+            change = true;
+            m_currentPortfolio->data.tickers[i] = f.getReturnValues();
+            loadPortfolioHoldings(QDate());
+        }
+    }
+}
+
 void frmMain::options()
 {
     frmOptions f(m_settings, *sql, this);
@@ -690,3 +707,28 @@ void frmMain::statusUpdate(const QString &message)
     ui.stbStatus->setText(QString("Status: ").append(message));
 }
 
+int frmMain::getCurrentDateOrPrevious(int date)
+{
+    QList<int>::const_iterator place = qLowerBound(m_dates, date);
+    if (*place != date && place != m_dates.constBegin())
+        return *(place - 1);
+    else
+        return *place;
+}
+
+int frmMain::getDateDropDownDate(QDateEdit *dateDropDown)
+{
+    int currentDate = getCurrentDateOrPrevious(dateDropDown->date().toJulianDay());
+    dateDropDown->blockSignals(true);
+    dateDropDown->setDate(QDate::fromJulianDay(currentDate));
+    dateDropDown->blockSignals(false);
+    return currentDate;
+}
+
+void frmMain::loadSortDropDown(const QSqlRecord &record, QComboBox *dropDown)
+{
+    dropDown->addItem("", -1);
+    for (int i = 0; i < record.count(); ++i)
+        dropDown->addItem(record.fieldName(i), i);
+    dropDown->addItem("Custom...", -2);
+}

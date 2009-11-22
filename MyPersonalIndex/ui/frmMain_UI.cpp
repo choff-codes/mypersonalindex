@@ -80,7 +80,20 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsGrid->setSpacing(0);
     holdingsGrid->setMargin(1);
     holdingsToolbar = new QToolBar(tab_holdings);
+
     holdings = new QTableView(tab_holdings);
+
+    int fntHeight = holdings->fontMetrics().height() + 2; // add small buffer
+
+    holdings->verticalHeader()->hide();
+    holdings->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    holdings->setSelectionBehavior(QAbstractItemView::SelectRows);
+    holdings->setAlternatingRowColors(true);
+    holdings->horizontalHeader()->setHighlightSections(false);
+    holdings->verticalHeader()->setDefaultSectionSize(fntHeight);
+    holdings->horizontalHeader()->setFixedHeight(fntHeight);
+    holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     holdingsGrid->addWidget(holdingsToolbar);
     holdingsGrid->addWidget(holdings);
 
@@ -117,7 +130,17 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statGrid->setSpacing(0);
     statGrid->setMargin(1);
     statToolbar = new QToolBar(tab_stat);
+
     stat = new QTableView(tab_stat);
+    stat->verticalHeader()->hide();
+    stat->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    stat->setSelectionBehavior(QAbstractItemView::SelectRows);
+    stat->setAlternatingRowColors(true);
+    stat->horizontalHeader()->setHighlightSections(false);
+    stat->verticalHeader()->setDefaultSectionSize(fntHeight);
+    stat->horizontalHeader()->setFixedHeight(fntHeight);
+    stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     statGrid->addWidget(statToolbar);
     statGrid->addWidget(stat);
 
@@ -164,7 +187,17 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     performanceGrid->setSpacing(0);
     performanceGrid->setMargin(1);
     performanceToolbar = new QToolBar(tab_performance);
+
     performance = new QTableView(tab_performance);
+    performance->verticalHeader()->hide();
+    performance->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    performance->setSelectionBehavior(QAbstractItemView::SelectRows);
+    performance->setAlternatingRowColors(true);
+    performance->horizontalHeader()->setHighlightSections(false);
+    performance->verticalHeader()->setDefaultSectionSize(fntHeight);
+    performance->horizontalHeader()->setFixedHeight(fntHeight);
+    performance->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     performanceGrid->addWidget(performanceToolbar);
     performanceGrid->addWidget(performance);
 
@@ -181,7 +214,17 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsGrid->setSpacing(0);
     correlationsGrid->setMargin(1);
     correlationsToolbar = new QToolBar(tab_correlations);
+
     correlations = new QTableView(tab_correlations);
+    correlations->verticalHeader()->hide();
+    correlations->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
+    correlations->setAlternatingRowColors(true);
+    correlations->horizontalHeader()->setHighlightSections(false);
+    correlations->verticalHeader()->setDefaultSectionSize(fntHeight);
+    correlations->horizontalHeader()->setFixedHeight(fntHeight);
+    correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     correlationsGrid->addWidget(correlationsToolbar);
     correlationsGrid->addWidget(correlations);
 
@@ -213,7 +256,17 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsGrid->setSpacing(0);
     accountsGrid->setMargin(1);
     accountsToolbar = new QToolBar(tab_accounts);
+
     accounts = new QTableView(tab_accounts);
+    accounts->verticalHeader()->hide();
+    accounts->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    accounts->setSelectionBehavior(QAbstractItemView::SelectRows);
+    accounts->setAlternatingRowColors(true);
+    accounts->horizontalHeader()->setHighlightSections(false);
+    accounts->verticalHeader()->setDefaultSectionSize(fntHeight);
+    accounts->horizontalHeader()->setFixedHeight(fntHeight);
+    accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     accountsGrid->addWidget(accountsToolbar);
     accountsGrid->addWidget(accounts);
 
@@ -245,7 +298,17 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaGrid->setSpacing(0);
     aaGrid->setMargin(1);
     aaToolbar = new QToolBar(tab_aa);
+
     aa = new QTableView(tab_aa);
+    aa->verticalHeader()->hide();
+    aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    aa->setSelectionBehavior(QAbstractItemView::SelectRows);
+    aa->setAlternatingRowColors(true);
+    aa->horizontalHeader()->setHighlightSections(false);
+    aa->verticalHeader()->setDefaultSectionSize(fntHeight);
+    aa->horizontalHeader()->setFixedHeight(fntHeight);
+    aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
     aaGrid->addWidget(aaToolbar);
     aaGrid->addWidget(aa);
 

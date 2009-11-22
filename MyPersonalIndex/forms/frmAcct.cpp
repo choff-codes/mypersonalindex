@@ -1,5 +1,4 @@
 #include "frmAcct.h"
-#include "frmAcctEdit.h"
 
 frmAcct::frmAcct(const int &portfolioID, const QMap<int, globals::account> &acct, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_sql(sql), m_map(acct)

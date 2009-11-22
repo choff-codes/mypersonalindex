@@ -149,7 +149,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward) const
     if (query->lastError().text() != " ")
     {
         QString s = query->lastError().text();
-        int i = 0;
+        s.append("");
     }
 
     if (query->isActive() && query->first())
@@ -235,11 +235,12 @@ queries::queryInfo* queries::getVersion() const
     );
 }
 
-queries::queryInfo* queries::getDates() const
+queries::queryInfo* queries::getDates(const int &dataStartDate) const
 {
     return new queryInfo(
-        "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
+        "SELECT DISTINCT Date FROM ClosingPrices WHERE Date >= :DataStartDate ORDER BY Date",
         QList<parameter>()
+            << parameter(":DataStartDate", dataStartDate)
     );
 }
 
@@ -663,11 +664,12 @@ queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const 
     );
 }
 
-queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue) const
+queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const
 {
     return new queryInfo(
-            "SELECT a.Ticker AS Symbol,"
-                " (CASE WHEN a.CashAccount = 1 THEN 'Yes' ELSE 'No' END) AS Cash,"
+            QString(
+                "SELECT a.Ticker AS Symbol,"
+                " (CASE WHEN a.CashAccount = 1 THEN 'Yes' END) AS Cash,"
                 " g.Price,"
                 " Coalesce(f.Shares,0) AS Shares,"
                 " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS Average,"
@@ -678,7 +680,7 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
                 " (CASE WHEN :TotalValue <> 0 AND a.IncludeInCalc = 1 THEN g.Price * f.Shares / :TotalValue * 100 END) AS '% Total',"
                 " j.Description AS Account,"
                 " a.ID as ID,"
-                " a.IncludeInCalc"
+                " a.IncludeInCalc AS Active"
             " FROM Tickers AS a"
             " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
                         " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
@@ -697,7 +699,9 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
                 " ON a.ID = h.TickerID"
             " LEFT JOIN Acct AS j"
                 " ON a.Account = j.ID"
-            " WHERE a.PortfolioID = :PortfolioID",
+            " WHERE a.PortfolioID = :PortfolioID%1%2").arg(
+                    showHidden ? "" : " AND Hide = 0",
+                    sort.isEmpty() ? "" : QString("ORDER BY %1").arg(sort)),
         QList<parameter>()
             << parameter(":PortfolioID", portfolioID)
             << parameter(":Date", date)

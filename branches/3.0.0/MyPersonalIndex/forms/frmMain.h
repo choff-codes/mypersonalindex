@@ -5,9 +5,11 @@
 #define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
 
 #include <QtGui>
+#include <QtSql>
 #include "frmMain_UI.h"
-#include "queries.h"
 #include "globals.h"
+#include "functions.h"
+#include "queries.h"
 #include "updatePrices.h"
 
 class frmMain : public QMainWindow
@@ -51,6 +53,9 @@ private:
     void savePortfolio();
     void savePortfolios();
     void disableItems(bool disabled);
+    int getCurrentDateOrPrevious(int date);
+    int getDateDropDownDate(QDateEdit *dateDropDown);
+    void loadSortDropDown(const QSqlRecord &record, QComboBox *dropDown);
 
 private slots:
     void dateChanged(QDate);
@@ -58,9 +63,10 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void loadPortfolio();
-    void loadPortfolioHoldings();
+    void loadPortfolioHoldings(const QDate&);
     void about();
     void addTicker();
+    void editTicker();
     void options();
     void aa();
     void acct();
@@ -68,6 +74,7 @@ private slots:
     void beginUpdate();
     void finishUpdate(const QStringList &invalidTickers);
     void statusUpdate(const QString &message);
+    void holdingsShowHiddenToggle() { loadPortfolioHoldings(QDate()); }
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -76,25 +83,45 @@ protected:
 #endif // FRMMAIN_H
 
 
-class holdingsModel: public QSqlQueryModel
+class holdingsModel: public QAbstractTableModel
 {
     Q_OBJECT
 
 public:
 
-    holdingsModel(QSqlQuery *query, QObject *parent = 0): QSqlQueryModel(parent), m_query(query)
+    holdingsModel(QSqlQuery *query, QList<int> viewableColumns, QTableView *parent = 0): QAbstractTableModel(parent), m_parent(parent), m_query(query), m_viewableColumns(viewableColumns)
     {
-        setQuery(*m_query);
+        m_rowCount = 0;
+        if (!m_query)
+            return;
+
+        do
+        {
+            ++m_rowCount;
+        }
+        while (m_query->next());
+        insertRows(0, m_rowCount);
     }
 
     ~holdingsModel() { delete m_query; }
 
+    QSqlRecord fieldNames() { return m_query->record(); }
+
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
-        if (index.column() == queries::getPortfolioHoldings_Symbol)
-                return QSqlQueryModel::flags(index) | Qt::ItemIsUserCheckable;
+        if (m_viewableColumns.at(index.column()) == queries::getPortfolioHoldings_Symbol)
+                return QAbstractTableModel::flags(index) | Qt::ItemIsUserCheckable;
+        return QAbstractTableModel::flags(index);
+    }
 
-        return QSqlQueryModel::flags(index);
+    int rowCount(const QModelIndex&) const
+    {
+        return m_rowCount;
+    }
+
+    int columnCount (const QModelIndex&) const
+    {
+        return m_viewableColumns.count();
     }
 
     QVariant data(const QModelIndex &index, int role) const
@@ -102,15 +129,15 @@ public:
         if (!index.isValid())
             return QVariant();
 
+        int column = m_viewableColumns.at(index.column());
+
         if (role == Qt::DisplayRole)
         {
-            //if (index.column() == 1)
-            //    return functions::doubleToPercentage(m_list.at(index.row()).second);
-
-            return QSqlQueryModel::data(index, role);
+            m_query->seek(index.row());
+            return m_query->value(column);
         }
 
-        if (role == Qt::CheckStateRole && index.column() == queries::getPortfolioHoldings_Symbol)
+        if (role == Qt::CheckStateRole && column == queries::getPortfolioHoldings_Symbol)
         {
             m_query->seek(index.row());
             return m_query->value(queries::getPortfolioHoldings_Active).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
@@ -118,17 +145,46 @@ public:
 
         if (role == Qt::TextColorRole)
         {
-            if (index.column() == queries::getPortfolioHoldings_Shares)
+            if (column == queries::getPortfolioHoldings_Shares)
                 return qVariantFromValue(QColor(Qt::red));
         }
 
         return QVariant();
     }
 
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const
+    {
+        if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+            return QVariant();
+
+        if (section >= m_viewableColumns.count())
+            return QVariant();
+
+        return m_query->record().fieldName(m_viewableColumns.at(section));
+    }
+
+    QList<int> selectedItems()
+    {
+        QList<int> items;
+
+        QModelIndexList model = m_parent->selectionModel()->selectedRows();
+        if (model.count() == 0)
+            return items;
+
+        foreach(const QModelIndex &q, model)
+        {
+            m_query->seek(q.row());
+            items.append(m_query->value(queries::getPortfolioHoldings_ID).toInt());
+        }
+
+        return items;
+    }
+
 public slots:
 
-signals:
-
 private:
+    QTableView *m_parent;
     QSqlQuery *m_query;
+    QList<int> m_viewableColumns;
+    int m_rowCount;
 };

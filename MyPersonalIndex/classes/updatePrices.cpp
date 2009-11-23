@@ -22,9 +22,9 @@ void updatePrices::run()
     foreach(globals::myPersonalIndex* p, m_data)
         foreach(const globals::security &sec, p->data.tickers)
             if (!tickers.contains(sec.ticker) && !sec.cashAccount)
-                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_dataStartDate));
+                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_dataStartDate - 6));
 
-    getUpdateInfo(&tickers);
+    getUpdateInfo(tickers);
 
     int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
     foreach(const globals::updateInfo &info, tickers)
@@ -45,7 +45,7 @@ void updatePrices::run()
     exec();
 }
 
-void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> *tickers)
+void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> &tickers)
 {
     QSqlQuery *q = m_sql->executeResultSet(m_sql->getUpdateInfo());
     if (q)
@@ -57,17 +57,17 @@ void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> *tickers)
             QString ticker = q->value(queries::getUpdateInfo_Ticker).toString();
             if (type == "C")
             {
-                (*tickers)[ticker].closingDate = d;
+                tickers[ticker].closingDate = d;
                 continue;
             }
             if (type == "D")
             {
-                 (*tickers)[ticker].dividendDate = d;
+                tickers[ticker].dividendDate = d;
                 continue;
             }
             if (type == "S")
             {
-                 (*tickers)[ticker].splitDate = d;
+                tickers[ticker].splitDate = d;
                 continue;
             }
         }
@@ -136,7 +136,7 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
             dates.append(djulian);
             // add new date if it doesn't already exist
             QList<int>::iterator place = qLowerBound(m_dates.begin(), m_dates.end(), djulian);
-            if ((*place) != djulian)
+            if (*place != djulian && *place >= m_dataStartDate)
                 m_dates.insert(place, djulian);
             // update min date
             if (djulian < earliestUpdate)

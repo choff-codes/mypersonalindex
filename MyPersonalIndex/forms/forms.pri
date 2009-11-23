@@ -9,7 +9,9 @@ SOURCES += $$PWD/frmTicker.cpp \
     $$PWD/frmAcct.cpp \
     $$PWD/frmAcctEdit.cpp \
     $$PWD/frmStatEdit.cpp \
-    $$PWD/frmStat.cpp
+    $$PWD/frmStat.cpp \
+    $$PWD/frmColumns.cpp \
+    $$PWD/frmSort.cpp
 HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmMain.h \
     $$PWD/frmTicker.h \
@@ -20,4 +22,6 @@ HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmAcct.h \
     $$PWD/frmAcctEdit.h \
     $$PWD/frmStatEdit.h \
-    $$PWD/frmStat.h
+    $$PWD/frmStat.h \
+    $$PWD/frmColumns.h \
+    $$PWD/frmSort.h

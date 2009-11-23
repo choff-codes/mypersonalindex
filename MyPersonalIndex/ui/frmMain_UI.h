@@ -33,6 +33,7 @@ public:
     QAction *holdingsEdit;
     QAction *holdingsDelete;
     QAction *holdingsShowHidden;
+    QAction *holdingsReorderColumns;
     QAction *holdingsExport;
     QLabel *holdingsDate;
     QDateEdit *holdingsDateDropDown;

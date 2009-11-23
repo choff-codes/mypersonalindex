@@ -104,6 +104,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsDelete = new QAction("Delete", tab_holdings);
     holdingsShowHidden = new QAction("Show Hidden", tab_holdings);
     holdingsShowHidden->setCheckable(true);
+    holdingsReorderColumns = new QAction("Modify Columns...", tab_holdings);
+    holdingsReorderColumns->setIconText("Modify Columns...");
     holdingsExport = new QAction("Export...", tab_holdings);
     holdingsExport->setIconText("Export...");
     holdingsDate = new QLabel(" Date: ", tab_holdings);
@@ -124,6 +126,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsToolbar->addWidget(holdingsSortCombo);
     holdingsToolbar->addAction(holdingsShowHidden);
     holdingsToolbar->addSeparator();
+    holdingsToolbar->addAction(holdingsReorderColumns);
     holdingsToolbar->addAction(holdingsExport);
 
     statGrid = new QVBoxLayout(tab_stat);

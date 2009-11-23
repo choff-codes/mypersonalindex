@@ -7,6 +7,8 @@
 #include "frmAA.h"
 #include "frmAcct.h"
 #include "frmStat.h"
+#include "frmColumns.h"
+#include "frmSort.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -66,6 +68,8 @@ void frmMain::connectSlots()
     connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editTicker()));
     connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioHoldings(QDate)));
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(holdingsShowHiddenToggle()));
+    connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
+    connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(sortDropDownChange(int)));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
@@ -83,8 +87,6 @@ void frmMain::dateChanged(QDate)
 void frmMain::loadSettings()
 {
     checkVersion();
-    loadStats();
-    loadDates();  
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
 
@@ -117,7 +119,28 @@ void frmMain::loadSettings()
     }
 
     delete q;
+
+    loadSettingsColumns();
+    loadStats();
+    loadDates();
     resetLastDate();
+}
+
+void frmMain::loadSettingsColumns()
+{
+    QSqlQuery *q = sql->executeResultSet(sql->getSettingsColumns());
+
+    if (!q)
+        return;
+
+    do
+    {
+        m_settings.columns[q->value(queries::getSettingsColumns_ID).toInt()].append(
+                q->value(queries::getSettingsColumns_ColumnID).toInt());
+    }
+    while (q->next());
+
+    delete q;
 }
 
 void frmMain::loadStats()
@@ -240,19 +263,24 @@ void frmMain::loadPortfolioHoldings(const QDate &d)
 {
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
-            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), ""), false);
-    QList<int> columns;
-    columns << 0 << 1 << 2 << 3 << 4 << 5 << 6 << 7 << 8 << 9 << 10;
+            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false);
 
     QItemSelectionModel *m = ui.holdings->selectionModel();
-    holdingsModel *model = new holdingsModel(q, columns, ui.holdings);
+    holdingsModel *model = new holdingsModel(q, m_settings.columns.value(globals::columnIDs_Holdings), ui.holdings);
     ui.holdings->setModel(model);
+    ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     delete m;
 
     if (ui.holdingsSortCombo->count() == 0)
     {
         loadSortDropDown(model->fieldNames(), ui.holdingsSortCombo);
-        ui.holdingsSortCombo->removeItem(ui.holdingsSortCombo->findText("ID"));
+
+        if (m_currentPortfolio->info.holdingsSort.isEmpty())
+            ui.holdingsSortCombo->setCurrentIndex(0);
+        else if (m_currentPortfolio->info.holdingsSort.contains(',') || m_currentPortfolio->info.holdingsSort.contains(' '))
+            ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
+        else
+            ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
     }
 }
 
@@ -657,7 +685,6 @@ void frmMain::acct()
     {
         m_currentPortfolio->data.acct = f.getReturnValues();
     }
-
 }
 
 void frmMain::stat()
@@ -725,10 +752,54 @@ int frmMain::getDateDropDownDate(QDateEdit *dateDropDown)
     return currentDate;
 }
 
-void frmMain::loadSortDropDown(const QSqlRecord &record, QComboBox *dropDown)
+void frmMain::loadSortDropDown(const QList<QString> &fieldNames, QComboBox *dropDown)
 {
+    dropDown->blockSignals(true);
     dropDown->addItem("", -1);
-    for (int i = 0; i < record.count(); ++i)
-        dropDown->addItem(record.fieldName(i), i);
+    for (int i = 0; i < fieldNames.count(); ++i)
+        dropDown->addItem(fieldNames.at(i), i);
     dropDown->addItem("Custom...", -2);
+    dropDown->blockSignals(false);
+}
+
+void frmMain::holdingsModifyColumns()
+{
+    QList<QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames(true);
+    frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), fieldNames, *sql, this);
+    if (f.exec())
+    {
+        m_settings.columns[globals::columnIDs_Holdings] = f.getReturnValues();
+        loadPortfolioHoldings(QDate());
+    }
+}
+
+void frmMain::sortDropDownChange(int index)
+{
+    int columnID = ui.holdingsSortCombo->itemData(index).toInt();
+
+    if (columnID == -1)
+    {
+        m_currentPortfolio->info.holdingsSort.clear();
+        loadPortfolioHoldings(QDate());
+        return;
+    }
+
+    if (columnID != -2)
+    {
+        m_currentPortfolio->info.holdingsSort = QString::number(columnID + 1);
+        loadPortfolioHoldings(QDate());
+        return;
+    }
+
+    QList<QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
+    frmSort f(m_currentPortfolio->info.holdingsSort, fieldNames, this);
+
+    if (f.exec())
+    {
+        m_currentPortfolio->info.holdingsSort = f.getReturnValues();
+        loadPortfolioHoldings(QDate());
+    }
+
+    if (!m_currentPortfolio->info.holdingsSort.contains(',') && !m_currentPortfolio->info.holdingsSort.contains(' '))
+        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
 }

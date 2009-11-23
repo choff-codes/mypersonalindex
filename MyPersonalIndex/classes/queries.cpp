@@ -23,6 +23,9 @@ const QStringList queries::tickersAAColumns = QStringList() << "TickerID" << "AA
 //enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV }
 const QStringList queries::navColumns = QStringList() << "PortfolioID" << "Date" << "TotalValue" << "NAV";
 
+//enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence }
+const QStringList queries::settingsColumnsColumns = QStringList() << "ID" << "ColumnID" << "Sequence";
+
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
 const QString queries::table_AvgPricePerShare = "AvgPricePerShare";
@@ -31,6 +34,7 @@ const QString queries::table_Dividends = "Dividends";
 const QString queries::table_NAV = "NAV";
 const QString queries::table_Portfolios = "Portfolios";
 const QString queries::table_Settings = "Settings";
+const QString queries::table_SettingsColumns = "SettingsColumns";
 const QString queries::table_Splits = "Splits";
 const QString queries::table_Stat = "Stat";
 const QString queries::table_StatMapping = "StatMapping";
@@ -273,6 +277,14 @@ queries::queryInfo* queries::getSettings() const
     return new queryInfo(
         "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState,"
             " Splits, TickersIncludeDividends, Version FROM Settings",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getSettingsColumns() const
+{
+    return new queryInfo(
+        "SELECT ID, ColumnID FROM SettingsColumns ORDER BY Sequence",
         QList<parameter>()
     );
 }
@@ -679,8 +691,8 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
                 " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS Value,"
                 " (CASE WHEN :TotalValue <> 0 AND a.IncludeInCalc = 1 THEN g.Price * f.Shares / :TotalValue * 100 END) AS '% Total',"
                 " j.Description AS Account,"
-                " a.ID as ID,"
-                " a.IncludeInCalc AS Active"
+                " a.IncludeInCalc AS Active,"
+                " a.ID as ID"
             " FROM Tickers AS a"
             " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
                         " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
@@ -701,7 +713,7 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
                 " ON a.Account = j.ID"
             " WHERE a.PortfolioID = :PortfolioID%1%2").arg(
                     showHidden ? "" : " AND Hide = 0",
-                    sort.isEmpty() ? "" : QString("ORDER BY %1").arg(sort)),
+                    sort.isEmpty() ? "" : QString(" ORDER BY %1").arg(sort)),
         QList<parameter>()
             << parameter(":PortfolioID", portfolioID)
             << parameter(":Date", date)

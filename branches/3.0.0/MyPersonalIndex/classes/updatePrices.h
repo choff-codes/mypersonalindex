@@ -14,7 +14,6 @@ public:
     updatePrices(const QMap<int, globals::myPersonalIndex*> &data, QList<int> &dates, const bool &splits, const int &dataStartDate, QObject *parent = 0):
         QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_dataStartDate(dataStartDate)
     {
-        m_dataStartDate = m_dataStartDate - 6;
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
         db.setDatabaseName(queries::getDatabaseLocation());
         m_sql = new queries(db);
@@ -39,7 +38,7 @@ private:
     QString getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type);
     QString getSplitAddress(const QString &ticker);
     QList<QByteArray>* downloadFile(const QUrl&);
-    void getUpdateInfo(QMap<QString, globals::updateInfo> *tickers);
+    void getUpdateInfo(QMap<QString, globals::updateInfo> &tickers);
 
     void run();
     bool getPrices(const QString &ticker, const int &minDate, int &earliestUpdate);

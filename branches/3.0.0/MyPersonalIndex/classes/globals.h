@@ -19,6 +19,7 @@ public:
     enum dynamicTradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly, tradeFreq_Count };
     enum tickerHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
+    enum { columnIDs_Holdings, columnIDs_AA, columnIDs_Acct };
 
     struct dynamicTrade
     {
@@ -296,6 +297,7 @@ public:
         QSize windowSize;
         QPoint windowLocation;
         Qt::WindowState state;
+        QMap<int, QList<int> > columns;
 
         settings(): version(0), lastPortfolio(QVariant(QVariant::Int)) {}
 

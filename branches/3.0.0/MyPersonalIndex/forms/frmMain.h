@@ -35,6 +35,7 @@ private:
 
     void connectSlots();
     void loadSettings();
+    void loadSettingsColumns();
     void resetLastDate();
     void checkVersion();
     void saveSettings();
@@ -55,7 +56,7 @@ private:
     void disableItems(bool disabled);
     int getCurrentDateOrPrevious(int date);
     int getDateDropDownDate(QDateEdit *dateDropDown);
-    void loadSortDropDown(const QSqlRecord &record, QComboBox *dropDown);
+    void loadSortDropDown(const QList<QString> &fieldNames, QComboBox *dropDown);
 
 private slots:
     void dateChanged(QDate);
@@ -75,6 +76,8 @@ private slots:
     void finishUpdate(const QStringList &invalidTickers);
     void statusUpdate(const QString &message);
     void holdingsShowHiddenToggle() { loadPortfolioHoldings(QDate()); }
+    void holdingsModifyColumns();
+    void sortDropDownChange(int index);
 
 protected:
     void closeEvent(QCloseEvent *event);
@@ -105,7 +108,20 @@ public:
 
     ~holdingsModel() { delete m_query; }
 
-    QSqlRecord fieldNames() { return m_query->record(); }
+    QList<QString> fieldNames(const bool &removeActiveColumn = false)
+    {
+        QList<QString> names;
+        QSqlRecord record = m_query->record();
+
+        for (int i = 0; i < record.count(); ++i)
+            names.append(record.fieldName(i));
+
+        names.removeAt(names.indexOf("ID"));
+        if (removeActiveColumn)
+            names.removeAt(names.indexOf("Active"));
+
+        return names;
+    }
 
     Qt::ItemFlags flags(const QModelIndex &index) const
     {

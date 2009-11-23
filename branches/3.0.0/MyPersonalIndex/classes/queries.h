@@ -34,6 +34,7 @@ public:
     static const QString table_NAV;
     static const QString table_Portfolios;
     static const QString table_Settings;
+    static const QString table_SettingsColumns;
     static const QString table_Splits;
     static const QString table_Stat;
     static const QString table_StatMapping;
@@ -50,6 +51,7 @@ public:
     static const QStringList tradesColumns;
     static const QStringList tickersAAColumns;
     static const QStringList navColumns;
+    static const QStringList settingsColumnsColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPricesColumns_Date, closingPricesColumns_Ticker, closingPricesColumns_Price, closingPricesColumns_Change };
@@ -59,6 +61,7 @@ public:
     enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Code };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
+    enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
 
     queries(QSqlDatabase database);
     static QString getDatabaseLocation();
@@ -86,6 +89,9 @@ public:
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
     queryInfo* getSettings() const;
+
+    enum { getSettingsColumns_ID, getSettingsColumns_ColumnID };
+    queryInfo* getSettingsColumns() const;
 
     queryInfo* updateSettings(const globals::settings&) const;
 
@@ -154,7 +160,7 @@ public:
 
     enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
            getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
-           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_ID, getPortfolioHoldings_Active };
+           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_Active, getPortfolioHoldings_ID };
     queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
 
 protected:

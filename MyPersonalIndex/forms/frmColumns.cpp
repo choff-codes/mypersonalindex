@@ -1,6 +1,6 @@
 #include "frmColumns.h"
 
-frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QList<QString> &columns, const queries &sql, QWidget *parent):
+frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QMap<int, QString> &columns, const queries &sql, QWidget *parent):
         QDialog(parent), m_id(id), m_selectedColumns(selectedColumns), m_columns(columns), m_sql(sql)
 {
     if (!m_sql.isOpen())
@@ -11,10 +11,10 @@ frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const Q
 
     ui.setupUI(this);
 
-    for(int i = 0; i < m_columns.count(); ++i)
+    for(QMap<int, QString>::const_iterator i = m_columns.constBegin(); i != m_columns.constEnd(); ++i)
     {
-        QListWidgetItem *item = new QListWidgetItem(m_columns.at(i), ui.removedColumns);
-        item->setData(Qt::UserRole, i);
+        QListWidgetItem *item = new QListWidgetItem(i.value(), ui.removedColumns);
+        item->setData(Qt::UserRole, i.key());
     }
 
     foreach(const int &columnID, m_selectedColumns)

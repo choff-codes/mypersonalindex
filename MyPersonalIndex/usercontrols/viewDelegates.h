@@ -86,4 +86,40 @@ private:
     double m_min, m_max;
 };
 
+//class checkBoxDelegate : public QItemDelegate
+//{
+//public:
+//    checkBoxDelegate(QObject *parent): QItemDelegate(parent) {}
+//
+//    QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem&, const QModelIndex&) const
+//    {
+//        QCheckBox *editor = new QCheckBox(parent);
+//        editor->installEventFilter(const_cast<checkBoxDelegate*>(this));
+//        return editor;
+//    }
+//
+//    void setEditorData(QWidget *editor, const QModelIndex &index) const
+//    {
+//        if (!index.isValid())
+//            return;
+//
+//        QCheckBox *c = static_cast<QCheckBox*>(editor);
+//        c->setChecked(index.model()->data(index).toInt() == 1);
+//    }
+//
+//    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
+//    {
+//        if(!index.isValid())
+//            return;
+//
+//        QCheckBox *c = static_cast<QCheckBox*>(editor);
+//        model->setData(index, c->isChecked() ? 1 : 0);
+//    }
+//
+//    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex&) const
+//    {
+//        editor->setGeometry(option.rect);
+//    }
+//};
+
 #endif // VIEWDELEGATES_H

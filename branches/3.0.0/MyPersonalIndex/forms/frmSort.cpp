@@ -1,6 +1,6 @@
 #include "frmSort.h"
 
-frmSort::frmSort(const QString &sort, const QList<QString> &columns, QWidget *parent): QDialog(parent), m_sort(sort), m_columns(columns)
+frmSort::frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget *parent): QDialog(parent), m_sort(sort), m_columns(columns)
 {
     ui.setupUI(this);
 
@@ -8,14 +8,12 @@ frmSort::frmSort(const QString &sort, const QList<QString> &columns, QWidget *pa
     ui.sort2->addItem("", -1);
     ui.sort3->addItem("", -1);
 
-    for(int i = 0; i < m_columns.count(); ++i)
-        ui.sort1->addItem(m_columns.at(i), i);
-
-    for(int i = 0; i < m_columns.count(); ++i)
-        ui.sort2->addItem(m_columns.at(i), i);
-
-    for(int i = 0; i < m_columns.count(); ++i)
-        ui.sort3->addItem(m_columns.at(i), i);
+    for(QMap<int, QString>::const_iterator i = m_columns.constBegin(); i != m_columns.constEnd(); ++i)
+    {
+        ui.sort1->addItem(i.value(), i.key());
+        ui.sort2->addItem(i.value(), i.key());
+        ui.sort3->addItem(i.value(), i.key());
+    }
 
     if (m_sort.isEmpty())
         return;

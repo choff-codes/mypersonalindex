@@ -56,9 +56,9 @@ public:
         return QString("%L1%").arg(value, 0, 'f', 2);
     }
 
-    static QString doubleToLocalFormat(const double &value)
+    static QString doubleToLocalFormat(const double &value, const int &precision = 2)
     {
-        return QString("%L1").arg(value, 0, 'f', 2);
+        return QString("%L1").arg(value, 0, 'f', precision);
     }
 
     static double stringToDouble(const QString &value, bool *ok)

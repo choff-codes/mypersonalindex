@@ -9,6 +9,8 @@
 #include "frmStat.h"
 #include "frmColumns.h"
 #include "frmSort.h"
+#include "mainHoldingsModel.h"
+#include "viewDelegates.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -752,19 +754,20 @@ int frmMain::getDateDropDownDate(QDateEdit *dateDropDown)
     return currentDate;
 }
 
-void frmMain::loadSortDropDown(const QList<QString> &fieldNames, QComboBox *dropDown)
+void frmMain::loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown)
 {
     dropDown->blockSignals(true);
     dropDown->addItem("", -1);
-    for (int i = 0; i < fieldNames.count(); ++i)
-        dropDown->addItem(fieldNames.at(i), i);
+
+    for (QMap<int, QString>::const_iterator i = fieldNames.constBegin(); i != fieldNames.constEnd(); ++i)
+        dropDown->addItem(i.value(), i.key());
     dropDown->addItem("Custom...", -2);
     dropDown->blockSignals(false);
 }
 
 void frmMain::holdingsModifyColumns()
 {
-    QList<QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames(true);
+    QMap<int, QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
     frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), fieldNames, *sql, this);
     if (f.exec())
     {
@@ -791,7 +794,7 @@ void frmMain::sortDropDownChange(int index)
         return;
     }
 
-    QList<QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
+    QMap<int, QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
     frmSort f(m_currentPortfolio->info.holdingsSort, fieldNames, this);
 
     if (f.exec())

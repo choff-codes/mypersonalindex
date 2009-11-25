@@ -11,12 +11,12 @@ class frmSort : public QDialog
 public:
     const QString& getReturnValues() const { return m_sort; }
 
-    frmSort(const QString &sort, const QList<QString> &columns, QWidget *parent = 0);
+    frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget *parent = 0);
 
 private:
     frmSort_UI ui;
     QString m_sort;
-    QList<QString> m_columns;
+    QMap<int, QString> m_columns;
 
 private slots:
     void accept();

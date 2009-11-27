@@ -71,7 +71,7 @@ public:
     void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
     QSqlQueryModel* executeDataSet(queryInfo *q);
-    QSqlQuery* executeResultSet(queryInfo*, const bool &setForward = false) const;
+    QSqlQuery* executeResultSet(queryInfo*, const bool &setForward = true) const;
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant()) const;
 
     queryInfo* deleteItem(const QString &table, const int &id) const;
@@ -146,6 +146,9 @@ public:
     enum { getPortfolioLastDate_PortfolioID, getPortfolioLastDate_Date };
     queryInfo* getPortfolioLastDate() const;
 
+    enum { getPortfolioFirstDate_PortfolioID, getPortfolioFirstDate_Date };
+    queryInfo* getPortfolioFirstDate() const;
+
     enum { getPortfolioNAV_PortfolioID, getPortfolioNAV_TotalValue, getPortfolioNAV_NAV };
     queryInfo* getPortfolioNAV(const int &portfolioID, const int &date) const;
 
@@ -162,6 +165,9 @@ public:
            getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
            getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_Active, getPortfolioHoldings_ID };
     queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
+
+    enum { getPortfolioGainLossInfo_CostBasis, getPortfolioGainLossInfo_TotalValue, getPortfolioGainLossInfo_TaxLiability };
+    queryInfo* getPortfolioGainLossInfo(const int &portfolioID, const int &date) const;
 
 protected:
     QSqlDatabase db;

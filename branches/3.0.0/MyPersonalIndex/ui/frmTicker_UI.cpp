@@ -126,6 +126,8 @@ void frmTicker_UI::setupUI(QDialog *dialog)
 
     btnOkCancel = new QDialogButtonBox(dialog);
     btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    btnAddAnother = new QPushButton("Add Another", dialog);
+    btnOkCancel->addButton(btnAddAnother, QDialogButtonBox::ActionRole);
 
     gpHistorical = new QGroupBox("Historical Prices", dialog);
     gpHistorical->setHidden(true);

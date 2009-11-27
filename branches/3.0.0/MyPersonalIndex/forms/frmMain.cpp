@@ -68,7 +68,7 @@ void frmMain::connectSlots()
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
     connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editTicker()));
-    connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioHoldings(QDate)));
+    connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(holdingsDateChange()));
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(holdingsShowHiddenToggle()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(sortDropDownChange(int)));
@@ -185,11 +185,11 @@ void frmMain::loadDates()
 
 void frmMain::resetLastDate()
 {
-    m_lastDate = m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count() - 1];
+    int lastDate = getLastDate();
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
-                m_lastDate == m_settings.dataStartDate ?
+                lastDate == m_settings.dataStartDate ?
                 "Never" :
-                QDate::fromJulianDay(m_lastDate).toString(Qt::SystemLocaleShortDate)));
+                QDate::fromJulianDay(lastDate).toString(Qt::SystemLocaleShortDate)));
 }
 
 void frmMain::checkVersion()
@@ -254,36 +254,85 @@ void frmMain::loadPortfolio()
             disableItems(true);
             return;
         }
+
         loadPortfolioSettings();
-        loadPortfolioHoldings(QDate());
-        // resetCalendars();
-        // todo
+        int lastDate = getLastDate();
+        m_gainLossInfo = getPortfolioGainLossInfo(lastDate);
+        resetCalendars(lastDate);
+        loadPortfolioHoldings(refreshType_LoadPortfolio);
     }
 }
 
-void frmMain::loadPortfolioHoldings(const QDate &d)
+void frmMain::resetCalendars(const int &date)
+{
+    int start = m_currentPortfolio->info.startDate;
+    int end = date < start ? start : date;
+
+    resetCalendar(end, start, ui.holdingsDateDropDown);
+}
+
+void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *calendar)
+{
+    calendar->blockSignals(true);
+    calendar->setMinimumDate(QDate::fromJulianDay(minDate));
+    calendar->setDate(QDate::fromJulianDay(date));
+    calendar->blockSignals(false);
+}
+
+void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd)
+{
+    calendarStart->blockSignals(true);
+    calendarStart->setMinimumDate(QDate::fromJulianDay(minDate));
+    calendarStart->setDate(QDate::fromJulianDay(minDate));
+    calendarStart->blockSignals(false);
+    calendarEnd->blockSignals(true);
+    calendarEnd->setMinimumDate(QDate::fromJulianDay(minDate));
+    calendarEnd->setDate(QDate::fromJulianDay(date));
+    calendarEnd->blockSignals(false);
+}
+
+globals::gainLossInfo frmMain::getPortfolioGainLossInfo(const int &date)
+{
+    globals::gainLossInfo gainLossInfo;
+
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioGainLossInfo(m_currentPortfolio->info.id, date));
+    if (q)
+    {
+        gainLossInfo.costBasis = q->value(queries::getPortfolioGainLossInfo_CostBasis).toDouble();
+        gainLossInfo.taxLiability = q->value(queries::getPortfolioGainLossInfo_TotalValue).toDouble();
+        gainLossInfo.totalValue = q->value(queries::getPortfolioGainLossInfo_TotalValue).toDouble();
+    }
+
+    return gainLossInfo;
+}
+
+void frmMain::loadPortfolioHoldings(const refreshType &r)
 {
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
             m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false);
 
-    QItemSelectionModel *m = ui.holdings->selectionModel();
-    holdingsModel *model = new holdingsModel(q, m_settings.columns.value(globals::columnIDs_Holdings), ui.holdings);
+    holdingsModel *m = static_cast<holdingsModel*>(ui.holdings->model());
+
+    globals::gainLossInfo g =
+            r == refreshType_LoadPortfolio ? m_gainLossInfo :
+            r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
+            m->gainLossInfo();
+
+    holdingsModel *model = new holdingsModel(q, m_settings.columns.value(globals::columnIDs_Holdings), g, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     delete m;
 
     if (ui.holdingsSortCombo->count() == 0)
-    {
         loadSortDropDown(model->fieldNames(), ui.holdingsSortCombo);
 
-        if (m_currentPortfolio->info.holdingsSort.isEmpty())
-            ui.holdingsSortCombo->setCurrentIndex(0);
-        else if (m_currentPortfolio->info.holdingsSort.contains(',') || m_currentPortfolio->info.holdingsSort.contains(' '))
-            ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
-        else
-            ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
-    }
+    if (m_currentPortfolio->info.holdingsSort.isEmpty())
+        ui.holdingsSortCombo->setCurrentIndex(0);
+    else if (m_currentPortfolio->info.holdingsSort.contains(',') || m_currentPortfolio->info.holdingsSort.contains(' '))
+        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
+    else
+        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
 }
 
 void frmMain::loadPortfolioSettings()
@@ -642,25 +691,64 @@ void frmMain::about()
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
 }
 
+void frmMain::refreshPortfolioSecurities(const int &minDate)
+{
+    if (minDate != -1)
+    {
+        beginNAV(m_currentPortfolio->info.id, minDate);
+        return;
+    }
+
+    loadPortfolioHoldings(refreshType_Other);
+}
+
 void frmMain::addTicker()
 {
-    frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, globals::security(), *sql, this);
-    f.exec();
+    int resultcode;
+    bool change = false;
+    int minDate = -1;
+    do
+    {
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, globals::security(), *sql, this);
+        resultcode = f.exec();
+        if (resultcode == QDialog::Accepted || resultcode == QDialog::Accepted + 1)
+        {
+            change = true;
+            m_currentPortfolio->data.tickers[f.getReturnValuesSecurity().id] = f.getReturnValuesSecurity();
+            int currentMinDate = f.getReturnValuesMinDate();
+            if (currentMinDate != -1 && (currentMinDate < minDate || minDate == -1))
+                minDate = currentMinDate;
+        }
+    }
+    while (resultcode == QDialog::Accepted + 1);
+
+    if (!change)
+        return;
+
+    refreshPortfolioSecurities(minDate);
 }
 
 void frmMain::editTicker()
 {
     bool change = false;
+    int minDate = -1;
     foreach(int i, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
     {
         frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(i), *sql, this);
         if (f.exec())
         {
             change = true;
-            m_currentPortfolio->data.tickers[i] = f.getReturnValues();
-            loadPortfolioHoldings(QDate());
+            m_currentPortfolio->data.tickers[i] = f.getReturnValuesSecurity();
+            int currentMinDate = f.getReturnValuesMinDate();
+            if (currentMinDate != -1 && (currentMinDate < minDate || minDate == -1))
+                minDate = currentMinDate;
         }
     }
+
+    if (!change)
+        return;
+
+    refreshPortfolioSecurities(minDate);
 }
 
 void frmMain::options()
@@ -731,6 +819,25 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
     delete m_updateThread;
 }
 
+void frmMain::beginNAV(const int &portfolioID, const int &minDate)
+{
+    ui.stbProgress->setMaximum(0);
+    m_navThread = new NAV(m_portfolios, m_dates, minDate, this, portfolioID);
+    connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
+    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
+    m_navThread->run();
+}
+
+void frmMain::finishNAV()
+{
+    ui.stbProgress->setMaximum(100);
+    ui.stbProgress->setValue(0);
+    statusUpdate("");
+    m_navThread->quit();
+    m_navThread->disconnect();
+    delete m_navThread;
+}
+
 void frmMain::statusUpdate(const QString &message)
 {
     ui.stbStatus->setText(QString("Status: ").append(message));
@@ -772,7 +879,7 @@ void frmMain::holdingsModifyColumns()
     if (f.exec())
     {
         m_settings.columns[globals::columnIDs_Holdings] = f.getReturnValues();
-        loadPortfolioHoldings(QDate());
+        loadPortfolioHoldings(refreshType_Other);
     }
 }
 
@@ -783,14 +890,14 @@ void frmMain::sortDropDownChange(int index)
     if (columnID == -1)
     {
         m_currentPortfolio->info.holdingsSort.clear();
-        loadPortfolioHoldings(QDate());
+        loadPortfolioHoldings(refreshType_Other);
         return;
     }
 
     if (columnID != -2)
     {
         m_currentPortfolio->info.holdingsSort = QString::number(columnID + 1);
-        loadPortfolioHoldings(QDate());
+        loadPortfolioHoldings(refreshType_Other);
         return;
     }
 
@@ -800,7 +907,7 @@ void frmMain::sortDropDownChange(int index)
     if (f.exec())
     {
         m_currentPortfolio->info.holdingsSort = f.getReturnValues();
-        loadPortfolioHoldings(QDate());
+        loadPortfolioHoldings(refreshType_Other);
     }
 
     if (!m_currentPortfolio->info.holdingsSort.contains(',') && !m_currentPortfolio->info.holdingsSort.contains(' '))

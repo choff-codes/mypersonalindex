@@ -13,7 +13,17 @@ frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data,
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.ticker));
 
-    //ui.cmbAcct->model()->sort(0);
+    if (m_security.id != -1)
+        ui.btnAddAnother->setVisible(false);
+
+    m_minDate = -1;
+    foreach(globals::dynamicTrade d, m_security.trades)
+    {
+        if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
+            m_minDate = d.startDate;
+        else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
+            m_minDate = d.startDate;
+    }
 
     loadDropDowns();
     loadSecurity();
@@ -35,6 +45,7 @@ void frmTicker::connectSlots()
     connect(ui.btnHistorical, SIGNAL(toggled(bool)), ui.gpHistorical, SLOT(setVisible(bool)));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
+    connect(ui.btnAddAnother, SIGNAL(clicked()), this, SLOT(accept()));
     connect(ui.btnTradesAdd, SIGNAL(clicked()), m_modelTrade, SLOT(addNew()));
     connect(ui.btnTradesEdit, SIGNAL(clicked()), m_modelTrade, SLOT(editSelected()));
     connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), m_modelTrade, SLOT(editSelected()));
@@ -102,6 +113,11 @@ void frmTicker::installAAModel()
 
 void frmTicker::accept()
 {
+    int result = QDialog::Accepted;
+
+    if (sender() == ui.btnAddAnother)
+        result++;
+
     m_security.ticker = ui.txtTicker->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
     m_security.expense = ui.sbExpense->value();
@@ -118,13 +134,24 @@ void frmTicker::accept()
         return;
     }
 
+    if (m_security.trades == m_securityOriginal.trades)
+        m_minDate = -1;
+
+    foreach(globals::dynamicTrade d, m_security.trades)
+    {
+        if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
+            m_minDate = d.startDate;
+        else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
+            m_minDate = d.startDate;
+    }
+
     m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
     if (m_security.id == -1)
         m_security.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
 
     if(m_security.aa == m_securityOriginal.aa)
     {
-        QDialog::accept();
+        QDialog::done(result);
         return;
     }
 
@@ -149,7 +176,7 @@ void frmTicker::accept()
         tableUpdateQuery.executeTableUpdate(queries::table_TickersAA, tableValues);
     }
 
-    QDialog::accept();
+    QDialog::done(result);
 }
 
 void frmTicker::resetExpense()

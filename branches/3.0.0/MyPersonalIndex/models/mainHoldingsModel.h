@@ -12,7 +12,8 @@ class holdingsModel: public QAbstractTableModel
 
 public:
 
-    holdingsModel(QSqlQuery *query, QList<int> viewableColumns, QTableView *parent = 0): QAbstractTableModel(parent), m_parent(parent), m_query(query), m_viewableColumns(viewableColumns)
+    holdingsModel(QSqlQuery *query, QList<int> viewableColumns, const globals::gainLossInfo &gainLossInfo, QTableView *parent = 0):
+            QAbstractTableModel(parent), m_parent(parent), m_query(query), m_viewableColumns(viewableColumns), m_gainLossInfo(gainLossInfo)
     {
         m_rowCount = 0;
         if (!m_query)
@@ -34,11 +35,13 @@ public:
         QSqlRecord record = m_query->record();
 
         for (int i = 0; i < record.count(); ++i)
-            names[i] = record.fieldName(i);
+            names[i] = record.fieldName(i).replace('|', ' ');
 
         names.remove(queries::getPortfolioHoldings_ID);
         return names;
     }
+
+    globals::gainLossInfo gainLossInfo () { return m_gainLossInfo; }
 
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
@@ -108,13 +111,31 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const
     {
+         if (section >= m_viewableColumns.count())
+            return QVariant();
+
+        if (role == Qt::TextAlignmentRole)
+            return (int)Qt::AlignLeft | Qt::AlignVCenter;
+
         if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
             return QVariant();
 
-        if (section >= m_viewableColumns.count())
-            return QVariant();
+        int column = m_viewableColumns.at(section);
+        QString extra;
+        switch(column)
+        {
+            case queries::getPortfolioHoldings_CostBasis:
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.costBasis));
+                break;
+            case queries::getPortfolioHoldings_TotalValue:
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue));
+                break;
+            case queries::getPortfolioHoldings_Gain:
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue - m_gainLossInfo.costBasis));
+                break;
+        }
 
-        return m_query->record().fieldName(m_viewableColumns.at(section));
+        return m_query->record().fieldName(column).replace('|', '\n').append(extra);
     }
 
     QList<int> selectedItems()
@@ -141,6 +162,7 @@ private:
     QSqlQuery *m_query;
     QList<int> m_viewableColumns;
     int m_rowCount;
+    globals::gainLossInfo m_gainLossInfo;
 };
 
 

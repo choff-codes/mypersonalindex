@@ -32,12 +32,15 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     if (m_dates.count() < 2)  // need at least 2 days of data
         return;
 
+    QList<int>::const_iterator previousDate = qLowerBound(m_dates, calculationDate) - 1;
+    if (*previousDate == m_dates.last())
+        return;
+
     dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate, portfolioStartDate);
     tickerReinvestmentList tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
     QVariantList portfolio, dates, totalvalue, nav;
     globals::myPersonalIndex *currentPortfolio = m_data.value(portfolioID);
     emit statusUpdate(QString("Calculating '%1'").arg(currentPortfolio->info.description));
-    QList<int>::const_iterator previousDate = qLowerBound(m_dates, calculationDate) - 1;
     double previousTotalValue = 0, previousNAV = currentPortfolio->info.startValue;
 
     if (portfolioStartDate)

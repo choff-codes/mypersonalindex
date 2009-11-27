@@ -141,8 +141,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward) const
         return 0;
 
     QSqlQuery *query = new QSqlQuery(db);
-    if (setForward)
-        query->setForwardOnly(true);
+    query->setForwardOnly(setForward);
     query->prepare(q->sql);
     foreach(const parameter &p, q->parameters)
         query->bindValue(p.name, p.value);
@@ -153,6 +152,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward) const
     if (query->lastError().text() != " ")
     {
         QString s = query->lastError().text();
+        QString s2 = query->lastQuery();
         s.append("");
     }
 
@@ -599,6 +599,16 @@ queries::queryInfo* queries::getPortfolioLastDate() const
     );
 }
 
+queries::queryInfo* queries::getPortfolioFirstDate() const
+{
+    return new queryInfo(
+            "SELECT PortfolioID, MIN(Date)"
+            " FROM NAV "
+            " GROUP BY PortfolioID",
+        QList<parameter>()
+    );
+}
+
 queries::queryInfo* queries::getPortfolioNAV(const int &portfolioID, const int &date) const
 {
     return new queryInfo(
@@ -680,16 +690,16 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
 {
     return new queryInfo(
             QString(
-                "SELECT a.Ticker AS Symbol,"
+            "SELECT a.Ticker AS Symbol,"
                 " (CASE WHEN a.CashAccount = 1 THEN 'Yes' END) AS Cash,"
                 " g.Price,"
                 " Coalesce(f.Shares,0) AS Shares,"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS Average,"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS 'Avg Price|Per Share',"
                 " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN h.Price * f.Shares END) AS 'Cost Basis',"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN (g.Price - h.Price) * f.Shares END) AS Gain,"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 AND h.Price <> 0 THEN ((g.Price / h.Price) - 1) * 100 END) AS '% Gain',"
-                " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS Value,"
-                " (CASE WHEN :TotalValue <> 0 AND a.IncludeInCalc = 1 THEN g.Price * f.Shares / :TotalValue * 100 END) AS '% Total',"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN (g.Price - h.Price) * f.Shares END) AS 'Gain/Loss',"
+                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 AND h.Price <> 0 THEN ((g.Price / h.Price) - 1) * 100 END) AS '% Gain/|Loss',"
+                " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS 'Total Value',"
+                " (CASE WHEN :TotalValue <> 0 AND a.IncludeInCalc = 1 THEN g.Price * f.Shares / :TotalValue * 100 END) AS '% of|Portfolio',"
                 " j.Description AS Account,"
                 " a.IncludeInCalc AS Active,"
                 " a.ID as ID"
@@ -698,9 +708,9 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
                         " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
                                 " FROM Trades AS b"
                                 " INNER JOIN Tickers AS c"
-                                " ON c.ID = b.TickerID"
+                                    " ON c.ID = b.TickerID"
                                 " LEFT JOIN Splits AS d"
-                                " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date"
+                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date"
                                 " WHERE c.PortfolioID = :PortfolioID AND b.Date <= :Date"
                                 " GROUP BY b.rowid) AS e"
                         " GROUP BY TickerID) AS f"
@@ -718,6 +728,37 @@ queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const 
             << parameter(":PortfolioID", portfolioID)
             << parameter(":Date", date)
             << parameter(":TotalValue", totalValue)
+    );
+}
+
+queries::queryInfo* queries::getPortfolioGainLossInfo(const int &portfolioID, const int &date) const
+{
+    return new queryInfo(
+            "SELECT COALESCE(SUM(f.Shares * h.Price), 0) AS CostBasis, COALESCE(SUM(f.Shares * g.Price), 0) AS TotalValue,"
+                " COALESCE(SUM(CASE WHEN j.TaxDeferred = 1 THEN g.Price * f.Shares * Coalesce(j.TaxRate / 100, 0.0)"
+                        " ELSE (g.Price - h.Price) * f.Shares * (CASE WHEN g.Price > h.Price THEN Coalesce(j.TaxRate / 100, 0.0) ELSE 0.0 END) END), 0) AS TaxLiability"
+            " FROM Tickers AS a"
+            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
+                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
+                                " FROM Trades AS b"
+                                " INNER JOIN Tickers AS c"
+                                    " ON c.ID = b.TickerID"
+                                " LEFT JOIN Splits AS d"
+                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date"
+                                " WHERE c.PortfolioID = :PortfolioID AND b.Date <= :Date"
+                                " GROUP BY b.rowid) AS e"
+                        " GROUP BY TickerID) AS f"
+                " ON a.ID = f.TickerID"
+            " LEFT JOIN ClosingPrices AS g"
+                " ON a.Ticker = g.Ticker AND g.Date = :Date"
+            " LEFT JOIN AvgPricePerShare AS h"
+                " ON a.ID = h.TickerID"
+            " LEFT JOIN Acct AS j"
+                " ON a.Account = j.ID"
+            " WHERE a.PortfolioID = :PortfolioID AND a.IncludeInCalc = 1",
+        QList<parameter>()
+            << parameter(":PortfolioID", portfolioID)
+            << parameter(":Date", date)
     );
 }
 

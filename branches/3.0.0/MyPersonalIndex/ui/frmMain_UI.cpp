@@ -91,7 +91,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdings->setAlternatingRowColors(true);
     holdings->horizontalHeader()->setHighlightSections(false);
     holdings->verticalHeader()->setDefaultSectionSize(fntHeight);
-    holdings->horizontalHeader()->setFixedHeight(fntHeight);
+    holdings->horizontalHeader()->setFixedHeight(fntHeight * 2);
     holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     holdingsGrid->addWidget(holdingsToolbar);

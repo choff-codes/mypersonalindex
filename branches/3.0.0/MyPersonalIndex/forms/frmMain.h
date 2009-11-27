@@ -11,6 +11,7 @@
 #include "functions.h"
 #include "queries.h"
 #include "updatePrices.h"
+#include "NAV.h"
 
 class frmMain : public QMainWindow
 {
@@ -27,12 +28,16 @@ private:
     queries *sql;
     QMap<int, globals::myPersonalIndex*> m_portfolios;
     globals::myPersonalIndex *m_currentPortfolio;
-    int m_lastDate;
     globals::settings m_settings;
     QList<int> m_dates;
     QMap<int, globals::statistic> m_statistics;
+    globals::gainLossInfo m_gainLossInfo;
     updatePrices *m_updateThread;
+    NAV *m_navThread;
 
+    enum refreshType { refreshType_LoadPortfolio, refreshType_DateChange, refreshType_Other };
+
+    void closeEvent(QCloseEvent *event);
     void connectSlots();
     void loadSettings();
     void loadSettingsColumns();
@@ -56,7 +61,13 @@ private:
     void disableItems(bool disabled);
     int getCurrentDateOrPrevious(int date);
     int getDateDropDownDate(QDateEdit *dateDropDown);
+    globals::gainLossInfo getPortfolioGainLossInfo(const int &date);
     void loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
+    void refreshPortfolioSecurities(const int &minDate);
+    int getLastDate() { return m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count() - 1]; }
+    void resetCalendars(const int &date);
+    void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
+    void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
 
 private slots:
     void dateChanged(QDate);
@@ -64,7 +75,7 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void loadPortfolio();
-    void loadPortfolioHoldings(const QDate&);
+    void loadPortfolioHoldings(const refreshType&);
     void about();
     void addTicker();
     void editTicker();
@@ -74,13 +85,13 @@ private slots:
     void stat();
     void beginUpdate();
     void finishUpdate(const QStringList &invalidTickers);
+    void beginNAV(const int &portfolioID, const int &minDate);
+    void finishNAV();
     void statusUpdate(const QString &message);
-    void holdingsShowHiddenToggle() { loadPortfolioHoldings(QDate()); }
+    void holdingsShowHiddenToggle() { loadPortfolioHoldings(refreshType_Other); }
+    void holdingsDateChange() { loadPortfolioHoldings(refreshType_DateChange); }
     void holdingsModifyColumns();
     void sortDropDownChange(int index);
-
-protected:
-    void closeEvent(QCloseEvent *event);
 };
 
 #endif // FRMMAIN_H

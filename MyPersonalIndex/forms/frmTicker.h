@@ -15,7 +15,8 @@ class frmTicker : public QDialog
 
 public:
 
-    const globals::security& getReturnValues() const { return m_security; }
+    const globals::security& getReturnValuesSecurity() const { return m_security; }
+    const int& getReturnValuesMinDate() const { return m_minDate; }
     //const int &getTickerID() const { return m_security.id; }
     const QMap<int, globals::security>& getCashAccounts() const { return m_data.tickers; }
 
@@ -32,6 +33,7 @@ private:
     const queries &m_sql;
     tickerTradeModel *m_modelTrade;
     tickerAAModel *m_modelAA;
+    int m_minDate;
 
     void connectSlots();
     void loadSecurity();

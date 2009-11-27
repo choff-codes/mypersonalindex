@@ -44,6 +44,7 @@ public:
     QAction *tradesPaste;
     QShortcut *tradesPasteShortcut;
     QDialogButtonBox *btnOkCancel;
+    QPushButton *btnAddAnother;
     QGroupBox *gpHistorical;
     QVBoxLayout *historicalLayout;
     QToolBar *tbHistorical;

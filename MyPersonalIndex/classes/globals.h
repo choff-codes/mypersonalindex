@@ -359,6 +359,15 @@ public:
         updateInfo() {}
         updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
     };
+
+    struct gainLossInfo
+    {
+        double totalValue;
+        double taxLiability;
+        double costBasis;
+
+        gainLossInfo(): totalValue(0), taxLiability(0), costBasis(0) {}
+    };
 };
 
 #endif // GLOBALS_H

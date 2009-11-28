@@ -16,6 +16,22 @@ public:
     tickerAAModel(const QList<globals::tickerAATarget> &values, const QMap<int, globals::assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
+    double totalPercentage()
+    {
+        double total = 0;
+
+        foreach(const globals::tickerAATarget &aa, m_list)
+            total += aa.second;
+
+        return total;
+    }
+
+private:
+    const QMap<int, globals::assetAllocation> &m_aaValues;
+    QTableView *m_parent;
+    int m_columns;
+    QList<globals::tickerAATarget> m_list;
+
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
         Qt::ItemFlags flags = QAbstractTableModel::flags(index);
@@ -33,16 +49,6 @@ public:
     int columnCount (const QModelIndex&) const
     {
         return m_columns;
-    }
-
-    double totalPercentage()
-    {
-        double total = 0;
-
-        foreach(const globals::tickerAATarget &aa, m_list)
-            total += aa.second;
-
-        return total;
     }
 
     QVariant data(const QModelIndex &index, int role) const
@@ -74,12 +80,12 @@ public:
         return QVariant();
     }
 
-    QVariant headerData (int, Qt::Orientation, int) const
+    QVariant headerData(int, Qt::Orientation, int) const
     {
         return QVariant();
     }
 
-    bool setData (const QModelIndex &index, const QVariant &value, int role)
+    bool setData(const QModelIndex &index, const QVariant &value, int role)
     {
         if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
         {
@@ -122,12 +128,6 @@ public slots:
 
 signals:
     void updateHeader();
-
-private:
-    const QMap<int, globals::assetAllocation> &m_aaValues;
-    QTableView *m_parent;
-    int m_columns;
-    QList<globals::tickerAATarget> m_list;
 };
 
 #endif // TICKERAAMODEL_H

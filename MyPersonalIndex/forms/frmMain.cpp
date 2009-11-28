@@ -11,6 +11,7 @@
 #include "frmSort.h"
 #include "mainHoldingsModel.h"
 #include "viewDelegates.h"
+#include "avgPrice.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -68,6 +69,7 @@ void frmMain::connectSlots()
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addTicker()));
     connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editTicker()));
+    connect(ui.holdings, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editTicker()));
     connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(holdingsDateChange()));
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(holdingsShowHiddenToggle()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
@@ -79,11 +81,6 @@ void frmMain::connectSlots()
     connect(ui.mainUpdatePrices, SIGNAL(triggered()), this, SLOT(beginUpdate()));
 
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
-}
-
-void frmMain::dateChanged(QDate)
-{
-
 }
 
 void frmMain::loadSettings()
@@ -258,6 +255,7 @@ void frmMain::loadPortfolio()
         loadPortfolioSettings();
         int lastDate = getLastDate();
         m_gainLossInfo = getPortfolioGainLossInfo(lastDate);
+        avgPrice(m_currentPortfolio->data.trades, lastDate, m_currentPortfolio->info.costCalc, *sql);
         resetCalendars(lastDate);
         loadPortfolioHoldings(refreshType_LoadPortfolio);
     }
@@ -364,6 +362,7 @@ void frmMain::loadPortfolios()
     loadPortfoliosTickers();
     loadPortfoliosTickersAA();
     loadPortfoliosTickersTrades();
+    loadPortfoliosTrades();
 }
 
 void frmMain::loadPortfoliosInfo()
@@ -510,6 +509,38 @@ void frmMain::loadPortfoliosTickersTrades()
             current = portfolioID;
         }
         p->data.tickers[tickerID].trades.insert(trade.id, trade);
+    }
+    while(q->next());
+
+    delete q;
+}
+
+void frmMain::loadPortfoliosTrades()
+{
+    QSqlQuery *q = sql->executeResultSet(sql->getTrade());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::trade trade;
+
+        trade.date = q->value(queries::getTrade_Date).toInt();
+        trade.shares = q->value(queries::getTrade_Shares).toDouble();
+        trade.price = q->value(queries::getTrade_Price).toDouble();
+
+        int portfolioID = q->value(queries::getTrade_PortfolioID).toInt();
+        int tickerID = q->value(queries::getTrade_TickerID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+        p->data.trades[tickerID].append(trade);
     }
     while(q->next());
 
@@ -824,8 +855,8 @@ void frmMain::beginNAV(const int &portfolioID, const int &minDate)
     ui.stbProgress->setMaximum(0);
     m_navThread = new NAV(m_portfolios, m_dates, minDate, this, portfolioID);
     connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
-    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
-    m_navThread->run();
+    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
+    m_navThread->start();
 }
 
 void frmMain::finishNAV()

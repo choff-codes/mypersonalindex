@@ -186,6 +186,15 @@ public:
         }
     };
 
+    struct trade
+    {
+        int date;
+        double shares;
+        double price;
+
+        trade(): date(0), shares(0), price(0) {}
+    };
+
     struct statistic
     {
         int id;
@@ -318,6 +327,7 @@ public:
         QMap<int, assetAllocation> aa;
         QMap<int, account> acct;
         QList<int> stats;
+        QMap<int, QList<trade> > trades;
     };
 
     struct myPersonalIndex
@@ -327,7 +337,6 @@ public:
 
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
-
 
     struct securityInfo
     {

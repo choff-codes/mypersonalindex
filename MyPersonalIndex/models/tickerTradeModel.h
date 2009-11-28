@@ -14,7 +14,17 @@ public:
     tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             mpiModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
+    void autoResize()
+    {
+        if (m_list.count() == 0)
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        else
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    }
+
 private:
+    const QMap<int, globals::security> &m_cashAccounts;
+
     QVariant data(const QModelIndex &index, int role) const
     {
         if (!index.isValid())
@@ -164,17 +174,6 @@ public slots:
 signals:
     void saveItem(globals::dynamicTrade *trade);
     void deleteItem(const globals::dynamicTrade& trade);
-
-private:
-    const QMap<int, globals::security> &m_cashAccounts;
-
-    void autoResize()
-    {
-        if (m_list.count() == 0)
-            m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-        else
-            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    }
 };
 
 #endif // TICKERTRADEMODEL_H

@@ -22,7 +22,7 @@ frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data,
         if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
             m_minDate = d.startDate;
         else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
-            m_minDate = d.startDate;
+            m_minDate = d.date;
     }
 
     loadDropDowns();
@@ -79,6 +79,7 @@ void frmTicker::loadSecurity()
 
     m_modelTrade = new tickerTradeModel(m_security.trades.values(), m_data.tickers, 9, ui.trades, this);
     ui.trades->setModel(m_modelTrade);
+    m_modelTrade->autoResize();
 }
 
 void frmTicker::updateAAPercentage()
@@ -109,6 +110,7 @@ void frmTicker::installAAModel()
 
     ui.aa->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
     ui.aa->setColumnWidth(1, sbTmp.sizeHint().width());
+    updateAAPercentage();
 }
 
 void frmTicker::accept()
@@ -142,7 +144,7 @@ void frmTicker::accept()
         if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
             m_minDate = d.startDate;
         else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
-            m_minDate = d.startDate;
+            m_minDate = d.date;
     }
 
     m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));

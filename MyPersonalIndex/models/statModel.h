@@ -48,6 +48,8 @@ public:
     }
 
 private:
+    QMap<int, bool> m_selected;
+
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
         return mpiModelBase<globals::statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
@@ -133,9 +135,6 @@ public slots:
 signals:
     void saveItem(globals::statistic *stat);
     void deleteItem(const globals::statistic& stat);
-
-private:
-    QMap<int, bool> m_selected;
 };
 
 #endif // STATMODEL_H

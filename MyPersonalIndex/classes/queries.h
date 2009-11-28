@@ -52,16 +52,18 @@ public:
     static const QStringList tickersAAColumns;
     static const QStringList navColumns;
     static const QStringList settingsColumnsColumns;
+    static const QStringList avgPricePerShareColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPricesColumns_Date, closingPricesColumns_Ticker, closingPricesColumns_Price, closingPricesColumns_Change };
     enum { dividendsColumns_Date, dividendsColumns_Ticker, dividendsColumns_Amount };
     enum { splitsColumns_Date, splitsColumns_Ticker, splitsColumns_Ratio };
     enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence };
-    enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Code };
+    enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
+    enum { avgPricePerShareColumns_TickerID, avgPricePerShareColumns_Price };
 
     queries(QSqlDatabase database);
     static QString getDatabaseLocation();
@@ -74,6 +76,7 @@ public:
     QSqlQuery* executeResultSet(queryInfo*, const bool &setForward = true) const;
     QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant()) const;
 
+    queryInfo* deleteTable(const QString &table) const;
     queryInfo* deleteItem(const QString &table, const int &id) const;
     queryInfo* deleteTickerItems(const QString &table, const int &tickerID) const;
     queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID) const;
@@ -139,6 +142,9 @@ public:
     queryInfo* updateSecurity(const int &portfolioID, const globals::security&) const;
     queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&) const;
 
+    enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price };
+    queryInfo* getTrade() const;
+
     enum { getUpdateInfo_Ticker, getUpdateInfo_Date, getUpdateInfo_Type };
     queryInfo* getUpdateInfo() const;
     queryInfo* updateMissingPrices() const;
@@ -159,7 +165,7 @@ public:
            getPortfolioTickerInfo_Split, getPortfolioTickerInfo_Activity };
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date, const int &previousDate) const;
 
-    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const int &previousClose) const;
+    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const;
 
     enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
            getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,

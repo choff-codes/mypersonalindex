@@ -17,7 +17,7 @@ public:
         m_sql = new queries(db);
     }
 
-    ~NAV() { delete m_sql; }
+    ~NAV() { delete m_sql; QSqlDatabase::removeDatabase("nav"); }
     void run();
 
 signals:

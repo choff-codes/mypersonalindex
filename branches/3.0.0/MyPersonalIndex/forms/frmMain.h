@@ -50,6 +50,7 @@ private:
     void loadPortfoliosTickers();
     void loadPortfoliosTickersAA();
     void loadPortfoliosTickersTrades();
+    void loadPortfoliosTrades();
     void loadPortfoliosAA();
     void loadPortfoliosAcct();
     void loadPortfoliosStat();
@@ -70,7 +71,6 @@ private:
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
 
 private slots:
-    void dateChanged(QDate);
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();

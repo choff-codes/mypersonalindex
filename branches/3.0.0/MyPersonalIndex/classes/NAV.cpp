@@ -162,6 +162,7 @@ QMap<QString, globals::securityInfo> NAV::getPortfolioTickerInfo(const int &port
     do
     {
         globals::securityInfo s;
+
         s.ticker = q->value(queries::getPortfolioTickerInfo_Ticker).toString();
         s.previousClose = q->value(queries::getPortfolioTickerInfo_Price).toDouble();
         s.dividendAmount = q->value(queries::getPortfolioTickerInfo_Dividend).toDouble();
@@ -370,6 +371,7 @@ void NAV::insertPortfolioTrades(const int &portfolioID, const int &date, const i
     const dynamicTradeList &trades, const QMap<QString, globals::securityInfo> &tickerInfo, const tickerReinvestmentList &tickerReinvestments)
 {
     QVariantList portfolio, tickerID, dates, shares, price, commission, code;
+    globals::myPersonalIndex *currentPortfolio = m_data.value(portfolioID);
 
     // dividend reinvestments
     foreach(const tickerReinvestment &reinvest, tickerReinvestments)
@@ -461,7 +463,6 @@ void NAV::insertPortfolioTrades(const int &portfolioID, const int &date, const i
         if (d.trade.cashAccount == - 1)
             continue;
 
-        globals::myPersonalIndex *currentPortfolio = m_data.value(portfolioID);
         if ((!currentPortfolio->data.tickers.contains(d.trade.cashAccount)) || (!tickerInfo.contains(currentPortfolio->data.tickers.value(d.trade.cashAccount).ticker)))
             continue;
 
@@ -475,5 +476,27 @@ void NAV::insertPortfolioTrades(const int &portfolioID, const int &date, const i
         shares.append(price.last().toDouble() * sharesToBuy / (cashSecurity.previousClose / cashSecurity.splitRatio)) ;
         price.append(cashSecurity.previousClose / cashSecurity.splitRatio);
         commission.append(QVariant(QVariant::Double));
+    }
+
+    if (dates.count() != 0)
+    {
+        QMap<QString, QVariantList> tableValues;
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Portfolio), portfolio);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Date), dates);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_TickerID), tickerID);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Shares), shares);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Price), price);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Commission), commission);
+        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Code), code);
+        m_sql->executeTableUpdate(queries::table_Trades, tableValues);
+    }
+
+    for(int i = 0; i < dates.count(); ++i)
+    {
+        globals::trade t;
+        t.date = dates.at(i).toInt();
+        t.price = price.at(i).toDouble();
+        t.shares = shares.at(i).toDouble();
+        currentPortfolio->data.trades[tickerID.at(i).toInt()].append(t);
     }
 }

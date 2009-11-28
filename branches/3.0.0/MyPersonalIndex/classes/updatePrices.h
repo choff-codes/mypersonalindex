@@ -19,7 +19,7 @@ public:
         m_sql = new queries(db);
     }
 
-    ~updatePrices() { delete m_sql; }
+    ~updatePrices() { delete m_sql; QSqlDatabase::removeDatabase("update"); }
     static bool isInternetConnection();
 
 signals:

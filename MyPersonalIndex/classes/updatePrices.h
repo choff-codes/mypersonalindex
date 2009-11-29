@@ -11,8 +11,8 @@ class updatePrices: public QThread
     Q_OBJECT
 
 public:
-    updatePrices(const QMap<int, globals::myPersonalIndex*> &data, QList<int> &dates, const bool &splits, const int &dataStartDate, QObject *parent = 0):
-        QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_dataStartDate(dataStartDate)
+    updatePrices(const QMap<int, globals::myPersonalIndex*> &data, QList<int> &dates, globals::splitData &splits, const bool &downloadSplits, const int &dataStartDate, QObject *parent = 0):
+        QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_downloadSplits(downloadSplits), m_dataStartDate(dataStartDate)
     {
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "update");
         db.setDatabaseName(queries::getDatabaseLocation());
@@ -30,7 +30,8 @@ private:
     queries *m_sql;
     const QMap<int, globals::myPersonalIndex*> &m_data;
     QList<int> &m_dates;
-    bool m_splits;
+    globals::splitData &m_splits;
+    bool m_downloadSplits;
     int m_dataStartDate;
     QStringList m_updateFailures;
     NAV *m_nav;

@@ -66,6 +66,24 @@ public:
         QString s = value;
         return s.remove('%').replace("None", "-1", Qt::CaseInsensitive).toDouble(ok);
     }
+
+    static void exportTable(const QTableView *table, QMainWindow *parent)
+    {
+        QString fileType, filePath;
+        filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
+            "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
+    }
+
+    static double between(const globals::splitData &splits, const QString &ticker, const int &startDate, const int &endDate)
+    {
+        double ratio = 1;
+
+        for(globals::splitData::const_iterator i = splits.constBegin(); i != splits.constEnd(); ++i)
+            if (i.key() >= startDate && i.key() <= endDate && i.value().contains(ticker))
+                ratio = ratio * i.value().value(ticker);
+
+        return ratio;
+    }
 };
 
 #endif // FUNCTIONS_H

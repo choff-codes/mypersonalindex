@@ -16,7 +16,7 @@ public:
             QAbstractTableModel(parent), m_parent(parent), m_query(query), m_viewableColumns(viewableColumns), m_gainLossInfo(gainLossInfo)
     {
         m_rowCount = 0;
-        if (!m_query)
+        if (!m_query || !m_query->first())
             return;
 
         do
@@ -43,13 +43,6 @@ public:
 
     globals::gainLossInfo gainLossInfo () { return m_gainLossInfo; }
 
-    Qt::ItemFlags flags(const QModelIndex &index) const
-    {
-        if (m_viewableColumns.at(index.column()) == queries::getPortfolioHoldings_Symbol)
-                return QAbstractTableModel::flags(index) | Qt::ItemIsUserCheckable;
-        return QAbstractTableModel::flags(index);
-    }
-
     int rowCount(const QModelIndex&) const
     {
         return m_rowCount;
@@ -71,7 +64,7 @@ public:
         {
             m_query->seek(index.row());
 
-            if (m_query->value(column).isNull() || column == queries::getPortfolioHoldings_Active)
+            if (m_query->value(column).isNull() || column == queries::getPortfolioHoldings_Active || column == queries::getPortfolioHoldings_CashAccount)
                 return QVariant();
 
             switch (column)
@@ -92,16 +85,16 @@ public:
             return m_query->value(column);
         }
 
-        if (role == Qt::CheckStateRole && column == queries::getPortfolioHoldings_Active)
+        if (role == Qt::CheckStateRole && (column == queries::getPortfolioHoldings_Active || column == queries::getPortfolioHoldings_CashAccount))
         {
             m_query->seek(index.row());
-            return m_query->value(queries::getPortfolioHoldings_Active).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
+            return m_query->value(column).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
         }
 
         if (role == Qt::TextColorRole && column == queries::getPortfolioHoldings_GainP)
         {
             m_query->seek(index.row());
-            double value =  m_query->value(queries::getPortfolioHoldings_GainP).toDouble();
+            double value =  m_query->value(column).toDouble();
             return value == 0 ? QVariant() :
                 value > 0 ?  qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
         }

@@ -20,7 +20,7 @@ public:
             double shares = 0;
             double total = 0;
 
-            foreach(globals::trade t, i.value())
+            foreach(const globals::trade &t, i.value())
             {
                 shares += t.shares;
                 total += t.shares * t.price;
@@ -55,8 +55,9 @@ private:
             QList<globals::trade> existingTrades = i.value();
             QList<globals::trade> filteredTrades;
 
-            foreach(globals::trade t, existingTrades)
+            for(int x = 0; x < existingTrades.count(); ++x)
             {
+                globals::trade &t = existingTrades[x];
                 if (t.date > calculationDate)
                     break;
 

@@ -11,7 +11,6 @@
 #include "frmSort.h"
 #include "mainHoldingsModel.h"
 #include "viewDelegates.h"
-#include "avgPrice.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 {
@@ -45,11 +44,15 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
 
 void frmMain::closeEvent(QCloseEvent *event)
 {
+    if (m_updateThread || m_navThread)
+    {
+        event->ignore();
+        return;
+    }
+
     savePortfolio();
     saveSettings();
     event->accept();
-
-    //event->ignore();
 }
 
 void frmMain::connectSlots()
@@ -74,6 +77,7 @@ void frmMain::connectSlots()
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(holdingsShowHiddenToggle()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(sortDropDownChange(int)));
+    connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
@@ -122,6 +126,7 @@ void frmMain::loadSettings()
     loadSettingsColumns();
     loadStats();
     loadDates();
+    loadSplits();
     resetLastDate();
 }
 
@@ -166,7 +171,7 @@ void frmMain::loadStats()
 
 void frmMain::loadDates()
 {
-    QSqlQuery *q = sql->executeResultSet(sql->getDates(m_settings.dataStartDate));
+    QSqlQuery *q = sql->executeResultSet(sql->getDates());
 
     if (!q)
         return;
@@ -174,6 +179,22 @@ void frmMain::loadDates()
     do
     {
         m_dates.append(q->value(queries::getDates_Date).toInt());
+    }
+    while (q->next());
+
+    delete q;
+}
+
+void frmMain::loadSplits()
+{
+    QSqlQuery *q = sql->executeResultSet(sql->getSplits());
+
+    if (!q)
+        return;
+
+    do
+    {
+        m_splits[q->value(queries::getSplits_Date).toInt()].insert(q->value(queries::getSplits_Ticker).toString(), q->value(queries::getSplits_Ratio).toDouble());
     }
     while (q->next());
 
@@ -255,7 +276,7 @@ void frmMain::loadPortfolio()
         loadPortfolioSettings();
         int lastDate = getLastDate();
         m_gainLossInfo = getPortfolioGainLossInfo(lastDate);
-        avgPrice(m_currentPortfolio->data.trades, lastDate, m_currentPortfolio->info.costCalc, *sql);
+        calculateAvgPrice(lastDate);
         resetCalendars(lastDate);
         loadPortfolioHoldings(refreshType_LoadPortfolio);
     }
@@ -307,20 +328,22 @@ globals::gainLossInfo frmMain::getPortfolioGainLossInfo(const int &date)
 void frmMain::loadPortfolioHoldings(const refreshType &r)
 {
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
-    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
-            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false);
+    holdingsModel *oldModel = static_cast<holdingsModel*>(ui.holdings->model());
 
-    holdingsModel *m = static_cast<holdingsModel*>(ui.holdings->model());
+    if (r != refreshType_LoadPortfolio)
+        calculateAvgPrice(currentDate);
 
     globals::gainLossInfo g =
-            r == refreshType_LoadPortfolio ? m_gainLossInfo :
-            r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
-            m->gainLossInfo();
+        r == refreshType_LoadPortfolio ? m_gainLossInfo :
+        r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
+        oldModel->gainLossInfo();
+
+    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
+            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false, true);
 
     holdingsModel *model = new holdingsModel(q, m_settings.columns.value(globals::columnIDs_Holdings), g, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    delete m;
 
     if (ui.holdingsSortCombo->count() == 0)
         loadSortDropDown(model->fieldNames(), ui.holdingsSortCombo);
@@ -331,6 +354,8 @@ void frmMain::loadPortfolioHoldings(const refreshType &r)
         ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
     else
         ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
+
+    delete oldModel;
 }
 
 void frmMain::loadPortfolioSettings()
@@ -393,6 +418,7 @@ void frmMain::loadPortfoliosInfo()
         p.holdingsSort = q->value(queries::getPortfolio_HoldingsSort).toString();
         p.aaSort = q->value(queries::getPortfolio_AASort).toString();
         p.acctSort = q->value(queries::getPortfolio_AcctSort).toString();
+        p.lastNAVDate = q->value(queries::getPortfolio_LastNAVDate).toInt();
 
         m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
     }
@@ -532,6 +558,7 @@ void frmMain::loadPortfoliosTrades()
         trade.date = q->value(queries::getTrade_Date).toInt();
         trade.shares = q->value(queries::getTrade_Shares).toDouble();
         trade.price = q->value(queries::getTrade_Price).toDouble();
+        trade.commission = q->value(queries::getTrade_Commission).toDouble();
 
         int portfolioID = q->value(queries::getTrade_PortfolioID).toInt();
         int tickerID = q->value(queries::getTrade_TickerID).toInt();
@@ -828,7 +855,7 @@ void frmMain::beginUpdate()
     }
 
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(m_portfolios, m_dates, m_settings.splits, m_settings.dataStartDate, this);
+    m_updateThread = new updatePrices(m_portfolios, m_dates, m_splits, m_settings.splits, m_settings.dataStartDate, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
     connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_updateThread->start();
@@ -846,6 +873,7 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
             invalidTickers.join(", "));
 
     m_updateThread->quit();
+    m_updateThread->wait();
     m_updateThread->disconnect();
     delete m_updateThread;
 }
@@ -853,7 +881,7 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
 void frmMain::beginNAV(const int &portfolioID, const int &minDate)
 {
     ui.stbProgress->setMaximum(0);
-    m_navThread = new NAV(m_portfolios, m_dates, minDate, this, portfolioID);
+    m_navThread = new NAV(m_portfolios, m_dates, m_splits, minDate, this, portfolioID);
     connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
     connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_navThread->start();
@@ -865,6 +893,7 @@ void frmMain::finishNAV()
     ui.stbProgress->setValue(0);
     statusUpdate("");
     m_navThread->quit();
+    m_navThread->wait();
     m_navThread->disconnect();
     delete m_navThread;
 }
@@ -885,7 +914,7 @@ int frmMain::getCurrentDateOrPrevious(int date)
 
 int frmMain::getDateDropDownDate(QDateEdit *dateDropDown)
 {
-    int currentDate = getCurrentDateOrPrevious(dateDropDown->date().toJulianDay());
+    int currentDate = qMax(getCurrentDateOrPrevious(dateDropDown->date().toJulianDay()), m_currentPortfolio->info.startDate);
     dateDropDown->blockSignals(true);
     dateDropDown->setDate(QDate::fromJulianDay(currentDate));
     dateDropDown->blockSignals(false);

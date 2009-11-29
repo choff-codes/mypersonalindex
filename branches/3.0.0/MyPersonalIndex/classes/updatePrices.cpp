@@ -31,13 +31,13 @@ void updatePrices::run()
         if (getPrices(info.ticker, info.closingDate, firstUpdate))  // check if symbol exists
         {
             getDividends(info.ticker, info.dividendDate, firstUpdate);
-            if (m_splits)
+            if (m_downloadSplits)
                 getSplits(info.ticker, info.splitDate, firstUpdate);
         }
 
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, 0, this);
+    m_nav = new NAV(m_data, m_dates, m_splits, 0, this);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->run();
@@ -136,7 +136,7 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
             dates.append(djulian);
             // add new date if it doesn't already exist
             QList<int>::iterator place = qLowerBound(m_dates.begin(), m_dates.end(), djulian);
-            if (*place != djulian && *place >= m_dataStartDate)
+            if (*place != djulian)
                 m_dates.insert(place, djulian);
             // update min date
             if (djulian < earliestUpdate)
@@ -259,6 +259,9 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), tickers);
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), ratios);
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
+
+        for(int i = 0; i < dates.count(); ++i)
+            m_splits[dates.at(i).toInt()].insert(tickers.at(i).toString(), ratios.at(i).toDouble());
     }
 
     delete lines;

@@ -12,6 +12,7 @@
 #include "queries.h"
 #include "updatePrices.h"
 #include "NAV.h"
+#include "avgPrice.h"
 
 class frmMain : public QMainWindow
 {
@@ -30,6 +31,7 @@ private:
     globals::myPersonalIndex *m_currentPortfolio;
     globals::settings m_settings;
     QList<int> m_dates;
+    globals::splitData m_splits;
     QMap<int, globals::statistic> m_statistics;
     globals::gainLossInfo m_gainLossInfo;
     updatePrices *m_updateThread;
@@ -55,6 +57,7 @@ private:
     void loadPortfoliosAcct();
     void loadPortfoliosStat();
     void loadDates();
+    void loadSplits();
     void loadStats();
     void loadPortfolioSettings();
     void savePortfolio();
@@ -69,6 +72,7 @@ private:
     void resetCalendars(const int &date);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
+    void calculateAvgPrice (const int &date) { avgPrice(m_currentPortfolio->data.trades, date, m_currentPortfolio->info.costCalc, *sql); }
 
 private slots:
     void addPortfolio();
@@ -90,6 +94,7 @@ private slots:
     void statusUpdate(const QString &message);
     void holdingsShowHiddenToggle() { loadPortfolioHoldings(refreshType_Other); }
     void holdingsDateChange() { loadPortfolioHoldings(refreshType_DateChange); }
+    void holdingsExport() { functions::exportTable(ui.holdings, this); }
     void holdingsModifyColumns();
     void sortDropDownChange(int index);
 };

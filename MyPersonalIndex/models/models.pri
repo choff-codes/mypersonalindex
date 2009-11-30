@@ -5,3 +5,4 @@ HEADERS += $$PWD/aaModel.h \
     $$PWD/tickerAAModel.h \
     $$PWD/tickerTradeModel.h \
     $$PWD/mainHoldingsModel.h
+SOURCES += $$PWD/mainHoldingsModel.cpp

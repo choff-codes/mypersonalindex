@@ -8,4 +8,5 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/globals.h \
     $$PWD/functions.h \
     $$PWD/NAV.h \
-    $$PWD/avgPrice.h
+    $$PWD/avgPrice.h \
+    $$PWD/calculations.h

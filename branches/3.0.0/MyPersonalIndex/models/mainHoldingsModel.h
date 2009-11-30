@@ -5,6 +5,96 @@
 #include <QtSql>
 #include "queries.h"
 #include "functions.h"
+#include "calculations.h"
+
+class holdingsRow
+{
+public:
+    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_ID };
+    static const QStringList columns;
+    static const QVariantList columnsType;
+    QVariantList values;
+
+    holdingsRow(const QString &sort): m_sort(sort) {}
+
+    static holdingsRow getHoldingsRow(const globals::security &s, const QList<globals::trade> &trades, const globals::securityInfo &info,
+        const globals::splitData &splits, const QMap<int, globals::account> &accounts, const double &portfolioValue, const double &avgPrice,
+        const int &date, const QString &sort)
+    {
+        holdingsRow row(sort);
+        globals::tickerValue value;
+
+        if (s.includeInCalc)
+            value = calculations::tickerValue(trades, info, splits, date);
+
+        //row_Active
+        row.values.append((int)s.includeInCalc);
+        //row_Ticker
+        row.values.append(s.ticker);
+        //row_Cash
+        row.values.append((int)s.cashAccount);
+        //row_Price
+        row.values.append(info.closePrice);
+        //row_Shares
+        row.values.append(value.shares);
+        //row_Avg
+        row.values.append(value.shares == 0 ? QVariant() : avgPrice);
+        //row_Cost
+        row.values.append(value.shares == 0 ? QVariant() : value.costBasis);
+        //row_Value
+        row.values.append(value.shares == 0 ? QVariant() : value.totalValue);
+        //row_ValueP
+        row.values.append(portfolioValue == 0 ? QVariant() : value.totalValue / portfolioValue * 100);
+        //row_Gain
+        row.values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
+        //row_GainP
+        row.values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
+        //row_Acct
+        row.values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
+        //row_ID
+        row.values.append(s.id);
+
+        return row;
+    }
+
+    static QMap<int, QString> fieldNames()
+    {
+        QMap<int, QString> names;
+
+        for (int i = 0; i < columns.count(); ++i)
+            names[i] = QString(columns.at(i)).replace('\n', ' ');
+
+        names.remove(row_ID);
+        return names;
+    }
+
+    void setSort(const QString &sort) { m_sort = sort; }
+
+    bool operator< (const holdingsRow &other) const
+    {
+        if (m_sort.isEmpty())
+            return false;
+
+        QStringList strings = m_sort.split('|');
+        foreach(const QString &s, strings)
+        {
+            bool lessThan = s.at(0) != 'D';
+            int column = lessThan ? s.toInt() : QString(s).remove(0, 1).toInt();
+            if (lessThan)
+            {
+                if (functions::lessThan(values.at(column), other.values.at(column), columnsType.at(column)))
+                    return true;
+            }
+            else
+                if (functions::greaterThan(values.at(column), other.values.at(column), columnsType.at(column)))
+                    return true;
+        }
+        return false;
+    }
+
+private:
+    QString m_sort;
+};
 
 class holdingsModel: public QAbstractTableModel
 {
@@ -12,40 +102,19 @@ class holdingsModel: public QAbstractTableModel
 
 public:
 
-    holdingsModel(QSqlQuery *query, QList<int> viewableColumns, const globals::gainLossInfo &gainLossInfo, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_parent(parent), m_query(query), m_viewableColumns(viewableColumns), m_gainLossInfo(gainLossInfo)
+    holdingsModel(const QList<holdingsRow> &rows, QList<int> viewableColumns, const globals::gainLossInfo &gainLossInfo, const bool &showHidden, QTableView *parent = 0):
+            QAbstractTableModel(parent), m_parent(parent), m_rows(rows), m_viewableColumns(viewableColumns), m_gainLossInfo(gainLossInfo)
     {
-        m_rowCount = 0;
-        if (!m_query || !m_query->first())
-            return;
-
-        do
-        {
-            ++m_rowCount;
-        }
-        while (m_query->next());
-        insertRows(0, m_rowCount);
+        insertRows(0, rows.count());
     }
 
-    ~holdingsModel() { delete m_query; }
-
-    QMap<int, QString> fieldNames()
-    {
-        QMap<int, QString> names;
-        QSqlRecord record = m_query->record();
-
-        for (int i = 0; i < record.count(); ++i)
-            names[i] = record.fieldName(i).replace('|', ' ');
-
-        names.remove(queries::getPortfolioHoldings_ID);
-        return names;
-    }
+    //~holdingsModel() { delete m_query; }
 
     globals::gainLossInfo gainLossInfo () { return m_gainLossInfo; }
 
     int rowCount(const QModelIndex&) const
     {
-        return m_rowCount;
+        return m_rows.count();
     }
 
     int columnCount (const QModelIndex&) const
@@ -62,39 +131,35 @@ public:
 
         if (role == Qt::DisplayRole)
         {
-            m_query->seek(index.row());
-
-            if (m_query->value(column).isNull() || column == queries::getPortfolioHoldings_Active || column == queries::getPortfolioHoldings_CashAccount)
+            if (m_rows.at(index.row()).values.at(column).isNull() || column == holdingsRow::row_Active || column == holdingsRow::row_Cash)
                 return QVariant();
 
             switch (column)
             {
-                case queries::getPortfolioHoldings_AveragePrice:
-                case queries::getPortfolioHoldings_CostBasis:
-                case queries::getPortfolioHoldings_Gain:
-                case queries::getPortfolioHoldings_Price:
-                case queries::getPortfolioHoldings_TotalValue:
-                    return functions::doubleToCurrency(m_query->value(column).toDouble());
-                case queries::getPortfolioHoldings_GainP:
-                case queries::getPortfolioHoldings_TotalValueP:
-                    return functions::doubleToPercentage(m_query->value(column).toDouble());
-                case queries::getPortfolioHoldings_Shares:
-                    return functions::doubleToLocalFormat(m_query->value(column).toDouble(), 4);
+                case holdingsRow::row_Avg:
+                case holdingsRow::row_Cost:
+                case holdingsRow::row_Gain:
+                case holdingsRow::row_Price:
+                case holdingsRow::row_Value:
+                    return functions::doubleToCurrency(m_rows.at(index.row()).values.at(column).toDouble());
+                case holdingsRow::row_GainP:
+                case holdingsRow::row_ValueP:
+                    return functions::doubleToPercentage(m_rows.at(index.row()).values.at(column).toDouble());
+                case holdingsRow::row_Shares:
+                    return functions::doubleToLocalFormat(m_rows.at(index.row()).values.at(column).toDouble(), 4);
             }
 
-            return m_query->value(column);
+            return m_rows.at(index.row()).values.at(column);
         }
 
-        if (role == Qt::CheckStateRole && (column == queries::getPortfolioHoldings_Active || column == queries::getPortfolioHoldings_CashAccount))
+        if (role == Qt::CheckStateRole && (column == holdingsRow::row_Active || column == holdingsRow::row_Cash))
         {
-            m_query->seek(index.row());
-            return m_query->value(column).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
+            return m_rows.at(index.row()).values.at(column).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
         }
 
         if (role == Qt::TextColorRole && column == queries::getPortfolioHoldings_GainP)
         {
-            m_query->seek(index.row());
-            double value =  m_query->value(column).toDouble();
+            double value = m_rows.at(index.row()).values.at(column).toDouble();
             return value == 0 ? QVariant() :
                 value > 0 ?  qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
         }
@@ -117,18 +182,18 @@ public:
         QString extra;
         switch(column)
         {
-            case queries::getPortfolioHoldings_CostBasis:
+            case holdingsRow::row_Cost:
                 extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.costBasis));
                 break;
-            case queries::getPortfolioHoldings_TotalValue:
+            case holdingsRow::row_Value:
                 extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue));
                 break;
-            case queries::getPortfolioHoldings_Gain:
+            case holdingsRow::row_Gain:
                 extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue - m_gainLossInfo.costBasis));
                 break;
         }
 
-        return m_query->record().fieldName(column).replace('|', '\n').append(extra);
+        return QString(holdingsRow::columns.at(column)).append(extra);
     }
 
     QList<int> selectedItems()
@@ -140,10 +205,7 @@ public:
             return items;
 
         foreach(const QModelIndex &q, model)
-        {
-            m_query->seek(q.row());
-            items.append(m_query->value(queries::getPortfolioHoldings_ID).toInt());
-        }
+            items.append(m_rows.at(q.row()).values.at(holdingsRow::row_ID).toInt());
 
         return items;
     }
@@ -152,7 +214,7 @@ public slots:
 
 private:
     QTableView *m_parent;
-    QSqlQuery *m_query;
+    QList<holdingsRow> m_rows;
     QList<int> m_viewableColumns;
     int m_rowCount;
     globals::gainLossInfo m_gainLossInfo;

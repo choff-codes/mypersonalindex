@@ -674,7 +674,7 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
             "SELECT c.Ticker, COALESCE(CASE WHEN c.CashAccount = 1 THEN 1 ELSE d.Price END, 0) AS Price, COALESCE(e.Amount, 0) AS Dividend"
             " FROM (SELECT a.Ticker, MAX(a.CashAccount) AS CashAccount"
                     " FROM Tickers AS a"
-                    " WHERE a.IncludeInCalc = 1 AND a.PortfolioID = :PortfolioID"
+                    " WHERE a.PortfolioID = :PortfolioID"
                     " GROUP BY a.Ticker) AS c"
             " LEFT JOIN ClosingPrices AS d"
                 " ON c.CashAccount = 0 AND d.Ticker = c.Ticker AND d.Date = :Date1"
@@ -690,18 +690,20 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
 queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const
 {
     return new queryInfo(
-            "SELECT SUM(Shares * :Price) AS Shares"
-            " FROM (SELECT MAX(a.Shares) * COALESCE(EXP(SUM(LOG(b.Ratio))), 1) as Shares"
-                    " FROM Trades a"
-                    " LEFT JOIN Splits b"
-                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND :PreviousDate1"
-                    " WHERE a.TickerID = :TickerID AND a.Date <= :PreviousDate2"
-                    " GROUP BY a.rowID) AS c",
+            "SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL"
+            " SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices",
+//            "SELECT SUM(Shares * :Price) AS Shares"
+//            " FROM (SELECT MAX(a.Shares) * COALESCE(EXP(SUM(LOG(b.Ratio))), 1) as Shares"
+//                    " FROM Trades a"
+//                    " LEFT JOIN Splits b"
+//                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND :PreviousDate1"
+//                    " WHERE a.TickerID = :TickerID AND a.Date <= :PreviousDate2"
+//                    " GROUP BY a.rowID) AS c",
         QList<parameter>()
-            << parameter(":TickerID", tickerID)
-            << parameter(":Price", previousClose)
-            << parameter(":PreviousDate1", previousDate)
-            << parameter(":PreviousDate2", previousDate)
+//            << parameter(":TickerID", tickerID)
+//            << parameter(":Price", previousClose)
+//            << parameter(":PreviousDate1", previousDate)
+//            << parameter(":PreviousDate2", previousDate)
     );
 }
 

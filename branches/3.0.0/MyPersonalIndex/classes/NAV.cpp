@@ -1,5 +1,6 @@
 #include "NAV.h"
 #include "functions.h"
+#include "calculations.h"
 
 void NAV::run()
 {
@@ -40,7 +41,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate, portfolioStartDate);
     QList<int> tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
     double previousTotalValue = 0, previousNAV = currentPortfolio->info.startValue;
-    QMap<QString, globals::securityInfo> previousTickerInfo = getPortfolioTickerInfo(portfolioID, *previousDate);
+    QMap<QString, globals::securityInfo> previousTickerInfo = calculations::portfolioTickerInfo(portfolioID, *previousDate, *m_sql);
 
     if (portfolioStartDate)
     {
@@ -55,7 +56,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     for (QList<int>::const_iterator currentDate = previousDate + 1; currentDate != m_dates.constEnd(); ++currentDate)
     {
         double newTotalValue = 0, newTotalDividends = 0, dailyActivity = 0, newNAV = 0;
-        QMap<QString, globals::securityInfo> tickerInfo = getPortfolioTickerInfo(portfolioID, *currentDate);
+        QMap<QString, globals::securityInfo> tickerInfo = calculations::portfolioTickerInfo(portfolioID, *currentDate, *m_sql);
 
         insertPortfolioTrades(portfolioID, *currentDate, *previousDate, previousTotalValue, trades.value(*currentDate) + trades.value(-1),
             previousTickerInfo, tickerReinvestments);
@@ -175,19 +176,10 @@ double NAV::getPortfolioTotalValue(const globals::myPersonalIndex *currentPortfo
             continue;
 
         QString ticker = currentPortfolio->data.tickers.value(tickerID).ticker;
-        const globals::securityInfo &s = tickerInfo.value(ticker);
-
-        double shares = 0;
-        foreach(const globals::trade &trade, i.value())
-        {
-            if (trade.date > date)
-                break;
-
-            shares += trade.shares * functions::between(m_splits, ticker, trade.date, date);
-        }
-
-        *dividendValue += shares * s.dividendAmount;
-        value += shares * s.closePrice;
+        globals::tickerValue t = calculations::tickerValue(i.value(), tickerInfo.value(ticker), m_splits, date);
+        value += t.totalValue;
+        if (dividendValue)
+            *dividendValue += t.dividendAmount;
     }
 
     return value;
@@ -213,30 +205,6 @@ double NAV::getPortfolioDailyActivity(const int &portfolioID, const int &date, c
     }
 
     return activity;
-}
-
-QMap<QString, globals::securityInfo> NAV::getPortfolioTickerInfo(const int &portfolioID, const int &date)
-{
-    QMap<QString, globals::securityInfo> tickerInfo;
-    QSqlQuery *q = m_sql->executeResultSet(m_sql->getPortfolioTickerInfo(portfolioID, date));
-
-    if (!q)
-        return tickerInfo;
-
-    do
-    {
-        globals::securityInfo s;
-
-        s.ticker = q->value(queries::getPortfolioTickerInfo_Ticker).toString();
-        s.closePrice = q->value(queries::getPortfolioTickerInfo_Price).toDouble();
-        s.dividendAmount = q->value(queries::getPortfolioTickerInfo_Dividend).toDouble();
-
-        tickerInfo.insert(s.ticker, s);
-    }
-    while(q->next());
-
-    delete q;
-    return tickerInfo;
 }
 
 QList<int> NAV::getPortfolioTickerReinvestment(const int &portfolioID)

@@ -44,7 +44,6 @@ private:
     void deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate);
     double getPortfolioTotalValue(const globals::myPersonalIndex *currentPortfolio, const QMap<QString, globals::securityInfo> &tickerInfo, const int &date, double *dividendValue = 0);
     double getPortfolioDailyActivity(const int &portfolioID, const int &date, const QMap<QString, globals::securityInfo> &tickerInfo);
-    QMap<QString, globals::securityInfo> getPortfolioTickerInfo(const int &portfolioID, const int &date);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate);
     void getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
     bool getCurrentDateOrNext(int &date);

@@ -74,15 +74,44 @@ public:
             "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
     }
 
-    static double between(const globals::splitData &splits, const QString &ticker, const int &startDate, const int &endDate)
+    static bool lessThan(const QVariant &left, const QVariant &right, const QVariant &type)
     {
-        double ratio = 1;
+        if ((left.isNull() && right.isNull()) || right.isNull())
+            return false;
 
-        for(globals::splitData::const_iterator i = splits.constBegin(); i != splits.constEnd(); ++i)
-            if (i.key() >= startDate && i.key() <= endDate && i.value().contains(ticker))
-                ratio = ratio * i.value().value(ticker);
+        if (left.isNull())
+            return true;
 
-        return ratio;
+        switch (type.type())
+        { 
+            case QVariant::Double:
+                return left.toDouble() < right.toDouble();
+            case QVariant::Int:
+                return left.toInt() < right.toInt();
+            case QVariant::String:
+            default:
+                return left.toString().compare(right.toString(), Qt::CaseInsensitive) < 0;
+        };
+    }
+
+    static bool greaterThan(const QVariant &left, const QVariant &right, const QVariant &type)
+    {
+        if ((left.isNull() && right.isNull()) || left.isNull())
+            return false;
+
+        if (right.isNull())
+            return true;
+
+        switch (type.type())
+        {
+            case QVariant::Double:
+                return left.toDouble() > right.toDouble();
+            case QVariant::Int:
+                return left.toInt() > right.toInt();
+            case QVariant::String:
+            default:
+                return left.toString().compare(right.toString(), Qt::CaseInsensitive) > 0;
+        };
     }
 };
 

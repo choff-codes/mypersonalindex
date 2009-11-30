@@ -2,92 +2,80 @@
 #define AVGPRICE_H
 
 #include "globals.h"
-#include "queries.h"
+#include "calculations.h"
 
 class avgPrice
 {
-    typedef QMap<int, QList<globals::trade> > tradeList;
-
 public:
-    avgPrice(const tradeList &trades, const int &calculationDate, const globals::avgShareCalc &calcType, const queries &sql)
+
+    typedef QPair<double,double> sharePricePair;
+
+    static QMap<int, double> calculate(const globals::tradeList &trades, const int &calculationDate, const globals::avgShareCalc &calcType,
+        const QMap<int, globals::security> &tickers, const globals::splitData &splits)
     {
-        tradeList avgPrices = calculate(trades, calculationDate, calcType);
-        QVariantList ticker, avg;
-
-        for(tradeList::const_iterator i = avgPrices.constBegin(); i != avgPrices.constEnd(); ++i)
+        QMap<int, double> returnValues;
+        for(globals::tradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
         {
+            // get ticker info
             int tickerID = i.key();
-            double shares = 0;
-            double total = 0;
+            QString ticker = tickers.value(tickerID).ticker;
+            // get all trades for this ticker
+            const QList<globals::trade> &existingTrades = i.value();
+            int count = existingTrades.count();
+            // set up calculation variables
+            QList<sharePricePair> filteredTrades;
+            double shares = 0; double total = 0; double splitRatio = 1;
 
-            foreach(const globals::trade &t, i.value())
+            for(int x = 0; x < count; ++x)
             {
-                shares += t.shares;
-                total += t.shares * t.price;
-            }
-            if (shares > 0)
-            {
-                ticker.append(tickerID);
-                avg.append(total / shares);
-            }
-        }
-
-        sql.executeNonQuery(sql.deleteTable(queries::table_AvgPricePerShare));
-        if (ticker.count() != 0)
-        {
-            QMap<QString, QVariantList> tableValues;
-            tableValues.insert(queries::avgPricePerShareColumns.at(queries::avgPricePerShareColumns_TickerID), ticker);
-            tableValues.insert(queries::avgPricePerShareColumns.at(queries::avgPricePerShareColumns_Price), avg);
-
-            queries::queries &tableUpdateQuery = const_cast<queries::queries&>(sql);
-            tableUpdateQuery.executeTableUpdate(queries::table_AvgPricePerShare, tableValues);
-        }
-    }
-
-private:
-    tradeList calculate(const tradeList &trades, const int &calculationDate, const globals::avgShareCalc &calcType)
-    {
-        tradeList avgPrices;
-
-        for(tradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
-        {
-            int tickerID = i.key();
-            QList<globals::trade> existingTrades = i.value();
-            QList<globals::trade> filteredTrades;
-
-            for(int x = 0; x < existingTrades.count(); ++x)
-            {
-                globals::trade &t = existingTrades[x];
-                if (t.date > calculationDate)
+                globals::trade t = existingTrades.at(x);
+                if (t.date > calculationDate) // trade date outside of calculation date
                     break;
 
-                if (calcType == globals::calc_AVG && t.shares < 0)
+                if (calcType == globals::calc_AVG && t.shares < 0) // avg price averages all positive trades
                     continue;
 
-                if (t.shares < 0)
+                // check for any pre-existing splits
+                splitRatio = calculations::splitRatio(splits, ticker, t.date, calculationDate);
+                t.price = t.price / splitRatio;
+                t.shares = t.shares * splitRatio;
+
+                if (t.shares < 0) // sold shares, need to remove from filteredTrades at the beginning or end depending on LIFO or FIFO
                 {
-                    while (filteredTrades.count() != 0 && t.shares != 0)
+                    while (t.shares != 0 && filteredTrades.count() != 0) // still shares to sell
                     {
-                        int x = calcType == globals::calc_LIFO ? filteredTrades.count() - 1 : 0;
-                        if (filteredTrades.at(x).shares <= -1 * t.shares)
-                        {
-                            t.shares += filteredTrades.at(x).shares;
-                            filteredTrades.removeAt(x);
+                        int z = calcType == globals::calc_LIFO ? filteredTrades.count() - 1 : 0;
+                        const sharePricePair &pair = filteredTrades.at(x);
+
+                        if (pair.first <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
+                        {                            
+                            t.shares += pair.first;
+                            shares -= pair.first;
+                            total -= pair.first * pair.second;
+                            filteredTrades.removeAt(z);
                         }
-                        else
+                        else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
                         {
-                            filteredTrades[x].shares += t.shares;
-                            t.shares = 0;
+                            filteredTrades[z].first += t.shares;
+                            shares -= t.shares;
+                            total -= t.shares * pair.second;
+                            break;
                         }
                     }
                 }
-                else
-                    filteredTrades.append(t);
+                else // this is a buy, just add the trade
+                {
+                    filteredTrades.append(qMakePair(t.shares, t.price));
+                    shares += t.shares;
+                    total += t.shares * t.price;
+                }
             }
-            avgPrices.insert(tickerID, filteredTrades);
+
+            if (shares > 0)
+                returnValues.insert(tickerID, total / shares); // insert avg price for this tickerID
         }
 
-        return avgPrices;
+        return returnValues;
     }
 };
 

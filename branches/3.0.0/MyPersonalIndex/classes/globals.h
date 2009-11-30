@@ -390,6 +390,16 @@ public:
         gainLossInfo(): totalValue(0), taxLiability(0), costBasis(0) {}
     };
 
+    struct tickerValue
+    {
+        double totalValue;
+        double shares;
+        double costBasis;
+        double dividendAmount;
+
+        tickerValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0) {}
+    };
+
     typedef QMap<int, QMap<QString, double> > splitData;
 };
 

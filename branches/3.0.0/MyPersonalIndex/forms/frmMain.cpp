@@ -12,7 +12,7 @@
 #include "mainHoldingsModel.h"
 #include "viewDelegates.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0)
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
     QString location = queries::getDatabaseLocation();
     if (!QFile::exists(location))
@@ -89,7 +89,11 @@ void frmMain::connectSlots()
 
 void frmMain::loadSettings()
 {
+    QSqlQuery *t = sql->executeResultSet(sql->getPortfolioTickerValue(0,0,0));
+
     checkVersion();
+
+    delete t;
 
     QSqlQuery *q = sql->executeResultSet(sql->getSettings());
 
@@ -330,23 +334,38 @@ void frmMain::loadPortfolioHoldings(const refreshType &r)
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     holdingsModel *oldModel = static_cast<holdingsModel*>(ui.holdings->model());
 
-    if (r != refreshType_LoadPortfolio)
-        calculateAvgPrice(currentDate);
+//    if (r != refreshType_LoadPortfolio)
+//        calculateAvgPrice(currentDate);
 
-    globals::gainLossInfo g =
-        r == refreshType_LoadPortfolio ? m_gainLossInfo :
-        r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
-        oldModel->gainLossInfo();
 
-    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
-            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false, true);
+    globals::gainLossInfo g;// =
+//        r == refreshType_LoadPortfolio ? m_gainLossInfo :
+//        r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
+//        oldModel->gainLossInfo();
 
-    holdingsModel *model = new holdingsModel(q, m_settings.columns.value(globals::columnIDs_Holdings), g, ui.holdings);
+    QList<holdingsRow> rows;
+    QMap<QString, globals::securityInfo> tickerInfo = calculations::portfolioTickerInfo(m_currentPortfolio->info.id, currentDate, *sql);
+
+    QMap<int, double> avgPrices = avgPrice::calculate(m_currentPortfolio->data.trades, currentDate, m_currentPortfolio->info.costCalc,
+        m_currentPortfolio->data.tickers, m_splits);
+
+    foreach(const globals::security &s, m_currentPortfolio->data.tickers)
+        rows.append(
+            holdingsRow::getHoldingsRow(s, m_currentPortfolio->data.trades.value(s.id), tickerInfo.value(s.ticker), m_splits, m_currentPortfolio->data.acct,
+            g.totalValue, avgPrices.value(s.id), currentDate, "")
+        ); 
+
+    qSort(rows);
+
+//    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
+//            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false, true);
+
+    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), g, true, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     if (ui.holdingsSortCombo->count() == 0)
-        loadSortDropDown(model->fieldNames(), ui.holdingsSortCombo);
+        loadSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
 
     if (m_currentPortfolio->info.holdingsSort.isEmpty())
         ui.holdingsSortCombo->setCurrentIndex(0);
@@ -876,6 +895,7 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
     m_updateThread->wait();
     m_updateThread->disconnect();
     delete m_updateThread;
+    m_updateThread = 0;
 }
 
 void frmMain::beginNAV(const int &portfolioID, const int &minDate)
@@ -896,6 +916,7 @@ void frmMain::finishNAV()
     m_navThread->wait();
     m_navThread->disconnect();
     delete m_navThread;
+    m_navThread = 0;
 }
 
 void frmMain::statusUpdate(const QString &message)
@@ -934,8 +955,7 @@ void frmMain::loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *
 
 void frmMain::holdingsModifyColumns()
 {
-    QMap<int, QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
-    frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), fieldNames, *sql, this);
+    frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), holdingsRow::fieldNames(), *sql, this);
     if (f.exec())
     {
         m_settings.columns[globals::columnIDs_Holdings] = f.getReturnValues();
@@ -961,8 +981,7 @@ void frmMain::sortDropDownChange(int index)
         return;
     }
 
-    QMap<int, QString> fieldNames = static_cast<holdingsModel*>(ui.holdings->model())->fieldNames();
-    frmSort f(m_currentPortfolio->info.holdingsSort, fieldNames, this);
+    frmSort f(m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames(), this);
 
     if (f.exec())
     {

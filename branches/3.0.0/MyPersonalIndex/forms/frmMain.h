@@ -72,7 +72,7 @@ private:
     void resetCalendars(const int &date);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
-    void calculateAvgPrice (const int &date) { avgPrice(m_currentPortfolio->data.trades, date, m_currentPortfolio->info.costCalc, *sql); }
+    void calculateAvgPrice (const int &date) { avgPrice(); }
 
 private slots:
     void addPortfolio();

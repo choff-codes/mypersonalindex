@@ -113,6 +113,23 @@ public:
                 return left.toString().compare(right.toString(), Qt::CaseInsensitive) > 0;
         };
     }
+
+    static bool equal(const QVariant &left, const QVariant &right, const QVariant &type)
+    {
+        if (left.isNull() && right.isNull())
+            return true;
+
+        switch (type.type())
+        {
+            case QVariant::Double:
+                return left.toDouble() == right.toDouble();
+            case QVariant::Int:
+                return left.toInt() == right.toInt();
+            case QVariant::String:
+            default:
+                return left.toString().compare(right.toString(), Qt::CaseInsensitive) == 0;
+        };
+    }
 };
 
 #endif // FUNCTIONS_H

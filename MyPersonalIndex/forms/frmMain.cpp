@@ -352,10 +352,10 @@ void frmMain::loadPortfolioHoldings(const refreshType &r)
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
         rows.append(
             holdingsRow::getHoldingsRow(s, m_currentPortfolio->data.trades.value(s.id), tickerInfo.value(s.ticker), m_splits, m_currentPortfolio->data.acct,
-            g.totalValue, avgPrices.value(s.id), currentDate, "")
+            g.totalValue, avgPrices.value(s.id), currentDate, "2|D0|1")
         ); 
 
-    qSort(rows);
+    qStableSort(rows);
 
 //    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
 //            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false, true);

@@ -80,14 +80,14 @@ public:
         {
             bool lessThan = s.at(0) != 'D';
             int column = lessThan ? s.toInt() : QString(s).remove(0, 1).toInt();
-            if (lessThan)
-            {
-                if (functions::lessThan(values.at(column), other.values.at(column), columnsType.at(column)))
-                    return true;
-            }
-            else
-                if (functions::greaterThan(values.at(column), other.values.at(column), columnsType.at(column)))
-                    return true;
+
+            if (functions::equal(values.at(column), other.values.at(column), columnsType.at(column)))
+                continue;
+
+            if (functions::lessThan(values.at(column), other.values.at(column), columnsType.at(column)))
+                return lessThan;
+
+            return !lessThan;
         }
         return false;
     }

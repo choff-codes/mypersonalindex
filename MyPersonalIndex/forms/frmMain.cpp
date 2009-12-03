@@ -279,8 +279,6 @@ void frmMain::loadPortfolio()
 
         loadPortfolioSettings();
         int lastDate = getLastDate();
-        m_gainLossInfo = getPortfolioGainLossInfo(lastDate);
-        calculateAvgPrice(lastDate);
         resetCalendars(lastDate);
         loadPortfolioHoldings(refreshType_LoadPortfolio);
     }
@@ -314,53 +312,24 @@ void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *cale
     calendarEnd->blockSignals(false);
 }
 
-globals::gainLossInfo frmMain::getPortfolioGainLossInfo(const int &date)
-{
-    globals::gainLossInfo gainLossInfo;
-
-    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioGainLossInfo(m_currentPortfolio->info.id, date));
-    if (q)
-    {
-        gainLossInfo.costBasis = q->value(queries::getPortfolioGainLossInfo_CostBasis).toDouble();
-        gainLossInfo.taxLiability = q->value(queries::getPortfolioGainLossInfo_TotalValue).toDouble();
-        gainLossInfo.totalValue = q->value(queries::getPortfolioGainLossInfo_TotalValue).toDouble();
-    }
-
-    return gainLossInfo;
-}
-
 void frmMain::loadPortfolioHoldings(const refreshType &r)
 {
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
-    holdingsModel *oldModel = static_cast<holdingsModel*>(ui.holdings->model());
+    QAbstractItemModel *oldModel = ui.holdings->model();
 
-//    if (r != refreshType_LoadPortfolio)
-//        calculateAvgPrice(currentDate);
-
-
-    globals::gainLossInfo g;// =
-//        r == refreshType_LoadPortfolio ? m_gainLossInfo :
-//        r == refreshType_DateChange ? getPortfolioGainLossInfo(currentDate):
-//        oldModel->gainLossInfo();
+    if (!m_currentPortfolio->cache.contains(currentDate))
+        m_currentPortfolio->cache.insert(currentDate, calculations::portfolioValues(m_currentPortfolio, currentDate, m_splits, *sql));
 
     QList<holdingsRow> rows;
-    QMap<QString, globals::securityInfo> tickerInfo = calculations::portfolioTickerInfo(m_currentPortfolio->info.id, currentDate, *sql);
-
-    QMap<int, double> avgPrices = avgPrice::calculate(m_currentPortfolio->data.trades, currentDate, m_currentPortfolio->info.costCalc,
-        m_currentPortfolio->data.tickers, m_splits);
-
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
-        rows.append(
-            holdingsRow::getHoldingsRow(s, m_currentPortfolio->data.trades.value(s.id), tickerInfo.value(s.ticker), m_splits, m_currentPortfolio->data.acct,
-            g.totalValue, avgPrices.value(s.id), currentDate, "2|D0|1")
-        ); 
+        if (ui.holdingsShowHidden->isChecked() || !s.hide)
+            rows.append(
+                holdingsRow::getHoldingsRow(s, m_currentPortfolio->cache.at(currentDate), m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort)
+            );
 
     qStableSort(rows);
 
-//    QSqlQuery *q = sql->executeResultSet(sql->getPortfolioHoldings(
-//            m_currentPortfolio->info.id, currentDate, 0, ui.holdingsShowHidden->isChecked(), m_currentPortfolio->info.holdingsSort), false, true);
-
-    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), g, true, ui.holdings);
+    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), m_currentPortfolio->cache.at(currentDate), true, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -369,10 +338,10 @@ void frmMain::loadPortfolioHoldings(const refreshType &r)
 
     if (m_currentPortfolio->info.holdingsSort.isEmpty())
         ui.holdingsSortCombo->setCurrentIndex(0);
-    else if (m_currentPortfolio->info.holdingsSort.contains(',') || m_currentPortfolio->info.holdingsSort.contains(' '))
+    else if (m_currentPortfolio->info.holdingsSort.contains('|') || m_currentPortfolio->info.holdingsSort.contains('D'))
         ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
     else
-        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
+        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt()));
 
     delete oldModel;
 }
@@ -976,7 +945,7 @@ void frmMain::sortDropDownChange(int index)
 
     if (columnID != -2)
     {
-        m_currentPortfolio->info.holdingsSort = QString::number(columnID + 1);
+        m_currentPortfolio->info.holdingsSort = QString::number(columnID);
         loadPortfolioHoldings(refreshType_Other);
         return;
     }
@@ -986,9 +955,9 @@ void frmMain::sortDropDownChange(int index)
     if (f.exec())
     {
         m_currentPortfolio->info.holdingsSort = f.getReturnValues();
-        loadPortfolioHoldings(refreshType_Other);
+        loadPortfolioHoldings(refreshType_Sort);
     }
 
-    if (!m_currentPortfolio->info.holdingsSort.contains(',') && !m_currentPortfolio->info.holdingsSort.contains(' '))
-        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt() - 1));
+    if (!m_currentPortfolio->info.holdingsSort.contains('|') && !m_currentPortfolio->info.holdingsSort.contains('D'))
+        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt()));
 }

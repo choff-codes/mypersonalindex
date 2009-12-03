@@ -12,7 +12,6 @@
 #include "queries.h"
 #include "updatePrices.h"
 #include "NAV.h"
-#include "avgPrice.h"
 
 class frmMain : public QMainWindow
 {
@@ -33,11 +32,10 @@ private:
     QList<int> m_dates;
     globals::splitData m_splits;
     QMap<int, globals::statistic> m_statistics;
-    globals::gainLossInfo m_gainLossInfo;
     updatePrices *m_updateThread;
     NAV *m_navThread;
 
-    enum refreshType { refreshType_LoadPortfolio, refreshType_DateChange, refreshType_Other };
+    enum refreshType { refreshType_LoadPortfolio, refreshType_DateChange, refreshType_Sort, refreshType_Other };
 
     void closeEvent(QCloseEvent *event);
     void connectSlots();
@@ -65,14 +63,12 @@ private:
     void disableItems(bool disabled);
     int getCurrentDateOrPrevious(int date);
     int getDateDropDownDate(QDateEdit *dateDropDown);
-    globals::gainLossInfo getPortfolioGainLossInfo(const int &date);
     void loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
     void refreshPortfolioSecurities(const int &minDate);
     int getLastDate() { return m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count() - 1]; }
     void resetCalendars(const int &date);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
-    void calculateAvgPrice (const int &date) { avgPrice(); }
 
 private slots:
     void addPortfolio();

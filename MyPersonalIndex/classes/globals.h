@@ -268,6 +268,25 @@ public:
         }
     };
 
+    struct securityInfo
+    {
+        double closePrice;
+        double dividendAmount;
+        QString ticker;
+
+        securityInfo(): closePrice(0), dividendAmount(0) {}
+    };
+
+    struct securityValue
+    {
+        double totalValue;
+        double shares;
+        double costBasis;
+        double dividendAmount;
+
+        securityValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0) {}
+    };
+
     struct assetAllocation
     {
         int id;
@@ -344,21 +363,42 @@ public:
         tradeList trades;
     };
 
+    struct portfolioCache
+    {
+        QMap<int, double> avgPrices;
+        QMap<QString, securityInfo> tickerInfo;
+        QMap<int, securityValue> tickerValue;
+        double totalValue;
+        double costBasis;
+
+        portfolioCache(): totalValue(0), costBasis(0) {}
+    };
+
+    class portfolioCacheMap
+    {
+        public:
+
+            portfolioCache at(const int &date) const { return m_cache.value(date); }
+            void insert(const int &date, const portfolioCache& cache)
+            {
+                if (m_cache.count() > 50)
+                    m_cache.erase(m_cache.begin());
+                m_cache.insert(date, cache);
+            }
+            bool contains(const int &date) const { return m_cache.contains(date); }
+
+        private:
+
+            QMap<int, portfolioCache> m_cache;
+    };
+
     struct myPersonalIndex
     {
         portfolioData data;
         portfolio info;
+        portfolioCacheMap cache;
 
         myPersonalIndex(const globals::portfolio &p): info(p) {}
-    };
-
-    struct securityInfo
-    {
-        double closePrice;
-        double dividendAmount;
-        QString ticker;
-
-        securityInfo(): closePrice(0), dividendAmount(0) {}
     };
 
     struct dynamicTradeInfo
@@ -379,25 +419,6 @@ public:
 
         updateInfo() {}
         updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
-    };
-
-    struct gainLossInfo
-    {
-        double totalValue;
-        double taxLiability;
-        double costBasis;
-
-        gainLossInfo(): totalValue(0), taxLiability(0), costBasis(0) {}
-    };
-
-    struct tickerValue
-    {
-        double totalValue;
-        double shares;
-        double costBasis;
-        double dividendAmount;
-
-        tickerValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0) {}
     };
 
     typedef QMap<int, QMap<QString, double> > splitData;

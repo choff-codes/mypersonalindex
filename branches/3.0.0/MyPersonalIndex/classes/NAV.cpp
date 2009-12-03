@@ -176,7 +176,7 @@ double NAV::getPortfolioTotalValue(const globals::myPersonalIndex *currentPortfo
             continue;
 
         QString ticker = currentPortfolio->data.tickers.value(tickerID).ticker;
-        globals::tickerValue t = calculations::tickerValue(i.value(), tickerInfo.value(ticker), m_splits, date);
+        globals::securityValue t = calculations::tickerValue(i.value(), tickerInfo.value(ticker), m_splits, date);
         value += t.totalValue;
         if (dividendValue)
             *dividendValue += t.dividendAmount;

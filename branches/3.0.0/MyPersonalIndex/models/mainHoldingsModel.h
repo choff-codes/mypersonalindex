@@ -17,15 +17,11 @@ public:
 
     holdingsRow(const QString &sort): m_sort(sort) {}
 
-    static holdingsRow getHoldingsRow(const globals::security &s, const QList<globals::trade> &trades, const globals::securityInfo &info,
-        const globals::splitData &splits, const QMap<int, globals::account> &accounts, const double &portfolioValue, const double &avgPrice,
-        const int &date, const QString &sort)
+    static holdingsRow getHoldingsRow(const globals::security &s, const globals::portfolioCache &cache, const QMap<int, globals::account> &accounts, const QString &sort)
     {
         holdingsRow row(sort);
-        globals::tickerValue value;
 
-        if (s.includeInCalc)
-            value = calculations::tickerValue(trades, info, splits, date);
+        globals::securityValue value = cache.tickerValue.value(s.id);
 
         //row_Active
         row.values.append((int)s.includeInCalc);
@@ -34,17 +30,18 @@ public:
         //row_Cash
         row.values.append((int)s.cashAccount);
         //row_Price
-        row.values.append(info.closePrice);
+        double price = cache.tickerInfo.value(s.ticker).closePrice;
+        row.values.append(price == 0 ? QVariant() : price);
         //row_Shares
         row.values.append(value.shares);
         //row_Avg
-        row.values.append(value.shares == 0 ? QVariant() : avgPrice);
+        row.values.append(value.shares == 0 ? QVariant() : cache.avgPrices.value(s.id));
         //row_Cost
         row.values.append(value.shares == 0 ? QVariant() : value.costBasis);
         //row_Value
         row.values.append(value.shares == 0 ? QVariant() : value.totalValue);
         //row_ValueP
-        row.values.append(portfolioValue == 0 ? QVariant() : value.totalValue / portfolioValue * 100);
+        row.values.append(cache.totalValue == 0 ? QVariant() : value.totalValue / cache.totalValue * 100);
         //row_Gain
         row.values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
         //row_GainP
@@ -67,8 +64,6 @@ public:
         names.remove(row_ID);
         return names;
     }
-
-    void setSort(const QString &sort) { m_sort = sort; }
 
     bool operator< (const holdingsRow &other) const
     {
@@ -102,15 +97,11 @@ class holdingsModel: public QAbstractTableModel
 
 public:
 
-    holdingsModel(const QList<holdingsRow> &rows, QList<int> viewableColumns, const globals::gainLossInfo &gainLossInfo, const bool &showHidden, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_parent(parent), m_rows(rows), m_viewableColumns(viewableColumns), m_gainLossInfo(gainLossInfo)
+    holdingsModel(const QList<holdingsRow> &rows, QList<int> viewableColumns, const globals::portfolioCache &cache, const bool &showHidden, QTableView *parent = 0):
+            QAbstractTableModel(parent), m_parent(parent), m_rows(rows), m_viewableColumns(viewableColumns), m_totalValue(cache.totalValue), m_costBasis(cache.costBasis)
     {
         insertRows(0, rows.count());
     }
-
-    //~holdingsModel() { delete m_query; }
-
-    globals::gainLossInfo gainLossInfo () { return m_gainLossInfo; }
 
     int rowCount(const QModelIndex&) const
     {
@@ -183,13 +174,13 @@ public:
         switch(column)
         {
             case holdingsRow::row_Cost:
-                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.costBasis));
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_costBasis));
                 break;
             case holdingsRow::row_Value:
-                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue));
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue));
                 break;
             case holdingsRow::row_Gain:
-                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_gainLossInfo.totalValue - m_gainLossInfo.costBasis));
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
                 break;
         }
 
@@ -217,7 +208,8 @@ private:
     QList<holdingsRow> m_rows;
     QList<int> m_viewableColumns;
     int m_rowCount;
-    globals::gainLossInfo m_gainLossInfo;
+    double m_totalValue;
+    double m_costBasis;
 };
 
 

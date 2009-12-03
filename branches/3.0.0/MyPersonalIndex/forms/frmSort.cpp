@@ -18,27 +18,25 @@ frmSort::frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget
     if (m_sort.isEmpty())
         return;
 
-    QStringList list = m_sort.split(',');
+    QStringList list = m_sort.split('|');
 
     for (int i = 0; i < list.count(); ++i)
     {
-        QStringList s = list.at(i).split(' ');
+        bool desc = list.at(i).at(0) == 'D';
+        int sortColumn = desc ? QString(list.at(i)).remove(0, 1).toInt() : list.at(i).toInt();
         switch (i)
         {
             case 0:
-                ui.sort1->setCurrentIndex(ui.sort1->findData(s.at(0).toInt() - 1));  // remove the "DESC" from the values if it's attached
-                if (s.count() == 2) // DESC attached at end
-                    ui.rSortDesc1->setChecked(true);
+                ui.sort1->setCurrentIndex(ui.sort1->findData(sortColumn));
+                ui.rSortDesc1->setChecked(desc);
                 break;
             case 1:
-                ui.sort2->setCurrentIndex(ui.sort2->findData(s.at(0).toInt() - 1));  // remove the "DESC" from the values if it's attached
-                if (s.count() == 2) // DESC attached at end
-                    ui.rSortDesc2->setChecked(true);
+                ui.sort2->setCurrentIndex(ui.sort2->findData(sortColumn));
+                ui.rSortDesc2->setChecked(desc);
                 break;
             case 2:
-                ui.sort3->setCurrentIndex(ui.sort3->findData(s.at(0).toInt() - 1));  // remove the "DESC" from the values if it's attached
-                if (s.count() == 2) // DESC attached at end
-                    ui.rSortDesc3->setChecked(true);
+                ui.sort3->setCurrentIndex(ui.sort3->findData(sortColumn));
+                ui.rSortDesc3->setChecked(desc);
                 break;
         }
     }
@@ -49,18 +47,36 @@ frmSort::frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget
 
 void frmSort::accept()
 {
-    QString sort;
+    QStringList sortList;
+    QString sortString;
 
     if (!ui.sort1->currentText().isEmpty())
-        sort = QString::number(ui.sort1->itemData(ui.sort1->currentIndex()).toInt() + 1) + (ui.rSortDesc1->isChecked() ? " DESC" : "") +
-            (ui.sort2->currentText().isEmpty() ? "" : "," + QString::number(ui.sort2->itemData(ui.sort2->currentIndex()).toInt() + 1) + (ui.rSortDesc2->isChecked() ? " DESC" : "")) +
-            (ui.sort3->currentText().isEmpty() ? "" : "," + QString::number(ui.sort3->itemData(ui.sort3->currentIndex()).toInt() + 1) + (ui.rSortDesc3->isChecked() ? " DESC" : ""));
+    {
+        sortList.append(
+                (ui.rSortDesc1->isChecked() ? "D" : "") +
+                QString::number(ui.sort1->itemData(ui.sort1->currentIndex()).toInt())
+        );
 
-    if (sort == m_sort)
+        if (!ui.sort2->currentText().isEmpty())
+            sortList.append(
+                    (ui.rSortDesc2->isChecked() ? "D" : "") +
+                    QString::number(ui.sort2->itemData(ui.sort2->currentIndex()).toInt())
+            );
+
+        if (!ui.sort3->currentText().isEmpty())
+            sortList.append(
+                    (ui.rSortDesc3->isChecked() ? "D" : "") +
+                    QString::number(ui.sort2->itemData(ui.sort3->currentIndex()).toInt())
+            );
+
+        sortString = sortList.join("|");
+    }
+
+    if (sortString == m_sort)
         QDialog::reject();
     else
     {
-        m_sort = sort;
+        m_sort = sortString;
         QDialog::accept();
     }
 }

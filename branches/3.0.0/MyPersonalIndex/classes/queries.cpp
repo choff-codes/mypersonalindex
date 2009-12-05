@@ -26,12 +26,8 @@ const QStringList queries::navColumns = QStringList() << "PortfolioID" << "Date"
 //enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence }
 const QStringList queries::settingsColumnsColumns = QStringList() << "ID" << "ColumnID" << "Sequence";
 
-//enum { avgPricePerShareColumns_TickerID, avgPricePerShareColumns_Price };
-const QStringList queries::avgPricePerShareColumns = QStringList() << "TickerID" << "Price";
-
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Accounts";
-const QString queries::table_AvgPricePerShare = "AvgPricePerShare";
 const QString queries::table_ClosingPrices = "ClosingPrices";
 const QString queries::table_Dividends = "Dividends";
 const QString queries::table_NAV = "NAV";
@@ -49,7 +45,7 @@ const QString queries::table_Trades = "Trades";
 queries::queries(QSqlDatabase database): db(database)
 {
     db.open();
-    QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
+    //QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
     //QSqlQuery("PRAGMA synchronous = 0", db);
     //QSqlQuery("PRAGMA journal_mode = MEMORY", db);
 }
@@ -235,6 +231,20 @@ queries::queryInfo* queries::deleteTickerItems(const QString &table, const int &
         QString("DELETE FROM %1 WHERE TickerID = :ID").arg(table),
         QList<parameter>()
             << parameter(":ID", tickerID)
+    );
+}
+
+queries::queryInfo* queries::deleteUnusedPrices(const QString &table) const
+{
+    return new queryInfo(
+        QString(
+            "DELETE FROM %1"
+            " WHERE Ticker IN (SELECT a.Ticker"
+                            " FROM (SELECT DISTINCT Ticker FROM %1) AS a"
+                            " LEFT JOIN Tickers AS b"
+                                " ON a.Ticker = b.Ticker AND b.CashAccount = 0"
+                            " WHERE b.Ticker IS NULL )").arg(table),
+        QList<parameter>()
     );
 }
 
@@ -480,7 +490,7 @@ queries::queryInfo* queries::updateSecurity(const int &portfolioID, const global
     QList<parameter> params;
     params  << parameter(":PortfolioID", portfolioID)
             << parameter(":Ticker", sec.ticker)
-            << parameter(":Account", sec.account)
+            << parameter(":Account", functions::intToNull(sec.account))
             << parameter(":Expense", functions::doubleToNull(sec.expense))
             << parameter(":DivReinvest", (int)sec.divReinvest)
             << parameter(":CashAccount", (int)sec.cashAccount)
@@ -687,11 +697,9 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
     );
 }
 
-queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const
-{
-    return new queryInfo(
-            "SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices UNION ALL"
-            " SELECT * FROM ClosingPrices UNION ALL SELECT * FROM ClosingPrices",
+//queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const
+//{
+//    return new queryInfo(
 //            "SELECT SUM(Shares * :Price) AS Shares"
 //            " FROM (SELECT MAX(a.Shares) * COALESCE(EXP(SUM(LOG(b.Ratio))), 1) as Shares"
 //                    " FROM Trades a"
@@ -699,95 +707,95 @@ queries::queryInfo* queries::getPortfolioTickerValue(const int &tickerID, const 
 //                        " ON a.Ticker = b.Ticker AND b.Date BETWEEN a.Date AND :PreviousDate1"
 //                    " WHERE a.TickerID = :TickerID AND a.Date <= :PreviousDate2"
 //                    " GROUP BY a.rowID) AS c",
-        QList<parameter>()
+//        QList<parameter>()
 //            << parameter(":TickerID", tickerID)
 //            << parameter(":Price", previousClose)
 //            << parameter(":PreviousDate1", previousDate)
 //            << parameter(":PreviousDate2", previousDate)
-    );
-}
+//    );
+//}
 
-queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const
-{
-    return new queryInfo(
-            QString(
-            "SELECT a.Ticker AS Symbol,"
-                " a.CashAccount AS Cash,"
-                " g.Price,"
-                " Coalesce(f.Shares,0) AS Shares,"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS 'Avg Price|Per Share',"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN h.Price * f.Shares END) AS 'Cost Basis',"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN (g.Price - h.Price) * f.Shares END) AS 'Gain/Loss',"
-                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 AND h.Price <> 0 THEN ((CAST(g.Price AS REAL)  / h.Price) - 1) * 100 END) AS '% Gain/|Loss',"
-                " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS 'Total Value',"
-                " (CASE WHEN :TotalValue1 <> 0 AND a.IncludeInCalc = 1 THEN g.Price * CAST(f.Shares AS REAL) / :TotalValue2 * 100 END) AS '% of|Portfolio',"
-                " j.Description AS Account,"
-                " a.IncludeInCalc AS Active,"
-                " a.ID as ID"
-            " FROM Tickers AS a"
-            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
-                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
-                                " FROM Trades AS b"
-                                " INNER JOIN Tickers AS c"
-                                    " ON c.ID = b.TickerID"
-                                " LEFT JOIN Splits AS d"
-                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date1"
-                                " WHERE c.PortfolioID = :PortfolioID1 AND b.Date <= :Date2"
-                                " GROUP BY b.rowid) AS e"
-                        " GROUP BY TickerID) AS f"
-                " ON a.ID = f.TickerID"
-            " LEFT JOIN ClosingPrices AS g"
-                " ON a.Ticker = g.Ticker AND g.Date = :Date3"
-            " LEFT JOIN AvgPricePerShare AS h"
-                " ON a.ID = h.TickerID"
-            " LEFT JOIN Acct AS j"
-                " ON a.Account = j.ID"
-            " WHERE a.PortfolioID = :PortfolioID2%1%2").arg(
-                    showHidden ? "" : " AND Hide = 0",
-                    sort.isEmpty() ? "" : QString(" ORDER BY %1").arg(sort)),
-        QList<parameter>()
-            << parameter(":PortfolioID1", portfolioID)
-            << parameter(":PortfolioID2", portfolioID)
-            << parameter(":Date1", date)
-            << parameter(":Date2", date)
-            << parameter(":Date3", date)
-            << parameter(":TotalValue1", totalValue)
-            << parameter(":TotalValue2", totalValue)
-    );
-}
+//queries::queryInfo* queries::getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const
+//{
+//    return new queryInfo(
+//            QString(
+//            "SELECT a.Ticker AS Symbol,"
+//                " a.CashAccount AS Cash,"
+//                " g.Price,"
+//                " Coalesce(f.Shares,0) AS Shares,"
+//                " (CASE WHEN Coalesce(f.Shares,0) <> 0 THEN h.Price END) AS 'Avg Price|Per Share',"
+//                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN h.Price * f.Shares END) AS 'Cost Basis',"
+//                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 THEN (g.Price - h.Price) * f.Shares END) AS 'Gain/Loss',"
+//                " (CASE WHEN Coalesce(f.Shares,0) <> 0 AND a.IncludeInCalc = 1 AND h.Price <> 0 THEN ((CAST(g.Price AS REAL)  / h.Price) - 1) * 100 END) AS '% Gain/|Loss',"
+//                " (CASE WHEN a.IncludeInCalc = 1 THEN g.Price * f.Shares END) AS 'Total Value',"
+//                " (CASE WHEN :TotalValue1 <> 0 AND a.IncludeInCalc = 1 THEN g.Price * CAST(f.Shares AS REAL) / :TotalValue2 * 100 END) AS '% of|Portfolio',"
+//                " j.Description AS Account,"
+//                " a.IncludeInCalc AS Active,"
+//                " a.ID as ID"
+//            " FROM Tickers AS a"
+//            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
+//                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
+//                                " FROM Trades AS b"
+//                                " INNER JOIN Tickers AS c"
+//                                    " ON c.ID = b.TickerID"
+//                                " LEFT JOIN Splits AS d"
+//                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date1"
+//                                " WHERE c.PortfolioID = :PortfolioID1 AND b.Date <= :Date2"
+//                                " GROUP BY b.rowid) AS e"
+//                        " GROUP BY TickerID) AS f"
+//                " ON a.ID = f.TickerID"
+//            " LEFT JOIN ClosingPrices AS g"
+//                " ON a.Ticker = g.Ticker AND g.Date = :Date3"
+//            " LEFT JOIN AvgPricePerShare AS h"
+//                " ON a.ID = h.TickerID"
+//            " LEFT JOIN Acct AS j"
+//                " ON a.Account = j.ID"
+//            " WHERE a.PortfolioID = :PortfolioID2%1%2").arg(
+//                    showHidden ? "" : " AND Hide = 0",
+//                    sort.isEmpty() ? "" : QString(" ORDER BY %1").arg(sort)),
+//        QList<parameter>()
+//            << parameter(":PortfolioID1", portfolioID)
+//            << parameter(":PortfolioID2", portfolioID)
+//            << parameter(":Date1", date)
+//            << parameter(":Date2", date)
+//            << parameter(":Date3", date)
+//            << parameter(":TotalValue1", totalValue)
+//            << parameter(":TotalValue2", totalValue)
+//    );
+//}
 
-queries::queryInfo* queries::getPortfolioGainLossInfo(const int &portfolioID, const int &date) const
-{
-    return new queryInfo(
-            "SELECT COALESCE(SUM(f.Shares * h.Price), 0) AS CostBasis, COALESCE(SUM(f.Shares * g.Price), 0) AS TotalValue,"
-                " COALESCE(SUM(CASE WHEN j.TaxDeferred = 1 THEN g.Price * f.Shares * Coalesce(CAST(j.TaxRate AS REAL) / 100, 0.0)"
-                        " ELSE (g.Price - h.Price) * f.Shares * (CASE WHEN g.Price > h.Price THEN Coalesce(CAST(j.TaxRate AS REAL) / 100, 0.0) ELSE 0.0 END) END), 0) AS TaxLiability"
-            " FROM Tickers AS a"
-            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
-                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
-                                " FROM Trades AS b"
-                                " INNER JOIN Tickers AS c"
-                                    " ON c.ID = b.TickerID"
-                                " LEFT JOIN Splits AS d"
-                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date1"
-                                " WHERE c.PortfolioID = :PortfolioID1 AND b.Date <= :Date2"
-                                " GROUP BY b.rowid) AS e"
-                        " GROUP BY TickerID) AS f"
-                " ON a.ID = f.TickerID"
-            " LEFT JOIN ClosingPrices AS g"
-                " ON a.Ticker = g.Ticker AND g.Date = :Date3"
-            " LEFT JOIN AvgPricePerShare AS h"
-                " ON a.ID = h.TickerID"
-            " LEFT JOIN Acct AS j"
-                " ON a.Account = j.ID"
-            " WHERE a.PortfolioID = :PortfolioID2 AND a.IncludeInCalc = 1",
-        QList<parameter>()
-            << parameter(":PortfolioID1", portfolioID)
-            << parameter(":PortfolioID2", portfolioID)
-            << parameter(":Date1", date)
-            << parameter(":Date2", date)
-            << parameter(":Date3", date)
-    );
-}
-
-
+//queries::queryInfo* queries::getPortfolioGainLossInfo(const int &portfolioID, const int &date) const
+//{
+//    return new queryInfo(
+//            "SELECT COALESCE(SUM(f.Shares * h.Price), 0) AS CostBasis, COALESCE(SUM(f.Shares * g.Price), 0) AS TotalValue,"
+//                " COALESCE(SUM(CASE WHEN j.TaxDeferred = 1 THEN g.Price * f.Shares * Coalesce(CAST(j.TaxRate AS REAL) / 100, 0.0)"
+//                        " ELSE (g.Price - h.Price) * f.Shares * (CASE WHEN g.Price > h.Price THEN Coalesce(CAST(j.TaxRate AS REAL) / 100, 0.0) ELSE 0.0 END) END), 0) AS TaxLiability"
+//            " FROM Tickers AS a"
+//            " LEFT JOIN (SELECT TickerID, SUM(Shares) as Shares"
+//                        " FROM (SELECT MAX(b.TickerID) AS TickerID, MAX(b.Shares) * COALESCE(EXP(SUM(LOG(d.Ratio))), 1) as Shares"
+//                                " FROM Trades AS b"
+//                                " INNER JOIN Tickers AS c"
+//                                    " ON c.ID = b.TickerID"
+//                                " LEFT JOIN Splits AS d"
+//                                    " ON c.Ticker = d.Ticker AND d.Date BETWEEN b.Date AND :Date1"
+//                                " WHERE c.PortfolioID = :PortfolioID1 AND b.Date <= :Date2"
+//                                " GROUP BY b.rowid) AS e"
+//                        " GROUP BY TickerID) AS f"
+//                " ON a.ID = f.TickerID"
+//            " LEFT JOIN ClosingPrices AS g"
+//                " ON a.Ticker = g.Ticker AND g.Date = :Date3"
+//            " LEFT JOIN AvgPricePerShare AS h"
+//                " ON a.ID = h.TickerID"
+//            " LEFT JOIN Acct AS j"
+//                " ON a.Account = j.ID"
+//            " WHERE a.PortfolioID = :PortfolioID2 AND a.IncludeInCalc = 1",
+//        QList<parameter>()
+//            << parameter(":PortfolioID1", portfolioID)
+//            << parameter(":PortfolioID2", portfolioID)
+//            << parameter(":Date1", date)
+//            << parameter(":Date2", date)
+//            << parameter(":Date3", date)
+//    );
+//}
+//
+//

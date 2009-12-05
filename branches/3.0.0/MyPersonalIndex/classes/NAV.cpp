@@ -94,7 +94,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
 
 void NAV::insertVariantLists()
 {
-    if (m_NAV_Dates.count() != 0)
+    if (!m_NAV_Dates.isEmpty())
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::navColumns.at(queries::navColumns_PortfolioID), m_NAV_Portfolio);
@@ -104,7 +104,7 @@ void NAV::insertVariantLists()
         m_sql->executeTableUpdate(queries::table_NAV, tableValues);
     }
 
-    if (m_Trades_Dates.count() != 0)
+    if (!m_Trades_Dates.isEmpty())
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Portfolio), m_Trades_Portfolio);
@@ -145,6 +145,8 @@ void NAV::deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int 
         for(int x = 0; x < i.value().count(); ++x)
             if (i.value().at(x).date >= calculationDate)
                 i.value().removeAt(x);
+
+    currentPortfolio->cache.clear();
 }
 
 double NAV::getPortfolioNAV(const int &portfolioID, const int &date, double *totalValue)
@@ -466,16 +468,18 @@ void NAV::insertPortfolioTrades(const int &portfolioID, const int &date, const i
                 code = "T";
                 break;
             case globals::tradeType_AA:
-                double tickerValue = m_sql->executeScalar(m_sql->getPortfolioTickerValue(d.tickerID, previousDate, s.closePrice), 0).toDouble();
-                foreach(const globals::tickerAATarget &aa, currentPortfolio->data.tickers.value(d.tickerID).aa)
                 {
-                    if ((!currentPortfolio->data.aa.contains(aa.first)) || currentPortfolio->data.aa.value(aa.first).target <= 0)
-                        continue;
+                    double tickerValue = 0; //m_sql->executeScalar(m_sql->getPortfolioTickerValue(d.tickerID, previousDate, s.closePrice), 0).toDouble();
+                    foreach(const globals::tickerAATarget &aa, currentPortfolio->data.tickers.value(d.tickerID).aa)
+                    {
+                        if ((!currentPortfolio->data.aa.contains(aa.first)) || currentPortfolio->data.aa.value(aa.first).target <= 0)
+                            continue;
 
-                    sharesToBuy += ((previousTotalValue * (currentPortfolio->data.aa.value(aa.first).target * aa.second / 100)) - tickerValue)
-                                    / (s.closePrice / splitRatio);
+                        sharesToBuy += ((previousTotalValue * (currentPortfolio->data.aa.value(aa.first).target * aa.second / 100)) - tickerValue)
+                                        / (s.closePrice / splitRatio);
+                    }
+                    code = "A";
                 }
-                code = "A";
                 break;
             default:
                 break;

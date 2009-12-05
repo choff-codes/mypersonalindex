@@ -114,7 +114,7 @@ public slots:
             indexes.append(q.row());
         qSort(indexes);
 
-        if(indexes.count() == 0)
+        if(indexes.isEmpty())
             return;
 
         for(int i = indexes.count() - 1; i >= 0; --i)

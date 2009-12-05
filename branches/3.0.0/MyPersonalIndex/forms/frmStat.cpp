@@ -3,12 +3,6 @@
 frmStat::frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList), m_sql(sql)
 {
-    if(!m_sql.isOpen())
-    {
-        reject();
-        return;
-    }
-
     ui.setupUI(this, "Statistics", true);
     this->setWindowTitle("Edit Statistics");
 
@@ -59,7 +53,7 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
     m_sql.executeNonQuery(m_sql.deletePortfolioItems(queries::table_StatMapping, m_portfolio));
-    if (stat.count() != 0)
+    if (!stat.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
         tableUpdateQuery.executeTableUpdate(queries::table_StatMapping, tableValues);

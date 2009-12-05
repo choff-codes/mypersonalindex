@@ -58,13 +58,15 @@ void frmColumns::accept()
    }
 
     m_selectedColumns = selected;
+
     QMap<QString, QVariantList> tableValues;
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ID), id);
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ColumnID), columnID);
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence), sequence);
-    if (id.count() != 0)
+
+    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_SettingsColumns, m_id));
+    if (!id.isEmpty())
     {
-        m_sql.executeNonQuery(m_sql.deleteItem(queries::table_SettingsColumns, m_id));
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
         tableUpdateQuery.executeTableUpdate(queries::table_SettingsColumns, tableValues);
     }

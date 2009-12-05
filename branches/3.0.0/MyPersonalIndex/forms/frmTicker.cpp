@@ -1,29 +1,17 @@
 #include "frmTicker.h"
 #include "viewDelegates.h"
+#include "calculations.h"
 
 frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data, const globals::security& security, const queries &sql, QWidget *parent):
         QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_sql(sql)
 {
-    if(!m_sql.isOpen())
-    {
-        reject();
-        return;
-    }
-
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.ticker));
 
     if (m_security.id != -1)
         ui.btnAddAnother->setVisible(false);
 
-    m_minDate = -1;
-    foreach(globals::dynamicTrade d, m_security.trades)
-    {
-        if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
-            m_minDate = d.startDate;
-        else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
-            m_minDate = d.date;
-    }
+    m_minDate = calculations::firstTradeDate(m_security.trades);
 
     loadDropDowns();
     loadSecurity();
@@ -136,15 +124,11 @@ void frmTicker::accept()
         return;
     }
 
-    if (m_security.trades == m_securityOriginal.trades)
-        m_minDate = -1;
-
-    foreach(globals::dynamicTrade d, m_security.trades)
+    if (m_security.trades != m_securityOriginal.trades)
     {
-        if (d.frequency != globals::tradeFreq_Once && (d.startDate < m_minDate || m_minDate == -1))
-            m_minDate = d.startDate;
-        else if (d.startDate < d.date && (d.date < m_minDate || m_minDate == -1))
-            m_minDate = d.date;
+        int newMinDate = calculations::firstTradeDate(m_security.trades);
+        if (newMinDate < m_minDate || m_minDate == -1)
+            m_minDate = newMinDate;
     }
 
     m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
@@ -172,7 +156,7 @@ void frmTicker::accept()
     tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_Percent), percent);
 
     m_sql.deleteTickerItems(queries::table_TickersAA, m_security.id);
-    if (tickerID.count() != 0)
+    if (!tickerID.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
         tableUpdateQuery.executeTableUpdate(queries::table_TickersAA, tableValues);

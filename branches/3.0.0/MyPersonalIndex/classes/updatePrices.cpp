@@ -35,14 +35,48 @@ void updatePrices::run()
                 getSplits(info.ticker, info.splitDate, firstUpdate);
         }
 
+    insertUpdates();
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, m_splits, 0, this);
+    m_nav = new NAV(m_data, m_dates, m_splits, firstUpdate, this);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
-    m_nav->run();
+    m_nav->start();
 
     exec();
+}
+
+void updatePrices::insertUpdates()
+{
+    if (!m_pricesDate.isEmpty())
+    {
+        QMap<QString, QVariantList> tableValues;
+        tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Date), m_pricesDate);
+        tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), m_pricesTicker);
+        tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), m_pricesPrice);
+        m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
+    }
+
+    if (!m_divDate.isEmpty())
+    {
+        QMap<QString, QVariantList> tableValues;
+        tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Date), m_divDate);
+        tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), m_divTicker);
+        tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), m_divAmount);
+        m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
+    }
+
+    if (!m_splitDate.isEmpty())
+    {
+        QMap<QString, QVariantList> tableValues;
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Date), m_splitDate);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), m_splitTicker);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
+        m_sql->executeTableUpdate(queries::table_Splits, tableValues);
+
+        for(int i = 0; i < m_splitDate.count(); ++i)
+            m_splits[m_splitDate.at(i).toInt()].insert(m_splitTicker.at(i).toString(), m_splitRatio.at(i).toDouble());
+    }
 }
 
 void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> &tickers)
@@ -127,32 +161,22 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
         lines->removeFirst();
         lines->removeLast();
 
-        QVariantList dates, tickers, prices;
         foreach(const QByteArray &s, *lines)
         {
             QList<QByteArray> line = s.split(',');
 
             int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            dates.append(djulian);
+            m_pricesDate.append(djulian);
             // add new date if it doesn't already exist
             QList<int>::iterator place = qLowerBound(m_dates.begin(), m_dates.end(), djulian);
-            if (*place != djulian)
+            if (place == m_dates.end() || *place != djulian)
                 m_dates.insert(place, djulian);
             // update min date
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;
 
-            tickers.append(ticker);
-            prices.append(line.at(4).toDouble());
-        }
-
-        if (dates.count() != 0)
-        {
-            QMap<QString, QVariantList> tableValues;
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Date), dates);
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), tickers);
-            tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), prices);
-            m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
+            m_pricesTicker.append(ticker);
+            m_pricesPrice.append(line.at(4).toDouble());
         }
     }
 
@@ -172,27 +196,17 @@ void updatePrices::getDividends(const QString &ticker, const int &minDate, int &
         lines->removeFirst();
         lines->removeLast();
 
-        QVariantList dates, tickers, amounts;
         foreach(const QByteArray &s, *lines)
         {
             QList<QByteArray> line = s.split(',');
 
             int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            dates.append(djulian);
+            m_divDate.append(djulian);
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;
 
-            tickers.append(ticker);
-            amounts.append(line.at(1).toDouble());
-        }
-
-        if (dates.count() != 0)
-        {
-            QMap<QString, QVariantList> tableValues;
-            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Date), dates);
-            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), tickers);
-            tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), amounts);
-            m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
+            m_divTicker.append(ticker);
+            m_divAmount.append(line.at(1).toDouble());
         }
     }
 
@@ -229,7 +243,6 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
     //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
     splits.append(splits.takeLast().replace("</nobr>", ""));
 
-    QVariantList dates, tickers, ratios;
     foreach(const QString &s, splits)
     {
         QStringList split = s.split(' ');
@@ -241,27 +254,15 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
         if (djulian <= minDate)
             continue;
 
-        dates.append(djulian);
+        m_splitDate.append(djulian);
         if (djulian < earliestUpdate)
             earliestUpdate = djulian;
 
         // ratio looks like [2:1], so strip off the brackets
         QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');
-        ratios.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
+        m_splitRatio.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
 
-        tickers.append(ticker);
-    }
-
-    if (dates.count() != 0)
-    {
-        QMap<QString, QVariantList> tableValues;
-        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Date), dates);
-        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), tickers);
-        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), ratios);
-        m_sql->executeTableUpdate(queries::table_Splits, tableValues);
-
-        for(int i = 0; i < dates.count(); ++i)
-            m_splits[dates.at(i).toInt()].insert(tickers.at(i).toString(), ratios.at(i).toDouble());
+        m_splitTicker.append(ticker);
     }
 
     delete lines;
@@ -280,6 +281,7 @@ bool updatePrices::isInternetConnection()
 void updatePrices::calcuationFinished()
 {
     m_nav->quit();
+    m_nav->wait();
     m_nav->disconnect();
     delete m_nav;
 

@@ -35,8 +35,6 @@ private:
     updatePrices *m_updateThread;
     NAV *m_navThread;
 
-    enum refreshType { refreshType_LoadPortfolio, refreshType_DateChange, refreshType_Sort, refreshType_Other };
-
     void closeEvent(QCloseEvent *event);
     void connectSlots();
     void loadSettings();
@@ -65,20 +63,22 @@ private:
     int getDateDropDownDate(QDateEdit *dateDropDown);
     void loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
     void refreshPortfolioSecurities(const int &minDate);
-    int getLastDate() { return m_dates.count() == 0 ? m_settings.dataStartDate : m_dates[m_dates.count() - 1]; }
+    int getLastDate() { return m_dates.isEmpty() ? m_settings.dataStartDate : m_dates.last(); }
     void resetCalendars(const int &date);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
+    void deleteUnusedInfo();
 
 private slots:
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();
     void loadPortfolio();
-    void loadPortfolioHoldings(const refreshType&);
+    void loadPortfolioHoldings();
     void about();
     void addTicker();
     void editTicker();
+    void deleteTicker();
     void options();
     void aa();
     void acct();
@@ -88,8 +88,6 @@ private slots:
     void beginNAV(const int &portfolioID, const int &minDate);
     void finishNAV();
     void statusUpdate(const QString &message);
-    void holdingsShowHiddenToggle() { loadPortfolioHoldings(refreshType_Other); }
-    void holdingsDateChange() { loadPortfolioHoldings(refreshType_DateChange); }
     void holdingsExport() { functions::exportTable(ui.holdings, this); }
     void holdingsModifyColumns();
     void sortDropDownChange(int index);

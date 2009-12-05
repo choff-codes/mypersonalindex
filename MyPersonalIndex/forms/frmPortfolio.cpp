@@ -4,12 +4,6 @@
 
 frmPortfolio::frmPortfolio(const globals::portfolio& p, const int &dataStartDate, const queries &sql, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p), m_sql(sql)
 {
-    if (!m_sql.isOpen())
-    {
-        this->reject();
-        return;
-    }
-
     ui.setupUI(this);    
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
     if (dataStartDate != 0)

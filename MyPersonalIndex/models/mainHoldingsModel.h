@@ -17,11 +17,11 @@ public:
 
     holdingsRow(const QString &sort): m_sort(sort) {}
 
-    static holdingsRow getHoldingsRow(const globals::security &s, const globals::portfolioCache &cache, const QMap<int, globals::account> &accounts, const QString &sort)
+    static holdingsRow getHoldingsRow(const globals::security &s, const globals::portfolioCache *cache, const QMap<int, globals::account> &accounts, const QString &sort)
     {
         holdingsRow row(sort);
 
-        globals::securityValue value = cache.tickerValue.value(s.id);
+        globals::securityValue value = cache->tickerValue.value(s.id);
 
         //row_Active
         row.values.append((int)s.includeInCalc);
@@ -30,18 +30,18 @@ public:
         //row_Cash
         row.values.append((int)s.cashAccount);
         //row_Price
-        double price = cache.tickerInfo.value(s.ticker).closePrice;
+        double price = cache->tickerInfo.value(s.ticker).closePrice;
         row.values.append(price == 0 ? QVariant() : price);
         //row_Shares
         row.values.append(value.shares);
         //row_Avg
-        row.values.append(value.shares == 0 ? QVariant() : cache.avgPrices.value(s.id));
+        row.values.append(value.shares == 0 ? QVariant() : cache->avgPrices.value(s.id));
         //row_Cost
         row.values.append(value.shares == 0 ? QVariant() : value.costBasis);
         //row_Value
         row.values.append(value.shares == 0 ? QVariant() : value.totalValue);
         //row_ValueP
-        row.values.append(cache.totalValue == 0 ? QVariant() : value.totalValue / cache.totalValue * 100);
+        row.values.append(cache->totalValue == 0 ? QVariant() : value.totalValue / cache->totalValue * 100);
         //row_Gain
         row.values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
         //row_GainP
@@ -97,8 +97,8 @@ class holdingsModel: public QAbstractTableModel
 
 public:
 
-    holdingsModel(const QList<holdingsRow> &rows, QList<int> viewableColumns, const globals::portfolioCache &cache, const bool &showHidden, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_parent(parent), m_rows(rows), m_viewableColumns(viewableColumns), m_totalValue(cache.totalValue), m_costBasis(cache.costBasis)
+    holdingsModel(const QList<holdingsRow> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, const bool &showHidden, QTableView *parent = 0):
+            QAbstractTableModel(parent), m_parent(parent), m_rows(rows), m_viewableColumns(viewableColumns), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis)
     {
         insertRows(0, rows.count());
     }
@@ -148,7 +148,7 @@ public:
             return m_rows.at(index.row()).values.at(column).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
         }
 
-        if (role == Qt::TextColorRole && column == queries::getPortfolioHoldings_GainP)
+        if (role == Qt::TextColorRole && column == holdingsRow::row_GainP)
         {
             double value = m_rows.at(index.row()).values.at(column).toDouble();
             return value == 0 ? QVariant() :
@@ -192,7 +192,7 @@ public:
         QList<int> items;
 
         QModelIndexList model = m_parent->selectionModel()->selectedRows();
-        if (model.count() == 0)
+        if (model.isEmpty())
             return items;
 
         foreach(const QModelIndex &q, model)

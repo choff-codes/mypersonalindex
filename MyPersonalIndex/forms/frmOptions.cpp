@@ -2,12 +2,6 @@
 
 frmOptions::frmOptions(const globals::settings &s, const queries &sql, QWidget *parent): QDialog(parent), m_settings(s), m_settingsOriginal(s), m_sql(sql)
 {
-    if (!m_sql.isOpen())
-    {
-        this->reject();
-        return;
-    }
-
     ui.setupUI(this);
     ui.chkSplits->setChecked(m_settings.splits);
     ui.deDownloadDate->setDate(QDate::fromJulianDay(m_settings.dataStartDate));

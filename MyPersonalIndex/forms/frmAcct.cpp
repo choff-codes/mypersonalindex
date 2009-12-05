@@ -3,12 +3,6 @@
 frmAcct::frmAcct(const int &portfolioID, const QMap<int, globals::account> &acct, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_sql(sql), m_map(acct)
 {
-    if(!m_sql.isOpen())
-    {
-        reject();
-        return;
-    }
-
     ui.setupUI(this, "Accounts", false);
     this->setWindowTitle("Edit Accounts");
 

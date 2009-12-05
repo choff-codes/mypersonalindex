@@ -28,7 +28,6 @@ public:
 
     static const QString table_AA;
     static const QString table_Acct;
-    static const QString table_AvgPricePerShare;
     static const QString table_ClosingPrices;
     static const QString table_Dividends;
     static const QString table_NAV;
@@ -52,7 +51,6 @@ public:
     static const QStringList tickersAAColumns;
     static const QStringList navColumns;
     static const QStringList settingsColumnsColumns;
-    static const QStringList avgPricePerShareColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { closingPricesColumns_Date, closingPricesColumns_Ticker, closingPricesColumns_Price, closingPricesColumns_Change };
@@ -63,7 +61,6 @@ public:
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
-    enum { avgPricePerShareColumns_TickerID, avgPricePerShareColumns_Price };
 
     queries(QSqlDatabase database);
     static QString getDatabaseLocation();
@@ -81,6 +78,7 @@ public:
     queryInfo* deleteTickerItems(const QString &table, const int &tickerID) const;
     queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID) const;
     queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const;
+    queryInfo* deleteUnusedPrices(const QString &table) const;
 
     queryInfo* getVersion() const;
 
@@ -164,15 +162,15 @@ public:
     enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend };
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date) const;
 
-    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const;
+//    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const;
 
-    enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
-           getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
-           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_Active, getPortfolioHoldings_ID };
-    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
+//    enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
+//           getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
+//           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_Active, getPortfolioHoldings_ID };
+//    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
 
-    enum { getPortfolioGainLossInfo_CostBasis, getPortfolioGainLossInfo_TotalValue, getPortfolioGainLossInfo_TaxLiability };
-    queryInfo* getPortfolioGainLossInfo(const int &portfolioID, const int &date) const;
+//    enum { getPortfolioGainLossInfo_CostBasis, getPortfolioGainLossInfo_TotalValue, getPortfolioGainLossInfo_TaxLiability };
+//    queryInfo* getPortfolioGainLossInfo(const int &portfolioID, const int &date) const;
 
 protected:
     QSqlDatabase db;

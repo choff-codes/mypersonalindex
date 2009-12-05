@@ -34,7 +34,7 @@ public:
                 if (t.date > calculationDate) // trade date outside of calculation date
                     break;
 
-                if (calcType == globals::calc_AVG && t.shares < 0) // avg price averages all positive trades
+                if (calcType == globals::calc_AVG && t.shares < 0) // avg price averages only positive trades
                     continue;
 
                 // check for any pre-existing splits
@@ -44,7 +44,7 @@ public:
 
                 if (t.shares < 0) // sold shares, need to remove from filteredTrades at the beginning or end depending on LIFO or FIFO
                 {
-                    while (t.shares != 0 && filteredTrades.count() != 0) // still shares to sell
+                    while (t.shares != 0 && !filteredTrades.isEmpty()) // still shares to sell
                     {
                         int z = calcType == globals::calc_LIFO ? filteredTrades.count() - 1 : 0;
                         const sharePricePair &pair = filteredTrades.at(x);
@@ -88,8 +88,7 @@ public:
         {
             if (i.key() > endDate)
                 break;
-            if (i.value().contains(ticker))
-                ratio = ratio * i.value().value(ticker);
+            ratio = ratio * i.value().value(ticker, 1);
         }
 
         return ratio;
@@ -141,26 +140,40 @@ public:
         return tickerInfo;
     }
 
-    static globals::portfolioCache portfolioValues(const globals::myPersonalIndex *portfolio, const int &date, const globals::splitData &splits, const queries &sql)
+    static globals::portfolioCache* portfolioValues(const globals::myPersonalIndex *portfolio, const int &date, const globals::splitData &splits, const queries &sql)
     {
-        globals::portfolioCache cache;
+        globals::portfolioCache *cache = new globals::portfolioCache();
 
-        cache.tickerInfo = portfolioTickerInfo(portfolio->info.id, date, sql);
-        cache.avgPrices = avgPricePerShare(portfolio->data.trades, date, portfolio->info.costCalc, portfolio->data.tickers, splits);
+        cache->tickerInfo = portfolioTickerInfo(portfolio->info.id, date, sql);
+        cache->avgPrices = avgPricePerShare(portfolio->data.trades, date, portfolio->info.costCalc, portfolio->data.tickers, splits);
 
         foreach(const globals::security &s, portfolio->data.tickers)
         {
             globals::securityValue value;
 
             if (s.includeInCalc)
-                value = tickerValue(portfolio->data.trades.value(s.id), cache.tickerInfo.value(s.ticker), splits, date);
+                value = tickerValue(portfolio->data.trades.value(s.id), cache->tickerInfo.value(s.ticker), splits, date);
 
-            cache.tickerValue.insert(s.id, value);
-            cache.costBasis += value.costBasis;
-            cache.totalValue += value.totalValue;
+            cache->tickerValue.insert(s.id, value);
+            cache->costBasis += value.costBasis;
+            cache->totalValue += value.totalValue;
         }
 
         return cache;
+    }
+
+    static int firstTradeDate(const QMap<int, globals::dynamicTrade> &trades)
+    {
+        int minDate = -1;
+        foreach(globals::dynamicTrade d, trades)
+        {
+            if (d.frequency != globals::tradeFreq_Once && (d.startDate < minDate || minDate == -1))
+                minDate = d.startDate;
+            else if (d.startDate < d.date && d.endDate > d.date && (d.date < minDate || minDate == -1))
+                minDate = d.date;
+        }
+
+        return minDate;
     }
 };
 

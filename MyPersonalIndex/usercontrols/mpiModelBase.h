@@ -30,7 +30,7 @@ public:
     void beginCopy()
     {
         QList<int> indexes = getSelectedRows();
-        if(indexes.count() == 0)
+        if(indexes.isEmpty())
             return;
 
         QStringList lines;
@@ -41,7 +41,7 @@ public:
                 lines.append(s);
         }
 
-        if (lines.count() == 0)
+        if (lines.isEmpty())
             return;
 
         QApplication::clipboard()->setText(lines.join("\n"));
@@ -76,7 +76,7 @@ public:
     void editItems()
     {
         QModelIndexList il = m_parent->selectionModel()->selectedRows();
-        if(il.count() == 0)
+        if(il.isEmpty())
             return;
 
         foreach(const QModelIndex &q, il)
@@ -115,7 +115,7 @@ public:
     void removeItems()
     {
         QList<int> indexes = getSelectedRows();
-        if(indexes.count() == 0)
+        if(indexes.isEmpty())
             return;
 
         for(int i = indexes.count() - 1; i >= 0; --i)
@@ -172,7 +172,7 @@ protected:
     void moveUp()
     {
         QList<int> indexes = getSelectedRows();
-        if(indexes.count() == 0)
+        if(indexes.isEmpty())
             return;
 
         if (isContiguous(indexes, true))
@@ -196,7 +196,7 @@ protected:
     void moveDown()
     {
         QList<int> indexes = getSelectedRows();
-        if(indexes.count() == 0)
+        if(indexes.isEmpty())
             return;
 
         int rows = rowCount(QModelIndex());
@@ -222,7 +222,7 @@ protected:
     {
         QModelIndexList model = m_parent->selectionModel()->selectedRows();
         QList<int> indexes;
-        if (model.count() == 0)
+        if (model.isEmpty())
             return indexes;
 
         foreach(const QModelIndex &q, model)

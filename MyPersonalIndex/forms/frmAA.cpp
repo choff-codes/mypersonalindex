@@ -3,12 +3,6 @@
 frmAA::frmAA(const int &portfolioID, const QMap<int, globals::assetAllocation> &aa, const queries &sql, QWidget *parent):
     QDialog(parent), m_map(aa), m_sql(sql), m_portfolio(portfolioID)
 {
-    if(!m_sql.isOpen())
-    {
-        reject();
-        return;
-    }
-
     ui.setupUI(this, "Asset Allocation", false);
     this->setWindowTitle("Edit Asset Allocation");
 

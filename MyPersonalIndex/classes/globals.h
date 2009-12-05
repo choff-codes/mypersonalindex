@@ -374,29 +374,11 @@ public:
         portfolioCache(): totalValue(0), costBasis(0) {}
     };
 
-    class portfolioCacheMap
-    {
-        public:
-
-            portfolioCache at(const int &date) const { return m_cache.value(date); }
-            void insert(const int &date, const portfolioCache& cache)
-            {
-                if (m_cache.count() > 50)
-                    m_cache.erase(m_cache.begin());
-                m_cache.insert(date, cache);
-            }
-            bool contains(const int &date) const { return m_cache.contains(date); }
-
-        private:
-
-            QMap<int, portfolioCache> m_cache;
-    };
-
     struct myPersonalIndex
     {
         portfolioData data;
         portfolio info;
-        portfolioCacheMap cache;
+        QCache<int, portfolioCache> cache;
 
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };

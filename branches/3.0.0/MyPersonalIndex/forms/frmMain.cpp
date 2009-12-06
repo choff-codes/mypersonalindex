@@ -9,8 +9,7 @@
 #include "frmStat.h"
 #include "frmColumns.h"
 #include "frmSort.h"
-#include "mainHoldingsModel.h"
-#include "viewDelegates.h"
+#include "mpiViewModelBase.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -72,7 +71,7 @@ void frmMain::connectSlots()
     connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioHoldings()));
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(loadPortfolioHoldings()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
-    connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(sortDropDownChange(int)));
+    connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(holdingsSortChanged(int)));
     connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
 
@@ -123,7 +122,13 @@ void frmMain::loadSettings()
     loadStats();
     loadDates();
     loadSplits();
+    loadSortDropDowns();
     resetLastDate();
+}
+
+void frmMain::loadSortDropDowns()
+{
+    loadSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
 }
 
 void frmMain::loadSettingsColumns()
@@ -254,6 +259,7 @@ void frmMain::disableItems(bool disabled)
 
 void frmMain::loadPortfolio()
 {
+    m_currentPortfolio = 0;
     if (m_portfolios.isEmpty()) // no portfolios to load
         disableItems(true);
     else
@@ -311,36 +317,20 @@ void frmMain::loadPortfolioHoldings()
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
 
-    globals::portfolioCache *cache = m_currentPortfolio->cache.object(currentDate);;
-    if (!cache)
-    {
-        cache = calculations::portfolioValues(m_currentPortfolio, currentDate, m_splits, *sql);
-        m_currentPortfolio->cache.insert(currentDate, cache);
-    }
+    globals::portfolioCache *cache = portfolioCache(currentDate);
 
-    QList<holdingsRow> rows;
+    QList<baseRow*> rows;
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(
-                holdingsRow::getHoldingsRow(s, cache, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort)
-            );
+            rows.append(holdingsRow::getHoldingsRow(s, cache, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort));
 
-    qStableSort(rows);
+    qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), cache, true, ui.holdings);
+    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), cache, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-    if (ui.holdingsSortCombo->count() == 0)
-        loadSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
-
-    if (m_currentPortfolio->info.holdingsSort.isEmpty())
-        ui.holdingsSortCombo->setCurrentIndex(0);
-    else if (m_currentPortfolio->info.holdingsSort.contains('|') || m_currentPortfolio->info.holdingsSort.contains('D'))
-        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->count() - 1);
-    else
-        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt()));
-
+    setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
     delete oldModel;
 }
 
@@ -356,12 +346,6 @@ void frmMain::loadPortfolioSettings()
     ui.aaShowBlank->setChecked(m_currentPortfolio->info.aaShowBlank);
     ui.correlationsShowHidden->setChecked(m_currentPortfolio->info.correlationShowHidden);
     ui.accountsShowBlank->setChecked(m_currentPortfolio->info.acctShowBlank);
-
-    // todo
-    //ResetSortDropDown(cmbHoldingsSortBy, MPI.Holdings.Sort, new EventHandler(cmbHoldingsSortBy_SelectedIndexChanged));
-    // todo
-    //ResetSortDropDown(cmbAASortBy, MPI.AA.Sort, new EventHandler(cmbAASortBy_SelectedIndexChanged));
-    //mpi.account.sort = q->value(queries::getPortfolio_AcctSort).toString();
 }
 
 void frmMain::loadPortfolios()
@@ -404,7 +388,6 @@ void frmMain::loadPortfoliosInfo()
         p.holdingsSort = q->value(queries::getPortfolio_HoldingsSort).toString();
         p.aaSort = q->value(queries::getPortfolio_AASort).toString();
         p.acctSort = q->value(queries::getPortfolio_AcctSort).toString();
-        p.lastNAVDate = q->value(queries::getPortfolio_LastNAVDate).toInt();
 
         m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
     }
@@ -555,6 +538,37 @@ void frmMain::loadPortfoliosTrades()
             current = portfolioID;
         }
         p->data.trades[tickerID].append(trade);
+    }
+    while(q->next());
+
+    delete q;
+}
+
+void frmMain::loadPortfoliosNAV()
+{
+    QSqlQuery *q = sql->executeResultSet(sql->getNAV());
+
+    if (!q)
+        return;
+
+    globals::myPersonalIndex *p;
+    int current = -1;
+
+    do
+    {
+        globals::navInfo nav;
+
+        nav.nav = q->value(queries::getNAV_NAV).toDouble();
+        nav.totalValue = q->value(queries::getNAV_TotalValue).toDouble();
+
+        int portfolioID = q->value(queries::getNAV_PortfolioID).toInt();
+        if (portfolioID != current)
+        {
+            p = m_portfolios.value(portfolioID);
+            current = portfolioID;
+        }
+
+       p->data.nav.insert(q->value(queries::getNAV_Date).toInt(), nav);
     }
     while(q->next());
 
@@ -792,13 +806,14 @@ void frmMain::editTicker()
 {
     bool change = false;
     int minDate = -1;
-    foreach(int i, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
     {
-        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(i), *sql, this);
+        int tickerID = row->values.at(holdingsRow::row_ID).toInt();
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(tickerID), *sql, this);
         if (f.exec())
         {
             change = true;
-            m_currentPortfolio->data.tickers[i] = f.getReturnValuesSecurity();
+            m_currentPortfolio->data.tickers[tickerID] = f.getReturnValuesSecurity();
             int newMinDate = f.getReturnValuesMinDate();
             if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
                 minDate = newMinDate;
@@ -814,8 +829,8 @@ void frmMain::editTicker()
 void frmMain::deleteTicker()
 {
     QStringList tickers;
-    foreach(int i, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
-        tickers.append(m_currentPortfolio->data.tickers.value(i).ticker);
+    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+        tickers.append(row->values.at(holdingsRow::row_Ticker).toString());
 
     if (tickers.isEmpty())
         return;
@@ -825,9 +840,9 @@ void frmMain::deleteTicker()
         return;
 
     int minDate = -1;
-    foreach(int i, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
     {
-        globals::security s = m_currentPortfolio->data.tickers.value(i);
+        globals::security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
         int newMinDate = calculations::firstTradeDate(s.trades);
         if (newMinDate < minDate || minDate == -1)
             minDate = newMinDate;
@@ -979,6 +994,20 @@ void frmMain::loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *
     dropDown->blockSignals(false);
 }
 
+void frmMain::setSortDropDown(const QString &sort, QComboBox *dropDown)
+{
+    dropDown->blockSignals(true);
+
+    if (sort.isEmpty())
+        dropDown->setCurrentIndex(0);
+    else if (sort.contains('|') || sort.contains('D'))
+        dropDown->setCurrentIndex(dropDown->count() - 1);
+    else
+        dropDown->setCurrentIndex(dropDown->findData(sort.toInt()));
+
+    dropDown->blockSignals(false);
+}
+
 void frmMain::holdingsModifyColumns()
 {
     frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), holdingsRow::fieldNames(), *sql, this);
@@ -989,32 +1018,35 @@ void frmMain::holdingsModifyColumns()
     }
 }
 
-void frmMain::sortDropDownChange(int index)
+void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames)
 {
-    int columnID = ui.holdingsSortCombo->itemData(index).toInt();
-
     if (columnID == -1)
     {
-        m_currentPortfolio->info.holdingsSort.clear();
-        loadPortfolioHoldings();
+        sortString.clear();
         return;
     }
 
     if (columnID != -2)
     {
-        m_currentPortfolio->info.holdingsSort = QString::number(columnID);
-        loadPortfolioHoldings();
+        sortString = QString::number(columnID);
         return;
     }
 
-    frmSort f(m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames(), this);
+    frmSort f(sortString, fieldNames, this);
 
     if (f.exec())
-    {
-        m_currentPortfolio->info.holdingsSort = f.getReturnValues();
-        loadPortfolioHoldings();
-    }
+        sortString = f.getReturnValues();
 
-    if (!m_currentPortfolio->info.holdingsSort.contains('|') && !m_currentPortfolio->info.holdingsSort.contains('D'))
-        ui.holdingsSortCombo->setCurrentIndex(ui.holdingsSortCombo->findData(m_currentPortfolio->info.holdingsSort.toInt()));
+    setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
+}
+
+globals::portfolioCache* frmMain::portfolioCache(const int &date)
+{
+    globals::portfolioCache *cache = m_currentPortfolio->cache.object(date);;
+    if (!cache)
+    {
+        cache = calculations::portfolioValues(m_currentPortfolio, date, m_splits, *sql);
+        m_currentPortfolio->cache.insert(date, cache);
+    }
+    return cache;
 }

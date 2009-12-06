@@ -90,6 +90,9 @@ public:
     enum { getSplits_Date, getSplits_Ticker, getSplits_Ratio };
     queryInfo* getSplits() const;
 
+    enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
+    queryInfo* getNAV() const;
+
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
     queryInfo* getSettings() const;
@@ -109,12 +112,11 @@ public:
 
     queryInfo* updateAcct(const int &portfolioID, const globals::account&) const;
 
-
     enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
            getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
            getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
            getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
-           getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank, getPortfolio_LastNAVDate };
+           getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
     queryInfo* getPortfolio() const;
 
     queryInfo* updatePortfolio(const globals::portfolio&) const;
@@ -150,27 +152,9 @@ public:
     queryInfo* getUpdateInfo() const;
     queryInfo* updateMissingPrices() const;
 
-    enum { getPortfolioFirstDate_PortfolioID, getPortfolioFirstDate_Date };
-    queryInfo* getPortfolioFirstDate() const;
-
-    enum { getPortfolioNAV_PortfolioID, getPortfolioNAV_TotalValue, getPortfolioNAV_NAV };
-    queryInfo* getPortfolioNAV(const int &portfolioID, const int &date) const;
-
-//    enum { getPortfolioTotalValue_TotalValue, getPortfolioTotalValue_TotalDividends };
-//    queryInfo* getPortfolioTotalValue(const int &portfolioID, const int &date) const;
-
     enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend };
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date) const;
 
-//    queryInfo* getPortfolioTickerValue(const int &tickerID, const int &previousDate, const double &previousClose) const;
-
-//    enum { getPortfolioHoldings_Symbol, getPortfolioHoldings_CashAccount, getPortfolioHoldings_Price, getPortfolioHoldings_Shares,
-//           getPortfolioHoldings_AveragePrice, getPortfolioHoldings_CostBasis, getPortfolioHoldings_Gain, getPortfolioHoldings_GainP,
-//           getPortfolioHoldings_TotalValue, getPortfolioHoldings_TotalValueP, getPortfolioHoldings_Acct, getPortfolioHoldings_Active, getPortfolioHoldings_ID };
-//    queryInfo* getPortfolioHoldings(const int &portfolioID, const int &date, const double &totalValue, const bool &showHidden, const QString &sort) const;
-
-//    enum { getPortfolioGainLossInfo_CostBasis, getPortfolioGainLossInfo_TotalValue, getPortfolioGainLossInfo_TaxLiability };
-//    queryInfo* getPortfolioGainLossInfo(const int &portfolioID, const int &date) const;
 
 protected:
     QSqlDatabase db;

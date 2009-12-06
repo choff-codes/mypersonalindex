@@ -40,7 +40,6 @@ private:
 
     void clearVariantLists();
     void insertVariantLists();
-    double getPortfolioNAV(const int &portfolioID, const int &date, double *totalValue = 0);
     void deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate);
     double getPortfolioTotalValue(const globals::myPersonalIndex *currentPortfolio, const QMap<QString, globals::securityInfo> &tickerInfo, const int &date, double *dividendValue = 0);
     double getPortfolioDailyActivity(const int &portfolioID, const int &date, const QMap<QString, globals::securityInfo> &tickerInfo);
@@ -53,8 +52,8 @@ private:
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
-    void insertPortfolioTrades(const int &portfolioID, const int &date, const int &previousDate, const double &previousTotalValue,
-        const dynamicTradeList &trades, const QMap<QString, globals::securityInfo> &tickerInfo, const QList<int> &tickerReinvestments);
+    void insertPortfolioTrades(const int &portfolioID, const int &date, const int &previousDate, const globals::portfolioCache *previousCache,
+        const globals::portfolioCache *cache, const dynamicTradeList &trades, const QList<int> &tickerReinvestments);
 };
 
 #endif // NAV_H

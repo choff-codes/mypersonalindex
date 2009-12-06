@@ -3,16 +3,16 @@
 
 #include "globals.h"
 #include "functions.h"
-#include "mpiModelBase.h"
+#include "mpiEditModelBase.h"
 #include "frmTrade.h"
 
-class tickerTradeModel : public mpiModelBase<globals::dynamicTrade, frmTrade>
+class tickerTradeModel : public mpiEditModelBase<globals::dynamicTrade, frmTrade>
 {
     Q_OBJECT
 
 public:
     tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
-            mpiModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
+            mpiEditModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
     void autoResize()
     {

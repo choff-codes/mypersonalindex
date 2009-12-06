@@ -12,6 +12,7 @@
 #include "queries.h"
 #include "updatePrices.h"
 #include "NAV.h"
+#include "mainHoldingsModel.h"
 
 class frmMain : public QMainWindow
 {
@@ -43,6 +44,7 @@ private:
     void checkVersion();
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
+    void loadSortDropDowns();
     void loadPortfolios();
     void loadPortfoliosInfo();
     void loadPortfoliosTickers();
@@ -52,6 +54,7 @@ private:
     void loadPortfoliosAA();
     void loadPortfoliosAcct();
     void loadPortfoliosStat();
+    void loadPortfoliosNAV();
     void loadDates();
     void loadSplits();
     void loadStats();
@@ -62,12 +65,15 @@ private:
     int getCurrentDateOrPrevious(int date);
     int getDateDropDownDate(QDateEdit *dateDropDown);
     void loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
+    void setSortDropDown(const QString &sort, QComboBox *dropDown);
+    void sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames);
     void refreshPortfolioSecurities(const int &minDate);
     int getLastDate() { return m_dates.isEmpty() ? m_settings.dataStartDate : m_dates.last(); }
     void resetCalendars(const int &date);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
     void deleteUnusedInfo();
+    globals::portfolioCache* portfolioCache(const int &date);
 
 private slots:
     void addPortfolio();
@@ -90,7 +96,8 @@ private slots:
     void statusUpdate(const QString &message);
     void holdingsExport() { functions::exportTable(ui.holdings, this); }
     void holdingsModifyColumns();
-    void sortDropDownChange(int index);
+    void holdingsSortChanged(int index) { sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(),
+        m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames()); loadPortfolioHoldings(); }
 };
 
 #endif // FRMMAIN_H

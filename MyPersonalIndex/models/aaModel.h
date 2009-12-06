@@ -3,16 +3,16 @@
 
 #include "globals.h"
 #include "functions.h"
-#include "mpiModelBase.h"
+#include "mpiEditModelBase.h"
 #include "frmAAEdit.h"
 
-class aaModel : public mpiModelBase<globals::assetAllocation, frmAAEdit>
+class aaModel : public mpiEditModelBase<globals::assetAllocation, frmAAEdit>
 {
     Q_OBJECT
 
 public:
     aaModel(const QList<globals::assetAllocation> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
-            mpiModelBase<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
+            mpiEditModelBase<globals::assetAllocation, frmAAEdit>(values, cols, parent, dialog) { }
 
 private:
     QVariant data(const QModelIndex &index, int role) const

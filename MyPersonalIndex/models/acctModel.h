@@ -3,17 +3,17 @@
 
 #include "globals.h"
 #include "functions.h"
-#include "mpiModelBase.h"
+#include "mpiEditModelBase.h"
 #include "frmAcctEdit.h"
 
 
-class acctModel : public mpiModelBase<globals::account, frmAcctEdit>
+class acctModel : public mpiEditModelBase<globals::account, frmAcctEdit>
 {
     Q_OBJECT
 
 public:
     acctModel(const QList<globals::account> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
-            mpiModelBase<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
+            mpiEditModelBase<globals::account, frmAcctEdit>(values, cols, parent, dialog) { }
 
 private:
     QVariant data(const QModelIndex &index, int role) const

@@ -4,12 +4,6 @@
 #include <QtNetwork>
 #include <QtSql>
 
-//    EXPLAIN QUERY PLAN select date(a.date), (a.price / b.prilce) - 1 AS change
-//    from closingprices as a
-//    left join closingprices as b
-//    on a.ticker = b.ticker and
-//    b.date = (select max(c.date) from closingprices as c where c.ticker = b.ticker and c.date < a.date)
-
 void updatePrices::run()
 {
     QMap<QString, globals::updateInfo> tickers;
@@ -38,7 +32,7 @@ void updatePrices::run()
     insertUpdates();
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, m_splits, firstUpdate, this);
+    m_nav = new NAV(m_data, m_dates, m_splits, firstUpdate);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->start();

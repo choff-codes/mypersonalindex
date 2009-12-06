@@ -3,7 +3,6 @@
 
 #include "globals.h"
 #include "functions.h"
-#include "mpiModelBase.h"
 
 class tickerAAModel: public QAbstractTableModel
 {

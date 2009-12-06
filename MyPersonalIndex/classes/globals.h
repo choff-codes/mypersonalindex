@@ -156,11 +156,10 @@ public:
         QString holdingsSort;
         QString aaSort;
         QString acctSort;
-        int lastNAVDate;
 
         portfolio(): id(-1), dividends(true), costCalc(calc_FIFO), startValue(100),
             aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()), origStartDate(QDate::currentDate().toJulianDay()),
-            holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true), lastNAVDate(0) {}
+            holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
 
         bool operator==(const portfolio &other) const {
             return this->id == other.id
@@ -180,7 +179,6 @@ public:
                     && this->holdingsSort == other.holdingsSort
                     && this->aaSort == other.aaSort
                     && this->acctSort == other.acctSort
-                    // exclude LastNAVDate (not user set)
                     ;
         }
 
@@ -352,6 +350,15 @@ public:
         }
     };
 
+    struct navInfo
+    {
+        double nav;
+        double totalValue;
+
+        navInfo(): nav(0), totalValue(0) {}
+        navInfo(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
+    };
+
     typedef QMap<int, QList<trade> > tradeList;
 
     struct portfolioData
@@ -361,6 +368,7 @@ public:
         QMap<int, account> acct;
         QList<int> stats;
         tradeList trades;
+        QMap<int, navInfo> nav;
     };
 
     struct portfolioCache
@@ -370,8 +378,9 @@ public:
         QMap<int, securityValue> tickerValue;
         double totalValue;
         double costBasis;
+        double dividends;
 
-        portfolioCache(): totalValue(0), costBasis(0) {}
+        portfolioCache(): totalValue(0), costBasis(0), dividends(0) {}
     };
 
     struct myPersonalIndex

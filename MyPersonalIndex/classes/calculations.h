@@ -140,12 +140,14 @@ public:
         return tickerInfo;
     }
 
-    static globals::portfolioCache* portfolioValues(const globals::myPersonalIndex *portfolio, const int &date, const globals::splitData &splits, const queries &sql)
+    static globals::portfolioCache* portfolioValues(const globals::myPersonalIndex *portfolio, const int &date,
+        const globals::splitData &splits, const queries &sql, const bool &calculateAvgPrices = true /* NAV calc does not need this information */)
     {
         globals::portfolioCache *cache = new globals::portfolioCache();
 
         cache->tickerInfo = portfolioTickerInfo(portfolio->info.id, date, sql);
-        cache->avgPrices = avgPricePerShare(portfolio->data.trades, date, portfolio->info.costCalc, portfolio->data.tickers, splits);
+        if (calculateAvgPrices)
+            cache->avgPrices = avgPricePerShare(portfolio->data.trades, date, portfolio->info.costCalc, portfolio->data.tickers, splits);
 
         foreach(const globals::security &s, portfolio->data.tickers)
         {
@@ -157,6 +159,7 @@ public:
             cache->tickerValue.insert(s.id, value);
             cache->costBasis += value.costBasis;
             cache->totalValue += value.totalValue;
+            cache->dividends += value.dividendAmount;
         }
 
         return cache;
@@ -169,7 +172,7 @@ public:
         {
             if (d.frequency != globals::tradeFreq_Once && (d.startDate < minDate || minDate == -1))
                 minDate = d.startDate;
-            else if (d.startDate < d.date && d.endDate > d.date && (d.date < minDate || minDate == -1))
+            else if (d.startDate < d.date && (d.endDate > d.date || d.endDate == 0) && (d.date < minDate || minDate == -1))
                 minDate = d.date;
         }
 

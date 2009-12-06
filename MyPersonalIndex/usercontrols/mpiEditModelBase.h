@@ -1,16 +1,16 @@
-#ifndef MPIMODELBASE_H
-#define MPIMODELBASE_H
+#ifndef MPIEDITMODELBASE_H
+#define MPIEDITMODELBASE_H
 
 #include <QtGui>
 
 template<class T, class editForm>
-class mpiModelBase: public QAbstractTableModel
+class mpiEditModelBase: public QAbstractTableModel
 {    
 public:
 
     QList<T> getList() { return m_list; }
 
-    mpiModelBase(const QList<T> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
+    mpiEditModelBase(const QList<T> &values, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
             QAbstractTableModel(parent), m_parent(parent), m_dialog(dialog), m_columns(cols), m_list(values)
     {
         insertRows(0, m_list.count());
@@ -266,4 +266,4 @@ private:
     }
 };
 
-#endif // MPIMODELBASE_H
+#endif // MPIEDITMODELBASE_H

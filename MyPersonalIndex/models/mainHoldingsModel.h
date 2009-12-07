@@ -2,10 +2,7 @@
 #define MAINHOLDINGSMODEL_H
 
 #include <QtGui>
-#include <QtSql>
-#include "queries.h"
 #include "mpiViewModelBase.h"
-#include "calculations.h"
 
 class holdingsRow: public baseRow
 {
@@ -74,7 +71,7 @@ class holdingsModel: public mpiViewModelBase
 public:
 
     holdingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, QTableView *parent = 0):
-            mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis) { }
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {

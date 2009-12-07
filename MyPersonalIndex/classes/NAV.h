@@ -10,7 +10,7 @@ class NAV : public QThread
 
 public:
     NAV(const QMap<int, globals::myPersonalIndex*> &data, const QList<int> &dates, const globals::splitData &splits, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-        QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_calculationDate(calculationDate), m_portfolioID(portfolioID)
+        QThread(parent), m_data(data), m_dates(dates), m_splits(splits), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0)
     {
         QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "nav");
         db.setDatabaseName(queries::getDatabaseLocation());
@@ -41,8 +41,6 @@ private:
     void clearVariantLists();
     void insertVariantLists();
     void deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate);
-    double getPortfolioTotalValue(const globals::myPersonalIndex *currentPortfolio, const QMap<QString, globals::securityInfo> &tickerInfo, const int &date, double *dividendValue = 0);
-    double getPortfolioDailyActivity(const int &portfolioID, const int &date, const QMap<QString, globals::securityInfo> &tickerInfo);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate);
     void getPortfolioNAVValues(const int &portfolioID, const int &calculationDate, const bool &portfolioStartDate);
     bool getCurrentDateOrNext(int &date);
@@ -52,8 +50,11 @@ private:
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
-    void insertPortfolioTrades(const int &portfolioID, const int &date, const int &previousDate, const globals::portfolioCache *previousCache,
-        const globals::portfolioCache *cache, const dynamicTradeList &trades, const QList<int> &tickerReinvestments);
+    void insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const globals::portfolioCache *previousCache);
+    void insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const globals::portfolioCache *previousCache, const int &date, const double &reverseTradeValue);
+    void insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioCache *previousCache, const globals::portfolioCache *cache, const dynamicTradeList &trades);
+    void insertFirstPortfolioTrades(const int &portfolioID, const int &startDate, const dynamicTrades &allTrades);
+    void insertPortfolioTradesToObject(globals::myPersonalIndex *currentPortfolio);
 };
 
 #endif // NAV_H

@@ -13,6 +13,7 @@
 #include "updatePrices.h"
 #include "NAV.h"
 #include "mainHoldingsModel.h"
+#include "calculations.h"
 
 class frmMain : public QMainWindow
 {
@@ -81,6 +82,7 @@ private slots:
     void deletePortfolio();
     void loadPortfolio();
     void loadPortfolioHoldings();
+    void loadPortfolioPerformance();
     void about();
     void addTicker();
     void editTicker();

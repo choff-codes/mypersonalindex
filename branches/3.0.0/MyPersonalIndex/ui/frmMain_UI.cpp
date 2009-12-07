@@ -198,8 +198,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     performance->setAlternatingRowColors(true);
     performance->horizontalHeader()->setHighlightSections(false);
     performance->verticalHeader()->setDefaultSectionSize(fntHeight);
-    performance->horizontalHeader()->setFixedHeight(fntHeight);
-    performance->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    performance->horizontalHeader()->setFixedHeight(fntHeight + 6);
 
     performanceGrid->addWidget(performanceToolbar);
     performanceGrid->addWidget(performance);

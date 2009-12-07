@@ -127,7 +127,7 @@ void frmTicker::accept()
     if (m_security.trades != m_securityOriginal.trades)
     {
         int newMinDate = calculations::firstTradeDate(m_security.trades);
-        if (newMinDate < m_minDate || m_minDate == -1)
+        if (newMinDate != -1 && (newMinDate < m_minDate || m_minDate == -1))
             m_minDate = newMinDate;
     }
 

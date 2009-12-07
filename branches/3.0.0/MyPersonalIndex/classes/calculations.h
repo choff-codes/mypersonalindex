@@ -20,13 +20,16 @@ public:
         {
             // get ticker info
             int tickerID = i.key();
-            QString ticker = tickers.value(tickerID).ticker;
+            globals::security ticker = tickers.value(tickerID);
             // get all trades for this ticker
             const QList<globals::trade> &existingTrades = i.value();
             int count = existingTrades.count();
             // set up calculation variables
             QList<sharePricePair> filteredTrades;
             double shares = 0; double total = 0; double splitRatio = 1;
+
+            if (ticker.cashAccount)
+                returnValues.insert(tickerID, 1); // cash account is always $1
 
             for(int x = 0; x < count; ++x)
             {
@@ -38,7 +41,7 @@ public:
                     continue;
 
                 // check for any pre-existing splits
-                splitRatio = calculations::splitRatio(splits, ticker, t.date, calculationDate);
+                splitRatio = calculations::splitRatio(splits, ticker.ticker, t.date, calculationDate);
                 t.price = t.price / splitRatio;
                 t.shares = t.shares * splitRatio;
 

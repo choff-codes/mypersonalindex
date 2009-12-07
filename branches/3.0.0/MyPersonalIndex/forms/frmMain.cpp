@@ -10,6 +10,7 @@
 #include "frmColumns.h"
 #include "frmSort.h"
 #include "mpiViewModelBase.h"
+#include "mainPerformanceModel.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -74,6 +75,7 @@ void frmMain::connectSlots()
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(holdingsSortChanged(int)));
     connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
+    connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(loadPortfolioPerformance()));
 
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
 
@@ -280,7 +282,18 @@ void frmMain::loadPortfolio()
         loadPortfolioSettings();
         int lastDate = getLastDate();
         resetCalendars(lastDate);
+
+        QTime t;
+        t.start();;
+
         loadPortfolioHoldings();
+
+        qDebug("Time elapsed: %d ms", t.elapsed());
+        t.restart();
+
+        loadPortfolioPerformance();
+
+        qDebug("Time elapsed: %d ms", t.elapsed());
     }
 }
 
@@ -334,6 +347,14 @@ void frmMain::loadPortfolioHoldings()
     delete oldModel;
 }
 
+void frmMain::loadPortfolioPerformance()
+{
+    QAbstractItemModel *oldModel = ui.performance->model();
+    performanceModel *model = new performanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
+    ui.performance->setModel(model);
+    delete oldModel;
+}
+
 void frmMain::loadPortfolioSettings()
 {
     // set start date equal to earliest data day possible (may be after start date)
@@ -358,6 +379,7 @@ void frmMain::loadPortfolios()
     loadPortfoliosTickersAA();
     loadPortfoliosTickersTrades();
     loadPortfoliosTrades();
+    loadPortfoliosNAV();
 }
 
 void frmMain::loadPortfoliosInfo()
@@ -844,7 +866,7 @@ void frmMain::deleteTicker()
     {
         globals::security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
         int newMinDate = calculations::firstTradeDate(s.trades);
-        if (newMinDate < minDate || minDate == -1)
+        if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
             minDate = newMinDate;
 
         sql->executeNonQuery(sql->deleteItem(queries::table_Tickers, s.id));

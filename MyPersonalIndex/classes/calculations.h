@@ -109,6 +109,7 @@ public:
                 break;
 
             shares += trade.shares * splitRatio(splits, s.ticker, trade.date, date);
+            value.commission += trade.commission;
             value.costBasis += trade.shares * trade.price;
         }
 
@@ -163,6 +164,7 @@ public:
             cache->costBasis += value.costBasis;
             cache->totalValue += value.totalValue;
             cache->dividends += value.dividendAmount;
+            cache->commission += value.commission;
         }
 
         return cache;

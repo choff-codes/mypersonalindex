@@ -256,44 +256,41 @@ void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
 
 void frmMain::disableItems(bool disabled)
 {
-    ui.tab->setDisabled(disabled);
+    ui.mainToolbar->setDisabled(disabled);
+    ui.holdingsToolbar->setDisabled(disabled);
+    ui.statToolbar->setDisabled(disabled);
+    ui.chartToolbar->setDisabled(disabled);
+    ui.performanceToolbar->setDisabled(disabled);
+    ui.correlationsToolbar->setDisabled(disabled);
+    ui.accountsToolbar->setDisabled(disabled);
+    ui.aaToolbar->setDisabled(disabled);
 }
 
 void frmMain::loadPortfolio()
 {
     m_currentPortfolio = 0;
     if (m_portfolios.isEmpty()) // no portfolios to load
-        disableItems(true);
+        ui.tab->setDisabled(true);
     else
     {
         if (this->isVisible())
             savePortfolio(); // save currently loaded portfolio except on initial load
-        disableItems(false);
+        ui.tab->setDisabled(false);
 
         m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
 
         if (!m_currentPortfolio)
         {
             QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
-            disableItems(true);
+            ui.tab->setDisabled(true);
             return;
         }
 
         loadPortfolioSettings();
         int lastDate = getLastDate();
         resetCalendars(lastDate);
-
-        QTime t;
-        t.start();;
-
         loadPortfolioHoldings();
-
-        qDebug("Time elapsed: %d ms", t.elapsed());
-        t.restart();
-
         loadPortfolioPerformance();
-
-        qDebug("Time elapsed: %d ms", t.elapsed());
     }
 }
 
@@ -934,6 +931,7 @@ void frmMain::beginUpdate()
         return;
     }
 
+    disableItems(true);
     ui.stbProgress->setMaximum(0);
     m_updateThread = new updatePrices(m_portfolios, m_dates, m_splits, m_settings, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
@@ -958,10 +956,12 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
     delete m_updateThread;
     m_updateThread = 0;
     loadPortfolio();
+    disableItems(false);
 }
 
 void frmMain::beginNAV(const int &portfolioID, const int &minDate)
 {
+    disableItems(true);
     ui.stbProgress->setMaximum(0);
     m_navThread = new NAV(m_portfolios, m_dates, m_splits, minDate, this, portfolioID);
     connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
@@ -980,6 +980,7 @@ void frmMain::finishNAV()
     delete m_navThread;
     m_navThread = 0;
     loadPortfolio();
+    disableItems(false);
 }
 
 void frmMain::statusUpdate(const QString &message)

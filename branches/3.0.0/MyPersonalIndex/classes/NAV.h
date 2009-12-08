@@ -52,8 +52,8 @@ private:
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     void insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const globals::portfolioCache *previousCache);
     void insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const globals::portfolioCache *previousCache, const int &date, const double &reverseTradeValue);
-    void insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioCache *previousCache, const globals::portfolioCache *cache, const dynamicTradeList &trades);
-    void insertFirstPortfolioTrades(const int &portfolioID, const int &startDate, const dynamicTrades &allTrades);
+    void insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioCache *previousCache, const dynamicTradeList &trades);
+    void insertFirstPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &startDate, const dynamicTrades &allTrades);
     void insertPortfolioTradesToObject(globals::myPersonalIndex *currentPortfolio);
 };
 

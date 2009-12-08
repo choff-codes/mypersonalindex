@@ -281,8 +281,9 @@ public:
         double shares;
         double costBasis;
         double dividendAmount;
+        double commission;
 
-        securityValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0) {}
+        securityValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0), commission(0) {}
     };
 
     struct assetAllocation
@@ -379,8 +380,9 @@ public:
         double totalValue;
         double costBasis;
         double dividends;
+        double commission;
 
-        portfolioCache(): totalValue(0), costBasis(0), dividends(0) {}
+        portfolioCache(): totalValue(0), costBasis(0), dividends(0), commission(0) {}
     };
 
     struct myPersonalIndex

@@ -77,6 +77,9 @@ void frmMain::connectSlots()
 
     connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(loadPortfolioPerformance()));
 
+    connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
+    connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
+
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
 
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
@@ -291,6 +294,7 @@ void frmMain::loadPortfolio()
         resetCalendars(lastDate);
         loadPortfolioHoldings();
         loadPortfolioPerformance();
+        loadPortfolioChart();
     }
 }
 
@@ -350,6 +354,52 @@ void frmMain::loadPortfolioPerformance()
     performanceModel *model = new performanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
     ui.performance->setModel(model);
     delete oldModel;
+}
+
+void frmMain::loadPortfolioChart()
+{
+    const QMap<int, globals::navInfo> &nav = m_currentPortfolio->data.nav;
+
+    ui.chart->setTitle(m_currentPortfolio->info.description);
+    if (m_chartInfo.curve)
+    {
+        m_chartInfo.curve->detach();
+        delete m_chartInfo.curve;
+        m_chartInfo.xData.clear();
+        m_chartInfo.yData.clear();
+    }        
+
+    m_chartInfo.curve = new QwtPlotCurve();
+    m_chartInfo.curve->setCurveAttribute(QwtPlotCurve::Fitted, true);
+    QPen p(Qt::red); p.setWidth(3);
+    m_chartInfo.curve->setPen(p);
+
+    int startDate = ui.chartStartDateDropDown->date().toJulianDay();
+    int endDate = ui.chartEndDateDropDown->date().toJulianDay();
+    double startValue = -1;
+    for(QMap<int, globals::navInfo>::const_iterator i = nav.lowerBound(startDate); i != nav.end(); ++i)
+    {
+        if (i.key() > endDate)
+            break;
+
+        if (startValue == -1)
+            startValue = i.value().nav;
+
+        m_chartInfo.xData.append(i.key());
+        m_chartInfo.yData.append(i.value().nav / startValue * 100 - 100);
+    }
+
+    if (m_chartInfo.xData.count() != 0)
+    {
+        m_chartInfo.curve->setRawData(&m_chartInfo.xData[0], &m_chartInfo.yData[0], m_chartInfo.xData.count());
+        m_chartInfo.curve->attach(ui.chart);
+        ui.chart->setAxisScale(QwtPlot::xBottom, m_chartInfo.xData.first(), m_chartInfo.xData.last(), 0);
+    }
+    else
+        ui.chart->setAxisScale(QwtPlot::xBottom, m_currentPortfolio->info.startDate, m_currentPortfolio->info.startDate, 0);
+
+    ui.chart->replot();
+    ui.chartZoomer->setZoomBase();
 }
 
 void frmMain::loadPortfolioSettings()

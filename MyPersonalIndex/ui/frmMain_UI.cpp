@@ -1,5 +1,10 @@
 #include "frmMain_UI.h"
 #include "functions.h"
+#include "mpiDateScale.h"
+#include "mpiPercentScale.h"
+#include "qwt_plot_layout.h"
+#include "qwt_plot_canvas.h"
+#include "qwt_text_engine.h"
 
 const QString frmMain_UI::LAST_UPDATED_TEXT = "Last Updated: ";
 const QString frmMain_UI::INDEX_START_TEXT = "Index Start Date: ";
@@ -168,7 +173,42 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     chartGrid->setSpacing(0);
     chartGrid->setMargin(1);
     chartToolbar = new QToolBar(tab_chart);
-    chart = new QTableView(tab_chart);
+    chart = new QwtPlot(tab_chart);
+    chart->setAxisScaleDraw(QwtPlot::xBottom, new mpiDateScale());
+    chart->setAxisScaleDraw(QwtPlot::yLeft, new mpiPercentScale());
+    chart->plotLayout()->setCanvasMargin(20);
+    chart->plotLayout()->setMargin(20);
+    chartZoomer = new QwtPlotZoomer(chart->canvas(), false);
+
+    QLinearGradient grad(0, 0, 1, 1);
+    grad.setCoordinateMode(QGradient::StretchToDeviceMode);
+    grad.setColorAt(0, Qt::white);
+    grad.setColorAt(1, QColor(220, 220, 220));
+
+    QPalette palette(chart->canvas()->palette());
+    palette.setBrush(QPalette::Window, QBrush(grad));
+    chart->canvas()->setPalette(palette);
+
+    palette = chart->palette();
+    palette.setColor(QPalette::Window, Qt::white);
+    chart->setPalette(palette);
+    chart->setAutoFillBackground(true);
+
+    QFont cFont = chart->axisFont(QwtPlot::xBottom);
+    cFont.setBold(true);
+    cFont.setPointSize(cFont.pointSize() + 3);
+
+    QwtText xAxis("Date");
+    xAxis.setFont(cFont);
+    chart->setAxisTitle(QwtPlot::xBottom, xAxis);
+    QwtText yAxis("Percent");
+    yAxis.setFont(cFont);
+    chart->setAxisTitle(QwtPlot::yLeft, yAxis);
+
+    chartGridLines = new QwtPlotGrid();
+    chartGridLines->enableX(false);
+    chartGridLines->setPen(QPen(Qt::DotLine));
+    chartGridLines->attach(chart);
     chartGrid->addWidget(chartToolbar);
     chartGrid->addWidget(chart);
 

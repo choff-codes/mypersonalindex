@@ -14,6 +14,16 @@
 #include "NAV.h"
 #include "mainHoldingsModel.h"
 #include "calculations.h"
+#include <qwt_plot_curve.h>
+
+struct chartInfo
+{
+    QwtPlotCurve *curve;
+    QVector<double> xData;
+    QVector<double> yData;
+
+    chartInfo(): curve(0) {}
+};
 
 class frmMain : public QMainWindow
 {
@@ -36,6 +46,7 @@ private:
     QMap<int, globals::statistic> m_statistics;
     updatePrices *m_updateThread;
     NAV *m_navThread;
+    chartInfo m_chartInfo;
 
     void closeEvent(QCloseEvent *event);
     void connectSlots();
@@ -83,6 +94,7 @@ private slots:
     void loadPortfolio();
     void loadPortfolioHoldings();
     void loadPortfolioPerformance();
+    void loadPortfolioChart();
     void about();
     void addTicker();
     void editTicker();

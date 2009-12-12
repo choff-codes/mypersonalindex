@@ -2,6 +2,9 @@
 #define FRMMAIN_UI_H
 
 #include <QtGui>
+#include <qwt_plot.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_zoomer.h>
 
 class frmMain_UI
 {
@@ -58,7 +61,9 @@ public:
     QDateEdit *chartStartDateDropDown;
     QLabel *chartEndDate;
     QDateEdit *chartEndDateDropDown;
-    QTableView *chart;
+    QwtPlot *chart;
+    QwtPlotGrid *chartGridLines;
+    QwtPlotZoomer *chartZoomer;
 
     QVBoxLayout *performanceGrid;
     QToolBar *performanceToolbar;
@@ -115,6 +120,8 @@ public:
     QProgressBar *stbProgress;
 
     void setupUI(QMainWindow *MainWindow);
+
+    ~frmMain_UI() { delete chartGridLines; delete chartZoomer; }
 };
 
 #endif // FRMMAIN_UI_H

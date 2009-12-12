@@ -168,7 +168,7 @@ void NAV::deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int 
         QList<globals::trade> &list = i.value();
         QList<globals::trade>::iterator trade = list.begin();
         while (trade != list.end())
-            if ((*trade).date >= calculationDate)
+            if (trade->date >= calculationDate)
                 trade = list.erase(trade);
             else
                 ++trade;

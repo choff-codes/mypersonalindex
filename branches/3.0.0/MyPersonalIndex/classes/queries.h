@@ -57,7 +57,7 @@ public:
     enum { dividendsColumns_Date, dividendsColumns_Ticker, dividendsColumns_Amount };
     enum { splitsColumns_Date, splitsColumns_Ticker, splitsColumns_Ratio };
     enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence };
-    enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code };
+    enum { tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code };
     enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
@@ -76,8 +76,8 @@ public:
     queryInfo* deleteTable(const QString &table) const;
     queryInfo* deleteItem(const QString &table, const int &id) const;
     queryInfo* deleteTickerItems(const QString &table, const int &tickerID) const;
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID) const;
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const;
+    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers) const;
+    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers) const;
     queryInfo* deleteUnusedPrices(const QString &table) const;
 
     queryInfo* getVersion() const;

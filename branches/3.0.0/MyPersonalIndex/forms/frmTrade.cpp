@@ -104,15 +104,15 @@ void frmTrade::freqChange(int index)
             ui.deDate->setDisabled(true);
             break;
         case globals::tradeFreq_Monthly:
-            ui.deDate->setDisplayFormat("MMMM");
+            ui.deDate->setDisplayFormat("dd");
             ui.deDate->setMinimumDate(QDate(2009, 1, 1));
-            ui.deDate->setMaximumDate(QDate(2009, 12, 31));
+            ui.deDate->setMaximumDate(QDate(2009, 1, 31));
             ui.deDate->setCalendarPopup(false);
             ui.deDate->setDate(QDate(2009, 1, 1));
             break;
         case globals::tradeFreq_Once:
             ui.deDate->setDisplayFormat(globals::shortDateFormat);
-            ui.deDate->clearMaximumDate();
+            ui.deDate->clearMinimumDate();
             ui.deDate->clearMaximumDate();
             ui.deDate->setCalendarPopup(true);
             ui.deDate->setDate(QDate::currentDate());

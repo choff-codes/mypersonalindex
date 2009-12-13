@@ -16,7 +16,7 @@ public:
     QLabel *shares;
     QLineEdit *txtShares;
     QCheckBox *chkPrice;
-    QLineEdit *txtPrice;;
+    QLineEdit *txtPrice;
     QLabel *commission;
     QLineEdit *txtCommission;
     QLabel *cash;

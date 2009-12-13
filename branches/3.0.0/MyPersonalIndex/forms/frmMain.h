@@ -86,6 +86,7 @@ private:
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
     void deleteUnusedInfo();
     globals::portfolioCache* portfolioCache(const int &date);
+    bool invalidPortfolioNAVDates();
 
 private slots:
     void addPortfolio();

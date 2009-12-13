@@ -127,7 +127,7 @@ public:
                 case tradeFreq_Weekly:
                     return date != 0 ? QDate::fromJulianDay(date).toString("dddd") : "";
                 case tradeFreq_Monthly:
-                    return date != 0 ? QDate::fromJulianDay(date).toString("MMMM") : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString("dd") : "";
                 case tradeFreq_Yearly:
                     return date != 0 ? QDate::fromJulianDay(date).toString("dd MMM") : "";
                 default:

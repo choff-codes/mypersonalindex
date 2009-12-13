@@ -68,11 +68,12 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     {
         int date = *currentDate;
         double newTotalValue = 0, dailyActivity = 0, newNAV = 0;
-        globals::portfolioCache *cache = calculations::portfolioValues(currentPortfolio, date, m_splits, *m_sql, false);
 
         insertPortfolioReinvestments(currentPortfolio, date, tickerReinvestments, previousCache);
         insertPortfolioTrades(currentPortfolio, date, previousCache, trades.value(*currentDate) + trades.value(-1));
         insertPortfolioTradesToObject(currentPortfolio);
+
+        globals::portfolioCache *cache = calculations::portfolioValues(currentPortfolio, date, m_splits, *m_sql, false);
 
         m_NAV_Portfolio.append(portfolioID);
         m_NAV_Dates.append(*currentDate);
@@ -120,7 +121,6 @@ void NAV::insertVariantLists()
     if (!m_Trades_Dates.isEmpty())
     {
         QMap<QString, QVariantList> tableValues;
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Portfolio), m_Trades_Portfolio);
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Date), m_Trades_Dates);
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_TickerID), m_Trades_TickerID);
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Shares), m_Trades_Shares);
@@ -138,7 +138,6 @@ void NAV::clearVariantLists()
     m_NAV_Dates.clear();
     m_NAV_Totalvalue.clear();
     m_NAV_Nav.clear();
-    m_Trades_Portfolio.clear();
     m_Trades_TickerID.clear();
     m_Trades_Dates.clear();
     m_Trades_Shares.clear();
@@ -150,9 +149,9 @@ void NAV::clearVariantLists()
 void NAV::deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate)
 {
     // remove NAV prices that are to be recalculated
-    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate));
+    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, false));
     // remove custom trades that are to be recalculated
-    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate));
+    m_sql->executeNonQuery(m_sql->deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true));
 
     currentPortfolio->cache.clear();
 
@@ -385,13 +384,11 @@ void NAV::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPo
     if (!previousCache)
         return;
     
-    int portfolioID = currentPortfolio->info.id;
     foreach(const int &reinvest, tickerReinvestments)
     {
         globals::securityInfo s = previousCache->tickerInfo.value(currentPortfolio->data.tickers.value(reinvest).ticker);
         if (s.dividendAmount <= 0 || s.closePrice == 0)
             continue;
-        m_Trades_Portfolio.append(portfolioID);
         m_Trades_TickerID.append(reinvest);
         m_Trades_Dates.append(date);
         m_Trades_Shares.append(s.dividendAmount / s.closePrice);
@@ -416,7 +413,6 @@ void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
     if (cashSecurity.closePrice == 0)
         return;
 
-    m_Trades_Portfolio.append(currentPortfolio->info.id);
     m_Trades_TickerID.append(cashAccount);
     m_Trades_Dates.append(date);
     double cashSplitRatio = m_splits.value(date).value(cashSecurity.ticker, 1);
@@ -428,7 +424,6 @@ void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
 
 void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioCache *previousCache, const dynamicTradeList &trades)
 {
-    int portfolioID = currentPortfolio->info.id;
     foreach(const globals::dynamicTradeInfo &d, trades)
     {
         globals::securityInfo s = previousCache ? previousCache->tickerInfo.value(d.ticker): globals::securityInfo();
@@ -437,7 +432,6 @@ void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio
 
         double splitRatio = m_splits.value(date).value(s.ticker, 1);
 
-        m_Trades_Portfolio.append(portfolioID);
         m_Trades_TickerID.append(d.tickerID);
         m_Trades_Dates.append(date);
         m_Trades_Price.append(d.trade.tradeType == globals::tradeType_Interest ? 0 :

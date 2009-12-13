@@ -106,8 +106,8 @@ void frmTicker_UI::setupUI(QDialog *dialog)
 
     tradesLayoutButtons = new QHBoxLayout();
     btnTradesAdd = new QPushButton("Add New", gpTrades);
-    btnTradesEdit = new QPushButton("Edit", gpTrades);;
-    btnTradesDelete = new QPushButton("Delete", gpTrades);;
+    btnTradesEdit = new QPushButton("Edit", gpTrades);
+    btnTradesDelete = new QPushButton("Delete", gpTrades);
     tradesLayoutButtons->addWidget(btnTradesAdd);
     tradesLayoutButtons->addWidget(btnTradesEdit);
     tradesLayoutButtons->addWidget(btnTradesDelete);

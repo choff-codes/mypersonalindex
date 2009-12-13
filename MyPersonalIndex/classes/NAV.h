@@ -32,7 +32,7 @@ private:
     int m_calculationDate;
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;
-    QVariantList m_Trades_Portfolio, m_Trades_TickerID, m_Trades_Dates, m_Trades_Shares, m_Trades_Price, m_Trades_Commission, m_Trades_Code;
+    QVariantList m_Trades_TickerID, m_Trades_Dates, m_Trades_Shares, m_Trades_Price, m_Trades_Commission, m_Trades_Code;
     int m_TradesPosition;
 
     typedef QList<globals::dynamicTradeInfo> dynamicTradeList;

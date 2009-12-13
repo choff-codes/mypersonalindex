@@ -115,7 +115,8 @@ void frmTicker::accept()
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
     m_security.hide = ui.chkHide->isChecked();
-    m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
+    if (m_security.id != -1)
+        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
     m_security.aa = m_modelAA->getList();
 
     if (m_security == m_securityOriginal)
@@ -124,16 +125,21 @@ void frmTicker::accept()
         return;
     }
 
+    m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
+    if (m_security.id == -1)
+    {
+        m_security.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
+    }
+
     if (m_security.trades != m_securityOriginal.trades)
     {
         int newMinDate = calculations::firstTradeDate(m_security.trades);
         if (newMinDate != -1 && (newMinDate < m_minDate || m_minDate == -1))
             m_minDate = newMinDate;
     }
-
-    m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
-    if (m_security.id == -1)
-        m_security.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+    else
+        m_minDate = -1;
 
     if(m_security.aa == m_securityOriginal.aa)
     {

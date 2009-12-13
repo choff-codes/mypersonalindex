@@ -14,8 +14,8 @@ const QStringList queries::dividendsColumns = QStringList() << "Date" << "Ticker
 //enum { statMapping_PortfolioID, statMapping_StatID, statMapping_Sequence };
 const QStringList queries::statMappingColumns = QStringList() << "PortfolioID" << "StatID" << "Sequence";
 
-// enum { tradesColumns_Portfolio, tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code };
-const QStringList queries::tradesColumns = QStringList() << "PortfolioID" << "TickerID" << "Date" << "Shares" << "Price" << "Commission" << "Code";
+// enum { tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code };
+const QStringList queries::tradesColumns = QStringList() << "TickerID" << "Date" << "Shares" << "Price" << "Commission" << "Code";
 
 //enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent };
 const QStringList queries::tickersAAColumns = QStringList() << "TickerID" << "AAID" << "Percent";
@@ -27,7 +27,7 @@ const QStringList queries::navColumns = QStringList() << "PortfolioID" << "Date"
 const QStringList queries::settingsColumnsColumns = QStringList() << "ID" << "ColumnID" << "Sequence";
 
 const QString queries::table_AA = "AA";
-const QString queries::table_Acct = "Accounts";
+const QString queries::table_Acct = "Acct";
 const QString queries::table_ClosingPrices = "ClosingPrices";
 const QString queries::table_Dividends = "Dividends";
 const QString queries::table_NAV = "NAV";
@@ -202,19 +202,25 @@ queries::queryInfo* queries::deleteItem(const QString &table, const int &id) con
     );
 }
 
-queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID) const
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers) const
 {
     return new queryInfo(
-        QString("DELETE FROM %1 WHERE PortfolioID = :ID").arg(table),
+        QString("DELETE FROM %1 WHERE %2").arg(table,
+            joinToTickers ?
+                QString("%1.TickerID IN (SELECT TickerID FROM Tickers WHERE PortfolioID = :ID)").arg(table):
+                "PortfolioID = :ID"),
         QList<parameter>()
             << parameter(":ID", portfolioID)
     );
 }
 
-queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const
+
+queries::queryInfo* queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers) const
 {
     return new queryInfo(
-        QString("DELETE FROM %1 WHERE PortfolioID = :ID AND Date >= :Date").arg(table),
+        QString("DELETE FROM %1 WHERE %2").arg(table,
+            joinToTickers ? QString("%1.TickerID IN (SELECT TickerID FROM Tickers WHERE PortfolioID = :ID) AND %1.Date >= :Date").arg(table):
+            "PortfolioID = :ID AND Date >= :Date"),
         QList<parameter>()
             << parameter(":ID", portfolioID)
             << parameter(":Date", startingDate)
@@ -592,7 +598,11 @@ queries::queryInfo* queries::getSecurityAA() const
 queries::queryInfo* queries::getTrade() const
 {
     return new queryInfo(
-        "SELECT PortfolioID, TickerID, Date, Shares, Price, Commission FROM Trades ORDER BY PortfolioID, Date",
+        "SELECT b.PortfolioID, a.TickerID, a.Date, a.Shares, a.Price, a.Commission"
+        " FROM Trades AS a"
+        " INNER JOIN Tickers AS b"
+            " ON a.TickerID = b.ID"
+        " ORDER BY b.PortfolioID, a.Date",
         QList<parameter>()
     );
 }

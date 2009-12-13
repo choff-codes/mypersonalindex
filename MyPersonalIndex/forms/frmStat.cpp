@@ -52,7 +52,7 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), stat);
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
-    m_sql.executeNonQuery(m_sql.deletePortfolioItems(queries::table_StatMapping, m_portfolio));
+    m_sql.executeNonQuery(m_sql.deletePortfolioItems(queries::table_StatMapping, m_portfolio, false));
     if (!stat.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);

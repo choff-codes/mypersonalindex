@@ -50,7 +50,7 @@ public:
                     while (t.shares != 0 && !filteredTrades.isEmpty()) // still shares to sell
                     {
                         int z = calcType == globals::calc_LIFO ? filteredTrades.count() - 1 : 0;
-                        const sharePricePair &pair = filteredTrades.at(x);
+                        sharePricePair pair = filteredTrades.at(z);
 
                         if (pair.first <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
                         {
@@ -70,7 +70,7 @@ public:
                 }
                 else // this is a buy, just add the trade
                 {
-                    filteredTrades.append(qMakePair(t.shares, t.price));
+                    filteredTrades.append(sharePricePair(t.shares, t.price));
                     shares += t.shares;
                     total += t.shares * t.price;
                 }

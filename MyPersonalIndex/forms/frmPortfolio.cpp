@@ -76,6 +76,7 @@ void frmPortfolio::accept()
     m_portfolio.costCalc = (globals::avgShareCalc)ui.cmbCostBasis->currentIndex();
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.origStartDate = ui.dateStartDate->date().toJulianDay();
+    m_portfolio.startDate = m_portfolio.origStartDate;
 
     if (m_portfolio == m_portfolioOriginal)
     {

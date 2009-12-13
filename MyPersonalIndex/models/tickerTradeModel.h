@@ -19,7 +19,7 @@ public:
         if (m_list.isEmpty())
             m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
         else
-            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+            m_parent->resizeColumnsToContents();
     }
 
 private:

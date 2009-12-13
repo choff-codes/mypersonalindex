@@ -267,11 +267,11 @@ void frmMain::disableItems(bool disabled)
     ui.correlationsToolbar->setDisabled(disabled);
     ui.accountsToolbar->setDisabled(disabled);
     ui.aaToolbar->setDisabled(disabled);
+    ui.holdings->blockSignals(disabled);
 }
 
 void frmMain::loadPortfolio()
 {
-    m_currentPortfolio = 0;
     if (m_portfolios.isEmpty()) // no portfolios to load
         ui.tab->setDisabled(true);
     else
@@ -304,6 +304,7 @@ void frmMain::resetCalendars(const int &date)
     int end = date < start ? start : date;
 
     resetCalendar(end, start, ui.holdingsDateDropDown);
+    resetCalendar(end, start, ui.chartStartDateDropDown, ui.chartEndDateDropDown);
 }
 
 void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *calendar)
@@ -398,6 +399,7 @@ void frmMain::loadPortfolioChart()
     else
         ui.chart->setAxisScale(QwtPlot::xBottom, m_currentPortfolio->info.startDate, m_currentPortfolio->info.startDate, 0);
 
+    ui.chart->setAxisAutoScale(QwtPlot::yLeft);
     ui.chart->replot();
     ui.chartZoomer->setZoomBase();
 }
@@ -562,9 +564,9 @@ void frmMain::loadPortfoliosTickersTrades()
         if (!q->value(queries::getSecurityTrade_Date).isNull())
             trade.date = q->value(queries::getSecurityTrade_Date).toInt();
         if (!q->value(queries::getSecurityTrade_StartDate).isNull())
-            trade.date = q->value(queries::getSecurityTrade_StartDate).toInt();
+            trade.startDate = q->value(queries::getSecurityTrade_StartDate).toInt();
         if (!q->value(queries::getSecurityTrade_EndDate).isNull())
-            trade.date = q->value(queries::getSecurityTrade_EndDate).toInt();
+            trade.endDate = q->value(queries::getSecurityTrade_EndDate).toInt();
 
         int portfolioID = q->value(queries::getSecurityTrade_PortfolioID).toInt();
         int tickerID = q->value(queries::getSecurityTrade_TickerID).toInt();
@@ -796,18 +798,42 @@ void frmMain::deletePortfolio()
     {
         int i = m_currentPortfolio->info.id;
 
-        m_portfolios.remove(i);
+
         sql->executeNonQuery(sql->deleteItem(queries::table_Portfolios, i));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_AA, i, false));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Tickers, i, false));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Acct, i, false));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_NAV, i, false));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_StatMapping, i, false));
 
-        int row = ui.mainPortfolioCombo->currentIndex();
-        if (m_portfolios.count() == row)
-            row--;
 
-        loadPortfolioDropDown(-1);
-        if (!m_portfolios.isEmpty())
-            ui.mainPortfolioCombo->setCurrentIndex(row);
+        foreach(const globals::security &s, m_currentPortfolio->data.tickers)
+        {
+            sql->executeNonQuery(sql->deleteTickerItems(queries::table_TickersAA, s.id));
+            sql->executeNonQuery(sql->deleteTickerItems(queries::table_TickersTrades, s.id));
+            sql->executeNonQuery(sql->deleteTickerItems(queries::table_Trades, s.id));
+        }
+
+        delete m_currentPortfolio;
+        m_currentPortfolio = 0;
+        m_portfolios.remove(i);
     }
 
+    int row = ui.mainPortfolioCombo->currentIndex();
+    if (m_portfolios.count() == row)
+        row--;
+
+    loadPortfolioDropDown(-1);
+    if (!m_portfolios.isEmpty())
+        ui.mainPortfolioCombo->setCurrentIndex(row);
+
+    deleteUnusedInfo();
+
+    if (invalidPortfolioNAVDates())
+    {
+        beginNAV(-1, 0);
+        return;
+    }
 }
 
 void frmMain::about()
@@ -924,7 +950,10 @@ void frmMain::deleteTicker()
     }
 
     deleteUnusedInfo();
-    refreshPortfolioSecurities(minDate);
+    if (invalidPortfolioNAVDates())
+        beginNAV(-1, 0);
+    else
+        refreshPortfolioSecurities(minDate);
 }
 
 void frmMain::deleteUnusedInfo()
@@ -934,6 +963,20 @@ void frmMain::deleteUnusedInfo()
     sql->executeNonQuery(sql->deleteUnusedPrices(queries::table_Splits));
     loadDates();
     loadSplits();
+}
+
+bool frmMain::invalidPortfolioNAVDates()
+{
+    if (m_dates.isEmpty())
+        return true;
+
+    foreach(globals::myPersonalIndex *p, m_portfolios)
+    {
+        if (p != m_currentPortfolio)
+            if (!p->data.nav.isEmpty() && p->data.nav.constBegin().key() < m_dates.first())
+                return true;
+    }
+    return false;
 }
 
 void frmMain::options()
@@ -1115,7 +1158,7 @@ void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<i
 
 globals::portfolioCache* frmMain::portfolioCache(const int &date)
 {
-    globals::portfolioCache *cache = m_currentPortfolio->cache.object(date);;
+    globals::portfolioCache *cache = m_currentPortfolio->cache.object(date);
     if (!cache)
     {
         cache = calculations::portfolioValues(m_currentPortfolio, date, m_splits, *sql);

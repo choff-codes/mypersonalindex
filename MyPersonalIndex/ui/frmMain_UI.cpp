@@ -306,7 +306,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accounts->setAlternatingRowColors(true);
     accounts->horizontalHeader()->setHighlightSections(false);
     accounts->verticalHeader()->setDefaultSectionSize(fntHeight);
-    accounts->horizontalHeader()->setFixedHeight(fntHeight);
+    accounts->horizontalHeader()->setFixedHeight(fntHeight * 2 + 2);
     accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     accountsGrid->addWidget(accountsToolbar);
@@ -316,6 +316,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsEdit->setIconText("Edit Accounts...");
     accountsShowBlank = new QAction("Show (Blank)", tab_accounts);
     accountsShowBlank->setCheckable(true);
+    accountsReorderColumns = new QAction("Modify Columns...", tab_accounts);
+    accountsReorderColumns->setIconText("Modify Columns...");
     accountsExport = new QAction("Export...", tab_accounts);
     accountsExport->setIconText("Export...");
     accountsDate = new QLabel(" Date: ", tab_accounts);
@@ -334,6 +336,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsToolbar->addWidget(accountsSortCombo);
     accountsToolbar->addAction(accountsShowBlank);
     accountsToolbar->addSeparator();
+    accountsToolbar->addAction(accountsReorderColumns);
     accountsToolbar->addAction(accountsExport);
 
     aaGrid = new QVBoxLayout(tab_aa);
@@ -348,7 +351,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aa->setAlternatingRowColors(true);
     aa->horizontalHeader()->setHighlightSections(false);
     aa->verticalHeader()->setDefaultSectionSize(fntHeight);
-    aa->horizontalHeader()->setFixedHeight(fntHeight);
+    aa->horizontalHeader()->setFixedHeight(fntHeight * 2 + 2);
     aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     aaGrid->addWidget(aaToolbar);
@@ -358,6 +361,8 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaEdit->setIconText("Edit Asset Allocation...");
     aaShowBlank = new QAction("Show (Blank)", tab_aa);
     aaShowBlank->setCheckable(true);
+    aaReorderColumns = new QAction("Modify Columns...", tab_aa);
+    aaReorderColumns->setIconText("Modify Columns...");
     aaExport = new QAction("Export...", tab_aa);
     aaExport->setIconText("Export...");
     aaDate = new QLabel(" Date: ", tab_aa);
@@ -376,6 +381,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaToolbar->addWidget(aaSortCombo);
     aaToolbar->addAction(aaShowBlank);
     aaToolbar->addSeparator();
+    aaToolbar->addAction(aaReorderColumns);
     aaToolbar->addAction(aaExport);
 
     status = new QStatusBar(MainWindow);

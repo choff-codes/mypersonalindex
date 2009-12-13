@@ -17,7 +17,7 @@ public:
     void autoResize()
     {
         if (m_list.isEmpty())
-            m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
         else
             m_parent->resizeColumnsToContents();
     }

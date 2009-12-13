@@ -6,7 +6,10 @@ int main(int argc, char *argv[])
     QtSingleApplication app("MyPersonalIndexApp", argc, argv);
 
     if (app.isRunning())
-         return 0;
+    {
+        QMessageBox::information(0, "My Personal Index", "Only one instance of My Personal Index can be run at a time!");
+        return 0;
+     }
 
     frmMain mainForm;
 

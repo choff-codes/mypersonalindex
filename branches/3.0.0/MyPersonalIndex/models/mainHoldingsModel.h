@@ -64,13 +64,13 @@ public:
     }
 };
 
-class holdingsModel: public mpiViewModelBase
+class mainHoldingsModel: public mpiViewModelBase
 {
     Q_OBJECT
 
 public:
 
-    holdingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, QTableView *parent = 0):
+    mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, QTableView *parent = 0):
         mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const

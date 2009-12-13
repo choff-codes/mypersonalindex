@@ -86,6 +86,7 @@ public:
     QToolBar *accountsToolbar;
     QAction *accountsEdit;
     QAction *accountsShowBlank;
+    QAction *accountsReorderColumns;
     QAction *accountsExport;
     QLabel *accountsDate;
     QDateEdit *accountsDateDropDown;
@@ -97,6 +98,7 @@ public:
     QToolBar *aaToolbar;
     QAction *aaEdit;
     QAction *aaShowBlank;
+    QAction *aaReorderColumns;
     QAction *aaExport;
     QLabel *aaDate;
     QDateEdit *aaDateDropDown;

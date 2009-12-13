@@ -80,11 +80,21 @@ void frmMain::connectSlots()
     connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
     connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
 
-    connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(aa()));
+    connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(editAA()));
+    connect(ui.aaDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioAA()));
+    connect(ui.aaShowBlank, SIGNAL(changed()), this, SLOT(loadPortfolioAA()));
+    connect(ui.aaReorderColumns, SIGNAL(triggered()), this, SLOT(aaModifyColumns()));
+    connect(ui.aaSortCombo, SIGNAL(activated(int)), this, SLOT(aaSortChanged(int)));
+    //connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
-    connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(acct()));
+    connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(editAcct()));
+    connect(ui.accountsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioAcct()));
+    connect(ui.accountsShowBlank, SIGNAL(changed()), this, SLOT(loadPortfolioAcct()));
+    connect(ui.accountsReorderColumns, SIGNAL(triggered()), this, SLOT(acctModifyColumns()));
+    connect(ui.accountsSortCombo, SIGNAL(activated(int)), this, SLOT(acctSortChanged(int)));
+    //connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
-    connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(stat()));
+    connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(editStat()));
 }
 
 void frmMain::loadSettings()
@@ -134,6 +144,8 @@ void frmMain::loadSettings()
 void frmMain::loadSortDropDowns()
 {
     loadSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
+    loadSortDropDown(aaRow::fieldNames(), ui.aaSortCombo);
+    loadSortDropDown(acctRow::fieldNames(), ui.accountsSortCombo);
 }
 
 void frmMain::loadSettingsColumns()
@@ -295,6 +307,8 @@ void frmMain::loadPortfolio()
         loadPortfolioHoldings();
         loadPortfolioPerformance();
         loadPortfolioChart();
+        loadPortfolioAA();
+        loadPortfolioAcct();
     }
 }
 
@@ -341,11 +355,69 @@ void frmMain::loadPortfolioHoldings()
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    holdingsModel *model = new holdingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), cache, ui.holdings);
+    mainHoldingsModel *model = new mainHoldingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), cache, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
+    delete oldModel;
+}
+
+void frmMain::loadPortfolioAA()
+{
+    int currentDate = getDateDropDownDate(ui.aaDateDropDown);
+    QAbstractItemModel *oldModel = ui.aa->model();
+
+    globals::portfolioCache *cache = portfolioCache(currentDate);
+
+    QList<baseRow*> rows;
+
+    if (ui.aaShowBlank->isChecked())
+    {
+        globals::assetAllocation aa;
+        aa.description = "(Blank)";
+        rows.append(aaRow::getAARow(cache, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+    }
+
+    foreach(const globals::assetAllocation &aa, m_currentPortfolio->data.aa)
+        rows.append(aaRow::getAARow(cache, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+
+    qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
+
+    mainAAModel *model = new mainAAModel(rows, m_settings.columns.value(globals::columnIDs_AA), cache, m_currentPortfolio->info.aaThreshold, ui.aa);
+    ui.aa->setModel(model);
+    ui.aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    setSortDropDown(m_currentPortfolio->info.aaSort, ui.aaSortCombo);
+    delete oldModel;
+}
+
+void frmMain::loadPortfolioAcct()
+{
+    int currentDate = getDateDropDownDate(ui.accountsDateDropDown);
+    QAbstractItemModel *oldModel = ui.accounts->model();
+
+    globals::portfolioCache *cache = portfolioCache(currentDate);
+
+    QList<baseRow*> rows;
+
+    if (ui.accountsShowBlank->isChecked())
+    {
+        globals::account acct;
+        acct.description = "(Blank)";
+        rows.append(acctRow::getAcctRow(cache, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+    }
+
+    foreach(const globals::account &acct, m_currentPortfolio->data.acct)
+        rows.append(acctRow::getAcctRow(cache, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+
+    qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
+
+    mainAcctModel *model = new mainAcctModel(rows, m_settings.columns.value(globals::columnIDs_Acct), cache, ui.accounts);
+    ui.accounts->setModel(model);
+    ui.accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    setSortDropDown(m_currentPortfolio->info.acctSort, ui.accountsSortCombo);
     delete oldModel;
 }
 
@@ -855,6 +927,7 @@ void frmMain::refreshPortfolioSecurities(const int &minDate)
 
     m_currentPortfolio->cache.clear();
     loadPortfolioHoldings();
+    loadPortfolioAA();
 }
 
 void frmMain::addTicker()
@@ -901,7 +974,7 @@ void frmMain::editTicker()
 {
     bool change = false;
     int minDate = -1;
-    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         int tickerID = row->values.at(holdingsRow::row_ID).toInt();
         frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(tickerID), *sql, this);
@@ -924,7 +997,7 @@ void frmMain::editTicker()
 void frmMain::deleteTicker()
 {
     QStringList tickers;
-    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
         tickers.append(row->values.at(holdingsRow::row_Ticker).toString());
 
     if (tickers.isEmpty())
@@ -935,7 +1008,7 @@ void frmMain::deleteTicker()
         return;
 
     int minDate = -1;
-    foreach(baseRow *row, static_cast<holdingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         globals::security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
         int newMinDate = calculations::firstTradeDate(s.trades);
@@ -986,17 +1059,18 @@ void frmMain::options()
         m_settings = f.getReturnValues();
 }
 
-void frmMain::aa()
+void frmMain::editAA()
 {
     frmAA f(m_currentPortfolio->info.id, m_currentPortfolio->data.aa, *sql, this);
     if (f.exec())
     {
         m_currentPortfolio->data.aa = f.getReturnValues();
+        refreshPortfolioSecurities(-1);
     }
 
 }
 
-void frmMain::acct()
+void frmMain::editAcct()
 {
     frmAcct f(m_currentPortfolio->info.id, m_currentPortfolio->data.acct, *sql, this);
     if (f.exec())
@@ -1005,7 +1079,7 @@ void frmMain::acct()
     }
 }
 
-void frmMain::stat()
+void frmMain::editStat()
 {
     frmStat f(m_currentPortfolio->info.id, m_statistics, m_currentPortfolio->data.stats, *sql, this);
     if (f.exec())
@@ -1131,6 +1205,26 @@ void frmMain::holdingsModifyColumns()
     {
         m_settings.columns[globals::columnIDs_Holdings] = f.getReturnValues();
         loadPortfolioHoldings();
+    }
+}
+
+void frmMain::aaModifyColumns()
+{
+    frmColumns f(globals::columnIDs_AA, m_settings.columns.value(globals::columnIDs_AA), aaRow::fieldNames(), *sql, this);
+    if (f.exec())
+    {
+        m_settings.columns[globals::columnIDs_AA] = f.getReturnValues();
+        loadPortfolioAA();
+    }
+}
+
+void frmMain::acctModifyColumns()
+{
+    frmColumns f(globals::columnIDs_Acct, m_settings.columns.value(globals::columnIDs_Acct), acctRow::fieldNames(), *sql, this);
+    if (f.exec())
+    {
+        m_settings.columns[globals::columnIDs_Acct] = f.getReturnValues();
+        loadPortfolioAcct();
     }
 }
 

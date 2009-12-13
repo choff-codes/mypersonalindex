@@ -13,6 +13,8 @@
 #include "updatePrices.h"
 #include "NAV.h"
 #include "mainHoldingsModel.h"
+#include "mainAAModel.h"
+#include "mainAcctModel.h"
 #include "calculations.h"
 #include <qwt_plot_curve.h>
 
@@ -96,14 +98,16 @@ private slots:
     void loadPortfolioHoldings();
     void loadPortfolioPerformance();
     void loadPortfolioChart();
+    void loadPortfolioAA();
+    void loadPortfolioAcct();
     void about();
     void addTicker();
     void editTicker();
     void deleteTicker();
     void options();
-    void aa();
-    void acct();
-    void stat();
+    void editAA();
+    void editAcct();
+    void editStat();
     void beginUpdate();
     void finishUpdate(const QStringList &invalidTickers);
     void beginNAV(const int &portfolioID, const int &minDate);
@@ -113,6 +117,13 @@ private slots:
     void holdingsModifyColumns();
     void holdingsSortChanged(int index) { sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(),
         m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames()); loadPortfolioHoldings(); }
+    void aaModifyColumns();
+    void aaSortChanged(int index) { sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(),
+        m_currentPortfolio->info.aaSort, aaRow::fieldNames()); loadPortfolioAA(); }
+    void acctModifyColumns();
+    void acctSortChanged(int index) { sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(),
+        m_currentPortfolio->info.acctSort, acctRow::fieldNames()); loadPortfolioAcct(); }
+
 };
 
 #endif // FRMMAIN_H

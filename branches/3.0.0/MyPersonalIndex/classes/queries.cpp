@@ -68,13 +68,6 @@ void queries::executeNonQuery(queryInfo *q) const
 
     query.exec();
 
-    if (query.lastError().text() != " ")
-    {
-        QString s = query.lastError().text();
-        QString s2 = query.lastQuery();
-        s.append("");
-    }
-
     delete q;
 }
 
@@ -434,7 +427,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p) const
         params << parameter(":PortfolioID", p.id);
         return new queryInfo(
             "UPDATE Portfolios SET Description = :Description, Dividends = :Dividends, StartValue = :StartValue, CostCalc = :CostCalc, AAThreshold = :AAThreshold,"
-                " ThresholdMethod = :ThresholdMethod, StartDate = :StartDate, HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :ShowAABlank,"
+                " ThresholdMethod = :ThresholdMethod, StartDate = :StartDate, HoldingsShowHidden = :HoldingsShowHidden, NAVSortDesc = :NAVSortDesc, AAShowBlank = :AAShowBlank,"
                 " HoldingsSort = :HoldingsSort, AASort = :AASort, CorrelationShowHidden = :CorrelationShowHidden, AcctShowBlank = :ShowAcctBlank, AcctSort = :AcctSort"
                 " WHERE ID = :PortfolioID",
             params

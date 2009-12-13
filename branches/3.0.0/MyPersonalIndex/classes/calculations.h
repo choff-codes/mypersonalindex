@@ -98,7 +98,7 @@ public:
     }
 
     // assumes the ticker is included in calculations
-    static globals::securityValue tickerValue(const QList<globals::trade> &trades, const globals::securityInfo &s, const globals::splitData &splits, const int &date)
+    static globals::securityValue tickerValue(const QList<globals::trade> &trades, const globals::securityInfo &s, const globals::splitData &splits, const int &date, const globals::account &acct)
     {
         globals::securityValue value;
 
@@ -116,6 +116,14 @@ public:
         value.dividendAmount = shares * s.dividendAmount;
         value.totalValue = shares * s.closePrice;
         value.shares = shares;
+
+        if (acct.taxRate == -1)
+            return value;
+
+        if (acct.taxDeferred)
+            value.taxLiability = value.totalValue * acct.taxRate / 100;
+        else if (value.totalValue > value.costBasis)
+            value.taxLiability = (value.totalValue - value.costBasis) * acct.taxRate / 100.00;
 
         return value;
     }
@@ -158,13 +166,14 @@ public:
             globals::securityValue value;
 
             if (s.includeInCalc)
-                value = tickerValue(portfolio->data.trades.value(s.id), cache->tickerInfo.value(s.ticker), splits, date);
+                value = tickerValue(portfolio->data.trades.value(s.id), cache->tickerInfo.value(s.ticker), splits, date, portfolio->data.acct.value(s.account));
 
             cache->tickerValue.insert(s.id, value);
             cache->costBasis += value.costBasis;
             cache->totalValue += value.totalValue;
             cache->dividends += value.dividendAmount;
             cache->commission += value.commission;
+            cache->taxLiability += value.taxLiability;
         }
 
         return cache;

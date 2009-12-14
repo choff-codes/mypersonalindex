@@ -43,7 +43,7 @@ public:
         //row_Gain
         row->values.append(value - costBasis);
         //row_GainP
-        row->values.append((value / costBasis - 1) * 100);
+        row->values.append(costBasis == 0 ? QVariant() : ((value / costBasis) - 1) * 100);
         //row_TaxRate
         row->values.append(acct.taxRate < 0 ? QVariant() : acct.taxRate);
         //row_TaxLiability

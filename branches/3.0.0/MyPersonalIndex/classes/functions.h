@@ -48,7 +48,10 @@ public:
 
     static QString doubleToCurrency(const double &value)
     {
-        return QString("$%L1").arg(value, 0, 'f', 2);
+        if (value < 0)
+            return QString("($%L1)").arg(fabs(value), 0, 'f', 2);
+        else
+            return QString("$%L1").arg(value, 0, 'f', 2);
     }
 
     static QString doubleToPercentage(const double &value)

@@ -7,7 +7,7 @@
 class holdingsRow: public baseRow
 {
 public:
-    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_ID };
+    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
     static const QStringList columns;
     static const QVariantList columnsType;
 
@@ -46,6 +46,10 @@ public:
         row->values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
         //row_Acct
         row->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
+        //row_TaxLiability
+        row->values.append(value.taxLiability == 0 ? QVariant() : value.taxLiability);
+        //row_NetValue
+        row->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.taxLiability);
         //row_ID
         row->values.append(s.id);
 
@@ -71,7 +75,7 @@ class mainHoldingsModel: public mpiViewModelBase
 public:
 
     mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, QTableView *parent = 0):
-        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis) { }
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis), m_taxLiability(cache->taxLiability) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {
@@ -92,6 +96,8 @@ public:
                 case holdingsRow::row_Gain:
                 case holdingsRow::row_Price:
                 case holdingsRow::row_Value:
+                case holdingsRow::row_TaxLiability:
+                case holdingsRow::row_NetValue:
                     return functions::doubleToCurrency(m_rows.at(index.row())->values.at(column).toDouble());
                 case holdingsRow::row_GainP:
                 case holdingsRow::row_ValueP:
@@ -142,6 +148,12 @@ public:
             case holdingsRow::row_Gain:
                 extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
                 break;
+            case holdingsRow::row_TaxLiability:
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_taxLiability));
+                break;
+            case holdingsRow::row_NetValue:
+                extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_taxLiability));
+                break;
         }
 
         return QString(holdingsRow::columns.at(column)).append(extra);
@@ -150,6 +162,7 @@ public:
 private:
     double m_totalValue;
     double m_costBasis;
+    double m_taxLiability;
 };
 
 

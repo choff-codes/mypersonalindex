@@ -200,7 +200,7 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
     return new queryInfo(
         QString("DELETE FROM %1 WHERE %2").arg(table,
             joinToTickers ?
-                QString("%1.TickerID IN (SELECT TickerID FROM Tickers WHERE PortfolioID = :ID)").arg(table):
+                QString("%1.TickerID IN (SELECT ID FROM Tickers WHERE PortfolioID = :ID)").arg(table):
                 "PortfolioID = :ID"),
         QList<parameter>()
             << parameter(":ID", portfolioID)
@@ -212,7 +212,7 @@ queries::queryInfo* queries::deletePortfolioItems(const QString &table, const in
 {
     return new queryInfo(
         QString("DELETE FROM %1 WHERE %2").arg(table,
-            joinToTickers ? QString("%1.TickerID IN (SELECT TickerID FROM Tickers WHERE PortfolioID = :ID) AND %1.Date >= :Date").arg(table):
+            joinToTickers ? QString("%1.TickerID IN (SELECT ID FROM Tickers WHERE PortfolioID = :ID) AND %1.Date >= :Date").arg(table):
             "PortfolioID = :ID AND Date >= :Date"),
         QList<parameter>()
             << parameter(":ID", portfolioID)

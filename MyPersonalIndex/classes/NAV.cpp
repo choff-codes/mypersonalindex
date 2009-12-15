@@ -392,7 +392,7 @@ void NAV::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPo
         m_Trades_TickerID.append(reinvest);
         m_Trades_Dates.append(date);
         m_Trades_Shares.append(s.dividendAmount / s.closePrice);
-        double splitRatio = m_splits.value(date).value(s.ticker, 1);
+        double splitRatio = m_splits.value(s.ticker).value(date, 1);
         m_Trades_Price.append(s.closePrice / splitRatio);
         m_Trades_Commission.append(QVariant());
         m_Trades_Code.append("R");
@@ -415,7 +415,7 @@ void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
 
     m_Trades_TickerID.append(cashAccount);
     m_Trades_Dates.append(date);
-    double cashSplitRatio = m_splits.value(date).value(cashSecurity.ticker, 1);
+    double cashSplitRatio = m_splits.value(cashSecurity.ticker).value(date, 1);
     m_Trades_Shares.append(reverseTradeValue / (cashSecurity.closePrice / cashSplitRatio));
     m_Trades_Price.append(cashSecurity.closePrice / cashSplitRatio);
     m_Trades_Commission.append(QVariant());
@@ -430,7 +430,7 @@ void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio
         if (d.trade.price == -1 && s.closePrice == 0)
             continue;
 
-        double splitRatio = m_splits.value(date).value(s.ticker, 1);
+        double splitRatio = m_splits.value(s.ticker).value(date, 1);
 
         m_Trades_TickerID.append(d.tickerID);
         m_Trades_Dates.append(date);
@@ -471,12 +471,12 @@ void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio
                 break;
             case globals::tradeType_AA:
                 if (previousCache && s.closePrice != 0)
-                    foreach(const globals::tickerAATarget &aa, currentPortfolio->data.tickers.value(d.tickerID).aa)
+                    foreach(const globals::securityAATarget &aa, currentPortfolio->data.tickers.value(d.tickerID).aa)
                     {
-                        if (currentPortfolio->data.aa.value(aa.first).target <= 0)
+                        if (currentPortfolio->data.aa.value(aa.id).target <= 0)
                             continue;
 
-                        sharesToBuy += ((previousCache->totalValue * (currentPortfolio->data.aa.value(aa.first).target * aa.second / 100)) -
+                        sharesToBuy += ((previousCache->totalValue * (currentPortfolio->data.aa.value(aa.id).target * aa.target / 100)) -
                             previousCache->tickerValue.value(d.tickerID).totalValue) / (s.closePrice / splitRatio);
                     }
                 code = "A";

@@ -230,7 +230,23 @@ public:
         }
     };
 
-    typedef QPair<int /* aaID */, double /* target */> tickerAATarget;
+    struct securityAATarget
+    {
+        int id;
+        double target;
+
+        securityAATarget(int p_id, double p_target): id(p_id), target(p_target) {}
+
+        bool operator==(const securityAATarget &other) const {
+            return this->id == other.id
+                    && this->target == other.target;
+        }
+
+        bool operator!=(const securityAATarget &other) const {
+            return !(*this == other);
+        }
+
+    };
 
     struct security
     {
@@ -242,7 +258,7 @@ public:
         bool cashAccount;
         bool includeInCalc;
         bool hide;
-        QList<tickerAATarget> aa;
+        QList<securityAATarget> aa;
         QMap<int, dynamicTrade> trades;
 
         security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false),
@@ -416,7 +432,7 @@ public:
         updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
     };
 
-    typedef QMap<int, QMap<QString, double> > splitData;
+    typedef QHash<QString, QMap<int, double> > splitData;
 };
 
 #endif // GLOBALS_H

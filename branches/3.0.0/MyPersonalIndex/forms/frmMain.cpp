@@ -214,7 +214,7 @@ void frmMain::loadSplits()
 
     do
     {
-        m_splits[q->value(queries::getSplits_Date).toInt()].insert(q->value(queries::getSplits_Ticker).toString(), q->value(queries::getSplits_Ratio).toDouble());
+        m_splits[q->value(queries::getSplits_Ticker).toString()].insert(q->value(queries::getSplits_Date).toInt(), q->value(queries::getSplits_Ratio).toDouble());
     }
     while (q->next());
 
@@ -590,7 +590,7 @@ void frmMain::loadPortfoliosTickersAA()
 
     do
     {
-        globals::tickerAATarget pair(
+        globals::securityAATarget pair(
             q->value(queries::getSecurityAA_AAID).toInt(),
             q->value(queries::getSecurityAA_Percent).toDouble()
         );
@@ -873,18 +873,15 @@ void frmMain::deletePortfolio()
 
         sql->executeNonQuery(sql->deleteItem(queries::table_Portfolios, i));
         sql->executeNonQuery(sql->deletePortfolioItems(queries::table_AA, i, false));
-        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Tickers, i, false));
+
         sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Acct, i, false));
         sql->executeNonQuery(sql->deletePortfolioItems(queries::table_NAV, i, false));
         sql->executeNonQuery(sql->deletePortfolioItems(queries::table_StatMapping, i, false));
-
-
-        foreach(const globals::security &s, m_currentPortfolio->data.tickers)
-        {
-            sql->executeNonQuery(sql->deleteTickerItems(queries::table_TickersAA, s.id));
-            sql->executeNonQuery(sql->deleteTickerItems(queries::table_TickersTrades, s.id));
-            sql->executeNonQuery(sql->deleteTickerItems(queries::table_Trades, s.id));
-        }
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_TickersAA, i, true));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_TickersTrades, i, true));
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Trades, i, true));
+        // this must come last
+        sql->executeNonQuery(sql->deletePortfolioItems(queries::table_Tickers, i, false));
 
         delete m_currentPortfolio;
         m_currentPortfolio = 0;

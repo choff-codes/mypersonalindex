@@ -87,11 +87,13 @@ public:
     {
         double ratio = 1;
 
-        for(globals::splitData::const_iterator i = splits.lowerBound(startDate); i != splits.constEnd(); ++i)
+        QMap<int, double> s = splits.value(ticker);
+
+        for(QMap<int, double>::const_iterator i = s.lowerBound(startDate); i != s.constEnd(); ++i)
         {
             if (i.key() > endDate)
                 break;
-            ratio = ratio * i.value().value(ticker, 1);
+            ratio = ratio * i.value();
         }
 
         return ratio;

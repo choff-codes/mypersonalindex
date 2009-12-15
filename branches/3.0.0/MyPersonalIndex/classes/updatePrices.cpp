@@ -69,7 +69,7 @@ void updatePrices::insertUpdates()
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
 
         for(int i = 0; i < m_splitDate.count(); ++i)
-            m_splits[m_splitDate.at(i).toInt()].insert(m_splitTicker.at(i).toString(), m_splitRatio.at(i).toDouble());
+            m_splits[m_splitTicker.at(i).toString()].insert(m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
     }
 }
 

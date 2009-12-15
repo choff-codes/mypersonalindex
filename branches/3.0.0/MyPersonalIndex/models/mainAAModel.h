@@ -32,12 +32,12 @@ public:
                 costBasis += sv.costBasis;
             }
             else
-                foreach(const globals::tickerAATarget &target, s.aa)
-                    if (target.first == aa.id)
+                foreach(const globals::securityAATarget &target, s.aa)
+                    if (target.id == aa.id)
                     {
                         included = true;
                         globals::securityValue sv = cache->tickerValue.value(s.id);
-                        value += sv.totalValue;
+                        value += sv.totalValue * aa.target / 100;
                         costBasis += sv.costBasis;
                     }
 

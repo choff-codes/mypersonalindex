@@ -12,15 +12,7 @@ class tickerTradeModel : public mpiEditModelBase<globals::dynamicTrade, frmTrade
 
 public:
     tickerTradeModel(const QList<globals::dynamicTrade> &values, const QMap<int, globals::security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
-            mpiEditModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
-
-    void autoResize()
-    {
-        if (m_list.isEmpty())
-            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-        else
-            m_parent->resizeColumnsToContents();
-    }
+            mpiEditModelBase<globals::dynamicTrade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents); }
 
 private:
     const QMap<int, globals::security> &m_cashAccounts;
@@ -165,11 +157,19 @@ private:
     }
 
 public slots:
-    inline void addNew() { addItem(); autoResize(); }
-    inline void editSelected() { editItems(); autoResize(); }
-    inline void deleteSelected() { removeItems(); autoResize(); }
-    inline void copy() { beginCopy(); }
-    inline void paste() { beginPaste(); }
+    void addNew() { addItem(); autoResize(); }
+    void editSelected() { editItems(); autoResize(); }
+    void deleteSelected() { removeItems(); autoResize(); }
+    void copy() { beginCopy(); }
+    void paste() { beginPaste(); }
+
+    void autoResize()
+    {
+        if (m_list.isEmpty())
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+        else
+            m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    }
 
 signals:
     void saveItem(globals::dynamicTrade *trade);

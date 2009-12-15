@@ -10,17 +10,17 @@ class tickerAAModel: public QAbstractTableModel
 
 public:
 
-    QList<globals::tickerAATarget> getList() { return m_list; }
+    QList<globals::securityAATarget> getList() { return m_list; }
 
-    tickerAAModel(const QList<globals::tickerAATarget> &values, const QMap<int, globals::assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
+    tickerAAModel(const QList<globals::securityAATarget> &values, const QMap<int, globals::assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     double totalPercentage()
     {
         double total = 0;
 
-        foreach(const globals::tickerAATarget &aa, m_list)
-            total += aa.second;
+        foreach(const globals::securityAATarget &aa, m_list)
+            total += aa.target;
 
         return total;
     }
@@ -29,7 +29,7 @@ private:
     const QMap<int, globals::assetAllocation> &m_aaValues;
     QTableView *m_parent;
     int m_columns;
-    QList<globals::tickerAATarget> m_list;
+    QList<globals::securityAATarget> m_list;
 
     Qt::ItemFlags flags(const QModelIndex &index) const
     {
@@ -61,19 +61,19 @@ private:
         if (role == Qt::DisplayRole)
         {
             if (index.column() == 0)
-                return m_aaValues.value(m_list.at(index.row()).first).description;
+                return m_aaValues.value(m_list.at(index.row()).id).description;
 
             if (index.column() == 1)
-                return functions::doubleToPercentage(m_list.at(index.row()).second);
+                return functions::doubleToPercentage(m_list.at(index.row()).target);
         }
 
         if (role == Qt::EditRole)
         {
             if (index.column() == 0)
-                return m_aaValues.value(m_list.at(index.row()).first).description;
+                return m_aaValues.value(m_list.at(index.row()).id).description;
 
             if (index.column() == 1)
-                return m_list.at(index.row()).second;
+                return m_list.at(index.row()).target;
         }
 
         return QVariant();
@@ -88,7 +88,7 @@ private:
     {
         if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
         {
-            m_list[index.row()].second = value.toDouble();
+            m_list[index.row()].target = value.toDouble();
             emit updateHeader();
             return true;
         }
@@ -101,7 +101,7 @@ public slots:
     {
         beginInsertRows(QModelIndex(), m_list.count(), m_list.count());
         double total = totalPercentage();
-        m_list.append(qMakePair(id, total >= 100 ? 0 : 100 - total));
+        m_list.append(globals::securityAATarget(id, total >= 100 ? 0 : 100 - total));
         endInsertRows();
         emit updateHeader();
     }

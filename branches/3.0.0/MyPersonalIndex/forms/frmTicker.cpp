@@ -67,7 +67,9 @@ void frmTicker::loadSecurity()
 
     m_modelTrade = new tickerTradeModel(m_security.trades.values(), m_data.tickers, 9, ui.trades, this);
     ui.trades->setModel(m_modelTrade);
-    m_modelTrade->autoResize();
+    // HACK: could not get the model to resize correctly without this time
+    QTimer::singleShot(0, m_modelTrade, SLOT(autoResize()));
+
 }
 
 void frmTicker::updateAAPercentage()
@@ -149,11 +151,11 @@ void frmTicker::accept()
 
     QVariantList tickerID, aaID, percent;
 
-    foreach(const globals::tickerAATarget &aa, m_security.aa)
+    foreach(const globals::securityAATarget &aa, m_security.aa)
     {
         tickerID.append(m_security.id);
-        aaID.append(aa.first);
-        percent.append(aa.second);
+        aaID.append(aa.id);
+        percent.append(aa.target);
     }
 
     QMap<QString, QVariantList> tableValues;

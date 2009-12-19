@@ -48,12 +48,12 @@ globals::securityValue calculations::tickerValue(const globals::security &s, con
     return value;
 }
 
-globals::portfolioDailyInfo* calculations::portfolioValues(const int &date)
+calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
 {
     if (!m_portfolio)
         return 0;
 
-    globals::portfolioDailyInfo *info = new globals::portfolioDailyInfo(date);
+    portfolioDailyInfo *info = new portfolioDailyInfo(date);
 
     foreach(const globals::security &s, m_portfolio->data.tickers)
     {

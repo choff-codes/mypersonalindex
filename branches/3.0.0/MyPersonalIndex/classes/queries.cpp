@@ -42,9 +42,12 @@ const QString queries::table_TickersAA = "TickersAA";
 const QString queries::table_TickersTrades = "TickersTrades";
 const QString queries::table_Trades = "Trades";
 
-queries::queries(QSqlDatabase database): db(database)
+queries::queries(const QString &databaseName): m_databaseName(databaseName)
 {
-    db.open();
+    m_db = QSqlDatabase::addDatabase("QSQLITE", m_databaseName);
+    m_db.setDatabaseName(getDatabaseLocation());
+    m_db.open();
+
     //QSqlQuery("SELECT load_extension('libsqlitefunctions.so')", db);
     //QSqlQuery("PRAGMA synchronous = 0", db);
     //QSqlQuery("PRAGMA journal_mode = MEMORY", db);
@@ -61,7 +64,7 @@ void queries::executeNonQuery(queryInfo *q) const
     if (!q)
         return;
 
-    QSqlQuery query(db);
+    QSqlQuery query(m_db);
     query.prepare(q->sql);
     foreach(const parameter &p, q->parameters)
         query.bindValue(p.name, p.value);
@@ -76,9 +79,9 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     if (tableName.isEmpty() || values.isEmpty())
         return;
 
-    db.transaction();
+    m_db.transaction();
 
-    QSqlQuery query(db);
+    QSqlQuery query(m_db);
     QStringList parameters, columns;
     QList<QVariantList> binds = values.values();
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
@@ -106,7 +109,7 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
 
     }
 
-    db.commit();
+    m_db.commit();
 }
 
 QSqlQuery* queries::executeResultSet(queryInfo *q) const
@@ -114,7 +117,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
     if (!q)
         return 0;
 
-    QSqlQuery *query = new QSqlQuery(db);
+    QSqlQuery *query = new QSqlQuery(m_db);
     query->setForwardOnly(true);
     query->prepare(q->sql);
     foreach(const parameter &p, q->parameters)
@@ -138,7 +141,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
 
 int queries::getIdentity() const
 {
-    QSqlQuery query("SELECT last_insert_rowid()", db);
+    QSqlQuery query("SELECT last_insert_rowid()", m_db);
 
     if (query.isActive() && query.first())
         return query.value(0).toInt();

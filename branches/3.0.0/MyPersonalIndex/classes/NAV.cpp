@@ -49,7 +49,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     }
 
     QList<int> tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
-    globals::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
+    calculations::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
     QMap<int, globals::navInfo> &currentPortfolioNAV = currentPortfolio->data.nav;
@@ -74,7 +74,7 @@ void NAV::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         insertPortfolioTrades(currentPortfolio, date, previousInfo, trades.value(*currentDate) + trades.value(-1));
         insertPortfolioTradesToObject(currentPortfolio);
 
-        globals::portfolioDailyInfo *info = m_calculations.portfolioValues(date);
+        calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(date);
 
         m_NAV_Portfolio.append(portfolioID);
         m_NAV_Dates.append(*currentDate);
@@ -378,7 +378,7 @@ QList<int> NAV::getYearlyTrades(const globals::dynamicTrade &d, const int &minDa
     return dates;
 }
 
-void NAV::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const globals::portfolioDailyInfo *previousInfo)
+void NAV::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const calculations::portfolioDailyInfo *previousInfo)
 {
     if (!previousInfo)
         return;
@@ -397,7 +397,7 @@ void NAV::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPo
     }
 }
 
-void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const globals::portfolioDailyInfo *previousInfo,
+void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const calculations::portfolioDailyInfo *previousInfo,
     const int &date, const double &reverseTradeValue)
 {
     if (!previousInfo)
@@ -419,7 +419,7 @@ void NAV::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
     m_Trades_Code.append("C");
 }
 
-void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades)
+void NAV::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades)
 {
     foreach(const globals::dynamicTradeInfo &d, trades)
     {

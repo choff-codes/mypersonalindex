@@ -14,28 +14,7 @@ public:
 
     virtual QVariant columnType(int column) const = 0;
     QString sort() const { return m_sort; }
-    
-    static bool baseRowSort(const baseRow *row1, const baseRow *row2)
-    {
-        if (row1->sort().isEmpty())
-            return false;
-
-        QStringList strings = row1->sort().split('|');
-        foreach(const QString &s, strings)
-        {
-            bool lessThan = s.at(0) != 'D';
-            int column = lessThan ? s.toInt() : QString(s).remove(0, 1).toInt();
-
-            if (functions::equal(row1->values.at(column), row2->values.at(column), row1->columnType(column)))
-                continue;
-
-            if (functions::lessThan(row1->values.at(column), row2->values.at(column), row1->columnType(column)))
-                return lessThan;
-
-            return !lessThan;
-        }
-        return false;
-    }
+    static bool baseRowSort(const baseRow *row1, const baseRow *row2);
 
 private:
     QString m_sort;
@@ -55,29 +34,9 @@ public:
 
     ~mpiViewModelBase() { qDeleteAll(m_rows); }
 
-    int rowCount(const QModelIndex&) const
-    {
-        return m_rows.count();
-    }
-
-    int columnCount (const QModelIndex&) const
-    {
-        return m_viewableColumns.count();
-    }
-
-    QList<baseRow*> selectedItems()
-    {
-        QList<baseRow*> items;
-
-        QModelIndexList model = m_parent->selectionModel()->selectedRows();
-        if (model.isEmpty())
-            return items;
-
-        foreach(const QModelIndex &q, model)
-            items.append(m_rows.at(q.row()));
-
-        return items;
-    }
+    int rowCount(const QModelIndex&) const { return m_rows.count(); }
+    int columnCount (const QModelIndex&) const { return m_viewableColumns.count(); }
+    QList<baseRow*> selectedItems();
 
 protected:
     QTableView *m_parent;

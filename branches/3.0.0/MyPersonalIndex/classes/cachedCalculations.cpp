@@ -1,8 +1,8 @@
 #include "cachedCalculations.h"
 
-globals::portfolioDailyInfo* cachedCalculations::portfolioValues(const int &date)
+calculations::portfolioDailyInfo* cachedCalculations::portfolioValues(const int &date)
 {
-    globals::portfolioDailyInfo* info = m_cache.object(date);
+    portfolioDailyInfo* info = m_cache.object(date);
     if (info)
         return info;
 
@@ -17,6 +17,56 @@ globals::portfolioDailyInfo* cachedCalculations::portfolioValues(const int &date
     return info;
 }
 
+cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, const globals::assetAllocation &aa)
+{
+    dailyInfo info(date);
+
+    foreach(const globals::security &s, m_portfolio->data.tickers)
+    {
+        bool included = false;
+
+        if (aa.id == -1 and s.aa.isEmpty())
+        {
+            included = true;
+            globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            info.totalValue += sv.totalValue;
+            info.costBasis += sv.costBasis;
+            info.taxLiability += sv.taxLiability;
+        }
+        else
+            foreach(const globals::securityAATarget &target, s.aa)
+                if (target.id == aa.id)
+                {
+                    included = true;
+                    globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+                    info.totalValue += sv.totalValue * target.target / 100;
+                    info.costBasis += sv.costBasis;
+                    info.taxLiability += sv.taxLiability;
+                }
+
+        if (included)
+            ++info.count;
+    }
+
+    return info;
+}
+
+cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, const globals::account &acct)
+{
+    dailyInfo info(date);
+
+    foreach(const globals::security &s,  m_portfolio->data.tickers)
+        if (acct.id == s.account)
+        {
+            globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            info.totalValue += sv.totalValue;
+            info.taxLiability += sv.taxLiability;
+            info.costBasis += sv.costBasis;
+            ++info.count;
+        }
+
+    return info;
+}
 
 QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDate)
 {

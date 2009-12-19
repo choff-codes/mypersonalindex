@@ -5,3 +5,7 @@ HEADERS += $$PWD/mpiValidator.h \
     $$PWD/mpiViewModelBase.h \
     $$PWD/mpiDateScale.h \
     $$PWD/mpiPercentScale.h
+SOURCES += $$PWD/mpiEditModelBase.cpp \
+    $$PWD/mpiValidator.cpp \
+    $$PWD/viewDelegates.cpp \
+    $$PWD/mpiViewModelBase.cpp

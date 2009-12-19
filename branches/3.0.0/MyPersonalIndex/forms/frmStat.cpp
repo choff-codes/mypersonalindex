@@ -68,7 +68,7 @@ void frmStat::saveItem(globals::statistic *stat)
 {
     m_sql.executeNonQuery(m_sql.updateStat((*stat)));
     if (stat->id == -1)
-        stat->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        stat->id = m_sql.getIdentity();
 }
 
 void frmStat::deleteItem(const globals::statistic &stat)

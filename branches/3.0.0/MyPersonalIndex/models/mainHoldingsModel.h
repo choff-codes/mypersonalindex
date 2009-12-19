@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "mpiViewModelBase.h"
+#include "prices.h"
 
 class holdingsRow: public baseRow
 {
@@ -15,11 +16,11 @@ public:
 
     QVariant columnType(int column) const { return columnsType.at(column); }
 
-    static holdingsRow* getHoldingsRow(const globals::security &s, const globals::portfolioCache *cache, const QMap<int, globals::account> &accounts, const QString &sort)
+    static holdingsRow* getHoldingsRow(const globals::security &s, const globals::portfolioDailyInfo *info, const QMap<int, globals::account> &accounts, const QString &sort)
     {
         holdingsRow *row = new holdingsRow(sort);
 
-        globals::securityValue value = cache->tickerValue.value(s.id);
+        globals::securityValue value = info->tickerValue.value(s.id);
 
         //row_Active
         row->values.append((int)s.includeInCalc);
@@ -28,18 +29,18 @@ public:
         //row_Cash
         row->values.append((int)s.cashAccount);
         //row_Price
-        double price = cache->tickerInfo.value(s.ticker).closePrice;
+        double price = prices::price(s.ticker, info->date);
         row->values.append(price == 0 ? QVariant() : price);
         //row_Shares
         row->values.append(value.shares);
         //row_Avg
-        row->values.append(value.shares == 0 ? QVariant() : cache->avgPrices.value(s.id));
+        row->values.append(value.shares == 0 ? QVariant() : info->avgPrices.value(s.id));
         //row_Cost
         row->values.append(value.shares == 0 ? QVariant() : value.costBasis);
         //row_Value
         row->values.append(value.shares == 0 ? QVariant() : value.totalValue);
         //row_ValueP
-        row->values.append(cache->totalValue == 0 ? QVariant() : value.totalValue / cache->totalValue * 100);
+        row->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue * 100);
         //row_Gain
         row->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
         //row_GainP
@@ -74,8 +75,8 @@ class mainHoldingsModel: public mpiViewModelBase
 
 public:
 
-    mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, QTableView *parent = 0):
-        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_costBasis(cache->costBasis), m_taxLiability(cache->taxLiability) { }
+    mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioDailyInfo *info, QTableView *parent = 0):
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_costBasis(info->costBasis), m_taxLiability(info->taxLiability) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {

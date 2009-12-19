@@ -71,31 +71,6 @@ void queries::executeNonQuery(queryInfo *q) const
     delete q;
 }
 
-QSqlQueryModel* queries::executeDataSet(queryInfo *q)
-{
-    if (!q)
-        return 0;
-
-    QSqlQuery query(db);
-    query.prepare(q->sql);
-    foreach(const parameter &p, q->parameters)
-        query.bindValue(p.name, p.value);
-
-    query.exec();
-
-    if(!query.isActive())
-    {
-        delete q;
-        return 0;
-    }
-
-    QSqlQueryModel *dataset = new QSqlQueryModel();
-    dataset->setQuery(query);
-
-    delete q;
-    return dataset;
-}
-
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
 {
     if (tableName.isEmpty() || values.isEmpty())
@@ -122,18 +97,25 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
         for (int x = 0; x < binds.count(); ++x)
             query.addBindValue(binds.at(x).at(i));
         query.exec();
+
+        if (query.lastError().text().length() > 1)
+        {
+            QString s = query.lastError().text();
+            s.append("");
+        }
+
     }
 
     db.commit();
 }
 
-QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward, const bool &returnZeroRows) const
+QSqlQuery* queries::executeResultSet(queryInfo *q) const
 {
     if (!q)
         return 0;
 
     QSqlQuery *query = new QSqlQuery(db);
-    query->setForwardOnly(setForward);
+    query->setForwardOnly(true);
     query->prepare(q->sql);
     foreach(const parameter &p, q->parameters)
         query->bindValue(p.name, p.value);
@@ -148,34 +130,20 @@ QSqlQuery* queries::executeResultSet(queryInfo *q, const bool &setForward, const
         s.append("");
     }
 
-    if (query->isActive() && (query->first() || returnZeroRows))
+    if (query->isActive() && query->first())
         return query;
 
     return 0;
 }
 
-QVariant queries::executeScalar(queryInfo *q, const QVariant &nullValue) const
+int queries::getIdentity() const
 {
-    if (!q)
-        return QVariant();
-
-    QSqlQuery query(db);
-    query.setForwardOnly(true);
-    query.prepare(q->sql);
-    foreach(const parameter &p, q->parameters)
-        query.bindValue(p.name, p.value);
-
-    query.exec();
+    QSqlQuery query("SELECT last_insert_rowid()", db);
 
     if (query.isActive() && query.first())
-    {
-        QVariant retValue = query.value(0);
-        delete q;
-        return retValue;
-    }
+        return query.value(0).toInt();
 
-    delete q;
-    return nullValue;
+    return -1;
 }
 
 queries::queryInfo* queries::deleteTable(const QString &table) const
@@ -243,14 +211,6 @@ queries::queryInfo* queries::deleteUnusedPrices(const QString &table) const
     );
 }
 
-queries::queryInfo* queries::getIdentity() const
-{
-    return new queryInfo(
-        "SELECT last_insert_rowid()",
-        QList<parameter>()
-    );
-}
-
 queries::queryInfo* queries::getVersion() const
 {
     return new queryInfo(
@@ -263,14 +223,6 @@ queries::queryInfo* queries::getDates() const
 {
     return new queryInfo(
         "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
-        QList<parameter>()
-    );
-}
-
-queries::queryInfo* queries::getSplits() const
-{
-    return new queryInfo(
-        "SELECT Date, Ticker, Ratio FROM Splits ORDER BY Date",
         QList<parameter>()
     );
 }
@@ -654,3 +606,28 @@ queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, cons
             << parameter(":Date2", date)
     );
 }
+
+queries::queryInfo* queries::getPrices() const
+{
+    return new queryInfo(
+            "SELECT Date, Ticker, Price FROM ClosingPrices",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getDividends() const
+{
+    return new queryInfo(
+            "SELECT Date, Ticker, Amount FROM Dividends",
+        QList<parameter>()
+    );
+}
+
+queries::queryInfo* queries::getSplits() const
+{
+    return new queryInfo(
+        "SELECT Date, Ticker, Ratio FROM Splits",
+        QList<parameter>()
+    );
+}
+

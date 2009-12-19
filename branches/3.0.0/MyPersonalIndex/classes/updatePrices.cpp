@@ -32,7 +32,7 @@ void updatePrices::run()
     insertUpdates();
     m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, m_splits, firstUpdate);
+    m_nav = new NAV(m_data, m_dates, firstUpdate);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->start();
@@ -68,8 +68,8 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
 
-        for(int i = 0; i < m_splitDate.count(); ++i)
-            m_splits[m_splitTicker.at(i).toString()].insert(m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
+//        for(int i = 0; i < m_splitDate.count(); ++i)
+//            m_splits[m_splitTicker.at(i).toString()].insert(m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
     }
 }
 

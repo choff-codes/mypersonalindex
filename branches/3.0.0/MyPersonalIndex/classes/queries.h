@@ -64,14 +64,12 @@ public:
 
     queries(QSqlDatabase database);
     static QString getDatabaseLocation();
-    bool isOpen() const { return db.isOpen(); }
+    bool isOpen() const { bool open = db.isOpen(); if (open) { QSqlQuery *q = executeResultSet(getVersion()); open = q;  delete q; } return open;}
     QSqlDatabase getDatabase() const { return db; }
 
     void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    QSqlQueryModel* executeDataSet(queryInfo *q);
-    QSqlQuery* executeResultSet(queryInfo*, const bool &setForward = true, const bool &returnZeroRows = false) const;
-    QVariant executeScalar(queryInfo*, const QVariant &nullValue = QVariant()) const;
+    QSqlQuery* executeResultSet(queryInfo*) const;
 
     queryInfo* deleteTable(const QString &table) const;
     queryInfo* deleteItem(const QString &table, const int &id) const;
@@ -82,7 +80,7 @@ public:
 
     queryInfo* getVersion() const;
 
-    queryInfo* getIdentity() const;
+    int getIdentity() const;
 
     enum { getDates_Date };
     queryInfo* getDates() const;
@@ -155,6 +153,11 @@ public:
     enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend };
     queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date) const;
 
+    enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
+    queryInfo* getPrices() const;
+
+    //enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
+    queryInfo* getDividends() const;
 
 protected:
     QSqlDatabase db;

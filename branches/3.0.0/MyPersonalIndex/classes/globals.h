@@ -280,6 +280,20 @@ public:
         bool operator!=(const security &other) const {
             return !(*this == other);
         }
+
+        int firstTradeDate()
+        {
+            int minDate = -1;
+            foreach(dynamicTrade d, trades)
+            {
+                if (d.frequency != tradeFreq_Once && (d.startDate < minDate || minDate == -1))
+                    minDate = d.startDate;
+                else if (d.startDate < d.date && (d.endDate > d.date || d.endDate == 0) && (d.date < minDate || minDate == -1))
+                    minDate = d.date;
+            }
+
+            return minDate;
+        }
     };
 
     struct securityInfo
@@ -389,10 +403,10 @@ public:
         QMap<int, navInfo> nav;
     };
 
-    struct portfolioCache
+    struct portfolioDailyInfo
     {
+        int date;
         QMap<int, double> avgPrices;
-        QMap<QString, securityInfo> tickerInfo;
         QMap<int, securityValue> tickerValue;
         double totalValue;
         double costBasis;
@@ -400,14 +414,13 @@ public:
         double commission;
         double taxLiability;
 
-        portfolioCache(): totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
+        portfolioDailyInfo(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
     };
 
     struct myPersonalIndex
     {
         portfolioData data;
         portfolio info;
-        QCache<int, portfolioCache> cache;
 
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
@@ -432,7 +445,16 @@ public:
         updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
     };
 
+
+    struct securityPriceInfo
+    {
+        QMap<int, double> splits;
+        QMap<int, double> dividends;
+        QMap<int, double> prices;
+    };
+
     typedef QHash<QString, QMap<int, double> > splitData;
+    typedef QHash<QString, securityPriceInfo> securityPrices;
 };
 
 #endif // GLOBALS_H

@@ -46,7 +46,7 @@ void frmAA::saveItem(globals::assetAllocation *aa)
 {
     m_sql.executeNonQuery(m_sql.updateAA(m_portfolio, (*aa)));
     if (aa->id == -1)
-        aa->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        aa->id = m_sql.getIdentity();
 }
 
 void frmAA::deleteItem(const globals::assetAllocation &aa)

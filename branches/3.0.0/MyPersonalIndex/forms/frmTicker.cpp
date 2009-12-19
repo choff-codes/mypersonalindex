@@ -11,7 +11,7 @@ frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data,
     if (m_security.id != -1)
         ui.btnAddAnother->setVisible(false);
 
-    m_minDate = calculations::firstTradeDate(m_security.trades);
+    m_minDate = m_security.firstTradeDate();
 
     loadDropDowns();
     loadSecurity();
@@ -130,13 +130,13 @@ void frmTicker::accept()
     m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
     if (m_security.id == -1)
     {
-        m_security.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        m_security.id = m_sql.getIdentity();
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
     }
 
     if (m_security.trades != m_securityOriginal.trades)
     {
-        int newMinDate = calculations::firstTradeDate(m_security.trades);
+        int newMinDate = m_security.firstTradeDate();
         if (newMinDate != -1 && (newMinDate < m_minDate || m_minDate == -1))
             m_minDate = newMinDate;
     }
@@ -182,7 +182,7 @@ void frmTicker::saveItem(globals::dynamicTrade *trade)
 {
     m_sql.executeNonQuery(m_sql.updateSecurityTrade(m_security.id, (*trade)));
     if (trade->id == -1)
-        trade->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        trade->id = m_sql.getIdentity();
 }
 
 void frmTicker::deleteItem(const globals::dynamicTrade &trade)

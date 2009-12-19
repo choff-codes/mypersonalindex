@@ -46,7 +46,7 @@ void frmAcct::saveItem(globals::account *acct)
 {
     m_sql.executeNonQuery(m_sql.updateAcct(m_portfolio, (*acct)));
     if (acct->id == -1)
-        acct->id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        acct->id = m_sql.getIdentity();
 }
 
 void frmAcct::deleteItem(const globals::account &acct)

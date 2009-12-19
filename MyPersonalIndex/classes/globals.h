@@ -403,20 +403,6 @@ public:
         QMap<int, navInfo> nav;
     };
 
-    struct portfolioDailyInfo
-    {
-        int date;
-        QMap<int, double> avgPrices;
-        QMap<int, securityValue> tickerValue;
-        double totalValue;
-        double costBasis;
-        double dividends;
-        double commission;
-        double taxLiability;
-
-        portfolioDailyInfo(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
-    };
-
     struct myPersonalIndex
     {
         portfolioData data;

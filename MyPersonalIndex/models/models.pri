@@ -10,4 +10,10 @@ HEADERS += $$PWD/aaModel.h \
     $$PWD/mainAAModel.h
 SOURCES += $$PWD/mainHoldingsModel.cpp \
     $$PWD/mainAcctModel.cpp \
-    $$PWD/mainAAModel.cpp
+    $$PWD/mainAAModel.cpp \
+    $$PWD/aaModel.cpp \
+    $$PWD/acctModel.cpp \
+    $$PWD/mainPerformanceModel.cpp \
+    $$PWD/tickerAAModel.cpp \
+    $$PWD/tickerTradeModel.cpp \
+    $$PWD/statModel.cpp

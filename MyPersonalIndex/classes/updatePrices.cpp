@@ -30,7 +30,7 @@ void updatePrices::run()
         }
 
     insertUpdates();
-    m_sql->executeNonQuery(m_sql->updateMissingPrices());
+    //m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
     m_nav = new NAV(m_data, m_dates, firstUpdate);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
@@ -49,6 +49,9 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), m_pricesTicker);
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), m_pricesPrice);
         m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
+
+        for(int i = 0; i < m_pricesDate.count(); ++i)
+            prices::addPrice(m_pricesTicker.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
     }
 
     if (!m_divDate.isEmpty())
@@ -58,6 +61,9 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), m_divTicker);
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), m_divAmount);
         m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
+
+        for(int i = 0; i < m_divDate.count(); ++i)
+            prices::addDividend(m_divTicker.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
     }
 
     if (!m_splitDate.isEmpty())
@@ -68,8 +74,8 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
 
-//        for(int i = 0; i < m_splitDate.count(); ++i)
-//            m_splits[m_splitTicker.at(i).toString()].insert(m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
+        for(int i = 0; i < m_splitDate.count(); ++i)
+            prices::addSplit(m_splitTicker.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
     }
 }
 

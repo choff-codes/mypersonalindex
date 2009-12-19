@@ -11,14 +11,9 @@ class NAV : public QThread
 
 public:
     NAV(const QMap<int, globals::myPersonalIndex*> &data, const QList<int> &dates, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-        QThread(parent), m_data(data), m_dates(dates), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0)
-    {
-        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "nav");
-        db.setDatabaseName(queries::getDatabaseLocation());
-        m_sql = new queries(db);
-    }
+        QThread(parent), m_sql(new queries("nav")), m_data(data), m_dates(dates), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
 
-    ~NAV() { delete m_sql; QSqlDatabase::removeDatabase("nav"); }
+    ~NAV() { delete m_sql; }
     void run();
 
 signals:
@@ -51,9 +46,9 @@ private:
     QList<int> getWeeklyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const globals::dynamicTrade &d, const int &minDate, const int &maxDate);
-    void insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const globals::portfolioDailyInfo *previousInfo);
-    void insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const globals::portfolioDailyInfo *previousInfo, const int &date, const double &reverseTradeValue);
-    void insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const globals::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades);
+    void insertPortfolioReinvestments(const globals::myPersonalIndex *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const calculations::portfolioDailyInfo *previousInfo);
+    void insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfolio, const int &cashAccount, const calculations::portfolioDailyInfo *previousInfo, const int &date, const double &reverseTradeValue);
+    void insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades);
     void insertFirstPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &startDate, const dynamicTrades &allTrades);
     void insertPortfolioTradesToObject(globals::myPersonalIndex *currentPortfolio);
 };

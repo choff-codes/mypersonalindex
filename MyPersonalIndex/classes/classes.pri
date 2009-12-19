@@ -5,7 +5,8 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/NAV.cpp \
     $$PWD/prices.cpp \
     $$PWD/cachedCalculations.cpp \
-    $$PWD/calculations.cpp
+    $$PWD/calculations.cpp \
+    $$PWD/functions.cpp
 HEADERS += $$PWD/updatePrices.h \
     $$PWD/queries.h \
     $$PWD/globals.h \
@@ -13,4 +14,4 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/NAV.h \
     $$PWD/calculations.h \
     $$PWD/prices.h \
-    $$PWD/cachedCalculations.h \
+    $$PWD/cachedCalculations.h

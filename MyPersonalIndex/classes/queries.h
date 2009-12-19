@@ -62,10 +62,12 @@ public:
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV };
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
 
-    queries(QSqlDatabase database);
+    queries(const QString &databaseName);
+    ~queries() { m_db.close(); QSqlDatabase::removeDatabase(m_databaseName); }
+
     static QString getDatabaseLocation();
-    bool isOpen() const { bool open = db.isOpen(); if (open) { QSqlQuery *q = executeResultSet(getVersion()); open = q;  delete q; } return open;}
-    QSqlDatabase getDatabase() const { return db; }
+    bool isOpen() const { bool open = m_db.isOpen(); if (open) { QSqlQuery *q = executeResultSet(getVersion()); open = q;  delete q; } return open;}
+    //QSqlDatabase getDatabase() const { return m_db; }
 
     void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
@@ -160,7 +162,8 @@ public:
     queryInfo* getDividends() const;
 
 protected:
-    QSqlDatabase db;
+    QSqlDatabase m_db;
+    QString m_databaseName;
 };
 
 #endif // QUERIES_H

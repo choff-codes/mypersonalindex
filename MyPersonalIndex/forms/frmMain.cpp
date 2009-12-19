@@ -22,9 +22,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
             QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
         }
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "main");
-    db.setDatabaseName(location);
-    sql = new queries(db);
+    sql = new queries("main");
     if (!sql->isOpen())
     {
         delete sql;
@@ -328,7 +326,7 @@ void frmMain::loadPortfolioHoldings()
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
 
-    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
@@ -350,7 +348,7 @@ void frmMain::loadPortfolioAA()
     int currentDate = getDateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
 
-    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
 
@@ -358,11 +356,11 @@ void frmMain::loadPortfolioAA()
     {
         globals::assetAllocation aa;
         aa.description = "(Blank)";
-        rows.append(aaRow::getAARow(info, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+        rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
     }
 
     foreach(const globals::assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(aaRow::getAARow(info, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+        rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -379,7 +377,7 @@ void frmMain::loadPortfolioAcct()
     int currentDate = getDateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
 
-    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
 
@@ -387,11 +385,11 @@ void frmMain::loadPortfolioAcct()
     {
         globals::account acct;
         acct.description = "(Blank)";
-        rows.append(acctRow::getAcctRow(info, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+        rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
     }
 
     foreach(const globals::account &acct, m_currentPortfolio->data.acct)
-        rows.append(acctRow::getAcctRow(info, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+        rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -406,7 +404,7 @@ void frmMain::loadPortfolioAcct()
 void frmMain::loadPortfolioPerformance()
 {
     QAbstractItemModel *oldModel = ui.performance->model();
-    performanceModel *model = new performanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
+    mainPerformanceModel *model = new mainPerformanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
     ui.performance->setModel(model);
     delete oldModel;
 }
@@ -807,10 +805,10 @@ void frmMain::savePortfolio()
 
 void frmMain::savePortfolios()
 {
-    sql->getDatabase().transaction();
+    //sql->getDatabase().transaction();
     foreach(globals::myPersonalIndex *p, m_portfolios)
         sql->executeNonQuery(sql->updatePortfolio(p->info));
-    sql->getDatabase().commit();
+    //sql->getDatabase().commit();
 }
 
 void frmMain::addPortfolio()

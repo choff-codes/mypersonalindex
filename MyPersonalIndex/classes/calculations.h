@@ -8,12 +8,25 @@
 class calculations
 {
 public:
+    struct portfolioDailyInfo
+    {
+        int date;
+        QMap<int, double> avgPrices;
+        QMap<int, globals::securityValue> tickerValue;
+        double totalValue;
+        double costBasis;
+        double dividends;
+        double commission;
+        double taxLiability;
+
+        portfolioDailyInfo(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
+    };
 
     calculations(): m_portfolio(0) {};
     virtual ~calculations() {};
 
     virtual void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; }
-    virtual globals::portfolioDailyInfo* portfolioValues(const int &date);
+    virtual portfolioDailyInfo* portfolioValues(const int &date);
 
 protected:
     const globals::myPersonalIndex *m_portfolio;

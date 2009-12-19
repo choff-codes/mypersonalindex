@@ -2,27 +2,11 @@
 
 prices::prices()
 {
-    fillPrices();
-    QSqlDatabase::removeDatabase("prices");
-}
-
-void prices::fillPrices()
-{
-    QTime t;
-    t.start();
-
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "prices");
-    db.setDatabaseName(queries::getDatabaseLocation());
-    queries *sql = new queries(db);
-
-     qDebug("Time elapsed: %d ms (database)", t.elapsed());
-    t.restart();
+    queries *sql = new queries("prices");
 
     loadPrices(query_Price, sql->executeResultSet(sql->getPrices()));
     loadPrices(query_Dividend, sql->executeResultSet(sql->getDividends()));
     loadPrices(query_Split, sql->executeResultSet(sql->getSplits()));
-
-    qDebug("Time elapsed: %d ms (load)", t.elapsed());
 
     delete sql;
 }

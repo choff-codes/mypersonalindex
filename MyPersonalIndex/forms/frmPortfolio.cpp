@@ -86,6 +86,6 @@ void frmPortfolio::accept()
 
     m_sql.executeNonQuery(m_sql.updatePortfolio(m_portfolio));
     if (m_portfolio.id == -1)
-        m_portfolio.id = m_sql.executeScalar(m_sql.getIdentity()).toInt();
+        m_portfolio.id = m_sql.getIdentity();
     QDialog::accept();
 }

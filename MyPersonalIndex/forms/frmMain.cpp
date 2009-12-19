@@ -25,7 +25,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
     QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE", "main");
     db.setDatabaseName(location);
     sql = new queries(db);
-    if (!sql->isOpen() || !sql->executeScalar(sql->getVersion()).isValid())
+    if (!sql->isOpen())
     {
         delete sql;
         sql = 0;
@@ -136,7 +136,6 @@ void frmMain::loadSettings()
     loadSettingsColumns();
     loadStats();
     loadDates();
-    loadSplits();
     loadSortDropDowns();
     resetLastDate();
 }
@@ -203,24 +202,6 @@ void frmMain::loadDates()
 
     delete q;
 }
-
-void frmMain::loadSplits()
-{
-    m_splits.clear();
-    QSqlQuery *q = sql->executeResultSet(sql->getSplits());
-
-    if (!q)
-        return;
-
-    do
-    {
-        m_splits[q->value(queries::getSplits_Ticker).toString()].insert(q->value(queries::getSplits_Date).toInt(), q->value(queries::getSplits_Ratio).toDouble());
-    }
-    while (q->next());
-
-    delete q;
-}
-
 void frmMain::resetLastDate()
 {
     int lastDate = getLastDate();
@@ -301,6 +282,7 @@ void frmMain::loadPortfolio()
             return;
         }
 
+        m_calculations.setPortfolio(m_currentPortfolio);
         loadPortfolioSettings();
         int lastDate = getLastDate();
         resetCalendars(lastDate);
@@ -346,16 +328,16 @@ void frmMain::loadPortfolioHoldings()
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
 
-    globals::portfolioCache *cache = portfolioCache(currentDate);
+    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(holdingsRow::getHoldingsRow(s, cache, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort));
+            rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainHoldingsModel *model = new mainHoldingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), cache, ui.holdings);
+    mainHoldingsModel *model = new mainHoldingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), info, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -368,7 +350,7 @@ void frmMain::loadPortfolioAA()
     int currentDate = getDateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
 
-    globals::portfolioCache *cache = portfolioCache(currentDate);
+    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
 
@@ -376,15 +358,15 @@ void frmMain::loadPortfolioAA()
     {
         globals::assetAllocation aa;
         aa.description = "(Blank)";
-        rows.append(aaRow::getAARow(cache, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+        rows.append(aaRow::getAARow(info, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
     }
 
     foreach(const globals::assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(aaRow::getAARow(cache, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
+        rows.append(aaRow::getAARow(info, aa, m_currentPortfolio->data.tickers, m_currentPortfolio->info.aaSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainAAModel *model = new mainAAModel(rows, m_settings.columns.value(globals::columnIDs_AA), cache, m_currentPortfolio->info.aaThreshold, ui.aa);
+    mainAAModel *model = new mainAAModel(rows, m_settings.columns.value(globals::columnIDs_AA), info, m_currentPortfolio->info.aaThreshold, ui.aa);
     ui.aa->setModel(model);
     ui.aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -397,7 +379,7 @@ void frmMain::loadPortfolioAcct()
     int currentDate = getDateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
 
-    globals::portfolioCache *cache = portfolioCache(currentDate);
+    globals::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
 
@@ -405,15 +387,15 @@ void frmMain::loadPortfolioAcct()
     {
         globals::account acct;
         acct.description = "(Blank)";
-        rows.append(acctRow::getAcctRow(cache, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+        rows.append(acctRow::getAcctRow(info, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
     }
 
     foreach(const globals::account &acct, m_currentPortfolio->data.acct)
-        rows.append(acctRow::getAcctRow(cache, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
+        rows.append(acctRow::getAcctRow(info, acct, m_currentPortfolio->data.tickers, m_currentPortfolio->info.acctSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainAcctModel *model = new mainAcctModel(rows, m_settings.columns.value(globals::columnIDs_Acct), cache, ui.accounts);
+    mainAcctModel *model = new mainAcctModel(rows, m_settings.columns.value(globals::columnIDs_Acct), info, ui.accounts);
     ui.accounts->setModel(model);
     ui.accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -922,7 +904,7 @@ void frmMain::refreshPortfolioSecurities(const int &minDate)
         return;
     }
 
-    m_currentPortfolio->cache.clear();
+    m_calculations.clearCache();
     loadPortfolioHoldings();
     loadPortfolioAA();
 }
@@ -947,8 +929,7 @@ void frmMain::addTicker()
             if (currentMinDate != -1 && (currentMinDate < minDate || minDate == -1))
                 minDate = currentMinDate;
 
-            globals::portfolioCache *cache = m_currentPortfolio->cache.object(ui.holdingsDateDropDown->date().toJulianDay());
-            if (!s.cashAccount && (!cache || !cache->tickerInfo.contains(s.ticker)))
+            if (!s.cashAccount && (!prices::symbols().contains(s.ticker)))
                 showUpdatePrices = true;
         }
     }
@@ -1008,7 +989,7 @@ void frmMain::deleteTicker()
     foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         globals::security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
-        int newMinDate = calculations::firstTradeDate(s.trades);
+        int newMinDate = s.firstTradeDate();
         if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
             minDate = newMinDate;
 
@@ -1032,7 +1013,7 @@ void frmMain::deleteUnusedInfo()
     sql->executeNonQuery(sql->deleteUnusedPrices(queries::table_Dividends));
     sql->executeNonQuery(sql->deleteUnusedPrices(queries::table_Splits));
     loadDates();
-    loadSplits();
+    //loadSplits();
 }
 
 bool frmMain::invalidPortfolioNAVDates()
@@ -1097,7 +1078,7 @@ void frmMain::beginUpdate()
 
     disableItems(true);
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(m_portfolios, m_dates, m_splits, m_settings, this);
+    m_updateThread = new updatePrices(m_portfolios, m_dates, m_settings, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
     connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_updateThread->start();
@@ -1127,7 +1108,7 @@ void frmMain::beginNAV(const int &portfolioID, const int &minDate)
 {
     disableItems(true);
     ui.stbProgress->setMaximum(0);
-    m_navThread = new NAV(m_portfolios, m_dates, m_splits, minDate, this, portfolioID);
+    m_navThread = new NAV(m_portfolios, m_dates, minDate, this, portfolioID);
     connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
     connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_navThread->start();
@@ -1245,15 +1226,4 @@ void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<i
         sortString = f.getReturnValues();
 
     setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
-}
-
-globals::portfolioCache* frmMain::portfolioCache(const int &date)
-{
-    globals::portfolioCache *cache = m_currentPortfolio->cache.object(date);
-    if (!cache)
-    {
-        cache = calculations::portfolioValues(m_currentPortfolio, date, m_splits, *sql);
-        m_currentPortfolio->cache.insert(date, cache);
-    }
-    return cache;
 }

@@ -15,7 +15,7 @@ public:
 
     QVariant columnType(int column) const { return columnsType.at(column); }
 
-    static aaRow* getAARow(const globals::portfolioCache *cache, const globals::assetAllocation &aa, const QMap<int, globals::security> tickers, const QString &sort)
+    static aaRow* getAARow(const globals::portfolioDailyInfo *info, const globals::assetAllocation &aa, const QMap<int, globals::security> tickers, const QString &sort)
     {
         aaRow *row = new aaRow(sort);
 
@@ -27,7 +27,7 @@ public:
             if (aa.id == -1 and s.aa.isEmpty())
             {
                 included = true;
-                globals::securityValue sv = cache->tickerValue.value(s.id);
+                globals::securityValue sv = info->tickerValue.value(s.id);
                 value += sv.totalValue;
                 costBasis += sv.costBasis;
             }
@@ -36,8 +36,8 @@ public:
                     if (target.id == aa.id)
                     {
                         included = true;
-                        globals::securityValue sv = cache->tickerValue.value(s.id);
-                        value += sv.totalValue * aa.target / 100;
+                        globals::securityValue sv = info->tickerValue.value(s.id);
+                        value += sv.totalValue * target.target / 100;
                         costBasis += sv.costBasis;
                     }
 
@@ -52,7 +52,7 @@ public:
         //row_Value
         row->values.append(value);
         //row_ValueP
-        row->values.append(cache->totalValue == 0 ? QVariant() : 100.0 * value / cache->totalValue);
+        row->values.append(info->totalValue == 0 ? QVariant() : 100.0 * value / info->totalValue);
         //row_Gain
         row->values.append(value - costBasis);
         //row_GainP
@@ -60,7 +60,7 @@ public:
         //row_Target
         row->values.append(aa.target < 0 ? QVariant() : aa.target);
         //row_Offset
-        row->values.append(cache->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 * ((value / cache->totalValue) - (aa.target / 100.0)));
+        row->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 * ((value / info->totalValue) - (aa.target / 100.0)));
         //row_Holdings
         row->values.append(count);
 
@@ -84,8 +84,8 @@ class mainAAModel: public mpiViewModelBase
 
 public:
 
-    mainAAModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioCache *cache, const double &aaThreshold, QTableView *parent = 0):
-        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(cache->totalValue), m_threshold(aaThreshold), m_costBasis(cache->costBasis) { }
+    mainAAModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const globals::portfolioDailyInfo *info, const double &aaThreshold, QTableView *parent = 0):
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold), m_costBasis(info->costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const
     {

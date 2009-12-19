@@ -15,7 +15,7 @@
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
-#include "calculations.h"
+#include "cachedCalculations.h"
 #include <qwt_plot_curve.h>
 
 struct chartInfo
@@ -44,11 +44,11 @@ private:
     globals::myPersonalIndex *m_currentPortfolio;
     globals::settings m_settings;
     QList<int> m_dates;
-    globals::splitData m_splits;
     QMap<int, globals::statistic> m_statistics;
     updatePrices *m_updateThread;
     NAV *m_navThread;
     chartInfo m_chartInfo;
+    cachedCalculations m_calculations;
 
     void closeEvent(QCloseEvent *event);
     void connectSlots();
@@ -70,7 +70,6 @@ private:
     void loadPortfoliosStat();
     void loadPortfoliosNAV();
     void loadDates();
-    void loadSplits();
     void loadStats();
     void loadPortfolioSettings();
     void savePortfolio();
@@ -87,7 +86,6 @@ private:
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
     void deleteUnusedInfo();
-    globals::portfolioCache* portfolioCache(const int &date);
     bool invalidPortfolioNAVDates();
 
 private slots:

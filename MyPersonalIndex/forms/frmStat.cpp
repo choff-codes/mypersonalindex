@@ -52,7 +52,7 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), stat);
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
-    m_sql.executeNonQuery(m_sql.deletePortfolioItems(queries::table_StatMapping, m_portfolio, false));
+    m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, m_portfolio, false));
     if (!stat.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
@@ -66,12 +66,12 @@ void frmStat::accept()
 
 void frmStat::saveItem(globals::statistic *stat)
 {
-    m_sql.executeNonQuery(m_sql.updateStat((*stat)));
+    m_sql.executeNonQuery(queries::updateStat((*stat)));
     if (stat->id == -1)
         stat->id = m_sql.getIdentity();
 }
 
 void frmStat::deleteItem(const globals::statistic &stat)
 {
-    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_Stat, stat.id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_Stat, stat.id));
 }

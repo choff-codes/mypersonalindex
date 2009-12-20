@@ -44,14 +44,14 @@ void frmAcct::accept()
 
 void frmAcct::saveItem(globals::account *acct)
 {
-    m_sql.executeNonQuery(m_sql.updateAcct(m_portfolio, (*acct)));
+    m_sql.executeNonQuery(queries::updateAcct(m_portfolio, (*acct)));
     if (acct->id == -1)
         acct->id = m_sql.getIdentity();
 }
 
 void frmAcct::deleteItem(const globals::account &acct)
 {
-    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_Acct, acct.id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_Acct, acct.id));
 }
 
 void frmAcct::customContextMenuRequested(const QPoint&)

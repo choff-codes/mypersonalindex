@@ -22,8 +22,6 @@ private:
 
 class mpiViewModelBase: public QAbstractTableModel
 {
-    Q_OBJECT
-
 public:
 
     mpiViewModelBase(const QList<baseRow*> &rows, QList<int> viewableColumns, QTableView *parent = 0):

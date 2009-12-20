@@ -45,7 +45,10 @@ public:
     static QMap<int, double> dividend(const QString &ticker) { return instance().priceList()->value(ticker).dividends; }
     static QMap<int, double> split(const QString &ticker) { return instance().priceList()->value(ticker).splits; }
 
-    void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); }
+    static QList<int> dates() { return instance().getDates(); }
+
+    QList<int> getDates() { return m_dates; }
+    void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); insertDate(date);}
     void insertDividend(const QString &ticker, const int &date, const double &dividend) { m_securityPriceList[ticker].dividends.insert(date, dividend); }
     void insertSplit(const QString &ticker, const int &date, const double &split) { m_securityPriceList[ticker].splits.insert(date, split); }
 
@@ -57,8 +60,10 @@ public:
 
 private:
     securityPriceList m_securityPriceList;
+    QList<int> m_dates;
 
     void loadPrices(query_Type type, QSqlQuery *q);
+    void insertDate(const int &date);
 
     prices();
     // Dont forget to declare these two. You want to make sure they

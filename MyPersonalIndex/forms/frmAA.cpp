@@ -44,14 +44,14 @@ void frmAA::accept()
 
 void frmAA::saveItem(globals::assetAllocation *aa)
 {
-    m_sql.executeNonQuery(m_sql.updateAA(m_portfolio, (*aa)));
+    m_sql.executeNonQuery(queries::updateAA(m_portfolio, (*aa)));
     if (aa->id == -1)
         aa->id = m_sql.getIdentity();
 }
 
 void frmAA::deleteItem(const globals::assetAllocation &aa)
 {
-    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_AA, aa.id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_AA, aa.id));
 }
 
 void frmAA::customContextMenuRequested(const QPoint&)

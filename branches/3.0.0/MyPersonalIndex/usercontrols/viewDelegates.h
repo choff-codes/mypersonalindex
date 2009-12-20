@@ -2,8 +2,6 @@
 #define VIEWDELEGATES_H
 
 #include <QtGui>
-#include "functions.h"
-#include "globals.h"
 
 class spinBoxDelegate : public QItemDelegate
 {

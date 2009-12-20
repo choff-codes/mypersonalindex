@@ -127,7 +127,7 @@ void frmTicker::accept()
         return;
     }
 
-    m_sql.executeNonQuery(m_sql.updateSecurity(m_portfolioID, m_security));
+    m_sql.executeNonQuery(queries::updateSecurity(m_portfolioID, m_security));
     if (m_security.id == -1)
     {
         m_security.id = m_sql.getIdentity();
@@ -163,7 +163,7 @@ void frmTicker::accept()
     tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_AAID), aaID);
     tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_Percent), percent);
 
-    m_sql.deleteTickerItems(queries::table_TickersAA, m_security.id);
+    m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, m_security.id));
     if (!tickerID.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
@@ -180,14 +180,14 @@ void frmTicker::resetExpense()
 
 void frmTicker::saveItem(globals::dynamicTrade *trade)
 {
-    m_sql.executeNonQuery(m_sql.updateSecurityTrade(m_security.id, (*trade)));
+    m_sql.executeNonQuery(queries::updateSecurityTrade(m_security.id, (*trade)));
     if (trade->id == -1)
         trade->id = m_sql.getIdentity();
 }
 
 void frmTicker::deleteItem(const globals::dynamicTrade &trade)
 {
-    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_TickersTrades, trade.id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_TickersTrades, trade.id));
 }
 
 void frmTicker::customContextMenuRequested(const QPoint&)

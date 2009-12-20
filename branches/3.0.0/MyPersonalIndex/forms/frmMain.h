@@ -59,17 +59,6 @@ private:
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
     void loadSortDropDowns();
-    void loadPortfolios();
-    void loadPortfoliosInfo();
-    void loadPortfoliosTickers();
-    void loadPortfoliosTickersAA();
-    void loadPortfoliosTickersTrades();
-    void loadPortfoliosTrades();
-    void loadPortfoliosAA();
-    void loadPortfoliosAcct();
-    void loadPortfoliosStat();
-    void loadPortfoliosNAV();
-    void loadDates();
     void loadStats();
     void loadPortfolioSettings();
     void savePortfolio();

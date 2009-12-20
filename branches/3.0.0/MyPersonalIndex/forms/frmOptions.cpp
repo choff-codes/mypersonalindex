@@ -21,6 +21,6 @@ void frmOptions::accept()
         return;
     }
 
-    m_sql.executeNonQuery(m_sql.updateSettings(m_settings));
+    m_sql.executeNonQuery(queries::updateSettings(m_settings));
     QDialog::accept();
 }

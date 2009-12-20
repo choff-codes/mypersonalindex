@@ -4,14 +4,15 @@
 #include "globals.h"
 #include "queries.h"
 #include "calculations.h"
+#include "prices.h"
 
 class NAV : public QThread
 {
     Q_OBJECT
 
 public:
-    NAV(const QMap<int, globals::myPersonalIndex*> &data, const QList<int> &dates, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-        QThread(parent), m_sql(new queries("nav")), m_data(data), m_dates(dates), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
+    NAV(const QMap<int, globals::myPersonalIndex*> &data, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
+        QThread(parent), m_sql(new queries("nav")), m_data(data), m_dates(prices::dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
 
     ~NAV() { delete m_sql; }
     void run();
@@ -23,7 +24,7 @@ signals:
 private:
     queries *m_sql;
     const QMap<int, globals::myPersonalIndex*> &m_data;
-    const QList<int> &m_dates;
+    QList<int> m_dates;
     int m_calculationDate;
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;

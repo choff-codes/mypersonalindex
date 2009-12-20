@@ -32,7 +32,7 @@ void updatePrices::run()
     insertUpdates();
     //m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, m_dates, firstUpdate);
+    m_nav = new NAV(m_data, firstUpdate);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->start();
@@ -167,10 +167,6 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
 
             int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
             m_pricesDate.append(djulian);
-            // add new date if it doesn't already exist
-            QList<int>::iterator place = qLowerBound(m_dates.begin(), m_dates.end(), djulian);
-            if (place == m_dates.end() || *place != djulian)
-                m_dates.insert(place, djulian);
             // update min date
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;

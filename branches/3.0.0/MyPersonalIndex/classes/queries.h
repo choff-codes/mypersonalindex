@@ -63,7 +63,6 @@ public:
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
 
     queries(const QString &databaseName);
-    ~queries() { m_db.close(); QSqlDatabase::removeDatabase(m_databaseName); }
 
     static QString getDatabaseLocation();
     bool isOpen() const { bool open = m_db.isOpen(); if (open) { QSqlQuery *q = executeResultSet(getVersion()); open = q;  delete q; } return open;}
@@ -73,93 +72,93 @@ public:
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
     QSqlQuery* executeResultSet(queryInfo*) const;
 
-    queryInfo* deleteTable(const QString &table) const;
-    queryInfo* deleteItem(const QString &table, const int &id) const;
-    queryInfo* deleteTickerItems(const QString &table, const int &tickerID) const;
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers) const;
-    queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers) const;
-    queryInfo* deleteUnusedPrices(const QString &table) const;
-
-    queryInfo* getVersion() const;
-
     int getIdentity() const;
 
+    static queryInfo* deleteTable(const QString &table);
+    static queryInfo* deleteItem(const QString &table, const int &id);
+    static queryInfo* deleteTickerItems(const QString &table, const int &tickerID);
+    static queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers);
+    static queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers);
+    static queryInfo* deleteUnusedPrices(const QString &table);
+
+    static queryInfo* getVersion();
+
     enum { getDates_Date };
-    queryInfo* getDates() const;
+    static queryInfo* getDates();
 
     enum { getSplits_Date, getSplits_Ticker, getSplits_Ratio };
-    queryInfo* getSplits() const;
+    static queryInfo* getSplits();
 
     enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
-    queryInfo* getNAV() const;
+    static queryInfo* getNAV();
 
     enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
            getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
-    queryInfo* getSettings() const;
+    static queryInfo* getSettings();
 
     enum { getSettingsColumns_ID, getSettingsColumns_ColumnID };
-    queryInfo* getSettingsColumns() const;
+    static queryInfo* getSettingsColumns();
 
-    queryInfo* updateSettings(const globals::settings&) const;
+    static queryInfo* updateSettings(const globals::settings&);
 
     enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
-    queryInfo* getAA() const;
+    static queryInfo* getAA();
 
-    queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&) const;
+    static queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&);
 
     enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
-    queryInfo* getAcct() const;
+    static queryInfo* getAcct();
 
-    queryInfo* updateAcct(const int &portfolioID, const globals::account&) const;
+    static queryInfo* updateAcct(const int &portfolioID, const globals::account&);
 
     enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
            getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
            getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
            getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
            getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
-    queryInfo* getPortfolio() const;
+    static queryInfo* getPortfolio();
 
-    queryInfo* updatePortfolio(const globals::portfolio&) const;
+    static queryInfo* updatePortfolio(const globals::portfolio&);
 
     enum { getStat_ID, getStat_Description, getStat_SQL, getStat_Format };
-    queryInfo* getStat() const;
+    static queryInfo* getStat();
 
     enum { getStatMapping_PortfolioID, getStatMapping_StatID };
-    queryInfo* getStatMapping() const;
+    static queryInfo* getStatMapping();
 
-    queryInfo* updateStat(const globals::statistic&) const;
+    static queryInfo* updateStat(const globals::statistic&);
 
     enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
            getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
            getSecurity_IncludeInCalc, getSecurity_Hide };
-    queryInfo* getSecurity() const;
+    static queryInfo* getSecurity();
 
     enum { getSecurityTrade_ID, getSecurityTrade_PortfolioID, getSecurityTrade_TickerID, getSecurityTrade_Type,
            getSecurityTrade_Value, getSecurityTrade_Price, getSecurityTrade_Commission, getSecurityTrade_CashAccountID,
            getSecurityTrade_Frequency, getSecurityTrade_Date, getSecurityTrade_StartDate, getSecurityTrade_EndDate };
-    queryInfo* getSecurityTrade() const;
+    static queryInfo* getSecurityTrade();
 
     enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
-    queryInfo* getSecurityAA() const;
+    static queryInfo* getSecurityAA();
 
-    queryInfo* updateSecurity(const int &portfolioID, const globals::security&) const;
-    queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&) const;
+    static queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
+    static queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
 
     enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price, getTrade_Commission };
-    queryInfo* getTrade() const;
+    static queryInfo* getTrade();
 
     enum { getUpdateInfo_Ticker, getUpdateInfo_Date, getUpdateInfo_Type };
-    queryInfo* getUpdateInfo() const;
-    queryInfo* updateMissingPrices() const;
+    static queryInfo* getUpdateInfo();
+    static queryInfo* updateMissingPrices();
 
     enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend };
-    queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date) const;
+    static queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date);
 
     enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
-    queryInfo* getPrices() const;
+    static queryInfo* getPrices();
 
     //enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
-    queryInfo* getDividends() const;
+    static queryInfo* getDividends();
 
 protected:
     QSqlDatabase m_db;

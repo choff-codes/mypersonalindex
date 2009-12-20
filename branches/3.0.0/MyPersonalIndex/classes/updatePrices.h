@@ -11,8 +11,8 @@ class updatePrices: public QThread
     Q_OBJECT
 
 public:
-    updatePrices(const QMap<int, globals::myPersonalIndex*> &data, QList<int> &dates, const globals::settings &settings, QObject *parent = 0):
-        QThread(parent), m_sql(new queries("update")), m_data(data), m_dates(dates), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate) { }
+    updatePrices(const QMap<int, globals::myPersonalIndex*> &data, const globals::settings &settings, QObject *parent = 0):
+        QThread(parent), m_sql(new queries("update")), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate) { }
 
     ~updatePrices() { delete m_sql; }
     static bool isInternetConnection();
@@ -24,7 +24,6 @@ signals:
 private:
     queries *m_sql;
     const QMap<int, globals::myPersonalIndex*> &m_data;
-    QList<int> &m_dates;
     bool m_downloadSplits;
     int m_dataStartDate;
     QStringList m_updateFailures;

@@ -64,7 +64,7 @@ void frmColumns::accept()
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ColumnID), columnID);
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence), sequence);
 
-    m_sql.executeNonQuery(m_sql.deleteItem(queries::table_SettingsColumns, m_id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_SettingsColumns, m_id));
     if (!id.isEmpty())
     {
         queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);

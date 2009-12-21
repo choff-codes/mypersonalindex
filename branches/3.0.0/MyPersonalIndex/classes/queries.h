@@ -86,9 +86,6 @@ public:
     enum { getDates_Date };
     static queryInfo* getDates();
 
-    enum { getSplits_Date, getSplits_Ticker, getSplits_Ratio };
-    static queryInfo* getSplits();
-
     enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
     static queryInfo* getNAV();
 
@@ -147,17 +144,9 @@ public:
     enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price, getTrade_Commission };
     static queryInfo* getTrade();
 
-    enum { getUpdateInfo_Ticker, getUpdateInfo_Date, getUpdateInfo_Type };
-    static queryInfo* getUpdateInfo();
-    static queryInfo* updateMissingPrices();
-
-    enum { getPortfolioTickerInfo_Ticker, getPortfolioTickerInfo_Price, getPortfolioTickerInfo_Dividend };
-    static queryInfo* getPortfolioTickerInfo(const int &portfolioID, const int &date);
-
-    enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
+    enum { getPrices_Date, getPrices_Ticker, getPrices_Value };
     static queryInfo* getPrices();
-
-    //enum { getPrices_Date, getPrices_Ticker, getPrices_Price, getPrices_Dividend, getPrices_Split };
+    static queryInfo* getSplits();
     static queryInfo* getDividends();
 
 protected:

@@ -35,7 +35,13 @@ public:
     enum query_Type { query_Price, query_Dividend, query_Split };
 
     const securityPriceList* priceList() { return &m_securityPriceList; }
+
     static QStringList symbols() { return instance().priceList()->keys(); }
+    QList<int> getDates() { return m_dates; }
+
+    void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); insertDate(date);}
+    void insertDividend(const QString &ticker, const int &date, const double &dividend) { m_securityPriceList[ticker].dividends.insert(date, dividend); }
+    void insertSplit(const QString &ticker, const int &date, const double &split) { m_securityPriceList[ticker].splits.insert(date, split); }
 
     static double price(const QString &ticker, const int &date) { return instance().priceList()->value(ticker).prices.value(date, 0); }
     static double dividend(const QString &ticker, const int &date) { return instance().priceList()->value(ticker).dividends.value(date, 0); }
@@ -44,17 +50,6 @@ public:
     static QMap<int, double> price(const QString &ticker) { return instance().priceList()->value(ticker).prices; }
     static QMap<int, double> dividend(const QString &ticker) { return instance().priceList()->value(ticker).dividends; }
     static QMap<int, double> split(const QString &ticker) { return instance().priceList()->value(ticker).splits; }
-
-    static QList<int> dates() { return instance().getDates(); }
-
-    QList<int> getDates() { return m_dates; }
-    void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); insertDate(date);}
-    void insertDividend(const QString &ticker, const int &date, const double &dividend) { m_securityPriceList[ticker].dividends.insert(date, dividend); }
-    void insertSplit(const QString &ticker, const int &date, const double &split) { m_securityPriceList[ticker].splits.insert(date, split); }
-
-    static void addPrice(const QString &ticker, const int &date, const double &price) { instance().insertPrice(ticker, date, price); }
-    static void addDividend(const QString &ticker, const int &date, const double &dividend) { instance().insertDividend(ticker, date, dividend); }
-    static void addSplit(const QString &ticker, const int &date, const double &split) { instance().insertSplit(ticker, date, split); }
 
     static securityPrice dailyPriceInfo(const QString &ticker, const int &date);
 

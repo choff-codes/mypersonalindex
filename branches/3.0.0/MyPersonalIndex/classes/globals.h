@@ -420,18 +420,6 @@ public:
         dynamicTradeInfo(const QString &p_ticker, const int &p_tickerID, const dynamicTrade &p_trade): ticker(p_ticker), tickerID(p_tickerID), trade(p_trade) {}
     };
 
-    struct updateInfo
-    {
-        QString ticker;
-        int closingDate;
-        int dividendDate;
-        int splitDate;
-
-        updateInfo() {}
-        updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), closingDate(minDate), dividendDate(minDate), splitDate(minDate) {}
-    };
-
-
     struct securityPriceInfo
     {
         QMap<int, double> splits;

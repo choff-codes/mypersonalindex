@@ -2,11 +2,14 @@
 
 prices::prices()
 {
-    queries sql("prices");
+    queries *sql = new queries("prices");
 
-    loadPrices(query_Price, sql.executeResultSet(sql.getPrices()));
-    loadPrices(query_Dividend, sql.executeResultSet(sql.getDividends()));
-    loadPrices(query_Split, sql.executeResultSet(sql.getSplits()));
+    loadPrices(query_Price, sql->executeResultSet(queries::getPrices()));
+    loadPrices(query_Dividend, sql->executeResultSet(queries::getDividends()));
+    loadPrices(query_Split, sql->executeResultSet(queries::getSplits()));
+
+    delete sql;
+    QSqlDatabase::removeDatabase("prices");
 }
 
 void prices::insertDate(const int &date)
@@ -23,12 +26,12 @@ void prices::loadPrices(query_Type type, QSqlQuery *q)
 
     do
     {
-        QString ticker = q->value(queries::getSplits_Ticker).toString();
-        int date = q->value(queries::getSplits_Date).toInt();
+        QString ticker = q->value(queries::getPrices_Ticker).toString();
+        int date = q->value(queries::getPrices_Date).toInt();
 
         insertDate(date);
 
-        double value = q->value(queries::getSplits_Ratio).toDouble();
+        double value = q->value(queries::getPrices_Value).toDouble();
 
         switch(type)
         {

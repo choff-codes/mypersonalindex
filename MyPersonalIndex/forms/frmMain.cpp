@@ -13,7 +13,7 @@
 #include "mainPerformanceModel.h"
 #include "mpiBuilder.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_dates(prices::dates()), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_dates(prices::instance().getDates()), m_updateThread(0), m_navThread(0)
 {
     QString location = queries::getDatabaseLocation();
     if (!QFile::exists(location))
@@ -763,7 +763,7 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
     m_updateThread->disconnect();
     delete m_updateThread;
     m_updateThread = 0;
-    m_dates = prices::dates();
+    m_dates = prices::instance().getDates();
     loadPortfolio();
     disableItems(false);
 }
@@ -772,7 +772,7 @@ void frmMain::beginNAV(const int &portfolioID, const int &minDate)
 {
     disableItems(true);
     ui.stbProgress->setMaximum(0);
-    m_navThread = new NAV(m_portfolios, minDate, this, portfolioID);
+    m_navThread = new nav(m_portfolios, minDate, this, portfolioID);
     connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
     connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
     m_navThread->start();

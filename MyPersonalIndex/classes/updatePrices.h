@@ -12,9 +12,9 @@ class updatePrices: public QThread
 
 public:
     updatePrices(const QMap<int, globals::myPersonalIndex*> &data, const globals::settings &settings, QObject *parent = 0):
-        QThread(parent), m_sql(new queries("update")), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate) { }
+        QThread(parent), m_sql(new queries("update")), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
 
-    ~updatePrices() { delete m_sql; }
+    ~updatePrices() { delete m_sql; QSqlDatabase::removeDatabase("update"); }
     static bool isInternetConnection();
 
 signals:
@@ -30,16 +30,29 @@ private:
     QVariantList m_pricesDate, m_pricesTicker, m_pricesPrice;
     QVariantList m_divDate, m_divTicker, m_divAmount;
     QVariantList m_splitDate, m_splitTicker, m_splitRatio;
-    NAV *m_nav;
+    nav *m_nav;
+
+    struct updateInfo
+    {
+        QString ticker;
+        int lastPrice;
+        int lastDividend;
+        int lastSplit;
+
+        updateInfo() {}
+        updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), lastPrice(minDate), lastDividend(minDate), lastSplit(minDate) {}
+    };
 
     void run();
     QString getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type);
     QString getSplitAddress(const QString &ticker);
     QList<QByteArray>* downloadFile(const QUrl&);
-    void getUpdateInfo(QMap<QString, globals::updateInfo> &tickers);
+    void getUpdateInfo(QMap<QString, updateInfo> &tickers);
     bool getPrices(const QString &ticker, const int &minDate, int &earliestUpdate);
     void getDividends(const QString&ticker, const int &minDate, int &earliestUpdate);
     void getSplits(const QString &ticker, const int &minDate, int &earliestUpdate);
+    void updateMissingPrices();
+    void insertUpdatesToObject();
     void insertUpdates();
 
 private slots:

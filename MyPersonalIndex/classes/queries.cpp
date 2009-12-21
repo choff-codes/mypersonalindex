@@ -555,61 +555,6 @@ queries::queryInfo* queries::getTrade()
     );
 }
 
-queries::queryInfo* queries::getUpdateInfo()
-{
-    return new queryInfo(
-            "SELECT Ticker, MAX(Date) AS Date, 'C' AS Type"
-            " FROM ClosingPrices"
-            " GROUP BY Ticker"
-        " UNION ALL "
-            " SELECT Ticker, MAX(Date) as Date, 'D'"
-            " FROM Dividends"
-            " GROUP BY Ticker"
-        " UNION ALL"
-            " SELECT Ticker, MAX(Date) as Date, 'S'"
-            " FROM Splits"
-            " GROUP BY Ticker",
-        QList<parameter>()
-    );
-}
-
-queries::queryInfo* queries::updateMissingPrices()
-{
-    return new queryInfo(
-        "INSERT INTO ClosingPrices (Ticker, Date, Price)"
-        " SELECT a.Ticker, b.Date, d.Price"
-        " FROM (SELECT Ticker, MIN(Date) AS MinDate, MAX(Date) as MaxDate from ClosingPrices GROUP BY Ticker ) a"
-        " CROSS JOIN (SELECT DISTINCT Date FROM ClosingPrices) b"
-        " LEFT JOIN ClosingPrices c"
-                " ON a.Ticker = c.Ticker"
-                " AND b.Date = c.Date"
-        " LEFT JOIN ClosingPrices d"
-                " ON a.Ticker = d.Ticker"
-                " AND d.date = (SELECT MAX(e.Date) FROM ClosingPrices AS e WHERE e.Ticker = d.Ticker AND e.Date < b.Date)"
-        " WHERE b.Date BETWEEN a.MinDate AND a.MaxDate AND c.Ticker IS NULL",
-        QList<parameter>()
-    );
-}
-
-queries::queryInfo* queries::getPortfolioTickerInfo(const int &portfolioID, const int &date)
-{
-    return new queryInfo(
-            "SELECT c.Ticker, COALESCE(CASE WHEN c.CashAccount = 1 THEN 1 ELSE d.Price END, 0) AS Price, COALESCE(e.Amount, 0) AS Dividend"
-            " FROM (SELECT a.Ticker, MAX(a.CashAccount) AS CashAccount"
-                    " FROM Tickers AS a"
-                    " WHERE a.PortfolioID = :PortfolioID"
-                    " GROUP BY a.Ticker) AS c"
-            " LEFT JOIN ClosingPrices AS d"
-                " ON c.CashAccount = 0 AND d.Ticker = c.Ticker AND d.Date = :Date1"
-            " LEFT JOIN Dividends AS e"
-                " ON c.CashAccount = 0 AND e.Ticker = c.Ticker AND e.Date = :Date2",
-        QList<parameter>()
-            << parameter(":PortfolioID", portfolioID)
-            << parameter(":Date1", date)
-            << parameter(":Date2", date)
-    );
-}
-
 queries::queryInfo* queries::getPrices()
 {
     return new queryInfo(

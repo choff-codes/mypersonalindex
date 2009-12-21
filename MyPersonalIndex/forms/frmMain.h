@@ -46,7 +46,7 @@ private:
     QList<int> m_dates;
     QMap<int, globals::statistic> m_statistics;
     updatePrices *m_updateThread;
-    NAV *m_navThread;
+    nav *m_navThread;
     chartInfo m_chartInfo;
     cachedCalculations m_calculations;
 

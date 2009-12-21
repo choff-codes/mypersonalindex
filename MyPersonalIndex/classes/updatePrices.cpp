@@ -6,7 +6,7 @@
 
 void updatePrices::run()
 {
-    QMap<QString, globals::updateInfo> tickers;
+    QMap<QString, updateInfo> tickers;
 
     if (!m_sql->isOpen())
         return;
@@ -16,28 +16,73 @@ void updatePrices::run()
     foreach(globals::myPersonalIndex* p, m_data)
         foreach(const globals::security &sec, p->data.tickers)
             if (!tickers.contains(sec.ticker) && !sec.cashAccount)
-                tickers.insert(sec.ticker, globals::updateInfo(sec.ticker, m_dataStartDate - 6));
+                tickers.insert(sec.ticker, updateInfo(sec.ticker, m_dataStartDate));
 
     getUpdateInfo(tickers);
 
     int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
-    foreach(const globals::updateInfo &info, tickers)
-        if (getPrices(info.ticker, info.closingDate, firstUpdate))  // check if symbol exists
+    foreach(const updateInfo &info, tickers)
+        if (getPrices(info.ticker, info.lastPrice, firstUpdate))  // check if symbol exists
         {
-            getDividends(info.ticker, info.dividendDate, firstUpdate);
+            getDividends(info.ticker, info.lastDividend, firstUpdate);
             if (m_downloadSplits)
-                getSplits(info.ticker, info.splitDate, firstUpdate);
+                getSplits(info.ticker, info.lastSplit, firstUpdate);
         }
 
+    insertUpdatesToObject();
+    updateMissingPrices();
     insertUpdates();
-    //m_sql->executeNonQuery(m_sql->updateMissingPrices());
 
-    m_nav = new NAV(m_data, firstUpdate);
+    m_nav = new nav(m_data, firstUpdate);
     connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
     connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
     m_nav->start();
 
     exec();
+}
+
+void updatePrices::updateMissingPrices()
+{
+    const prices::securityPriceList *list = prices::instance().priceList();
+    QList<int> dates = prices::instance().getDates();
+
+    for(prices::securityPriceList::const_iterator i = list->constBegin(); i != list->constEnd(); ++i)
+    {
+        QString ticker = i.key();
+        QMap<int, double> prices = i.value().prices;
+
+        if (prices.count() <= 2)
+            continue;
+
+        for(QList<int>::const_iterator x = qLowerBound(dates, (prices.constBegin() + 1).key()); x != dates.constEnd(); ++x)
+        {
+            int date = *x;
+            QMap<int, double>::const_iterator z = prices.lowerBound(date);
+
+            if (z == prices.constEnd())
+                break;
+
+            if (z.key() != date)
+            {
+                m_pricesTicker.append(ticker);
+                m_pricesDate.append(date);
+                m_pricesPrice.append((z - 1).value());
+            }
+        }
+    }
+}
+
+void updatePrices::insertUpdatesToObject()
+{
+    for(int i = 0; i < m_pricesDate.count(); ++i)
+        prices::instance().insertPrice(m_pricesTicker.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
+
+
+    for(int i = 0; i < m_divDate.count(); ++i)
+        prices::instance().insertDividend(m_divTicker.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
+
+    for(int i = 0; i < m_splitDate.count(); ++i)
+        prices::instance().insertSplit(m_splitTicker.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
 }
 
 void updatePrices::insertUpdates()
@@ -49,9 +94,6 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), m_pricesTicker);
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), m_pricesPrice);
         m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
-
-        for(int i = 0; i < m_pricesDate.count(); ++i)
-            prices::addPrice(m_pricesTicker.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
     }
 
     if (!m_divDate.isEmpty())
@@ -61,9 +103,6 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), m_divTicker);
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), m_divAmount);
         m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
-
-        for(int i = 0; i < m_divDate.count(); ++i)
-            prices::addDividend(m_divTicker.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
     }
 
     if (!m_splitDate.isEmpty())
@@ -73,42 +112,27 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), m_splitTicker);
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
         m_sql->executeTableUpdate(queries::table_Splits, tableValues);
-
-        for(int i = 0; i < m_splitDate.count(); ++i)
-            prices::addSplit(m_splitTicker.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
     }
 }
 
-void updatePrices::getUpdateInfo(QMap<QString, globals::updateInfo> &tickers)
+void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &tickers)
 {
-    QSqlQuery *q = m_sql->executeResultSet(m_sql->getUpdateInfo());
-    if (q)
+    for(QMap<QString, updateInfo>::iterator i = tickers.begin(); i != tickers.end(); ++i)
     {
-        do
-        {
-            int d = q->value(queries::getUpdateInfo_Date).toInt();
-            QString type = q->value(queries::getUpdateInfo_Type).toString();
-            QString ticker = q->value(queries::getUpdateInfo_Ticker).toString();
-            if (type == "C")
-            {
-                tickers[ticker].closingDate = d;
-                continue;
-            }
-            if (type == "D")
-            {
-                tickers[ticker].dividendDate = d;
-                continue;
-            }
-            if (type == "S")
-            {
-                tickers[ticker].splitDate = d;
-                continue;
-            }
-        }
-        while (q->next());
-    }
+        QString ticker = i.key();
+        QMap<int, double> price = prices::price(ticker);
+        QMap<int, double> dividend = prices::dividend(ticker);
+        QMap<int, double> split = prices::split(ticker);
 
-    delete q;
+        if (!price.isEmpty())
+            i.value().lastPrice = (price.constEnd() - 1).key();
+
+        if (!dividend.isEmpty())
+            i.value().lastDividend = (dividend.constEnd() - 1).key();
+
+        if (!split.isEmpty())
+            i.value().lastSplit = (split.constEnd() - 1).key();
+    }
 }
 
 QString updatePrices::getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type)
@@ -247,7 +271,7 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
             d = d.addYears(100);
 
         int djulian = d.toJulianDay();
-        if (djulian <= minDate)
+        if (djulian <= minDate && minDate != m_dataStartDate) // if this is the first run, add all previous splits
             continue;
 
         m_splitDate.append(djulian);

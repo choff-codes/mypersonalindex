@@ -24,7 +24,7 @@ signals:
 private:
     queries *m_sql;
     const QMap<int, globals::myPersonalIndex*> &m_data;
-    QList<int> m_dates;
+    const QList<int> m_dates;
     int m_calculationDate;
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;

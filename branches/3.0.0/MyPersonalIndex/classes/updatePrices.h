@@ -3,7 +3,7 @@
 
 #include "globals.h"
 #include "queries.h"
-#include "NAV.h"
+#include "nav.h"
 #include <QtNetwork>
 
 class updatePrices: public QThread

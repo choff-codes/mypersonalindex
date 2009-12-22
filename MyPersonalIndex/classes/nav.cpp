@@ -284,12 +284,15 @@ QList<int> nav::getOnceTrades(const globals::dynamicTrade &d, const int &minDate
 {
     QList<int> dates;
     int date = d.date;
-    if (date >= d.startDate && date <= maxDate)
-        if (date < minDate && portfolioStartDate)
+
+    if (date < d.startDate || date > maxDate)
+        return dates;
+
+    if (date < minDate && portfolioStartDate)
+        dates.append(date);
+    else
+        if (date >= minDate && getCurrentDateOrNext(date))
             dates.append(date);
-        else
-            if (date >= minDate && getCurrentDateOrNext(date))
-                dates.append(date);
 
     return dates;
 }

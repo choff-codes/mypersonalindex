@@ -11,7 +11,7 @@
 #include "functions.h"
 #include "queries.h"
 #include "updatePrices.h"
-#include "NAV.h"
+#include "nav.h"
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"

@@ -13,7 +13,7 @@
 #include "mainPerformanceModel.h"
 #include "mpiBuilder.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_dates(prices::instance().getDates()), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
     QString location = queries::getDatabaseLocation();
     if (!QFile::exists(location))
@@ -34,6 +34,8 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
 
     ui.setupUI(this);
 
+    // do not use the database before this check
+    m_dates = prices::instance().getDates();
     m_portfolios = mpiBuilder().loadPortfolios();
     loadSettings();
     loadPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
@@ -733,13 +735,15 @@ void frmMain::editStat()
 
 void frmMain::beginUpdate()
 {
+    disableItems(true);
+
     if (!updatePrices::isInternetConnection())
     {
         QMessageBox::critical(this, "Update Error", "Cannot contact Yahoo! Finance, please check your internet connection.");
+        disableItems(false);
         return;
     }
 
-    disableItems(true);
     ui.stbProgress->setMaximum(0);
     m_updateThread = new updatePrices(m_portfolios, m_settings, this);
     connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));

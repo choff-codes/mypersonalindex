@@ -7,8 +7,15 @@ include(usercontrols/usercontrols.pri)
 
 INCLUDEPATH += shared/qwt
 
-CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd5.a
-    else: LIBS += shared/qwt/lib/libqwt5.a
+win32{
+    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd5.a
+        else: LIBS += shared/qwt/lib/libqwt5.a
+}
+
+unix{
+    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd.so
+        else: LIBS += shared/qwt/lib/libqwt.so
+}
 
 RESOURCES += icons/icons.qrc
 

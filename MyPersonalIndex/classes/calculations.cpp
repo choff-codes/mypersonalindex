@@ -72,3 +72,70 @@ calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
 
     return info;
 }
+
+double calculations::correlation(const QString &ticker1, const QString &ticker2, const int &startDate, const int &endDate)
+{
+    const QList<int> dates = prices::instance().getDates();
+    QList<int>::const_iterator end = dates.constEnd();
+    // use day after first date to get day over day change
+    int date = qMax(prices::firstDate(ticker1) + 1, prices::firstDate(ticker2) + 1);
+
+    if (date == 0 || dates.isEmpty())
+        return 0;
+
+    QList<int>::const_iterator i = qLowerBound(dates, qMax(date, startDate));
+    if (i != dates.constBegin())
+        i--;
+
+    date = *i;
+    prices::securityPrice previousPrice1 = prices::dailyPriceInfo(ticker1, date);
+    prices::securityPrice previousPrice2 = prices::dailyPriceInfo(ticker2, date);
+
+    if (previousPrice1.close == 0 || previousPrice2.close == 0)
+        return 0;
+
+    double ticker1Sum = 0, ticker2Sum = 0, ticker1Square = 0, ticker2Square = 0, productSquare = 0;
+    int count = 0;
+
+    for(++i; i != end; ++i)
+    {
+        date = *i;
+        if (date > endDate)
+            break;
+
+        prices::securityPrice price1 = prices::dailyPriceInfo(ticker1, date);
+        prices::securityPrice price2 = prices::dailyPriceInfo(ticker2, date);
+
+        if (price1.close == 0 || price2.close == 0)
+            break;
+
+        double change1 = change(price1.close * price1.split, previousPrice1.close, 0, price1.dividend * -1) - 1;
+        double change2 = change(price2.close * price2.split, previousPrice2.close, 0, price2.dividend * -1) - 1;
+
+        ticker1Sum += change1;
+        ticker2Sum += change2;
+        ticker1Square += change1 * change1;
+        ticker2Square += change2 * change2;
+        productSquare += change1 * change2;
+        count++;
+
+        previousPrice1 = price1;
+        previousPrice2 = price2;
+    }
+
+    if (count == 0)
+        return 0;
+
+    // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]
+    return (productSquare - (ticker1Sum * ticker2Sum / count)) /
+            sqrt((ticker1Square - (ticker1Sum * ticker1Sum / count)) * (ticker2Square - (ticker2Sum * ticker2Sum / count)));
+}
+
+double calculations::change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV)
+{
+    dailyActivity = dailyActivity - dividends;
+    if (dailyActivity < 0)
+        return (totalValue - dailyActivity) / (previousTotalValue / previousNAV);
+    else
+        return totalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+}

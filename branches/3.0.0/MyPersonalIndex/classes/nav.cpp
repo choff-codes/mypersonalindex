@@ -53,6 +53,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
     QMap<int, globals::navInfo> &currentPortfolioNAV = currentPortfolio->data.nav;
+    bool dividends = currentPortfolio->info.dividends;
 
     if (portfolioStartDate)
     {
@@ -82,22 +83,21 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         newTotalValue = info->totalValue;
         m_NAV_Totalvalue.append(newTotalValue);
 
-        dailyActivity = info->costBasis - previousInfo->costBasis + info->commission - (currentPortfolio->info.dividends ? info->dividends : 0);
-
-        if (dailyActivity < 0)
-            newNAV = (newTotalValue - dailyActivity) / (previousTotalValue / previousNAV);
-        else
-            newNAV = newTotalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+        dailyActivity = info->costBasis - previousInfo->costBasis + info->commission;
+        newNAV = calculations::change(newTotalValue, previousTotalValue, dailyActivity, dividends ? info->dividends : 0, previousNAV);
 
         if (isnan(newNAV) || isinf(newNAV))
+        {
             m_NAV_Nav.append(previousNAV);
+            currentPortfolioNAV.insert(date, globals::navInfo(previousNAV, newTotalValue));
+        }
         else
         {
             m_NAV_Nav.append(newNAV);
+            currentPortfolioNAV.insert(date, globals::navInfo(newNAV, newTotalValue));
             previousNAV = newNAV;
         }
 
-        currentPortfolioNAV.insert(date, globals::navInfo(m_NAV_Nav.last().toDouble(), m_NAV_Totalvalue.last().toDouble()));
         previousTotalValue = newTotalValue;
         delete previousInfo;
         previousInfo = info;
@@ -212,7 +212,7 @@ int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
 
     // if there is a day before, return successfully
     // otherwise, there needs to be 1 day before to pull previous day closing prices
-    if (qFind(m_dates, calculationDate) - m_dates.constBegin() >= 2)
+    if (qBinaryFind(m_dates, calculationDate) - m_dates.constBegin() >= 2)
         return calculationDate;
 
     // recalculate portfolio from the start of the 2nd day of pricing

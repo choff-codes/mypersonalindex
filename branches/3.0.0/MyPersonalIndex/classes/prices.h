@@ -51,6 +51,12 @@ public:
     static QMap<int, double> dividend(const QString &ticker) { return instance().priceList()->value(ticker).dividends; }
     static QMap<int, double> split(const QString &ticker) { return instance().priceList()->value(ticker).splits; }
 
+    static int firstDate() { return instance().getDates().isEmpty() ? 0 : instance().getDates().first(); }
+    static int firstDate(const QString &ticker);
+
+    static int lastDate() { return instance().getDates().isEmpty() ? 0 : instance().getDates().last(); }
+    static int lastDate(const QString &ticker);
+
     static securityPrice dailyPriceInfo(const QString &ticker, const int &date);
 
 private:

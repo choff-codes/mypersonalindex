@@ -19,6 +19,26 @@ void prices::insertDate(const int &date)
         m_dates.insert(i, date);
 }
 
+int prices::firstDate(const QString &ticker)
+{
+    QMap<int, double> dates = instance().priceList()->value(ticker).prices;
+
+    if (dates.isEmpty())
+        return 0;
+
+    return dates.constBegin().key();
+}
+
+int prices::lastDate(const QString &ticker)
+{
+    QMap<int, double> dates = instance().priceList()->value(ticker).prices;
+
+    if (dates.isEmpty())
+        return 0;
+
+    return (dates.constEnd() - 1).key();
+}
+
 void prices::loadPrices(query_Type type, QSqlQuery *q)
 {
     if (!q)

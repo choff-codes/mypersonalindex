@@ -85,19 +85,10 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
 
         dailyActivity = info->costBasis - previousInfo->costBasis + info->commission;
         newNAV = calculations::change(newTotalValue, previousTotalValue, dailyActivity, dividends ? info->dividends : 0, previousNAV);
+        m_NAV_Nav.append(newNAV);
+        currentPortfolioNAV.insert(date, globals::navInfo(newNAV, newTotalValue));
 
-        if (isnan(newNAV) || isinf(newNAV))
-        {
-            m_NAV_Nav.append(previousNAV);
-            currentPortfolioNAV.insert(date, globals::navInfo(previousNAV, newTotalValue));
-        }
-        else
-        {
-            m_NAV_Nav.append(newNAV);
-            currentPortfolioNAV.insert(date, globals::navInfo(newNAV, newTotalValue));
-            previousNAV = newNAV;
-        }
-
+        previousNAV = newNAV;
         previousTotalValue = newTotalValue;
         delete previousInfo;
         previousInfo = info;

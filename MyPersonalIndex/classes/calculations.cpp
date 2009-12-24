@@ -133,9 +133,12 @@ double calculations::correlation(const QString &ticker1, const QString &ticker2,
 
 double calculations::change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV)
 {
+    double nav;
     dailyActivity = dailyActivity - dividends;
     if (dailyActivity < 0)
-        return (totalValue - dailyActivity) / (previousTotalValue / previousNAV);
+        nav = (totalValue - dailyActivity) / (previousTotalValue / previousNAV);
     else
-        return totalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+        nav = totalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+
+    return (isnan(nav) || isinf(nav)) ? previousNAV : nav;
 }

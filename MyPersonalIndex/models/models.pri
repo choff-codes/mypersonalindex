@@ -7,7 +7,8 @@ HEADERS += $$PWD/aaModel.h \
     $$PWD/mainHoldingsModel.h \
     $$PWD/mainPerformanceModel.h \
     $$PWD/mainAcctModel.h \
-    $$PWD/mainAAModel.h
+    $$PWD/mainAAModel.h \
+    $$PWD/mainCorrelationModel.h
 SOURCES += $$PWD/mainHoldingsModel.cpp \
     $$PWD/mainAcctModel.cpp \
     $$PWD/mainAAModel.cpp \
@@ -16,4 +17,5 @@ SOURCES += $$PWD/mainHoldingsModel.cpp \
     $$PWD/mainPerformanceModel.cpp \
     $$PWD/tickerAAModel.cpp \
     $$PWD/tickerTradeModel.cpp \
-    $$PWD/statModel.cpp
+    $$PWD/statModel.cpp \
+    $$PWD/mainCorrelationModel.cpp

@@ -22,8 +22,8 @@ public:
         portfolioDailyInfo(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
     };
 
-    calculations(): m_portfolio(0) {};
-    virtual ~calculations() {};
+    calculations(): m_portfolio(0) {}
+    virtual ~calculations() {}
 
     virtual void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; }
     virtual portfolioDailyInfo* portfolioValues(const int &date);

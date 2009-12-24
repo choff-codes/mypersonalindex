@@ -25,6 +25,7 @@ struct chartInfo
     QVector<double> yData;
 
     chartInfo(): curve(0) {}
+    ~chartInfo() { delete curve; }
 };
 
 class frmMain : public QMainWindow
@@ -87,6 +88,7 @@ private slots:
     void loadPortfolioChart();
     void loadPortfolioAA();
     void loadPortfolioAcct();
+    void loadPortfolioCorrelation();
     void about();
     void addTicker();
     void editTicker();

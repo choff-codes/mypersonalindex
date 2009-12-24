@@ -12,6 +12,7 @@
 #include "mpiViewModelBase.h"
 #include "mainPerformanceModel.h"
 #include "mpiBuilder.h"
+#include "mainCorrelationModel.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -96,6 +97,8 @@ void frmMain::connectSlots()
     //connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
     connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(editStat()));
+
+    connect(ui.correlationsCalculate, SIGNAL(triggered()), this, SLOT(loadPortfolioCorrelation()));
 }
 
 void frmMain::loadSettings()
@@ -391,6 +394,34 @@ void frmMain::loadPortfolioPerformance()
     QAbstractItemModel *oldModel = ui.performance->model();
     mainPerformanceModel *model = new mainPerformanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
     ui.performance->setModel(model);
+    delete oldModel;
+}
+
+void frmMain::loadPortfolioCorrelation()
+{
+    QAbstractItemModel *oldModel = ui.correlations->model();
+    int startDate = ui.correlationsStartDateDropDown->date().toJulianDay();
+    int endDate = ui.correlationsEndDateDropDown->date().toJulianDay();
+
+    mainCorrelationModel::correlationList correlations;
+    foreach(const globals::security &s, m_currentPortfolio->data.tickers)
+        if (m_currentPortfolio->info.correlationShowHidden || !s.hide)
+            correlations.insert(s.ticker, QHash<QString, double>());
+
+    QStringList symbols = correlations.keys();
+    for(int i = 0; i < symbols.count(); ++i)
+    {
+        QString ticker1 = symbols.at(i);
+        for (int x = i + 1; x < symbols.count(); ++x)
+        {
+            QString ticker2 = symbols.at(x);
+            correlations[ticker1].insert(ticker2, calculations::correlation(ticker1, ticker2, startDate, endDate));
+        }
+    }
+
+    mainCorrelationModel *model = new mainCorrelationModel(correlations, symbols, ui.correlations);
+    ui.correlations->setModel(model);
+    ui.correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     delete oldModel;
 }
 

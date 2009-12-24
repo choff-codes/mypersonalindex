@@ -258,7 +258,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsToolbar = new QToolBar(tab_correlations);
 
     correlations = new QTableView(tab_correlations);
-    correlations->verticalHeader()->hide();
     correlations->setSelectionMode(QAbstractItemView::ExtendedSelection);
     correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
     correlations->setAlternatingRowColors(true);

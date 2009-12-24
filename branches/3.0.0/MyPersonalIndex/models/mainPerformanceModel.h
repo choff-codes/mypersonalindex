@@ -23,7 +23,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private:
-    const QMap<int, globals::navInfo> &m_nav;
+    const QMap<int, globals::navInfo> m_nav;
     QList<int> m_dates;
     bool m_desc;
     double m_startValue;

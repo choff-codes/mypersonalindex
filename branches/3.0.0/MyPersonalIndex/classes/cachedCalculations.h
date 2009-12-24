@@ -20,7 +20,7 @@ public:
 
 
     cachedCalculations(): calculations() {}
-    virtual ~cachedCalculations() {};
+    virtual ~cachedCalculations() {}
 
     portfolioDailyInfo* portfolioValues(const int &date);
     void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; clearCache(); }

@@ -32,38 +32,41 @@ public:
 
     typedef QHash<QString, securityPrices> securityPriceList;
 
-    enum query_Type { query_Price, query_Dividend, query_Split };
+    securityPriceList priceList() { return m_securityPriceList; }
 
-    const securityPriceList* priceList() { return &m_securityPriceList; }
-
-    static QStringList symbols() { return instance().priceList()->keys(); }
-    QList<int> getDates() { return m_dates; }
+    QStringList symbols() { return m_securityPriceList.keys(); }
+    QList<int> dates() { return m_dates; }
 
     void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); insertDate(date);}
     void insertDividend(const QString &ticker, const int &date, const double &dividend) { m_securityPriceList[ticker].dividends.insert(date, dividend); }
     void insertSplit(const QString &ticker, const int &date, const double &split) { m_securityPriceList[ticker].splits.insert(date, split); }
 
-    static double price(const QString &ticker, const int &date) { return instance().priceList()->value(ticker).prices.value(date, 0); }
-    static double dividend(const QString &ticker, const int &date) { return instance().priceList()->value(ticker).dividends.value(date, 0); }
-    static double split(const QString &ticker, const int &date) { return instance().priceList()->value(ticker).splits.value(date, 1); }
+    QMap<int, double> price(const QString &ticker);
+    QMap<int, double> dividend(const QString &ticker);
+    QMap<int, double> split(const QString &ticker);
 
-    static QMap<int, double> price(const QString &ticker) { return instance().priceList()->value(ticker).prices; }
-    static QMap<int, double> dividend(const QString &ticker) { return instance().priceList()->value(ticker).dividends; }
-    static QMap<int, double> split(const QString &ticker) { return instance().priceList()->value(ticker).splits; }
+    double price(const QString &ticker, const int &date) { return price(ticker).value(date, 1); }
+    double dividend(const QString &ticker, const int &date) { return dividend(ticker).value(date, 0); }
+    double split(const QString &ticker, const int &date) { return split(ticker).value(date, 1); }
 
-    static int firstDate() { return instance().getDates().isEmpty() ? 0 : instance().getDates().first(); }
-    static int firstDate(const QString &ticker);
+    int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
+    int firstDate(const QString &ticker);
 
-    static int lastDate() { return instance().getDates().isEmpty() ? 0 : instance().getDates().last(); }
-    static int lastDate(const QString &ticker);
+    int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
+    int lastDate(const QString &ticker);
 
-    static securityPrice dailyPriceInfo(const QString &ticker, const int &date);
+    securityPrice dailyPriceInfo(const QString &ticker, const int &date) { return securityPrice(price(ticker, date), dividend(ticker, date), split(ticker, date)); }
 
 private:
     securityPriceList m_securityPriceList;
     QList<int> m_dates;
+    QSet<QString> m_cashSecurities;
+    securityPrices m_cashPrices;
+
+    enum query_Type { query_Price, query_Dividend, query_Split };
 
     void loadPrices(query_Type type, QSqlQuery *q);
+    void loadCashSecurities(QSqlQuery *q);
     void insertDate(const int &date);
 
     prices();

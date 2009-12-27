@@ -4,7 +4,7 @@ double calculations::splitRatio(const QString &ticker, const int &startDate, con
 {
     double ratio = 1;
 
-    QMap<int, double> s = prices::split(ticker);
+    QMap<int, double> s = prices::instance().split(ticker);
 
     for(QMap<int, double>::const_iterator i = s.lowerBound(startDate); i != s.constEnd(); ++i)
     {
@@ -19,7 +19,7 @@ double calculations::splitRatio(const QString &ticker, const int &startDate, con
 globals::securityValue calculations::tickerValue(const globals::security &s, const int &date)
 {
     globals::securityValue value;
-    prices::securityPrice price = prices::dailyPriceInfo(s.ticker, date);
+    prices::securityPrice price = prices::instance().dailyPriceInfo(s.ticker, date);
 
     double shares = 0;
     foreach(const globals::trade &trade, m_portfolio->data.trades.value(s.id))
@@ -75,10 +75,10 @@ calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
 
 double calculations::correlation(const QString &ticker1, const QString &ticker2, const int &startDate, const int &endDate)
 {
-    const QList<int> dates = prices::instance().getDates();
+    const QList<int> dates = prices::instance().dates();
     QList<int>::const_iterator end = dates.constEnd();
     // use day after first date to get day over day change
-    int date = qMax(prices::firstDate(ticker1) + 1, prices::firstDate(ticker2) + 1);
+    int date = qMax(prices::instance().firstDate(ticker1) + 1, prices::instance().firstDate(ticker2) + 1);
 
     if (date == 0 || dates.isEmpty())
         return 0;
@@ -88,8 +88,8 @@ double calculations::correlation(const QString &ticker1, const QString &ticker2,
         i--;
 
     date = *i;
-    prices::securityPrice previousPrice1 = prices::dailyPriceInfo(ticker1, date);
-    prices::securityPrice previousPrice2 = prices::dailyPriceInfo(ticker2, date);
+    prices::securityPrice previousPrice1 = prices::instance().dailyPriceInfo(ticker1, date);
+    prices::securityPrice previousPrice2 = prices::instance().dailyPriceInfo(ticker2, date);
 
     if (previousPrice1.close == 0 || previousPrice2.close == 0)
         return 0;
@@ -103,8 +103,8 @@ double calculations::correlation(const QString &ticker1, const QString &ticker2,
         if (date > endDate)
             break;
 
-        prices::securityPrice price1 = prices::dailyPriceInfo(ticker1, date);
-        prices::securityPrice price2 = prices::dailyPriceInfo(ticker2, date);
+        prices::securityPrice price1 = prices::instance().dailyPriceInfo(ticker1, date);
+        prices::securityPrice price2 = prices::instance().dailyPriceInfo(ticker2, date);
 
         if (price1.close == 0 || price2.close == 0)
             break;
@@ -123,7 +123,7 @@ double calculations::correlation(const QString &ticker1, const QString &ticker2,
         previousPrice2 = price2;
     }
 
-    if (count == 0)
+    if (count <= 1)
         return 0;
 
     // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]

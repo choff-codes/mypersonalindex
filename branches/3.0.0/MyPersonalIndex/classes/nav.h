@@ -12,7 +12,7 @@ class nav : public QThread
 
 public:
     nav(const QMap<int, globals::myPersonalIndex*> &data, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-            QThread(parent), m_sql(new queries("nav")), m_data(data), m_dates(prices::instance().getDates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
+            QThread(parent), m_sql(new queries("nav")), m_data(data), m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
 
     ~nav() { delete m_sql; QSqlDatabase::removeDatabase("nav"); }
     void run();

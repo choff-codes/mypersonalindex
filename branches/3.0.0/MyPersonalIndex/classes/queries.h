@@ -148,6 +148,9 @@ public:
     static queryInfo* getPrices();
     static queryInfo* getSplits();
     static queryInfo* getDividends();
+    
+    enum { getCashSecurities_Ticker };
+    static queryInfo* getCashSecurities();
 
 protected:
     QSqlDatabase m_db;

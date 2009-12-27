@@ -4,6 +4,8 @@ prices::prices()
 {
     queries *sql = new queries("prices");
 
+    // load cash securities first so prices are inserted properly
+    loadCashSecurities(sql->executeResultSet(queries::getCashSecurities()));
     loadPrices(query_Price, sql->executeResultSet(queries::getPrices()));
     loadPrices(query_Dividend, sql->executeResultSet(queries::getDividends()));
     loadPrices(query_Split, sql->executeResultSet(queries::getSplits()));
@@ -15,13 +17,41 @@ prices::prices()
 void prices::insertDate(const int &date)
 {
     QList<int>::iterator i = qLowerBound(m_dates.begin(), m_dates.end(), date);
-    if (*i != date)
-        m_dates.insert(i, date);
+    if (*i == date)
+        return;
+
+    m_dates.insert(i, date);
+    m_cashPrices.prices.insert(date, 1);
+}
+
+
+QMap<int, double> prices::price(const QString &ticker)
+{
+    if (m_cashSecurities.contains(ticker))
+        return m_cashPrices.prices;
+
+    return m_securityPriceList.value(ticker).prices;
+}
+
+QMap<int, double> prices::dividend(const QString &ticker)
+{
+    if (m_cashSecurities.contains(ticker))
+        return m_cashPrices.dividends;
+
+    return m_securityPriceList.value(ticker).dividends;
+}
+
+QMap<int, double> prices::split(const QString &ticker)
+{
+    if (m_cashSecurities.contains(ticker))
+        return m_cashPrices.splits;
+
+    return m_securityPriceList.value(ticker).splits;
 }
 
 int prices::firstDate(const QString &ticker)
 {
-    QMap<int, double> dates = instance().priceList()->value(ticker).prices;
+    QMap<int, double> dates = price(ticker);
 
     if (dates.isEmpty())
         return 0;
@@ -31,7 +61,7 @@ int prices::firstDate(const QString &ticker)
 
 int prices::lastDate(const QString &ticker)
 {
-    QMap<int, double> dates = instance().priceList()->value(ticker).prices;
+    QMap<int, double> dates = price(ticker);
 
     if (dates.isEmpty())
         return 0;
@@ -68,17 +98,19 @@ void prices::loadPrices(query_Type type, QSqlQuery *q)
     }
     while (q->next());
 
-    delete q;
+    delete q;        
 }
 
-prices::securityPrice prices::dailyPriceInfo(const QString &ticker, const int &date)
+void prices::loadCashSecurities(QSqlQuery *q)
 {
-    const securityPriceList* list = instance().priceList();
+    if (!q)
+        return;
 
-    return
-        securityPrice(
-            list->value(ticker).prices.value(date, 0),
-            list->value(ticker).dividends.value(date, 0),
-            list->value(ticker).splits.value(date, 1)
-        );
+    do
+    {
+        m_cashSecurities.insert(q->value(queries::getCashSecurities_Ticker).toString());
+    }
+    while (q->next());
+
+    delete q;
 }

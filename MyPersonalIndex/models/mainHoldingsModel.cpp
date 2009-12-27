@@ -22,7 +22,7 @@ holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const globals::security &s
     //row_Cash
     row->values.append((int)s.cashAccount);
     //row_Price
-    double price = prices::price(s.ticker, info->date);
+    double price = prices::instance().price(s.ticker, info->date);
     row->values.append(price == 0 ? QVariant() : price);
     //row_Shares
     row->values.append(value.shares);

@@ -579,3 +579,11 @@ queries::queryInfo* queries::getSplits()
     );
 }
 
+queries::queryInfo* queries::getCashSecurities()
+{
+    return new queryInfo(
+        "SELECT Ticker FROM Tickers WHERE CashAccount = 1",
+        QList<parameter>()
+    );
+}
+

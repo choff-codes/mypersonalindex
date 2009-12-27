@@ -43,10 +43,10 @@ void updatePrices::run()
 
 void updatePrices::updateMissingPrices()
 {
-    const prices::securityPriceList *list = prices::instance().priceList();
-    QList<int> dates = prices::instance().getDates();
+    const prices::securityPriceList list = prices::instance().priceList();
+    QList<int> dates = prices::instance().dates();
 
-    for(prices::securityPriceList::const_iterator i = list->constBegin(); i != list->constEnd(); ++i)
+    for(prices::securityPriceList::const_iterator i = list.constBegin(); i != list.constEnd(); ++i)
     {
         QString ticker = i.key();
         QMap<int, double> prices = i.value().prices;
@@ -120,9 +120,9 @@ void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &tickers)
     for(QMap<QString, updateInfo>::iterator i = tickers.begin(); i != tickers.end(); ++i)
     {
         QString ticker = i.key();
-        QMap<int, double> price = prices::price(ticker);
-        QMap<int, double> dividend = prices::dividend(ticker);
-        QMap<int, double> split = prices::split(ticker);
+        QMap<int, double> price = prices::instance().price(ticker);
+        QMap<int, double> dividend = prices::instance().dividend(ticker);
+        QMap<int, double> split = prices::instance().split(ticker);
 
         if (!price.isEmpty())
             i.value().lastPrice = (price.constEnd() - 1).key();

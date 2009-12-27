@@ -36,7 +36,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
     ui.setupUI(this);
 
     // do not use the database before this check
-    m_dates = prices::instance().getDates();
+    m_dates = prices::instance().dates();
     m_portfolios = mpiBuilder().loadPortfolios();
     loadSettings();
     loadPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
@@ -405,7 +405,7 @@ void frmMain::loadPortfolioCorrelation()
 
     mainCorrelationModel::correlationList correlations;
     foreach(const globals::security &s, m_currentPortfolio->data.tickers)
-        if (m_currentPortfolio->info.correlationShowHidden || !s.hide)
+        if (ui.correlationsShowHidden->isChecked() || !s.hide)
             correlations.insert(s.ticker, QHash<QString, double>());
 
     QStringList symbols = correlations.keys();
@@ -625,7 +625,7 @@ void frmMain::addTicker()
             if (currentMinDate != -1 && (currentMinDate < minDate || minDate == -1))
                 minDate = currentMinDate;
 
-            if (!s.cashAccount && (!prices::symbols().contains(s.ticker)))
+            if (!s.cashAccount && (!prices::instance().symbols().contains(s.ticker)))
                 showUpdatePrices = true;
         }
     }
@@ -798,7 +798,7 @@ void frmMain::finishUpdate(const QStringList &invalidTickers)
     m_updateThread->disconnect();
     delete m_updateThread;
     m_updateThread = 0;
-    m_dates = prices::instance().getDates();
+    m_dates = prices::instance().dates();
     loadPortfolio();
     disableItems(false);
 }

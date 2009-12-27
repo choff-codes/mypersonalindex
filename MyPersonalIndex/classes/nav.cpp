@@ -379,7 +379,7 @@ void nav::insertPortfolioReinvestments(const globals::myPersonalIndex *currentPo
     
     foreach(const int &reinvest, tickerReinvestments)
     {
-        prices::securityPrice s = prices::dailyPriceInfo(currentPortfolio->data.tickers.value(reinvest).ticker, previousInfo->date);
+        prices::securityPrice s = prices::instance().dailyPriceInfo(currentPortfolio->data.tickers.value(reinvest).ticker, previousInfo->date);
         if (s.dividend <= 0 || s.close == 0)
             continue;
         m_Trades_TickerID.append(reinvest);
@@ -401,7 +401,7 @@ void nav::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
     if (!tickers.contains(cashAccount))
         return;
 
-    prices::securityPrice cashSecurity = prices::dailyPriceInfo(tickers.value(cashAccount).ticker, previousInfo->date);
+    prices::securityPrice cashSecurity = prices::instance().dailyPriceInfo(tickers.value(cashAccount).ticker, previousInfo->date);
     if (cashSecurity.close == 0)
         return;
 
@@ -417,7 +417,7 @@ void nav::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio
 {
     foreach(const globals::dynamicTradeInfo &d, trades)
     {
-        prices::securityPrice s = previousInfo ? prices::dailyPriceInfo(d.ticker, previousInfo->date) : prices::securityPrice();
+        prices::securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.ticker, previousInfo->date) : prices::securityPrice();
         if (d.trade.price == -1 && s.close == 0)
             continue;
 

@@ -4,8 +4,6 @@ prices::prices()
 {
     queries *sql = new queries("prices");
 
-    // load cash securities first so prices are inserted properly
-    loadCashSecurities(sql->executeResultSet(queries::getCashSecurities()));
     loadPrices(query_Price, sql->executeResultSet(queries::getPrices()));
     loadPrices(query_Dividend, sql->executeResultSet(queries::getDividends()));
     loadPrices(query_Split, sql->executeResultSet(queries::getSplits()));
@@ -99,18 +97,4 @@ void prices::loadPrices(query_Type type, QSqlQuery *q)
     while (q->next());
 
     delete q;        
-}
-
-void prices::loadCashSecurities(QSqlQuery *q)
-{
-    if (!q)
-        return;
-
-    do
-    {
-        m_cashSecurities.insert(q->value(queries::getCashSecurities_Ticker).toString());
-    }
-    while (q->next());
-
-    delete q;
 }

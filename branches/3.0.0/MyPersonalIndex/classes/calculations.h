@@ -28,7 +28,7 @@ public:
     virtual void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; }
     virtual portfolioDailyInfo* portfolioValues(const int &date);
 
-    static double correlation(const QString &ticker1, const QString &ticker2, const int &startDate, const int &endDate);
+    static double correlation(const prices::securityPrices &price1, const prices::securityPrices &price2, const int &startDate, const int &endDate);
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 protected:

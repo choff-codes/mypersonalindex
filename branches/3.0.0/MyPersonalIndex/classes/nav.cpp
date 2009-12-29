@@ -52,7 +52,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     calculations::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
-    QMap<int, globals::navInfo> &currentPortfolioNAV = currentPortfolio->data.nav;
+    globals::navInfo &currentPortfolioNAV = currentPortfolio->data.nav;
     bool dividends = currentPortfolio->info.dividends;
 
     if (portfolioStartDate)
@@ -61,10 +61,10 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         m_NAV_Dates.append(*previousDate);
         m_NAV_Totalvalue.append(previousTotalValue);
         m_NAV_Nav.append(previousNAV);
-        currentPortfolioNAV.insert(*previousDate, globals::navInfo(previousNAV, previousTotalValue));
+        currentPortfolioNAV.insert(*previousDate, previousNAV, previousTotalValue);
     }
     else
-        previousNAV = currentPortfolio->data.nav.value(*previousDate).nav;
+        previousNAV = currentPortfolioNAV.nav(*previousDate);
 
     for (QList<int>::const_iterator currentDate = previousDate + 1; currentDate != m_dates.constEnd(); ++currentDate)
     {
@@ -86,7 +86,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         dailyActivity = info->costBasis - previousInfo->costBasis + info->commission;
         newNAV = calculations::change(newTotalValue, previousTotalValue, dailyActivity, dividends ? info->dividends : 0, previousNAV);
         m_NAV_Nav.append(newNAV);
-        currentPortfolioNAV.insert(date, globals::navInfo(newNAV, newTotalValue));
+        currentPortfolioNAV.insert(date, newNAV, newTotalValue);
 
         previousNAV = newNAV;
         previousTotalValue = newTotalValue;
@@ -163,10 +163,7 @@ void nav::deleteOldValues(globals::myPersonalIndex *currentPortfolio, const int 
                 ++trade;
     }
 
-    QMap<int, globals::navInfo> &currentPortfolionav = currentPortfolio->data.nav;
-    QMap<int, globals::navInfo>::iterator i = portfolioStartDate ? currentPortfolionav.begin() : currentPortfolionav.lowerBound(calculationDate);
-    while (i != currentPortfolionav.end())
-        i = currentPortfolionav.erase(i);
+    currentPortfolio->data.nav.clear(calculationDate);
 }
 
 QList<int> nav::getPortfolioTickerReinvestment(const int &portfolioID)
@@ -185,7 +182,7 @@ int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
     globals::myPersonalIndex *currentPortfolio = m_data.value(portfolioID);
 
     int lastNavDate = currentPortfolio->data.nav.isEmpty() ? -1 :
-        (--currentPortfolio->data.nav.constEnd()).key();
+        currentPortfolio->data.nav.lastDate();
     // check if the portfolio needs to be recalculated even before the mindate
     if (lastNavDate < calculationDate)
         calculationDate = lastNavDate + 1;

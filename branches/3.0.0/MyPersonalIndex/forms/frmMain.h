@@ -34,7 +34,16 @@ class frmMain : public QMainWindow
 
 public:
     frmMain(QWidget *parent = 0);
-    ~frmMain() { delete sql; qDeleteAll(m_portfolios); }
+    ~frmMain()
+    {
+        delete sql;
+        qDeleteAll(m_portfolios);
+        delete ui.holdings->model();
+        delete ui.aa->model();
+        delete ui.accounts->model();
+        delete ui.correlations->model();
+        delete ui.performance->model();
+    }
 
     bool databaseExists() { return sql; }
 

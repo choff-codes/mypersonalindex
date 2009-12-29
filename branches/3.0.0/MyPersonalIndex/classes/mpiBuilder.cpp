@@ -162,6 +162,8 @@ void mpiBuilder::loadPortfoliosTickers(QSqlQuery *q)
         sec.divReinvest = q->value(queries::getSecurity_DivReinvest).toBool();
         sec.cashAccount = q->value(queries::getSecurity_CashAccount).toBool();
         sec.includeInCalc = q->value(queries::getSecurity_IncludeInCalc).toBool();
+        if(sec.includeInCalc)
+            prices::instance().insertCashSecurity(sec.ticker);
         sec.hide = q->value(queries::getSecurity_Hide).toBool();
 
         int portfolioID = q->value(queries::getSecurity_PortfolioID).toInt();
@@ -291,11 +293,6 @@ void mpiBuilder::loadPortfoliosNAV(QSqlQuery *q)
 
     do
     {
-        globals::navInfo nav;
-
-        nav.nav = q->value(queries::getNAV_NAV).toDouble();
-        nav.totalValue = q->value(queries::getNAV_TotalValue).toDouble();
-
         int portfolioID = q->value(queries::getNAV_PortfolioID).toInt();
         if (portfolioID != current)
         {
@@ -303,7 +300,7 @@ void mpiBuilder::loadPortfoliosNAV(QSqlQuery *q)
             current = portfolioID;
         }
 
-       p->data.nav.insert(q->value(queries::getNAV_Date).toInt(), nav);
+       p->data.nav.insert(q->value(queries::getNAV_Date).toInt(), q->value(queries::getNAV_NAV).toDouble(), q->value(queries::getNAV_TotalValue).toDouble());
     }
     while(q->next());
 

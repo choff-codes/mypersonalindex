@@ -12,27 +12,27 @@ QVariant mainPerformanceModel::data(const QModelIndex &index, int role) const
             row = m_nav.count() - row - 1;
 
         int date = m_dates.at(row);
-        globals::navInfo nav = m_nav.value(date);
 
         switch (index.column())
         {
             case row_Date:
                 return QDate::fromJulianDay(date).toString(globals::shortDateFormat);
             case row_TotalValue:
-                return functions::doubleToLocalFormat(nav.totalValue);
+                //return functions::doubleToLocalFormat(nav.totalValue);
+                return functions::doubleToLocalFormat(m_nav.totalValue(date));
             case row_Index:
-                return functions::doubleToLocalFormat(nav.nav);
+                return functions::doubleToLocalFormat(m_nav.nav(date));
             case row_Change:
             case row_Gain:
             {
                 if (row == 0)
                     return QVariant();
 
-                globals::navInfo previousNav = m_nav.value(m_dates.at(row - 1));
-                if (previousNav.nav == 0)
+                double previousNav = m_nav.nav(m_dates.at(row - 1));
+                if (previousNav == 0)
                     return QVariant();
 
-                return functions::doubleToPercentage((100 * nav.nav / (index.column() == row_Change ? previousNav.nav : m_startValue)) - 100);
+                return functions::doubleToPercentage((100 * m_nav.nav(date) / (index.column() == row_Change ? previousNav : m_startValue)) - 100);
             }
         };
     }

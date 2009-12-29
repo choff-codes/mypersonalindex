@@ -13,13 +13,6 @@ public:
         return m_instance;
     }
 
-    struct securityPrices
-    {
-        QMap<int, double> splits;
-        QMap<int, double> dividends;
-        QMap<int, double> prices;
-    };
-
     struct securityPrice
     {
         double close;
@@ -30,9 +23,19 @@ public:
         securityPrice(double p_close, double p_dividend, double p_split): close(p_close), dividend(p_dividend), split(p_split) {}
     };
 
-    typedef QHash<QString, securityPrices> securityPriceList;
+    struct securityPrices
+    {
+        QMap<int, double> splits;
+        QMap<int, double> dividends;
+        QMap<int, double> prices;
 
-    securityPriceList priceList() { return m_securityPriceList; }
+        double price(const int &date) const { return prices.value(date, 0); }
+        double dividend(const int &date) const { return dividends.value(date, 0); }
+        double split(const int &date) const { return splits.value(date, 1); }
+        securityPrice dailyPriceInfo(const int &date) const { return securityPrice(price(date), dividend(date), split(date)); }
+    };
+
+    typedef QHash<QString, securityPrices> securityPriceList;
 
     QStringList symbols() { return m_securityPriceList.keys(); }
     QList<int> dates() { return m_dates; }
@@ -44,10 +47,11 @@ public:
     QMap<int, double> price(const QString &ticker);
     QMap<int, double> dividend(const QString &ticker);
     QMap<int, double> split(const QString &ticker);
+    securityPrices history(const QString &ticker) { return m_securityPriceList.value(ticker); }
 
-    double price(const QString &ticker, const int &date) { return price(ticker).value(date, 1); }
-    double dividend(const QString &ticker, const int &date) { return dividend(ticker).value(date, 0); }
-    double split(const QString &ticker, const int &date) { return split(ticker).value(date, 1); }
+    double price(const QString &ticker, const int &date) { return history(ticker).price(date); }
+    double dividend(const QString &ticker, const int &date) { return history(ticker).dividend(date); }
+    double split(const QString &ticker, const int &date) { return history(ticker).split(date); }
 
     int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
     int firstDate(const QString &ticker);
@@ -55,7 +59,10 @@ public:
     int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
     int lastDate(const QString &ticker);
 
-    securityPrice dailyPriceInfo(const QString &ticker, const int &date) { return securityPrice(price(ticker, date), dividend(ticker, date), split(ticker, date)); }
+    securityPrice dailyPriceInfo(const QString &ticker, const int &date) { return history(ticker).dailyPriceInfo(date); }
+
+    void insertCashSecurity(const QString &ticker) { m_cashSecurities.insert(ticker); }
+    bool isCashSecurity(const QString &ticker) { return m_cashSecurities.contains(ticker); }
 
 private:
     securityPriceList m_securityPriceList;

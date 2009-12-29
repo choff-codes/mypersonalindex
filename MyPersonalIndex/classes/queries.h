@@ -83,9 +83,6 @@ public:
 
     static queryInfo* getVersion();
 
-    enum { getDates_Date };
-    static queryInfo* getDates();
-
     enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
     static queryInfo* getNAV();
 
@@ -148,9 +145,6 @@ public:
     static queryInfo* getPrices();
     static queryInfo* getSplits();
     static queryInfo* getDividends();
-    
-    enum { getCashSecurities_Ticker };
-    static queryInfo* getCashSecurities();
 
 protected:
     QSqlDatabase m_db;

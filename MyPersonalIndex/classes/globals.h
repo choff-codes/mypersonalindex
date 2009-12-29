@@ -382,13 +382,33 @@ public:
         }
     };
 
-    struct navInfo
+    class navInfo
     {
-        double nav;
-        double totalValue;
+        private:
+            QMap<int, double> m_nav;
+            QMap<int, double> m_totalValue;
 
-        navInfo(): nav(0), totalValue(0) {}
-        navInfo(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
+        public:
+            void insert(const int &date, const double &nav, const double &totalValue) { m_nav.insert(date, nav); m_totalValue.insert(date, totalValue); }
+            double nav(const int &date) const { return m_nav.value(date); }
+            double totalValue(const int &date) const { return m_totalValue.value(date); }
+            QMap<int, double> navHistory() const { return m_nav; }
+            QList<int> dates() const { return m_nav.keys(); }
+            int count() const { return m_nav.count(); }
+            bool isEmpty() const { return m_nav.isEmpty(); }
+            int firstDate() const { return m_nav.constBegin().key(); }
+            int lastDate() const { return (m_nav.constEnd() - 1).key(); }
+            void clear() { m_nav.clear(); m_totalValue.clear(); }
+            void clear(int startDate)
+            {
+                QMap<int, double>::iterator i = m_nav.lowerBound(startDate);
+                while (i != m_nav.end())
+                    i = m_nav.erase(i);
+
+                i = m_totalValue.lowerBound(startDate);
+                while (i != m_totalValue.end())
+                    i = m_totalValue.erase(i);
+            }
     };
 
     typedef QMap<int, QList<trade> > tradeList;
@@ -400,7 +420,7 @@ public:
         QMap<int, account> acct;
         QList<int> stats;
         tradeList trades;
-        QMap<int, navInfo> nav;
+        navInfo nav;
     };
 
     struct myPersonalIndex

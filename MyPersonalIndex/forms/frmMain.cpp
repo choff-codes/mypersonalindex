@@ -9,7 +9,6 @@
 #include "frmStat.h"
 #include "frmColumns.h"
 #include "frmSort.h"
-#include "mpiViewModelBase.h"
 #include "mainPerformanceModel.h"
 #include "mpiBuilder.h"
 #include "mainCorrelationModel.h"
@@ -277,6 +276,7 @@ void frmMain::loadPortfolio()
         loadPortfolioChart();
         loadPortfolioAA();
         loadPortfolioAcct();
+        loadPortfolioCorrelation();
     }
 }
 
@@ -287,6 +287,7 @@ void frmMain::resetCalendars(const int &date)
 
     resetCalendar(end, start, ui.holdingsDateDropDown);
     resetCalendar(end, start, ui.chartStartDateDropDown, ui.chartEndDateDropDown);
+    resetCalendar(end, start, ui.correlationsStartDateDropDown, ui.correlationsEndDateDropDown);
 }
 
 void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *calendar)
@@ -409,13 +410,26 @@ void frmMain::loadPortfolioCorrelation()
             correlations.insert(s.ticker, QHash<QString, double>());
 
     QStringList symbols = correlations.keys();
-    for(int i = 0; i < symbols.count(); ++i)
+    correlations.insert(m_currentPortfolio->info.description, QHash<QString, double>());
+    symbols.insert(0, m_currentPortfolio->info.description);    
+    
+    int count = symbols.count();
+    for(int i = 0; i < count; ++i)
     {
         QString ticker1 = symbols.at(i);
-        for (int x = i + 1; x < symbols.count(); ++x)
+        QHash<QString, double> &list = correlations[ticker1];
+        prices::securityPrices s1;
+
+        if (i == 0) // always current portfolio
+            s1.prices = m_currentPortfolio->data.nav.navHistory();
+        else
+            s1 = prices::instance().history(ticker1);
+
+        for (int x = i + 1; x < count; ++x)
         {
             QString ticker2 = symbols.at(x);
-            correlations[ticker1].insert(ticker2, calculations::correlation(ticker1, ticker2, startDate, endDate));
+            prices::securityPrices s2 = prices::instance().history(ticker2);
+            list.insert(ticker2, calculations::correlation(s1, s2, startDate, endDate));
         }
     }
 
@@ -427,7 +441,7 @@ void frmMain::loadPortfolioCorrelation()
 
 void frmMain::loadPortfolioChart()
 {
-    const QMap<int, globals::navInfo> &nav = m_currentPortfolio->data.nav;
+    const QMap<int, double> &nav = m_currentPortfolio->data.nav.navHistory();
 
     ui.chart->setTitle(m_currentPortfolio->info.description);
     if (m_chartInfo.curve)
@@ -446,16 +460,16 @@ void frmMain::loadPortfolioChart()
     int startDate = ui.chartStartDateDropDown->date().toJulianDay();
     int endDate = ui.chartEndDateDropDown->date().toJulianDay();
     double startValue = -1;
-    for(QMap<int, globals::navInfo>::const_iterator i = nav.lowerBound(startDate); i != nav.end(); ++i)
+    for(QMap<int, double>::const_iterator i = nav.lowerBound(startDate); i != nav.end(); ++i)
     {
         if (i.key() > endDate)
             break;
 
         if (startValue == -1)
-            startValue = i.value().nav;
+            startValue = i.value();
 
         m_chartInfo.xData.append(i.key());
-        m_chartInfo.yData.append(i.value().nav / startValue * 100 - 100);
+        m_chartInfo.yData.append(i.value() / startValue * 100 - 100);
     }
 
     if (m_chartInfo.xData.count() != 0)
@@ -720,7 +734,7 @@ bool frmMain::invalidPortfolioNAVDates()
     foreach(globals::myPersonalIndex *p, m_portfolios)
     {
         if (p != m_currentPortfolio)
-            if (!p->data.nav.isEmpty() && p->data.nav.constBegin().key() < m_dates.first())
+            if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < m_dates.first())
                 return true;
     }
     return false;

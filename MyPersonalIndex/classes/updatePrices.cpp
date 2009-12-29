@@ -43,13 +43,11 @@ void updatePrices::run()
 
 void updatePrices::updateMissingPrices()
 {
-    const prices::securityPriceList list = prices::instance().priceList();
     QList<int> dates = prices::instance().dates();
 
-    for(prices::securityPriceList::const_iterator i = list.constBegin(); i != list.constEnd(); ++i)
+    foreach(const QString &ticker, prices::instance().symbols())
     {
-        QString ticker = i.key();
-        QMap<int, double> prices = i.value().prices;
+        QMap<int, double> prices = prices::instance().price(ticker);
 
         if (prices.count() <= 2)
             continue;
@@ -64,6 +62,7 @@ void updatePrices::updateMissingPrices()
 
             if (z.key() != date)
             {
+                prices::instance().insertPrice(ticker, date, (z - 1).value());
                 m_pricesTicker.append(ticker);
                 m_pricesDate.append(date);
                 m_pricesPrice.append((z - 1).value());

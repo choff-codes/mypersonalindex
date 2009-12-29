@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "queries.h"
 #include "globals.h"
+#include "prices.h"
 
 class mpiBuilder
 {

@@ -222,14 +222,6 @@ queries::queryInfo* queries::getVersion()
     );
 }
 
-queries::queryInfo* queries::getDates()
-{
-    return new queryInfo(
-        "SELECT DISTINCT Date FROM ClosingPrices ORDER BY Date",
-        QList<parameter>()
-    );
-}
-
 queries::queryInfo* queries::getNAV()
 {
     return new queryInfo(
@@ -578,12 +570,3 @@ queries::queryInfo* queries::getSplits()
         QList<parameter>()
     );
 }
-
-queries::queryInfo* queries::getCashSecurities()
-{
-    return new queryInfo(
-        "SELECT Ticker FROM Tickers WHERE CashAccount = 1",
-        QList<parameter>()
-    );
-}
-

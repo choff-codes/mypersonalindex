@@ -32,7 +32,16 @@ private:
     int m_TradesPosition;
     calculations m_calculations;
 
-    typedef QList<globals::dynamicTradeInfo> dynamicTradeList;
+    struct dynamicTradeInfo
+    {
+        QString ticker;
+        int tickerID;
+        globals::dynamicTrade trade;
+
+        dynamicTradeInfo(const QString &p_ticker, const int &p_tickerID, const globals::dynamicTrade &p_trade): ticker(p_ticker), tickerID(p_tickerID), trade(p_trade) {}
+    };
+
+    typedef QList<dynamicTradeInfo> dynamicTradeList;
     typedef QMap<int, dynamicTradeList> dynamicTrades;
 
     void clearVariantLists();

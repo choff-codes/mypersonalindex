@@ -52,7 +52,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     calculations::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
-    globals::navInfo &currentPortfolioNAV = currentPortfolio->data.nav;
+    navInfo::navInfo &currentPortfolioNAV = currentPortfolio->data.nav;
     bool dividends = currentPortfolio->info.dividends;
 
     if (portfolioStartDate)
@@ -262,7 +262,7 @@ nav::dynamicTrades nav::getPortfolioTrades(const int &portfolioID, const int &mi
                         break;
                 }
                 foreach(const int &i, dates)
-                    trades[i].append(globals::dynamicTradeInfo(s.ticker, s.id, d));
+                    trades[i].append(dynamicTradeInfo(s.ticker, s.id, d));
             }
 
     return trades;
@@ -412,7 +412,7 @@ void nav::insertPortfolioCashTrade(const globals::myPersonalIndex *currentPortfo
 
 void nav::insertPortfolioTrades(const globals::myPersonalIndex *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades)
 {
-    foreach(const globals::dynamicTradeInfo &d, trades)
+    foreach(const dynamicTradeInfo &d, trades)
     {
         prices::securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.ticker, previousInfo->date) : prices::securityPrice();
         if (d.trade.price == -1 && s.close == 0)

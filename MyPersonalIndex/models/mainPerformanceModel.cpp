@@ -16,7 +16,7 @@ QVariant mainPerformanceModel::data(const QModelIndex &index, int role) const
         switch (index.column())
         {
             case row_Date:
-                return QDate::fromJulianDay(date).toString(globals::shortDateFormat);
+                return QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate);
             case row_TotalValue:
                 //return functions::doubleToLocalFormat(nav.totalValue);
                 return functions::doubleToLocalFormat(m_nav.totalValue(date));

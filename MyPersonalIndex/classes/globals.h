@@ -2,16 +2,11 @@
 #define GLOBALS_H
 
 #include <QtGui>
+#include "navInfo.h"
 
 class globals
 {
 public:
-    static const QString shortDateFormat; // see cpp
-    static const char signifyPortfolio = '`';
-    static const char stockPrices = 'd';
-    static const char stockDividends = 'v';
-    static const int nonLeapYear = 2009;
-
     enum avgShareCalc { calc_FIFO, calc_LIFO, calc_AVG };
     enum outputFormat { format_Currency, format_Percentage, format_Decimal, format_Integer, format_ShortDate, format_LongDate, format_None };
     enum statVariables { stat_Portfolio, stat_PortfolioName, stat_StartDate, stat_EndDate, stat_PreviousDay, stat_TotalValue };
@@ -121,7 +116,7 @@ public:
             switch (f)
             {
                 case tradeFreq_Once:
-                    return date != 0 ? QDate::fromJulianDay(date).toString(shortDateFormat) : "";
+                    return date != 0 ? QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate) : "";
                 case tradeFreq_Daily:
                     return "Market Days";
                 case tradeFreq_Weekly:
@@ -382,34 +377,7 @@ public:
         }
     };
 
-    class navInfo
-    {
-        private:
-            QMap<int, double> m_nav;
-            QMap<int, double> m_totalValue;
 
-        public:
-            void insert(const int &date, const double &nav, const double &totalValue) { m_nav.insert(date, nav); m_totalValue.insert(date, totalValue); }
-            double nav(const int &date) const { return m_nav.value(date); }
-            double totalValue(const int &date) const { return m_totalValue.value(date); }
-            QMap<int, double> navHistory() const { return m_nav; }
-            QList<int> dates() const { return m_nav.keys(); }
-            int count() const { return m_nav.count(); }
-            bool isEmpty() const { return m_nav.isEmpty(); }
-            int firstDate() const { return m_nav.constBegin().key(); }
-            int lastDate() const { return (m_nav.constEnd() - 1).key(); }
-            void clear() { m_nav.clear(); m_totalValue.clear(); }
-            void clear(int startDate)
-            {
-                QMap<int, double>::iterator i = m_nav.lowerBound(startDate);
-                while (i != m_nav.end())
-                    i = m_nav.erase(i);
-
-                i = m_totalValue.lowerBound(startDate);
-                while (i != m_totalValue.end())
-                    i = m_totalValue.erase(i);
-            }
-    };
 
     typedef QMap<int, QList<trade> > tradeList;
 
@@ -431,24 +399,7 @@ public:
         myPersonalIndex(const globals::portfolio &p): info(p) {}
     };
 
-    struct dynamicTradeInfo
-    {
-        QString ticker;
-        int tickerID;
-        dynamicTrade trade;
 
-        dynamicTradeInfo(const QString &p_ticker, const int &p_tickerID, const dynamicTrade &p_trade): ticker(p_ticker), tickerID(p_tickerID), trade(p_trade) {}
-    };
-
-    struct securityPriceInfo
-    {
-        QMap<int, double> splits;
-        QMap<int, double> dividends;
-        QMap<int, double> prices;
-    };
-
-    typedef QHash<QString, QMap<int, double> > splitData;
-    typedef QHash<QString, securityPriceInfo> securityPrices;
 };
 
 #endif // GLOBALS_H

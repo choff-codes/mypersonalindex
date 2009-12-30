@@ -171,7 +171,7 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
     if (minDate == QDate::currentDate().toJulianDay())
         return true;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(globals::stockPrices))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
     if (!lines)
     {
         m_updateFailures.append(ticker);
@@ -208,7 +208,7 @@ void updatePrices::getDividends(const QString &ticker, const int &minDate, int &
     if (minDate == QDate::currentDate().toJulianDay())
         return;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(globals::stockDividends))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockDividends))));
 
     if (lines && lines->count() > 2)
     {

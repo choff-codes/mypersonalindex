@@ -11,7 +11,7 @@ public:
 
     QwtText label(double v) const
     {
-        return QDate::fromJulianDay((int)v).toString(globals::shortDateFormat);
+        return QDate::fromJulianDay((int)v).toString(Qt::SystemLocaleShortDate);
     }
 };
 

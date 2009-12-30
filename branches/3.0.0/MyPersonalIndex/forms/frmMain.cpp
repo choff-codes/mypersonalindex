@@ -286,6 +286,8 @@ void frmMain::resetCalendars(const int &date)
     int end = date < start ? start : date;
 
     resetCalendar(end, start, ui.holdingsDateDropDown);
+    resetCalendar(end, start, ui.aaDateDropDown);
+    resetCalendar(end, start, ui.accountsDateDropDown);
     resetCalendar(end, start, ui.chartStartDateDropDown, ui.chartEndDateDropDown);
     resetCalendar(end, start, ui.correlationsStartDateDropDown, ui.correlationsEndDateDropDown);
 }

@@ -5,7 +5,7 @@ QDateEdit* functions::createDateEdit(QWidget* parent)
     QDateEdit *d = new QDateEdit(parent);
     d->setDate(QDate::currentDate());
     d->setCalendarPopup(true);
-    d->setDisplayFormat(globals::shortDateFormat);
+    d->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
     return d;
 }
 

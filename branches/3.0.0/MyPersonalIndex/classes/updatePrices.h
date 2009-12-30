@@ -32,6 +32,9 @@ private:
     QVariantList m_splitDate, m_splitTicker, m_splitRatio;
     nav *m_nav;
 
+    static const char stockPrices = 'd';
+    static const char stockDividends = 'v';
+
     struct updateInfo
     {
         QString ticker;

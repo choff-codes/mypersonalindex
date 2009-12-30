@@ -111,7 +111,7 @@ void frmTrade::freqChange(int index)
             ui.deDate->setDate(QDate(2009, 1, 1));
             break;
         case globals::tradeFreq_Once:
-            ui.deDate->setDisplayFormat(globals::shortDateFormat);
+            ui.deDate->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
             ui.deDate->clearMinimumDate();
             ui.deDate->clearMaximumDate();
             ui.deDate->setCalendarPopup(true);

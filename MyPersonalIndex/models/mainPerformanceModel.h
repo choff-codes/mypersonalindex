@@ -2,7 +2,6 @@
 #define MAINPERFORMANCEMODEL_H
 
 #include <QtGui>
-#include "globals.h"
 #include "functions.h"
 #include "cachedCalculations.h"
 

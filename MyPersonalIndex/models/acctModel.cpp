@@ -45,14 +45,14 @@ QVariant acctModel::headerData (int section, Qt::Orientation orientation, int ro
     return QVariant();
 }
 
-QString acctModel::internalCopy(const globals::account &item)
+QString acctModel::internalCopy(const account &item)
 {
     return QString("%1\t%2\t%3").arg(item.description, item.taxRate < 0 ? "None" : functions::doubleToPercentage(item.taxRate), QString(item.taxDeferred ? "Yes": "No"));
 }
 
-globals::account acctModel::internalPaste(const QStringList &value, bool *ok)
+account acctModel::internalPaste(const QStringList &value, bool *ok)
 {
-    globals::account item;
+    account item;
 
     if (value.count() != 3)
     {

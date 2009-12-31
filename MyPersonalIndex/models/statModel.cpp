@@ -1,7 +1,7 @@
 #include "statModel.h"
 
-statModel::statModel(const QList<globals::statistic> &values, const QList<int> &selected, const int &cols, QTableView *parent, QDialog *dialog):
-        mpiEditModelBase<globals::statistic, frmStatEdit>(values, cols, parent, dialog)
+statModel::statModel(const QList<statistic> &values, const QList<int> &selected, const int &cols, QTableView *parent, QDialog *dialog):
+        mpiEditModelBase<statistic, frmStatEdit>(values, cols, parent, dialog)
 {
     qSort(m_list);
     for(int i = 0; i < selected.count(); ++i)
@@ -38,7 +38,7 @@ QList<int> statModel::getSelected()
 
 Qt::ItemFlags statModel::flags(const QModelIndex &index) const
 {
-    return mpiEditModelBase<globals::statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
+    return mpiEditModelBase<statistic, frmStatEdit>::flags(index) | Qt::ItemIsUserCheckable;
 }
 
 QVariant statModel::data(const QModelIndex &index, int role) const

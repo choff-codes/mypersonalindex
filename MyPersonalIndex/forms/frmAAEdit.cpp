@@ -1,6 +1,6 @@
 #include "frmAAEdit.h"
 
-frmAAEdit::frmAAEdit(QWidget *parent, const globals::assetAllocation &aa): QDialog(parent), m_aa(aa)
+frmAAEdit::frmAAEdit(QWidget *parent, const assetAllocation &aa): QDialog(parent), m_aa(aa)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit AA");

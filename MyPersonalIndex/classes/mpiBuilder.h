@@ -3,16 +3,15 @@
 
 #include <QtGui>
 #include "queries.h"
-#include "globals.h"
 #include "prices.h"
 
 class mpiBuilder
 {
 public:
-    QMap<int, globals::myPersonalIndex*> loadPortfolios();
+    QMap<int, portfolio*> loadPortfolios();
 
 private:
-    QMap<int, globals::myPersonalIndex*> m_portfolios;
+    QMap<int, portfolio*> m_portfolios;
 
     void loadPortfoliosInfo(QSqlQuery *q);
     void loadPortfoliosTickers(QSqlQuery *q);

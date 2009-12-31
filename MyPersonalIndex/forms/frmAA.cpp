@@ -1,6 +1,6 @@
 #include "frmAA.h"
 
-frmAA::frmAA(const int &portfolioID, const QMap<int, globals::assetAllocation> &aa, const queries &sql, QWidget *parent):
+frmAA::frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, const queries &sql, QWidget *parent):
     QDialog(parent), m_map(aa), m_sql(sql), m_portfolio(portfolioID)
 {
     ui.setupUI(this, "Asset Allocation", false);
@@ -24,14 +24,14 @@ void frmAA::connectSlots()
     connect(ui.pasteShortcut, SIGNAL(activated()), m_model, SLOT(paste()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(m_model, SIGNAL(saveItem(globals::assetAllocation*)), this, SLOT(saveItem(globals::assetAllocation*)));
-    connect(m_model, SIGNAL(deleteItem(globals::assetAllocation)), this, SLOT(deleteItem(globals::assetAllocation)));
+    connect(m_model, SIGNAL(saveItem(assetAllocation*)), this, SLOT(saveItem(assetAllocation*)));
+    connect(m_model, SIGNAL(deleteItem(assetAllocation)), this, SLOT(deleteItem(assetAllocation)));
     connect(ui.table, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
 }
 
 void frmAA::accept()
 {
-    QMap<int, globals::assetAllocation> returnValues = m_model->saveList(m_map);
+    QMap<int, assetAllocation> returnValues = m_model->saveList(m_map);
 
     if (returnValues != m_map)
     {
@@ -42,14 +42,14 @@ void frmAA::accept()
         QDialog::reject();
 }
 
-void frmAA::saveItem(globals::assetAllocation *aa)
+void frmAA::saveItem(assetAllocation *aa)
 {
     m_sql.executeNonQuery(queries::updateAA(m_portfolio, (*aa)));
     if (aa->id == -1)
         aa->id = m_sql.getIdentity();
 }
 
-void frmAA::deleteItem(const globals::assetAllocation &aa)
+void frmAA::deleteItem(const assetAllocation &aa)
 {
     m_sql.executeNonQuery(queries::deleteItem(queries::table_AA, aa.id));
 }

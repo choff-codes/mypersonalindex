@@ -2,7 +2,7 @@
 #include "viewDelegates.h"
 #include "calculations.h"
 
-frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data, const globals::security& security, const queries &sql, QWidget *parent):
+frmTicker::frmTicker(const int &portfolioID, const portfolioData &data, const security& security, const queries &sql, QWidget *parent):
         QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_sql(sql)
 {
     ui.setupUI(this);
@@ -20,11 +20,11 @@ frmTicker::frmTicker(const int &portfolioID, const globals::portfolioData &data,
 
 void frmTicker::loadDropDowns()
 {
-    foreach(const globals::assetAllocation &value, m_data.aa)
+    foreach(const assetAllocation &value, m_data.aa)
         ui.cmbAA->addItem(value.description, value.id);
 
     ui.cmbAcct->addItem("(None)", -1);
-    foreach(const globals::account &value, m_data.acct)
+    foreach(const account &value, m_data.acct)
         ui.cmbAcct->addItem(value.description, value.id);
 }
 
@@ -47,8 +47,8 @@ void frmTicker::connectSlots()
     connect(ui.btnAAAdd, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui.btnAADelete, SIGNAL(clicked()), m_modelAA, SLOT(deleteSelected()));
     connect(m_modelAA, SIGNAL(updateHeader()), this, SLOT(updateAAPercentage()));
-    connect(m_modelTrade, SIGNAL(saveItem(globals::dynamicTrade*)), this, SLOT(saveItem(globals::dynamicTrade*)));
-    connect(m_modelTrade, SIGNAL(deleteItem(globals::dynamicTrade)), this, SLOT(deleteItem(globals::dynamicTrade)));
+    connect(m_modelTrade, SIGNAL(saveItem(trade*)), this, SLOT(saveItem(trade*)));
+    connect(m_modelTrade, SIGNAL(deleteItem(trade)), this, SLOT(deleteItem(trade)));
 }
 
 void frmTicker::loadSecurity()
@@ -151,7 +151,7 @@ void frmTicker::accept()
 
     QVariantList tickerID, aaID, percent;
 
-    foreach(const globals::securityAATarget &aa, m_security.aa)
+    foreach(const aaTarget &aa, m_security.aa)
     {
         tickerID.append(m_security.id);
         aaID.append(aa.id);
@@ -178,16 +178,16 @@ void frmTicker::resetExpense()
     ui.sbExpense->setValue(-1);
 }
 
-void frmTicker::saveItem(globals::dynamicTrade *trade)
+void frmTicker::saveItem(trade *t)
 {
-    m_sql.executeNonQuery(queries::updateSecurityTrade(m_security.id, (*trade)));
-    if (trade->id == -1)
-        trade->id = m_sql.getIdentity();
+    m_sql.executeNonQuery(queries::updateSecurityTrade(m_security.id, (*t)));
+    if (t->id == -1)
+        t->id = m_sql.getIdentity();
 }
 
-void frmTicker::deleteItem(const globals::dynamicTrade &trade)
+void frmTicker::deleteItem(const trade &t)
 {
-    m_sql.executeNonQuery(queries::deleteItem(queries::table_TickersTrades, trade.id));
+    m_sql.executeNonQuery(queries::deleteItem(queries::table_TickersTrades, t.id));
 }
 
 void frmTicker::customContextMenuRequested(const QPoint&)

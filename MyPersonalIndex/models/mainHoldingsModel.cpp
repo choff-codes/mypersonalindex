@@ -1,4 +1,5 @@
 #include "mainHoldingsModel.h"
+#include "calculations.h"
 
 //enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
 const QStringList holdingsRow::columns = QStringList() << "Active" << "Symbol" << "Cash" << "Closing Price" << "Shares" << "Avg Price\nPer Share"
@@ -9,11 +10,11 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double);
 
-holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const globals::security &s, const calculations::portfolioDailyInfo *info, const QMap<int, globals::account> &accounts, const QString &sort)
+holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QString &sort)
 {
     holdingsRow *row = new holdingsRow(sort);
 
-    globals::securityValue value = info->tickerValue.value(s.id);
+    calculations::securityValue value = info->tickerValue.value(s.id);
 
     //row_Active
     row->values.append((int)s.includeInCalc);

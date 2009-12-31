@@ -16,8 +16,8 @@ public:
     holdingsRow(const QString &sort): baseRow(sort) {}
 
     QVariant columnType(int column) const { return columnsType.at(column); }
-    static holdingsRow* getHoldingsRow(const globals::security &s, const calculations::portfolioDailyInfo *info,
-        const QMap<int, globals::account> &accounts, const QString &sort);
+    static holdingsRow* getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info,
+        const QMap<int, account> &accounts, const QString &sort);
     static QMap<int, QString> fieldNames();
 };
 

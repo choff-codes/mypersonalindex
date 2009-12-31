@@ -3,7 +3,7 @@
 
 #include <QtGui>
 #include "frmTrade_UI.h"
-#include "globals.h"
+#include "security.h"
 
 class frmTrade : public QDialog
 {
@@ -11,14 +11,14 @@ class frmTrade : public QDialog
 
 public:
 
-    const globals::dynamicTrade& getReturnValues() const { return m_trade; }
+    const trade& getReturnValues() const { return m_trade; }
 
-    frmTrade(QWidget *parent = 0, const globals::dynamicTrade &trade = globals::dynamicTrade());
+    frmTrade(QWidget *parent = 0, const trade &trade = trade());
 
 private:
 
     frmTrade_UI ui;
-    globals::dynamicTrade m_trade;
+    trade m_trade;
     QString m_oldPrice; // store txtPrice to restore if chkPrice is checked
 
     void connectSlots();

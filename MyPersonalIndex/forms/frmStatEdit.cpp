@@ -1,6 +1,6 @@
 #include "frmStatEdit.h"
 
-frmStatEdit::frmStatEdit(QWidget *parent, const globals::statistic &stat): QDialog(parent), m_stat(stat)
+frmStatEdit::frmStatEdit(QWidget *parent, const statistic &stat): QDialog(parent), m_stat(stat)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Statistic");
@@ -18,7 +18,7 @@ void frmStatEdit::accept()
 {
     m_stat.description = ui.txtDesc->text();
     m_stat.sql = ui.txtSql->toPlainText();
-    m_stat.format = (globals::outputFormat)ui.cmbFormat->currentIndex();
+    m_stat.format = (statistic::outputFormat)ui.cmbFormat->currentIndex();
 
     QDialog::accept();
 }

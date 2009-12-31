@@ -2,7 +2,6 @@
 #define FUNCTIONS_H
 
 #include <QtGui>
-#include "globals.h"
 
 class functions
 {

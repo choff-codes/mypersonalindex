@@ -2,7 +2,6 @@
 #define MAINCORRELATIONMODEL_H
 
 #include <QtGui>
-#include "globals.h"
 #include "functions.h"
 
 class mainCorrelationModel: public QAbstractTableModel

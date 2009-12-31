@@ -3,20 +3,20 @@
 
 #include <QtGui>
 #include "frmAcctEdit_UI.h"
-#include "globals.h"
+#include "account.h"
 
 class frmAcctEdit : public QDialog
 {
     Q_OBJECT
 
 public:
-    const globals::account& getReturnValues() const { return m_acct; }
+    const account& getReturnValues() const { return m_acct; }
 
-    frmAcctEdit(QWidget *parent = 0, const globals::account &acct = globals::account());
+    frmAcctEdit(QWidget *parent = 0, const account &acct = account());
 
 private:
     frmAcctEdit_UI ui;
-    globals::account m_acct;
+    account m_acct;
 
 private slots:
     void accept();

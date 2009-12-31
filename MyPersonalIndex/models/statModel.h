@@ -1,17 +1,16 @@
 #ifndef STATMODEL_H
 #define STATMODEL_H
 
-#include "globals.h"
 #include "functions.h"
 #include "mpiEditModelBase.h"
 #include "frmStatEdit.h"
 
-class statModel : public mpiEditModelBase<globals::statistic, frmStatEdit>
+class statModel : public mpiEditModelBase<statistic, frmStatEdit>
 {
     Q_OBJECT
 
 public:
-    statModel(const QList<globals::statistic> &values, const QList<int> &selected, const int &cols, QTableView *parent = 0, QDialog *dialog = 0);
+    statModel(const QList<statistic> &values, const QList<int> &selected, const int &cols, QTableView *parent = 0, QDialog *dialog = 0);
 
     QList<int> getSelected();
 
@@ -24,9 +23,9 @@ private:
     bool setData (const QModelIndex &index, const QVariant &value, int role);
 
     // not used
-    QString internalCopy(const globals::statistic&) { return QString(); }
+    QString internalCopy(const statistic&) { return QString(); }
     // not used
-    globals::statistic internalPaste(const QStringList&, bool*) {  return globals::statistic(); }
+    statistic internalPaste(const QStringList&, bool*) {  return statistic(); }
 
 public slots:
     inline void addNew() { addItem(); }
@@ -39,8 +38,8 @@ public slots:
     void itemDeleted(const QModelIndex&, int start, int end);
 
 signals:
-    void saveItem(globals::statistic *stat);
-    void deleteItem(const globals::statistic& stat);
+    void saveItem(statistic *stat);
+    void deleteItem(const statistic& stat);
 };
 
 #endif // STATMODEL_H

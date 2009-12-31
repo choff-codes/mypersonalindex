@@ -3,7 +3,7 @@
 #include "frmTicker.h"
 #include <QtGui>
 
-frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog(parent), m_trade(trade)
+frmTrade::frmTrade(QWidget *parent, const trade &trade): QDialog(parent), m_trade(trade)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Trade");
@@ -13,7 +13,7 @@ frmTrade::frmTrade(QWidget *parent, const globals::dynamicTrade &trade): QDialog
 
     // cannot pass cash accounts in constructor since it does not match the format
     // of mpiModelBase edit function
-    foreach(const globals::security &sec, static_cast<frmTicker*>(parent)->getCashAccounts())
+    foreach(const security &sec, static_cast<frmTicker*>(parent)->getCashAccounts())
         // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
         // but now will show up as no cash account selected
         if (sec.cashAccount) // && sec.id != id)
@@ -36,7 +36,7 @@ void frmTrade::connectSlots()
 
 void frmTrade::loadTrade()
 {
-    ui.cmbType->setCurrentIndex((int)m_trade.tradeType);
+    ui.cmbType->setCurrentIndex((int)m_trade.type);
     if (m_trade.value >= 0)
         ui.txtShares->setText(QString::number(m_trade.value, 'f', 4));
     if (m_trade.price >= 0)
@@ -82,12 +82,12 @@ void frmTrade::togglePrice(bool checked)
 
 void frmTrade::accept()
 {
-    m_trade.tradeType = (globals::dynamicTradeType)ui.cmbType->currentIndex();
+    m_trade.type = (trade::tradeType)ui.cmbType->currentIndex();
     m_trade.value = ui.txtShares->text().toDouble();
     m_trade.price = ui.chkPrice->isChecked() && !ui.txtPrice->text().isEmpty() ? ui.txtPrice->text().toDouble() : -1;
     m_trade.commission = !ui.txtCommission->text().isEmpty() ? ui.txtCommission->text().toDouble() : -1;
     m_trade.cashAccount = ui.cmbCash->itemData(ui.cmbCash->currentIndex()).toInt();
-    m_trade.frequency = (globals::dynamicTradeFreq)ui.cmbFreq->currentIndex();
+    m_trade.frequency = (trade::tradeFreq)ui.cmbFreq->currentIndex();
     m_trade.date = ui.deDate->isEnabled() ? ui.deDate->date().toJulianDay() : 0;
     m_trade.startDate = ui.deStarting->isEnabled() ? ui.deStarting->date().toJulianDay() : 0;
     m_trade.endDate = ui.deEnding->isEnabled() ? ui.deEnding->date().toJulianDay() : 0;
@@ -98,70 +98,70 @@ void frmTrade::accept()
 void frmTrade::freqChange(int index)
 {
     ui.deDate->setEnabled(true);
-    switch ((globals::dynamicTradeFreq)index)
+    switch ((trade::tradeFreq)index)
     {
-        case globals::tradeFreq_Daily:
+        case trade::tradeFreq_Daily:
             ui.deDate->setDisabled(true);
             break;
-        case globals::tradeFreq_Monthly:
+        case trade::tradeFreq_Monthly:
             ui.deDate->setDisplayFormat("dd");
             ui.deDate->setMinimumDate(QDate(2009, 1, 1));
             ui.deDate->setMaximumDate(QDate(2009, 1, 31));
             ui.deDate->setCalendarPopup(false);
             ui.deDate->setDate(QDate(2009, 1, 1));
             break;
-        case globals::tradeFreq_Once:
+        case trade::tradeFreq_Once:
             ui.deDate->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
             ui.deDate->clearMinimumDate();
             ui.deDate->clearMaximumDate();
             ui.deDate->setCalendarPopup(true);
             ui.deDate->setDate(QDate::currentDate());
             break;
-        case globals::tradeFreq_Weekly:
+        case trade::tradeFreq_Weekly:
             ui.deDate->setDisplayFormat("dddd");
             ui.deDate->setMinimumDate(QDate(2009, 1, 5));
             ui.deDate->setMaximumDate(QDate(2009, 1, 9));
             ui.deDate->setCalendarPopup(false);
             ui.deDate->setDate(QDate(2009, 1, 5));
             break;
-        case globals::tradeFreq_Yearly:
+        case trade::tradeFreq_Yearly:
             ui.deDate->setDisplayFormat("dd MMM");
             ui.deDate->setMinimumDate(QDate(2009, 1, 1));
             ui.deDate->setMaximumDate(QDate(2009, 12, 31));
             ui.deDate->setCalendarPopup(false);
             ui.deDate->setDate(QDate(2009, 1, 1));
             break;
-        case globals::tradeFreq_Count:
+        case trade::tradeFreq_Count:
             break;
     }
 }
 
 void frmTrade::typeChange(int index)
 {
-    switch ((globals::dynamicTradeType)index)
+    switch ((trade::tradeType)index)
     {
-        case globals::tradeType_Purchase:
+        case trade::tradeType_Purchase:
             ui.shares->setText("Shares:");
             break;
-        case globals::tradeType_Sale:
+        case trade::tradeType_Sale:
             ui.shares->setText("Shares:");
             break;
-        case globals::tradeType_DivReinvest:
+        case trade::tradeType_DivReinvest:
             ui.shares->setText("Shares:");
             break;
-        case globals::tradeType_Interest:
+        case trade::tradeType_Interest:
             ui.shares->setText("Amount ($):");
             break;
-        case globals::tradeType_Fixed:
+        case trade::tradeType_Fixed:
             ui.shares->setText("Amount ($):");
             break;
-        case globals::tradeType_TotalValue:
+        case trade::tradeType_TotalValue:
             ui.shares->setText("% of Value:");
             break;
-        case globals::tradeType_AA:
+        case trade::tradeType_AA:
             ui.shares->setText("% of Target:");
             break;
-        case globals::tradeType_Count:
+        case trade::tradeType_Count:
             break;
     }
 }

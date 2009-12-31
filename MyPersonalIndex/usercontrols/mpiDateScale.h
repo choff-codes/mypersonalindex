@@ -3,7 +3,6 @@
 
 #include <QtGui>
 #include <qwt_scale_draw.h>
-#include "globals.h"
 
 class mpiDateScale: public QwtScaleDraw
 {

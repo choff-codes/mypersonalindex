@@ -1,5 +1,4 @@
 #include "mpiEditModelBase.h"
-#include "globals.h"
 #include "frmStatEdit.h"
 #include "frmAcctEdit.h"
 #include "frmAAEdit.h"
@@ -228,7 +227,7 @@ bool mpiEditModelBase<T, editForm>::isContiguous(const QList<int> &values, const
 }
 
 // define the template for each implementation to prevent linking errors
-template class mpiEditModelBase<globals::statistic, frmStatEdit>;
-template class mpiEditModelBase<globals::account, frmAcctEdit>;
-template class mpiEditModelBase<globals::assetAllocation, frmAAEdit>;
-template class mpiEditModelBase<globals::dynamicTrade, frmTrade>;
+template class mpiEditModelBase<statistic, frmStatEdit>;
+template class mpiEditModelBase<account, frmAcctEdit>;
+template class mpiEditModelBase<assetAllocation, frmAAEdit>;
+template class mpiEditModelBase<trade, frmTrade>;

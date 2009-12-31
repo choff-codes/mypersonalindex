@@ -1,5 +1,4 @@
 #include "updatePrices.h"
-#include "globals.h"
 #include "queries.h"
 #include <QtNetwork>
 #include <QtSql>
@@ -13,8 +12,8 @@ void updatePrices::run()
 
     emit statusUpdate("Updating Prices");
 
-    foreach(globals::myPersonalIndex* p, m_data)
-        foreach(const globals::security &sec, p->data.tickers)
+    foreach(portfolio* p, m_data)
+        foreach(const security &sec, p->data.tickers)
             if (!tickers.contains(sec.ticker) && !sec.cashAccount)
                 tickers.insert(sec.ticker, updateInfo(sec.ticker, m_dataStartDate));
 

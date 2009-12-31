@@ -10,35 +10,35 @@ QVariant tickerTradeModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole)
     {
-        globals::dynamicTrade trade = m_list.at(index.row());
+        trade t = m_list.at(index.row());
         switch(index.column())
         {
             case 0:
-                return globals::dynamicTrade::tradeTypeToString(trade.tradeType);
+                return trade::tradeTypeToString(t.type);
                 break;
             case 1:
-                return globals::dynamicTrade::valueToString(trade.tradeType, trade.value);
+                return trade::valueToString(t.type, t.value);
                 break;
             case 2:
-                return trade.price < 0 ? "Prev Close" : functions::doubleToCurrency(trade.price);
+                return t.price < 0 ? "Prev Close" : functions::doubleToCurrency(t.price);
                 break;
             case 3:
-                return trade.commission < 0 ? "" : functions::doubleToCurrency(trade.commission);
+                return t.commission < 0 ? "" : functions::doubleToCurrency(t.commission);
                 break;
             case 4:
-                return m_cashAccounts.contains(trade.cashAccount) ? m_cashAccounts.value(trade.cashAccount).ticker : "";
+                return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).ticker : "";
                 break;
             case 5:
-                return globals::dynamicTrade::frequencyToString(trade.frequency);
+                return trade::frequencyToString(t.frequency);
                 break;
             case 6:
-                return globals::dynamicTrade::dateToString(trade.frequency, trade.date);
+                return trade::dateToString(t.frequency, t.date);
                 break;
             case 7:
-                return trade.startDate != 0 ? QDate::fromJulianDay(trade.startDate).toString(Qt::SystemLocaleShortDate) : "";
+                return t.startDate != 0 ? QDate::fromJulianDay(t.startDate).toString(Qt::SystemLocaleShortDate) : "";
                 break;
             case 8:
-                return trade.endDate != 0 ? QDate::fromJulianDay(trade.endDate).toString(Qt::SystemLocaleShortDate) : "";
+                return t.endDate != 0 ? QDate::fromJulianDay(t.endDate).toString(Qt::SystemLocaleShortDate) : "";
                 break;
         }
     }
@@ -85,18 +85,18 @@ QVariant tickerTradeModel::headerData (int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-QString tickerTradeModel::internalCopy(const globals::dynamicTrade &item)
+QString tickerTradeModel::internalCopy(const trade &item)
 {
     return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
-           QString::number((int)item.tradeType), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
+           QString::number((int)item.type), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
            functions::doubleToLocalFormat(item.commission), QString::number(item.cashAccount),
            QString::number((int)item.frequency), QString::number(item.date),
            QString::number(item.startDate), QString::number(item.endDate));
 }
 
-globals::dynamicTrade tickerTradeModel::internalPaste(const QStringList &value, bool *ok)
+trade tickerTradeModel::internalPaste(const QStringList &value, bool *ok)
 {
-    globals::dynamicTrade item;
+    trade item;
 
     if (value.count() != 9)
     {
@@ -105,8 +105,8 @@ globals::dynamicTrade tickerTradeModel::internalPaste(const QStringList &value, 
     }
 
     int i = value.at(0).toInt(ok);
-    if (*ok && i < globals::tradeType_Count)
-        item.tradeType = (globals::dynamicTradeType)i;
+    if (*ok && i < trade::tradeType_Count)
+        item.type = (trade::tradeType)i;
 
     if (*ok)
         item.value = value.at(1).toDouble(ok);
@@ -123,8 +123,8 @@ globals::dynamicTrade tickerTradeModel::internalPaste(const QStringList &value, 
     if (*ok)
     {
         int i = value.at(5).toInt(ok);
-        if (*ok && i < globals::tradeFreq_Count)
-            item.frequency = (globals::dynamicTradeFreq)i;
+        if (*ok && i < trade::tradeFreq_Count)
+            item.frequency = (trade::tradeFreq)i;
     }
 
     if (*ok)

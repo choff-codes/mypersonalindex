@@ -17,28 +17,28 @@ calculations::portfolioDailyInfo* cachedCalculations::portfolioValues(const int 
     return info;
 }
 
-cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, const globals::assetAllocation &aa)
+cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &aa)
 {
     dailyInfo info(date);
 
-    foreach(const globals::security &s, m_portfolio->data.tickers)
+    foreach(const security &s, m_portfolio->data.tickers)
     {
         bool included = false;
 
         if (aa.id == -1 and s.aa.isEmpty())
         {
             included = true;
-            globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
             info.totalValue += sv.totalValue;
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
         }
         else
-            foreach(const globals::securityAATarget &target, s.aa)
+            foreach(const aaTarget &target, s.aa)
                 if (target.id == aa.id)
                 {
                     included = true;
-                    globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+                    securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
                     info.totalValue += sv.totalValue * target.target / 100;
                     info.costBasis += sv.costBasis;
                     info.taxLiability += sv.taxLiability;
@@ -51,14 +51,14 @@ cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, cons
     return info;
 }
 
-cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, const globals::account &acct)
+cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, const account &acct)
 {
     dailyInfo info(date);
 
-    foreach(const globals::security &s,  m_portfolio->data.tickers)
+    foreach(const security &s,  m_portfolio->data.tickers)
         if (acct.id == s.account)
         {
-            globals::securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
             info.totalValue += sv.totalValue;
             info.taxLiability += sv.taxLiability;
             info.costBasis += sv.costBasis;
@@ -71,17 +71,17 @@ cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, co
 QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDate)
 {
     QMap<int, double> returnValues;
-    const globals::tradeList &trades = m_portfolio->data.trades;
-    const QMap<int, globals::security> &tickers = m_portfolio->data.tickers;
-    globals::avgShareCalc calcType = m_portfolio->info.costCalc;
+    const portfolioData::executedTradeList &trades = m_portfolio->data.executedTrades;
+    const QMap<int, security> &tickers = m_portfolio->data.tickers;
+    portfolioInfo::avgPriceCalculation calcType = m_portfolio->info.avgPriceCalc;
 
-    for(globals::tradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
+    for(portfolioData::executedTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
         // get ticker info
         int tickerID = i.key();
-        globals::security ticker = tickers.value(tickerID);
+        security ticker = tickers.value(tickerID);
         // get all trades for this ticker
-        const QList<globals::trade> &existingTrades = i.value();
+        const QList<executedTrade> &existingTrades = i.value();
         int count = existingTrades.count();
         // set up calculation variables
         QList<sharePricePair> filteredTrades;
@@ -92,11 +92,11 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
 
         for(int x = 0; x < count; ++x)
         {
-            globals::trade t = existingTrades.at(x);
+            executedTrade t = existingTrades.at(x);
             if (t.date > calculationDate) // trade date outside of calculation date
                 break;
 
-            if (calcType == globals::calc_AVG && t.shares < 0) // avg price averages only positive trades
+            if (calcType == portfolioInfo::avgPriceCalculation_AVG && t.shares < 0) // avg price averages only positive trades
                 continue;
 
             // check for any pre-existing splits
@@ -108,7 +108,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             {
                 while (t.shares != 0 && !filteredTrades.isEmpty()) // still shares to sell
                 {
-                    int z = calcType == globals::calc_LIFO ? filteredTrades.count() - 1 : 0;
+                    int z = calcType == portfolioInfo::avgPriceCalculation_LIFO ? filteredTrades.count() - 1 : 0;
                     sharePricePair pair = filteredTrades.at(z);
 
                     if (pair.first <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade

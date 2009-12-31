@@ -4,7 +4,7 @@ double tickerAAModel::totalPercentage()
 {
     double total = 0;
 
-    foreach(const globals::securityAATarget &aa, m_list)
+    foreach(const aaTarget &aa, m_list)
         total += aa.target;
 
     return total;
@@ -64,7 +64,7 @@ void tickerAAModel::addNew(const int &id)
 {
     beginInsertRows(QModelIndex(), m_list.count(), m_list.count());
     double total = totalPercentage();
-    m_list.append(globals::securityAATarget(id, total >= 100 ? 0 : 100 - total));
+    m_list.append(aaTarget(id, total >= 100 ? 0 : 100 - total));
     endInsertRows();
     emit updateHeader();
 }

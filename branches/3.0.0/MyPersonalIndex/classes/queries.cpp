@@ -1,5 +1,4 @@
 #include "queries.h"
-#include "globals.h"
 #include "functions.h"
 
 //enum { closingPrices_Date, closingPrices_Ticker, closingPrices_Price, closingPrices_Change };
@@ -126,12 +125,12 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
     query->exec();
     delete q;
 
-    if (query->lastError().text() != " ")
-    {
-        QString s = query->lastError().text();
-        QString s2 = query->lastQuery();
-        s.append("");
-    }
+//    if (query->lastError().text() != " ")
+//    {
+//        QString s = query->lastError().text();
+//        QString s2 = query->lastQuery();
+//        s.append("");
+//    }
 
     if (query->isActive() && query->first())
         return query;
@@ -230,7 +229,7 @@ queries::queryInfo* queries::getNAV()
     );
 }
 
-queries::queryInfo* queries::updateSettings(const globals::settings &s)
+queries::queryInfo* queries::updateSettings(const settings &s)
 {
     QString sql = "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate, TickersIncludeDividends = :TickersIncludeDividends,"
             " LastPortfolio = :LastPortfolio, Version = :Version, WindowState = :WindowState";
@@ -279,7 +278,7 @@ queries::queryInfo* queries::getAA()
     );
 }
 
-queries::queryInfo* queries::updateAA(const int &portfolioID, const globals::assetAllocation &aa)
+queries::queryInfo* queries::updateAA(const int &portfolioID, const assetAllocation &aa)
 {
     if(aa.id == -1) // insert new
     {
@@ -312,7 +311,7 @@ queries::queryInfo* queries::getAcct()
     );
 }
 
-queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::account &acct)
+queries::queryInfo* queries::updateAcct(const int &portfolioID, const account &acct)
 {
     if(acct.id == -1) // insert new
     {
@@ -339,7 +338,7 @@ queries::queryInfo* queries::updateAcct(const int &portfolioID, const globals::a
     }
 }
 
-queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
+queries::queryInfo* queries::updatePortfolio(const portfolioInfo& p)
 {
     QList<parameter> params;
     params
@@ -347,7 +346,7 @@ queries::queryInfo* queries::updatePortfolio(const globals::portfolio& p)
         << parameter(":StartValue", p.startValue)
         << parameter(":AAThreshold", p.aaThreshold)
         << parameter(":ThresholdMethod", (int)p.aaThresholdMethod)
-        << parameter(":CostCalc", (int)p.costCalc)
+        << parameter(":CostCalc", (int)p.avgPriceCalc)
         << parameter(":StartDate", p.origStartDate)
         << parameter(":Dividends", (int)p.dividends)
         << parameter(":HoldingsShowHidden", (int)p.holdingsShowHidden)
@@ -393,7 +392,7 @@ queries::queryInfo* queries::getPortfolio()
     );
 }
 
-queries::queryInfo* queries::updateStat(const globals::statistic &stat)
+queries::queryInfo* queries::updateStat(const statistic &stat)
 {
     if(stat.id == -1) // insert new
     {
@@ -435,7 +434,7 @@ queries::queryInfo* queries::getStatMapping()
     );
 }
 
-queries::queryInfo* queries::updateSecurity(const int &portfolioID, const globals::security& sec)
+queries::queryInfo* queries::updateSecurity(const int &portfolioID, const security& sec)
 {
     QList<parameter> params;
     params  << parameter(":PortfolioID", portfolioID)
@@ -476,11 +475,11 @@ queries::queryInfo* queries::getSecurity()
     );
 }
 
-queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const globals::dynamicTrade& trade)
+queries::queryInfo* queries::updateSecurityTrade(const int &tickerID, const trade& trade)
 {
     QList<parameter> params;
     params  << parameter(":TickerID", tickerID)
-            << parameter(":Type", (int)trade.tradeType)
+            << parameter(":Type", (int)trade.type)
             << parameter(":Value", trade.value)
             << parameter(":Price", functions::doubleToNull(trade.price))
             << parameter(":Commission", functions::doubleToNull(trade.commission))

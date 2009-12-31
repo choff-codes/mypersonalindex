@@ -1,8 +1,9 @@
 #ifndef TICKERAAMODEL_H
 #define TICKERAAMODEL_H
 
-#include "globals.h"
 #include "functions.h"
+#include "security.h"
+#include "assetAllocation.h"
 
 class tickerAAModel: public QAbstractTableModel
 {
@@ -10,18 +11,18 @@ class tickerAAModel: public QAbstractTableModel
 
 public:
 
-    QList<globals::securityAATarget> getList() { return m_list; }
+    QList<aaTarget> getList() { return m_list; }
 
-    tickerAAModel(const QList<globals::securityAATarget> &values, const QMap<int, globals::assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
+    tickerAAModel(const QList<aaTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     double totalPercentage();
 
 private:
-    const QMap<int, globals::assetAllocation> &m_aaValues;
+    const QMap<int, assetAllocation> &m_aaValues;
     QTableView *m_parent;
     int m_columns;
-    QList<globals::securityAATarget> m_list;
+    QList<aaTarget> m_list;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     int rowCount(const QModelIndex&) const { return m_list.count(); }

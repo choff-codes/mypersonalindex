@@ -1,9 +1,10 @@
 #ifndef UPDATEPRICES_H
 #define UPDATEPRICES_H
 
-#include "globals.h"
 #include "queries.h"
 #include "nav.h"
+#include "portfolio.h"
+#include "settings.h"
 #include <QtNetwork>
 
 class updatePrices: public QThread
@@ -11,7 +12,7 @@ class updatePrices: public QThread
     Q_OBJECT
 
 public:
-    updatePrices(const QMap<int, globals::myPersonalIndex*> &data, const globals::settings &settings, QObject *parent = 0):
+    updatePrices(const QMap<int, portfolio*> &data, const settings &settings, QObject *parent = 0):
         QThread(parent), m_sql(new queries("update")), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
 
     ~updatePrices() { delete m_sql; QSqlDatabase::removeDatabase("update"); }
@@ -23,7 +24,7 @@ signals:
 
 private:
     queries *m_sql;
-    const QMap<int, globals::myPersonalIndex*> &m_data;
+    const QMap<int, portfolio*> &m_data;
     bool m_downloadSplits;
     int m_dataStartDate;
     QStringList m_updateFailures;

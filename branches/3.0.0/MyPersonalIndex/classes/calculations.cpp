@@ -16,27 +16,27 @@ double calculations::splitRatio(const QString &ticker, const int &startDate, con
     return ratio;
 }
 
-globals::securityValue calculations::tickerValue(const globals::security &s, const int &date)
+calculations::securityValue calculations::tickerValue(const security::security &s, const int &date)
 {
-    globals::securityValue value;
+    securityValue value;
     prices::securityPrice price = prices::instance().dailyPriceInfo(s.ticker, date);
 
     double shares = 0;
-    foreach(const globals::trade &trade, m_portfolio->data.trades.value(s.id))
+    foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
     {
-        if (trade.date > date)
+        if (t.date > date)
             break;
 
-        shares += trade.shares * splitRatio(s.ticker, trade.date, date);
-        value.commission += trade.commission;
-        value.costBasis += trade.shares * trade.price;
+        shares += t.shares * splitRatio(s.ticker, t.date, date);
+        value.commission += t.commission;
+        value.costBasis += t.shares * t.price;
     }
 
     value.dividendAmount = shares * price.dividend;
     value.totalValue = shares * price.close;
     value.shares = shares;
 
-    globals::account acct = m_portfolio->data.acct.value(s.account);
+    account::account acct = m_portfolio->data.acct.value(s.account);
     if (acct.taxRate == -1)
         return value;
 
@@ -55,12 +55,12 @@ calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
 
     portfolioDailyInfo *info = new portfolioDailyInfo(date);
 
-    foreach(const globals::security &s, m_portfolio->data.tickers)
+    foreach(const security::security &s, m_portfolio->data.tickers)
     {
         if (!s.includeInCalc)
             continue;
 
-        globals::securityValue value = tickerValue(s, date);
+        securityValue value = tickerValue(s, date);
 
         info->tickerValue.insert(s.id, value);
         info->costBasis += value.costBasis;

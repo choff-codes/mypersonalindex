@@ -1,6 +1,6 @@
 #include "frmAcct.h"
 
-frmAcct::frmAcct(const int &portfolioID, const QMap<int, globals::account> &acct, const queries &sql, QWidget *parent):
+frmAcct::frmAcct(const int &portfolioID, const QMap<int, account> &acct, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_sql(sql), m_map(acct)
 {
     ui.setupUI(this, "Accounts", false);
@@ -24,14 +24,14 @@ void frmAcct::connectSlots()
     connect(ui.pasteShortcut, SIGNAL(activated()), m_model, SLOT(paste()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(m_model, SIGNAL(saveItem(globals::account*)), this, SLOT(saveItem(globals::account*)));
-    connect(m_model, SIGNAL(deleteItem(globals::account)), this, SLOT(deleteItem(globals::account)));
+    connect(m_model, SIGNAL(saveItem(account*)), this, SLOT(saveItem(account*)));
+    connect(m_model, SIGNAL(deleteItem(account)), this, SLOT(deleteItem(account)));
     connect(ui.table, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
 }
 
 void frmAcct::accept()
 {
-    QMap<int, globals::account> returnValues = m_model->saveList(m_map);
+    QMap<int, account> returnValues = m_model->saveList(m_map);
 
     if (returnValues != m_map)
     {
@@ -42,14 +42,14 @@ void frmAcct::accept()
         QDialog::reject();
 }
 
-void frmAcct::saveItem(globals::account *acct)
+void frmAcct::saveItem(account *acct)
 {
     m_sql.executeNonQuery(queries::updateAcct(m_portfolio, (*acct)));
     if (acct->id == -1)
         acct->id = m_sql.getIdentity();
 }
 
-void frmAcct::deleteItem(const globals::account &acct)
+void frmAcct::deleteItem(const account &acct)
 {
     m_sql.executeNonQuery(queries::deleteItem(queries::table_Acct, acct.id));
 }

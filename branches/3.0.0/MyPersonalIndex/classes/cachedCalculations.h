@@ -23,10 +23,10 @@ public:
     virtual ~cachedCalculations() {}
 
     portfolioDailyInfo* portfolioValues(const int &date);
-    void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; clearCache(); }
+    void setPortfolio(const portfolio *portfolio) { m_portfolio = portfolio; clearCache(); }
     void clearCache() { m_cache.clear(); }
-    dailyInfo aaValues(const int &date, const globals::assetAllocation &aa);
-    dailyInfo acctValues(const int &date, const globals::account &acct);
+    dailyInfo aaValues(const int &date, const assetAllocation &aa);
+    dailyInfo acctValues(const int &date, const account &acct);
 
 protected:
     QCache<int, portfolioDailyInfo> m_cache;

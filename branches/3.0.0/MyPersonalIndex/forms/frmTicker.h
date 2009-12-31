@@ -3,33 +3,35 @@
 
 #include <QtGui>
 #include "frmTicker_UI.h"
-#include "globals.h"
 #include "queries.h"
 #include "tickerAAModel.h"
 #include "tickerTradeModel.h"
 #include "functions.h"
+#include "security.h"
+#include "portfolio.h"
 
 class frmTicker : public QDialog
 {
     Q_OBJECT
 
 public:
+    enum tickerHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
 
-    const globals::security& getReturnValuesSecurity() const { return m_security; }
+    const security& getReturnValuesSecurity() const { return m_security; }
     const int& getReturnValuesMinDate() const { return m_minDate; }
     //const int &getTickerID() const { return m_security.id; }
-    const QMap<int, globals::security>& getCashAccounts() const { return m_data.tickers; }
+    const QMap<int, security::security>& getCashAccounts() const { return m_data.tickers; }
 
-    frmTicker(const int &portfolioID, const globals::portfolioData &data, const globals::security& security, const queries &sql, QWidget *parent = 0);
+    frmTicker(const int &portfolioID, const portfolioData &data, const security& security, const queries &sql, QWidget *parent = 0);
     ~frmTicker() { delete m_modelTrade; delete m_modelAA; }
 
 private:
 
     frmTicker_UI ui;
     int m_portfolioID;
-    const globals::portfolioData &m_data;
-    globals::security m_security;
-    globals::security m_securityOriginal;
+    const portfolioData &m_data;
+    security m_security;
+    security m_securityOriginal;
     const queries &m_sql;
     tickerTradeModel *m_modelTrade;
     tickerAAModel *m_modelAA;
@@ -45,8 +47,8 @@ private slots:
     void resetExpense();
     void addAA();
     void updateAAPercentage();
-    void saveItem(globals::dynamicTrade *trade);
-    void deleteItem(const globals::dynamicTrade &trade);
+    void saveItem(trade *trade);
+    void deleteItem(const trade &trade);
     void customContextMenuRequested(const QPoint&);
 };
 

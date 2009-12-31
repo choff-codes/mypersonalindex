@@ -16,7 +16,7 @@ public:
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static aaRow* getAARow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo,
-        const globals::assetAllocation &aa, const QString &sort);
+        const assetAllocation &aa, const QString &sort);
     static QMap<int, QString> fieldNames();
 };
 

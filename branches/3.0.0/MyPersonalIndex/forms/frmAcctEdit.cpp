@@ -1,6 +1,6 @@
 #include "frmAcctEdit.h"
 
-frmAcctEdit::frmAcctEdit(QWidget *parent, const globals::account &acct): QDialog(parent), m_acct(acct)
+frmAcctEdit::frmAcctEdit(QWidget *parent, const account &acct): QDialog(parent), m_acct(acct)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Account");

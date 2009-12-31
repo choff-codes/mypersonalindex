@@ -158,7 +158,7 @@ void frmMain::loadSettingsColumns()
 
     do
     {
-        m_settings.columns[q->value(queries::getSettingsColumns_ID).toInt()].append(
+        m_settings.viewableColumns[q->value(queries::getSettingsColumns_ID).toInt()].append(
                 q->value(queries::getSettingsColumns_ColumnID).toInt());
     }
     while (q->next());
@@ -175,11 +175,11 @@ void frmMain::loadStats()
 
     do
     {
-        globals::statistic stat;
+        statistic stat;
         stat.id = q->value(queries::getStat_ID).toInt();
         stat.description = q->value(queries::getStat_Description).toString();
         stat.sql = q->value(queries::getStat_SQL).toString();
-        stat.format = (globals::outputFormat)q->value(queries::getStat_Format).toInt();
+        stat.format = (statistic::outputFormat)q->value(queries::getStat_Format).toInt();
 
         m_statistics.insert(stat.id, stat);
     }
@@ -223,7 +223,7 @@ void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
     ui.mainPortfolioCombo->setUpdatesEnabled(false);
     ui.mainPortfolioCombo->clear();
 
-    foreach(globals::myPersonalIndex *p, m_portfolios)
+    foreach(portfolio *p, m_portfolios)
         ui.mainPortfolioCombo->addItem(p->info.description, p->info.id);
 
     int row = portfolioID == -1 ? -1 : ui.mainPortfolioCombo->findData(portfolioID);
@@ -320,13 +320,13 @@ void frmMain::loadPortfolioHoldings()
     calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
-    foreach(const globals::security &s, m_currentPortfolio->data.tickers)
+    foreach(const security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
             rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainHoldingsModel *model = new mainHoldingsModel(rows, m_settings.columns.value(globals::columnIDs_Holdings), info, ui.holdings);
+    mainHoldingsModel *model = new mainHoldingsModel(rows, m_settings.viewableColumns.value(settings::columns_Holdings), info, ui.holdings);
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -345,17 +345,17 @@ void frmMain::loadPortfolioAA()
 
     if (ui.aaShowBlank->isChecked())
     {
-        globals::assetAllocation aa;
+        assetAllocation aa;
         aa.description = "(Blank)";
         rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
     }
 
-    foreach(const globals::assetAllocation &aa, m_currentPortfolio->data.aa)
+    foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
         rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainAAModel *model = new mainAAModel(rows, m_settings.columns.value(globals::columnIDs_AA), info, m_currentPortfolio->info.aaThreshold, ui.aa);
+    mainAAModel *model = new mainAAModel(rows, m_settings.viewableColumns.value(settings::columns_AA), info, m_currentPortfolio->info.aaThreshold, ui.aa);
     ui.aa->setModel(model);
     ui.aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -374,17 +374,17 @@ void frmMain::loadPortfolioAcct()
 
     if (ui.accountsShowBlank->isChecked())
     {
-        globals::account acct;
+        account acct;
         acct.description = "(Blank)";
         rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
     }
 
-    foreach(const globals::account &acct, m_currentPortfolio->data.acct)
+    foreach(const account &acct, m_currentPortfolio->data.acct)
         rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainAcctModel *model = new mainAcctModel(rows, m_settings.columns.value(globals::columnIDs_Acct), info, ui.accounts);
+    mainAcctModel *model = new mainAcctModel(rows, m_settings.viewableColumns.value(settings::columns_Acct), info, ui.accounts);
     ui.accounts->setModel(model);
     ui.accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
@@ -407,7 +407,7 @@ void frmMain::loadPortfolioCorrelation()
     int endDate = ui.correlationsEndDateDropDown->date().toJulianDay();
 
     mainCorrelationModel::correlationList correlations;
-    foreach(const globals::security &s, m_currentPortfolio->data.tickers)
+    foreach(const security &s, m_currentPortfolio->data.tickers)
         if (ui.correlationsShowHidden->isChecked() || !s.hide)
             correlations.insert(s.ticker, QHash<QString, double>());
 
@@ -520,19 +520,19 @@ void frmMain::savePortfolio()
 void frmMain::savePortfolios()
 {
     //sql->getDatabase().transaction();
-    foreach(globals::myPersonalIndex *p, m_portfolios)
+    foreach(portfolio *p, m_portfolios)
         sql->executeNonQuery(queries::updatePortfolio(p->info));
     //sql->getDatabase().commit();
 }
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(globals::portfolio(), m_settings.dataStartDate, *sql, this);
+    frmPortfolio f(portfolioInfo(), m_settings.dataStartDate, *sql, this);
     if (f.exec())
     {
-        globals::portfolio p = f.getReturnValues();
+        portfolioInfo p = f.getReturnValues();
 
-        m_portfolios.insert(p.id, new globals::myPersonalIndex(p));
+        m_portfolios.insert(p.id, new portfolio(p));
         loadPortfolioDropDown(p.id);
         loadPortfolio();
     };
@@ -629,12 +629,12 @@ void frmMain::addTicker()
     int minDate = -1;
     do
     {
-        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, globals::security(), *sql, this);
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, security(), *sql, this);
         resultcode = f.exec();
         if (resultcode == QDialog::Accepted || resultcode == QDialog::Accepted + 1)
         {
             change = true;
-            globals::security s = f.getReturnValuesSecurity();
+            security s = f.getReturnValuesSecurity();
 
             m_currentPortfolio->data.tickers[s.id] = s;
             int currentMinDate = f.getReturnValuesMinDate();
@@ -700,7 +700,7 @@ void frmMain::deleteTicker()
     int minDate = -1;
     foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
-        globals::security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
+        security s = m_currentPortfolio->data.tickers.value(row->values.at(holdingsRow::row_ID).toInt());
         int newMinDate = s.firstTradeDate();
         if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
             minDate = newMinDate;
@@ -733,7 +733,7 @@ bool frmMain::invalidPortfolioNAVDates()
     if (m_dates.isEmpty())
         return true;
 
-    foreach(globals::myPersonalIndex *p, m_portfolios)
+    foreach(portfolio *p, m_portfolios)
     {
         if (p != m_currentPortfolio)
             if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < m_dates.first())
@@ -893,30 +893,30 @@ void frmMain::setSortDropDown(const QString &sort, QComboBox *dropDown)
 
 void frmMain::holdingsModifyColumns()
 {
-    frmColumns f(globals::columnIDs_Holdings, m_settings.columns.value(globals::columnIDs_Holdings), holdingsRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_Holdings, m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), *sql, this);
     if (f.exec())
     {
-        m_settings.columns[globals::columnIDs_Holdings] = f.getReturnValues();
+        m_settings.viewableColumns[settings::columns_Holdings] = f.getReturnValues();
         loadPortfolioHoldings();
     }
 }
 
 void frmMain::aaModifyColumns()
 {
-    frmColumns f(globals::columnIDs_AA, m_settings.columns.value(globals::columnIDs_AA), aaRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_AA, m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), *sql, this);
     if (f.exec())
     {
-        m_settings.columns[globals::columnIDs_AA] = f.getReturnValues();
+        m_settings.viewableColumns[settings::columns_AA] = f.getReturnValues();
         loadPortfolioAA();
     }
 }
 
 void frmMain::acctModifyColumns()
 {
-    frmColumns f(globals::columnIDs_Acct, m_settings.columns.value(globals::columnIDs_Acct), acctRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_Acct, m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), *sql, this);
     if (f.exec())
     {
-        m_settings.columns[globals::columnIDs_Acct] = f.getReturnValues();
+        m_settings.viewableColumns[settings::columns_Acct] = f.getReturnValues();
         loadPortfolioAcct();
     }
 }

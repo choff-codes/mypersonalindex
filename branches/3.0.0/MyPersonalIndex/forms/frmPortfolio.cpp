@@ -1,8 +1,7 @@
 #include <QtGui>
 #include "frmPortfolio.h"
-#include "globals.h"
 
-frmPortfolio::frmPortfolio(const globals::portfolio& p, const int &dataStartDate, const queries &sql, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p), m_sql(sql)
+frmPortfolio::frmPortfolio(const portfolioInfo& p, const int &dataStartDate, const queries &sql, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p), m_sql(sql)
 {
     ui.setupUI(this);    
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
@@ -28,7 +27,7 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.txtStartValue->setText(QString::number(m_portfolio.startValue));
     ui.sbAAThreshold->setValue(m_portfolio.aaThreshold);
     ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdMethod);
-    ui.cmbCostBasis->setCurrentIndex((int)m_portfolio.costCalc);
+    ui.cmbCostBasis->setCurrentIndex((int)m_portfolio.avgPriceCalc);
     if (m_portfolio.id != -1)
         ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.origStartDate));
 }
@@ -72,8 +71,8 @@ void frmPortfolio::accept()
     m_portfolio.description = ui.txtDesc->text();
     m_portfolio.dividends = ui.chkIncludeDiv->isChecked();
     m_portfolio.aaThreshold = ui.sbAAThreshold->value();
-    m_portfolio.aaThresholdMethod = (globals::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
-    m_portfolio.costCalc = (globals::avgShareCalc)ui.cmbCostBasis->currentIndex();
+    m_portfolio.aaThresholdMethod = (portfolioInfo::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
+    m_portfolio.avgPriceCalc = (portfolioInfo::avgPriceCalculation)ui.cmbCostBasis->currentIndex();
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.origStartDate = ui.dateStartDate->date().toJulianDay();
     m_portfolio.startDate = m_portfolio.origStartDate;

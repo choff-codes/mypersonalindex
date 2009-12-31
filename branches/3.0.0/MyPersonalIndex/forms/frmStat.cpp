@@ -1,6 +1,6 @@
 #include "frmStat.h"
 
-frmStat::frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent):
+frmStat::frmStat(const int &portfolioID, const QMap<int, statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent):
     QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList), m_sql(sql)
 {
     ui.setupUI(this, "Statistics", true);
@@ -24,13 +24,13 @@ void frmStat::connectSlots()
     connect(ui.btnMoveDown, SIGNAL(clicked()), m_model, SLOT(moveSelectedDown()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(m_model, SIGNAL(saveItem(globals::statistic*)), this, SLOT(saveItem(globals::statistic*)));
-    connect(m_model, SIGNAL(deleteItem(globals::statistic)), this, SLOT(deleteItem(globals::statistic)));
+    connect(m_model, SIGNAL(saveItem(statistic*)), this, SLOT(saveItem(statistic*)));
+    connect(m_model, SIGNAL(deleteItem(statistic)), this, SLOT(deleteItem(statistic)));
 }
 
 void frmStat::accept()
 {
-    QMap<int, globals::statistic> returnValues = m_model->saveList(m_map);
+    QMap<int, statistic> returnValues = m_model->saveList(m_map);
     QList<int> returnValuesSelected = m_model->getSelected();
 
     if (returnValues == m_map && returnValuesSelected == m_selected)
@@ -64,14 +64,14 @@ void frmStat::accept()
     QDialog::accept();
 }
 
-void frmStat::saveItem(globals::statistic *stat)
+void frmStat::saveItem(statistic *stat)
 {
     m_sql.executeNonQuery(queries::updateStat((*stat)));
     if (stat->id == -1)
         stat->id = m_sql.getIdentity();
 }
 
-void frmStat::deleteItem(const globals::statistic &stat)
+void frmStat::deleteItem(const statistic &stat)
 {
     m_sql.executeNonQuery(queries::deleteItem(queries::table_Stat, stat.id));
 }

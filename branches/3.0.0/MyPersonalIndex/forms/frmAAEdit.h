@@ -3,20 +3,20 @@
 
 #include <QtGui>
 #include "frmAAEdit_UI.h"
-#include "globals.h"
+#include "assetAllocation.h"
 
 class frmAAEdit : public QDialog
 {
     Q_OBJECT
 
 public:
-    const globals::assetAllocation& getReturnValues() const { return m_aa; }
+    const assetAllocation& getReturnValues() const { return m_aa; }
 
-    frmAAEdit(QWidget *parent = 0, const globals::assetAllocation &aa = globals::assetAllocation());
+    frmAAEdit(QWidget *parent = 0, const assetAllocation &aa = assetAllocation());
 
 private:
     frmAAEdit_UI ui;
-    globals::assetAllocation m_aa;
+    assetAllocation m_aa;
 
 private slots:
     void accept();

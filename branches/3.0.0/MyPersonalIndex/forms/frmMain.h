@@ -7,7 +7,6 @@
 #include <QtGui>
 #include <QtSql>
 #include "frmMain_UI.h"
-#include "globals.h"
 #include "functions.h"
 #include "queries.h"
 #include "updatePrices.h"
@@ -50,11 +49,11 @@ public:
 private:
     frmMain_UI ui;
     queries *sql;
-    QMap<int, globals::myPersonalIndex*> m_portfolios;
-    globals::myPersonalIndex *m_currentPortfolio;
-    globals::settings m_settings;
+    QMap<int, portfolio*> m_portfolios;
+    portfolio *m_currentPortfolio;
+    settings m_settings;
     QList<int> m_dates;
-    QMap<int, globals::statistic> m_statistics;
+    QMap<int, statistic> m_statistics;
     updatePrices *m_updateThread;
     nav *m_navThread;
     chartInfo m_chartInfo;

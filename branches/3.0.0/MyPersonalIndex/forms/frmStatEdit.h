@@ -3,20 +3,20 @@
 
 #include <QtGui>
 #include "frmStatEdit_UI.h"
-#include "globals.h"
+#include "statistic.h"
 
 class frmStatEdit : public QDialog
 {
     Q_OBJECT
 
 public:
-    const globals::statistic& getReturnValues() const { return m_stat; }
+    const statistic& getReturnValues() const { return m_stat; }
 
-    frmStatEdit(QWidget *parent = 0, const globals::statistic &stat = globals::statistic());
+    frmStatEdit(QWidget *parent = 0, const statistic &stat = statistic());
 
 private:
     frmStatEdit_UI ui;
-    globals::statistic m_stat;
+    statistic m_stat;
 
 private slots:
     void accept();

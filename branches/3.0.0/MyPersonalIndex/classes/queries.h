@@ -3,7 +3,12 @@
 
 #include <QtSql>
 #include <QtGui>
-#include "globals.h"
+#include "settings.h"
+#include "assetAllocation.h"
+#include "account.h"
+#include "statistic.h"
+#include "portfolio.h"
+#include "security.h"
 
 class queries
 {
@@ -93,17 +98,17 @@ public:
     enum { getSettingsColumns_ID, getSettingsColumns_ColumnID };
     static queryInfo* getSettingsColumns();
 
-    static queryInfo* updateSettings(const globals::settings&);
+    static queryInfo* updateSettings(const settings::settings&);
 
     enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
     static queryInfo* getAA();
 
-    static queryInfo* updateAA(const int &portfolioID, const globals::assetAllocation&);
+    static queryInfo* updateAA(const int &portfolioID, const assetAllocation::assetAllocation&);
 
     enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
     static queryInfo* getAcct();
 
-    static queryInfo* updateAcct(const int &portfolioID, const globals::account&);
+    static queryInfo* updateAcct(const int &portfolioID, const account::account&);
 
     enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
            getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
@@ -112,7 +117,7 @@ public:
            getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
     static queryInfo* getPortfolio();
 
-    static queryInfo* updatePortfolio(const globals::portfolio&);
+    static queryInfo* updatePortfolio(const portfolioInfo&);
 
     enum { getStat_ID, getStat_Description, getStat_SQL, getStat_Format };
     static queryInfo* getStat();
@@ -120,7 +125,7 @@ public:
     enum { getStatMapping_PortfolioID, getStatMapping_StatID };
     static queryInfo* getStatMapping();
 
-    static queryInfo* updateStat(const globals::statistic&);
+    static queryInfo* updateStat(const statistic::statistic&);
 
     enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
            getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
@@ -135,8 +140,8 @@ public:
     enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
     static queryInfo* getSecurityAA();
 
-    static queryInfo* updateSecurity(const int &portfolioID, const globals::security&);
-    static queryInfo* updateSecurityTrade(const int &tickerID, const globals::dynamicTrade&);
+    static queryInfo* updateSecurity(const int &portfolioID, const security&);
+    static queryInfo* updateSecurityTrade(const int &tickerID, const trade&);
 
     enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price, getTrade_Commission };
     static queryInfo* getTrade();

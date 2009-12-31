@@ -2,17 +2,31 @@
 #define CALCULATIONS_H
 
 #include <QtCore>
-#include "globals.h"
 #include "prices.h"
+#include "security.h"
+#include "account.h"
+#include "portfolio.h"
 
 class calculations
 {
 public:
+    struct securityValue
+    {
+        double totalValue;
+        double shares;
+        double costBasis;
+        double dividendAmount;
+        double commission;
+        double taxLiability;
+
+        securityValue(): totalValue(0), shares(0), costBasis(0), dividendAmount(0), commission(0), taxLiability(0) {}
+    };
+    
     struct portfolioDailyInfo
     {
         int date;
         QMap<int, double> avgPrices;
-        QMap<int, globals::securityValue> tickerValue;
+        QMap<int, securityValue> tickerValue;
         double totalValue;
         double costBasis;
         double dividends;
@@ -25,17 +39,17 @@ public:
     calculations(): m_portfolio(0) {}
     virtual ~calculations() {}
 
-    virtual void setPortfolio(const globals::myPersonalIndex *portfolio) { m_portfolio = portfolio; }
+    virtual void setPortfolio(const portfolio *p_portfolio) { m_portfolio = p_portfolio; }
     virtual portfolioDailyInfo* portfolioValues(const int &date);
 
     static double correlation(const prices::securityPrices &price1, const prices::securityPrices &price2, const int &startDate, const int &endDate);
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 protected:
-    const globals::myPersonalIndex *m_portfolio;
+    const portfolio *m_portfolio;
 
     double splitRatio(const QString &ticker, const int &startDate, const int &endDate);
-    globals::securityValue tickerValue(const globals::security &s, const int &date);
+    securityValue tickerValue(const security &s, const int &date);
 };
 
 

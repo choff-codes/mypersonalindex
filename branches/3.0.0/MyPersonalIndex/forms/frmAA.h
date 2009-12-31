@@ -4,7 +4,6 @@
 #include <QtGui>
 #include "functions.h"
 #include "frmTableViewBase_UI.h"
-#include "globals.h"
 #include "aaModel.h"
 #include "queries.h"
 
@@ -14,17 +13,17 @@ class frmAA : public QDialog
     Q_OBJECT
 
 public:
-    QMap<int, globals::assetAllocation> getReturnValues()
+    QMap<int, assetAllocation> getReturnValues()
     {
         return m_map;
     }
 
-    frmAA(const int &portfolioID, const QMap<int, globals::assetAllocation> &aa, const queries &sql, QWidget *parent = 0);
+    frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, const queries &sql, QWidget *parent = 0);
     ~frmAA() { delete m_model; }
 
 private:
     frmTableViewBase_UI ui;
-    QMap<int, globals::assetAllocation> m_map;
+    QMap<int, assetAllocation> m_map;
     const queries &m_sql;
     int m_portfolio;
     aaModel *m_model;
@@ -33,8 +32,8 @@ private:
 
 private slots:
     void accept();
-    void saveItem(globals::assetAllocation *aa);
-    void deleteItem(const globals::assetAllocation &aa);
+    void saveItem(assetAllocation *aa);
+    void deleteItem(const assetAllocation &aa);
     void customContextMenuRequested(const QPoint&);
 };
 

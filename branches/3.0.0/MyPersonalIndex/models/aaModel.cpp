@@ -35,7 +35,7 @@ QVariant aaModel::headerData (int section, Qt::Orientation orientation, int role
     if (section == 1)
     {
         double d = 0;
-        foreach(const globals::assetAllocation &aa, m_list)
+        foreach(const assetAllocation &aa, m_list)
             if (aa.target >= 0)
                 d += aa.target;
 
@@ -45,14 +45,14 @@ QVariant aaModel::headerData (int section, Qt::Orientation orientation, int role
     return QVariant();
 }
 
-QString aaModel::internalCopy(const globals::assetAllocation &item)
+QString aaModel::internalCopy(const assetAllocation &item)
 {
     return QString("%1\t%2").arg(item.description, item.target < 0 ? "None" : functions::doubleToPercentage(item.target));
 }
 
-globals::assetAllocation aaModel::internalPaste(const QStringList &value, bool *ok)
+assetAllocation aaModel::internalPaste(const QStringList &value, bool *ok)
 {
-    globals::assetAllocation item;
+    assetAllocation item;
 
     if (value.count() != 2)
     {

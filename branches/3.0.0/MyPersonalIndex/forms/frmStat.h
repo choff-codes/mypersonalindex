@@ -3,7 +3,6 @@
 
 #include <QtGui>
 #include "frmTableViewBase_UI.h"
-#include "globals.h"
 #include "statModel.h"
 #include "queries.h"
 
@@ -12,10 +11,10 @@ class frmStat : public QDialog
     Q_OBJECT
 
 public:
-    QMap<int, globals::statistic> getReturnValues_Map() { return m_map; }
+    QMap<int, statistic> getReturnValues_Map() { return m_map; }
     QList<int> getReturnValues_Selected() {  return m_selected; }
 
-    frmStat(const int &portfolioID, const QMap<int, globals::statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent = 0);
+    frmStat(const int &portfolioID, const QMap<int, statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent = 0);
     ~frmStat() { delete m_model; }
 
 private:
@@ -23,7 +22,7 @@ private:
 
     statModel *m_model;
     int m_portfolio;
-    QMap<int, globals::statistic> m_map;
+    QMap<int, statistic> m_map;
     QList<int> m_selected;
     const queries &m_sql;
 
@@ -31,8 +30,8 @@ private:
 
 private slots:
     void accept();
-    void saveItem(globals::statistic *stat);
-    void deleteItem(const globals::statistic &stat);
+    void saveItem(statistic *stat);
+    void deleteItem(const statistic &stat);
 };
 
 #endif // FRMSTAT_H

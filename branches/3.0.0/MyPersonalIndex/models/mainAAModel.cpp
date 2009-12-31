@@ -9,7 +9,7 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Int);
 
 
-aaRow::aaRow* aaRow::getAARow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, const globals::assetAllocation &aa, const QString &sort)
+aaRow::aaRow* aaRow::getAARow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, const assetAllocation &aa, const QString &sort)
 {
     aaRow *row = new aaRow(sort);
 

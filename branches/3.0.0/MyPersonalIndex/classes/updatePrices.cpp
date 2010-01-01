@@ -7,9 +7,6 @@ void updatePrices::run()
 {
     QMap<QString, updateInfo> tickers;
 
-    if (!m_sql->isOpen())
-        return;
-
     emit statusUpdate("Updating Prices");
 
     foreach(portfolio* p, m_data)
@@ -85,13 +82,15 @@ void updatePrices::insertUpdatesToObject()
 
 void updatePrices::insertUpdates()
 {
+    queries sql("update");
+
     if (!m_pricesDate.isEmpty())
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Date), m_pricesDate);
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), m_pricesTicker);
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), m_pricesPrice);
-        m_sql->executeTableUpdate(queries::table_ClosingPrices, tableValues);
+        sql.executeTableUpdate(queries::table_ClosingPrices, tableValues);
     }
 
     if (!m_divDate.isEmpty())
@@ -100,7 +99,7 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Date), m_divDate);
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), m_divTicker);
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), m_divAmount);
-        m_sql->executeTableUpdate(queries::table_Dividends, tableValues);
+        sql.executeTableUpdate(queries::table_Dividends, tableValues);
     }
 
     if (!m_splitDate.isEmpty())
@@ -109,7 +108,7 @@ void updatePrices::insertUpdates()
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Date), m_splitDate);
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), m_splitTicker);
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
-        m_sql->executeTableUpdate(queries::table_Splits, tableValues);
+        sql.executeTableUpdate(queries::table_Splits, tableValues);
     }
 }
 

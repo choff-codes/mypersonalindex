@@ -43,7 +43,7 @@ const QString queries::table_Trades = "Trades";
 
 queries::queries(const QString &databaseName): m_databaseName(databaseName)
 {
-    m_db = QSqlDatabase::addDatabase("QSQLITE", m_databaseName);
+    QSqlDatabase m_db = QSqlDatabase::addDatabase("QSQLITE", m_databaseName);
     m_db.setDatabaseName(getDatabaseLocation());
     m_db.open();
 
@@ -58,12 +58,24 @@ QString queries::getDatabaseLocation()
     return QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
 }
 
+//bool queries::isOpen() const
+//{
+//    bool open = QSqlDatabase::database(m_databaseName).isOpen();
+//    if (open)
+//    {
+//        QSqlQuery *q = executeResultSet(getVersion());
+//        open = q;
+//        delete q;
+//    }
+//    return open;
+//}
+
 void queries::executeNonQuery(queryInfo *q) const
 {
     if (!q)
         return;
 
-    QSqlQuery query(m_db);
+    QSqlQuery query(QSqlDatabase::database(m_databaseName));
     query.prepare(q->sql);
     foreach(const parameter &p, q->parameters)
         query.bindValue(p.name, p.value);
@@ -78,6 +90,7 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     if (tableName.isEmpty() || values.isEmpty())
         return;
 
+    QSqlDatabase m_db = QSqlDatabase::database(m_databaseName);
     m_db.transaction();
 
     QSqlQuery query(m_db);
@@ -116,7 +129,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
     if (!q)
         return 0;
 
-    QSqlQuery *query = new QSqlQuery(m_db);
+    QSqlQuery *query = new QSqlQuery(QSqlDatabase::database(m_databaseName));
     query->setForwardOnly(true);
     query->prepare(q->sql);
     foreach(const parameter &p, q->parameters)
@@ -140,7 +153,7 @@ QSqlQuery* queries::executeResultSet(queryInfo *q) const
 
 int queries::getIdentity() const
 {
-    QSqlQuery query("SELECT last_insert_rowid()", m_db);
+    QSqlQuery query("SELECT last_insert_rowid()", QSqlDatabase::database(m_databaseName));
 
     if (query.isActive() && query.first())
         return query.value(0).toInt();

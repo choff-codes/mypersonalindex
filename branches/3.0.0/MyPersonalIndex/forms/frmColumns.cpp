@@ -3,12 +3,6 @@
 frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QMap<int, QString> &columns, const queries &sql, QWidget *parent):
         QDialog(parent), m_id(id), m_selectedColumns(selectedColumns), m_columns(columns), m_sql(sql)
 {
-    if (!m_sql.isOpen())
-    {
-        this->reject();
-        return;
-    }
-
     ui.setupUI(this);
 
     for(QMap<int, QString>::const_iterator i = m_columns.constBegin(); i != m_columns.constEnd(); ++i)

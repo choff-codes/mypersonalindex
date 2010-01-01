@@ -2,20 +2,17 @@
 
 QMap<int, portfolio*> mpiBuilder::loadPortfolios()
 {
-    queries *sql = new queries("mpiBuilder");
+    queries sql("mpiBuilder");
 
-    loadPortfoliosInfo(sql->executeResultSet(queries::getPortfolio()));
-    loadPortfoliosAA(sql->executeResultSet(queries::getAA()));
-    loadPortfoliosAcct(sql->executeResultSet(queries::getAcct()));
-    loadPortfoliosStat(sql->executeResultSet(queries::getStatMapping()));
-    loadPortfoliosTickers(sql->executeResultSet(queries::getSecurity()));
-    loadPortfoliosTickersAA(sql->executeResultSet(queries::getSecurityAA()));
-    loadPortfoliosTickersTrades(sql->executeResultSet(queries::getSecurityTrade()));
-    loadPortfoliosTrades(sql->executeResultSet(queries::getTrade()));
-    loadPortfoliosNAV(sql->executeResultSet(queries::getNAV()));
-
-    delete sql;
-    QSqlDatabase::removeDatabase("mpiBuilder");
+    loadPortfoliosInfo(sql.executeResultSet(queries::getPortfolio()));
+    loadPortfoliosAA(sql.executeResultSet(queries::getAA()));
+    loadPortfoliosAcct(sql.executeResultSet(queries::getAcct()));
+    loadPortfoliosStat(sql.executeResultSet(queries::getStatMapping()));
+    loadPortfoliosTickers(sql.executeResultSet(queries::getSecurity()));
+    loadPortfoliosTickersAA(sql.executeResultSet(queries::getSecurityAA()));
+    loadPortfoliosTickersTrades(sql.executeResultSet(queries::getSecurityTrade()));
+    loadPortfoliosTrades(sql.executeResultSet(queries::getTrade()));
+    loadPortfoliosNAV(sql.executeResultSet(queries::getNAV()));
 
     return m_portfolios;
 }

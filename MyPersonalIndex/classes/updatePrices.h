@@ -13,9 +13,8 @@ class updatePrices: public QThread
 
 public:
     updatePrices(const QMap<int, portfolio*> &data, const settings &settings, QObject *parent = 0):
-        QThread(parent), m_sql(new queries("update")), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
+        QThread(parent), m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
 
-    ~updatePrices() { delete m_sql; QSqlDatabase::removeDatabase("update"); }
     static bool isInternetConnection();
 
 signals:
@@ -23,7 +22,6 @@ signals:
     void statusUpdate(const QString &message);
 
 private:
-    queries *m_sql;
     const QMap<int, portfolio*> &m_data;
     bool m_downloadSplits;
     int m_dataStartDate;

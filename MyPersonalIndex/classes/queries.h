@@ -68,10 +68,10 @@ public:
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
 
     queries(const QString &databaseName);
+    ~queries() { QSqlDatabase::removeDatabase(m_databaseName); }
 
     static QString getDatabaseLocation();
-    bool isOpen() const { bool open = m_db.isOpen(); if (open) { QSqlQuery *q = executeResultSet(getVersion()); open = q;  delete q; } return open;}
-    //QSqlDatabase getDatabase() const { return m_db; }
+    //bool isOpen() const;
 
     void executeNonQuery(queryInfo*) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
@@ -152,7 +152,6 @@ public:
     static queryInfo* getDividends();
 
 protected:
-    QSqlDatabase m_db;
     QString m_databaseName;
 };
 

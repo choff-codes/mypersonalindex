@@ -1,3 +1,4 @@
+#include <QtCore>
 #include "frmMain.h"
 #include "qtsingleapplication.h"
 
@@ -11,17 +12,18 @@ int main(int argc, char *argv[])
         return 0;
      }
 
+    QString location = queries::getDatabaseLocation();
+    if (!QFile::exists(location))
+        if (!QDir().mkpath(QFileInfo(location).absolutePath()) ||
+            !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
+        {
+            QMessageBox::critical(0, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
+            QApplication::quit();
+            return 0;
+        }
+
     frmMain mainForm;
-
     app.setActivationWindow(&mainForm);
-
-    if (mainForm.databaseExists())
-    {
-        mainForm.show();
-        return app.exec();
-    }
-    else
-        QApplication::quit();
-
-    return 0;
+    mainForm.show();
+    return app.exec();
 }

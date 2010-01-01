@@ -35,7 +35,6 @@ public:
     frmMain(QWidget *parent = 0);
     ~frmMain()
     {
-        delete sql;
         qDeleteAll(m_portfolios);
         delete ui.holdings->model();
         delete ui.aa->model();
@@ -44,11 +43,9 @@ public:
         delete ui.performance->model();
     }
 
-    bool databaseExists() { return sql; }
-
 private:
     frmMain_UI ui;
-    queries *sql;
+    queries m_sql;
     QMap<int, portfolio*> m_portfolios;
     portfolio *m_currentPortfolio;
     settings m_settings;

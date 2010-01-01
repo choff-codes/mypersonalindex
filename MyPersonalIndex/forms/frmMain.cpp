@@ -13,25 +13,8 @@
 #include "mpiBuilder.h"
 #include "mainCorrelationModel.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_sql(queries("main")), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
-    QString location = queries::getDatabaseLocation();
-    if (!QFile::exists(location))
-        if (!QDir().mkpath(QFileInfo(location).dir().absolutePath()) ||
-            !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))
-        {
-            QMessageBox::critical(this, "Error", "Cannot write to the user settings folder!", QMessageBox::Ok);
-        }
-
-    sql = new queries("main");
-    if (!sql->isOpen())
-    {
-        delete sql;
-        sql = 0;
-        QMessageBox::critical(this, "Error", "Cannot read user settings folder!", QMessageBox::Ok);
-        return;
-    }
-
     ui.setupUI(this);
 
     // do not use the database before this check
@@ -104,7 +87,7 @@ void frmMain::loadSettings()
 {
     checkVersion();
 
-    QSqlQuery *q = sql->executeResultSet(queries::getSettings());
+    QSqlQuery *q = m_sql.executeResultSet(queries::getSettings());
 
     if (!q)
         return;
@@ -151,7 +134,7 @@ void frmMain::loadSortDropDowns()
 
 void frmMain::loadSettingsColumns()
 {
-    QSqlQuery *q = sql->executeResultSet(queries::getSettingsColumns());
+    QSqlQuery *q = m_sql.executeResultSet(queries::getSettingsColumns());
 
     if (!q)
         return;
@@ -168,7 +151,7 @@ void frmMain::loadSettingsColumns()
 
 void frmMain::loadStats()
 {
-    QSqlQuery *q = sql->executeResultSet(queries::getStat());
+    QSqlQuery *q = m_sql.executeResultSet(queries::getStat());
 
     if (!q)
         return;
@@ -214,7 +197,7 @@ void frmMain::saveSettings()
     m_settings.windowSize = size();
     m_settings.windowLocation = pos();
     m_settings.state = isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState;
-    sql->executeNonQuery(queries::updateSettings(m_settings));
+    m_sql.executeNonQuery(queries::updateSettings(m_settings));
 }
 
 void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
@@ -521,13 +504,13 @@ void frmMain::savePortfolios()
 {
     //sql->getDatabase().transaction();
     foreach(portfolio *p, m_portfolios)
-        sql->executeNonQuery(queries::updatePortfolio(p->info));
+        m_sql.executeNonQuery(queries::updatePortfolio(p->info));
     //sql->getDatabase().commit();
 }
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(portfolioInfo(), m_settings.dataStartDate, *sql, this);
+    frmPortfolio f(portfolioInfo(), m_settings.dataStartDate, m_sql, this);
     if (f.exec())
     {
         portfolioInfo p = f.getReturnValues();
@@ -543,7 +526,7 @@ void frmMain::editPortfolio()
     if (!m_currentPortfolio)
         return;
 
-    frmPortfolio f(m_currentPortfolio->info, m_settings.dataStartDate, *sql, this);
+    frmPortfolio f(m_currentPortfolio->info, m_settings.dataStartDate, m_sql, this);
     if (f.exec())
     {
         m_currentPortfolio->info = f.getReturnValues();
@@ -565,17 +548,17 @@ void frmMain::deletePortfolio()
         int i = m_currentPortfolio->info.id;
 
 
-        sql->executeNonQuery(queries::deleteItem(queries::table_Portfolios, i));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_AA, i, false));
+        m_sql.executeNonQuery(queries::deleteItem(queries::table_Portfolios, i));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_AA, i, false));
 
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_Acct, i, false));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, i, false));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, i, false));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_TickersAA, i, true));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_TickersTrades, i, true));
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, i, true));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Acct, i, false));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, i, false));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, i, false));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersAA, i, true));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersTrades, i, true));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, i, true));
         // this must come last
-        sql->executeNonQuery(queries::deletePortfolioItems(queries::table_Tickers, i, false));
+        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Tickers, i, false));
 
         delete m_currentPortfolio;
         m_currentPortfolio = 0;
@@ -629,7 +612,7 @@ void frmMain::addTicker()
     int minDate = -1;
     do
     {
-        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, security(), *sql, this);
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, security(), m_sql, this);
         resultcode = f.exec();
         if (resultcode == QDialog::Accepted || resultcode == QDialog::Accepted + 1)
         {
@@ -667,7 +650,7 @@ void frmMain::editTicker()
     foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         int tickerID = row->values.at(holdingsRow::row_ID).toInt();
-        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(tickerID), *sql, this);
+        frmTicker f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.tickers.value(tickerID), m_sql, this);
         if (f.exec())
         {
             change = true;
@@ -705,10 +688,10 @@ void frmMain::deleteTicker()
         if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
             minDate = newMinDate;
 
-        sql->executeNonQuery(queries::deleteItem(queries::table_Tickers, s.id));
-        sql->executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, s.id));
-        sql->executeNonQuery(queries::deleteTickerItems(queries::table_TickersTrades, s.id));
-        sql->executeNonQuery(queries::deleteTickerItems(queries::table_Trades, s.id));
+        m_sql.executeNonQuery(queries::deleteItem(queries::table_Tickers, s.id));
+        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, s.id));
+        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersTrades, s.id));
+        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_Trades, s.id));
         m_currentPortfolio->data.tickers.remove(s.id);
     }
 
@@ -721,9 +704,9 @@ void frmMain::deleteTicker()
 
 void frmMain::deleteUnusedInfo()
 {
-    sql->executeNonQuery(queries::deleteUnusedPrices(queries::table_ClosingPrices));
-    sql->executeNonQuery(queries::deleteUnusedPrices(queries::table_Dividends));
-    sql->executeNonQuery(queries::deleteUnusedPrices(queries::table_Splits));
+    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_ClosingPrices));
+    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Dividends));
+    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Splits));
     //loadDates();
     //loadSplits();
 }
@@ -744,14 +727,14 @@ bool frmMain::invalidPortfolioNAVDates()
 
 void frmMain::options()
 {
-    frmOptions f(m_settings, *sql, this);
+    frmOptions f(m_settings, m_sql, this);
     if (f.exec())
         m_settings = f.getReturnValues();
 }
 
 void frmMain::editAA()
 {
-    frmAA f(m_currentPortfolio->info.id, m_currentPortfolio->data.aa, *sql, this);
+    frmAA f(m_currentPortfolio->info.id, m_currentPortfolio->data.aa, m_sql, this);
     if (f.exec())
     {
         m_currentPortfolio->data.aa = f.getReturnValues();
@@ -762,7 +745,7 @@ void frmMain::editAA()
 
 void frmMain::editAcct()
 {
-    frmAcct f(m_currentPortfolio->info.id, m_currentPortfolio->data.acct, *sql, this);
+    frmAcct f(m_currentPortfolio->info.id, m_currentPortfolio->data.acct, m_sql, this);
     if (f.exec())
     {
         m_currentPortfolio->data.acct = f.getReturnValues();
@@ -771,7 +754,7 @@ void frmMain::editAcct()
 
 void frmMain::editStat()
 {
-    frmStat f(m_currentPortfolio->info.id, m_statistics, m_currentPortfolio->data.stats, *sql, this);
+    frmStat f(m_currentPortfolio->info.id, m_statistics, m_currentPortfolio->data.stats, m_sql, this);
     if (f.exec())
     {
         m_statistics = f.getReturnValues_Map();
@@ -893,7 +876,7 @@ void frmMain::setSortDropDown(const QString &sort, QComboBox *dropDown)
 
 void frmMain::holdingsModifyColumns()
 {
-    frmColumns f(settings::columns_Holdings, m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_Holdings, m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), m_sql, this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_Holdings] = f.getReturnValues();
@@ -903,7 +886,7 @@ void frmMain::holdingsModifyColumns()
 
 void frmMain::aaModifyColumns()
 {
-    frmColumns f(settings::columns_AA, m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_AA, m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), m_sql, this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_AA] = f.getReturnValues();
@@ -913,7 +896,7 @@ void frmMain::aaModifyColumns()
 
 void frmMain::acctModifyColumns()
 {
-    frmColumns f(settings::columns_Acct, m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), *sql, this);
+    frmColumns f(settings::columns_Acct, m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), m_sql, this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_Acct] = f.getReturnValues();

@@ -5,17 +5,16 @@
 #define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
 
 #include <QtGui>
-#include <QtSql>
 #include "frmMain_UI.h"
 #include "functions.h"
 #include "queries.h"
 #include "updatePrices.h"
 #include "nav.h"
+#include "cachedCalculations.h"
+#include <qwt_plot_curve.h>
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
-#include "cachedCalculations.h"
-#include <qwt_plot_curve.h>
 
 struct chartInfo
 {
@@ -58,8 +57,6 @@ private:
 
     void closeEvent(QCloseEvent *event);
     void connectSlots();
-    void loadSettings();
-    void loadSettingsColumns();
     void resetLastDate();
     void checkVersion();
     void saveSettings();

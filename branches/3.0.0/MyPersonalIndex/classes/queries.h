@@ -119,9 +119,6 @@ public:
 
     static queryInfo* updatePortfolio(const portfolioInfo&);
 
-    enum { getStat_ID, getStat_Description, getStat_SQL, getStat_Format };
-    static queryInfo* getStat();
-
     enum { getStatMapping_PortfolioID, getStatMapping_StatID };
     static queryInfo* getStatMapping();
 

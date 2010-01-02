@@ -431,14 +431,6 @@ queries::queryInfo* queries::updateStat(const statistic &stat)
     }
 }
 
-queries::queryInfo* queries::getStat()
-{
-    return new queryInfo(
-        "SELECT ID, Description, SQL, Format FROM Stat",
-        QList<parameter>()
-    );
-}
-
 queries::queryInfo* queries::getStatMapping()
 {
     return new queryInfo(

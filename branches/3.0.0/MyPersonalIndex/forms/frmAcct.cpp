@@ -1,7 +1,7 @@
 #include "frmAcct.h"
 
-frmAcct::frmAcct(const int &portfolioID, const QMap<int, account> &acct, const queries &sql, QWidget *parent):
-    QDialog(parent), m_portfolio(portfolioID), m_sql(sql), m_map(acct)
+frmAcct::frmAcct(const int &portfolioID, const QMap<int, account> &acct, QWidget *parent):
+    QDialog(parent), m_portfolio(portfolioID), m_sql(queries("account")), m_map(acct)
 {
     ui.setupUI(this, "Accounts", false);
     this->setWindowTitle("Edit Accounts");

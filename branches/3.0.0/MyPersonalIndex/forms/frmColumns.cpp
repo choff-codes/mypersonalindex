@@ -1,7 +1,7 @@
 #include "frmColumns.h"
 
-frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QMap<int, QString> &columns, const queries &sql, QWidget *parent):
-        QDialog(parent), m_id(id), m_selectedColumns(selectedColumns), m_columns(columns), m_sql(sql)
+frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QMap<int, QString> &columns, QWidget *parent):
+        QDialog(parent), m_id(id), m_selectedColumns(selectedColumns), m_columns(columns)
 {
     ui.setupUI(this);
 
@@ -51,6 +51,7 @@ void frmColumns::accept()
        return;
    }
 
+    queries sql("columns");
     m_selectedColumns = selected;
 
     QMap<QString, QVariantList> tableValues;
@@ -58,12 +59,9 @@ void frmColumns::accept()
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ColumnID), columnID);
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence), sequence);
 
-    m_sql.executeNonQuery(queries::deleteItem(queries::table_SettingsColumns, m_id));
+    sql.executeNonQuery(queries::deleteItem(queries::table_SettingsColumns, m_id));
     if (!id.isEmpty())
-    {
-        queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
-        tableUpdateQuery.executeTableUpdate(queries::table_SettingsColumns, tableValues);
-    }
+        sql.executeTableUpdate(queries::table_SettingsColumns, tableValues);
 
     QDialog::accept();
 }

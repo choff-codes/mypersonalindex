@@ -2,8 +2,8 @@
 #include "viewDelegates.h"
 #include "calculations.h"
 
-frmTicker::frmTicker(const int &portfolioID, const portfolioData &data, const security& security, const queries &sql, QWidget *parent):
-        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_sql(sql)
+frmTicker::frmTicker(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent):
+        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_sql(queries("security"))
 {
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.ticker));
@@ -165,10 +165,7 @@ void frmTicker::accept()
 
     m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, m_security.id));
     if (!tickerID.isEmpty())
-    {
-        queries::queries &tableUpdateQuery = const_cast<queries::queries&>(m_sql);
-        tableUpdateQuery.executeTableUpdate(queries::table_TickersAA, tableValues);
-    }
+        m_sql.executeTableUpdate(queries::table_TickersAA, tableValues);
 
     QDialog::done(result);
 }

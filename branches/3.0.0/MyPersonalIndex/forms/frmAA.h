@@ -18,13 +18,13 @@ public:
         return m_map;
     }
 
-    frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, const queries &sql, QWidget *parent = 0);
+    frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, QWidget *parent = 0);
     ~frmAA() { delete m_model; }
 
 private:
     frmTableViewBase_UI ui;
     QMap<int, assetAllocation> m_map;
-    const queries &m_sql;
+    queries m_sql;
     int m_portfolio;
     aaModel *m_model;
 

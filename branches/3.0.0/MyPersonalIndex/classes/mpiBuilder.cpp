@@ -1,8 +1,11 @@
 #include "mpiBuilder.h"
 
-QMap<int, portfolio*> mpiBuilder::loadPortfolios()
+mpiBuilder::mpiBuilder()
 {
     queries sql("mpiBuilder");
+
+    loadSettingsInfo(sql.executeResultSet(queries::getSettings()));
+    loadSettingsColumns(sql.executeResultSet(queries::getSettingsColumns()));
 
     loadPortfoliosInfo(sql.executeResultSet(queries::getPortfolio()));
     loadPortfoliosAA(sql.executeResultSet(queries::getAA()));
@@ -13,8 +16,6 @@ QMap<int, portfolio*> mpiBuilder::loadPortfolios()
     loadPortfoliosTickersTrades(sql.executeResultSet(queries::getSecurityTrade()));
     loadPortfoliosTrades(sql.executeResultSet(queries::getTrade()));
     loadPortfoliosNAV(sql.executeResultSet(queries::getNAV()));
-
-    return m_portfolios;
 }
 
 void mpiBuilder::loadPortfoliosInfo(QSqlQuery *q)
@@ -300,6 +301,48 @@ void mpiBuilder::loadPortfoliosNAV(QSqlQuery *q)
        p->data.nav.insert(q->value(queries::getNAV_Date).toInt(), q->value(queries::getNAV_NAV).toDouble(), q->value(queries::getNAV_TotalValue).toDouble());
     }
     while(q->next());
+
+    delete q;
+}
+
+
+void mpiBuilder::loadSettingsInfo(QSqlQuery *q)
+{
+    //checkVersion();
+
+    if (!q)
+        return;
+
+    m_settings.dataStartDate = q->value(queries::getSettings_DataStartDate).toInt();
+    m_settings.splits = q->value(queries::getSettings_Splits).toBool();
+    m_settings.tickersIncludeDividends = q->value(queries::getSettings_TickersIncludeDividends).toBool();
+    m_settings.version = q->value(queries::getSettings_Version).toInt();
+    if (!q->value(queries::getSettings_WindowState).isNull())
+    {
+        m_settings.windowSize = QSize(q->value(queries::getSettings_WindowWidth).toInt(),
+            q->value(queries::getSettings_WindowHeight).toInt());
+        m_settings.windowLocation = QPoint(q->value(queries::getSettings_WindowX).toInt(),
+                    q->value(queries::getSettings_WindowY).toInt());
+        m_settings.state = (Qt::WindowState)q->value(queries::getSettings_WindowState).toInt();
+    }
+
+    if (!q->value(queries::getSettings_LastPortfolio).isNull())
+        m_settings.lastPortfolio = q->value(queries::getSettings_LastPortfolio).toInt();
+
+    delete q;
+}
+
+void mpiBuilder::loadSettingsColumns(QSqlQuery *q)
+{
+    if (!q)
+        return;
+
+    do
+    {
+        m_settings.viewableColumns[q->value(queries::getSettingsColumns_ID).toInt()].append(
+                q->value(queries::getSettingsColumns_ColumnID).toInt());
+    }
+    while (q->next());
 
     delete q;
 }

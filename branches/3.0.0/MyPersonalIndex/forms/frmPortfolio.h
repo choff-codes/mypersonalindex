@@ -14,14 +14,13 @@ public:
 
     const portfolioInfo& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(const portfolioInfo& p, const int &dataStartDate, const queries &sql, QWidget *parent = 0);
+    frmPortfolio(const portfolioInfo& p, const int &dataStartDate, QWidget *parent = 0);
 
 private:
 
     frmPortfolio_UI ui;
     portfolioInfo m_portfolio;
     portfolioInfo m_portfolioOriginal;
-    const queries &m_sql;
 
     void loadPortfolioAttributes();
     bool getErrors();

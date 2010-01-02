@@ -14,7 +14,7 @@ public:
     QMap<int, statistic> getReturnValues_Map() { return m_map; }
     QList<int> getReturnValues_Selected() {  return m_selected; }
 
-    frmStat(const int &portfolioID, const QMap<int, statistic> &stat, const QList<int> &statList, const queries &sql, QWidget *parent = 0);
+    frmStat(const int &portfolioID, const QMap<int, statistic> &stat, const QList<int> &statList, QWidget *parent = 0);
     ~frmStat() { delete m_model; }
 
 private:
@@ -24,7 +24,7 @@ private:
     int m_portfolio;
     QMap<int, statistic> m_map;
     QList<int> m_selected;
-    const queries &m_sql;
+    queries m_sql;
 
     void connectSlots();
 

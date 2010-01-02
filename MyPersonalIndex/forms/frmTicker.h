@@ -22,7 +22,7 @@ public:
     //const int &getTickerID() const { return m_security.id; }
     const QMap<int, security::security>& getCashAccounts() const { return m_data.tickers; }
 
-    frmTicker(const int &portfolioID, const portfolioData &data, const security& security, const queries &sql, QWidget *parent = 0);
+    frmTicker(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent = 0);
     ~frmTicker() { delete m_modelTrade; delete m_modelAA; }
 
 private:
@@ -32,7 +32,7 @@ private:
     const portfolioData &m_data;
     security m_security;
     security m_securityOriginal;
-    const queries &m_sql;
+    queries m_sql;
     tickerTradeModel *m_modelTrade;
     tickerAAModel *m_modelAA;
     int m_minDate;

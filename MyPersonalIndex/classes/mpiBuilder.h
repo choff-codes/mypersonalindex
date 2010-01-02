@@ -8,10 +8,14 @@
 class mpiBuilder
 {
 public:
-    QMap<int, portfolio*> loadPortfolios();
+    mpiBuilder();
+
+    QMap<int, portfolio*> loadPortfolios() { return m_portfolios; }
+    settings loadSettings() { return m_settings; }
 
 private:
     QMap<int, portfolio*> m_portfolios;
+    settings m_settings;
 
     void loadPortfoliosInfo(QSqlQuery *q);
     void loadPortfoliosTickers(QSqlQuery *q);
@@ -22,6 +26,9 @@ private:
     void loadPortfoliosAcct(QSqlQuery *q);
     void loadPortfoliosStat(QSqlQuery *q);
     void loadPortfoliosNAV(QSqlQuery *q);
+
+    void loadSettingsInfo(QSqlQuery *q);
+    void loadSettingsColumns(QSqlQuery *q);
 };
 
 #endif // MPIBUILDER_H

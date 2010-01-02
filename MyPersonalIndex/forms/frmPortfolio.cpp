@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "frmPortfolio.h"
 
-frmPortfolio::frmPortfolio(const portfolioInfo& p, const int &dataStartDate, const queries &sql, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p), m_sql(sql)
+frmPortfolio::frmPortfolio(const portfolioInfo& p, const int &dataStartDate, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p)
 {
     ui.setupUI(this);    
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
@@ -83,8 +83,9 @@ void frmPortfolio::accept()
         return;
     }
 
-    m_sql.executeNonQuery(queries::updatePortfolio(m_portfolio));
+    queries sql("portfolio");
+    sql.executeNonQuery(queries::updatePortfolio(m_portfolio));
     if (m_portfolio.id == -1)
-        m_portfolio.id = m_sql.getIdentity();
+        m_portfolio.id = sql.getIdentity();
     QDialog::accept();
 }

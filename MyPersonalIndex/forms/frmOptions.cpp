@@ -1,6 +1,6 @@
 #include "frmOptions.h"
 
-frmOptions::frmOptions(const settings &s, const queries &sql, QWidget *parent): QDialog(parent), m_settings(s), m_settingsOriginal(s), m_sql(sql)
+frmOptions::frmOptions(const settings &s, QWidget *parent): QDialog(parent), m_settings(s), m_settingsOriginal(s)
 {
     ui.setupUI(this);
     ui.chkSplits->setChecked(m_settings.splits);
@@ -21,6 +21,7 @@ void frmOptions::accept()
         return;
     }
 
-    m_sql.executeNonQuery(queries::updateSettings(m_settings));
+    queries sql("settings");
+    sql.executeNonQuery(queries::updateSettings(m_settings));
     QDialog::accept();
 }

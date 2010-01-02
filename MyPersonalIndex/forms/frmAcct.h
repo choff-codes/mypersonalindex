@@ -14,13 +14,13 @@ class frmAcct : public QDialog
 public:
     QMap<int, account> getReturnValues() { return m_map; }
 
-    frmAcct(const int &portfolioID, const QMap<int, account> &acct, const queries &sql, QWidget *parent = 0);
+    frmAcct(const int &portfolioID, const QMap<int, account> &acct, QWidget *parent = 0);
     ~frmAcct() { delete m_model; }
 
 private:
     frmTableViewBase_UI ui;
     int m_portfolio;
-    const queries &m_sql;
+    queries m_sql;
     acctModel *m_model;
     QMap<int, account> m_map;
 

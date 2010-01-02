@@ -1,7 +1,7 @@
 #include "frmAA.h"
 
-frmAA::frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, const queries &sql, QWidget *parent):
-    QDialog(parent), m_map(aa), m_sql(sql), m_portfolio(portfolioID)
+frmAA::frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, QWidget *parent):
+    QDialog(parent), m_map(aa), m_sql(queries("aa")), m_portfolio(portfolioID)
 {
     ui.setupUI(this, "Asset Allocation", false);
     this->setWindowTitle("Edit Asset Allocation");

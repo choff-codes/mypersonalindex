@@ -19,7 +19,7 @@ public:
     Qt::WindowState state;
     columns viewableColumns;
 
-    settings(): version(0), lastPortfolio(QVariant()) {}
+    settings(): version(0), lastPortfolio(QVariant()), state(Qt::WindowActive) {}
 
     bool operator==(const settings &other) const
     {

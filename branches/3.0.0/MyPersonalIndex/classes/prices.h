@@ -4,6 +4,20 @@
 #include <QtGui>
 #include "queries.h"
 
+//sqliteQuery* queries::deleteUnusedPrices(const QString &table)
+//{
+//    return new sqliteQuery(
+//        QString(
+//            "DELETE FROM %1"
+//            " WHERE Ticker IN (SELECT a.Ticker"
+//                            " FROM (SELECT DISTINCT Ticker FROM %1) AS a"
+//                            " LEFT JOIN Tickers AS b"
+//                                " ON a.Ticker = b.Ticker AND b.CashAccount = 0"
+//                            " WHERE b.Ticker IS NULL )").arg(table),
+//        QList<sqliteParameter>()
+//    );
+//}
+
 class prices
 {
 public:
@@ -71,6 +85,11 @@ private:
     securityPrices m_cashPrices;
 
     enum query_Type { query_Price, query_Dividend, query_Split };
+
+    enum { getPrices_Date, getPrices_Ticker, getPrices_Value };
+    static QString getPrices();
+    static QString getSplits();
+    static QString getDividends();
 
     void loadPrices(query_Type type, QSqlQuery *q);
     void loadCashSecurities(QSqlQuery *q);

@@ -33,6 +33,9 @@ public:
     {
         return this->description.toUpper() < other.description.toUpper();
     }
+
+    void save(int) {}
+    void remove() const {}
 };
 
 #endif // STATISTIC_H

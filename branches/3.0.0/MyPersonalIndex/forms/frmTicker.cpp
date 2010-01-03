@@ -1,9 +1,9 @@
 #include "frmTicker.h"
-#include "viewDelegates.h"
+#include "mpiViewDelegates.h"
 #include "calculations.h"
 
 frmTicker::frmTicker(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent):
-        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_sql(queries("security"))
+        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security)
 {
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Ticker" : m_security.ticker));
@@ -47,8 +47,6 @@ void frmTicker::connectSlots()
     connect(ui.btnAAAdd, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui.btnAADelete, SIGNAL(clicked()), m_modelAA, SLOT(deleteSelected()));
     connect(m_modelAA, SIGNAL(updateHeader()), this, SLOT(updateAAPercentage()));
-    connect(m_modelTrade, SIGNAL(saveItem(trade*)), this, SLOT(saveItem(trade*)));
-    connect(m_modelTrade, SIGNAL(deleteItem(trade)), this, SLOT(deleteItem(trade)));
 }
 
 void frmTicker::loadSecurity()
@@ -106,6 +104,7 @@ void frmTicker::installAAModel()
 void frmTicker::accept()
 {
     int result = QDialog::Accepted;
+    bool newSecurity = m_security.id == -1;
 
     if (sender() == ui.btnAddAnother)
         result++;
@@ -117,8 +116,8 @@ void frmTicker::accept()
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
     m_security.hide = ui.chkHide->isChecked();
-    if (m_security.id != -1)
-        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
+    if (!newSecurity)
+        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
     m_security.aa = m_modelAA->getList();
 
     if (m_security == m_securityOriginal)
@@ -127,12 +126,10 @@ void frmTicker::accept()
         return;
     }
 
-    m_sql.executeNonQuery(queries::updateSecurity(m_portfolioID, m_security));
-    if (m_security.id == -1)
-    {
-        m_security.id = m_sql.getIdentity();
-        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades);
-    }
+    m_security.save(m_portfolioID);
+
+    if (newSecurity)
+        m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
 
     if (m_security.trades != m_securityOriginal.trades)
     {
@@ -149,42 +146,13 @@ void frmTicker::accept()
         return;
     }
 
-    QVariantList tickerID, aaID, percent;
-
-    foreach(const aaTarget &aa, m_security.aa)
-    {
-        tickerID.append(m_security.id);
-        aaID.append(aa.id);
-        percent.append(aa.target);
-    }
-
-    QMap<QString, QVariantList> tableValues;
-    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_TickerID), tickerID);
-    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_AAID), aaID);
-    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_Percent), percent);
-
-    m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, m_security.id));
-    if (!tickerID.isEmpty())
-        m_sql.executeTableUpdate(queries::table_TickersAA, tableValues);
-
+    m_security.saveAATargets();
     QDialog::done(result);
 }
 
 void frmTicker::resetExpense()
 {
     ui.sbExpense->setValue(-1);
-}
-
-void frmTicker::saveItem(trade *t)
-{
-    m_sql.executeNonQuery(queries::updateSecurityTrade(m_security.id, (*t)));
-    if (t->id == -1)
-        t->id = m_sql.getIdentity();
-}
-
-void frmTicker::deleteItem(const trade &t)
-{
-    m_sql.executeNonQuery(queries::deleteItem(queries::table_TickersTrades, t.id));
 }
 
 void frmTicker::customContextMenuRequested(const QPoint&)

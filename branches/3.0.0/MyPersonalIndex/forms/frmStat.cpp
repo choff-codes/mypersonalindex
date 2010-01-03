@@ -24,13 +24,11 @@ void frmStat::connectSlots()
     connect(ui.btnMoveDown, SIGNAL(clicked()), m_model, SLOT(moveSelectedDown()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(m_model, SIGNAL(saveItem(statistic*)), this, SLOT(saveItem(statistic*)));
-    connect(m_model, SIGNAL(deleteItem(statistic)), this, SLOT(deleteItem(statistic)));
 }
 
 void frmStat::accept()
 {
-    QMap<int, statistic> returnValues = m_model->saveList(m_map);
+    QMap<int, statistic> returnValues = m_model->saveList(m_map, m_portfolio);
     QList<int> returnValuesSelected = m_model->getSelected();
 
     if (returnValues == m_map && returnValuesSelected == m_selected)
@@ -59,16 +57,4 @@ void frmStat::accept()
     m_map = returnValues;
     m_selected = returnValuesSelected;
     QDialog::accept();
-}
-
-void frmStat::saveItem(statistic *stat)
-{
-    m_sql.executeNonQuery(queries::updateStat((*stat)));
-    if (stat->id == -1)
-        stat->id = m_sql.getIdentity();
-}
-
-void frmStat::deleteItem(const statistic &stat)
-{
-    m_sql.executeNonQuery(queries::deleteItem(queries::table_Stat, stat.id));
 }

@@ -36,10 +36,6 @@ public slots:
     void selectAll();
     void clearAll();
     void itemDeleted(const QModelIndex&, int start, int end);
-
-signals:
-    void saveItem(statistic *stat);
-    void deleteItem(const statistic& stat);
 };
 
 #endif // STATMODEL_H

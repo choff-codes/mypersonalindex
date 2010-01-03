@@ -83,9 +83,6 @@ void frmPortfolio::accept()
         return;
     }
 
-    queries sql("portfolio");
-    sql.executeNonQuery(queries::updatePortfolio(m_portfolio));
-    if (m_portfolio.id == -1)
-        m_portfolio.id = sql.getIdentity();
+    m_portfolio.save();
     QDialog::accept();
 }

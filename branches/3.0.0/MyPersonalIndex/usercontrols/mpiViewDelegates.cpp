@@ -1,4 +1,4 @@
-#include "viewDelegates.h"
+#include "mpiViewDelegates.h"
 
 QWidget* spinBoxDelegate::createEditor(QWidget *parent, const QStyleOptionViewItem&, const QModelIndex&) const
 {

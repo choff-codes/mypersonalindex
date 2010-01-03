@@ -30,8 +30,6 @@ private:
 
 private slots:
     void accept();
-    void saveItem(statistic *stat);
-    void deleteItem(const statistic &stat);
 };
 
 #endif // FRMSTAT_H

@@ -36,14 +36,8 @@ frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const Q
 void frmColumns::accept()
 {
     QList<int> selected;
-    QVariantList id, columnID, sequence;
     for(int i = 0; i < ui.addedColumns->count(); ++i)
-    {
         selected.append(ui.addedColumns->item(i)->data(Qt::UserRole).toInt());
-        id.append(m_id);
-        columnID.append(selected.last());
-        sequence.append(i);
-    }
 
     if (selected == m_selectedColumns)
     {
@@ -51,17 +45,8 @@ void frmColumns::accept()
        return;
    }
 
-    queries sql("columns");
     m_selectedColumns = selected;
-
-    QMap<QString, QVariantList> tableValues;
-    tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ID), id);
-    tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ColumnID), columnID);
-    tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence), sequence);
-
-    sql.executeNonQuery(queries::deleteItem(queries::table_SettingsColumns, m_id));
-    if (!id.isEmpty())
-        sql.executeTableUpdate(queries::table_SettingsColumns, tableValues);
+    settings::saveColumns(m_id, m_selectedColumns);
 
     QDialog::accept();
 }

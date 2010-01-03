@@ -2,6 +2,8 @@
 #define ASSETALLOCATION_H
 
 #include <QtGui>
+#include "queries.h"
+#include "functions.h"
 
 class assetAllocation
 {
@@ -23,6 +25,10 @@ public:
     {
         return !(*this == other);
     }
+
+
+    void save(const int &portfolioID);
+    void remove() const;
 };
 
 #endif // ASSETALLOCATION_H

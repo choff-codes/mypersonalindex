@@ -29,10 +29,6 @@ public slots:
     void copy() { beginCopy(); }
     void paste() { beginPaste(); }
     void autoResize();
-
-signals:
-    void saveItem(trade *trade);
-    void deleteItem(const trade& trade);
 };
 
 #endif // TICKERTRADEMODEL_H

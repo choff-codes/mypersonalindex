@@ -2,10 +2,8 @@
 #define FRMAA_H
 
 #include <QtGui>
-#include "functions.h"
 #include "frmTableViewBase_UI.h"
 #include "aaModel.h"
-#include "queries.h"
 
 
 class frmAA : public QDialog
@@ -24,16 +22,13 @@ public:
 private:
     frmTableViewBase_UI ui;
     QMap<int, assetAllocation> m_map;
-    queries m_sql;
-    int m_portfolio;
+    int m_portfolioID;
     aaModel *m_model;
 
     void connectSlots();
 
 private slots:
     void accept();
-    void saveItem(assetAllocation *aa);
-    void deleteItem(const assetAllocation &aa);
     void customContextMenuRequested(const QPoint&);
 };
 

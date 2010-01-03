@@ -2,6 +2,8 @@
 #define ACCOUNT_H
 
 #include <QtGui>
+#include "queries.h"
+#include "functions.h"
 
 class account
 {
@@ -25,6 +27,9 @@ public:
     {
         return !(*this == other);
     }
+
+    void save(const int &portfolioID);
+    void remove() const;
 };
 
 #endif // ACCOUNT_H

@@ -3,7 +3,6 @@
 
 #include <QtGui>
 #include "frmPortfolio_UI.h"
-#include "queries.h"
 #include "portfolio.h"
 
 class frmPortfolio : public QDialog

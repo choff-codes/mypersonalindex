@@ -2,6 +2,7 @@
 #define SECURITY_H
 
 #include <QtGui>
+#include "queries.h"
 
 class trade
 {
@@ -39,6 +40,9 @@ public:
     {
         return !(*this == other);
     }
+
+    void save(const int &tickerID);
+    void remove() const;
 
     static QString tradeTypeToString(const tradeType &type);
     static QString frequencyToString(const tradeFreq &freq);
@@ -105,6 +109,8 @@ public:
     }
 
     int firstTradeDate();
+    void save(const int &portfolioID);
+    void saveAATargets();
 };
 
 #endif // SECURITY_H

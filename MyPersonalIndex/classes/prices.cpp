@@ -4,9 +4,9 @@ prices::prices()
 {
     queries sql("prices");
 
-    loadPrices(query_Price, sql.executeResultSet(queries::getPrices()));
-    loadPrices(query_Dividend, sql.executeResultSet(queries::getDividends()));
-    loadPrices(query_Split, sql.executeResultSet(queries::getSplits()));
+    loadPrices(query_Price, sql.executeResultSet(getPrices()));
+    loadPrices(query_Dividend, sql.executeResultSet(getDividends()));
+    loadPrices(query_Split, sql.executeResultSet(getSplits()));
 }
 
 void prices::insertDate(const int &date)
@@ -71,12 +71,12 @@ void prices::loadPrices(query_Type type, QSqlQuery *q)
 
     do
     {
-        QString ticker = q->value(queries::getPrices_Ticker).toString();
-        int date = q->value(queries::getPrices_Date).toInt();
+        QString ticker = q->value(getPrices_Ticker).toString();
+        int date = q->value(getPrices_Date).toInt();
 
         insertDate(date);
 
-        double value = q->value(queries::getPrices_Value).toDouble();
+        double value = q->value(getPrices_Value).toDouble();
 
         switch(type)
         {
@@ -94,4 +94,19 @@ void prices::loadPrices(query_Type type, QSqlQuery *q)
     while (q->next());
 
     delete q;        
+}
+
+QString prices::getPrices()
+{
+    return "SELECT Date, Ticker, Price FROM ClosingPrices";
+}
+
+QString prices::getDividends()
+{
+    return"SELECT Date, Ticker, Amount FROM Dividends";
+}
+
+QString prices::getSplits()
+{
+    return "SELECT Date, Ticker, Ratio FROM Splits";
 }

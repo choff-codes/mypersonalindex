@@ -1,5 +1,4 @@
 #include "frmMain.h"
-#include "queries.h"
 #include "frmPortfolio.h"
 #include "frmTicker.h"
 #include "frmOptions.h"
@@ -10,19 +9,16 @@
 #include "frmSort.h"
 #include "mainPerformanceModel.h"
 #include "mainCorrelationModel.h"
-#include "mpiBuilder.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_sql(queries("main")), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
     ui.setupUI(this);
 
     // do not use the database before this check
     m_dates = prices::instance().dates();
 
-    mpiBuilder mpi;
-
-    m_portfolios = mpi.loadPortfolios();
-    m_settings = mpi.loadSettings();
+    m_portfolios = portfolio::loadPortfolios();
+    m_settings = settings::loadSettings();
     m_currentPortfolio = m_settings.lastPortfolio.isNull() ? 0 : m_portfolios.value(m_settings.lastPortfolio.toInt());
     if (m_settings.state != Qt::WindowActive)
     {
@@ -131,7 +127,7 @@ void frmMain::saveSettings()
     m_settings.windowSize = size();
     m_settings.windowLocation = pos();
     m_settings.state = isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState;
-    m_sql.executeNonQuery(queries::updateSettings(m_settings));
+    m_settings.save();
 }
 
 void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
@@ -433,10 +429,8 @@ void frmMain::savePortfolio()
 
 void frmMain::savePortfolios()
 {
-    //sql->getDatabase().transaction();
     foreach(portfolio *p, m_portfolios)
-        m_sql.executeNonQuery(queries::updatePortfolio(p->info));
-    //sql->getDatabase().commit();
+        p->info.save();
 }
 
 void frmMain::addPortfolio()
@@ -479,17 +473,17 @@ void frmMain::deletePortfolio()
         int i = m_currentPortfolio->info.id;
 
 
-        m_sql.executeNonQuery(queries::deleteItem(queries::table_Portfolios, i));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_AA, i, false));
-
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Acct, i, false));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, i, false));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, i, false));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersAA, i, true));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersTrades, i, true));
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, i, true));
-        // this must come last
-        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Tickers, i, false));
+//        m_sql.executeNonQuery(queries::deleteItem(queries::table_Portfolios, i));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_AA, i, false));
+//
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Acct, i, false));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, i, false));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, i, false));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersAA, i, true));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersTrades, i, true));
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, i, true));
+//        // this must come last
+//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Tickers, i, false));
 
         delete m_currentPortfolio;
         m_currentPortfolio = 0;
@@ -619,10 +613,10 @@ void frmMain::deleteTicker()
         if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
             minDate = newMinDate;
 
-        m_sql.executeNonQuery(queries::deleteItem(queries::table_Tickers, s.id));
-        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, s.id));
-        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersTrades, s.id));
-        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_Trades, s.id));
+//        m_sql.executeNonQuery(queries::deleteItem(queries::table_Tickers, s.id));
+//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, s.id));
+//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersTrades, s.id));
+//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_Trades, s.id));
         m_currentPortfolio->data.tickers.remove(s.id);
     }
 
@@ -635,9 +629,9 @@ void frmMain::deleteTicker()
 
 void frmMain::deleteUnusedInfo()
 {
-    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_ClosingPrices));
-    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Dividends));
-    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Splits));
+//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_ClosingPrices));
+//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Dividends));
+//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Splits));
     //loadDates();
     //loadSplits();
 }

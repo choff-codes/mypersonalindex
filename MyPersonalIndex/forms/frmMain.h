@@ -7,7 +7,6 @@
 #include <QtGui>
 #include "frmMain_UI.h"
 #include "functions.h"
-#include "queries.h"
 #include "updatePrices.h"
 #include "nav.h"
 #include "cachedCalculations.h"
@@ -15,6 +14,7 @@
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
+#include "statistic.h"
 
 struct chartInfo
 {
@@ -44,7 +44,6 @@ public:
 
 private:
     frmMain_UI ui;
-    queries m_sql;
     QMap<int, portfolio*> m_portfolios;
     portfolio *m_currentPortfolio;
     settings m_settings;

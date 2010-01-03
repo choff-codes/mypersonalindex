@@ -2,8 +2,8 @@
 #define FRMCOLUMNS_H
 
 #include <QtGui>
-#include "queries.h"
 #include "frmColumns_UI.h"
+#include "settings.h"
 
 class frmColumns : public QDialog
 {

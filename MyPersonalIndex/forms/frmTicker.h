@@ -3,10 +3,8 @@
 
 #include <QtGui>
 #include "frmTicker_UI.h"
-#include "queries.h"
 #include "tickerAAModel.h"
 #include "tickerTradeModel.h"
-#include "functions.h"
 #include "security.h"
 #include "portfolio.h"
 
@@ -32,7 +30,6 @@ private:
     const portfolioData &m_data;
     security m_security;
     security m_securityOriginal;
-    queries m_sql;
     tickerTradeModel *m_modelTrade;
     tickerAAModel *m_modelAA;
     int m_minDate;
@@ -47,8 +44,6 @@ private slots:
     void resetExpense();
     void addAA();
     void updateAAPercentage();
-    void saveItem(trade *trade);
-    void deleteItem(const trade &trade);
     void customContextMenuRequested(const QPoint&);
 };
 

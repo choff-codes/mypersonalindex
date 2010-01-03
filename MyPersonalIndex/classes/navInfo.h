@@ -6,8 +6,6 @@
 class navInfo
 {
 public:
-    //navInfo() {}
-
     void insert(const int &date, const double &nav, const double &totalValue);
 
     QMap<int, double> navHistory() const { return m_nav; }

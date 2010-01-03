@@ -3,7 +3,7 @@
 
 #include <QtGui>
 #include "frmOptions_UI.h"
-#include "queries.h"
+#include "settings.h"
 
 class frmOptions : public QDialog
 {

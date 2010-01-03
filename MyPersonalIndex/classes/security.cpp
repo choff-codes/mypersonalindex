@@ -97,3 +97,106 @@ int security::firstTradeDate()
 
     return minDate;
 }
+
+void security::save(const int &portfolioID)
+{
+    queries sql("security");
+
+    QList<sqliteParameter> params;
+    params  << sqliteParameter(":PortfolioID", portfolioID)
+            << sqliteParameter(":Ticker", this->ticker)
+            << sqliteParameter(":Account", functions::intToNull(this->account))
+            << sqliteParameter(":Expense", functions::doubleToNull(this->expense))
+            << sqliteParameter(":DivReinvest", (int)this->divReinvest)
+            << sqliteParameter(":CashAccount", (int)this->cashAccount)
+            << sqliteParameter(":IncludeInCalc", (int)this->includeInCalc)
+            << sqliteParameter(":Hide", (int)this->hide);
+
+    if(this->id == -1) // insert new
+    {
+        sql.executeNonQuery(new sqliteQuery(
+            "INSERT INTO Tickers (PortfolioID, Ticker, Account, Expense, DivReinvest, CashAccount, IncludeInCalc, Hide)"
+            " VALUES (:PortfolioID, :Ticker, :Account, :Expense, :DivReinvest, :CashAccount, :IncludeInCalc, :Hide)",
+            params
+        ));
+
+        this->id = sql.getIdentity();
+    }
+    else // update
+    {
+        params << sqliteParameter(":SecurityID", this->id);
+        sql.executeNonQuery(new sqliteQuery(
+            "UPDATE Tickers SET PortfolioID = :PortfolioID, Ticker = :Ticker, Account = :Account, Expense = :Expense,"
+                " DivReinvest = :DivReinvest, CashAccount = :CashAccount, IncludeInCalc = :IncludeInCalc, Hide = :Hide"
+                " WHERE ID = :SecurityID",
+            params
+        ));
+    }
+}
+
+void security::saveAATargets()
+{
+    queries sql("aaTargets");
+
+    QVariantList tickerID, aaID, percent;
+
+    foreach(const aaTarget &aa, this->aa)
+    {
+        tickerID.append(this->id);
+        aaID.append(aa.id);
+        percent.append(aa.target);
+    }
+
+    QMap<QString, QVariantList> tableValues;
+    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_TickerID), tickerID);
+    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_AAID), aaID);
+    tableValues.insert(queries::tickersAAColumns.at(queries::tickersAAColumns_Percent), percent);
+
+    sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, this->id));
+    if (!tickerID.isEmpty())
+        sql.executeTableUpdate(queries::table_TickersAA, tableValues);
+}
+
+void trade::save(const int &tickerID)
+{
+    queries sql("trade");
+
+    QList<sqliteParameter> params;
+    params  << sqliteParameter(":TickerID", tickerID)
+            << sqliteParameter(":Type", (int)this->type)
+            << sqliteParameter(":Value", this->value)
+            << sqliteParameter(":Price", functions::doubleToNull(this->price))
+            << sqliteParameter(":Commission", functions::doubleToNull(this->commission))
+            << sqliteParameter(":CashAccountID", functions::intToNull(this->cashAccount))
+            << sqliteParameter(":Frequency", (int)this->frequency)
+            << sqliteParameter(":Date", functions::dateToNull(this->date))
+            << sqliteParameter(":StartDate", functions::dateToNull(this->startDate))
+            << sqliteParameter(":EndDate", functions::dateToNull(this->endDate));
+
+    if(this->id == -1) // insert new
+    {
+        sql.executeNonQuery(new sqliteQuery(
+            "INSERT INTO TickersTrades (TickerID, Type, Value, Price, Commission, CashAccountID, Frequency, Date, StartDate, EndDate)"
+            " VALUES (:TickerID, :Type, :Value, :Price, :Commission, :CashAccountID, :Frequency, :Date, :StartDate, :EndDate)",
+            params
+        ));
+
+        this->id = sql.getIdentity();
+    }
+    else // update
+    {
+        params << sqliteParameter(":TradeID", this->id);
+        sql.executeNonQuery(new sqliteQuery(
+            "UPDATE TickersTrades SET TickerID = :TickerID, Type = :Type, Value = :Value, Price = :Price,"
+                " Commission = :Commission, CashAccountID = :CashAccountID, Frequency = :Frequency, Date = :Date,"
+                " StartDate = :StartDate, EndDate = :EndDate WHERE ID = :TradeID",
+            params
+        ));
+    }
+}
+
+void trade::remove() const
+{
+    queries sql("trade");
+    sql.executeNonQuery(queries::deleteItem(queries::table_TickersTrades, this->id));
+}

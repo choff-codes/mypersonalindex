@@ -1,5 +1,5 @@
-#ifndef VIEWDELEGATES_H
-#define VIEWDELEGATES_H
+#ifndef MPIVIEWDELEGATES_H
+#define MPIVIEWDELEGATES_H
 
 #include <QtGui>
 
@@ -90,4 +90,4 @@ private:
 //
 //};
 
-#endif // VIEWDELEGATES_H
+#endif // MPIVIEWDELEGATES_H

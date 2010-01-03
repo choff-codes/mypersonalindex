@@ -114,21 +114,21 @@ void mpiEditModelBase<T, editForm>::removeItems()
 }
 
 template<class T, class editForm>
-QMap<int, T> mpiEditModelBase<T, editForm>::saveList(QMap<int, T> originalValues)
+QMap<int, T> mpiEditModelBase<T, editForm>::saveList(const QMap<int, T> &originalValues, const int parentID)
 {
     QMap<int, T> returnValues;
 
     for(int i = 0; i < m_list.count(); ++i) // save all items
     {
         if (m_list.at(i).id == -1 || originalValues.value(m_list.at(i).id) != m_list.at(i))
-            emit saveItem(&m_list[i]);
+            m_list[i].save(parentID);
 
         returnValues.insert(m_list.at(i).id, m_list.at(i));
     }
 
     foreach(const T &item, originalValues) // delete items that have been removed
         if(!returnValues.contains(item.id))
-            emit deleteItem(item);
+            item.remove();
 
     return returnValues;
 }

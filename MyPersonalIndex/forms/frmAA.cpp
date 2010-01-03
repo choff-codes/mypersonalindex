@@ -1,7 +1,7 @@
 #include "frmAA.h"
 
 frmAA::frmAA(const int &portfolioID, const QMap<int, assetAllocation> &aa, QWidget *parent):
-    QDialog(parent), m_map(aa), m_sql(queries("aa")), m_portfolio(portfolioID)
+    QDialog(parent), m_map(aa), m_portfolioID(portfolioID)
 {
     ui.setupUI(this, "Asset Allocation", false);
     this->setWindowTitle("Edit Asset Allocation");
@@ -24,14 +24,12 @@ void frmAA::connectSlots()
     connect(ui.pasteShortcut, SIGNAL(activated()), m_model, SLOT(paste()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(m_model, SIGNAL(saveItem(assetAllocation*)), this, SLOT(saveItem(assetAllocation*)));
-    connect(m_model, SIGNAL(deleteItem(assetAllocation)), this, SLOT(deleteItem(assetAllocation)));
     connect(ui.table, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
 }
 
 void frmAA::accept()
 {
-    QMap<int, assetAllocation> returnValues = m_model->saveList(m_map);
+    QMap<int, assetAllocation> returnValues = m_model->saveList(m_map, m_portfolioID);
 
     if (returnValues != m_map)
     {
@@ -40,18 +38,6 @@ void frmAA::accept()
     }
     else
         QDialog::reject();
-}
-
-void frmAA::saveItem(assetAllocation *aa)
-{
-    m_sql.executeNonQuery(queries::updateAA(m_portfolio, (*aa)));
-    if (aa->id == -1)
-        aa->id = m_sql.getIdentity();
-}
-
-void frmAA::deleteItem(const assetAllocation &aa)
-{
-    m_sql.executeNonQuery(queries::deleteItem(queries::table_AA, aa.id));
 }
 
 void frmAA::customContextMenuRequested(const QPoint&)

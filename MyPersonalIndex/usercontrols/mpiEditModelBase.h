@@ -24,7 +24,7 @@ public:
     void editItems();
     void addItem();
     void removeItems();
-    QMap<int, T> saveList(QMap<int, T> originalValues);
+    QMap<int, T> saveList(const QMap<int, T> &originalValues, const int parentID);
 
 protected:
     QTableView *m_parent;
@@ -35,8 +35,6 @@ protected:
     virtual void editSelected() = 0;
     virtual void deleteSelected() = 0;
     virtual void addNew() = 0;
-    virtual void saveItem(T *item) = 0;
-    virtual void deleteItem(const T &item) = 0;
     virtual QString internalCopy(const T &item) = 0;
     virtual T internalPaste(const QStringList &value, bool *ok) = 0;
 

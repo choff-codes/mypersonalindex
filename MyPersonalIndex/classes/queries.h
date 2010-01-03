@@ -3,34 +3,29 @@
 
 #include <QtSql>
 #include <QtGui>
-#include "settings.h"
-#include "assetAllocation.h"
-#include "account.h"
-#include "statistic.h"
-#include "portfolio.h"
-#include "security.h"
+
+class sqliteParameter
+{
+public:
+    QString name;
+    QVariant value;
+
+    sqliteParameter();
+    sqliteParameter(const QString &p_name, const QVariant &p_value): name(p_name), value(p_value) {}
+};
+
+class sqliteQuery
+{
+public:
+    QString sql;
+    QList<sqliteParameter> parameters;
+
+    sqliteQuery(const QString &p_sql, const QList<sqliteParameter> &p_parameters): sql(p_sql), parameters(p_parameters) {}
+};
 
 class queries
 {
 public:
-
-    struct parameter
-    {
-        QString name;
-        QVariant value;
-
-        parameter();
-        parameter(const QString &p_name, const QVariant &p_value): name(p_name), value(p_value) {}
-    };
-
-    struct queryInfo
-    {
-        QString sql;
-        QList<parameter> parameters;
-
-        queryInfo(const QString &p_sql, const QList<parameter> &p_parameters): sql(p_sql), parameters(p_parameters) {}
-    };
-
     static const QString table_AA;
     static const QString table_Acct;
     static const QString table_ClosingPrices;
@@ -46,7 +41,6 @@ public:
     static const QString table_TickersAA;
     static const QString table_TickersTrades;
     static const QString table_Trades; 
-
 
     static const QStringList closingPricesColumns;
     static const QStringList dividendsColumns;
@@ -71,84 +65,23 @@ public:
     ~queries() { QSqlDatabase::removeDatabase(m_databaseName); }
 
     static QString getDatabaseLocation();
-    //bool isOpen() const;
 
-    void executeNonQuery(queryInfo*) const;
+    void executeNonQuery(sqliteQuery*) const;
+    void executeNonQuery(const QString&) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    QSqlQuery* executeResultSet(queryInfo*) const;
+    QSqlQuery* executeResultSet(sqliteQuery*) const;
+    QSqlQuery* executeResultSet(const QString&) const;
 
     int getIdentity() const;
+    int getVersion() const;
 
-    static queryInfo* deleteTable(const QString &table);
-    static queryInfo* deleteItem(const QString &table, const int &id);
-    static queryInfo* deleteTickerItems(const QString &table, const int &tickerID);
-    static queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers);
-    static queryInfo* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers);
-    static queryInfo* deleteUnusedPrices(const QString &table);
+    static sqliteQuery* deleteTable(const QString &table);
+    static sqliteQuery* deleteItem(const QString &table, const int &id);
+    static sqliteQuery* deleteTickerItems(const QString &table, const int &tickerID);
+    static sqliteQuery* deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers);
+    static sqliteQuery* deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers);
 
-    static queryInfo* getVersion();
-
-    enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
-    static queryInfo* getNAV();
-
-    enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
-           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
-    static queryInfo* getSettings();
-
-    enum { getSettingsColumns_ID, getSettingsColumns_ColumnID };
-    static queryInfo* getSettingsColumns();
-
-    static queryInfo* updateSettings(const settings::settings&);
-
-    enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
-    static queryInfo* getAA();
-
-    static queryInfo* updateAA(const int &portfolioID, const assetAllocation::assetAllocation&);
-
-    enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
-    static queryInfo* getAcct();
-
-    static queryInfo* updateAcct(const int &portfolioID, const account::account&);
-
-    enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
-           getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
-           getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
-           getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
-           getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
-    static queryInfo* getPortfolio();
-
-    static queryInfo* updatePortfolio(const portfolioInfo&);
-
-    enum { getStatMapping_PortfolioID, getStatMapping_StatID };
-    static queryInfo* getStatMapping();
-
-    static queryInfo* updateStat(const statistic::statistic&);
-
-    enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
-           getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
-           getSecurity_IncludeInCalc, getSecurity_Hide };
-    static queryInfo* getSecurity();
-
-    enum { getSecurityTrade_ID, getSecurityTrade_PortfolioID, getSecurityTrade_TickerID, getSecurityTrade_Type,
-           getSecurityTrade_Value, getSecurityTrade_Price, getSecurityTrade_Commission, getSecurityTrade_CashAccountID,
-           getSecurityTrade_Frequency, getSecurityTrade_Date, getSecurityTrade_StartDate, getSecurityTrade_EndDate };
-    static queryInfo* getSecurityTrade();
-
-    enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
-    static queryInfo* getSecurityAA();
-
-    static queryInfo* updateSecurity(const int &portfolioID, const security&);
-    static queryInfo* updateSecurityTrade(const int &tickerID, const trade&);
-
-    enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price, getTrade_Commission };
-    static queryInfo* getTrade();
-
-    enum { getPrices_Date, getPrices_Ticker, getPrices_Value };
-    static queryInfo* getPrices();
-    static queryInfo* getSplits();
-    static queryInfo* getDividends();
-
-protected:
+private:
     QString m_databaseName;
 };
 

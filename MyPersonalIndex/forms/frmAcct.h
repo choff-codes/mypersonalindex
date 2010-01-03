@@ -4,8 +4,6 @@
 #include <QtGui>
 #include "frmTableViewBase_UI.h"
 #include "acctModel.h"
-#include "queries.h"
-#include "functions.h"
 
 class frmAcct : public QDialog
 {
@@ -19,7 +17,7 @@ public:
 
 private:
     frmTableViewBase_UI ui;
-    int m_portfolio;
+    int m_portfolioID;
     queries m_sql;
     acctModel *m_model;
     QMap<int, account> m_map;
@@ -28,8 +26,6 @@ private:
 
 private slots:
     void accept();
-    void saveItem(account *acct);
-    void deleteItem(const account &acct);
     void customContextMenuRequested(const QPoint&);
 };
 

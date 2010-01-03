@@ -26,10 +26,6 @@ public slots:
     inline void deleteSelected() { removeItems(); }
     inline void copy() { beginCopy(); }
     inline void paste() { beginPaste(); }
-
-signals:
-    void saveItem(account *acct);
-    void deleteItem(const account& acct);
 };
 
 #endif // ACCTMODEL_H

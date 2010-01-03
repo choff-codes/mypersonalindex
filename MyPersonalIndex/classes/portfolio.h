@@ -6,6 +6,8 @@
 #include "security.h"
 #include "assetAllocation.h"
 #include "account.h"
+#include "queries.h"
+#include "prices.h"
 
 class executedTrade
 {
@@ -60,6 +62,8 @@ public:
         aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()), origStartDate(QDate::currentDate().toJulianDay()),
         holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
 
+    void save();
+
     bool operator==(const portfolioInfo &other) const
     {
         return this->id == other.id
@@ -94,6 +98,54 @@ public:
     portfolioInfo info;
 
     portfolio(const portfolioInfo &pi): info(pi) {}
+
+    static QMap<int, portfolio*> loadPortfolios();
+
+private:
+    enum { getPortfolio_PortfolioID, getPortfolio_Description, getPortfolio_Dividends, getPortfolio_StartValue,
+           getPortfolio_CostCalc, getPortfolio_AAThreshold, getPortfolio_AAThresholdMethod,
+           getPortfolio_StartDate, getPortfolio_HoldingsShowHidden, getPortfolio_HoldingsSort,
+           getPortfolio_NAVSortDesc, getPortfolio_AASort, getPortfolio_AAShowBlank,
+           getPortfolio_CorrelationShowHidden, getPortfolio_AcctSort, getPortfolio_AcctShowBlank };
+    static QString getPortfolio();
+
+    enum { getStatMapping_PortfolioID, getStatMapping_StatID };
+    static QString getStatMapping();
+
+    enum { getNAV_Date, getNAV_PortfolioID, getNAV_NAV, getNAV_TotalValue };
+    static QString getNAV();
+
+    enum { getAA_ID, getAA_PortfolioID, getAA_Description, getAA_Target };
+    static QString getAA();
+
+    enum { getAcct_ID, getAcct_PortfolioID, getAcct_Description, getAcct_TaxRate, getAcct_TaxDeferred };
+    static QString getAcct();
+
+    enum { getSecurity_ID, getSecurity_PortfolioID, getSecurity_Ticker, getSecurity_Account,
+           getSecurity_Expense, getSecurity_DivReinvest, getSecurity_CashAccount,
+           getSecurity_IncludeInCalc, getSecurity_Hide };
+    static QString getSecurity();
+
+    enum { getSecurityTrade_ID, getSecurityTrade_PortfolioID, getSecurityTrade_TickerID, getSecurityTrade_Type,
+           getSecurityTrade_Value, getSecurityTrade_Price, getSecurityTrade_Commission, getSecurityTrade_CashAccountID,
+           getSecurityTrade_Frequency, getSecurityTrade_Date, getSecurityTrade_StartDate, getSecurityTrade_EndDate };
+    static QString getSecurityTrade();
+
+    enum { getSecurityAA_PortfolioID, getSecurityAA_TickerID, getSecurityAA_AAID, getSecurityAA_Percent };
+    static QString getSecurityAA();
+
+    enum { getTrade_PortfolioID, getTrade_TickerID, getTrade_Date, getTrade_Shares, getTrade_Price, getTrade_Commission };
+    static QString getTrade();
+
+    static void loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosTickers(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosTickersAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosTickersTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
+    static void loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery *q);
 };
 
 #endif // PORTFOLIO_H

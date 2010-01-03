@@ -25,10 +25,6 @@ public slots:
     inline void deleteSelected() { removeItems(); }
     inline void copy() { beginCopy(); }
     inline void paste() { beginPaste(); }
-
-signals:
-    void saveItem(assetAllocation *aa);
-    void deleteItem(const assetAllocation& aa);
 };
 
 #endif // AAMODEL_H

@@ -148,7 +148,7 @@ void trade::save(const int &tickerID)
     values.insert(queries::tickersTradeColumns.at(queries::tickersTradeColumns_StartDate), functions::dateToNull(this->startDate));
     values.insert(queries::tickersTradeColumns.at(queries::tickersTradeColumns_EndDate), functions::dateToNull(this->endDate));
 
-    this->id = queries::insert(queries::table_Tickers, values, this->id);
+    this->id = queries::insert(queries::table_TickersTrades, values, this->id);
 }
 
 void trade::remove() const

@@ -37,7 +37,7 @@ void frmTrade::connectSlots()
 void frmTrade::loadTrade()
 {
     ui.cmbType->setCurrentIndex((int)m_trade.type);
-    if (m_trade.value >= 0)
+    //if (m_trade.value >= 0)
         ui.txtShares->setText(QString::number(m_trade.value, 'f', 4));
     if (m_trade.price >= 0)
     {

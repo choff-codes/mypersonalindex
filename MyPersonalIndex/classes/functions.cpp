@@ -42,7 +42,7 @@ QVariant functions::dateToNull(const int &value)
 QString functions::doubleToCurrency(const double &value)
 {
     if (value < 0)
-        return QString("($%L1)").arg(fabs(value), 0, 'f', 2);
+        return QString("($%L1)").arg(-value, 0, 'f', 2);
     else
         return QString("$%L1").arg(value, 0, 'f', 2);
 }

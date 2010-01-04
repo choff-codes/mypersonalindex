@@ -84,15 +84,9 @@ private:
     QSet<QString> m_cashSecurities;
     securityPrices m_cashPrices;
 
-    enum query_Type { query_Price, query_Dividend, query_Split };
-
-    enum { getPrices_Date, getPrices_Ticker, getPrices_Value };
-    static QString getPrices();
-    static QString getSplits();
-    static QString getDividends();
-
-    void loadPrices(query_Type type, QSqlQuery *q);
-    void loadCashSecurities(QSqlQuery *q);
+    void loadPrices(QSqlQuery);
+    void loadDividends(QSqlQuery);
+    void loadSplits(QSqlQuery);
     void insertDate(const int &date);
 
     prices();

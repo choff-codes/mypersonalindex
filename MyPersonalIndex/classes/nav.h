@@ -13,7 +13,7 @@ class nav : public QThread
 
 public:
     nav(const QMap<int, portfolio*> &data, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-            QThread(parent), m_sql(queries("nav")), m_data(data), m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
+        QThread(parent), m_data(data), m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID), m_TradesPosition(0) { }
 
     void run();
 
@@ -22,7 +22,6 @@ signals:
     void statusUpdate(const QString &message);
 
 private:
-    queries m_sql;
     const QMap<int, portfolio*> &m_data;
     const QList<int> m_dates;
     int m_calculationDate;

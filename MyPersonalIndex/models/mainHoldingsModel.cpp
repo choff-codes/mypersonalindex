@@ -1,16 +1,15 @@
 #include "mainHoldingsModel.h"
-#include "calculations.h"
 
 //enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
 const QStringList holdingsRow::columns = QStringList() << "Active" << "Symbol" << "Cash" << "Closing Price" << "Shares" << "Avg Price\nPer Share"
-     << "Cost Basis" << "Total Value" << "% of\nPortfolio" << "Gain/Loss" << "% Gain/Loss" << "Account" << "Tax Liability" << "After Tax Value";
+     << "Cost Basis" << "Total Value" << "% of\nPortfolio" << "Gain/Loss" << "% Gain/Loss" << "Account" << "Asset Allocation" << "Tax Liability" << "After Tax Value" << "ID";
 
 const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVariant::Int) << QVariant(QVariant::String) << QVariant(QVariant::Int)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::Double)
-     << QVariant(QVariant::Double);
+     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
+     << QVariant(QVariant::Double) << QVariant(QVariant::Double);
 
-holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QString &sort)
+holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
 {
     holdingsRow *row = new holdingsRow(sort);
 
@@ -41,6 +40,11 @@ holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const c
     row->values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
     //row_Acct
     row->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
+    //row_AA
+    QStringList aaList;
+    foreach(const aaTarget &target, s.aa)
+        aaList.append(QString("%1 - %2").arg(aa.value(target.id).description, functions::doubleToPercentage(target.target)));
+    row->values.append(aaList.join(", "));
     //row_TaxLiability
     row->values.append(value.taxLiability == 0 ? QVariant() : value.taxLiability);
     //row_NetValue

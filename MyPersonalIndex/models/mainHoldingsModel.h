@@ -9,7 +9,7 @@
 class holdingsRow: public baseRow
 {
 public:
-    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
+    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_AA, row_TaxLiability, row_NetValue, row_ID };
     static const QStringList columns;
     static const QVariantList columnsType;
 
@@ -17,7 +17,7 @@ public:
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static holdingsRow* getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info,
-        const QMap<int, account> &accounts, const QString &sort);
+        const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort);
     static QMap<int, QString> fieldNames();
 };
 

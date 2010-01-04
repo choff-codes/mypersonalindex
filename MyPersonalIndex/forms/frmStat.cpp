@@ -1,7 +1,7 @@
 #include "frmStat.h"
 
 frmStat::frmStat(const int &portfolioID, const QMap<int, statistic> &stat, const QList<int> &statList, QWidget *parent):
-    QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList), m_sql(queries("statistic"))
+    QDialog(parent), m_portfolio(portfolioID), m_map(stat), m_selected(statList)
 {
     ui.setupUI(this, "Statistics", true);
     this->setWindowTitle("Edit Statistics");
@@ -50,9 +50,9 @@ void frmStat::accept()
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), stat);
     tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
 
-    m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, m_portfolio, false));
+    queries::deletePortfolioItems(queries::table_StatMapping, m_portfolio, false);
     if (!stat.isEmpty())
-        m_sql.executeTableUpdate(queries::table_StatMapping, tableValues);
+        queries::executeTableUpdate(queries::table_StatMapping, tableValues);
 
     m_map = returnValues;
     m_selected = returnValuesSelected;

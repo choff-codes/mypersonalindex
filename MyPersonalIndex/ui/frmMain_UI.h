@@ -73,7 +73,6 @@ public:
 
     QVBoxLayout *correlationsGrid;
     QToolBar *correlationsToolbar;
-    QAction *correlationsCalculate;
     QAction *correlationsShowHidden;
     QAction *correlationsExport;
     QLabel *correlationsStartDate;

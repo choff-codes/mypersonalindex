@@ -2,11 +2,14 @@
 
 prices::prices()
 {
-    queries sql("prices");
+    QTime t;
+    t.start();
+    
+    loadPrices(queries::select(queries::table_ClosingPrices, queries::closingPricesColumns));
+    loadDividends(queries::select(queries::table_Dividends, queries::dividendsColumns));
+    loadSplits(queries::select(queries::table_Splits, queries::splitsColumns));
 
-    loadPrices(query_Price, sql.executeResultSet(getPrices()));
-    loadPrices(query_Dividend, sql.executeResultSet(getDividends()));
-    loadPrices(query_Split, sql.executeResultSet(getSplits()));
+    qDebug("Time elapsed (prices): %d ms", t.elapsed());
 }
 
 void prices::insertDate(const int &date)
@@ -64,49 +67,27 @@ int prices::lastDate(const QString &ticker)
     return (dates.constEnd() - 1).key();
 }
 
-void prices::loadPrices(query_Type type, QSqlQuery *q)
+void prices::loadPrices(QSqlQuery q)
 {
-    if (!q)
-        return;
-
-    do
+    while(q.next())
     {
-        QString ticker = q->value(getPrices_Ticker).toString();
-        int date = q->value(getPrices_Date).toInt();
-
+        int date = q.value(queries::closingPricesColumns_Date).toInt();
         insertDate(date);
 
-        double value = q->value(getPrices_Value).toDouble();
-
-        switch(type)
-        {
-            case query_Price:
-                m_securityPriceList[ticker].prices.insert(date, value);
-                break;
-            case query_Dividend:
-                m_securityPriceList[ticker].dividends.insert(date, value);
-                break;
-            case query_Split:
-                m_securityPriceList[ticker].splits.insert(date, value);
-                break;
-        }
+        m_securityPriceList[q.value(queries::closingPricesColumns_Ticker).toString()].prices.insert(date, q.value(queries::closingPricesColumns_Price).toDouble());
     }
-    while (q->next());
-
-    delete q;        
 }
 
-QString prices::getPrices()
+void prices::loadDividends(QSqlQuery q)
 {
-    return "SELECT Date, Ticker, Price FROM ClosingPrices";
+    while(q.next())
+        m_securityPriceList[q.value(queries::dividendsColumns_Ticker).toString()].dividends.insert(
+            q.value(queries::dividendsColumns_Date).toInt(), q.value(queries::dividendsColumns_Amount).toDouble());
 }
 
-QString prices::getDividends()
+void prices::loadSplits(QSqlQuery q)
 {
-    return"SELECT Date, Ticker, Amount FROM Dividends";
-}
-
-QString prices::getSplits()
-{
-    return "SELECT Date, Ticker, Ratio FROM Splits";
+    while(q.next())
+        m_securityPriceList[q.value(queries::splitsColumns_Ticker).toString()].splits.insert(
+            q.value(queries::splitsColumns_Date).toInt(), q.value(queries::splitsColumns_Ratio).toDouble());
 }

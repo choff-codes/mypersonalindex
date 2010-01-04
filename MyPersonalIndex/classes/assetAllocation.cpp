@@ -2,35 +2,15 @@
 
 void assetAllocation::save(const int &portfolioID)
 {
-    queries sql("assetAllocation");
+    QMap<QString, QVariant> values;
+    values.insert(queries::aaColumns.at(queries::aaColumns_PortfolioID), portfolioID);
+    values.insert(queries::aaColumns.at(queries::aaColumns_Description), this->description);
+    values.insert(queries::aaColumns.at(queries::aaColumns_Target), functions::doubleToNull(this->target));
 
-    if(this->id == -1) // insert new
-    {
-        sql.executeNonQuery(new sqliteQuery(
-            "INSERT INTO AA (PortfolioID, Description, Target)"
-            " VALUES (:PortfolioID, :Description, :Target)",
-            QList<sqliteParameter>()
-                << sqliteParameter(":PortfolioID", portfolioID)
-                << sqliteParameter(":Description", this->description)
-                << sqliteParameter(":Target", functions::doubleToNull(this->target))
-        ));
-
-        this->id = sql.getIdentity();
-    }
-    else // update
-    {
-        sql.executeNonQuery(new sqliteQuery(
-            "UPDATE AA SET Description = :Description, Target = :Target WHERE ID = :AAID",
-            QList<sqliteParameter>()
-                << sqliteParameter(":Description", this->description)
-                << sqliteParameter(":Target", functions::doubleToNull(this->target))
-                << sqliteParameter(":AAID", this->id)
-        ));
-    }
+    this->id = queries::insert(queries::table_AA, values, this->id);
 }
 
 void assetAllocation::remove() const
 {
-    queries sql("assetAllocation");
-    sql.executeNonQuery(queries::deleteItem(queries::table_AA, this->id));
+    queries::deleteItem(queries::table_AA, this->id);
 }

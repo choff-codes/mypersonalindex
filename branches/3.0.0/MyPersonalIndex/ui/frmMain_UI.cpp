@@ -269,10 +269,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsGrid->addWidget(correlationsToolbar);
     correlationsGrid->addWidget(correlations);
 
-    correlationsCalculate = new QAction("Calculate", tab_correlations);
-    QFont f(correlationsCalculate->font());
-    f.setBold(true);
-    correlationsCalculate->setFont(f);
     correlationsShowHidden = new QAction("Show Hidden", tab_correlations);
     correlationsShowHidden->setCheckable(true);
     correlationsExport = new QAction("Export...", tab_correlations);
@@ -282,8 +278,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsEndDate = new QLabel(" End Date: ", tab_correlations);
     correlationsEndDateDropDown = functions::createDateEdit(tab_correlations);
 
-    correlationsToolbar->addAction(correlationsCalculate);
-    correlationsToolbar->addSeparator();
     correlationsToolbar->addWidget(correlationsStartDate);
     correlationsToolbar->addWidget(correlationsStartDateDropDown);
     correlationsToolbar->addWidget(correlationsEndDate);

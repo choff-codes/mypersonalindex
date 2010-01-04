@@ -107,7 +107,7 @@ void nav::insertVariantLists()
         tableValues.insert(queries::navColumns.at(queries::navColumns_Date), m_NAV_Dates);
         tableValues.insert(queries::navColumns.at(queries::navColumns_TotalValue), m_NAV_Totalvalue);
         tableValues.insert(queries::navColumns.at(queries::navColumns_NAV), m_NAV_Nav);
-        m_sql.executeTableUpdate(queries::table_NAV, tableValues);
+        queries::executeTableUpdate(queries::table_NAV, tableValues);
     }
 
     if (!m_Trades_Dates.isEmpty())
@@ -119,7 +119,7 @@ void nav::insertVariantLists()
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Price), m_Trades_Price);
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Commission), m_Trades_Commission);
         tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Code), m_Trades_Code);
-        m_sql.executeTableUpdate(queries::table_Trades, tableValues);
+        queries::executeTableUpdate(queries::table_Trades, tableValues);
     }
 }
 
@@ -141,9 +141,9 @@ void nav::clearVariantLists()
 void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate)
 {
     // remove nav prices that are to be recalculated
-    m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, false));
+    queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, false);
     // remove custom trades that are to be recalculated
-    m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true));
+    queries::deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true);
 
     if (portfolioStartDate)
     {

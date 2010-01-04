@@ -91,7 +91,9 @@ void frmMain::connectSlots()
 
     connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(editStat()));
 
-    connect(ui.correlationsCalculate, SIGNAL(triggered()), this, SLOT(loadPortfolioCorrelation()));
+    connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(loadPortfolioCorrelation()));
+    connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioCorrelation()));
+    connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioCorrelation()));
 }
 
 void frmMain::loadSortDropDowns()
@@ -181,6 +183,9 @@ void frmMain::loadPortfolio()
             return;
         }
 
+        QTime t;
+        t.start();
+
         m_calculations.setPortfolio(m_currentPortfolio);
         loadPortfolioSettings();
         resetCalendars(getLastDate());
@@ -190,6 +195,8 @@ void frmMain::loadPortfolio()
         loadPortfolioAA();
         loadPortfolioAcct();
         loadPortfolioCorrelation();
+
+        qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
     }
 }
 
@@ -229,13 +236,12 @@ void frmMain::loadPortfolioHoldings()
 {
     int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
-
     calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     foreach(const security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->info.holdingsSort));
+            rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 

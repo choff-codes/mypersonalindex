@@ -18,7 +18,6 @@ public:
 private:
     frmTableViewBase_UI ui;
     int m_portfolioID;
-    queries m_sql;
     acctModel *m_model;
     QMap<int, account> m_map;
 

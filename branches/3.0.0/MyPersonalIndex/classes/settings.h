@@ -39,15 +39,8 @@ public:
     }
 
 private:
-    enum { getSettings_DataStartDate, getSettings_LastPortfolio, getSettings_WindowX, getSettings_WindowY, getSettings_WindowHeight,
-           getSettings_WindowWidth, getSettings_WindowState, getSettings_Splits, getSettings_TickersIncludeDividends, getSettings_Version };
-    static QString getSettings();
-
-    enum { getSettingsColumns_ID, getSettingsColumns_ColumnID };
-    static QString getSettingsColumns();
-
-    static void loadSettingsInfo(settings &s, QSqlQuery *q);
-    static void loadSettingsColumns(settings &s, QSqlQuery *q);
+    static void loadSettingsInfo(settings &s, QSqlQuery q);
+    static void loadSettingsColumns(settings &s, QSqlQuery q);
 };
 
 #endif // SETTINGS_H

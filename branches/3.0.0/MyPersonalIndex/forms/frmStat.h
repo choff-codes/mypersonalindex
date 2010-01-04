@@ -24,7 +24,6 @@ private:
     int m_portfolio;
     QMap<int, statistic> m_map;
     QList<int> m_selected;
-    queries m_sql;
 
     void connectSlots();
 

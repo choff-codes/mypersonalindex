@@ -2,84 +2,71 @@
 
 settings::settings settings::loadSettings()
 {
-    queries sql("settings");
+    QTime t;
+    t.start();
+
     settings s;
 
-    loadSettingsInfo(s, sql.executeResultSet(getSettings()));
-    loadSettingsColumns(s, sql.executeResultSet(getSettingsColumns()));
+    loadSettingsInfo(s, queries::select(queries::table_Settings, queries::settingsColumns));
+    loadSettingsColumns(s, queries::select(queries::table_SettingsColumns, queries::settingsColumnsColumns,
+        queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence)));
+
+    qDebug("Time elapsed: %d ms (settings)", t.elapsed());
 
     return s;
 }
 
-void settings::loadSettingsInfo(settings &s, QSqlQuery *q)
+void settings::loadSettingsInfo(settings &s, QSqlQuery q)
 {
-    if (!q)
+    if (!q.first())
         return;
 
-    s.dataStartDate = q->value(getSettings_DataStartDate).toInt();
-    s.splits = q->value(getSettings_Splits).toBool();
-    s.tickersIncludeDividends = q->value(getSettings_TickersIncludeDividends).toBool();
-    s.version = q->value(getSettings_Version).toInt();
-    if (!q->value(getSettings_WindowState).isNull())
+    s.dataStartDate = q.value(queries::settingsColumns_DataStartDate).toInt();
+    s.splits = q.value(queries::settingsColumns_Splits).toBool();
+    s.tickersIncludeDividends = q.value(queries::settingsColumns_TickersIncludeDividends).toBool();
+    s.version = q.value(queries::settingsColumns_Version).toInt();
+    if (!q.value(queries::settingsColumns_WindowState).isNull())
     {
-        s.windowSize = QSize(q->value(getSettings_WindowWidth).toInt(),
-            q->value(getSettings_WindowHeight).toInt());
-        s.windowLocation = QPoint(q->value(getSettings_WindowX).toInt(),
-                    q->value(getSettings_WindowY).toInt());
-        s.state = (Qt::WindowState)q->value(getSettings_WindowState).toInt();
+        s.windowSize = QSize(q.value(queries::settingsColumns_WindowWidth).toInt(),
+            q.value(queries::settingsColumns_WindowHeight).toInt());
+        s.windowLocation = QPoint(q.value(queries::settingsColumns_WindowX).toInt(),
+                    q.value(queries::settingsColumns_WindowY).toInt());
+        s.state = (Qt::WindowState)q.value(queries::settingsColumns_WindowState).toInt();
     }
 
-    if (!q->value(getSettings_LastPortfolio).isNull())
-        s.lastPortfolio = q->value(getSettings_LastPortfolio).toInt();
-
-    delete q;
+    if (!q.value(queries::settingsColumns_LastPortfolio).isNull())
+        s.lastPortfolio = q.value(queries::settingsColumns_LastPortfolio).toInt();
 }
 
-void settings::loadSettingsColumns(settings &s, QSqlQuery *q)
+void settings::loadSettingsColumns(settings &s, QSqlQuery q)
 {
-    if (!q)
-        return;
-
-    do
-    {
-        s.viewableColumns[q->value(getSettingsColumns_ID).toInt()].append(
-                q->value(getSettingsColumns_ColumnID).toInt());
-    }
-    while (q->next());
-
-    delete q;
+    while(q.next())
+        s.viewableColumns[q.value(queries::settingsColumnsColumns_ID).toInt()].append(
+                q.value(queries::settingsColumnsColumns_ColumnID).toInt());
 }
 
 void settings::save()
 {
-    queries sql("settings");
-
-    QString sqlQuery = "UPDATE Settings SET Splits = :Splits, DataStartDate = :DataStartDate, TickersIncludeDividends = :TickersIncludeDividends,"
-            " LastPortfolio = :LastPortfolio, Version = :Version, WindowState = :WindowState";
-    QList<sqliteParameter> params;
-    params  << sqliteParameter(":Splits", (int)this->splits)
-            << sqliteParameter(":DataStartDate", this->dataStartDate)
-            << sqliteParameter(":TickersIncludeDividends", (int)this->tickersIncludeDividends)
-            << sqliteParameter(":LastPortfolio", this->lastPortfolio)
-            << sqliteParameter(":WindowState", (int)this->state)
-            << sqliteParameter(":Version", this->version);
+    QMap<QString, QVariant> values;
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_Splits), (int)this->splits);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_DataStartDate), this->dataStartDate);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_TickersIncludeDividends), (int)this->tickersIncludeDividends);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_LastPortfolio), this->lastPortfolio);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowState), (int)this->state);
 
     if (this->state == Qt::WindowNoState) // only save size and position if the window is in normal state
     {
-        sqlQuery.append(", WindowX = :WindowX, WindowY = :WindowY, WindowHeight = :WindowHeight, WindowWidth = :WindowWidth");
-        params  << sqliteParameter(":WindowX", this->windowLocation.x())
-                << sqliteParameter(":WindowY", this->windowLocation.y())
-                << sqliteParameter(":WindowHeight", this->windowSize.height())
-                << sqliteParameter(":WindowWidth", this->windowSize.width());
+        values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowX), this->windowLocation.x());
+        values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowY), this->windowLocation.y());
+        values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowHeight), this->windowSize.height());
+        values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowWidth), this->windowSize.width());
     }
 
-    sql.executeNonQuery(new sqliteQuery(sqlQuery, params));
+    queries::update(queries::table_Settings, values);
 }
 
 void settings::saveColumns(const int &columnsID, const QList<int> &columns)
 {
-    queries sql("columns");
-
     QVariantList id, columnID, sequence;
     for(int i = 0; i < columns.count(); ++i)
     {
@@ -93,18 +80,7 @@ void settings::saveColumns(const int &columnsID, const QList<int> &columns)
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_ColumnID), columnID);
     tableValues.insert(queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence), sequence);
 
-    sql.executeNonQuery(queries::deleteItem(queries::table_SettingsColumns, columnsID));
+    queries::deleteItem(queries::table_SettingsColumns, columnsID);
     if (!id.isEmpty())
-        sql.executeTableUpdate(queries::table_SettingsColumns, tableValues);
-}
-
-QString settings::getSettings()
-{
-    return "SELECT DataStartDate, LastPortfolio, WindowX, WindowY, WindowHeight, WindowWidth, WindowState,"
-            " Splits, TickersIncludeDividends, Version FROM Settings";
-}
-
-QString settings::getSettingsColumns()
-{
-    return "SELECT ID, ColumnID FROM SettingsColumns ORDER BY Sequence";
+        queries::executeTableUpdate(queries::table_SettingsColumns, tableValues);
 }

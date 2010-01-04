@@ -76,7 +76,7 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
     if (role == Qt::TextColorRole && column == aaRow::row_Offset)
     {
         double value = m_rows.at(index.row())->values.at(column).toDouble();
-        return fabs(value) <= m_threshold ? QVariant() :
+        return qAbs(value) <= m_threshold ? QVariant() :
             value > m_threshold ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
     }
 

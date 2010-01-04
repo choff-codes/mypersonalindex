@@ -12,7 +12,7 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     gpTrade = new QGroupBox("Trade", dialog);
     tradeLayout = new QFormLayout(gpTrade);
 
-    validator = new mpiDoubleValidator(0, 100000000, 4, dialog);
+    validator = new mpiDoubleValidator(-100000000, 100000000, 4, dialog);
     type = new QLabel("Type:", gpTrade);
     cmbType = new QComboBox(gpTrade);
     cmbType->addItem("Purchase");

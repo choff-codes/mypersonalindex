@@ -241,8 +241,7 @@ void frmMain::loadPortfolioHoldings()
     QList<baseRow*> rows;
     foreach(const security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(holdingsRow::getHoldingsRow(s, prices::instance().price(s.ticker, currentDate), info,
-                m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
+            rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 

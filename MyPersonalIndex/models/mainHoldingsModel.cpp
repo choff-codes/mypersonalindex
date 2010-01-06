@@ -9,7 +9,7 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double);
 
-holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const double &price, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
+holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
 {
     holdingsRow *row = new holdingsRow(sort);
 
@@ -22,6 +22,7 @@ holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const d
     //row_Cash
     row->values.append((int)s.cashAccount);
     //row_Price
+    double price = prices::instance().price(s.ticker, info->date);
     row->values.append(price == 0 ? QVariant() : price);
     //row_Shares
     row->values.append(value.shares);

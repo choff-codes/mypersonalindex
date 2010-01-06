@@ -9,6 +9,7 @@ public:
     void insert(const int &date, const double &nav, const double &totalValue);
 
     QMap<int, double> navHistory() const { return m_nav; }
+    QMap<int, double> totalValueHistory() const { return m_totalValue; }
     double nav(const int &date) const { return m_nav.value(date); }
     double totalValue(const int &date) const { return m_totalValue.value(date); }
 

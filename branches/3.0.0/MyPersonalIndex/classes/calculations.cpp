@@ -21,20 +21,18 @@ calculations::securityValue calculations::tickerValue(const security::security &
     securityValue value;
     prices::securityPrice price = prices::instance().dailyPriceInfo(s.ticker, date);
 
-    double shares = 0;
     foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
     {
         if (t.date > date)
             break;
 
-        shares += t.shares * splitRatio(s.ticker, t.date, date);
+        value.shares += t.shares * splitRatio(s.ticker, t.date, date);
         value.commission += t.commission;
         value.costBasis += t.shares * t.price;
     }
 
-    value.dividendAmount = shares * price.dividend;
-    value.totalValue = shares * price.close;
-    value.shares = shares;
+    value.dividendAmount = value.shares * price.dividend;
+    value.totalValue = value.shares * price.close;
 
     account::account acct = m_portfolio->data.acct.value(s.account);
     if (acct.taxRate == -1)

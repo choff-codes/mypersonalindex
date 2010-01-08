@@ -12,11 +12,10 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    aaRow(const QString &sort): baseRow(sort) {}
+    aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo,
+           const assetAllocation &aa, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
-    static aaRow* getAARow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo,
-        const assetAllocation &aa, const QString &sort);
     static QMap<int, QString> fieldNames();
 };
 

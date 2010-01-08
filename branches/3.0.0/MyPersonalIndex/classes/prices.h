@@ -68,10 +68,8 @@ public:
     double split(const QString &ticker, const int &date) { return history(ticker).split(date); }
 
     int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
-    int firstDate(const QString &ticker);
-
     int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
-    int lastDate(const QString &ticker);
+
 
     securityPrice dailyPriceInfo(const QString &ticker, const int &date) { return history(ticker).dailyPriceInfo(date); }
 

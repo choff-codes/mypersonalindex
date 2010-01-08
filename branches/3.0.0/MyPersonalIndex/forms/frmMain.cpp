@@ -241,7 +241,7 @@ void frmMain::loadPortfolioHoldings()
     QList<baseRow*> rows;
     foreach(const security &s, m_currentPortfolio->data.tickers)
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(holdingsRow::getHoldingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
+            rows.append(new holdingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -266,11 +266,11 @@ void frmMain::loadPortfolioAA()
     {
         assetAllocation aa;
         aa.description = "(Blank)";
-        rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
     }
 
     foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(aaRow::getAARow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -295,11 +295,11 @@ void frmMain::loadPortfolioAcct()
     {
         account acct;
         acct.description = "(Blank)";
-        rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
+        rows.append( new acctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
     }
 
     foreach(const account &acct, m_currentPortfolio->data.acct)
-        rows.append(acctRow::getAcctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
+        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 

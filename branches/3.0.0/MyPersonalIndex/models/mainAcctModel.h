@@ -12,11 +12,10 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    acctRow(const QString &sort): baseRow(sort) {}
+    acctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo,
+            const account &acct, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
-    static acctRow* getAcctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo,
-        const account &acct, const QString &sort);
     static QMap<int, QString> fieldNames();
 };
 

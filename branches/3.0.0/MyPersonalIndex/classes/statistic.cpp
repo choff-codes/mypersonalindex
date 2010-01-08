@@ -71,14 +71,18 @@ QString statistic::currentValue(portfolio *currentPortfolio, calculations::portf
 
 QString statistic::dailyReturn(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info, const int &startDate, const int &previousDay)
 {
-//    QMap<int, double> navHistory = currentPortfolio->data.nav.navHistory();
-//    QMap<int, double>::const_iterator startNav = navHistory().lowerBound(previousDay);
-//    QMap<int, double>::const_iterator endNav = navHistory().lowerBound(info->date);
-//    if (startNav.key() != previousDay || endNav.key() != info->date)
-//        return QString();
-//    QList<int>::iterator i;
-//    int days = (endNav - startNav) + 1;
+    QMap<int, double> navHistory = currentPortfolio->data.nav.navHistory();
+    QMap<int, double>::const_iterator startNav = navHistory.lowerBound(previousDay);
+    QMap<int, double>::const_iterator endNav = navHistory.lowerBound(info->date);
+    if (startNav.key() != previousDay || endNav.key() != info->date)
+        return QString();
 
-    return QString();
+    QList<int> dates = prices::instance().dates();
+    int days = qLowerBound(dates, startDate) - qLowerBound(dates, info->date);
+
+    if (days == 0)
+        return QString();
+
+    return functions::doubleToPercentage(100 * (pow(endNav.value() / startNav.value(), 1.0 / days) - 1));
 
 }

@@ -9,30 +9,27 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Int);
 
 
-aaRow::aaRow* aaRow::getAARow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, const assetAllocation &aa, const QString &sort)
+aaRow::aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, const assetAllocation &aa, const QString &sort)
+    : baseRow(sort)
 {
-    aaRow *row = new aaRow(sort);
-
     //row_Description
-    row->values.append(aa.description);
+    this->values.append(aa.description);
     //row_CostBasis
-    row->values.append(aaInfo.costBasis);
+    this->values.append(aaInfo.costBasis);
     //row_Value
-    row->values.append(aaInfo.totalValue);
+    this->values.append(aaInfo.totalValue);
     //row_ValueP
-    row->values.append(info->totalValue == 0 ? QVariant() : 100.0 * aaInfo.totalValue / info->totalValue);
+    this->values.append(info->totalValue == 0 ? QVariant() : 100.0 * aaInfo.totalValue / info->totalValue);
     //row_Gain
-    row->values.append(aaInfo.totalValue - aaInfo.costBasis);
+    this->values.append(aaInfo.totalValue - aaInfo.costBasis);
     //row_GainP
-    row->values.append(aaInfo.costBasis == 0 ? QVariant() : ((aaInfo.totalValue / aaInfo.costBasis) - 1) * 100);
+    this->values.append(aaInfo.costBasis == 0 ? QVariant() : ((aaInfo.totalValue / aaInfo.costBasis) - 1) * 100);
     //row_Target
-    row->values.append(aa.target < 0 ? QVariant() : aa.target);
+    this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Offset
-    row->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 * ((aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
+    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 * ((aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
     //row_Holdings
-    row->values.append(aaInfo.count);
-
-    return row;
+    this->values.append(aaInfo.count);
 }
 
 QMap<int, QString> aaRow::fieldNames()

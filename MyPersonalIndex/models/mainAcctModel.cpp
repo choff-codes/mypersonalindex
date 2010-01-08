@@ -8,32 +8,29 @@ const QVariantList acctRow::columnsType = QVariantList() << QVariant(QVariant::S
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Int);
 
-acctRow::acctRow* acctRow::getAcctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo, const account &acct, const QString &sort)
+acctRow::acctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo, const account &acct, const QString &sort)
+    : baseRow(sort)
 {
-    acctRow *row = new acctRow(sort);
-
     //row_Description
-    row->values.append(acct.description);
+    this->values.append(acct.description);
     //row_CostBasis
-    row->values.append(acctInfo.costBasis);
+    this->values.append(acctInfo.costBasis);
     //row_Value
-    row->values.append(acctInfo.totalValue);
+    this->values.append(acctInfo.totalValue);
     //row_ValueP
-    row->values.append(info->totalValue == 0 ? QVariant() : 100.0 * acctInfo.totalValue / info->totalValue);
+    this->values.append(info->totalValue == 0 ? QVariant() : 100.0 * acctInfo.totalValue / info->totalValue);
     //row_Gain
-    row->values.append(acctInfo.totalValue - acctInfo.costBasis);
+    this->values.append(acctInfo.totalValue - acctInfo.costBasis);
     //row_GainP
-    row->values.append(acctInfo.costBasis == 0 ? QVariant() : ((acctInfo.totalValue / acctInfo.costBasis) - 1) * 100);
+    this->values.append(acctInfo.costBasis == 0 ? QVariant() : ((acctInfo.totalValue / acctInfo.costBasis) - 1) * 100);
     //row_TaxRate
-    row->values.append(acct.taxRate < 0 ? QVariant() : acct.taxRate);
+    this->values.append(acct.taxRate < 0 ? QVariant() : acct.taxRate);
     //row_TaxLiability
-    row->values.append(acctInfo.taxLiability);
+    this->values.append(acctInfo.taxLiability);
     //row_Net
-    row->values.append(acctInfo.totalValue - acctInfo.taxLiability);
+    this->values.append(acctInfo.totalValue - acctInfo.taxLiability);
     //row_Holdings
-    row->values.append(acctInfo.count);
-
-    return row;
+    this->values.append(acctInfo.count);
 }
 
 QMap<int, QString> acctRow::fieldNames()

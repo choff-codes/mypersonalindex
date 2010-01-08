@@ -47,26 +47,6 @@ QMap<int, double> prices::split(const QString &ticker)
     return m_securityPriceList.value(ticker).splits;
 }
 
-int prices::firstDate(const QString &ticker)
-{
-    QMap<int, double> dates = price(ticker);
-
-    if (dates.isEmpty())
-        return 0;
-
-    return dates.constBegin().key();
-}
-
-int prices::lastDate(const QString &ticker)
-{
-    QMap<int, double> dates = price(ticker);
-
-    if (dates.isEmpty())
-        return 0;
-
-    return (dates.constEnd() - 1).key();
-}
-
 void prices::loadPrices(QSqlQuery q)
 {
     while(q.next())

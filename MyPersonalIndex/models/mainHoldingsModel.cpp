@@ -9,50 +9,47 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double);
 
-holdingsRow::holdingsRow* holdingsRow::getHoldingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
+holdingsRow::holdingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
+    : baseRow(sort)
 {
-    holdingsRow *row = new holdingsRow(sort);
-
     calculations::securityValue value = info->tickerValue.value(s.id);
 
     //row_Active
-    row->values.append((int)s.includeInCalc);
+    this->values.append((int)s.includeInCalc);
     //row_Ticker
-    row->values.append(s.ticker);
+    this->values.append(s.ticker);
     //row_Cash
-    row->values.append((int)s.cashAccount);
+    this->values.append((int)s.cashAccount);
     //row_Price
     double price = prices::instance().price(s.ticker, info->date);
-    row->values.append(price == 0 ? QVariant() : price);
+    this->values.append(price == 0 ? QVariant() : price);
     //row_Shares
-    row->values.append(value.shares);
+    this->values.append(value.shares);
     //row_Avg
-    row->values.append(value.shares == 0 ? QVariant() : info->avgPrices.value(s.id));
+    this->values.append(value.shares == 0 ? QVariant() : info->avgPrices.value(s.id));
     //row_Cost
-    row->values.append(value.shares == 0 ? QVariant() : value.costBasis);
+    this->values.append(value.shares == 0 ? QVariant() : value.costBasis);
     //row_Value
-    row->values.append(value.shares == 0 ? QVariant() : value.totalValue);
+    this->values.append(value.shares == 0 ? QVariant() : value.totalValue);
     //row_ValueP
-    row->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue * 100);
+    this->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue * 100);
     //row_Gain
-    row->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
+    this->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
     //row_GainP
-    row->values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
+    this->values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
     //row_Acct
-    row->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
+    this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA
     QStringList aaList;
     foreach(const aaTarget &target, s.aa)
         aaList.append(QString("%1 - %2").arg(aa.value(target.id).description, functions::doubleToPercentage(target.target)));
-    row->values.append(aaList.join(", "));
+    this->values.append(aaList.join(", "));
     //row_TaxLiability
-    row->values.append(value.taxLiability == 0 ? QVariant() : value.taxLiability);
+    this->values.append(value.taxLiability == 0 ? QVariant() : value.taxLiability);
     //row_NetValue
-    row->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.taxLiability);
+    this->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.taxLiability);
     //row_ID
-    row->values.append(s.id);
-
-    return row;
+    this->values.append(s.id);
 }
 
 QMap<int, QString> holdingsRow::fieldNames()

@@ -1,6 +1,7 @@
 #include "frmAAEdit.h"
 
-frmAAEdit::frmAAEdit(QWidget *parent, const assetAllocation &aa): QDialog(parent), m_aa(aa)
+frmAAEdit::frmAAEdit(const int &portfolioID, QWidget *parent, const assetAllocation &aa)
+    : QDialog(parent), m_portfolioID(portfolioID), m_aa(aa), m_aaOriginal(aa)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit AA");
@@ -20,6 +21,13 @@ void frmAAEdit::accept()
     m_aa.description = ui.txtDesc->text();
     m_aa.target = ui.sbTarget->value();
 
+    if (m_aa == m_aaOriginal)
+    {
+        QDialog::reject();
+        return;
+    }
+
+    m_aa.save(m_portfolioID);
     QDialog::accept();
 }
 

@@ -2,11 +2,11 @@
 
 //enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_TaxRate, row_TaxLiability, row_Net, row_Holdings };
 const QStringList acctRow::columns = QStringList() << "Account" << "Cost Basis" << "Total Value" << "% of Portfolio" << "Gain/Loss" << "% Gain/Loss"
-    << "Tax Rate" << "Tax Liability" << "After Tax Value" << "# of Holdings";
+    << "Tax Rate" << "Tax Liability" << "After Tax Value" << "# of Holdings" << "ID";
 
 const QVariantList acctRow::columnsType = QVariantList() << QVariant(QVariant::String) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-     << QVariant(QVariant::Double) << QVariant(QVariant::Int);
+     << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 acctRow::acctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo, const account &acct, const QString &sort)
     : baseRow(sort)
@@ -31,6 +31,8 @@ acctRow::acctRow(const calculations::portfolioDailyInfo *info, const cachedCalcu
     this->values.append(acctInfo.totalValue - acctInfo.taxLiability);
     //row_Holdings
     this->values.append(acctInfo.count);
+    //row_ID
+    this->values.append(acct.id);
 }
 
 QMap<int, QString> acctRow::fieldNames()
@@ -40,6 +42,7 @@ QMap<int, QString> acctRow::fieldNames()
     for (int i = 0; i < columns.count(); ++i)
         names[i] = QString(columns.at(i)).replace('\n', ' ');
 
+    names.remove(row_ID);
     return names;
 }
 

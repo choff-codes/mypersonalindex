@@ -92,8 +92,8 @@ public:
     static void deleteTable(const QString &table);
     static void deleteItem(const QString &table, const int &id);
     static void deleteTickerItems(const QString &table, const int &tickerID);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers);
+    static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers = false);
+    static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers = false);
 
 private:
     queries();

@@ -8,7 +8,7 @@
 class acctRow: public baseRow
 {
 public:
-    enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_TaxRate, row_TaxLiability, row_Net, row_Holdings };
+    enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_TaxRate, row_TaxLiability, row_Net, row_Holdings, row_ID };
     static const QStringList columns;
     static const QVariantList columnsType;
 

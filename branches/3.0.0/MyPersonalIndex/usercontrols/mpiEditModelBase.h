@@ -39,12 +39,9 @@ protected:
     virtual T internalPaste(const QStringList &value, bool *ok) = 0;
 
     void updateHeader() { emit headerDataChanged(Qt::Horizontal, 0, m_columns - 1); }
-    void moveUp();
-    void moveDown();
     QList<int> getSelectedRows() const;
 
 private:
-    static bool isContiguous(const QList<int> &values, const bool &ascending, const int &count = 0);
     void selectItem(const QModelIndex &index)  { m_parent->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows); }
 };
 

@@ -1,7 +1,7 @@
 #include "frmColumns.h"
 
-frmColumns::frmColumns(const int &id, const QList<int> &selectedColumns, const QMap<int, QString> &columns, QWidget *parent):
-        QDialog(parent), m_id(id), m_selectedColumns(selectedColumns), m_columns(columns)
+frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, QWidget *parent):
+        QDialog(parent), m_selectedColumns(selectedColumns), m_columns(columns)
 {
     ui.setupUI(this);
 
@@ -46,7 +46,6 @@ void frmColumns::accept()
    }
 
     m_selectedColumns = selected;
-    settings::saveColumns(m_id, m_selectedColumns);
 
     QDialog::accept();
 }

@@ -141,7 +141,7 @@ void nav::clearVariantLists()
 void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate)
 {
     // remove nav prices that are to be recalculated
-    queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, false);
+    queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate);
     // remove custom trades that are to be recalculated
     queries::deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true);
 

@@ -84,7 +84,7 @@ QString trade::dateToString(const tradeFreq &freq, const int &date)
     }
 }
 
-int security::firstTradeDate()
+int security::firstTradeDate() const
 {
     int minDate = -1;
     foreach(const trade &t, trades)

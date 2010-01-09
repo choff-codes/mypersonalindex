@@ -47,7 +47,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     mainPortfolioCombo->setMinimumSize(QSize(100, 0));
     mainPortfolioCombo->setMaximumSize(QSize(100, 16777215));
 
-
     mainToolbar->addAction(mainUpdatePrices);
     mainToolbar->addSeparator();
     mainToolbar->addAction(mainCompare);
@@ -61,7 +60,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     mainToolbar->addSeparator();
     mainToolbar->addAction(mainOptions);
     mainToolbar->addAction(mainAbout);
-
 
     tab = new QTabWidget(centralwidget);
     tab_holdings = new QWidget(centralwidget);
@@ -305,8 +303,11 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsGrid->addWidget(accountsToolbar);
     accountsGrid->addWidget(accounts);
 
-    accountsEdit = new QAction("Edit Accounts...", tab_accounts);
-    accountsEdit->setIconText("Edit Accounts...");
+    accountsAdd = new QAction("Add...", tab_accounts);
+    accountsAdd->setIconText("Add...");
+    accountsEdit = new QAction("Edit...", tab_accounts);
+    accountsEdit->setIconText("Edit...");
+    accountsDelete = new QAction("Delete", tab_accounts);
     accountsShowBlank = new QAction("Show (Blank)", tab_accounts);
     accountsShowBlank->setCheckable(true);
     accountsReorderColumns = new QAction("Modify Columns...", tab_accounts);
@@ -320,7 +321,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsSortCombo->setMinimumSize(QSize(100, 0));
     accountsSortCombo->setMaximumSize(QSize(100, 16777215));
 
+    accountsToolbar->addAction(accountsAdd);
     accountsToolbar->addAction(accountsEdit);
+    accountsToolbar->addAction(accountsDelete);
     accountsToolbar->addSeparator();
     accountsToolbar->addWidget(accountsDate);
     accountsToolbar->addWidget(accountsDateDropDown);
@@ -350,8 +353,11 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaGrid->addWidget(aaToolbar);
     aaGrid->addWidget(aa);
 
-    aaEdit = new QAction("Edit Asset Allocation...", tab_aa);
-    aaEdit->setIconText("Edit Asset Allocation...");
+    aaAdd = new QAction("Add...", tab_aa);
+    aaAdd->setIconText("Add...");
+    aaEdit = new QAction("Edit...", tab_aa);
+    aaEdit->setIconText("Edit...");
+    aaDelete = new QAction("Delete", tab_aa);
     aaShowBlank = new QAction("Show (Blank)", tab_aa);
     aaShowBlank->setCheckable(true);
     aaReorderColumns = new QAction("Modify Columns...", tab_aa);
@@ -365,7 +371,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaSortCombo->setMinimumSize(QSize(100, 0));
     aaSortCombo->setMaximumSize(QSize(100, 16777215));
 
+    aaToolbar->addAction(aaAdd);
     aaToolbar->addAction(aaEdit);
+    aaToolbar->addAction(aaDelete);
     aaToolbar->addSeparator();
     aaToolbar->addWidget(aaDate);
     aaToolbar->addWidget(aaDateDropDown);

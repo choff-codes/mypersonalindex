@@ -83,7 +83,9 @@ public:
 
     QVBoxLayout *accountsGrid;
     QToolBar *accountsToolbar;
+    QAction *accountsAdd;
     QAction *accountsEdit;
+    QAction *accountsDelete;
     QAction *accountsShowBlank;
     QAction *accountsReorderColumns;
     QAction *accountsExport;
@@ -95,7 +97,9 @@ public:
 
     QVBoxLayout *aaGrid;
     QToolBar *aaToolbar;
+    QAction *aaAdd;
     QAction *aaEdit;
+    QAction *aaDelete;
     QAction *aaShowBlank;
     QAction *aaReorderColumns;
     QAction *aaExport;

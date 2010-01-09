@@ -32,6 +32,9 @@ public:
     static QString currentValue(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info);
     static QString dailyReturn(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info, const int &startDate, const int &previousDay);
 
+    static QMap<int, QString> statisticList();
+    static void saveSelectedStats(const int &portfolioID, const QList<int> &stats);
+
     int id;
     QString description;
     QString sql;

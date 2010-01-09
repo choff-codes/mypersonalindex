@@ -2,9 +2,8 @@
 #include "frmPortfolio.h"
 #include "frmTicker.h"
 #include "frmOptions.h"
-#include "frmAA.h"
-#include "frmAcct.h"
-#include "frmStat.h"
+#include "frmAAEdit.h"
+#include "frmAcctEdit.h"
 #include "frmColumns.h"
 #include "frmSort.h"
 #include "mainPerformanceModel.h"
@@ -266,11 +265,11 @@ void frmMain::loadPortfolioAA()
     {
         assetAllocation aa;
         aa.description = "(Blank)";
-        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
     }
 
     foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), aa, m_currentPortfolio->info.aaSort));
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -533,6 +532,7 @@ void frmMain::refreshPortfolioSecurities(const int &minDate)
     m_calculations.clearCache();
     loadPortfolioHoldings();
     loadPortfolioAA();
+    loadPortfolioAcct();
 }
 
 void frmMain::addTicker()
@@ -665,33 +665,69 @@ void frmMain::options()
 
 void frmMain::editAA()
 {
-    frmAA f(m_currentPortfolio->info.id, m_currentPortfolio->data.aa, this);
-    if (f.exec())
+    bool change = false;
+    int minDate = -1;
+    foreach(baseRow *row, static_cast<mainAAModel*>(ui.aa->model())->selectedItems())
     {
-        m_currentPortfolio->data.aa = f.getReturnValues();
-        refreshPortfolioSecurities(-1);
+        int aaID = row->values.at(aaRow::row_ID).toInt();
+        frmAAEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.aa.value(aaID));
+        if (f.exec())
+        {
+            change = true;
+            m_currentPortfolio->data.aa[aaID] = f.getReturnValues();
+
+            foreach(const security &s, m_currentPortfolio->data.tickers)
+                foreach(const aaTarget &target, s.aa)
+                    if(target.id == aaID)
+                    {
+                        foreach(const trade &t, s.trades)
+                            if (t.type == trade::tradeType_AA)
+                            {
+                                int newMinDate = s.firstTradeDate();
+                                if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
+                                    minDate = newMinDate;
+                                break;
+                            }
+                        break;
+                    }
+        }
     }
 
+    if (!change)
+        return;
+
+    refreshPortfolioSecurities(minDate);
 }
 
 void frmMain::editAcct()
 {
-    frmAcct f(m_currentPortfolio->info.id, m_currentPortfolio->data.acct, this);
-    if (f.exec())
+    bool change = false;
+    foreach(baseRow *row, static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems())
     {
-        m_currentPortfolio->data.acct = f.getReturnValues();
+        int accountID = row->values.at(acctRow::row_ID).toInt();
+        frmAcctEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.acct.value(accountID));
+        if (f.exec())
+        {
+            change = true;
+            m_currentPortfolio->data.acct[accountID] = f.getReturnValues();
+        }
     }
+
+    if (!change)
+        return;
+
+    refreshPortfolioSecurities(-1);
 }
 
 void frmMain::editStat()
 {
-    frmStat f(m_currentPortfolio->info.id, m_statistics, m_currentPortfolio->data.stats, this);
+    frmColumns f(m_currentPortfolio->data.stats, statistic::statisticList(), this);
     if (f.exec())
     {
-        m_statistics = f.getReturnValues_Map();
-        m_currentPortfolio->data.stats = f.getReturnValues_Selected();
+        m_currentPortfolio->data.stats = f.getReturnValues();
+        statistic::saveSelectedStats(m_currentPortfolio->info.id, m_currentPortfolio->data.stats);
+        //loadStats();
     }
-
 }
 
 void frmMain::beginUpdate()
@@ -807,30 +843,33 @@ void frmMain::setSortDropDown(const QString &sort, QComboBox *dropDown)
 
 void frmMain::holdingsModifyColumns()
 {
-    frmColumns f(settings::columns_Holdings, m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), this);
+    frmColumns f(m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_Holdings] = f.getReturnValues();
+        settings::saveColumns(settings::columns_Holdings, m_settings.viewableColumns[settings::columns_Holdings]);
         loadPortfolioHoldings();
     }
 }
 
 void frmMain::aaModifyColumns()
 {
-    frmColumns f(settings::columns_AA, m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), this);
+    frmColumns f(m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_AA] = f.getReturnValues();
+        settings::saveColumns(settings::columns_AA, m_settings.viewableColumns[settings::columns_AA]);
         loadPortfolioAA();
     }
 }
 
 void frmMain::acctModifyColumns()
 {
-    frmColumns f(settings::columns_Acct, m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), this);
+    frmColumns f(m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), this);
     if (f.exec())
     {
         m_settings.viewableColumns[settings::columns_Acct] = f.getReturnValues();
+        settings::saveColumns(settings::columns_Acct, m_settings.viewableColumns[settings::columns_Acct]);
         loadPortfolioAcct();
     }
 }

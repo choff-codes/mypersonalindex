@@ -1,7 +1,4 @@
 #include "mpiEditModelBase.h"
-#include "frmStatEdit.h"
-#include "frmAcctEdit.h"
-#include "frmAAEdit.h"
 #include "frmTrade.h"
 
 template<class T, class editForm>
@@ -134,57 +131,6 @@ QMap<int, T> mpiEditModelBase<T, editForm>::saveList(const QMap<int, T> &origina
 }
 
 template<class T, class editForm>
-void mpiEditModelBase<T, editForm>::moveUp()
-{
-    QList<int> indexes = getSelectedRows();
-    if(indexes.isEmpty())
-        return;
-
-    if (isContiguous(indexes, true))
-        return;
-
-    m_parent->selectionModel()->clearSelection();
-    for(int i = 0; i < indexes.count(); ++i)
-    {
-        int row = indexes.value(i);
-        if (row == 0)
-            continue;
-
-        m_list.swap(row, row-1);
-        emit dataChanged(index(row-1, 0), index(row, m_columns));
-
-        selectItem(index(row-1, 0));
-    }
-    updateHeader();
-}
-
-template<class T, class editForm>
-void mpiEditModelBase<T, editForm>::moveDown()
-{
-    QList<int> indexes = getSelectedRows();
-    if(indexes.isEmpty())
-        return;
-
-    int rows = rowCount(QModelIndex());
-    if (isContiguous(indexes, false, rows))
-        return;
-
-    m_parent->selectionModel()->clearSelection();
-    for(int i = indexes.count() - 1; i >= 0; --i)
-    {
-        int row = indexes.value(i);
-        if (row == rows - 1)
-            continue;
-
-        m_list.swap(row, row+1);
-        emit dataChanged(index(row, 0), index(row + 1, m_columns));
-
-        selectItem(index(row+1, 0));
-    }
-    updateHeader();
-}
-
-template<class T, class editForm>
 QList<int> mpiEditModelBase<T, editForm>::getSelectedRows() const
 {
     QModelIndexList model = m_parent->selectionModel()->selectedRows();
@@ -199,35 +145,5 @@ QList<int> mpiEditModelBase<T, editForm>::getSelectedRows() const
     return indexes;
 }
 
-template<class T, class editForm>
-bool mpiEditModelBase<T, editForm>::isContiguous(const QList<int> &values, const bool &ascending, const int &count)
-{
-    int x = ascending ? 0 : count - 1;
-    bool contiguous = true;
-
-    if (ascending)
-    {
-        for(int i = 0; i < values.count(); ++i, ++x)
-            if (values.value(i) != x)
-            {
-                contiguous = false;
-                break;
-            }
-    }
-    else
-    {
-        for(int i = values.count(); i >= 0; --i, --x)
-            if (values.value(i) != x)
-            {
-                contiguous = false;
-                break;
-            }
-    }
-    return contiguous;
-}
-
 // define the template for each implementation to prevent linking errors
-template class mpiEditModelBase<statistic, frmStatEdit>;
-template class mpiEditModelBase<account, frmAcctEdit>;
-template class mpiEditModelBase<assetAllocation, frmAAEdit>;
 template class mpiEditModelBase<trade, frmTrade>;

@@ -60,7 +60,7 @@ void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioLi
         p.avgPriceCalc = (portfolioInfo::avgPriceCalculation)q.value(queries::portfoliosColumns_CostCalc).toInt();
         p.startValue = q.value(queries::portfoliosColumns_StartValue).toInt();
         p.aaThreshold = q.value(queries::portfoliosColumns_AAThreshold).toInt();
-        p.aaThresholdMethod = (portfolioInfo::thesholdMethod)q.value(queries::portfoliosColumns_AAThreshold).toInt();
+        p.aaThresholdMethod = (portfolioInfo::thesholdMethod)q.value(queries::portfoliosColumns_ThresholdMethod).toInt();
         p.holdingsShowHidden = q.value(queries::portfoliosColumns_HoldingsShowHidden).toBool();
         p.navSortDesc = q.value(queries::portfoliosColumns_NAVSortDesc).toBool();
         p.aaShowBlank = q.value(queries::portfoliosColumns_AAShowBlank).toBool();

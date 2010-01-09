@@ -8,13 +8,42 @@
 //      stat_ProbabilityOfYearlyLoss, stat_TaxLiability, stat_YearlyReturn, stat_YearlyStandardDeviation, stat_WeightedExpenseRatio } ;
 
 const QStringList statistic::statisticDisplayNames = QStringList() << "Beginning Index Value" << "Beginning Value" << "Cost Basis"
-     "Current Index Value" <<  "Current Value" <<  "Daily Return" << "Daily Standard Deviation" << "Date" << "Days Invested"
+     << "Current Index Value" <<  "Current Value" <<  "Daily Return" << "Daily Standard Deviation" << "Date" << "Days Invested"
      << "Gain Loss" << "Hourly Return" << "Max % Down" << "Max % Down Day" << "Max % Up" << "Max % Up Day" << "Maximum Index Value"
      << "Maximum Index Value Day" << "Maximum Portfolio Value" << "Maximum Portfolio Value Day" << "Minimum Index Value"
      << "Minimum Index Value Day" << "Minimum Portfolio Value" << "Minimum Portfolio Value Day" << "Monthly Return"
      << "Monthly Standard Deviation" << "Net Change" << "Overall Return" << "Probability Of Yearly Gain" << "Probability Of Yearly Loss"
      << "Tax Liability" << "Yearly Return" << "Yearly Standard Deviation" << "Weighted Expense Ratio";
 
+
+QMap<int, QString> statistic::statisticList()
+{
+    QMap<int, QString> stats;
+    for (int i = 0; i < statisticDisplayNames.count(); ++i)
+        stats[i] = QString(statisticDisplayNames.at(i));
+
+    return stats;
+}
+
+void statistic::saveSelectedStats(const int &portfolioID, const QList<int> &stats)
+{
+    QVariantList portfolio, statID, sequence;
+    for(int i = 0; i < stats.count(); ++i)
+    {
+        portfolio.append(portfolioID);
+        statID.append(stats.at(i));
+        sequence.append(i);
+    }
+
+    QMap<QString, QVariantList> tableValues;
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_PortfolioID), portfolio);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), statID);
+    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
+
+    queries::deletePortfolioItems(queries::table_StatMapping, portfolioID);
+    if (!statID.isEmpty())
+        queries::executeTableUpdate(queries::table_StatMapping, tableValues);
+}
 
 QString statistic::calculate(stat statistic, portfolio *currentPortfolio, calculations::portfolioDailyInfo *info, const int &startDate, const int &previousDay)
 {

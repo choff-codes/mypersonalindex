@@ -12,11 +12,13 @@ class frmAAEdit : public QDialog
 public:
     const assetAllocation& getReturnValues() const { return m_aa; }
 
-    frmAAEdit(QWidget *parent = 0, const assetAllocation &aa = assetAllocation());
+    frmAAEdit(const int &portfolioID, QWidget *parent = 0, const assetAllocation &aa = assetAllocation());
 
 private:
     frmAAEdit_UI ui;
+    int m_portfolioID;
     assetAllocation m_aa;
+    assetAllocation m_aaOriginal;
 
 private slots:
     void accept();

@@ -1,6 +1,7 @@
 #include "frmAcctEdit.h"
 
-frmAcctEdit::frmAcctEdit(QWidget *parent, const account &acct): QDialog(parent), m_acct(acct)
+frmAcctEdit::frmAcctEdit(const int &portfolioID, QWidget *parent, const account &acct)
+    : QDialog(parent), m_portfolioID(portfolioID), m_acct(acct), m_acctOriginal(acct)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Account");
@@ -22,6 +23,13 @@ void frmAcctEdit::accept()
     m_acct.taxRate = ui.sbTaxRate->value();
     m_acct.taxDeferred = ui.chkTaxDeferred->isChecked();
 
+    if (m_acct == m_acctOriginal)
+    {
+        QDialog::reject();
+        return;
+    }
+
+    m_acct.save(m_portfolioID);
     QDialog::accept();
 }
 

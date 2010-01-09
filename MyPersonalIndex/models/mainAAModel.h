@@ -8,11 +8,11 @@
 class aaRow: public baseRow
 {
 public:
-    enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Offset, row_Holdings };
+    enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Offset, row_OffsetAmount, row_Holdings, row_ID };
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo,
+    aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
            const assetAllocation &aa, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }

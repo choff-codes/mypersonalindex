@@ -108,7 +108,7 @@ public:
         return !(*this == other);
     }
 
-    int firstTradeDate();
+    int firstTradeDate() const;
     void save(const int &portfolioID);
     void saveAATargets();
 };

@@ -2,15 +2,15 @@
 
 //enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Offset, row_Holdings };
 const QStringList aaRow::columns = QStringList() << "Asset Allocation" << "Cost Basis" << "Total Value" << "% of Portfolio"
-    << "Gain/Loss" << "% Gain Loss" << "Target" << "Offset" << "# Holdings";
+    << "Gain/Loss" << "% Gain Loss" << "Target" << "Offset" << "Offset Amount" << "# Holdings" << "ID";
 
 const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::String) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-    << QVariant(QVariant::Int);
+    << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 
-aaRow::aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, const assetAllocation &aa, const QString &sort)
-    : baseRow(sort)
+aaRow::aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
+    const assetAllocation &aa, const QString &sort): baseRow(sort)
 {
     //row_Description
     this->values.append(aa.description);
@@ -27,9 +27,15 @@ aaRow::aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculati
     //row_Target
     this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Offset
-    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 * ((aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
+    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 *
+        (method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info->totalValue * aa.target / 100.0)) - 1) :
+        (aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
+    //row_OffsetAmount
+    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : info->totalValue * ((aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
     //row_Holdings
     this->values.append(aaInfo.count);
+    //row_ID
+    this->values.append(aa.id);
 }
 
 QMap<int, QString> aaRow::fieldNames()
@@ -39,6 +45,7 @@ QMap<int, QString> aaRow::fieldNames()
     for (int i = 0; i < columns.count(); ++i)
         names[i] = QString(columns.at(i)).replace('\n', ' ');
 
+    names.remove(row_ID);
     return names;
 }
 
@@ -59,6 +66,7 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
             case aaRow::row_Value:
             case aaRow::row_CostBasis:
             case aaRow::row_Gain:
+            case aaRow::row_OffsetAmount:
                 return functions::doubleToCurrency(m_rows.at(index.row())->values.at(column).toDouble());
             case aaRow::row_ValueP:
             case aaRow::row_Target:

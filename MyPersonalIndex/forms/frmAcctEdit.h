@@ -12,11 +12,13 @@ class frmAcctEdit : public QDialog
 public:
     const account& getReturnValues() const { return m_acct; }
 
-    frmAcctEdit(QWidget *parent = 0, const account &acct = account());
+    frmAcctEdit(const int &portfolioID, QWidget *parent = 0, const account &acct = account());
 
 private:
     frmAcctEdit_UI ui;
+    int m_portfolioID;
     account m_acct;
+    account m_acctOriginal;
 
 private slots:
     void accept();

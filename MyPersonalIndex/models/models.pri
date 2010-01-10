@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
-HEADERS += $$PWD/tickerAAModel.h \
-    $$PWD/tickerTradeModel.h \
+HEADERS += $$PWD/securityAAModel.h \
+    $$PWD/securityTradeModel.h \
     $$PWD/mainHoldingsModel.h \
     $$PWD/mainPerformanceModel.h \
     $$PWD/mainAcctModel.h \
@@ -10,6 +10,6 @@ SOURCES += $$PWD/mainHoldingsModel.cpp \
     $$PWD/mainAcctModel.cpp \
     $$PWD/mainAAModel.cpp \
     $$PWD/mainPerformanceModel.cpp \
-    $$PWD/tickerAAModel.cpp \
-    $$PWD/tickerTradeModel.cpp \
+    $$PWD/securityAAModel.cpp \
+    $$PWD/securityTradeModel.cpp \
     $$PWD/mainCorrelationModel.cpp

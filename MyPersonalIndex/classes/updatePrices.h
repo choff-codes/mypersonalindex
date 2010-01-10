@@ -18,7 +18,7 @@ public:
     static bool isInternetConnection();
 
 signals:
-    void updateFinished(const QStringList &invalidTickers);
+    void updateFinished(const QStringList &invalidSecurities);
     void statusUpdate(const QString &message);
 
 private:
@@ -26,9 +26,9 @@ private:
     bool m_downloadSplits;
     int m_dataStartDate;
     QStringList m_updateFailures;
-    QVariantList m_pricesDate, m_pricesTicker, m_pricesPrice;
-    QVariantList m_divDate, m_divTicker, m_divAmount;
-    QVariantList m_splitDate, m_splitTicker, m_splitRatio;
+    QVariantList m_pricesDate, m_pricesSymbol, m_pricesPrice;
+    QVariantList m_divDate, m_divSymbol, m_divAmount;
+    QVariantList m_splitDate, m_splitSymbol, m_splitRatio;
     nav *m_nav;
 
     static const char stockPrices = 'd';
@@ -36,23 +36,23 @@ private:
 
     struct updateInfo
     {
-        QString ticker;
+        QString symbol;
         int lastPrice;
         int lastDividend;
         int lastSplit;
 
         updateInfo() {}
-        updateInfo(const QString &p_ticker, const int &minDate): ticker(p_ticker), lastPrice(minDate), lastDividend(minDate), lastSplit(minDate) {}
+        updateInfo(const QString &p_symbol, const int &minDate): symbol(p_symbol), lastPrice(minDate), lastDividend(minDate), lastSplit(minDate) {}
     };
 
     void run();
-    QString getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type);
-    QString getSplitAddress(const QString &ticker);
+    QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
+    QString getSplitAddress(const QString &symbol);
     QList<QByteArray>* downloadFile(const QUrl&);
-    void getUpdateInfo(QMap<QString, updateInfo> &tickers);
-    bool getPrices(const QString &ticker, const int &minDate, int &earliestUpdate);
-    void getDividends(const QString&ticker, const int &minDate, int &earliestUpdate);
-    void getSplits(const QString &ticker, const int &minDate, int &earliestUpdate);
+    void getUpdateInfo(QMap<QString, updateInfo> &securities);
+    bool getPrices(const QString &symbol, const int &minDate, int &earliestUpdate);
+    void getDividends(const QString&symbol, const int &minDate, int &earliestUpdate);
+    void getSplits(const QString &symbol, const int &minDate, int &earliestUpdate);
     void updateMissingPrices();
     void insertUpdatesToObject();
     void insertUpdates();

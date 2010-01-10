@@ -16,6 +16,8 @@ public:
     QList<int> dates() const { return m_nav.keys(); }
     int count() const { return m_nav.count(); }
     bool isEmpty() const { return m_nav.isEmpty(); }
+
+    // must check IsEmpty first when calling
     int firstDate() const { return m_nav.constBegin().key(); }
     int lastDate() const { return (m_nav.constEnd() - 1).key(); }
 

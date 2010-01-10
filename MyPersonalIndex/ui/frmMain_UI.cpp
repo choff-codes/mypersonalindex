@@ -12,12 +12,14 @@ const QString frmMain_UI::STATUS_TEXT = "Status: ";
 const QString frmMain_UI::DATE = "Date: ";
 const QString frmMain_UI::START_DATE = "Start Date: ";
 const QString frmMain_UI::END_DATE = "End Date: ";
+const QString frmMain_UI::WINDOW_TITLE = "My Personal Index";
+const QString frmMain_UI::BUSY = "Finishing current task...";
 
 void frmMain_UI::setupUI(QMainWindow *MainWindow)
 {
     QString shortDate = QLocale().dateFormat(QLocale::ShortFormat);
 
-    MainWindow->setWindowTitle("My Personal Index");
+    MainWindow->setWindowTitle(WINDOW_TITLE);
     MainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
     MainWindow->resize(800, 600);
     MainWindow->setContextMenuPolicy(Qt::NoContextMenu);
@@ -94,7 +96,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdings->setAlternatingRowColors(true);
     holdings->horizontalHeader()->setHighlightSections(false);
     holdings->verticalHeader()->setDefaultSectionSize(fntHeight);
-    holdings->horizontalHeader()->setFixedHeight(fntHeight * 2 + 2);
     holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     holdingsGrid->addWidget(holdingsToolbar);
@@ -144,7 +145,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     stat->setAlternatingRowColors(true);
     stat->horizontalHeader()->setHighlightSections(false);
     stat->verticalHeader()->setDefaultSectionSize(fntHeight);
-    stat->horizontalHeader()->setFixedHeight(fntHeight);
     stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     statGrid->addWidget(statToolbar);
@@ -236,7 +236,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     performance->setAlternatingRowColors(true);
     performance->horizontalHeader()->setHighlightSections(false);
     performance->verticalHeader()->setDefaultSectionSize(fntHeight);
-    performance->horizontalHeader()->setFixedHeight(fntHeight + 6);
 
     performanceGrid->addWidget(performanceToolbar);
     performanceGrid->addWidget(performance);
@@ -260,8 +259,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
     correlations->setAlternatingRowColors(true);
     correlations->horizontalHeader()->setHighlightSections(false);
-    correlations->verticalHeader()->setDefaultSectionSize(fntHeight);
-    correlations->horizontalHeader()->setFixedHeight(fntHeight);
+    correlations->verticalHeader()->setDefaultSectionSize(fntHeight + 4);
     correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     correlationsGrid->addWidget(correlationsToolbar);
@@ -297,7 +295,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accounts->setAlternatingRowColors(true);
     accounts->horizontalHeader()->setHighlightSections(false);
     accounts->verticalHeader()->setDefaultSectionSize(fntHeight);
-    accounts->horizontalHeader()->setFixedHeight(fntHeight * 2 + 2);
     accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     accountsGrid->addWidget(accountsToolbar);
@@ -347,7 +344,6 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aa->setAlternatingRowColors(true);
     aa->horizontalHeader()->setHighlightSections(false);
     aa->verticalHeader()->setDefaultSectionSize(fntHeight);
-    aa->horizontalHeader()->setFixedHeight(fntHeight * 2 + 2);
     aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     aaGrid->addWidget(aaToolbar);

@@ -1,6 +1,6 @@
 #include "frmTrade.h"
 #include "frmTrade_UI.h"
-#include "frmTicker.h"
+#include "frmSecurity.h"
 #include <QtGui>
 
 frmTrade::frmTrade(QWidget *parent, const trade &trade): QDialog(parent), m_trade(trade)
@@ -13,11 +13,11 @@ frmTrade::frmTrade(QWidget *parent, const trade &trade): QDialog(parent), m_trad
 
     // cannot pass cash accounts in constructor since it does not match the format
     // of mpiModelBase edit function
-    foreach(const security &sec, static_cast<frmTicker*>(parent)->getCashAccounts())
+    foreach(const security &sec, static_cast<frmSecurity*>(parent)->getCashAccounts())
         // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
         // but now will show up as no cash account selected
         if (sec.cashAccount) // && sec.id != id)
-            ui.cmbCash->addItem(sec.ticker, sec.id);
+            ui.cmbCash->addItem(sec.symbol, sec.id);
 
     connectSlots();
     loadTrade();

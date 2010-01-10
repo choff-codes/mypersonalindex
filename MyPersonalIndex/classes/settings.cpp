@@ -23,7 +23,7 @@ void settings::loadSettingsInfo(settings &s, QSqlQuery q)
 
     s.dataStartDate = q.value(queries::settingsColumns_DataStartDate).toInt();
     s.splits = q.value(queries::settingsColumns_Splits).toBool();
-    s.tickersIncludeDividends = q.value(queries::settingsColumns_TickersIncludeDividends).toBool();
+    s.securitiesIncludeDividends = q.value(queries::settingsColumns_SecuritiesIncludeDividends).toBool();
     s.version = q.value(queries::settingsColumns_Version).toInt();
     if (!q.value(queries::settingsColumns_WindowState).isNull())
     {
@@ -50,7 +50,7 @@ void settings::save()
     QMap<QString, QVariant> values;
     values.insert(queries::settingsColumns.at(queries::settingsColumns_Splits), (int)this->splits);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_DataStartDate), this->dataStartDate);
-    values.insert(queries::settingsColumns.at(queries::settingsColumns_TickersIncludeDividends), (int)this->tickersIncludeDividends);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_SecuritiesIncludeDividends), (int)this->securitiesIncludeDividends);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_LastPortfolio), this->lastPortfolio);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowState), (int)this->state);
 

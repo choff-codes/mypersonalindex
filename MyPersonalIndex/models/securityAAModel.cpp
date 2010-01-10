@@ -1,6 +1,6 @@
-#include "tickerAAModel.h"
+#include "securityAAModel.h"
 
-double tickerAAModel::totalPercentage()
+double securityAAModel::totalPercentage()
 {
     double total = 0;
 
@@ -10,7 +10,7 @@ double tickerAAModel::totalPercentage()
     return total;
 }
 
-Qt::ItemFlags tickerAAModel::flags(const QModelIndex &index) const
+Qt::ItemFlags securityAAModel::flags(const QModelIndex &index) const
 {
     Qt::ItemFlags flags = QAbstractTableModel::flags(index);
     if (index.column() == 1)
@@ -19,7 +19,7 @@ Qt::ItemFlags tickerAAModel::flags(const QModelIndex &index) const
     return flags;
 }
 
-QVariant tickerAAModel::data(const QModelIndex &index, int role) const
+QVariant securityAAModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -48,7 +48,7 @@ QVariant tickerAAModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-bool tickerAAModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool securityAAModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
     {
@@ -60,7 +60,7 @@ bool tickerAAModel::setData(const QModelIndex &index, const QVariant &value, int
     return false;
 }
 
-void tickerAAModel::addNew(const int &id)
+void securityAAModel::addNew(const int &id)
 {
     beginInsertRows(QModelIndex(), m_list.count(), m_list.count());
     double total = totalPercentage();
@@ -69,7 +69,7 @@ void tickerAAModel::addNew(const int &id)
     emit updateHeader();
 }
 
-void tickerAAModel::deleteSelected()
+void securityAAModel::deleteSelected()
 {
     QList<int> indexes;
     foreach(const QModelIndex &q, m_parent->selectionModel()->selectedRows())

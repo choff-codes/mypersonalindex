@@ -9,6 +9,7 @@ class mainCorrelationModel: public QAbstractTableModel
 public:
 
     typedef QMap<QString, QHash<QString, double> > correlationList;
+    static const char portfolioIndicator = '`';
 
     mainCorrelationModel(const correlationList &correlations, const QStringList &symbols, QTableView *parent = 0):
         QAbstractTableModel(parent), m_correlationList(correlations), m_symbols(symbols)

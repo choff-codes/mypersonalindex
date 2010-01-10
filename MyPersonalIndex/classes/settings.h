@@ -1,6 +1,9 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define VERSION 300 // UPDATE EACH RELEASE
+#define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
+
 #include <QtGui>
 #include "queries.h"
 
@@ -13,7 +16,7 @@ public:
     int dataStartDate;
     bool splits;
     int version;
-    bool tickersIncludeDividends;
+    bool securitiesIncludeDividends;
     QVariant lastPortfolio;
     QSize windowSize;
     QPoint windowLocation;

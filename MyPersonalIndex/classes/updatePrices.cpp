@@ -5,24 +5,24 @@
 
 void updatePrices::run()
 {
-    QMap<QString, updateInfo> tickers;
+    QMap<QString, updateInfo> securities;
 
     emit statusUpdate("Updating Prices");
 
     foreach(portfolio* p, m_data)
-        foreach(const security &sec, p->data.tickers)
-            if (!tickers.contains(sec.ticker) && !sec.cashAccount)
-                tickers.insert(sec.ticker, updateInfo(sec.ticker, m_dataStartDate));
+        foreach(const security &sec, p->data.securities)
+            if (!securities.contains(sec.symbol) && !sec.cashAccount)
+                securities.insert(sec.symbol, updateInfo(sec.symbol, m_dataStartDate));
 
-    getUpdateInfo(tickers);
+    getUpdateInfo(securities);
 
     int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
-    foreach(const updateInfo &info, tickers)
-        if (getPrices(info.ticker, info.lastPrice, firstUpdate))  // check if symbol exists
+    foreach(const updateInfo &info, securities)
+        if (getPrices(info.symbol, info.lastPrice, firstUpdate))  // check if symbol exists
         {
-            getDividends(info.ticker, info.lastDividend, firstUpdate);
+            getDividends(info.symbol, info.lastDividend, firstUpdate);
             if (m_downloadSplits)
-                getSplits(info.ticker, info.lastSplit, firstUpdate);
+                getSplits(info.symbol, info.lastSplit, firstUpdate);
         }
 
     insertUpdatesToObject();
@@ -41,9 +41,9 @@ void updatePrices::updateMissingPrices()
 {
     QList<int> dates = prices::instance().dates();
 
-    foreach(const QString &ticker, prices::instance().symbols())
+    foreach(const QString &symbol, prices::instance().symbols())
     {
-        QMap<int, double> prices = prices::instance().price(ticker);
+        QMap<int, double> prices = prices::instance().price(symbol);
 
         if (prices.count() <= 2)
             continue;
@@ -58,8 +58,8 @@ void updatePrices::updateMissingPrices()
 
             if (z.key() != date)
             {
-                prices::instance().insertPrice(ticker, date, (z - 1).value());
-                m_pricesTicker.append(ticker);
+                prices::instance().insertPrice(symbol, date, (z - 1).value());
+                m_pricesSymbol.append(symbol);
                 m_pricesDate.append(date);
                 m_pricesPrice.append((z - 1).value());
             }
@@ -70,14 +70,14 @@ void updatePrices::updateMissingPrices()
 void updatePrices::insertUpdatesToObject()
 {
     for(int i = 0; i < m_pricesDate.count(); ++i)
-        prices::instance().insertPrice(m_pricesTicker.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
+        prices::instance().insertPrice(m_pricesSymbol.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
 
 
     for(int i = 0; i < m_divDate.count(); ++i)
-        prices::instance().insertDividend(m_divTicker.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
+        prices::instance().insertDividend(m_divSymbol.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
 
     for(int i = 0; i < m_splitDate.count(); ++i)
-        prices::instance().insertSplit(m_splitTicker.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
+        prices::instance().insertSplit(m_splitSymbol.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
 }
 
 void updatePrices::insertUpdates()
@@ -86,7 +86,7 @@ void updatePrices::insertUpdates()
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Date), m_pricesDate);
-        tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Ticker), m_pricesTicker);
+        tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Symbol), m_pricesSymbol);
         tableValues.insert(queries::closingPricesColumns.at(queries::closingPricesColumns_Price), m_pricesPrice);
         queries::executeTableUpdate(queries::table_ClosingPrices, tableValues);
     }
@@ -95,7 +95,7 @@ void updatePrices::insertUpdates()
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Date), m_divDate);
-        tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Ticker), m_divTicker);
+        tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Symbol), m_divSymbol);
         tableValues.insert(queries::dividendsColumns.at(queries::dividendsColumns_Amount), m_divAmount);
         queries::executeTableUpdate(queries::table_Dividends, tableValues);
     }
@@ -104,20 +104,20 @@ void updatePrices::insertUpdates()
     {
         QMap<QString, QVariantList> tableValues;
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Date), m_splitDate);
-        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ticker), m_splitTicker);
+        tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Symbol), m_splitSymbol);
         tableValues.insert(queries::splitsColumns.at(queries::splitsColumns_Ratio), m_splitRatio);
         queries::executeTableUpdate(queries::table_Splits, tableValues);
     }
 }
 
-void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &tickers)
+void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &securities)
 {
-    for(QMap<QString, updateInfo>::iterator i = tickers.begin(); i != tickers.end(); ++i)
+    for(QMap<QString, updateInfo>::iterator i = securities.begin(); i != securities.end(); ++i)
     {
-        QString ticker = i.key();
-        QMap<int, double> price = prices::instance().price(ticker);
-        QMap<int, double> dividend = prices::instance().dividend(ticker);
-        QMap<int, double> split = prices::instance().split(ticker);
+        QString symbol = i.key();
+        QMap<int, double> price = prices::instance().price(symbol);
+        QMap<int, double> dividend = prices::instance().dividend(symbol);
+        QMap<int, double> split = prices::instance().split(symbol);
 
         if (!price.isEmpty())
             i.value().lastPrice = (price.constEnd() - 1).key();
@@ -130,16 +130,16 @@ void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &tickers)
     }
 }
 
-QString updatePrices::getCSVAddress(const QString &ticker, const QDate &begin, const QDate &end, const QString &type)
+QString updatePrices::getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type)
 {
     return QString("http://ichart.finance.yahoo.com/table.csv?s=%1&a=%2&b=%3&c=%4&d=%5&e=%6&f=%7&g=%8&ignore=.csv").arg(
-        ticker, QString::number(begin.month() - 1), QString::number(begin.day()), QString::number(begin.year()),
+        symbol, QString::number(begin.month() - 1), QString::number(begin.day()), QString::number(begin.year()),
                 QString::number(end.month() - 1), QString::number(end.day()), QString::number(end.year()), type);
 }
 
-QString updatePrices::getSplitAddress(const QString &ticker)
+QString updatePrices::getSplitAddress(const QString &symbol)
 {
-    return QString("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s=%1").arg(ticker);
+    return QString("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s=%1").arg(symbol);
 }
 
 QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
@@ -162,15 +162,15 @@ QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
     return lines;
 }
 
-bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &earliestUpdate)
+bool updatePrices::getPrices(const QString &symbol, const int &minDate, int &earliestUpdate)
 {
     if (minDate == QDate::currentDate().toJulianDay())
         return true;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
     if (!lines)
     {
-        m_updateFailures.append(ticker);
+        m_updateFailures.append(symbol);
         delete lines;
         return false;
     }
@@ -190,7 +190,7 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;
 
-            m_pricesTicker.append(ticker);
+            m_pricesSymbol.append(symbol);
             m_pricesPrice.append(line.at(4).toDouble());
         }
     }
@@ -199,12 +199,12 @@ bool updatePrices::getPrices(const QString &ticker, const int &minDate, int &ear
     return true;
 }
 
-void updatePrices::getDividends(const QString &ticker, const int &minDate, int &earliestUpdate)
+void updatePrices::getDividends(const QString &symbol, const int &minDate, int &earliestUpdate)
 {
     if (minDate == QDate::currentDate().toJulianDay())
         return;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(ticker, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockDividends))));
+    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockDividends))));
 
     if (lines && lines->count() > 2)
     {
@@ -220,7 +220,7 @@ void updatePrices::getDividends(const QString &ticker, const int &minDate, int &
             if (djulian < earliestUpdate)
                 earliestUpdate = djulian;
 
-            m_divTicker.append(ticker);
+            m_divSymbol.append(symbol);
             m_divAmount.append(line.at(1).toDouble());
         }
     }
@@ -228,7 +228,7 @@ void updatePrices::getDividends(const QString &ticker, const int &minDate, int &
     delete lines;
 }
 
-void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &earliestUpdate)
+void updatePrices::getSplits(const QString &symbol, const int &minDate,  int &earliestUpdate)
 {
     if (minDate == QDate::currentDate().toJulianDay())
         return;
@@ -236,7 +236,7 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
     const QString htmlSplitStart = "<br><center>Splits:";  // text starting splits
     const QString htmlSplitTrue = "<br><center>Splits:<nobr>";  // same line, but signifying splits
     const QString htmlSplitNone = "<br><center>Splits:none</center>"; // same line, but signifying no splits
-    QList<QByteArray> *lines = downloadFile(QUrl(getSplitAddress(ticker)));
+    QList<QByteArray> *lines = downloadFile(QUrl(getSplitAddress(symbol)));
 
     if (!lines)
         return;
@@ -277,7 +277,7 @@ void updatePrices::getSplits(const QString &ticker, const int &minDate,  int &ea
         QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');
         m_splitRatio.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
 
-        m_splitTicker.append(ticker);
+        m_splitSymbol.append(symbol);
     }
 
     delete lines;

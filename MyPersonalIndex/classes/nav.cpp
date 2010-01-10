@@ -41,14 +41,14 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     if (*previousDate == m_dates.last())
         return;
 
-    dynamicTrades trades = getPortfolioTrades(portfolioID, calculationDate, portfolioStartDate);
+    navTrades trades = getPortfolioTrades(portfolioID, calculationDate, portfolioStartDate);
     if (portfolioStartDate)
     {
         insertFirstPortfolioTrades(currentPortfolio, calculationDate, trades);
         insertPortfolioTradesToObject(currentPortfolio);
     }
 
-    QList<int> tickerReinvestments = getPortfolioTickerReinvestment(portfolioID);
+    QList<int> securityReinvestments = getPortfolioSecurityReinvestment(portfolioID);
     calculations::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
@@ -71,7 +71,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         int date = *currentDate;
         double newTotalValue = 0, dailyActivity = 0, newNAV = 0;
 
-        insertPortfolioReinvestments(currentPortfolio, date, tickerReinvestments, previousInfo);
+        insertPortfolioReinvestments(currentPortfolio, date, securityReinvestments, previousInfo);
         insertPortfolioTrades(currentPortfolio, date, previousInfo, trades.value(date) + trades.value(-1));
         insertPortfolioTradesToObject(currentPortfolio);
 
@@ -110,16 +110,16 @@ void nav::insertVariantLists()
         queries::executeTableUpdate(queries::table_NAV, tableValues);
     }
 
-    if (!m_Trades_Dates.isEmpty())
+    if (!m_ExecutedTrades_Dates.isEmpty())
     {
         QMap<QString, QVariantList> tableValues;
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Date), m_Trades_Dates);
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_TickerID), m_Trades_TickerID);
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Shares), m_Trades_Shares);
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Price), m_Trades_Price);
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Commission), m_Trades_Commission);
-        tableValues.insert(queries::tradesColumns.at(queries::tradesColumns_Code), m_Trades_Code);
-        queries::executeTableUpdate(queries::table_Trades, tableValues);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Date), m_ExecutedTrades_Dates);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_SecurityID), m_ExecutedTrades_SecurityID);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Shares), m_ExecutedTrades_Shares);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Price), m_ExecutedTrades_Price);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Commission), m_ExecutedTrades_Commission);
+        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Code), m_ExecutedTrades_Code);
+        queries::executeTableUpdate(queries::table_ExecutedTrades, tableValues);
     }
 }
 
@@ -130,12 +130,12 @@ void nav::clearVariantLists()
     m_NAV_Dates.clear();
     m_NAV_Totalvalue.clear();
     m_NAV_Nav.clear();
-    m_Trades_TickerID.clear();
-    m_Trades_Dates.clear();
-    m_Trades_Shares.clear();
-    m_Trades_Price.clear();
-    m_Trades_Commission.clear();
-    m_Trades_Code.clear();
+    m_ExecutedTrades_SecurityID.clear();
+    m_ExecutedTrades_Dates.clear();
+    m_ExecutedTrades_Shares.clear();
+    m_ExecutedTrades_Price.clear();
+    m_ExecutedTrades_Commission.clear();
+    m_ExecutedTrades_Code.clear();
 }
 
 void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate)
@@ -143,7 +143,7 @@ void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDat
     // remove nav prices that are to be recalculated
     queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate);
     // remove custom trades that are to be recalculated
-    queries::deletePortfolioItems(queries::table_Trades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true);
+    queries::deletePortfolioItems(queries::table_ExecutedTrades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true);
 
     if (portfolioStartDate)
     {
@@ -166,15 +166,15 @@ void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDat
     currentPortfolio->data.nav.clear(calculationDate);
 }
 
-QList<int> nav::getPortfolioTickerReinvestment(const int &portfolioID)
+QList<int> nav::getPortfolioSecurityReinvestment(const int &portfolioID)
 {
-    QList<int> tickers;
+    QList<int> securities;
 
-    foreach(const security &s, m_data.value(portfolioID)->data.tickers)
+    foreach(const security &s, m_data.value(portfolioID)->data.securities)
         if (s.includeInCalc && s.divReinvest && !s.cashAccount)
-            tickers.append(s.id);
+            securities.append(s.id);
 
-    return tickers;
+    return securities;
 }
 
 int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool &calcuateFromStartDate)
@@ -187,7 +187,7 @@ int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
     if (lastNavDate < calculationDate)
         calculationDate = lastNavDate + 1;
 
-    int portfolioStartDate = currentPortfolio->info.origStartDate;
+    int portfolioStartDate = currentPortfolio->info.startDate;
     if (calculationDate <= portfolioStartDate)
     {
         // portfolio will recalculate from its startdate
@@ -221,12 +221,12 @@ bool nav::getCurrentDateOrNext(int &date)
     return false;
 }
 
-nav::dynamicTrades nav::getPortfolioTrades(const int &portfolioID, const int &minDate, const bool &portfolioStartDate)
+nav::navTrades nav::getPortfolioTrades(const int &portfolioID, const int &minDate, const bool &portfolioStartDate)
 {
-    dynamicTrades trades;
+    navTrades trades;
     int lastDate = m_dates.last();
 
-    foreach(const security &s, m_data.value(portfolioID)->data.tickers)
+    foreach(const security &s, m_data.value(portfolioID)->data.securities)
         if (s.includeInCalc)
             foreach(const trade &d, s.trades)
             {
@@ -262,7 +262,7 @@ nav::dynamicTrades nav::getPortfolioTrades(const int &portfolioID, const int &mi
                         break;
                 }
                 foreach(const int &i, dates)
-                    trades[i].append(dynamicTradeInfo(s.ticker, s.id, d));
+                    trades[i].append(navTrade(s.symbol, s.id, d));
             }
 
     return trades;
@@ -369,22 +369,22 @@ QList<int> nav::getYearlyTrades(const trade &d, const int &minDate, const int &m
     return dates;
 }
 
-void nav::insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &tickerReinvestments, const calculations::portfolioDailyInfo *previousInfo)
+void nav::insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const calculations::portfolioDailyInfo *previousInfo)
 {
     if (!previousInfo)
         return;
     
-    foreach(const int &reinvest, tickerReinvestments)
+    foreach(const int &reinvest, securityReinvestments)
     {
-        prices::securityPrice s = prices::instance().dailyPriceInfo(currentPortfolio->data.tickers.value(reinvest).ticker, previousInfo->date);
+        prices::securityPrice s = prices::instance().dailyPriceInfo(currentPortfolio->data.securities.value(reinvest).symbol, previousInfo->date);
         if (s.dividend <= 0 || s.close == 0)
             continue;
-        m_Trades_TickerID.append(reinvest);
-        m_Trades_Dates.append(date);
-        m_Trades_Shares.append(s.dividend / s.close);
-        m_Trades_Price.append(s.close / s.split);
-        m_Trades_Commission.append(QVariant());
-        m_Trades_Code.append("R");
+        m_ExecutedTrades_SecurityID.append(reinvest);
+        m_ExecutedTrades_Dates.append(date);
+        m_ExecutedTrades_Shares.append(s.dividend / s.close);
+        m_ExecutedTrades_Price.append(s.close / s.split);
+        m_ExecutedTrades_Commission.append(QVariant());
+        m_ExecutedTrades_Code.append("R");
     }
 }
 
@@ -394,95 +394,95 @@ void nav::insertPortfolioCashTrade(const portfolio *currentPortfolio, const int 
     if (!previousInfo)
         return;
 
-    const QMap<int, security> &tickers = currentPortfolio->data.tickers;
-    if (!tickers.contains(cashAccount))
+    const QMap<int, security> &securities = currentPortfolio->data.securities;
+    if (!securities.contains(cashAccount))
         return;
 
-    prices::securityPrice cashSecurity = prices::instance().dailyPriceInfo(tickers.value(cashAccount).ticker, previousInfo->date);
+    prices::securityPrice cashSecurity = prices::instance().dailyPriceInfo(securities.value(cashAccount).symbol, previousInfo->date);
     if (cashSecurity.close == 0)
         return;
 
-    m_Trades_TickerID.append(cashAccount);
-    m_Trades_Dates.append(date);
-    m_Trades_Shares.append(reverseTradeValue / (cashSecurity.close / cashSecurity.split));
-    m_Trades_Price.append(cashSecurity.close / cashSecurity.split);
-    m_Trades_Commission.append(QVariant());
-    m_Trades_Code.append("C");
+    m_ExecutedTrades_SecurityID.append(cashAccount);
+    m_ExecutedTrades_Dates.append(date);
+    m_ExecutedTrades_Shares.append(reverseTradeValue / (cashSecurity.close / cashSecurity.split));
+    m_ExecutedTrades_Price.append(cashSecurity.close / cashSecurity.split);
+    m_ExecutedTrades_Commission.append(QVariant());
+    m_ExecutedTrades_Code.append("C");
 }
 
-void nav::insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const dynamicTradeList &trades)
+void nav::insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const navTradeList &trades)
 {
-    foreach(const dynamicTradeInfo &d, trades)
+    foreach(const navTrade &d, trades)
     {
-        prices::securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.ticker, previousInfo->date) : prices::securityPrice();
-        if (d.trade.price == -1 && s.close == 0)
+        prices::securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.symbol, previousInfo->date) : prices::securityPrice();
+        if (d.singleTrade.price == -1 && s.close == 0)
             continue;
 
-        m_Trades_TickerID.append(d.tickerID);
-        m_Trades_Dates.append(date);
-        m_Trades_Price.append(d.trade.type == trade::tradeType_Interest ? 0 :
-                              d.trade.price >= 0 ? d.trade.price :
+        m_ExecutedTrades_SecurityID.append(d.securityID);
+        m_ExecutedTrades_Dates.append(date);
+        m_ExecutedTrades_Price.append(d.singleTrade.type == trade::tradeType_Interest ? 0 :
+                              d.singleTrade.price >= 0 ? d.singleTrade.price :
                               s.close / s.split);
-        m_Trades_Commission.append(d.trade.commission >= 0 ? d.trade.commission : QVariant());
+        m_ExecutedTrades_Commission.append(d.singleTrade.commission >= 0 ? d.singleTrade.commission : QVariant());
 
         double sharesToBuy = 0;
         QString code;
-        switch(d.trade.type)
+        switch(d.singleTrade.type)
         {
             case trade::tradeType_Purchase:
-                sharesToBuy = d.trade.value;
+                sharesToBuy = d.singleTrade.value;
                 code = "P";
                 break;
             case trade::tradeType_Sale:
-                sharesToBuy = d.trade.value * -1;
+                sharesToBuy = d.singleTrade.value * -1;
                 code = "S";
                 break;
             case trade::tradeType_DivReinvest:
-                sharesToBuy = d.trade.value;
+                sharesToBuy = d.singleTrade.value;
                 code = "R";
                 break;
             case trade::tradeType_Interest:
-                sharesToBuy = d.trade.value;
+                sharesToBuy = d.singleTrade.value;
                 code = "I";
                 break;
             case trade::tradeType_Fixed:
                 if (s.close != 0)
-                    sharesToBuy = d.trade.value / (s.close / s.split);
+                    sharesToBuy = d.singleTrade.value / (s.close / s.split);
                 code = "F";
                 break;
             case trade::tradeType_TotalValue:
                 if (previousInfo && s.close != 0)
-                    sharesToBuy = (previousInfo->totalValue * (d.trade.value / 100)) / (s.close / s.split);
+                    sharesToBuy = (previousInfo->totalValue * (d.singleTrade.value / 100)) / (s.close / s.split);
                 code = "T";
                 break;
             case trade::tradeType_AA:
                 if (previousInfo && s.close != 0)
-                    foreach(const aaTarget &aa, currentPortfolio->data.tickers.value(d.tickerID).aa)
+                    foreach(const aaTarget &aa, currentPortfolio->data.securities.value(d.securityID).aa)
                     {
                         if (currentPortfolio->data.aa.value(aa.id).target <= 0)
                             continue;
 
                         sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa.id).target * aa.target / 100)) -
-                            previousInfo->tickerValue.value(d.tickerID).totalValue) / (s.close / s.split);
+                            previousInfo->securityValues.value(d.securityID).totalValue) / (s.close / s.split);
                     }
                 code = "A";
                 break;
             default:
                 break;
         }
-        m_Trades_Shares.append(sharesToBuy);
-        m_Trades_Code.append(code);
+        m_ExecutedTrades_Shares.append(sharesToBuy);
+        m_ExecutedTrades_Code.append(code);
 
-        if (d.trade.cashAccount == - 1 || !previousInfo)
+        if (d.singleTrade.cashAccount == - 1 || !previousInfo)
             continue;
 
-        insertPortfolioCashTrade(currentPortfolio, d.trade.cashAccount, previousInfo, date, sharesToBuy * m_Trades_Price.last().toDouble());
+        insertPortfolioCashTrade(currentPortfolio, d.singleTrade.cashAccount, previousInfo, date, sharesToBuy * m_ExecutedTrades_Price.last().toDouble());
     }
 }
 
-void nav::insertFirstPortfolioTrades(const portfolio *currentPortfolio, const int &startDate, const dynamicTrades &allTrades)
+void nav::insertFirstPortfolioTrades(const portfolio *currentPortfolio, const int &startDate, const navTrades &allTrades)
 {
-    for(dynamicTrades::const_iterator i = allTrades.begin(); i != allTrades.end(); ++i)
+    for(navTrades::const_iterator i = allTrades.begin(); i != allTrades.end(); ++i)
     {
         int date = i.key();
 
@@ -498,14 +498,14 @@ void nav::insertFirstPortfolioTrades(const portfolio *currentPortfolio, const in
 
 void nav::insertPortfolioTradesToObject(portfolio *currentPortfolio)
 {
-    for(int i = m_TradesPosition; i < m_Trades_Dates.count(); ++i)
+    for(int i = m_TradesPosition; i < m_ExecutedTrades_Dates.count(); ++i)
     {
         executedTrade t;
-        t.date = m_Trades_Dates.at(i).toInt();
-        t.price = m_Trades_Price.at(i).toDouble();
-        t.shares = m_Trades_Shares.at(i).toDouble();
-        t.commission = m_Trades_Commission.at(i).toDouble();
-        currentPortfolio->data.executedTrades[m_Trades_TickerID.at(i).toInt()].append(t);
+        t.date = m_ExecutedTrades_Dates.at(i).toInt();
+        t.price = m_ExecutedTrades_Price.at(i).toDouble();
+        t.shares = m_ExecutedTrades_Shares.at(i).toDouble();
+        t.commission = m_ExecutedTrades_Commission.at(i).toDouble();
+        currentPortfolio->data.executedTrades[m_ExecutedTrades_SecurityID.at(i).toInt()].append(t);
     }
-    m_TradesPosition = m_Trades_Dates.count();
+    m_TradesPosition = m_ExecutedTrades_Dates.count();
 }

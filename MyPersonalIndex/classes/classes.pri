@@ -12,7 +12,8 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/security.cpp \
     $$PWD/settings.cpp \
     $$PWD/statistic.cpp \
-    $$PWD/portfolio.cpp
+    $$PWD/portfolio.cpp \
+    $$PWD/chartInfo.cpp
 HEADERS += $$PWD/updatePrices.h \
     $$PWD/queries.h \
     $$PWD/functions.h \
@@ -26,4 +27,5 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/security.h \
     $$PWD/settings.h \
     $$PWD/statistic.h \
-    $$PWD/portfolio.h
+    $$PWD/portfolio.h \
+    $$PWD/chartInfo.h

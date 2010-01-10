@@ -23,28 +23,28 @@ void prices::insertDate(const int &date)
 }
 
 
-QMap<int, double> prices::price(const QString &ticker)
+QMap<int, double> prices::price(const QString &symbol)
 {
-    if (m_cashSecurities.contains(ticker))
+    if (m_cashSecurities.contains(symbol))
         return m_cashPrices.prices;
 
-    return m_securityPriceList.value(ticker).prices;
+    return m_securityPriceList.value(symbol).prices;
 }
 
-QMap<int, double> prices::dividend(const QString &ticker)
+QMap<int, double> prices::dividend(const QString &symbol)
 {
-    if (m_cashSecurities.contains(ticker))
+    if (m_cashSecurities.contains(symbol))
         return m_cashPrices.dividends;
 
-    return m_securityPriceList.value(ticker).dividends;
+    return m_securityPriceList.value(symbol).dividends;
 }
 
-QMap<int, double> prices::split(const QString &ticker)
+QMap<int, double> prices::split(const QString &symbol)
 {
-    if (m_cashSecurities.contains(ticker))
+    if (m_cashSecurities.contains(symbol))
         return m_cashPrices.splits;
 
-    return m_securityPriceList.value(ticker).splits;
+    return m_securityPriceList.value(symbol).splits;
 }
 
 void prices::loadPrices(QSqlQuery q)
@@ -54,20 +54,20 @@ void prices::loadPrices(QSqlQuery q)
         int date = q.value(queries::closingPricesColumns_Date).toInt();
         insertDate(date);
 
-        m_securityPriceList[q.value(queries::closingPricesColumns_Ticker).toString()].prices.insert(date, q.value(queries::closingPricesColumns_Price).toDouble());
+        m_securityPriceList[q.value(queries::closingPricesColumns_Symbol).toString()].prices.insert(date, q.value(queries::closingPricesColumns_Price).toDouble());
     }
 }
 
 void prices::loadDividends(QSqlQuery q)
 {
     while(q.next())
-        m_securityPriceList[q.value(queries::dividendsColumns_Ticker).toString()].dividends.insert(
+        m_securityPriceList[q.value(queries::dividendsColumns_Symbol).toString()].dividends.insert(
             q.value(queries::dividendsColumns_Date).toInt(), q.value(queries::dividendsColumns_Amount).toDouble());
 }
 
 void prices::loadSplits(QSqlQuery q)
 {
     while(q.next())
-        m_securityPriceList[q.value(queries::splitsColumns_Ticker).toString()].splits.insert(
+        m_securityPriceList[q.value(queries::splitsColumns_Symbol).toString()].splits.insert(
             q.value(queries::splitsColumns_Date).toInt(), q.value(queries::splitsColumns_Ratio).toDouble());
 }

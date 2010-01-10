@@ -1,5 +1,5 @@
 INCLUDEPATH += $$PWD
-SOURCES += $$PWD/frmTicker_UI.cpp \
+SOURCES += $$PWD/frmSecurity_UI.cpp \
     $$PWD/frmPortfolio_UI.cpp \
     $$PWD/frmMain_UI.cpp \
     $$PWD/frmTrade_UI.cpp \
@@ -10,7 +10,7 @@ SOURCES += $$PWD/frmTicker_UI.cpp \
     $$PWD/frmSort_UI.cpp
 HEADERS += $$PWD/frmPortfolio_UI.h \
     $$PWD/frmMain_UI.h \
-    $$PWD/frmTicker_UI.h \
+    $$PWD/frmSecurity_UI.h \
     $$PWD/frmTrade_UI.h \
     $$PWD/frmOptions_UI.h \
     $$PWD/frmAAEdit_UI.h \

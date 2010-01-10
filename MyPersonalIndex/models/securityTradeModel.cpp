@@ -1,6 +1,6 @@
-#include "tickerTradeModel.h"
+#include "securityTradeModel.h"
 
-QVariant tickerTradeModel::data(const QModelIndex &index, int role) const
+QVariant securityTradeModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
         return QVariant();
@@ -26,7 +26,7 @@ QVariant tickerTradeModel::data(const QModelIndex &index, int role) const
                 return t.commission < 0 ? "" : functions::doubleToCurrency(t.commission);
                 break;
             case 4:
-                return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).ticker : "";
+                return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).symbol : "";
                 break;
             case 5:
                 return trade::frequencyToString(t.frequency);
@@ -46,7 +46,7 @@ QVariant tickerTradeModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QVariant tickerTradeModel::headerData (int section, Qt::Orientation orientation, int role) const
+QVariant securityTradeModel::headerData (int section, Qt::Orientation orientation, int role) const
 {
     if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
         return QVariant();
@@ -85,7 +85,7 @@ QVariant tickerTradeModel::headerData (int section, Qt::Orientation orientation,
     return QVariant();
 }
 
-QString tickerTradeModel::internalCopy(const trade &item)
+QString securityTradeModel::internalCopy(const trade &item)
 {
     return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
            QString::number((int)item.type), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
@@ -94,7 +94,7 @@ QString tickerTradeModel::internalCopy(const trade &item)
            QString::number(item.startDate), QString::number(item.endDate));
 }
 
-trade tickerTradeModel::internalPaste(const QStringList &value, bool *ok)
+trade securityTradeModel::internalPaste(const QStringList &value, bool *ok)
 {
     trade item;
 
@@ -139,7 +139,7 @@ trade tickerTradeModel::internalPaste(const QStringList &value, bool *ok)
     return item;
 }
 
-void tickerTradeModel::autoResize()
+void securityTradeModel::autoResize()
 {
     if (m_list.isEmpty())
         m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);

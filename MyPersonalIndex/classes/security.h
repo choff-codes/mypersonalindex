@@ -41,7 +41,7 @@ public:
         return !(*this == other);
     }
 
-    void save(const int &tickerID);
+    void save(const int &securityID);
     void remove() const;
 
     static QString tradeTypeToString(const tradeType &type);
@@ -76,7 +76,7 @@ class security
 {
 public:
     int id;
-    QString ticker;
+    QString symbol;
     int account;
     double expense;
     bool divReinvest;
@@ -92,7 +92,7 @@ public:
     bool operator==(const security &other) const
     {
         return this->id == other.id
-                && this->ticker == other.ticker
+                && this->symbol == other.symbol
                 && this->account == other.account
                 && this->expense == other.expense
                 && this->divReinvest == other.divReinvest

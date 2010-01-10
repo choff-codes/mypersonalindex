@@ -26,7 +26,7 @@ public:
     {
         int date;
         QMap<int, double> avgPrices;
-        QMap<int, securityValue> tickerValue;
+        QMap<int, securityValue> securityValues;
         double totalValue;
         double costBasis;
         double dividends;
@@ -48,8 +48,8 @@ public:
 protected:
     const portfolio *m_portfolio;
 
-    double splitRatio(const QString &ticker, const int &startDate, const int &endDate);
-    securityValue tickerValue(const security &s, const int &date);
+    double splitRatio(const QString &symbol, const int &startDate, const int &endDate);
+    securityValue specificSecurityValue(const security &s, const int &date);
 };
 
 

@@ -9,11 +9,11 @@
 //    return new sqliteQuery(
 //        QString(
 //            "DELETE FROM %1"
-//            " WHERE Ticker IN (SELECT a.Ticker"
-//                            " FROM (SELECT DISTINCT Ticker FROM %1) AS a"
-//                            " LEFT JOIN Tickers AS b"
-//                                " ON a.Ticker = b.Ticker AND b.CashAccount = 0"
-//                            " WHERE b.Ticker IS NULL )").arg(table),
+//            " WHERE symbol IN (SELECT a.symbol"
+//                            " FROM (SELECT DISTINCT symbol FROM %1) AS a"
+//                            " LEFT JOIN symbols AS b"
+//                                " ON a.symbol = b.symbol AND b.CashAccount = 0"
+//                            " WHERE b.symbol IS NULL )").arg(table),
 //        QList<sqliteParameter>()
 //    );
 //}
@@ -54,27 +54,27 @@ public:
     QStringList symbols() { return m_securityPriceList.keys(); }
     QList<int> dates() { return m_dates; }
 
-    void insertPrice(const QString &ticker, const int &date, const double &price) { m_securityPriceList[ticker].prices.insert(date, price); insertDate(date);}
-    void insertDividend(const QString &ticker, const int &date, const double &dividend) { m_securityPriceList[ticker].dividends.insert(date, dividend); }
-    void insertSplit(const QString &ticker, const int &date, const double &split) { m_securityPriceList[ticker].splits.insert(date, split); }
+    void insertPrice(const QString &symbol, const int &date, const double &price) { m_securityPriceList[symbol].prices.insert(date, price); insertDate(date);}
+    void insertDividend(const QString &symbol, const int &date, const double &dividend) { m_securityPriceList[symbol].dividends.insert(date, dividend); }
+    void insertSplit(const QString &symbol, const int &date, const double &split) { m_securityPriceList[symbol].splits.insert(date, split); }
 
-    QMap<int, double> price(const QString &ticker);
-    QMap<int, double> dividend(const QString &ticker);
-    QMap<int, double> split(const QString &ticker);
-    securityPrices history(const QString &ticker) { return m_securityPriceList.value(ticker); }
+    QMap<int, double> price(const QString &symbol);
+    QMap<int, double> dividend(const QString &symbol);
+    QMap<int, double> split(const QString &symbol);
+    securityPrices history(const QString &symbol) { return m_securityPriceList.value(symbol); }
 
-    double price(const QString &ticker, const int &date) { return history(ticker).price(date); }
-    double dividend(const QString &ticker, const int &date) { return history(ticker).dividend(date); }
-    double split(const QString &ticker, const int &date) { return history(ticker).split(date); }
+    double price(const QString &symbol, const int &date) { return history(symbol).price(date); }
+    double dividend(const QString &symbol, const int &date) { return history(symbol).dividend(date); }
+    double split(const QString &symbol, const int &date) { return history(symbol).split(date); }
 
     int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
     int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
 
 
-    securityPrice dailyPriceInfo(const QString &ticker, const int &date) { return history(ticker).dailyPriceInfo(date); }
+    securityPrice dailyPriceInfo(const QString &symbol, const int &date) { return history(symbol).dailyPriceInfo(date); }
 
-    void insertCashSecurity(const QString &ticker) { m_cashSecurities.insert(ticker); }
-    bool isCashSecurity(const QString &ticker) { return m_cashSecurities.contains(ticker); }
+    void insertCashSecurity(const QString &symbol) { m_cashSecurities.insert(symbol); }
+    bool isCashSecurity(const QString &symbol) { return m_cashSecurities.contains(symbol); }
 
 private:
     securityPriceList m_securityPriceList;

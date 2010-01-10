@@ -1,10 +1,10 @@
 #include "calculations.h"
 
-double calculations::splitRatio(const QString &ticker, const int &startDate, const int &endDate)
+double calculations::splitRatio(const QString &symbol, const int &startDate, const int &endDate)
 {
     double ratio = 1;
 
-    QMap<int, double> s = prices::instance().split(ticker);
+    QMap<int, double> s = prices::instance().split(symbol);
 
     for(QMap<int, double>::const_iterator i = s.lowerBound(startDate); i != s.constEnd(); ++i)
     {
@@ -16,17 +16,17 @@ double calculations::splitRatio(const QString &ticker, const int &startDate, con
     return ratio;
 }
 
-calculations::securityValue calculations::tickerValue(const security::security &s, const int &date)
+calculations::securityValue calculations::specificSecurityValue(const security::security &s, const int &date)
 {
     securityValue value;
-    prices::securityPrice price = prices::instance().dailyPriceInfo(s.ticker, date);
+    prices::securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
 
     foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
     {
         if (t.date > date)
             break;
 
-        value.shares += t.shares * splitRatio(s.ticker, t.date, date);
+        value.shares += t.shares * splitRatio(s.symbol, t.date, date);
         value.commission += t.commission;
         value.costBasis += t.shares * t.price;
     }
@@ -53,14 +53,14 @@ calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
 
     portfolioDailyInfo *info = new portfolioDailyInfo(date);
 
-    foreach(const security::security &s, m_portfolio->data.tickers)
+    foreach(const security::security &s, m_portfolio->data.securities)
     {
         if (!s.includeInCalc)
             continue;
 
-        securityValue value = tickerValue(s, date);
+        securityValue value = specificSecurityValue(s, date);
 
-        info->tickerValue.insert(s.id, value);
+        info->securityValues.insert(s.id, value);
         info->costBasis += value.costBasis;
         info->totalValue += value.totalValue;
         info->dividends += value.dividendAmount;
@@ -93,7 +93,7 @@ double calculations::correlation(const prices::securityPrices &price1, const pri
     if (previousPrice1.close == 0 || previousPrice2.close == 0)
         return 0;
 
-    double ticker1Sum = 0, ticker2Sum = 0, ticker1Square = 0, ticker2Square = 0, productSquare = 0;
+    double security1Sum = 0, security2Sum = 0, security1Square = 0, security2Square = 0, productSquare = 0;
     int count = 0;
 
     for(++i; i != end; ++i)
@@ -111,10 +111,10 @@ double calculations::correlation(const prices::securityPrices &price1, const pri
         double change1 = change(currentPrice1.close * currentPrice1.split, previousPrice1.close, 0, currentPrice1.dividend * -1) - 1;
         double change2 = change(currentPrice2.close * currentPrice2.split, previousPrice2.close, 0, currentPrice2.dividend * -1) - 1;
 
-        ticker1Sum += change1;
-        ticker2Sum += change2;
-        ticker1Square += change1 * change1;
-        ticker2Square += change2 * change2;
+        security1Sum += change1;
+        security2Sum += change2;
+        security1Square += change1 * change1;
+        security2Square += change2 * change2;
         productSquare += change1 * change2;
         count++;
 
@@ -126,8 +126,8 @@ double calculations::correlation(const prices::securityPrices &price1, const pri
         return 0;
 
     // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]
-    return (productSquare - (ticker1Sum * ticker2Sum / count)) /
-            sqrt((ticker1Square - (ticker1Sum * ticker1Sum / count)) * (ticker2Square - (ticker2Sum * ticker2Sum / count)));
+    return (productSquare - (security1Sum * security2Sum / count)) /
+            sqrt((security1Square - (security1Sum * security1Sum / count)) * (security2Square - (security2Sum * security2Sum / count)));
 }
 
 double calculations::change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV)

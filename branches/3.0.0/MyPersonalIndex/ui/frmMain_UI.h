@@ -15,6 +15,8 @@ public:
     static const QString DATE;
     static const QString START_DATE;
     static const QString END_DATE;
+    static const QString WINDOW_TITLE;
+    static const QString BUSY;
 
     QWidget *centralwidget;
     QHBoxLayout *centralgrid;

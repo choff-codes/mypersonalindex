@@ -25,7 +25,7 @@ class portfolioData
 public:
     typedef QMap<int, QList<executedTrade> > executedTradeList;
 
-    QMap<int, security> tickers;
+    QMap<int, security> securities;
     QMap<int, assetAllocation> aa;
     QMap<int, account> acct;
     QList<int> stats;
@@ -47,8 +47,6 @@ public:
     int aaThreshold;
     thesholdMethod aaThresholdMethod;
     int startDate;
-    // start date may be updated if it is a non-market day, but the original date also needs to be tracked
-    int origStartDate;
     bool holdingsShowHidden;
     bool navSortDesc;
     bool aaShowBlank;
@@ -59,7 +57,7 @@ public:
     QString acctSort;
 
     portfolioInfo(): id(-1), dividends(true), avgPriceCalc(avgPriceCalculation_FIFO), startValue(100),
-        aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()), origStartDate(QDate::currentDate().toJulianDay()),
+        aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
         holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
 
     void save();
@@ -73,8 +71,7 @@ public:
                 && this->startValue == other.startValue
                 && this->aaThreshold == other.aaThreshold
                 && this->aaThresholdMethod == other.aaThresholdMethod
-                // exclude startDate
-                && this->origStartDate == other.origStartDate
+                && this->startDate == other.startDate
                 && this->holdingsShowHidden == other.holdingsShowHidden
                 && this->navSortDesc == other.navSortDesc
                 && this->aaShowBlank == other.aaShowBlank
@@ -103,9 +100,9 @@ public:
 
 private:
     static void loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosTickers(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosTickersAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosTickersTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
+    static void loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
+    static void loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
+    static void loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
     static void loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
     static void loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
     static void loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);

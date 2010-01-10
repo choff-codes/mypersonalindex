@@ -8,7 +8,7 @@ void portfolioInfo::save()
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AAThreshold), this->aaThreshold);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)this->aaThresholdMethod);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostCalc), (int)this->avgPriceCalc);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartDate), this->origStartDate);
+    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartDate), this->startDate);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Dividends), (int)this->dividends);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)this->holdingsShowHidden);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsSort), this->holdingsSort);
@@ -34,11 +34,11 @@ QMap<int, portfolio::portfolio*> portfolio::loadPortfolios()
     loadPortfoliosAcct(portfolioList, queries::select(queries::table_Acct, queries::acctColumns));
     loadPortfoliosStat(portfolioList, queries::select(queries::table_StatMapping, queries::statMappingColumns,
         queries::statMappingColumns.at(queries::statMappingColumns_Sequence)));
-    loadPortfoliosTickers(portfolioList, queries::select(queries::table_Tickers, queries::tickersColumns));
-    loadPortfoliosTickersAA(portfolioList, queries::select(queries::table_TickersAA, queries::tickersAAColumns, QString(), true));
-    loadPortfoliosTickersTrades(portfolioList, queries::select(queries::table_TickersTrades, queries::tickersTradeColumns, QString(), true));
-    loadPortfoliosExecutedTrades(portfolioList, queries::select(queries::table_Trades, queries::tradesColumns,
-        queries::tradesColumns.at(queries::tradesColumns_Date), true));
+    loadPortfoliosSecurity(portfolioList, queries::select(queries::table_Security, queries::SecurityColumns));
+    loadPortfoliosSecurityAA(portfolioList, queries::select(queries::table_SecurityAA, queries::SecurityAAColumns, QString(), true));
+    loadPortfoliosSecurityTrades(portfolioList, queries::select(queries::table_SecurityTrades, queries::SecurityTradeColumns, QString(), true));
+    loadPortfoliosExecutedTrades(portfolioList, queries::select(queries::table_ExecutedTrades, queries::executedTradesColumns,
+        queries::executedTradesColumns.at(queries::executedTradesColumns_Date), true));
     loadPortfoliosNAV(portfolioList, queries::select(queries::table_NAV, queries::navColumns));
 
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
@@ -54,8 +54,7 @@ void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioLi
 
         p.id = q.value(queries::portfoliosColumns_ID).toInt();
         p.description = q.value(queries::portfoliosColumns_Description).toString();
-        p.origStartDate = q.value(queries::portfoliosColumns_StartDate).toInt();
-        p.startDate = p.origStartDate;
+        p.startDate = q.value(queries::portfoliosColumns_StartDate).toInt();
         p.dividends = q.value(queries::portfoliosColumns_Dividends).toBool();
         p.avgPriceCalc = (portfolioInfo::avgPriceCalculation)q.value(queries::portfoliosColumns_CostCalc).toInt();
         p.startValue = q.value(queries::portfoliosColumns_StartValue).toInt();
@@ -112,65 +111,65 @@ void portfolio::loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioLi
             q.value(queries::statMappingColumns_StatID).toInt());
 }
 
-void portfolio::loadPortfoliosTickers(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
 {
     while(q.next())
     {
         security sec;
 
-        sec.id = q.value(queries::tickersColumns_ID).toInt();
-        sec.ticker = q.value(queries::tickersColumns_Ticker).toString();
-        if (!q.value(queries::tickersColumns_Account).isNull())
-            sec.account = q.value(queries::tickersColumns_Account).toInt();
-        if (!q.value(queries::tickersColumns_Expense).isNull())
-            sec.expense = q.value(queries::tickersColumns_Expense).toDouble();
-        sec.divReinvest = q.value(queries::tickersColumns_DivReinvest).toBool();
-        sec.cashAccount = q.value(queries::tickersColumns_CashAccount).toBool();
+        sec.id = q.value(queries::securityColumns_ID).toInt();
+        sec.symbol = q.value(queries::securityColumns_Symbol).toString();
+        if (!q.value(queries::securityColumns_Account).isNull())
+            sec.account = q.value(queries::securityColumns_Account).toInt();
+        if (!q.value(queries::securityColumns_Expense).isNull())
+            sec.expense = q.value(queries::securityColumns_Expense).toDouble();
+        sec.divReinvest = q.value(queries::securityColumns_DivReinvest).toBool();
+        sec.cashAccount = q.value(queries::securityColumns_CashAccount).toBool();
         if (sec.cashAccount)
-            prices::instance().insertCashSecurity(sec.ticker);
-        sec.includeInCalc = q.value(queries::tickersColumns_IncludeInCalc).toBool();
-        sec.hide = q.value(queries::tickersColumns_Hide).toBool();
+            prices::instance().insertCashSecurity(sec.symbol);
+        sec.includeInCalc = q.value(queries::securityColumns_IncludeInCalc).toBool();
+        sec.hide = q.value(queries::securityColumns_Hide).toBool();
 
-        portfolioList[q.value(queries::tickersColumns_PortfolioID).toInt()]->data.tickers.insert(sec.id, sec);
+        portfolioList[q.value(queries::securityColumns_PortfolioID).toInt()]->data.securities.insert(sec.id, sec);
     }
 }
 
-void portfolio::loadPortfoliosTickersAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
 {
     while(q.next())
-        portfolioList[q.value(queries::tickersAAColumns_Count).toInt()]->data.tickers[q.value(queries::tickersAAColumns_TickerID).toInt()]
+        portfolioList[q.value(queries::securityAAColumns_Count).toInt()]->data.securities[q.value(queries::securityAAColumns_SecurityID).toInt()]
             .aa.append(
                 aaTarget(
-                    q.value(queries::tickersAAColumns_AAID).toInt(),
-                    q.value(queries::tickersAAColumns_Percent).toDouble()
+                    q.value(queries::securityAAColumns_AAID).toInt(),
+                    q.value(queries::securityAAColumns_Percent).toDouble()
                 )
         );
 }
 
-void portfolio::loadPortfoliosTickersTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
 {
     while(q.next())
     {
         trade t;
 
-        t.id = q.value(queries::tickersTradeColumns_ID).toInt();
-        t.type = (trade::tradeType)q.value(queries::tickersTradeColumns_Type).toInt();
-        t.value = q.value(queries::tickersTradeColumns_Value).toDouble();
-        if (!q.value(queries::tickersTradeColumns_Price).isNull())
-            t.price = q.value(queries::tickersTradeColumns_Price).toDouble();
-        if (!q.value(queries::tickersTradeColumns_Commission).isNull())
-            t.commission = q.value(queries::tickersTradeColumns_Commission).toDouble();
-        if (!q.value(queries::tickersTradeColumns_CashAccountID).isNull())
-            t.cashAccount = q.value(queries::tickersTradeColumns_CashAccountID).toInt();
-        t.frequency = (trade::tradeFreq)q.value(queries::tickersTradeColumns_Frequency).toInt();
-        if (!q.value(queries::tickersTradeColumns_Date).isNull())
-            t.date = q.value(queries::tickersTradeColumns_Date).toInt();
-        if (!q.value(queries::tickersTradeColumns_StartDate).isNull())
-            t.startDate = q.value(queries::tickersTradeColumns_StartDate).toInt();
-        if (!q.value(queries::tickersTradeColumns_EndDate).isNull())
-            t.endDate = q.value(queries::tickersTradeColumns_EndDate).toInt();
+        t.id = q.value(queries::securityTradeColumns_ID).toInt();
+        t.type = (trade::tradeType)q.value(queries::securityTradeColumns_Type).toInt();
+        t.value = q.value(queries::securityTradeColumns_Value).toDouble();
+        if (!q.value(queries::securityTradeColumns_Price).isNull())
+            t.price = q.value(queries::securityTradeColumns_Price).toDouble();
+        if (!q.value(queries::securityTradeColumns_Commission).isNull())
+            t.commission = q.value(queries::securityTradeColumns_Commission).toDouble();
+        if (!q.value(queries::securityTradeColumns_CashAccountID).isNull())
+            t.cashAccount = q.value(queries::securityTradeColumns_CashAccountID).toInt();
+        t.frequency = (trade::tradeFreq)q.value(queries::securityTradeColumns_Frequency).toInt();
+        if (!q.value(queries::securityTradeColumns_Date).isNull())
+            t.date = q.value(queries::securityTradeColumns_Date).toInt();
+        if (!q.value(queries::securityTradeColumns_StartDate).isNull())
+            t.startDate = q.value(queries::securityTradeColumns_StartDate).toInt();
+        if (!q.value(queries::securityTradeColumns_EndDate).isNull())
+            t.endDate = q.value(queries::securityTradeColumns_EndDate).toInt();
 
-        portfolioList[q.value(queries::tickersTradeColumns_Count).toInt()]->data.tickers[q.value(queries::tickersTradeColumns_TickerID).toInt()]
+        portfolioList[q.value(queries::securityTradeColumns_Count).toInt()]->data.securities[q.value(queries::securityTradeColumns_SecurityID).toInt()]
             .trades.insert(t.id, t);
     }
 }
@@ -181,12 +180,12 @@ void portfolio::loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &p
     {
         executedTrade t;
 
-        t.date = q.value(queries::tradesColumns_Date).toInt();
-        t.shares = q.value(queries::tradesColumns_Shares).toDouble();
-        t.price = q.value(queries::tradesColumns_Price).toDouble();
-        t.commission = q.value(queries::tradesColumns_Commission).toDouble();
+        t.date = q.value(queries::executedTradesColumns_Date).toInt();
+        t.shares = q.value(queries::executedTradesColumns_Shares).toDouble();
+        t.price = q.value(queries::executedTradesColumns_Price).toDouble();
+        t.commission = q.value(queries::executedTradesColumns_Commission).toDouble();
 
-        portfolioList[q.value(queries::tradesColumns_Count).toInt()]->data.executedTrades[q.value(queries::tradesColumns_TickerID).toInt()].append(t);
+        portfolioList[q.value(queries::executedTradesColumns_Count).toInt()]->data.executedTrades[q.value(queries::executedTradesColumns_SecurityID).toInt()].append(t);
     }
 }
 

@@ -1,17 +1,17 @@
-#ifndef TICKERTRADEMODEL_H
-#define TICKERTRADEMODEL_H
+#ifndef SECURITYTRADEMODEL_H
+#define SECURITYTRADEMODEL_H
 
 #include "functions.h"
 #include "mpiEditModelBase.h"
 #include "frmTrade.h"
 #include "security.h"
 
-class tickerTradeModel : public mpiEditModelBase<trade, frmTrade>
+class securityTradeModel : public mpiEditModelBase<trade, frmTrade>
 {
     Q_OBJECT
 
 public:
-    tickerTradeModel(const QList<trade> &values, const QMap<int, security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
+    securityTradeModel(const QList<trade> &values, const QMap<int, security> &cashAccounts, const int &cols, QTableView *parent = 0, QDialog *dialog = 0):
         mpiEditModelBase<trade, frmTrade>(values, cols, parent, dialog), m_cashAccounts(cashAccounts) { }
 
 private:
@@ -31,4 +31,4 @@ public slots:
     void autoResize();
 };
 
-#endif // TICKERTRADEMODEL_H
+#endif // SECURITYTRADEMODEL_H

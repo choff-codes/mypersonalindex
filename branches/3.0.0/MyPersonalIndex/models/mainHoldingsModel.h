@@ -9,7 +9,7 @@
 class holdingsRow: public baseRow
 {
 public:
-    enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_AA, row_TaxLiability, row_NetValue, row_ID };
+    enum { row_Active, row_Symbol, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_AA, row_TaxLiability, row_NetValue, row_ID };
     static const QStringList columns;
     static const QVariantList columnsType;
 

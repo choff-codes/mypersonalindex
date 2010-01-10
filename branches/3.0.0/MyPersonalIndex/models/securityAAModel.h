@@ -1,11 +1,11 @@
-#ifndef TICKERAAMODEL_H
-#define TICKERAAMODEL_H
+#ifndef SECURITYAAMODEL_H
+#define SECURITYAAMODEL_H
 
 #include "functions.h"
 #include "security.h"
 #include "assetAllocation.h"
 
-class tickerAAModel: public QAbstractTableModel
+class securityAAModel: public QAbstractTableModel
 {
     Q_OBJECT
 
@@ -13,7 +13,7 @@ public:
 
     QList<aaTarget> getList() { return m_list; }
 
-    tickerAAModel(const QList<aaTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
+    securityAAModel(const QList<aaTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     double totalPercentage();
@@ -40,4 +40,4 @@ signals:
     void updateHeader();
 };
 
-#endif // TICKERAAMODEL_H
+#endif // SECURITYAAMODEL_H

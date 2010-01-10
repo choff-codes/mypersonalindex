@@ -1,30 +1,17 @@
 #ifndef FRMMAIN_H
 #define FRMMAIN_H
 
-#define VERSION 300 // UPDATE EACH RELEASE
-#define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
-
 #include <QtGui>
 #include "frmMain_UI.h"
 #include "functions.h"
 #include "updatePrices.h"
 #include "nav.h"
 #include "cachedCalculations.h"
-#include <qwt_plot_curve.h>
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
 #include "statistic.h"
-
-struct chartInfo
-{
-    QwtPlotCurve *curve;
-    QVector<double> xData;
-    QVector<double> yData;
-
-    chartInfo(): curve(0) {}
-    ~chartInfo() { delete curve; }
-};
+#include "chartInfo.h"
 
 class frmMain : public QMainWindow
 {
@@ -47,8 +34,6 @@ private:
     QMap<int, portfolio*> m_portfolios;
     portfolio *m_currentPortfolio;
     settings m_settings;
-    QList<int> m_dates;
-    QMap<int, statistic> m_statistics;
     updatePrices *m_updateThread;
     nav *m_navThread;
     chartInfo m_chartInfo;
@@ -57,7 +42,6 @@ private:
     void closeEvent(QCloseEvent *event);
     void connectSlots();
     void resetLastDate();
-    void checkVersion();
     void saveSettings();
     void loadPortfolioDropDown(const int &portfolioID);
     void loadSortDropDowns();
@@ -72,8 +56,7 @@ private:
     void setSortDropDown(const QString &sort, QComboBox *dropDown);
     void sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames);
     void refreshPortfolioSecurities(const int &minDate);
-    int getLastDate() { return m_dates.isEmpty() ? m_settings.dataStartDate : m_dates.last(); }
-    void resetCalendars(const int &date);
+    void resetCalendars();
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
     void deleteUnusedInfo();
@@ -91,19 +74,25 @@ private slots:
     void loadPortfolioAcct();
     void loadPortfolioCorrelation();
     void about();
-    void addTicker();
-    void editTicker();
-    void deleteTicker();
+    void addSecurity();
+    void editSecurity();
+    void deleteSecurity();
     void options();
+    void addAA();
     void editAA();
+    void deleteAA();
+    void addAcct();
     void editAcct();
+    void deleteAcct();
     void editStat();
     void beginUpdate();
-    void finishUpdate(const QStringList &invalidTickers);
+    void finishUpdate(const QStringList &invalidSecurities);
     void beginNAV(const int &portfolioID, const int &minDate);
     void finishNAV();
     void statusUpdate(const QString &message);
     void holdingsExport() { functions::exportTable(ui.holdings, this); }
+    void aaExport() { functions::exportTable(ui.aa, this); }
+    void acctExport() { functions::exportTable(ui.accounts, this); }
     void holdingsModifyColumns();
     void holdingsSortChanged(int index) { sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(),
         m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames()); loadPortfolioHoldings(); }

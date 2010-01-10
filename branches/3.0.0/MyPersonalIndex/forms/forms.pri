@@ -1,5 +1,5 @@
 INCLUDEPATH += $$PWD
-SOURCES += $$PWD/frmTicker.cpp \
+SOURCES += $$PWD/frmSecurity.cpp \
     $$PWD/frmPortfolio.cpp \
     $$PWD/frmMain.cpp \
     $$PWD/frmTrade.cpp \
@@ -10,7 +10,7 @@ SOURCES += $$PWD/frmTicker.cpp \
     $$PWD/frmSort.cpp
 HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmMain.h \
-    $$PWD/frmTicker.h \
+    $$PWD/frmSecurity.h \
     $$PWD/frmTrade.h \
     $$PWD/frmOptions.h \
     $$PWD/frmAAEdit.h \

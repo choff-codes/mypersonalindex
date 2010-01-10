@@ -21,14 +21,14 @@ cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, cons
 {
     dailyInfo info(date);
 
-    foreach(const security &s, m_portfolio->data.tickers)
+    foreach(const security &s, m_portfolio->data.securities)
     {
         bool included = false;
 
         if (aa.id == -1 and s.aa.isEmpty())
         {
             included = true;
-            securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            securityValue sv = portfolioValues(date)->securityValues.value(s.id);
             info.totalValue += sv.totalValue;
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
@@ -38,7 +38,7 @@ cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, cons
                 if (target.id == aa.id)
                 {
                     included = true;
-                    securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+                    securityValue sv = portfolioValues(date)->securityValues.value(s.id);
                     info.totalValue += sv.totalValue * target.target / 100;
                     info.costBasis += sv.costBasis;
                     info.taxLiability += sv.taxLiability;
@@ -55,10 +55,10 @@ cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, co
 {
     dailyInfo info(date);
 
-    foreach(const security &s,  m_portfolio->data.tickers)
+    foreach(const security &s,  m_portfolio->data.securities)
         if (acct.id == s.account)
         {
-            securityValue sv = portfolioValues(date)->tickerValue.value(s.id);
+            securityValue sv = portfolioValues(date)->securityValues.value(s.id);
             info.totalValue += sv.totalValue;
             info.taxLiability += sv.taxLiability;
             info.costBasis += sv.costBasis;
@@ -72,23 +72,23 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
 {
     QMap<int, double> returnValues;
     const portfolioData::executedTradeList &trades = m_portfolio->data.executedTrades;
-    const QMap<int, security> &tickers = m_portfolio->data.tickers;
+    const QMap<int, security> &securities = m_portfolio->data.securities;
     portfolioInfo::avgPriceCalculation calcType = m_portfolio->info.avgPriceCalc;
 
     for(portfolioData::executedTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
-        // get ticker info
-        int tickerID = i.key();
-        security ticker = tickers.value(tickerID);
-        // get all trades for this ticker
+        // get security info
+        int securityID = i.key();
+        security s = securities.value(securityID);
+        // get all trades for this security
         const QList<executedTrade> &existingTrades = i.value();
         int count = existingTrades.count();
         // set up calculation variables
         QList<sharePricePair> filteredTrades;
         double shares = 0; double total = 0; double splitRatio = 1;
 
-        if (ticker.cashAccount)
-            returnValues.insert(tickerID, 1); // cash account is always $1
+        if (s.cashAccount)
+            returnValues.insert(securityID, 1); // cash account is always $1
 
         for(int x = 0; x < count; ++x)
         {
@@ -100,7 +100,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
                 continue;
 
             // check for any pre-existing splits
-            splitRatio = calculations::splitRatio(ticker.ticker, t.date, calculationDate);
+            splitRatio = calculations::splitRatio(s.symbol, t.date, calculationDate);
             t.price = t.price / splitRatio;
             t.shares = t.shares * splitRatio;
 
@@ -136,7 +136,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         }
 
         if (shares > 0)
-            returnValues.insert(tickerID, total / shares); // insert avg price for this tickerID
+            returnValues.insert(securityID, total / shares); // insert avg price for this securityID
     }
 
     return returnValues;

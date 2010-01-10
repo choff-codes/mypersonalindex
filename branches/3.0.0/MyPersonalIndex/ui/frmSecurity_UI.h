@@ -1,18 +1,18 @@
-#ifndef FRMTICKER_UI_H
-#define FRMTICKER_UI_H
+#ifndef FRMSECURITY_UI_H
+#define FRMSECURITY_UI_H
 
 #include <QtGui>
 
-class frmTicker_UI
+class frmSecurity_UI
 {
 public:
     QGridLayout *mainLayout;
     QHBoxLayout *topSectionLayout;
     QGroupBox *gpSecurity;
     QFormLayout *securityLayout;
-    QLabel *ticker;
-    QHBoxLayout *tickerLayout;
-    QLineEdit *txtTicker;
+    QLabel *symbol;
+    QHBoxLayout *symbolLayout;
+    QLineEdit *txtSymbol;
     QToolButton *btnHistorical;
     QLabel *acct;
     QComboBox *cmbAcct;
@@ -55,4 +55,4 @@ public:
     void setupUI(QDialog* dialog);
 };
 
-#endif // FRMTICKER_UI_H
+#endif // FRMSECURITY_UI_H

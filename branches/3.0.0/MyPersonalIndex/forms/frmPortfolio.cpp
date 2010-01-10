@@ -28,8 +28,7 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.sbAAThreshold->setValue(m_portfolio.aaThreshold);
     ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdMethod);
     ui.cmbCostBasis->setCurrentIndex((int)m_portfolio.avgPriceCalc);
-    if (m_portfolio.id != -1)
-        ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.origStartDate));
+    ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.startDate));
 }
 
 bool frmPortfolio::getErrors()
@@ -74,8 +73,7 @@ void frmPortfolio::accept()
     m_portfolio.aaThresholdMethod = (portfolioInfo::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
     m_portfolio.avgPriceCalc = (portfolioInfo::avgPriceCalculation)ui.cmbCostBasis->currentIndex();
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
-    m_portfolio.origStartDate = ui.dateStartDate->date().toJulianDay();
-    m_portfolio.startDate = m_portfolio.origStartDate;
+    m_portfolio.startDate = ui.dateStartDate->date().toJulianDay();
 
     if (m_portfolio == m_portfolioOriginal)
     {

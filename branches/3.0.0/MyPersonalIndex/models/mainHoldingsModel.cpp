@@ -1,6 +1,6 @@
 #include "mainHoldingsModel.h"
 
-//enum { row_Active, row_Ticker, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
+//enum { row_Active, row_Symbol, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
 const QStringList holdingsRow::columns = QStringList() << "Active" << "Symbol" << "Cash" << "Closing Price" << "Shares" << "Avg Price\nPer Share"
      << "Cost Basis" << "Total Value" << "% of\nPortfolio" << "Gain/Loss" << "% Gain/Loss" << "Account" << "Asset Allocation" << "Tax Liability" << "After Tax Value" << "ID";
 
@@ -12,16 +12,16 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
 holdingsRow::holdingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
     : baseRow(sort)
 {
-    calculations::securityValue value = info->tickerValue.value(s.id);
+    calculations::securityValue value = info->securityValues.value(s.id);
 
     //row_Active
     this->values.append((int)s.includeInCalc);
-    //row_Ticker
-    this->values.append(s.ticker);
+    //row_Symbol
+    this->values.append(s.symbol);
     //row_Cash
     this->values.append((int)s.cashAccount);
     //row_Price
-    double price = prices::instance().price(s.ticker, info->date);
+    double price = prices::instance().price(s.symbol, info->date);
     this->values.append(price == 0 ? QVariant() : price);
     //row_Shares
     this->values.append(value.shares);

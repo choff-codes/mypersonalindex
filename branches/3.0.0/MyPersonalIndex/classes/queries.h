@@ -16,12 +16,11 @@ public:
     static const QString table_Settings;
     static const QString table_SettingsColumns;
     static const QString table_Splits;
-    static const QString table_Stat;
     static const QString table_StatMapping;
-    static const QString table_Tickers;
-    static const QString table_TickersAA;
-    static const QString table_TickersTrades;
-    static const QString table_Trades; 
+    static const QString table_Security;
+    static const QString table_SecurityAA;
+    static const QString table_SecurityTrades;
+    static const QString table_ExecutedTrades;
 
     static const QStringList aaColumns;
     static const QStringList acctColumns;
@@ -32,21 +31,20 @@ public:
     static const QStringList settingsColumns;
     static const QStringList settingsColumnsColumns;
     static const QStringList splitsColumns;
-    static const QStringList statColumns;
     static const QStringList statMappingColumns;
-    static const QStringList tickersColumns;
-    static const QStringList tickersAAColumns;
-    static const QStringList tickersTradeColumns;
-    static const QStringList tradesColumns;
+    static const QStringList SecurityColumns;
+    static const QStringList SecurityAAColumns;
+    static const QStringList SecurityTradeColumns;
+    static const QStringList executedTradesColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { aaColumns_ID, aaColumns_PortfolioID, aaColumns_Description, aaColumns_Target };
 
     enum { acctColumns_ID, acctColumns_PortfolioID, acctColumns_Description, acctColumns_TaxRate, acctColumns_TaxDeferred, acctColumns_Count};
 
-    enum { closingPricesColumns_Date, closingPricesColumns_Ticker, closingPricesColumns_Price, closingPricesColumns_Count };
+    enum { closingPricesColumns_Date, closingPricesColumns_Symbol, closingPricesColumns_Price, closingPricesColumns_Count };
 
-    enum { dividendsColumns_Date, dividendsColumns_Ticker, dividendsColumns_Amount, dividendsColumns_Count };
+    enum { dividendsColumns_Date, dividendsColumns_Symbol, dividendsColumns_Amount, dividendsColumns_Count };
 
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV, navColumns_Count };
 
@@ -56,27 +54,26 @@ public:
            portfoliosColumns_NAVSortDesc, portfoliosColumns_Count };
 
     enum { settingsColumns_DataStartDate, settingsColumns_LastPortfolio, settingsColumns_Version, settingsColumns_WindowX, settingsColumns_WindowY,
-           settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_TickersIncludeDividends,
+           settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_SecuritiesIncludeDividends,
            settingsColumns_Count };
 
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence, settingsColumnsColumns_Count };
 
-    enum { splitsColumns_Date, splitsColumns_Ticker, splitsColumns_Ratio, splitsColumns_Count };
-
-    enum { statColumns_ID, statColumns_Description, statColumns_SQL, statColumns_Format, statColumns_Count };
+    enum { splitsColumns_Date, splitsColumns_Symbol, splitsColumns_Ratio, splitsColumns_Count };
 
     enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence, statMappingColumns_Count };
 
-    enum {tickersColumns_ID, tickersColumns_PortfolioID, tickersColumns_Ticker, tickersColumns_Account, tickersColumns_Expense, tickersColumns_DivReinvest,
-          tickersColumns_CashAccount, tickersColumns_IncludeInCalc, tickersColumns_Hide, tickersColumns_Count };
+    enum {securityColumns_ID, securityColumns_PortfolioID, securityColumns_Symbol, securityColumns_Account, securityColumns_Expense, securityColumns_DivReinvest,
+          securityColumns_CashAccount, securityColumns_IncludeInCalc, securityColumns_Hide, securityColumns_Count };
 
-    enum { tickersAAColumns_TickerID, tickersAAColumns_AAID, tickersAAColumns_Percent, tickersAAColumns_Count };
+    enum { securityAAColumns_SecurityID, securityAAColumns_AAID, securityAAColumns_Percent, securityAAColumns_Count };
 
-    enum { tickersTradeColumns_ID, tickersTradeColumns_TickerID, tickersTradeColumns_Type, tickersTradeColumns_Value, tickersTradeColumns_Price, tickersTradeColumns_Commission,
-           tickersTradeColumns_CashAccountID, tickersTradeColumns_Frequency, tickersTradeColumns_Date, tickersTradeColumns_StartDate, tickersTradeColumns_EndDate,
-           tickersTradeColumns_Count };
+    enum { securityTradeColumns_ID, securityTradeColumns_SecurityID, securityTradeColumns_Type, securityTradeColumns_Value, securityTradeColumns_Price, securityTradeColumns_Commission,
+           securityTradeColumns_CashAccountID, securityTradeColumns_Frequency, securityTradeColumns_Date, securityTradeColumns_StartDate, securityTradeColumns_EndDate,
+           securityTradeColumns_Count };
 
-    enum { tradesColumns_TickerID, tradesColumns_Date, tradesColumns_Shares, tradesColumns_Price, tradesColumns_Commission, tradesColumns_Code, tradesColumns_Count };
+    enum { executedTradesColumns_SecurityID, executedTradesColumns_Date, executedTradesColumns_Shares, executedTradesColumns_Price, executedTradesColumns_Commission,
+           executedTradesColumns_Code, executedTradesColumns_Count };
 
     static QString getDatabaseLocation();
 
@@ -84,16 +81,16 @@ public:
     static void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
     static int insert(const QString &tableName, QMap<QString, QVariant> values, const int &id);
     static void update(const QString &tableName, QMap<QString, QVariant> values, const int &id = -1);
-    static QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString(), bool joinToTickers = false);
+    static QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString(), bool joinToSecurity = false);
 
     static int getIdentity();
     static int getVersion();
 
     static void deleteTable(const QString &table);
     static void deleteItem(const QString &table, const int &id);
-    static void deleteTickerItems(const QString &table, const int &tickerID);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToTickers = false);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToTickers = false);
+    static void deleteSecurityItems(const QString &table, const int &securityID);
+    static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity = false);
+    static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity = false);
 
 private:
     queries();

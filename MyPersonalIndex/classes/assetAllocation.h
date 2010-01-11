@@ -26,7 +26,6 @@ public:
         return !(*this == other);
     }
 
-
     void save(const int &portfolioID);
     void remove() const;
 };

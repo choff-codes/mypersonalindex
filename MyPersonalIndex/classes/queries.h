@@ -91,6 +91,7 @@ public:
     static void deleteSecurityItems(const QString &table, const int &securityID);
     static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity = false);
     static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity = false);
+    static void deleteSymbolItems(const QString &symbol);
 
 private:
     queries();

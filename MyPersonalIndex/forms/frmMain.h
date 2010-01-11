@@ -19,15 +19,7 @@ class frmMain : public QMainWindow
 
 public:
     frmMain(QWidget *parent = 0);
-    ~frmMain()
-    {
-        qDeleteAll(m_portfolios);
-        delete ui.holdings->model();
-        delete ui.aa->model();
-        delete ui.accounts->model();
-        delete ui.correlations->model();
-        delete ui.performance->model();
-    }
+    ~frmMain();
 
 private:
     frmMain_UI ui;
@@ -43,36 +35,39 @@ private:
     void connectSlots();
     void resetLastDate();
     void saveSettings();
-    void loadPortfolioDropDown(const int &portfolioID);
-    void loadSortDropDowns();
+    void resetPortfolioDropDown(const int &portfolioID);
+    void resetSortDropDowns();
     void loadStats();
-    void loadPortfolioSettings();
+    void resetPortfolioSettings();
     void savePortfolio();
     void savePortfolios();
     void disableItems(bool disabled);
-    int getCurrentDateOrPrevious(int date);
-    int getDateDropDownDate(QDateEdit *dateDropDown);
-    void loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
+    int currentDateOrPrevious(int date);
+    int dateDropDownDate(QDateEdit *dateDropDown);
+    void resetSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
     void setSortDropDown(const QString &sort, QComboBox *dropDown);
     void sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames);
-    void refreshPortfolioSecurities(const int &minDate);
+    void resetSecurityRelatedTabs(const int &minDate);
     void resetCalendars();
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
-    void deleteUnusedInfo();
-    bool invalidPortfolioNAVDates();
+    void deleteUnusedSymbols();
+    bool invalidNAVDates();
+    int aaMinDate(const int &aaID, int currentMinDate);
+    int securityMinDate(int currentMinDate, const int &firstTradeDate);
+    QStringList selectedRows(const int &column, mpiViewModelBase *model);
 
 private slots:
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();
     void loadPortfolio();
-    void loadPortfolioHoldings();
-    void loadPortfolioPerformance();
-    void loadPortfolioChart();
-    void loadPortfolioAA();
-    void loadPortfolioAcct();
-    void loadPortfolioCorrelation();
+    void resetPortfolioHoldings();
+    void resetPortfolioPerformance();
+    void resetPortfolioChart();
+    void resetPortfolioAA();
+    void resetPortfolioAcct();
+    void resetPortfolioCorrelation();
     void about();
     void addSecurity();
     void editSecurity();
@@ -93,15 +88,13 @@ private slots:
     void holdingsExport() { functions::exportTable(ui.holdings, this); }
     void aaExport() { functions::exportTable(ui.aa, this); }
     void acctExport() { functions::exportTable(ui.accounts, this); }
+    bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames);
     void holdingsModifyColumns();
-    void holdingsSortChanged(int index) { sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(),
-        m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames()); loadPortfolioHoldings(); }
+    void holdingsSortChanged(int index);
     void aaModifyColumns();
-    void aaSortChanged(int index) { sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(),
-        m_currentPortfolio->info.aaSort, aaRow::fieldNames()); loadPortfolioAA(); }
+    void aaSortChanged(int index);
     void acctModifyColumns();
-    void acctSortChanged(int index) { sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(),
-        m_currentPortfolio->info.acctSort, acctRow::fieldNames()); loadPortfolioAcct(); }
+    void acctSortChanged(int index);
 
 };
 

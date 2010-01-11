@@ -26,11 +26,21 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
     else
         functions::showWelcomeMessage(this); // first time being run
 
-    loadSortDropDowns();
+    resetSortDropDowns();
     resetLastDate();
-    loadPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
+    resetPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
     loadPortfolio();
     connectSlots();
+}
+
+frmMain::~frmMain()
+{
+    qDeleteAll(m_portfolios);
+    delete ui.holdings->model();
+    delete ui.aa->model();
+    delete ui.accounts->model();
+    delete ui.correlations->model();
+    delete ui.performance->model();
 }
 
 void frmMain::closeEvent(QCloseEvent *event)
@@ -61,23 +71,23 @@ void frmMain::connectSlots()
     connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editSecurity()));
     connect(ui.holdingsDelete, SIGNAL(triggered()), this, SLOT(deleteSecurity()));
     connect(ui.holdings, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editSecurity()));
-    connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioHoldings()));
-    connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(loadPortfolioHoldings()));
+    connect(ui.holdingsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioHoldings()));
+    connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(resetPortfolioHoldings()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(holdingsSortChanged(int)));
     connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
-    connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(loadPortfolioPerformance()));
+    connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(resetPortfolioPerformance()));
 
-    connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
-    connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioChart()));
+    connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
+    connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
 
     connect(ui.aaAdd, SIGNAL(triggered()), this, SLOT(addAA()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(editAA()));
     connect(ui.aa, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editAA()));
     connect(ui.aaDelete, SIGNAL(triggered()), this, SLOT(deleteAA()));
-    connect(ui.aaDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioAA()));
-    connect(ui.aaShowBlank, SIGNAL(changed()), this, SLOT(loadPortfolioAA()));
+    connect(ui.aaDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioAA()));
+    connect(ui.aaShowBlank, SIGNAL(changed()), this, SLOT(resetPortfolioAA()));
     connect(ui.aaReorderColumns, SIGNAL(triggered()), this, SLOT(aaModifyColumns()));
     connect(ui.aaSortCombo, SIGNAL(activated(int)), this, SLOT(aaSortChanged(int)));
     connect(ui.aaExport, SIGNAL(triggered()), this, SLOT(aaExport()));
@@ -86,27 +96,27 @@ void frmMain::connectSlots()
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(editAcct()));
     connect(ui.accounts, SIGNAL(doubleClicked(QModelIndex)), this, SLOT(editAcct()));
     connect(ui.accountsDelete, SIGNAL(triggered()), this, SLOT(deleteAcct()));
-    connect(ui.accountsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioAcct()));
-    connect(ui.accountsShowBlank, SIGNAL(changed()), this, SLOT(loadPortfolioAcct()));
+    connect(ui.accountsDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioAcct()));
+    connect(ui.accountsShowBlank, SIGNAL(changed()), this, SLOT(resetPortfolioAcct()));
     connect(ui.accountsReorderColumns, SIGNAL(triggered()), this, SLOT(acctModifyColumns()));
     connect(ui.accountsSortCombo, SIGNAL(activated(int)), this, SLOT(acctSortChanged(int)));
     connect(ui.accountsExport, SIGNAL(triggered()), this, SLOT(acctExport()));
 
     connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(editStat()));
 
-    connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(loadPortfolioCorrelation()));
-    connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioCorrelation()));
-    connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(loadPortfolioCorrelation()));
+    connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(resetPortfolioCorrelation()));
+    connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
+    connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
 }
 
-void frmMain::loadSortDropDowns()
+void frmMain::resetSortDropDowns()
 {
-    loadSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
-    loadSortDropDown(aaRow::fieldNames(), ui.aaSortCombo);
-    loadSortDropDown(acctRow::fieldNames(), ui.accountsSortCombo);
+    resetSortDropDown(holdingsRow::fieldNames(), ui.holdingsSortCombo);
+    resetSortDropDown(aaRow::fieldNames(), ui.aaSortCombo);
+    resetSortDropDown(acctRow::fieldNames(), ui.accountsSortCombo);
 }
 
-void frmMain::loadSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown)
+void frmMain::resetSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown)
 {
     dropDown->blockSignals(true);
     dropDown->addItem("", -1);
@@ -151,7 +161,7 @@ void frmMain::saveSettings()
     m_settings.save();
 }
 
-void frmMain::loadPortfolioDropDown(const int &portfolioID = -1)
+void frmMain::resetPortfolioDropDown(const int &portfolioID = -1)
 {
     ui.mainPortfolioCombo->blockSignals(true);
     ui.mainPortfolioCombo->clear();
@@ -181,37 +191,38 @@ void frmMain::disableItems(bool disabled)
 void frmMain::loadPortfolio()
 {
     if (m_portfolios.isEmpty()) // no portfolios to load
-        ui.tab->setDisabled(true);
-    else
     {
-        if (this->isVisible()) // save currently loaded portfolio except on initial load
-            savePortfolio();
-        ui.tab->setDisabled(false);
-
-        m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt(), 0);
-
-        if (!m_currentPortfolio)
-        {
-            QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
-            ui.tab->setDisabled(true);
-            return;
-        }
-
-        QTime t;
-        t.start();
-
-        m_calculations.setPortfolio(m_currentPortfolio);
-        loadPortfolioSettings();
-        resetCalendars();
-        loadPortfolioHoldings();
-        loadPortfolioPerformance();
-        loadPortfolioChart();
-        loadPortfolioAA();
-        loadPortfolioAcct();
-        loadPortfolioCorrelation();
-
-        qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
+        ui.tab->setDisabled(true);
+        return;
     }
+
+    if (this->isVisible()) // save currently loaded portfolio except on initial load
+        savePortfolio();
+    ui.tab->setDisabled(false);
+
+    m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt(), 0);
+
+    if (!m_currentPortfolio)
+    {
+        QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
+        ui.tab->setDisabled(true);
+        return;
+    }
+
+    QTime t;
+    t.start();
+
+    m_calculations.setPortfolio(m_currentPortfolio);
+    resetPortfolioSettings();
+    resetCalendars();
+    resetPortfolioHoldings();
+    resetPortfolioPerformance();
+    resetPortfolioChart();
+    resetPortfolioAA();
+    resetPortfolioAcct();
+    resetPortfolioCorrelation();
+
+    qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
 }
 
 void frmMain::resetCalendars()
@@ -250,9 +261,9 @@ void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *cale
     calendarEnd->blockSignals(false);
 }
 
-void frmMain::loadPortfolioHoldings()
+void frmMain::resetPortfolioHoldings()
 {
-    int currentDate = getDateDropDownDate(ui.holdingsDateDropDown);
+    int currentDate = dateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
     calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
@@ -271,9 +282,9 @@ void frmMain::loadPortfolioHoldings()
     delete oldModel;
 }
 
-void frmMain::loadPortfolioAA()
+void frmMain::resetPortfolioAA()
 {
-    int currentDate = getDateDropDownDate(ui.aaDateDropDown);
+    int currentDate = dateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
     calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
@@ -299,9 +310,9 @@ void frmMain::loadPortfolioAA()
     delete oldModel;
 }
 
-void frmMain::loadPortfolioAcct()
+void frmMain::resetPortfolioAcct()
 {
-    int currentDate = getDateDropDownDate(ui.accountsDateDropDown);
+    int currentDate = dateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
     calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
 
@@ -328,7 +339,7 @@ void frmMain::loadPortfolioAcct()
     delete oldModel;
 }
 
-void frmMain::loadPortfolioPerformance()
+void frmMain::resetPortfolioPerformance()
 {
     QAbstractItemModel *oldModel = ui.performance->model();
     mainPerformanceModel *model = new mainPerformanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
@@ -336,11 +347,11 @@ void frmMain::loadPortfolioPerformance()
     delete oldModel;
 }
 
-void frmMain::loadPortfolioCorrelation()
+void frmMain::resetPortfolioCorrelation()
 {
     QAbstractItemModel *oldModel = ui.correlations->model();
-    int startDate = getDateDropDownDate(ui.correlationsStartDateDropDown);
-    int endDate = getDateDropDownDate(ui.correlationsEndDateDropDown);
+    int startDate = dateDropDownDate(ui.correlationsStartDateDropDown);
+    int endDate = dateDropDownDate(ui.correlationsEndDateDropDown);
 
     mainCorrelationModel::correlationList correlations;
     foreach(const security &s, m_currentPortfolio->data.securities)
@@ -373,7 +384,7 @@ void frmMain::loadPortfolioCorrelation()
     delete oldModel;
 }
 
-void frmMain::loadPortfolioChart()
+void frmMain::resetPortfolioChart()
 {
     const QMap<int, double> nav = m_currentPortfolio->data.nav.navHistory();
     ui.chart->setTitle(m_currentPortfolio->info.description);
@@ -385,8 +396,8 @@ void frmMain::loadPortfolioChart()
 
     m_chartInfo.setCurve(newLine);
 
-    int startDate = getDateDropDownDate(ui.chartStartDateDropDown);
-    int endDate = getDateDropDownDate(ui.chartEndDateDropDown);
+    int startDate = dateDropDownDate(ui.chartStartDateDropDown);
+    int endDate = dateDropDownDate(ui.chartEndDateDropDown);
     double startValue = -1;
     for(QMap<int, double>::const_iterator i = nav.lowerBound(startDate); i != nav.constEnd(); ++i)
     {
@@ -412,7 +423,7 @@ void frmMain::loadPortfolioChart()
     ui.chartZoomer->setZoomBase();
 }
 
-void frmMain::loadPortfolioSettings()
+void frmMain::resetPortfolioSettings()
 {
     ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, QDate::fromJulianDay(m_currentPortfolio->info.startDate).toString(Qt::SystemLocaleShortDate)));
     ui.holdingsShowHidden->setChecked(m_currentPortfolio->info.holdingsShowHidden);
@@ -448,7 +459,7 @@ void frmMain::addPortfolio()
         portfolioInfo p = f.getReturnValues();
 
         m_portfolios.insert(p.id, new portfolio(p));
-        loadPortfolioDropDown(p.id);
+        resetPortfolioDropDown(p.id);
         loadPortfolio();
     };
 }
@@ -465,7 +476,7 @@ void frmMain::editPortfolio()
 
         // toDo
 
-        loadPortfolioDropDown(m_currentPortfolio->info.id);
+        resetPortfolioDropDown(m_currentPortfolio->info.id);
     }
 }
 
@@ -475,43 +486,27 @@ void frmMain::deletePortfolio()
         return;
 
     if (QMessageBox::question(this, "Delete Portfolio?", QString("Are you sure you want to delete %1?").arg(m_currentPortfolio->info.description),
-            QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-    {
-        int i = m_currentPortfolio->info.id;
+        QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
+        return;
 
+    int id = m_currentPortfolio->info.id;
+    m_currentPortfolio->remove();
+    delete m_currentPortfolio;
+    m_currentPortfolio = 0;
+    m_portfolios.remove(id);
 
-//        m_sql.executeNonQuery(queries::deleteItem(queries::table_Portfolios, i));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_AA, i, false));
-//
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Acct, i, false));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_NAV, i, false));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_StatMapping, i, false));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersAA, i, true));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_TickersTrades, i, true));
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Trades, i, true));
-//        // this must come last
-//        m_sql.executeNonQuery(queries::deletePortfolioItems(queries::table_Tickers, i, false));
+    deleteUnusedSymbols();
 
-        delete m_currentPortfolio;
-        m_currentPortfolio = 0;
-        m_portfolios.remove(i);
-    }
-
-    int row = ui.mainPortfolioCombo->currentIndex();
+    int row = ui.mainPortfolioCombo->currentIndex(); // select another portfolio
     if (m_portfolios.count() == row)
         row--;
 
-    loadPortfolioDropDown(-1);
+    resetPortfolioDropDown(-1);
     if (!m_portfolios.isEmpty())
         ui.mainPortfolioCombo->setCurrentIndex(row);
 
-    deleteUnusedInfo();
-
-    if (invalidPortfolioNAVDates())
-    {
+    if (invalidNAVDates())
         beginNAV(-1, 0);
-        return;
-    }
 }
 
 void frmMain::about()
@@ -523,7 +518,7 @@ void frmMain::about()
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
 }
 
-void frmMain::refreshPortfolioSecurities(const int &minDate)
+void frmMain::resetSecurityRelatedTabs(const int &minDate)
 {
     if (minDate != -1)
     {
@@ -532,17 +527,18 @@ void frmMain::refreshPortfolioSecurities(const int &minDate)
     }
 
     m_calculations.clearCache();
-    loadPortfolioHoldings();
-    loadPortfolioAA();
-    loadPortfolioAcct();
+    resetPortfolioHoldings();
+    resetPortfolioAA();
+    resetPortfolioAcct();
 }
 
 void frmMain::addSecurity()
 {
+    int minDate = -1;
     int resultcode;
     bool change = false;
     bool showUpdatePrices = false;
-    int minDate = -1;
+
     do
     {
         frmSecurity f(m_currentPortfolio->info.id, m_currentPortfolio->data, security(), this);
@@ -551,11 +547,8 @@ void frmMain::addSecurity()
         {
             change = true;
             security s = f.getReturnValuesSecurity();
-
             m_currentPortfolio->data.securities[s.id] = s;
-            int currentMinDate = f.getReturnValuesMinDate();
-            if (currentMinDate != -1 && (currentMinDate < minDate || minDate == -1))
-                minDate = currentMinDate;
+            minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
 
             if (!s.cashAccount && (!prices::instance().symbols().contains(s.symbol)))
                 showUpdatePrices = true;
@@ -573,7 +566,7 @@ void frmMain::addSecurity()
             return;
         }
 
-    refreshPortfolioSecurities(minDate);
+    resetSecurityRelatedTabs(minDate);
 }
 
 void frmMain::editSecurity()
@@ -588,24 +581,19 @@ void frmMain::editSecurity()
         {
             change = true;
             m_currentPortfolio->data.securities[securityID] = f.getReturnValuesSecurity();
-            int newMinDate = f.getReturnValuesMinDate();
-            if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
-                minDate = newMinDate;
+            minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
         }
     }
 
     if (!change)
         return;
 
-    refreshPortfolioSecurities(minDate);
+    resetSecurityRelatedTabs(minDate);
 }
 
 void frmMain::deleteSecurity()
 {
-    QStringList securities;
-    foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
-        securities.append(row->values.at(holdingsRow::row_Symbol).toString());
-
+    QStringList securities = selectedRows(holdingsRow::row_Symbol, static_cast<mpiViewModelBase*>(ui.holdings->model()));
     if (securities.isEmpty())
         return;
 
@@ -614,48 +602,46 @@ void frmMain::deleteSecurity()
         return;
 
     int minDate = -1;
-    foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
+    foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.holdings->model())->selectedItems())
     {
         security s = m_currentPortfolio->data.securities.value(row->values.at(holdingsRow::row_ID).toInt());
-        int newMinDate = s.firstTradeDate();
-        if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
-            minDate = newMinDate;
-
-//        m_sql.executeNonQuery(queries::deleteItem(queries::table_Tickers, s.id));
-//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersAA, s.id));
-//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_TickersTrades, s.id));
-//        m_sql.executeNonQuery(queries::deleteTickerItems(queries::table_Trades, s.id));
+        minDate = securityMinDate(minDate, s.firstTradeDate());
+        s.remove();
         m_currentPortfolio->data.securities.remove(s.id);
     }
 
-    deleteUnusedInfo();
-    if (invalidPortfolioNAVDates())
+    deleteUnusedSymbols();
+    if (invalidNAVDates())
         beginNAV(-1, 0);
+    else if (minDate != -1)
+        beginNAV(m_currentPortfolio->info.id, minDate);
     else
-        refreshPortfolioSecurities(minDate);
+        resetSecurityRelatedTabs(minDate);
 }
 
-void frmMain::deleteUnusedInfo()
+void frmMain::deleteUnusedSymbols()
 {
-//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_ClosingPrices));
-//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Dividends));
-//    m_sql.executeNonQuery(queries::deleteUnusedPrices(queries::table_Splits));
-    //loadDates();
-    //loadSplits();
+    QStringList symbols;
+    foreach(portfolio* p, m_portfolios)
+        foreach(const security &s, p->data.securities)
+            symbols.append(s.symbol);
+    symbols.removeDuplicates();
+
+    prices::instance().remove(functions::except(prices::instance().symbols(), symbols));
+    resetLastDate();
 }
 
-bool frmMain::invalidPortfolioNAVDates()
+bool frmMain::invalidNAVDates()
 {
     int firstDate = prices::instance().firstDate();
     if (firstDate == 0)
         return true;
 
     foreach(portfolio *p, m_portfolios)
-    {
         if (p != m_currentPortfolio)
             if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < firstDate)
                 return true;
-    }
+
     return false;
 }
 
@@ -665,7 +651,7 @@ void frmMain::options()
     if (f.exec())
         m_settings = f.getReturnValues();
 
-    // to do if date changes
+    // TODO if date changes
 }
 
 void frmMain::addAA()
@@ -688,7 +674,31 @@ void frmMain::addAA()
     if (!change)
         return;
 
-    refreshPortfolioSecurities(-1);
+    resetSecurityRelatedTabs(-1);
+}
+
+int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
+{
+    if (firstTradeDate != -1 && (firstTradeDate < currentMinDate || currentMinDate == -1))
+        currentMinDate = firstTradeDate;
+    return currentMinDate;
+}
+
+int frmMain::aaMinDate(const int &aaID, int currentMinDate)
+{
+    foreach(const security &s, m_currentPortfolio->data.securities)
+        foreach(const aaTarget &target, s.aa)
+            if(target.id == aaID)
+            {
+                foreach(const trade &t, s.trades)
+                    if (t.type == trade::tradeType_AA)
+                    {
+                        currentMinDate = securityMinDate(currentMinDate, s.firstTradeDate());
+                        break;
+                    }
+                break;
+            }
+    return currentMinDate;
 }
 
 void frmMain::editAA()
@@ -703,36 +713,27 @@ void frmMain::editAA()
         {
             change = true;
             m_currentPortfolio->data.aa[aaID] = f.getReturnValues();
-
-            foreach(const security &s, m_currentPortfolio->data.securities)
-                foreach(const aaTarget &target, s.aa)
-                    if(target.id == aaID)
-                    {
-                        foreach(const trade &t, s.trades)
-                            if (t.type == trade::tradeType_AA)
-                            {
-                                int newMinDate = s.firstTradeDate();
-                                if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
-                                    minDate = newMinDate;
-                                break;
-                            }
-                        break;
-                    }
+            minDate = aaMinDate(aaID, minDate);
         }
     }
 
     if (!change)
         return;
 
-    refreshPortfolioSecurities(minDate);
+    resetSecurityRelatedTabs(minDate);
+}
+
+QStringList frmMain::selectedRows(const int &column, mpiViewModelBase *model)
+{
+    QStringList returnList;
+    foreach(baseRow *row, model->selectedItems())
+        returnList.append(row->values.at(column).toString());
+    return returnList;
 }
 
 void frmMain::deleteAA()
 {
-    QStringList selectedAA;
-    foreach(baseRow *row, static_cast<mainAAModel*>(ui.aa->model())->selectedItems())
-        selectedAA.append(row->values.at(aaRow::row_Description).toString());
-
+    QStringList selectedAA = selectedRows(aaRow::row_Description, static_cast<mpiViewModelBase*>(ui.aa->model()));
     if (selectedAA.isEmpty())
         return;
 
@@ -741,29 +742,15 @@ void frmMain::deleteAA()
         return;
 
     int minDate = -1;
-    foreach(baseRow *row, static_cast<mainAAModel*>(ui.aa->model())->selectedItems())
+    foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems())
     {
         assetAllocation aa = m_currentPortfolio->data.aa.value(row->values.at(aaRow::row_ID).toInt());
-        foreach(const security &s, m_currentPortfolio->data.securities)
-            foreach(const aaTarget &target, s.aa)
-                if(target.id == aa.id)
-                {
-                    foreach(const trade &t, s.trades)
-                        if (t.type == trade::tradeType_AA)
-                        {
-                            int newMinDate = s.firstTradeDate();
-                            if (newMinDate != -1 && (newMinDate < minDate || minDate == -1))
-                                minDate = newMinDate;
-                            break;
-                        }
-                    break;
-                }
-
+        minDate = aaMinDate(aa.id, minDate);
         aa.remove();
         m_currentPortfolio->data.aa.remove(aa.id);
     }
 
-    refreshPortfolioSecurities(minDate);
+    resetSecurityRelatedTabs(minDate);
 }
 
 void frmMain::addAcct()
@@ -786,7 +773,7 @@ void frmMain::addAcct()
     if (!change)
         return;
 
-    refreshPortfolioSecurities(-1);
+    resetSecurityRelatedTabs(-1);
 }
 
 
@@ -807,15 +794,12 @@ void frmMain::editAcct()
     if (!change)
         return;
 
-    refreshPortfolioSecurities(-1);
+    resetSecurityRelatedTabs(-1);
 }
 
 void frmMain::deleteAcct()
 {
-    QStringList selectedAcct;
-    foreach(baseRow *row, static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems())
-        selectedAcct.append(row->values.at(acctRow::row_Description).toString());
-
+    QStringList selectedAcct = selectedRows(acctRow::row_Description, static_cast<mpiViewModelBase*>(ui.accounts->model()));
     if (selectedAcct.isEmpty())
         return;
 
@@ -830,7 +814,7 @@ void frmMain::deleteAcct()
         m_currentPortfolio->data.acct.remove(acct.id);
     }
 
-    refreshPortfolioSecurities(-1);
+    resetSecurityRelatedTabs(-1);
 }
 
 void frmMain::editStat()
@@ -925,7 +909,7 @@ void frmMain::statusUpdate(const QString &message)
     ui.stbStatus->setText(QString("Status: ").append(message));
 }
 
-int frmMain::getCurrentDateOrPrevious(int date)
+int frmMain::currentDateOrPrevious(int date)
 {
     QList<int>::const_iterator place = qLowerBound(prices::instance().dates(), date);
     if (*place != date && place != prices::instance().dates().constBegin())
@@ -934,46 +918,43 @@ int frmMain::getCurrentDateOrPrevious(int date)
         return *place;
 }
 
-int frmMain::getDateDropDownDate(QDateEdit *dateDropDown)
+int frmMain::dateDropDownDate(QDateEdit *dateDropDown)
 {
-    int currentDate = qMax(getCurrentDateOrPrevious(dateDropDown->date().toJulianDay()), m_currentPortfolio->info.startDate);
+    int currentDate = qMax(currentDateOrPrevious(dateDropDown->date().toJulianDay()), m_currentPortfolio->info.startDate);
     dateDropDown->blockSignals(true);
     dateDropDown->setDate(QDate::fromJulianDay(currentDate));
     dateDropDown->blockSignals(false);
     return currentDate;
 }
 
-void frmMain::holdingsModifyColumns()
+bool frmMain::modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames)
 {
-    frmColumns f(m_settings.viewableColumns.value(settings::columns_Holdings), holdingsRow::fieldNames(), this);
+    frmColumns f(m_settings.viewableColumns.value(columnID), fieldNames, this);
     if (f.exec())
     {
-        m_settings.viewableColumns[settings::columns_Holdings] = f.getReturnValues();
-        settings::saveColumns(settings::columns_Holdings, m_settings.viewableColumns[settings::columns_Holdings]);
-        loadPortfolioHoldings();
+        m_settings.viewableColumns[columnID] = f.getReturnValues();
+        settings::saveColumns(columnID, m_settings.viewableColumns[columnID]);
+        return true;
     }
+    return false;
+}
+
+void frmMain::holdingsModifyColumns()
+{
+    if (modifyColumns(settings::columns_Holdings, holdingsRow::fieldNames()))
+        resetPortfolioHoldings();
 }
 
 void frmMain::aaModifyColumns()
 {
-    frmColumns f(m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), this);
-    if (f.exec())
-    {
-        m_settings.viewableColumns[settings::columns_AA] = f.getReturnValues();
-        settings::saveColumns(settings::columns_AA, m_settings.viewableColumns[settings::columns_AA]);
-        loadPortfolioAA();
-    }
+    if (modifyColumns(settings::columns_AA, aaRow::fieldNames()))
+        resetPortfolioAA();
 }
 
 void frmMain::acctModifyColumns()
 {
-    frmColumns f(m_settings.viewableColumns.value(settings::columns_Acct), acctRow::fieldNames(), this);
-    if (f.exec())
-    {
-        m_settings.viewableColumns[settings::columns_Acct] = f.getReturnValues();
-        settings::saveColumns(settings::columns_Acct, m_settings.viewableColumns[settings::columns_Acct]);
-        loadPortfolioAcct();
-    }
+    if (modifyColumns(settings::columns_Acct, acctRow::fieldNames()))
+        resetPortfolioHoldings();
 }
 
 void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames)
@@ -996,4 +977,22 @@ void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<i
         sortString = f.getReturnValues();
 
     setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
+}
+
+void frmMain::holdingsSortChanged(int index)
+{
+    sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames());
+    resetPortfolioHoldings();
+}
+
+void frmMain::aaSortChanged(int index)
+{
+    sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(), m_currentPortfolio->info.aaSort, aaRow::fieldNames());
+    resetPortfolioAA();
+}
+
+void frmMain::acctSortChanged(int index)
+{
+    sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.acctSort, acctRow::fieldNames());
+    resetPortfolioAcct();
 }

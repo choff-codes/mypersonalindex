@@ -126,3 +126,13 @@ bool functions::equal(const QVariant &left, const QVariant &right, const QVarian
             return left.toString().compare(right.toString(), Qt::CaseInsensitive) == 0;
     };
 }
+
+QStringList functions::except(const QStringList &list1, const QStringList &list2)
+{
+    QStringList returnList;
+    foreach(const QString &s, list1)
+        if (!list2.contains(s))
+            returnList.append(s);
+
+    return returnList;
+}

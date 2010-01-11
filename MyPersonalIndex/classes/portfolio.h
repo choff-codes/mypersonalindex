@@ -96,6 +96,8 @@ public:
 
     portfolio(const portfolioInfo &pi): info(pi) {}
 
+    void remove() const;
+
     static QMap<int, portfolio*> loadPortfolios();
 
 private:

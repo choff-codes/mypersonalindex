@@ -110,7 +110,8 @@ public:
 
     int firstTradeDate() const;
     void save(const int &portfolioID);
-    void saveAATargets();
+    void saveAATargets() const;
+    void remove() const;
 };
 
 #endif // SECURITY_H

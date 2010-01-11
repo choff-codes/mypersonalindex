@@ -19,6 +19,7 @@ public:
     static bool lessThan(const QVariant &left, const QVariant &right, const QVariant &type);
     static bool greaterThan(const QVariant &left, const QVariant &right, const QVariant &type);
     static bool equal(const QVariant &left, const QVariant &right, const QVariant &type);
+    static QStringList except(const QStringList &list1, const QStringList &list2);
 };
 
 #endif // FUNCTIONS_H

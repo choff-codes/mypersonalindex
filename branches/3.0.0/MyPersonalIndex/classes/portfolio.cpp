@@ -1,5 +1,19 @@
 #include "portfolio.h"
 
+void portfolio::remove() const
+{
+    queries::deleteItem(queries::table_Portfolios, this->info.id);
+    queries::deletePortfolioItems(queries::table_AA, this->info.id);
+    queries::deletePortfolioItems(queries::table_Acct, this->info.id);
+    queries::deletePortfolioItems(queries::table_NAV, this->info.id);
+    queries::deletePortfolioItems(queries::table_StatMapping, this->info.id);
+    queries::deletePortfolioItems(queries::table_SecurityAA, this->info.id, true);
+    queries::deletePortfolioItems(queries::table_SecurityTrades, this->info.id, true);
+    queries::deletePortfolioItems(queries::table_ExecutedTrades, this->info.id, true);
+    // this must come last due to the joinToSecurities above
+    queries::deletePortfolioItems(queries::table_Security, this->info.id);
+}
+
 void portfolioInfo::save()
 {
     QMap<QString, QVariant> values;

@@ -4,20 +4,6 @@
 #include <QtGui>
 #include "queries.h"
 
-//sqliteQuery* queries::deleteUnusedPrices(const QString &table)
-//{
-//    return new sqliteQuery(
-//        QString(
-//            "DELETE FROM %1"
-//            " WHERE symbol IN (SELECT a.symbol"
-//                            " FROM (SELECT DISTINCT symbol FROM %1) AS a"
-//                            " LEFT JOIN symbols AS b"
-//                                " ON a.symbol = b.symbol AND b.CashAccount = 0"
-//                            " WHERE b.symbol IS NULL )").arg(table),
-//        QList<sqliteParameter>()
-//    );
-//}
-
 class prices
 {
 public:
@@ -70,8 +56,9 @@ public:
     int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
     int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
 
-
     securityPrice dailyPriceInfo(const QString &symbol, const int &date) { return history(symbol).dailyPriceInfo(date); }
+
+    void remove(const QStringList &removedSymbols);
 
     void insertCashSecurity(const QString &symbol) { m_cashSecurities.insert(symbol); }
     bool isCashSecurity(const QString &symbol) { return m_cashSecurities.contains(symbol); }

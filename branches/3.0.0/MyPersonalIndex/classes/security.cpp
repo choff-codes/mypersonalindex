@@ -113,7 +113,7 @@ void security::save(const int &portfolioID)
     this->id = queries::insert(queries::table_Security, values, this->id);
 }
 
-void security::saveAATargets()
+void security::saveAATargets() const
 {
     QVariantList securityID, aaID, percent;
 
@@ -132,6 +132,14 @@ void security::saveAATargets()
     queries::deleteSecurityItems(queries::table_SecurityAA, this->id);
     if (!securityID.isEmpty())
         queries::executeTableUpdate(queries::table_SecurityAA, tableValues);
+}
+
+void security::remove() const
+{
+    queries::deleteItem(queries::table_Security, this->id);
+    queries::deleteSecurityItems(queries::table_SecurityAA, this->id);
+    queries::deleteSecurityItems(queries::table_SecurityTrades, this->id);
+    queries::deleteSecurityItems(queries::table_ExecutedTrades, this->id);
 }
 
 void trade::save(const int &securityID)

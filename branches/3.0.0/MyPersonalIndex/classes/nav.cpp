@@ -140,30 +140,15 @@ void nav::clearVariantLists()
 
 void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate)
 {
-    // remove nav prices that are to be recalculated
-    queries::deletePortfolioItems(queries::table_NAV, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate);
-    // remove custom trades that are to be recalculated
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, currentPortfolio->info.id, portfolioStartDate ? 0 : calculationDate, true);
-
     if (portfolioStartDate)
     {
-        currentPortfolio->data.executedTrades.clear();
-        currentPortfolio->data.nav.clear();
+        currentPortfolio->data.executedTrades.remove(currentPortfolio->info.id);
+        currentPortfolio->data.nav.remove(currentPortfolio->info.id);
         return;
     }
 
-    for(portfolioData::executedTradeList::iterator i = currentPortfolio->data.executedTrades.begin(); i != currentPortfolio->data.executedTrades.end(); ++i)
-    {
-        QList<executedTrade> &list = i.value();
-        QList<executedTrade>::iterator trade = list.begin();
-        while (trade != list.end())
-            if (trade->date >= calculationDate)
-                trade = list.erase(trade);
-            else
-                ++trade;
-    }
-
-    currentPortfolio->data.nav.clear(calculationDate);
+    currentPortfolio->data.executedTrades.remove(currentPortfolio->info.id, calculationDate);
+    currentPortfolio->data.nav.remove(currentPortfolio->info.id, calculationDate);
 }
 
 QList<int> nav::getPortfolioSecurityReinvestment(const int &portfolioID)

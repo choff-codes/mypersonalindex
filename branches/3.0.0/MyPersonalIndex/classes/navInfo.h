@@ -2,6 +2,7 @@
 #define NAVINFO_H
 
 #include <QtGui>
+#include "queries.h"
 
 class navInfo
 {
@@ -21,8 +22,8 @@ public:
     int firstDate() const { return m_nav.constBegin().key(); }
     int lastDate() const { return (m_nav.constEnd() - 1).key(); }
 
-    void clear() { m_nav.clear(); m_totalValue.clear(); }
-    void clear(int startDate);
+    void remove(const int &portfolioID);
+    void remove(const int &portfolioID, const int &startDate);
 
 private:
     QMap<int, double> m_nav;

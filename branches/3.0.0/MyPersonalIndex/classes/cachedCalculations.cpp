@@ -71,11 +71,11 @@ cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, co
 QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDate)
 {
     QMap<int, double> returnValues;
-    const portfolioData::executedTradeList &trades = m_portfolio->data.executedTrades;
+    const executedTradeList &trades = m_portfolio->data.executedTrades;
     const QMap<int, security> &securities = m_portfolio->data.securities;
     portfolioInfo::avgPriceCalculation calcType = m_portfolio->info.avgPriceCalc;
 
-    for(portfolioData::executedTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
+    for(executedTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
         // get security info
         int securityID = i.key();
@@ -88,7 +88,10 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         double shares = 0; double total = 0; double splitRatio = 1;
 
         if (s.cashAccount)
+        {
             returnValues.insert(securityID, 1); // cash account is always $1
+            continue;
+        }
 
         for(int x = 0; x < count; ++x)
         {

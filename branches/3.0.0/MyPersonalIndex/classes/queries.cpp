@@ -72,8 +72,7 @@ const QString queries::table_ExecutedTrades = "ExecutedTrades";
 
 QString queries::getDatabaseLocation()
 {
-    QSettings cfg(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI");
-    return QFileInfo(cfg.fileName()).absolutePath().append("/MPI.sqlite");
+    return QFileInfo(QSettings(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI").fileName()).absolutePath().append("/MPI.sqlite");
 }
 
 void queries::executeNonQuery(const QString &query)

@@ -21,6 +21,12 @@ void frmOptions::accept()
         return;
     }
 
+    if (m_settings.dataStartDate != m_settingsOriginal.dataStartDate)
+        if (QMessageBox::question(this, "Start Date Change", "Are you sure you want to change the data start date?"
+            " This will cause you to redownload all price data. If any portfolios have a start date before this date,"
+            " they will be adjusted to the new start date.", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) != QMessageBox::Yes)
+                return;
+
     m_settings.save();
     QDialog::accept();
 }

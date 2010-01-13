@@ -69,9 +69,6 @@ void updatePrices::updateMissingPrices()
 
 void updatePrices::insertUpdatesToObject()
 {
-    for(int i = 0; i < m_pricesDate.count(); ++i)
-        prices::instance().insertPrice(m_pricesSymbol.at(i).toString(), m_pricesDate.at(i).toInt(), m_pricesPrice.at(i).toDouble());
-
 
     for(int i = 0; i < m_divDate.count(); ++i)
         prices::instance().insertDividend(m_divSymbol.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
@@ -184,14 +181,17 @@ bool updatePrices::getPrices(const QString &symbol, const int &minDate, int &ear
         {
             QList<QByteArray> line = s.split(',');
 
-            int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            m_pricesDate.append(djulian);
-            // update min date
-            if (djulian < earliestUpdate)
-                earliestUpdate = djulian;
+            int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
+            if (date < earliestUpdate)
+                earliestUpdate = date;
 
+            double price = line.at(4).toDouble();
+
+            m_pricesDate.append(date);
             m_pricesSymbol.append(symbol);
-            m_pricesPrice.append(line.at(4).toDouble());
+            m_pricesPrice.append(price);
+
+            prices::instance().insertPrice(symbol, date, price);
         }
     }
 
@@ -215,13 +215,17 @@ void updatePrices::getDividends(const QString &symbol, const int &minDate, int &
         {
             QList<QByteArray> line = s.split(',');
 
-            int djulian = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            m_divDate.append(djulian);
-            if (djulian < earliestUpdate)
-                earliestUpdate = djulian;
+            int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
+            if (date < earliestUpdate)
+                earliestUpdate = date;
 
+            double price = line.at(1).toDouble();
+
+            m_divDate.append(date);
             m_divSymbol.append(symbol);
-            m_divAmount.append(line.at(1).toDouble());
+            m_divAmount.append(price);
+
+            prices::instance().insertDividend(symbol, date, price);
         }
     }
 
@@ -265,19 +269,22 @@ void updatePrices::getSplits(const QString &symbol, const int &minDate,  int &ea
         if (d.year() - 1900 <= QDate::currentDate().year() - 2000) // defaults to 19xx
             d = d.addYears(100);
 
-        int djulian = d.toJulianDay();
-        if (djulian <= minDate && minDate != m_dataStartDate) // if this is the first run, add all previous splits
+        int date = d.toJulianDay();
+        if (date <= minDate && minDate != m_dataStartDate) // if this is the first run, add all previous splits
             continue;
 
-        m_splitDate.append(djulian);
-        if (djulian < earliestUpdate)
-            earliestUpdate = djulian;
+        if (date < earliestUpdate)
+            earliestUpdate = date;
 
         // ratio looks like [2:1], so strip off the brackets
         QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');
-        m_splitRatio.append(divisor.at(0).toDouble() / divisor.at(1).toDouble());
+        double ratio = divisor.at(0).toDouble() / divisor.at(1).toDouble();
 
+        m_splitDate.append(date);
+        m_splitRatio.append(ratio);
         m_splitSymbol.append(symbol);
+
+        prices::instance().insertSplit(symbol, date, ratio);
     }
 
     delete lines;

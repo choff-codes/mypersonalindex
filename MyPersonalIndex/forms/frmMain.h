@@ -82,7 +82,7 @@ private slots:
     void editStat();
     void beginUpdate();
     void finishUpdate(const QStringList &invalidSecurities);
-    void beginNAV(const int &portfolioID, const int &minDate);
+    void beginNAV(const int &portfolioID = -1, const int &minDate = 0);
     void finishNAV();
     void statusUpdate(const QString &message);
     void holdingsExport() { functions::exportTable(ui.holdings, this); }

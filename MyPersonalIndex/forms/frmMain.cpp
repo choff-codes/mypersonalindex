@@ -506,7 +506,7 @@ void frmMain::deletePortfolio()
         ui.mainPortfolioCombo->setCurrentIndex(row);
 
     if (invalidNAVDates())
-        beginNAV(-1, 0);
+        beginNAV();
 }
 
 void frmMain::about()
@@ -612,7 +612,7 @@ void frmMain::deleteSecurity()
 
     deleteUnusedSymbols();
     if (invalidNAVDates())
-        beginNAV(-1, 0);
+        beginNAV();
     else if (minDate != -1)
         beginNAV(m_currentPortfolio->info.id, minDate);
     else
@@ -649,9 +649,33 @@ void frmMain::options()
 {
     frmOptions f(m_settings, this);
     if (f.exec())
-        m_settings = f.getReturnValues();
+    {
+        if (f.getReturnValues().dataStartDate == m_settings.dataStartDate)
+        {
+            m_settings = f.getReturnValues();
+            return;
+        }
 
-    // TODO if date changes
+        m_settings = f.getReturnValues();
+        prices::instance().remove(prices::instance().symbols());
+        foreach(portfolio *p, m_portfolios)
+        {
+            if (p->info.startDate < m_settings.dataStartDate)
+            {
+                p->info.startDate = m_settings.dataStartDate;
+                p->info.save();
+            }
+            p->data.nav.remove(p->info.id);
+            p->data.executedTrades.remove(p->info.id);
+        }
+
+        if (QMessageBox::question(this, "Update Prices", "Would you like to update prices from the new data start date?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
+        {
+            beginUpdate();
+            return;
+        }
+        beginNAV();
+    }
 }
 
 void frmMain::addAA()

@@ -20,11 +20,16 @@ public:
     executedTrade(): date(0), shares(0), price(0), commission(0) {}
 };
 
+class executedTradeList: public QMap<int, QList<executedTrade> >
+{
+public:
+    void remove(const int &portfolioID, const int &startDate);
+    void remove(const int &portfolioID);
+};
+
 class portfolioData
 {
 public:
-    typedef QMap<int, QList<executedTrade> > executedTradeList;
-
     QMap<int, security> securities;
     QMap<int, assetAllocation> aa;
     QMap<int, account> acct;

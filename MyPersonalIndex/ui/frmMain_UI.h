@@ -48,7 +48,7 @@ public:
 
     QVBoxLayout *statGrid;
     QToolBar *statToolbar;
-    QAction *statAddEdit;
+    QAction *statEdit;
     QAction *statExport;
     QLabel *statStartDate;
     QDateEdit *statStartDateDropDown;

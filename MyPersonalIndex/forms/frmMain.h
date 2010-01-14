@@ -37,7 +37,6 @@ private:
     void saveSettings();
     void resetPortfolioDropDown(const int &portfolioID);
     void resetSortDropDowns();
-    void loadStats();
     void resetPortfolioSettings();
     void savePortfolio();
     void savePortfolios();
@@ -68,6 +67,7 @@ private slots:
     void resetPortfolioAA();
     void resetPortfolioAcct();
     void resetPortfolioCorrelation();
+    void resetPortfolioStat();
     void about();
     void addSecurity();
     void editSecurity();

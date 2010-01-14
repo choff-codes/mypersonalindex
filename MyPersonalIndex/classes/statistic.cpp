@@ -59,7 +59,8 @@ QString statistic::calculate(stat statistic, portfolio *currentPortfolio, calcul
 
 QString statistic::beginningIndexValue(portfolio *currentPortfolio, const int &previousDay)
 {
-    QMap<int, double>::const_iterator i = currentPortfolio->data.nav.navHistory().lowerBound(previousDay);
+    QMap<int, double> nav = currentPortfolio->data.nav.navHistory();
+    QMap<int, double>::const_iterator i = nav.lowerBound(previousDay);
     if (i.key() == previousDay)
         return functions::doubleToLocalFormat(i.value());
 

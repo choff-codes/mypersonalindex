@@ -139,26 +139,25 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statToolbar = new QToolBar(tab_stat);
 
     stat = new QTableView(tab_stat);
-    stat->verticalHeader()->hide();
     stat->setSelectionMode(QAbstractItemView::ExtendedSelection);
     stat->setSelectionBehavior(QAbstractItemView::SelectRows);
     stat->setAlternatingRowColors(true);
     stat->horizontalHeader()->setHighlightSections(false);
-    stat->verticalHeader()->setDefaultSectionSize(fntHeight);
+    stat->verticalHeader()->setDefaultSectionSize(fntHeight + 6);
     stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     statGrid->addWidget(statToolbar);
     statGrid->addWidget(stat);
 
-    statAddEdit = new QAction("Add/Edit Statistics...", tab_stat);
-    statAddEdit->setIconText("Add/Edit Statistics...");
+    statEdit = new QAction("Add/Edit Statistics...", tab_stat);
+    statEdit->setIconText("Add/Edit Statistics...");
     statExport = new QAction("Export...", tab_stat);
     statExport->setIconText("Export...");
     statStartDate = new QLabel(" Start Date: ", tab_stat);
     statStartDateDropDown = functions::createDateEdit(tab_stat);
     statEndDate = new QLabel(" End Date: ", tab_stat);
     statEndDateDropDown = functions::createDateEdit(tab_stat);
-    statToolbar->addAction(statAddEdit);
+    statToolbar->addAction(statEdit);
     statToolbar->addSeparator();
     statToolbar->addWidget(statStartDate);
     statToolbar->addWidget(statStartDateDropDown);
@@ -259,7 +258,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
     correlations->setAlternatingRowColors(true);
     correlations->horizontalHeader()->setHighlightSections(false);
-    correlations->verticalHeader()->setDefaultSectionSize(fntHeight + 4);
+    correlations->verticalHeader()->setDefaultSectionSize(fntHeight + 6);
     correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
     correlationsGrid->addWidget(correlationsToolbar);

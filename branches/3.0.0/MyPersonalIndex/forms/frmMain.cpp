@@ -8,6 +8,7 @@
 #include "frmSort.h"
 #include "mainPerformanceModel.h"
 #include "mainCorrelationModel.h"
+#include "mainStatisticModel.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -102,7 +103,9 @@ void frmMain::connectSlots()
     connect(ui.accountsSortCombo, SIGNAL(activated(int)), this, SLOT(acctSortChanged(int)));
     connect(ui.accountsExport, SIGNAL(triggered()), this, SLOT(acctExport()));
 
-    connect(ui.statAddEdit, SIGNAL(triggered()), this, SLOT(editStat()));
+    connect(ui.statEdit, SIGNAL(triggered()), this, SLOT(editStat()));
+    connect(ui.statStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
+    connect(ui.statEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
 
     connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
@@ -221,6 +224,7 @@ void frmMain::loadPortfolio()
     resetPortfolioAA();
     resetPortfolioAcct();
     resetPortfolioCorrelation();
+    resetPortfolioStat();
 
     qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
 }
@@ -239,6 +243,7 @@ void frmMain::resetCalendars()
     resetCalendar(end, start, ui.accountsDateDropDown);
     resetCalendar(end, start, ui.chartStartDateDropDown, ui.chartEndDateDropDown);
     resetCalendar(end, start, ui.correlationsStartDateDropDown, ui.correlationsEndDateDropDown);
+    resetCalendar(end, start, ui.statStartDateDropDown, ui.statEndDateDropDown);
 }
 
 void frmMain::resetCalendar(const int &date, const int &minDate, QDateEdit *calendar)
@@ -381,6 +386,7 @@ void frmMain::resetPortfolioCorrelation()
     mainCorrelationModel *model = new mainCorrelationModel(correlations, symbols, ui.correlations);
     ui.correlations->setModel(model);
     ui.correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui.correlations->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     delete oldModel;
 }
 
@@ -421,6 +427,28 @@ void frmMain::resetPortfolioChart()
     ui.chart->setAxisAutoScale(QwtPlot::yLeft);
     ui.chart->replot();
     ui.chartZoomer->setZoomBase();
+}
+
+void frmMain::resetPortfolioStat()
+{
+    int startDate = dateDropDownDate(ui.statStartDateDropDown);
+    int endDate = dateDropDownDate(ui.statEndDateDropDown);
+    int previousDay = currentDateOrPrevious(startDate - 1);
+
+    QAbstractItemModel *oldModel = ui.stat->model();
+    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(endDate);
+
+    QMap<int, QString> statisticValues;
+
+    foreach(int i, m_currentPortfolio->data.stats)
+        statisticValues.insert(i, statistic::calculate((statistic::stat)i, m_currentPortfolio, info, startDate, previousDay));
+
+
+    mainStatisticModel *model = new mainStatisticModel(statisticValues, ui.stat);
+    ui.stat->setModel(model);
+    ui.stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui.stat->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    delete oldModel;
 }
 
 void frmMain::resetPortfolioSettings()
@@ -848,7 +876,7 @@ void frmMain::editStat()
     {
         m_currentPortfolio->data.stats = f.getReturnValues();
         statistic::saveSelectedStats(m_currentPortfolio->info.id, m_currentPortfolio->data.stats);
-        //loadStats();
+        resetPortfolioStat();
     }
 }
 
@@ -935,8 +963,9 @@ void frmMain::statusUpdate(const QString &message)
 
 int frmMain::currentDateOrPrevious(int date)
 {
-    QList<int>::const_iterator place = qLowerBound(prices::instance().dates(), date);
-    if (*place != date && place != prices::instance().dates().constBegin())
+    QList<int> dates = prices::instance().dates();
+    QList<int>::const_iterator place = qLowerBound(dates, date);
+    if (*place != date && place != dates.constBegin())
         return *(place - 1);
     else
         return *place;

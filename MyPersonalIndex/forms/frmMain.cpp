@@ -270,7 +270,7 @@ void frmMain::resetPortfolioHoldings()
 {
     int currentDate = dateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
-    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     foreach(const security &s, m_currentPortfolio->data.securities)
@@ -291,7 +291,7 @@ void frmMain::resetPortfolioAA()
 {
     int currentDate = dateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
-    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
@@ -319,7 +319,7 @@ void frmMain::resetPortfolioAcct()
 {
     int currentDate = dateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
-    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     if (ui.accountsShowBlank->isChecked()) // insert blank acct
@@ -372,7 +372,7 @@ void frmMain::resetPortfolioCorrelation()
     {
         QString security1 = symbols.at(i);
         QHash<QString, double> &list = correlations[security1];
-        prices::securityPrices security1history;
+        securityPrices security1history;
 
         if (i == 0) // always current portfolio
             security1history.prices = m_currentPortfolio->data.nav.navHistory();
@@ -436,7 +436,7 @@ void frmMain::resetPortfolioStat()
     int previousDay = currentDateOrPrevious(startDate - 1);
 
     QAbstractItemModel *oldModel = ui.stat->model();
-    calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(endDate);
+    dailyInfoPortfolio *info = m_calculations.portfolioValues(endDate);
 
     QMap<int, QString> statisticValues;
 
@@ -739,7 +739,7 @@ int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
 int frmMain::aaMinDate(const int &aaID, int currentMinDate)
 {
     foreach(const security &s, m_currentPortfolio->data.securities)
-        foreach(const aaTarget &target, s.aa)
+        foreach(const assetAllocationTarget &target, s.aa)
             if(target.id == aaID)
             {
                 foreach(const trade &t, s.trades)

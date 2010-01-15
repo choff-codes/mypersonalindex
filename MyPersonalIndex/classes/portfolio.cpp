@@ -1,25 +1,29 @@
 #include "portfolio.h"
 
-void executedTradeList::remove(const int &portfolioID, const int &startDate)
+portfolioInfo::portfolioInfo(): id(-1), dividends(true), avgPriceCalc(avgPriceCalculation_FIFO), startValue(100),
+    aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
+    holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true)
 {
-    for(iterator i = begin(); i != end(); ++i)
-    {
-        QList<executedTrade> &list = i.value();
-        QList<executedTrade>::iterator trade = list.begin();
-        while (trade != list.end())
-            if (trade->date >= startDate)
-                trade = list.erase(trade);
-            else
-                ++trade;
-    }
-
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, startDate, true);
 }
 
-void executedTradeList::remove(const int &portfolioID)
+bool portfolioInfo::operator==(const portfolioInfo &other) const
 {
-    clear();
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, 0, true);
+    return this->id == other.id
+            && this->description == other.description
+            && this->dividends == other.dividends
+            && this->avgPriceCalc == other.avgPriceCalc
+            && this->startValue == other.startValue
+            && this->aaThreshold == other.aaThreshold
+            && this->aaThresholdMethod == other.aaThresholdMethod
+            && this->startDate == other.startDate
+            && this->holdingsShowHidden == other.holdingsShowHidden
+            && this->navSortDesc == other.navSortDesc
+            && this->aaShowBlank == other.aaShowBlank
+            && this->correlationShowHidden == other.correlationShowHidden
+            && this->acctShowBlank == other.acctShowBlank
+            && this->holdingsSort == other.holdingsSort
+            && this->aaSort == other.aaSort
+            && this->acctSort == other.acctSort;
 }
 
 void portfolio::remove() const
@@ -175,7 +179,7 @@ void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portf
     while(q.next())
         portfolioList[q.value(queries::securityAAColumns_Count).toInt()]->data.securities[q.value(queries::securityAAColumns_SecurityID).toInt()]
             .aa.append(
-                aaTarget(
+                assetAllocationTarget(
                     q.value(queries::securityAAColumns_AAID).toInt(),
                     q.value(queries::securityAAColumns_Percent).toDouble()
                 )

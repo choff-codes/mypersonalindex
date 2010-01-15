@@ -8,7 +8,7 @@ const QVariantList acctRow::columnsType = QVariantList() << QVariant(QVariant::S
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
-acctRow::acctRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &acctInfo, const account &acct, const QString &sort)
+acctRow::acctRow(const dailyInfoPortfolio *info, const dailyInfo &acctInfo, const account &acct, const QString &sort)
     : baseRow(sort)
 {
     //row_Description

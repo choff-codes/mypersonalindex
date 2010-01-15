@@ -45,7 +45,7 @@ void statistic::saveSelectedStats(const int &portfolioID, const QList<int> &stat
         queries::executeTableUpdate(queries::table_StatMapping, tableValues);
 }
 
-QString statistic::calculate(stat statistic, portfolio *currentPortfolio, calculations::portfolioDailyInfo *info, const int &startDate, const int &previousDay)
+QString statistic::calculate(stat statistic, portfolio *currentPortfolio, dailyInfoPortfolio *info, const int &startDate, const int &previousDay)
 {
     switch(statistic)
     {
@@ -76,12 +76,12 @@ QString statistic::beginningValue(portfolio *currentPortfolio, const int &previo
     return QString();
 }
 
-QString statistic::costBasis(calculations::portfolioDailyInfo* info)
+QString statistic::costBasis(dailyInfoPortfolio* info)
 {
     return functions::doubleToCurrency(info->costBasis);
 }
 
-QString statistic::currentIndexValue(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info)
+QString statistic::currentIndexValue(portfolio *currentPortfolio, dailyInfoPortfolio* info)
 {
     QMap<int, double>::const_iterator i = currentPortfolio->data.nav.totalValueHistory().lowerBound(info->date);
     if (i.key() == info->date)
@@ -90,7 +90,7 @@ QString statistic::currentIndexValue(portfolio *currentPortfolio, calculations::
     return QString();
 }
 
-QString statistic::currentValue(portfolio *currentPortfolio, calculations::portfolioDailyInfo *info)
+QString statistic::currentValue(portfolio *currentPortfolio, dailyInfoPortfolio *info)
 {
     QMap<int, double>::const_iterator i = currentPortfolio->data.nav.navHistory().lowerBound(info->date);
     if (i.key() == info->date)
@@ -99,7 +99,7 @@ QString statistic::currentValue(portfolio *currentPortfolio, calculations::portf
     return QString();
 }
 
-QString statistic::dailyReturn(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info, const int &startDate, const int &previousDay)
+QString statistic::dailyReturn(portfolio *currentPortfolio, dailyInfoPortfolio* info, const int &startDate, const int &previousDay)
 {
     QMap<int, double> navHistory = currentPortfolio->data.nav.navHistory();
     QMap<int, double>::const_iterator startNav = navHistory.lowerBound(previousDay);

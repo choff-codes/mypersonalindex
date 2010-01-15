@@ -13,7 +13,7 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    holdingsRow(const security &s, const calculations::portfolioDailyInfo *info,
+    holdingsRow(const security &s, const dailyInfoPortfolio *info,
         const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
@@ -24,7 +24,7 @@ class mainHoldingsModel: public mpiViewModelBase
 {
 public:
 
-    mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const calculations::portfolioDailyInfo *info, QTableView *parent = 0):
+    mainHoldingsModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const dailyInfoPortfolio *info, QTableView *parent = 0):
         mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_costBasis(info->costBasis), m_taxLiability(info->taxLiability) { }
 
     QVariant data(const QModelIndex &index, int role) const;

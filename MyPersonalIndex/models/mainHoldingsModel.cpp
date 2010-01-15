@@ -9,10 +9,10 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double);
 
-holdingsRow::holdingsRow(const security &s, const calculations::portfolioDailyInfo *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
+holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
     : baseRow(sort)
 {
-    calculations::securityValue value = info->securityValues.value(s.id);
+    securityInfo value = info->securitiesInfo.value(s.id);
 
     //row_Active
     this->values.append((int)s.includeInCalc);
@@ -41,7 +41,7 @@ holdingsRow::holdingsRow(const security &s, const calculations::portfolioDailyIn
     this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA
     QStringList aaList;
-    foreach(const aaTarget &target, s.aa)
+    foreach(const assetAllocationTarget &target, s.aa)
         aaList.append(QString("%1 - %2").arg(aa.value(target.id).description, functions::doubleToPercentage(target.target)));
     this->values.append(aaList.join(", "));
     //row_TaxLiability

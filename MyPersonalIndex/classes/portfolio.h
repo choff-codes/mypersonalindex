@@ -2,30 +2,13 @@
 #define PORTFOLIO_H
 
 #include <QtGui>
+#include "executedTrade.h"
 #include "navInfo.h"
 #include "security.h"
 #include "assetAllocation.h"
 #include "account.h"
 #include "queries.h"
 #include "prices.h"
-
-class executedTrade
-{
-public:
-    int date;
-    double shares;
-    double price;
-    double commission;
-
-    executedTrade(): date(0), shares(0), price(0), commission(0) {}
-};
-
-class executedTradeList: public QMap<int, QList<executedTrade> >
-{
-public:
-    void remove(const int &portfolioID, const int &startDate);
-    void remove(const int &portfolioID);
-};
 
 class portfolioData
 {
@@ -61,36 +44,11 @@ public:
     QString aaSort;
     QString acctSort;
 
-    portfolioInfo(): id(-1), dividends(true), avgPriceCalc(avgPriceCalculation_FIFO), startValue(100),
-        aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
-        holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true) {}
-
+    portfolioInfo();
     void save();
 
-    bool operator==(const portfolioInfo &other) const
-    {
-        return this->id == other.id
-                && this->description == other.description
-                && this->dividends == other.dividends
-                && this->avgPriceCalc == other.avgPriceCalc
-                && this->startValue == other.startValue
-                && this->aaThreshold == other.aaThreshold
-                && this->aaThresholdMethod == other.aaThresholdMethod
-                && this->startDate == other.startDate
-                && this->holdingsShowHidden == other.holdingsShowHidden
-                && this->navSortDesc == other.navSortDesc
-                && this->aaShowBlank == other.aaShowBlank
-                && this->correlationShowHidden == other.correlationShowHidden
-                && this->acctShowBlank == other.acctShowBlank
-                && this->holdingsSort == other.holdingsSort
-                && this->aaSort == other.aaSort
-                && this->acctSort == other.acctSort;
-    }
-
-    bool operator!=(const portfolioInfo &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const portfolioInfo &other) const;
+    bool operator!=(const portfolioInfo &other) const { return !(*this == other); }
 };
 
 class portfolio

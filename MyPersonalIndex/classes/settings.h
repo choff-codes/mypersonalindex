@@ -32,14 +32,10 @@ public:
     bool operator==(const settings &other) const
     {
         // these are the only static properties, the other properties cannot be edited by the user
-        return this->dataStartDate == other.dataStartDate
-                && this->splits == other.splits;
+        return this->dataStartDate == other.dataStartDate && this->splits == other.splits;
     }
 
-    bool operator!=(const settings &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator!=(const settings &other) const { return !(*this == other); }
 
 private:
     static void loadSettingsInfo(settings &s, QSqlQuery q);

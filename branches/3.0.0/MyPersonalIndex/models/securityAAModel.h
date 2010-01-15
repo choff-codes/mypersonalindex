@@ -11,9 +11,9 @@ class securityAAModel: public QAbstractTableModel
 
 public:
 
-    QList<aaTarget> getList() { return m_list; }
+    QList<assetAllocationTarget> getList() { return m_list; }
 
-    securityAAModel(const QList<aaTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
+    securityAAModel(const QList<assetAllocationTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
             QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
 
     double totalPercentage();
@@ -22,7 +22,7 @@ private:
     const QMap<int, assetAllocation> &m_aaValues;
     QTableView *m_parent;
     int m_columns;
-    QList<aaTarget> m_list;
+    QList<assetAllocationTarget> m_list;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     int rowCount(const QModelIndex&) const { return m_list.count(); }

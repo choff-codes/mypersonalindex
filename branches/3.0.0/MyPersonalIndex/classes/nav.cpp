@@ -49,7 +49,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
     }
 
     QList<int> securityReinvestments = getPortfolioSecurityReinvestment(portfolioID);
-    calculations::portfolioDailyInfo *previousInfo = m_calculations.portfolioValues(*previousDate);
+    dailyInfoPortfolio *previousInfo = m_calculations.portfolioValues(*previousDate);
     double previousTotalValue = previousInfo->totalValue;
     double previousNAV = currentPortfolio->info.startValue;
     navInfo::navInfo &currentPortfolioNAV = currentPortfolio->data.nav;
@@ -75,7 +75,7 @@ void nav::getPortfolioNAVValues(const int &portfolioID, const int &calculationDa
         insertPortfolioTrades(currentPortfolio, date, previousInfo, trades.value(date) + trades.value(-1));
         insertPortfolioTradesToObject(currentPortfolio);
 
-        calculations::portfolioDailyInfo *info = m_calculations.portfolioValues(date);
+        dailyInfoPortfolio *info = m_calculations.portfolioValues(date);
 
         m_NAV_Portfolio.append(portfolioID);
         m_NAV_Dates.append(date);
@@ -206,7 +206,7 @@ bool nav::getCurrentDateOrNext(int &date)
     return false;
 }
 
-nav::navTrades nav::getPortfolioTrades(const int &portfolioID, const int &minDate, const bool &portfolioStartDate)
+navTrades nav::getPortfolioTrades(const int &portfolioID, const int &minDate, const bool &portfolioStartDate)
 {
     navTrades trades;
     int lastDate = m_dates.last();
@@ -354,14 +354,14 @@ QList<int> nav::getYearlyTrades(const trade &d, const int &minDate, const int &m
     return dates;
 }
 
-void nav::insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const calculations::portfolioDailyInfo *previousInfo)
+void nav::insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio *previousInfo)
 {
     if (!previousInfo)
         return;
     
     foreach(const int &reinvest, securityReinvestments)
     {
-        prices::securityPrice s = prices::instance().dailyPriceInfo(currentPortfolio->data.securities.value(reinvest).symbol, previousInfo->date);
+        securityPrice s = prices::instance().dailyPriceInfo(currentPortfolio->data.securities.value(reinvest).symbol, previousInfo->date);
         if (s.dividend <= 0 || s.close == 0)
             continue;
         m_ExecutedTrades_SecurityID.append(reinvest);
@@ -373,7 +373,7 @@ void nav::insertPortfolioReinvestments(const portfolio *currentPortfolio, const 
     }
 }
 
-void nav::insertPortfolioCashTrade(const portfolio *currentPortfolio, const int &cashAccount, const calculations::portfolioDailyInfo *previousInfo,
+void nav::insertPortfolioCashTrade(const portfolio *currentPortfolio, const int &cashAccount, const dailyInfoPortfolio *previousInfo,
     const int &date, const double &reverseTradeValue)
 {
     if (!previousInfo)
@@ -383,7 +383,7 @@ void nav::insertPortfolioCashTrade(const portfolio *currentPortfolio, const int 
     if (!securities.contains(cashAccount))
         return;
 
-    prices::securityPrice cashSecurity = prices::instance().dailyPriceInfo(securities.value(cashAccount).symbol, previousInfo->date);
+    securityPrice cashSecurity = prices::instance().dailyPriceInfo(securities.value(cashAccount).symbol, previousInfo->date);
     if (cashSecurity.close == 0)
         return;
 
@@ -395,11 +395,11 @@ void nav::insertPortfolioCashTrade(const portfolio *currentPortfolio, const int 
     m_ExecutedTrades_Code.append("C");
 }
 
-void nav::insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const navTradeList &trades)
+void nav::insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const dailyInfoPortfolio *previousInfo, const navTradeList &trades)
 {
     foreach(const navTrade &d, trades)
     {
-        prices::securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.symbol, previousInfo->date) : prices::securityPrice();
+        securityPrice s = previousInfo ? prices::instance().dailyPriceInfo(d.symbol, previousInfo->date) : securityPrice();
         if (d.singleTrade.price == -1 && s.close == 0)
             continue;
 
@@ -442,13 +442,13 @@ void nav::insertPortfolioTrades(const portfolio *currentPortfolio, const int &da
                 break;
             case trade::tradeType_AA:
                 if (previousInfo && s.close != 0)
-                    foreach(const aaTarget &aa, currentPortfolio->data.securities.value(d.securityID).aa)
+                    foreach(const assetAllocationTarget &aa, currentPortfolio->data.securities.value(d.securityID).aa)
                     {
                         if (currentPortfolio->data.aa.value(aa.id).target <= 0)
                             continue;
 
                         sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa.id).target * aa.target / 100)) -
-                            previousInfo->securityValues.value(d.securityID).totalValue) / (s.close / s.split);
+                            previousInfo->securitiesInfo.value(d.securityID).totalValue) / (s.close / s.split);
                     }
                 code = "A";
                 break;

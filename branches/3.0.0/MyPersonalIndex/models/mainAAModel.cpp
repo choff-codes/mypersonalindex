@@ -9,7 +9,7 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 
-aaRow::aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
+aaRow::aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
     const assetAllocation &aa, const QString &sort): baseRow(sort)
 {
     //row_Description

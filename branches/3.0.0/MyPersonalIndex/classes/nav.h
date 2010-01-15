@@ -2,6 +2,7 @@
 #define NAV_H
 
 #include "queries.h"
+#include "navTrade.h"
 #include "calculations.h"
 #include "prices.h"
 #include "portfolio.h"
@@ -31,18 +32,6 @@ private:
     int m_TradesPosition;
     calculations m_calculations;
 
-    struct navTrade
-    {
-        QString symbol;
-        int securityID;
-        trade singleTrade;
-
-        navTrade(const QString &p_symbol, const int &p_securityID, const trade &p_singleTrade): symbol(p_symbol), securityID(p_securityID), singleTrade(p_singleTrade) {}
-    };
-
-    typedef QList<navTrade> navTradeList;
-    typedef QMap<int, navTradeList> navTrades;
-
     void clearVariantLists();
     void insertVariantLists();
     void deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate);
@@ -55,9 +44,9 @@ private:
     QList<int> getWeeklyTrades(const trade &d, const int &minDate, const int &maxDate);
     QList<int> getMonthlyTrades(const trade &d, const int &minDate, const int &maxDate);
     QList<int> getYearlyTrades(const trade &d, const int &minDate, const int &maxDate);
-    void insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const calculations::portfolioDailyInfo *previousInfo);
-    void insertPortfolioCashTrade(const portfolio *currentPortfolio, const int &cashAccount, const calculations::portfolioDailyInfo *previousInfo, const int &date, const double &reverseTradeValue);
-    void insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const calculations::portfolioDailyInfo *previousInfo, const navTradeList &trades);
+    void insertPortfolioReinvestments(const portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio *previousInfo);
+    void insertPortfolioCashTrade(const portfolio *currentPortfolio, const int &cashAccount, const dailyInfoPortfolio *previousInfo, const int &date, const double &reverseTradeValue);
+    void insertPortfolioTrades(const portfolio *currentPortfolio, const int &date, const dailyInfoPortfolio *previousInfo, const navTradeList &trades);
     void insertFirstPortfolioTrades(const portfolio *currentPortfolio, const int &startDate, const navTrades &allTrades);
     void insertPortfolioTradesToObject(portfolio *currentPortfolio);
 };

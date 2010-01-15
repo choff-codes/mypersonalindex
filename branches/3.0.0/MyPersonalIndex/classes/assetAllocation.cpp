@@ -1,5 +1,12 @@
 #include "assetAllocation.h"
 
+bool assetAllocation::operator==(const assetAllocation &other) const
+{
+    return this->id == other.id
+            && this->description == other.description
+            && this->target == other.target;
+}
+
 void assetAllocation::save(const int &portfolioID)
 {
     QMap<QString, QVariant> values;

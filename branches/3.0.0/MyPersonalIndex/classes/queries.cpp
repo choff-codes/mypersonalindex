@@ -70,6 +70,20 @@ const QString queries::table_SecurityAA = "SecurityAA";
 const QString queries::table_SecurityTrades = "SecurityTrades";
 const QString queries::table_ExecutedTrades = "ExecutedTrades";
 
+QSqlDatabase queries::instance()
+{
+    QSqlDatabase db = QSqlDatabase::database();
+
+    if (db.isOpen())
+        return db;
+
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(getDatabaseLocation());
+    db.open();
+
+    return db;
+}
+
 QString queries::getDatabaseLocation()
 {
     return QFileInfo(QSettings(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI").fileName()).absolutePath().append("/MPI.sqlite");

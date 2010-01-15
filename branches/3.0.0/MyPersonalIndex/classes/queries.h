@@ -101,19 +101,7 @@ private:
     queries(queries const&);  // Don't Implement
     void operator=(queries const&); // Don't implement
 
-    static QSqlDatabase instance()
-    {
-        QSqlDatabase db = QSqlDatabase::database();
-
-        if (db.isOpen())
-            return db;
-
-        db = QSqlDatabase::addDatabase("QSQLITE");
-        db.setDatabaseName(getDatabaseLocation());
-        db.open();
-
-        return db;
-    }
+    static QSqlDatabase instance();
 
 };
 

@@ -23,45 +23,25 @@ public:
 
     static const QStringList statisticDisplayNames;
 
-    static QString calculate(stat statistic, portfolio *currentPortfolio, calculations::portfolioDailyInfo *info, const int &startDate, const int &previousDay);
+    static QString calculate(stat statistic, portfolio *currentPortfolio, dailyInfoPortfolio *info, const int &startDate, const int &previousDay);
 
     static QString beginningIndexValue(portfolio *currentPortfolio, const int &previousDay);
     static QString beginningValue(portfolio *currentPortfolio, const int &previousDay);
-    static QString costBasis(calculations::portfolioDailyInfo* info);
-    static QString currentIndexValue(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info);
-    static QString currentValue(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info);
-    static QString dailyReturn(portfolio *currentPortfolio, calculations::portfolioDailyInfo* info, const int &startDate, const int &previousDay);
+    static QString costBasis(dailyInfoPortfolio* info);
+    static QString currentIndexValue(portfolio *currentPortfolio, dailyInfoPortfolio* info);
+    static QString currentValue(portfolio *currentPortfolio, dailyInfoPortfolio* info);
+    static QString dailyReturn(portfolio *currentPortfolio, dailyInfoPortfolio* info, const int &startDate, const int &previousDay);
 
     static QMap<int, QString> statisticList();
     static void saveSelectedStats(const int &portfolioID, const QList<int> &stats);
 
-    int id;
-    QString description;
-    QString sql;
-    outputFormat format;
-
-    statistic(): id(-1), format(format_None) {}
-
-    bool operator==(const statistic &other) const
-    {
-        return this->id == other.id
-                && this->description == other.description
-                && this->sql == other.sql
-                && this->format == other.format;
-    }
-
-    bool operator!=(const statistic &other) const
-    {
-        return !(*this == other);
-    }
-
-    bool operator<(const statistic &other) const
-    {
-        return this->description.toUpper() < other.description.toUpper();
-    }
-
-    void save(int) {}
-    void remove() const {}
+private:
+    statistic();
+    // Dont forget to declare these two. You want to make sure they
+    // are unaccessable otherwise you may accidently get copies of
+    // your singelton appearing.
+    statistic(prices const&);  // Don't Implement
+    void operator=(statistic const&); // Don't implement
 };
 
 #endif // STATISTIC_H

@@ -1,8 +1,8 @@
 #include "cachedCalculations.h"
 
-calculations::portfolioDailyInfo* cachedCalculations::portfolioValues(const int &date)
+dailyInfoPortfolio* cachedCalculations::portfolioValues(const int &date)
 {
-    portfolioDailyInfo* info = m_cache.object(date);
+    dailyInfoPortfolio* info = m_cache.object(date);
     if (info)
         return info;
 
@@ -17,7 +17,7 @@ calculations::portfolioDailyInfo* cachedCalculations::portfolioValues(const int 
     return info;
 }
 
-cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &aa)
+dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &aa)
 {
     dailyInfo info(date);
 
@@ -28,17 +28,17 @@ cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, cons
         if (aa.id == -1 and s.aa.isEmpty())
         {
             included = true;
-            securityValue sv = portfolioValues(date)->securityValues.value(s.id);
+            securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
             info.totalValue += sv.totalValue;
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
         }
         else
-            foreach(const aaTarget &target, s.aa)
+            foreach(const assetAllocationTarget &target, s.aa)
                 if (target.id == aa.id)
                 {
                     included = true;
-                    securityValue sv = portfolioValues(date)->securityValues.value(s.id);
+                    securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
                     info.totalValue += sv.totalValue * target.target / 100;
                     info.costBasis += sv.costBasis;
                     info.taxLiability += sv.taxLiability;
@@ -51,14 +51,14 @@ cachedCalculations::dailyInfo cachedCalculations::aaValues(const int &date, cons
     return info;
 }
 
-cachedCalculations::dailyInfo cachedCalculations::acctValues(const int &date, const account &acct)
+dailyInfo cachedCalculations::acctValues(const int &date, const account &acct)
 {
     dailyInfo info(date);
 
     foreach(const security &s,  m_portfolio->data.securities)
         if (acct.id == s.account)
         {
-            securityValue sv = portfolioValues(date)->securityValues.value(s.id);
+            securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
             info.totalValue += sv.totalValue;
             info.taxLiability += sv.taxLiability;
             info.costBasis += sv.costBasis;

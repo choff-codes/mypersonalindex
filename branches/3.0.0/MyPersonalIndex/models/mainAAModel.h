@@ -12,8 +12,7 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    aaRow(const calculations::portfolioDailyInfo *info, const cachedCalculations::dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
-           const assetAllocation &aa, const QString &sort);
+    aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioInfo::thesholdMethod method, const assetAllocation &aa, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();
@@ -23,7 +22,7 @@ class mainAAModel: public mpiViewModelBase
 {
 public:
 
-    mainAAModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const calculations::portfolioDailyInfo *info, const double &aaThreshold, QTableView *parent = 0):
+    mainAAModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const dailyInfoPortfolio *info, const double &aaThreshold, QTableView *parent = 0):
         mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold), m_costBasis(info->costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const;

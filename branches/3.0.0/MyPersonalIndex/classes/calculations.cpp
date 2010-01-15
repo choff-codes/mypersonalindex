@@ -16,10 +16,10 @@ double calculations::splitRatio(const QString &symbol, const int &startDate, con
     return ratio;
 }
 
-calculations::securityValue calculations::specificSecurityValue(const security::security &s, const int &date)
+securityInfo calculations::specificSecurityValue(const security::security &s, const int &date)
 {
-    securityValue value;
-    prices::securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
+    securityInfo value;
+    securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
 
     foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
     {
@@ -46,21 +46,21 @@ calculations::securityValue calculations::specificSecurityValue(const security::
     return value;
 }
 
-calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
+dailyInfoPortfolio* calculations::portfolioValues(const int &date)
 {
     if (!m_portfolio)
         return 0;
 
-    portfolioDailyInfo *info = new portfolioDailyInfo(date);
+    dailyInfoPortfolio *info = new dailyInfoPortfolio(date);
 
     foreach(const security::security &s, m_portfolio->data.securities)
     {
         if (!s.includeInCalc)
             continue;
 
-        securityValue value = specificSecurityValue(s, date);
+        securityInfo value = specificSecurityValue(s, date);
 
-        info->securityValues.insert(s.id, value);
+        info->securitiesInfo.insert(s.id, value);
         info->costBasis += value.costBasis;
         info->totalValue += value.totalValue;
         info->dividends += value.dividendAmount;
@@ -71,7 +71,7 @@ calculations::portfolioDailyInfo* calculations::portfolioValues(const int &date)
     return info;
 }
 
-double calculations::correlation(const prices::securityPrices &price1, const prices::securityPrices &price2, const int &startDate, const int &endDate)
+double calculations::correlation(const securityPrices &price1, const securityPrices &price2, const int &startDate, const int &endDate)
 {
     const QList<int> dates = prices::instance().dates();
 
@@ -87,8 +87,8 @@ double calculations::correlation(const prices::securityPrices &price1, const pri
         i--;
 
     date = *i;
-    prices::securityPrice previousPrice1 = price1.dailyPriceInfo(date);
-    prices::securityPrice previousPrice2 = price2.dailyPriceInfo(date);
+    securityPrice previousPrice1 = price1.dailyPriceInfo(date);
+    securityPrice previousPrice2 = price2.dailyPriceInfo(date);
 
     if (previousPrice1.close == 0 || previousPrice2.close == 0)
         return 0;
@@ -102,8 +102,8 @@ double calculations::correlation(const prices::securityPrices &price1, const pri
         if (date > endDate)
             break;
 
-        prices::securityPrice currentPrice1 = price1.dailyPriceInfo(date);
-        prices::securityPrice currentPrice2 = price2.dailyPriceInfo(date);
+        securityPrice currentPrice1 = price1.dailyPriceInfo(date);
+        securityPrice currentPrice2 = price2.dailyPriceInfo(date);
 
         if (currentPrice1.close == 0 || currentPrice2.close == 0)
             break;

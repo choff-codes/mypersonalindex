@@ -1,6 +1,7 @@
 #ifndef UPDATEPRICES_H
 #define UPDATEPRICES_H
 
+#include "updateInfo.h"
 #include "queries.h"
 #include "nav.h"
 #include "portfolio.h"
@@ -33,17 +34,6 @@ private:
 
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';
-
-    struct updateInfo
-    {
-        QString symbol;
-        int lastPrice;
-        int lastDividend;
-        int lastSplit;
-
-        updateInfo() {}
-        updateInfo(const QString &p_symbol, const int &minDate): symbol(p_symbol), lastPrice(minDate), lastDividend(minDate), lastSplit(minDate) {}
-    };
 
     void run();
     QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);

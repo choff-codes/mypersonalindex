@@ -14,17 +14,8 @@ public:
 
     assetAllocation(): id(-1), target(-1) {}
 
-    bool operator==(const assetAllocation &other) const
-    {
-        return this->id == other.id
-                && this->description == other.description
-                && this->target == other.target;
-    }
-
-    bool operator!=(const assetAllocation &other) const
-    {
-        return !(*this == other);
-    }
+    bool operator==(const assetAllocation &other) const;
+    bool operator!=(const assetAllocation &other) const { return !(*this == other); }
 
     void save(const int &portfolioID);
     void remove() const;

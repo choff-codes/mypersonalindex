@@ -1,5 +1,13 @@
 #include "account.h"
 
+bool account::operator==(const account &other) const
+{
+    return this->id == other.id
+            && this->description == other.description
+            && this->taxRate == other.taxRate
+            && this->taxDeferred == other.taxDeferred;
+}
+
 void account::save(const int &portfolioID)
 {
     QMap<QString, QVariant> values;

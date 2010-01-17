@@ -12,7 +12,6 @@ frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QStrin
     }
 
     foreach(const int &columnID, m_selectedColumns)
-    {
         for(int i = 0; i < ui.removedColumns->count(); ++i)
             if (ui.removedColumns->item(i)->data(Qt::UserRole).toInt() == columnID)
             {
@@ -23,7 +22,6 @@ frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QStrin
                 delete item;
                 break;
             }
-    }
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
@@ -46,7 +44,6 @@ void frmColumns::accept()
    }
 
     m_selectedColumns = selected;
-
     QDialog::accept();
 }
 

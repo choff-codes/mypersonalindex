@@ -1,11 +1,9 @@
 INCLUDEPATH += $$PWD
 HEADERS += $$PWD/mpiValidator.h \
     $$PWD/mpiViewDelegates.h \
-    $$PWD/mpiEditModelBase.h \
     $$PWD/mpiViewModelBase.h \
     $$PWD/mpiDateScale.h \
     $$PWD/mpiPercentScale.h
-SOURCES += $$PWD/mpiEditModelBase.cpp \
-    $$PWD/mpiValidator.cpp \
+SOURCES += $$PWD/mpiValidator.cpp \
     $$PWD/mpiViewDelegates.cpp \
     $$PWD/mpiViewModelBase.cpp

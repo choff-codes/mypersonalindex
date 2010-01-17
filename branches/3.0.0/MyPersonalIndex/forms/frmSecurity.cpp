@@ -63,7 +63,7 @@ void frmSecurity::loadSecurity()
     m_modelAA = new securityAAModel(m_security.aa, m_data.aa, 2, ui.aa);
     installAAModel();
 
-    m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.securities, 9, ui.trades, this);
+    m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.securities,  ui.trades, this);
     ui.trades->setModel(m_modelTrade);
     // HACK: could not get the model to resize correctly without this time
     QTimer::singleShot(0, m_modelTrade, SLOT(autoResize()));

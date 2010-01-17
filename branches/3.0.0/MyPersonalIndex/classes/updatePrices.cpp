@@ -5,34 +5,31 @@
 
 void updatePrices::run()
 {
-    QMap<QString, updateInfo> securities;
-
     emit statusUpdate("Updating Prices");
 
-    foreach(portfolio* p, m_data)
-        foreach(const security &sec, p->data.securities)
-            if (!securities.contains(sec.symbol) && !sec.cashAccount)
-                securities.insert(sec.symbol, updateInfo(sec.symbol, m_dataStartDate));
+    QMap<QString, updateInfo> securities = getUpdateInfo();
+    int earliestUpdate = QDate::currentDate().toJulianDay() + 1; // track earliest date saved to database for recalc
 
-    getUpdateInfo(securities);
-
-    int firstUpdate = QDate::currentDate().addDays(1).toJulianDay(); // track earliest date saved to database for recalc
     foreach(const updateInfo &info, securities)
-        if (getPrices(info.symbol, info.lastPrice, firstUpdate))  // check if symbol exists
+        if (getPrices(info.symbol, info.lastPrice, earliestUpdate))  // check if symbol exists
         {
-            getDividends(info.symbol, info.lastDividend, firstUpdate);
+            getDividends(info.symbol, info.lastDividend, earliestUpdate);
             if (m_downloadSplits)
-                getSplits(info.symbol, info.lastSplit, firstUpdate);
+                getSplits(info.symbol, info.lastSplit, earliestUpdate);
         }
 
-    insertUpdatesToObject();
     updateMissingPrices();
     insertUpdates();
 
-    m_nav = new nav(m_data, firstUpdate);
-    connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()));
-    connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)));
-    m_nav->start();
+    if (earliestUpdate == QDate::currentDate().toJulianDay() + 1)
+        emit updateFinished(m_updateFailures);
+    else
+    {
+        m_nav = new nav(m_data, earliestUpdate);
+        connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()), Qt::QueuedConnection);
+        connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)), Qt::QueuedConnection);
+        m_nav->start();
+    }
 
     exec();
 }
@@ -67,16 +64,6 @@ void updatePrices::updateMissingPrices()
     }
 }
 
-void updatePrices::insertUpdatesToObject()
-{
-
-    for(int i = 0; i < m_divDate.count(); ++i)
-        prices::instance().insertDividend(m_divSymbol.at(i).toString(), m_divDate.at(i).toInt(), m_divAmount.at(i).toDouble());
-
-    for(int i = 0; i < m_splitDate.count(); ++i)
-        prices::instance().insertSplit(m_splitSymbol.at(i).toString(), m_splitDate.at(i).toInt(), m_splitRatio.at(i).toDouble());
-}
-
 void updatePrices::insertUpdates()
 {
     if (!m_pricesDate.isEmpty())
@@ -107,24 +94,29 @@ void updatePrices::insertUpdates()
     }
 }
 
-void updatePrices::getUpdateInfo(QMap<QString, updateInfo> &securities)
+QMap<QString, updateInfo> updatePrices::getUpdateInfo()
 {
-    for(QMap<QString, updateInfo>::iterator i = securities.begin(); i != securities.end(); ++i)
-    {
-        QString symbol = i.key();
-        QMap<int, double> price = prices::instance().price(symbol);
-        QMap<int, double> dividend = prices::instance().dividend(symbol);
-        QMap<int, double> split = prices::instance().split(symbol);
+    QMap<QString, updateInfo> returnList;
+    foreach(portfolio* p, m_data)
+        foreach(const security &sec, p->data.securities)
+            if (!returnList.contains(sec.symbol) && !sec.cashAccount)
+            {
+                updateInfo u(sec.symbol, m_dataStartDate);
+                securityPrices history = prices::instance().history(sec.symbol);
 
-        if (!price.isEmpty())
-            i.value().lastPrice = (price.constEnd() - 1).key();
+                if (!history.prices.isEmpty())
+                    u.lastPrice = (history.prices.constEnd() - 1).key();
 
-        if (!dividend.isEmpty())
-            i.value().lastDividend = (dividend.constEnd() - 1).key();
+                if (!history.dividends.isEmpty())
+                    u.lastDividend = (history.dividends.constEnd() - 1).key();
 
-        if (!split.isEmpty())
-            i.value().lastSplit = (split.constEnd() - 1).key();
-    }
+                if (!history.splits.isEmpty())
+                    u.lastSplit = (history.splits.constEnd() - 1).key();
+
+                returnList.insert(sec.symbol, u);
+            }
+
+    return returnList;
 }
 
 QString updatePrices::getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type)

@@ -10,7 +10,6 @@
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
-#include "statistic.h"
 #include "chartInfo.h"
 
 class frmMain : public QMainWindow
@@ -95,7 +94,6 @@ private slots:
     void aaSortChanged(int index);
     void acctModifyColumns();
     void acctSortChanged(int index);
-
 };
 
 #endif // FRMMAIN_H

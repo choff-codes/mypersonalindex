@@ -9,6 +9,7 @@
 #include "mainPerformanceModel.h"
 #include "mainCorrelationModel.h"
 #include "mainStatisticModel.h"
+#include "statistic.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -203,14 +204,7 @@ void frmMain::loadPortfolio()
         savePortfolio();
     ui.tab->setDisabled(false);
 
-    m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt(), 0);
-
-    if (!m_currentPortfolio)
-    {
-        QMessageBox::information(this, "Error!", "Portfolio appears to be deleted. Please restart.");
-        ui.tab->setDisabled(true);
-        return;
-    }
+    m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
 
     QTime t;
     t.start();
@@ -442,7 +436,6 @@ void frmMain::resetPortfolioStat()
 
     foreach(int i, m_currentPortfolio->data.stats)
         statisticValues.insert(i, statistic::calculate((statistic::stat)i, m_currentPortfolio, info, startDate, previousDay));
-
 
     mainStatisticModel *model = new mainStatisticModel(statisticValues, ui.stat);
     ui.stat->setModel(model);
@@ -893,8 +886,8 @@ void frmMain::beginUpdate()
 
     ui.stbProgress->setMaximum(0);
     m_updateThread = new updatePrices(m_portfolios, m_settings, this);
-    connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)));
-    connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
+    connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)), Qt::QueuedConnection);
+    connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)), Qt::QueuedConnection);
     m_updateThread->start();
 }
 
@@ -930,8 +923,8 @@ void frmMain::beginNAV(const int &portfolioID, const int &minDate)
     disableItems(true);
     ui.stbProgress->setMaximum(0);
     m_navThread = new nav(m_portfolios, minDate, this, portfolioID);
-    connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()));
-    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)));
+    connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()), Qt::QueuedConnection);
+    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)), Qt::QueuedConnection);
     m_navThread->start();
 }
 

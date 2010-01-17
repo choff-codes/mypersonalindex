@@ -23,7 +23,7 @@ signals:
     void statusUpdate(const QString &message);
 
 private:
-    const QMap<int, portfolio*> &m_data;
+    const QMap<int, portfolio*> m_data;
     bool m_downloadSplits;
     int m_dataStartDate;
     QStringList m_updateFailures;
@@ -39,12 +39,11 @@ private:
     QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
     QString getSplitAddress(const QString &symbol);
     QList<QByteArray>* downloadFile(const QUrl&);
-    void getUpdateInfo(QMap<QString, updateInfo> &securities);
+    QMap<QString, updateInfo> getUpdateInfo();
     bool getPrices(const QString &symbol, const int &minDate, int &earliestUpdate);
     void getDividends(const QString&symbol, const int &minDate, int &earliestUpdate);
     void getSplits(const QString &symbol, const int &minDate, int &earliestUpdate);
     void updateMissingPrices();
-    void insertUpdatesToObject();
     void insertUpdates();
 
 private slots:

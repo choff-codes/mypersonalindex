@@ -5,12 +5,12 @@ QVariant securityTradeModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
-    if (index.row() >= m_list.size())
+    if (index.row() >= m_trades.size())
         return QVariant();
 
     if (role == Qt::DisplayRole)
     {
-        trade t = m_list.at(index.row());
+        trade t = m_trades.at(index.row());
         switch(index.column())
         {
             case 0:
@@ -85,6 +85,47 @@ QVariant securityTradeModel::headerData (int section, Qt::Orientation orientatio
     return QVariant();
 }
 
+void securityTradeModel::paste()
+{
+    bool *ok = new bool;
+    int i = 1;
+
+    m_parent->selectionModel()->clearSelection();
+    foreach(QString s, QApplication::clipboard()->text().remove('\r').split('\n'))
+    {
+        (*ok) = false;
+        trade item = internalPaste(s.split('\t'), ok);
+        if (*ok)
+        {
+            beginInsertRows(QModelIndex(), m_trades.count(), m_trades.count());
+            m_trades.append(item);
+            endInsertRows();
+            selectItem(index(m_trades.count()-1, 0));
+        }
+        else
+            QMessageBox::critical(m_dialog, "Paste Error", QString("Invalid format on row %1! Fix the error and paste again.").arg(i));
+        i++;
+    }
+
+    delete ok;
+}
+
+void securityTradeModel::copy()
+{
+    QList<int> indexes = getSelectedRows();
+    if(indexes.isEmpty())
+        return;
+
+    QStringList lines;
+    foreach(const int &i, indexes)
+        lines.append(internalCopy(m_trades.at(i)));
+
+    if (lines.isEmpty())
+        return;
+
+    QApplication::clipboard()->setText(lines.join("\n"));
+}
+
 QString securityTradeModel::internalCopy(const trade &item)
 {
     return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
@@ -141,8 +182,103 @@ trade securityTradeModel::internalPaste(const QStringList &value, bool *ok)
 
 void securityTradeModel::autoResize()
 {
-    if (m_list.isEmpty())
+    if (m_trades.isEmpty())
         m_parent->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     else
         m_parent->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+}
+
+void securityTradeModel::selectItem(const QModelIndex &index)
+{
+    m_parent->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+}
+
+void securityTradeModel::editSelected()
+{
+    QModelIndexList il = m_parent->selectionModel()->selectedRows();
+    if(il.isEmpty())
+        return;
+
+    foreach(const QModelIndex &q, il)
+    {
+        int i = q.row();
+        frmTrade f(m_dialog, m_trades.at(i));
+
+        if (f.exec())
+        {
+            trade item = f.getReturnValues();
+            m_trades[i] = item;
+            emit dataChanged(index(i, 0), index(i, m_columns - 1));
+        }
+        selectItem(q);
+    }
+     autoResize();
+}
+
+void securityTradeModel::addNew()
+{
+    frmTrade f(m_dialog);
+
+    if (f.exec())
+    {
+        beginInsertRows(QModelIndex(), m_trades.count(), m_trades.count());
+
+        trade item = f.getReturnValues();
+        m_trades.append(item);
+
+        endInsertRows();
+    }
+     autoResize();
+}
+
+void securityTradeModel::deleteSelected()
+{
+    QList<int> indexes = getSelectedRows();
+    if(indexes.isEmpty())
+        return;
+
+    for(int i = indexes.count() - 1; i >= 0; --i)
+    {
+        beginRemoveRows(QModelIndex(), i, i);
+
+        m_trades.removeAt(indexes.at(i));
+
+        endRemoveRows();
+    }
+
+    m_parent->selectionModel()->clearSelection();
+    autoResize();
+}
+
+QMap<int, trade> securityTradeModel::saveList(const QMap<int, trade> &originalValues, const int &parentID)
+{
+    QMap<int, trade> returnValues;
+
+    for(int i = 0; i < m_trades.count(); ++i) // save all items
+    {
+        if (m_trades.at(i).id == -1 || originalValues.value(m_trades.at(i).id) != m_trades.at(i))
+            m_trades[i].save(parentID);
+
+        returnValues.insert(m_trades.at(i).id, m_trades.at(i));
+    }
+
+    foreach(const trade &item, originalValues) // delete items that have been removed
+        if(!returnValues.contains(item.id))
+            item.remove();
+
+    return returnValues;
+}
+
+QList<int> securityTradeModel::getSelectedRows() const
+{
+    QModelIndexList model = m_parent->selectionModel()->selectedRows();
+    QList<int> indexes;
+    if (model.isEmpty())
+        return indexes;
+
+    foreach(const QModelIndex &q, model)
+        indexes.append(q.row());
+    qSort(indexes);
+
+    return indexes;
 }

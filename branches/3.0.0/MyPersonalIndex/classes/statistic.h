@@ -2,6 +2,7 @@
 #define STATISTIC_H
 
 #include <QtGui>
+#include "statisticInfo.h"
 #include "portfolio.h"
 #include "calculations.h"
 #include "functions.h"
@@ -23,25 +24,12 @@ public:
 
     static const QStringList statisticDisplayNames;
 
-    static QString calculate(stat statistic, portfolio *currentPortfolio, dailyInfoPortfolio *info, const int &startDate, const int &previousDay);
+    static QString calculate(stat statistic, const statisticInfo &statInfo);
 
-    static QString beginningIndexValue(portfolio *currentPortfolio, const int &previousDay);
-    static QString beginningValue(portfolio *currentPortfolio, const int &previousDay);
-    static QString costBasis(dailyInfoPortfolio* info);
-    static QString currentIndexValue(portfolio *currentPortfolio, dailyInfoPortfolio* info);
-    static QString currentValue(portfolio *currentPortfolio, dailyInfoPortfolio* info);
-    static QString dailyReturn(portfolio *currentPortfolio, dailyInfoPortfolio* info, const int &startDate, const int &previousDay);
+    static QString returnPercent(const statisticInfo &statInfo, const double &divisor);
 
     static QMap<int, QString> statisticList();
     static void saveSelectedStats(const int &portfolioID, const QList<int> &stats);
-
-private:
-    statistic();
-    // Dont forget to declare these two. You want to make sure they
-    // are unaccessable otherwise you may accidently get copies of
-    // your singelton appearing.
-    statistic(prices const&);  // Don't Implement
-    void operator=(statistic const&); // Don't implement
 };
 
 #endif // STATISTIC_H

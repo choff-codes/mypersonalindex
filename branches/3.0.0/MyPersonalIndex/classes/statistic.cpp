@@ -45,74 +45,55 @@ void statistic::saveSelectedStats(const int &portfolioID, const QList<int> &stat
         queries::executeTableUpdate(queries::table_StatMapping, tableValues);
 }
 
-QString statistic::calculate(stat statistic, portfolio *currentPortfolio, dailyInfoPortfolio *info, const int &startDate, const int &previousDay)
+QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
 {
     switch(statistic)
     {
         case stat_BeginningIndexValue:
-            return beginningIndexValue(currentPortfolio, previousDay);
-            break;
+            return functions::doubleToLocalFormat(statInfo.startNAV());
+        case stat_BeginningValue:
+            return functions::doubleToCurrency(statInfo.startTotalValue());
+        case stat_CurrentIndexValue:
+            return functions::doubleToLocalFormat(statInfo.endNAV());
+        case stat_CurrentValue:
+            return functions::doubleToCurrency(statInfo.endTotalValue());
+        case stat_CostBasis:
+            return functions::doubleToCurrency(statInfo.endInfo()->costBasis);
+        case stat_DailyStandardDeviation:
+            return functions::doubleToPercentage(statInfo.standardDeviation());
+        case stat_MonthlyStandardDeviation:
+            return functions::doubleToPercentage(sqrt(21) * statInfo.standardDeviation());
+        case stat_YearlyStandardDeviation:
+            return functions::doubleToPercentage(sqrt(252) * statInfo.standardDeviation());
+        case stat_DaysInvested:
+            return functions::doubleToLocalFormat(statInfo.days(), 0);
+        case stat_Date:
+            return QDate::fromJulianDay(statInfo.endDate()).toString(Qt::SystemLocaleShortDate);
+        case stat_GainLoss:
+            return functions::doubleToCurrency(statInfo.endInfo()->totalValue - statInfo.endInfo()->costBasis);
+        case stat_DailyReturn:
+            return returnPercent(statInfo, 1);
+        case stat_HourlyReturn:
+            return returnPercent(statInfo, 1.0 / 6.5);
+        case stat_MonthlyReturn:
+            return returnPercent(statInfo, 21);
+        case stat_YearlyReturn:
+            return returnPercent(statInfo, 252);
+        case stat_NetChange:
+            return functions::doubleToCurrency(statInfo.endTotalValue() - statInfo.startTotalValue());
+        case stat_OverallReturn:
+            return functions::doubleToPercentage(100 * ((statInfo.endNAV() / statInfo.startNAV()) - 1));
+        case stat_TaxLiability:
+            return functions::doubleToCurrency(statInfo.endInfo()->taxLiability);
         default:
             return QString();
     }
 }
 
-QString statistic::beginningIndexValue(portfolio *currentPortfolio, const int &previousDay)
+QString statistic::returnPercent(const statisticInfo &statInfo, const double &divisor)
 {
-    QMap<int, double> nav = currentPortfolio->data.nav.navHistory();
-    QMap<int, double>::const_iterator i = nav.lowerBound(previousDay);
-    if (i.key() == previousDay)
-        return functions::doubleToLocalFormat(i.value());
+    if (statInfo.days() == 0 || statInfo.startNAV() == 0)
+        return functions::doubleToPercentage(0);
 
-    return QString();
-}
-
-QString statistic::beginningValue(portfolio *currentPortfolio, const int &previousDay)
-{
-    QMap<int, double>::const_iterator i = currentPortfolio->data.nav.totalValueHistory().lowerBound(previousDay);
-    if (i.key() == previousDay)
-        return functions::doubleToCurrency(i.value());
-
-    return QString();
-}
-
-QString statistic::costBasis(dailyInfoPortfolio* info)
-{
-    return functions::doubleToCurrency(info->costBasis);
-}
-
-QString statistic::currentIndexValue(portfolio *currentPortfolio, dailyInfoPortfolio* info)
-{
-    QMap<int, double>::const_iterator i = currentPortfolio->data.nav.totalValueHistory().lowerBound(info->date);
-    if (i.key() == info->date)
-        return functions::doubleToCurrency(i.value());
-
-    return QString();
-}
-
-QString statistic::currentValue(portfolio *currentPortfolio, dailyInfoPortfolio *info)
-{
-    QMap<int, double>::const_iterator i = currentPortfolio->data.nav.navHistory().lowerBound(info->date);
-    if (i.key() == info->date)
-        return functions::doubleToLocalFormat(i.value());
-
-    return QString();
-}
-
-QString statistic::dailyReturn(portfolio *currentPortfolio, dailyInfoPortfolio* info, const int &startDate, const int &previousDay)
-{
-    QMap<int, double> navHistory = currentPortfolio->data.nav.navHistory();
-    QMap<int, double>::const_iterator startNav = navHistory.lowerBound(previousDay);
-    QMap<int, double>::const_iterator endNav = navHistory.lowerBound(info->date);
-    if (startNav.key() != previousDay || endNav.key() != info->date)
-        return QString();
-
-    QList<int> dates = prices::instance().dates();
-    int days = qLowerBound(dates, startDate) - qLowerBound(dates, info->date);
-
-    if (days == 0)
-        return QString();
-
-    return functions::doubleToPercentage(100 * (pow(endNav.value() / startNav.value(), 1.0 / days) - 1));
-
+    return functions::doubleToPercentage(100 * (pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1));
 }

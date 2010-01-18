@@ -20,7 +20,8 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/trade.cpp \
     $$PWD/assetAllocationTarget.cpp \
     $$PWD/updateInfo.cpp \
-    $$PWD/navTrade.cpp
+    $$PWD/navTrade.cpp \
+    $$PWD/statisticInfo.cpp
 HEADERS += $$PWD/updatePrices.h \
     $$PWD/queries.h \
     $$PWD/functions.h \
@@ -42,4 +43,5 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/trade.h \
     $$PWD/assetAllocationTarget.h \
     $$PWD/updateInfo.h \
-    $$PWD/navTrade.h
+    $$PWD/navTrade.h \
+    $$PWD/statisticInfo.h

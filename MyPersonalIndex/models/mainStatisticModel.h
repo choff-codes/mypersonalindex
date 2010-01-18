@@ -7,7 +7,8 @@
 class mainStatisticModel: public QAbstractTableModel
 {
 public:
-    mainStatisticModel(const QMap<int, QString> &statisticValues, QTableView *parent = 0): QAbstractTableModel(parent), m_statistics(statisticValues)
+    mainStatisticModel(const QList<QString> &statisticValues, const QList<int> statisticIDs, QTableView *parent = 0): QAbstractTableModel(parent),
+        m_statistics(statisticValues), m_rowNames(statisticIDs)
     {
         insertRows(0, m_statistics.count());
     }
@@ -18,7 +19,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private:
-    QMap<int, QString> m_statistics;
+    QList<QString> m_statistics;
+    QList<int> m_rowNames;
 };
 
 #endif // MAINSTATISTICMODEL_H

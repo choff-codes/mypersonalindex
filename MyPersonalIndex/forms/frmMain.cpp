@@ -431,13 +431,13 @@ void frmMain::resetPortfolioStat()
 
     QAbstractItemModel *oldModel = ui.stat->model();
     dailyInfoPortfolio *info = m_calculations.portfolioValues(endDate);
+    statisticInfo s(m_currentPortfolio, info, startDate, previousDay);
 
-    QMap<int, QString> statisticValues;
+    QList<QString> statisticValues;
+    foreach(const int &i, m_currentPortfolio->data.stats)
+        statisticValues.append(statistic::calculate((statistic::stat)i, s));
 
-    foreach(int i, m_currentPortfolio->data.stats)
-        statisticValues.insert(i, statistic::calculate((statistic::stat)i, m_currentPortfolio, info, startDate, previousDay));
-
-    mainStatisticModel *model = new mainStatisticModel(statisticValues, ui.stat);
+    mainStatisticModel *model = new mainStatisticModel(statisticValues, m_currentPortfolio->data.stats, ui.stat);
     ui.stat->setModel(model);
     ui.stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui.stat->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);

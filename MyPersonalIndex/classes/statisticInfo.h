@@ -20,17 +20,18 @@ public:
     double endTotalValue() const { return m_endTotalValue; }
     int days() const { return m_count; }
     double standardDeviation() const { return m_stdDev; }
-    int maxChangePositiveDay() { return m_maxChangePositiveDay; }
-    double maxChangeNegative() { return m_maxChangeNegative; }
-    int maxChangeNegativeDay() { return m_maxChangeNegativeDay; }
-    double minNAVValue() { return m_minNAVValue; }
-    int minNAVValueDay() { return m_minNAVValueDay; }
-    double maxNAVValue() { return m_maxNAVValue; }
-    int maxNAVValueDay() { return m_maxNAVValueDay; }
-    double minTotalValue() { return m_minTotalValue; }
-    int minTotalValueDay() { return m_minTotalValueDay; }
-    double maxTotalValue() { return m_maxTotalValue; }
-    int maxTotalValueDay() { return m_maxTotalValueDay; }
+    double maxChangePositive() const { return m_maxChangePositive; }
+    int maxChangePositiveDay() const { return m_maxChangePositiveDay; }
+    double maxChangeNegative() const { return m_maxChangeNegative; }
+    int maxChangeNegativeDay() const { return m_maxChangeNegativeDay; }
+    double minNAVValue() const { return m_minNAVValue; }
+    int minNAVValueDay() const { return m_minNAVValueDay; }
+    double maxNAVValue() const { return m_maxNAVValue; }
+    int maxNAVValueDay() const { return m_maxNAVValueDay; }
+    double minTotalValue() const { return m_minTotalValue; }
+    int minTotalValueDay() const { return m_minTotalValueDay; }
+    double maxTotalValue() const { return m_maxTotalValue; }
+    int maxTotalValueDay() const { return m_maxTotalValueDay; }
 
 private:
     const portfolio *m_portfolio;

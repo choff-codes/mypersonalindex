@@ -85,6 +85,30 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
             return functions::doubleToPercentage(100 * ((statInfo.endNAV() / statInfo.startNAV()) - 1));
         case stat_TaxLiability:
             return functions::doubleToCurrency(statInfo.endInfo()->taxLiability);
+        case stat_MaxPercentDown:
+                return functions::doubleToPercentage(statInfo.maxChangeNegative());
+        case stat_MaxPercentDownDay:
+                return QDate::fromJulianDay(statInfo.maxChangeNegativeDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_MaxPercentUp:
+                return functions::doubleToPercentage(statInfo.maxChangePositive());
+        case stat_MaxPercentUpDay:
+                return QDate::fromJulianDay(statInfo.maxChangePositiveDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_MaximumIndexValue:
+                return functions::doubleToLocalFormat(statInfo.maxNAVValue());
+        case stat_MaximumIndexValueDay:
+                return QDate::fromJulianDay(statInfo.maxNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_MinimumIndexValue:
+                return functions::doubleToLocalFormat(statInfo.minNAVValue());
+        case stat_MinimumIndexValueDay:
+                return QDate::fromJulianDay(statInfo.minNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_MinimumPortfolioValue:
+                return functions::doubleToCurrency(statInfo.minTotalValue());
+        case stat_MinimumPortfolioValueDay:
+                return QDate::fromJulianDay(statInfo.minTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_MaximumPortfolioValue:
+                return functions::doubleToCurrency(statInfo.maxTotalValue());
+        case stat_MaximumPortfolioValueDay:
+                return QDate::fromJulianDay(statInfo.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
         default:
             return QString();
     }

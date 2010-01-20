@@ -16,48 +16,53 @@ statisticInfo::statisticInfo(const portfolio *currentPortfolio, const dailyInfoP
 
 void statisticInfo::setNAV()
 {
-    if (m_portfolio->data.nav.isEmpty())
-        return;
-
     QMap<int, double> navHistory = m_portfolio->data.nav.navHistory();
+    if (navHistory.isEmpty())
+        return;
 
     QMap<int, double>::const_iterator startNav = navHistory.lowerBound(m_previousClose);
     m_startNAV = startNav.value();
 
     QMap<int, double>::const_iterator endNav = navHistory.lowerBound(m_endInfo->date);
-    if (endNav == navHistory.constEnd())
-        m_endNAV = m_startNAV;
-    else
-        m_endNAV = endNav.value();
+    m_endNAV = endNav == navHistory.constEnd() ? m_startNAV : endNav.value();
 
-    if (endNav == startNav)
+    if (endNav == startNav) // no changes
         return;
 
-    ++startNav;
-    ++endNav;
-    double previousNAV = m_startNAV;
+    ++startNav; // go to first day
+
+    // assign defaults
     m_minNAVValue = m_startNAV;
     m_minNAVValueDay = startNav.key();
     m_maxNAVValue = m_startNAV;
     m_maxNAVValueDay = startNav.key();
-    double changeSum = 0;
-    double changeSumSquared = 0;
-    bool maxChangeAssigned = false;
-    bool minChangeAssigned = false;
-    for(QMap<int, double>::const_iterator i = startNav; i != endNav; ++i)
+
+    calculateChanges(startNav, ++endNav); // include last day in end NAV
+}
+
+void statisticInfo::calculateChanges(QMap<int, double>::const_iterator startNav, QMap<int, double>::const_iterator endNav)
+{
+    double previousNAV = m_startNAV;
+
+    //http://www.johndcook.com/standard_deviation.html
+    double oldM = 0;
+    double oldS = 0;
+    double newM = 0;
+    double newS = 0;
+    int count = 1;
+
+    for(QMap<int, double>::const_iterator i = startNav; i != endNav; ++i, ++count)
     {
         double newNav = i.value();
         double change = newNav / previousNAV - 1;
 
-        if (change * 100 > m_maxChangePositive || !maxChangeAssigned)
+        if (change * 100 > m_maxChangePositive || count == 1)
         {
-            maxChangeAssigned = true;
             m_maxChangePositive = change * 100;
             m_maxChangePositiveDay = i.key();
         }
-        if (change * 100 < m_maxChangeNegative || !minChangeAssigned)
+        if (change * 100 < m_maxChangeNegative || count == 1)
         {
-            minChangeAssigned = true;
             m_maxChangeNegative = change * 100;
             m_maxChangeNegativeDay = i.key();
         }
@@ -72,41 +77,45 @@ void statisticInfo::setNAV()
             m_minNAVValueDay = i.key();
         }
 
-        changeSum += change;
-        changeSumSquared += change * change;
+        newM = oldM + (change - oldM) / count;
+        newS = oldS + (change - oldM) * (change - newM);
+
+        // set up for next iteration
+        oldM = newM;
+        oldS = newS;
 
         previousNAV = i.value();
     }
-    m_stdDev = 100 * sqrt((changeSumSquared - (changeSum / days())) / (days() - 1));
+
+    // standard deviation
+    if (--count != 1)
+        m_stdDev = 100 * sqrt(newS / (count - 1));
 }
 
 void statisticInfo::setTotalValue()
 {
-    if (m_portfolio->data.nav.isEmpty())
-        return;
-
     QMap<int, double> totalValueHistory = m_portfolio->data.nav.totalValueHistory();
+    if (totalValueHistory.isEmpty())
+        return;
 
     QMap<int, double>::const_iterator startTotalValue = totalValueHistory.lowerBound(m_previousClose);
     m_startTotalValue = startTotalValue.value();
 
     QMap<int, double>::const_iterator endTotalValue = totalValueHistory.lowerBound(m_endInfo->date);
-    if (endTotalValue == totalValueHistory.constEnd())
-        m_endTotalValue = m_startTotalValue;
-    else
-        m_endTotalValue = endTotalValue.value();
+    m_endTotalValue = endTotalValue == totalValueHistory.constEnd() ? m_startTotalValue : endTotalValue.value();
 
     if (endTotalValue == startTotalValue)
         return;
 
+    ++startTotalValue; // go to first day
+    ++endTotalValue; // include last day in end NAV
 
-    ++startTotalValue;
-    ++endTotalValue;
-
+    // assign defaults
     m_minTotalValue = m_startTotalValue;
     m_minTotalValueDay = startTotalValue.key();
     m_maxTotalValue = m_startTotalValue;
     m_maxTotalValueDay = startTotalValue.key();
+
     for(QMap<int, double>::const_iterator i = startTotalValue; i != endTotalValue; ++i)
     {
         double totalValue = i.value();

@@ -4,6 +4,7 @@
 #include <QtCore>
 #include "portfolio.h"
 #include "calculations.h"
+#include "security.h"
 
 class statisticInfo
 {
@@ -32,6 +33,7 @@ public:
     int minTotalValueDay() const { return m_minTotalValueDay; }
     double maxTotalValue() const { return m_maxTotalValue; }
     int maxTotalValueDay() const { return m_maxTotalValueDay; }
+    QMap<int, security> securities() const { return m_portfolio->data.securities; }
 
 private:
     const portfolio *m_portfolio;
@@ -58,6 +60,7 @@ private:
     int m_maxTotalValueDay;
 
     void setNAV();
+    void calculateChanges(QMap<int, double>::const_iterator startNav, QMap<int, double>::const_iterator endNav);
     void setTotalValue();
 };
 

@@ -72,13 +72,13 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_GainLoss:
             return functions::doubleToCurrency(statInfo.endInfo()->totalValue - statInfo.endInfo()->costBasis);
         case stat_DailyReturn:
-            return returnPercent(statInfo, 1);
+            return functions::doubleToPercentage(returnPercent(statInfo, 1));
         case stat_HourlyReturn:
-            return returnPercent(statInfo, 1.0 / 6.5);
+            return functions::doubleToPercentage(returnPercent(statInfo, 1.0 / 6.5));
         case stat_MonthlyReturn:
-            return returnPercent(statInfo, 21);
+            return functions::doubleToPercentage(returnPercent(statInfo, 21));
         case stat_YearlyReturn:
-            return returnPercent(statInfo, 252);
+            return functions::doubleToPercentage(returnPercent(statInfo, 252));
         case stat_NetChange:
             return functions::doubleToCurrency(statInfo.endTotalValue() - statInfo.startTotalValue());
         case stat_OverallReturn:
@@ -86,38 +86,80 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_TaxLiability:
             return functions::doubleToCurrency(statInfo.endInfo()->taxLiability);
         case stat_MaxPercentDown:
-                return functions::doubleToPercentage(statInfo.maxChangeNegative());
+            return functions::doubleToPercentage(statInfo.maxChangeNegative());
         case stat_MaxPercentDownDay:
-                return QDate::fromJulianDay(statInfo.maxChangeNegativeDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.maxChangeNegativeDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaxPercentUp:
-                return functions::doubleToPercentage(statInfo.maxChangePositive());
+            return functions::doubleToPercentage(statInfo.maxChangePositive());
         case stat_MaxPercentUpDay:
-                return QDate::fromJulianDay(statInfo.maxChangePositiveDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.maxChangePositiveDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaximumIndexValue:
-                return functions::doubleToLocalFormat(statInfo.maxNAVValue());
+            return functions::doubleToLocalFormat(statInfo.maxNAVValue());
         case stat_MaximumIndexValueDay:
-                return QDate::fromJulianDay(statInfo.maxNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.maxNAVValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MinimumIndexValue:
-                return functions::doubleToLocalFormat(statInfo.minNAVValue());
+            return functions::doubleToLocalFormat(statInfo.minNAVValue());
         case stat_MinimumIndexValueDay:
-                return QDate::fromJulianDay(statInfo.minNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.minNAVValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MinimumPortfolioValue:
-                return functions::doubleToCurrency(statInfo.minTotalValue());
+            return functions::doubleToCurrency(statInfo.minTotalValue());
         case stat_MinimumPortfolioValueDay:
-                return QDate::fromJulianDay(statInfo.minTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.minTotalValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaximumPortfolioValue:
-                return functions::doubleToCurrency(statInfo.maxTotalValue());
+            return functions::doubleToCurrency(statInfo.maxTotalValue());
         case stat_MaximumPortfolioValueDay:
-                return QDate::fromJulianDay(statInfo.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statInfo.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+        case stat_ProbabilityOfYearlyGain:
+            return functions::doubleToPercentage(100 * cumulativeNormalDistribution(statInfo));
+        case stat_ProbabilityOfYearlyLoss:
+            return functions::doubleToPercentage(100 - (100 * cumulativeNormalDistribution(statInfo)));
+        case stat_WeightedExpenseRatio:
+            return functions::doubleToPercentage(weightedExpenseRatio(statInfo));
         default:
             return QString();
     }
 }
 
-QString statistic::returnPercent(const statisticInfo &statInfo, const double &divisor)
+double statistic::returnPercent(const statisticInfo &statInfo, const double &divisor)
 {
     if (statInfo.days() == 0 || statInfo.startNAV() == 0)
-        return functions::doubleToPercentage(0);
+        return 0;
 
-    return functions::doubleToPercentage(100 * (pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1));
+    return 100 * (pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1);
+}
+
+double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
+{
+    //http://www.sitmo.com/doc/Calculating_the_Cumulative_Normal_Distribution
+    const double b1 =  0.319381530;
+    const double b2 = -0.356563782;
+    const double b3 =  1.781477937;
+    const double b4 = -1.821255978;
+    const double b5 =  1.330274429;
+    const double p  =  0.2316419;
+    const double c  =  0.39894228;
+    const double x = returnPercent(statInfo, 252) / (sqrt(252) * statInfo.standardDeviation());
+    double t;
+
+    if (x >= 0)
+    {
+        t = 1.0 / ( 1.0 + p * x );
+        return (1.0 - c * exp( -x * x / 2.0 ) * t * ( t *( t * ( t * ( t * b5 + b4 ) + b3 ) + b2 ) + b1 ));
+    }
+
+    t = 1.0 / ( 1.0 - p * x );
+    return ( c * exp( -x * x / 2.0 ) * t * ( t *( t * ( t * ( t * b5 + b4 ) + b3 ) + b2 ) + b1 ));
+}
+
+double statistic::weightedExpenseRatio(const statisticInfo &statInfo)
+{
+    double er = 0;
+    QMap<int, securityInfo> securities = statInfo.endInfo()->securitiesInfo;
+    double totalValue = statInfo.endTotalValue();
+
+    foreach(const security &s, statInfo.securities())
+        if (s.expense > 0)
+            er += s.expense * (securities.value(s.id).totalValue / totalValue);
+
+    return er;
 }

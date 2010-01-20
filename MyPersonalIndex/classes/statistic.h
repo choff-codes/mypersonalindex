@@ -26,7 +26,9 @@ public:
 
     static QString calculate(stat statistic, const statisticInfo &statInfo);
 
-    static QString returnPercent(const statisticInfo &statInfo, const double &divisor);
+    static double returnPercent(const statisticInfo &statInfo, const double &divisor);
+    static double cumulativeNormalDistribution(const statisticInfo &statInfo);
+    static double weightedExpenseRatio(const statisticInfo &statInfo);
 
     static QMap<int, QString> statisticList();
     static void saveSelectedStats(const int &portfolioID, const QList<int> &stats);

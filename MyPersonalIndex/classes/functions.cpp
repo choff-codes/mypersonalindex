@@ -127,11 +127,11 @@ bool functions::equal(const QVariant &left, const QVariant &right, const QVarian
     };
 }
 
-QStringList functions::except(const QStringList &list1, const QStringList &list2)
+QStringList functions::exceptLeft(const QStringList &left, const QStringList &right)
 {
     QStringList returnList;
-    foreach(const QString &s, list1)
-        if (!list2.contains(s))
+    foreach(const QString &s, left)
+        if (!right.contains(s))
             returnList.append(s);
 
     return returnList;

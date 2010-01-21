@@ -9,7 +9,6 @@
 #include "mainPerformanceModel.h"
 #include "mainCorrelationModel.h"
 #include "mainStatisticModel.h"
-#include "statistic.h"
 
 frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
@@ -17,7 +16,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
 
     m_portfolios = portfolio::loadPortfolios();
     m_settings = settings::loadSettings();
-    m_currentPortfolio = m_settings.lastPortfolio.isNull() ? 0 : m_portfolios.value(m_settings.lastPortfolio.toInt(), 0);
+
     if (m_settings.state != Qt::WindowActive)
     {
         move(m_settings.windowLocation);
@@ -30,7 +29,7 @@ frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), 
 
     resetSortDropDowns();
     resetLastDate();
-    resetPortfolioDropDown(m_currentPortfolio ? m_currentPortfolio->info.id : -1);
+    resetPortfolioDropDown(m_settings.lastPortfolio.isNull() ? -1 : m_settings.lastPortfolio.toInt());
     loadPortfolio();
     connectSlots();
 }
@@ -200,8 +199,7 @@ void frmMain::loadPortfolio()
         return;
     }
 
-    if (this->isVisible()) // save currently loaded portfolio except on initial load
-        savePortfolio();
+    savePortfolio();
     ui.tab->setDisabled(false);
 
     m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
@@ -289,11 +287,8 @@ void frmMain::resetPortfolioAA()
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
-    {
-        assetAllocation aa;
-        aa.description = "(Blank)";
-        m_currentPortfolio->data.aa.insert(-1, aa);
-    }
+        m_currentPortfolio->data.aa.insert(-1, assetAllocation("Blank"));
+
     foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
         rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
 
@@ -317,11 +312,7 @@ void frmMain::resetPortfolioAcct()
 
     QList<baseRow*> rows;
     if (ui.accountsShowBlank->isChecked()) // insert blank acct
-    {
-        account acct;
-        acct.description = "(Blank)";
-        m_currentPortfolio->data.acct.insert(-1, acct);
-    }
+        m_currentPortfolio->data.acct.insert(-1, account("(Blank)"));
 
     foreach(const account &acct, m_currentPortfolio->data.acct)
         rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
@@ -407,7 +398,7 @@ void frmMain::resetPortfolioChart()
         if (startValue == -1)
             startValue = i.value();
 
-        m_chartInfo.append(i.key(), i.value() / startValue * 100 - 100);
+        m_chartInfo.append(i.key(), (i.value() / startValue * 100) - 100);
     }
 
     if (m_chartInfo.count() != 0)
@@ -493,10 +484,14 @@ void frmMain::editPortfolio()
     frmPortfolio f(m_currentPortfolio->info, m_settings.dataStartDate, this);
     if (f.exec())
     {
-        m_currentPortfolio->info = f.getReturnValues();
+        portfolioInfo info = f.getReturnValues();
+        bool reCalcChange = info.startValue != m_currentPortfolio->info.startValue
+                            || info.startDate != m_currentPortfolio->info.startDate
+                            || info.dividends != m_currentPortfolio->info.dividends;
 
-        // toDo
+        m_currentPortfolio->info = info;
 
+        resetSecurityRelatedTabs(reCalcChange ? 0 : -1);
         resetPortfolioDropDown(m_currentPortfolio->info.id);
     }
 }
@@ -510,11 +505,10 @@ void frmMain::deletePortfolio()
         QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
         return;
 
-    int id = m_currentPortfolio->info.id;
+    m_portfolios.remove(m_currentPortfolio->info.id);
     m_currentPortfolio->remove();
     delete m_currentPortfolio;
     m_currentPortfolio = 0;
-    m_portfolios.remove(id);
 
     deleteUnusedSymbols();
 
@@ -572,7 +566,7 @@ void frmMain::addSecurity()
             m_currentPortfolio->data.securities[s.id] = s;
             minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount && (!prices::instance().symbols().contains(s.symbol)))
+            if (!s.cashAccount && !prices::instance().symbols().contains(s.symbol))
                 showUpdatePrices = true;
         }
     }
@@ -635,8 +629,6 @@ void frmMain::deleteSecurity()
     deleteUnusedSymbols();
     if (invalidNAVDates())
         beginNAV();
-    else if (minDate != -1)
-        beginNAV(m_currentPortfolio->info.id, minDate);
     else
         resetSecurityRelatedTabs(minDate);
 }
@@ -649,7 +641,7 @@ void frmMain::deleteUnusedSymbols()
             symbols.append(s.symbol);
     symbols.removeDuplicates();
 
-    prices::instance().remove(functions::except(prices::instance().symbols(), symbols));
+    prices::instance().remove(functions::exceptLeft(prices::instance().symbols(), symbols));
     resetLastDate();
 }
 
@@ -692,11 +684,9 @@ void frmMain::options()
         }
 
         if (QMessageBox::question(this, "Update Prices", "Would you like to update prices from the new data start date?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
-        {
             beginUpdate();
-            return;
-        }
-        beginNAV();
+        else
+            beginNAV();
     }
 }
 
@@ -821,7 +811,6 @@ void frmMain::addAcct()
 
     resetSecurityRelatedTabs(-1);
 }
-
 
 void frmMain::editAcct()
 {

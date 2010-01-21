@@ -12,7 +12,7 @@ public:
     QString description;
     double target;
 
-    assetAllocation(): id(-1), target(-1) {}
+    assetAllocation(const QString &p_description = QString()): id(-1), description(p_description), target(-1) {}
 
     bool operator==(const assetAllocation &other) const;
     bool operator!=(const assetAllocation &other) const { return !(*this == other); }

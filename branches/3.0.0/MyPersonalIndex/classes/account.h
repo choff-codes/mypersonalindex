@@ -13,7 +13,7 @@ public:
     double taxRate;
     bool taxDeferred;
 
-    account(): id(-1), taxRate(-1), taxDeferred(false) {}
+    account(const QString &p_description = QString()): id(-1), description(p_description), taxRate(-1), taxDeferred(false) {}
 
     bool operator==(const account &other) const;
     bool operator!=(const account &other) const { return !(*this == other); }

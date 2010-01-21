@@ -19,5 +19,8 @@ QVariant mainStatisticModel::headerData(int section, Qt::Orientation orientation
     if (orientation != Qt::Vertical)
         return "Results";
 
-    return statistic::statisticDisplayNames.at(m_rowNames.at(section));
+    if (section < m_rowNames.count())
+        return statistic::statisticDisplayNames.at(m_rowNames.at(section));
+
+    return QVariant();
 }

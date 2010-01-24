@@ -697,7 +697,7 @@ void frmMain::options()
 void frmMain::addAA()
 {
     frmAAEdit f(m_currentPortfolio->info.id, this);
-    if (f.exec());
+    if (f.exec())
     {
         assetAllocation aa = f.getReturnValues();
         m_currentPortfolio->data.aa[aa.id] = aa;

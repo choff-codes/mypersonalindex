@@ -142,6 +142,14 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     historicalLayout->addWidget(tbHistorical);
 
     history = new QTableView(gpHistorical);
+    history->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    history->setSelectionBehavior(QAbstractItemView::SelectRows);
+    history->setAlternatingRowColors(true);
+    history->horizontalHeader()->setHighlightSections(false);
+    history->verticalHeader()->setDefaultSectionSize(fntHeight);
+    history->horizontalHeader()->setFixedHeight(fntHeight);
+    history->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
+    history->verticalHeader()->hide();
     historicalLayout->addWidget(history);
 
     mainLayout->addLayout(topSectionLayout, 0, 0);

@@ -1,9 +1,9 @@
 #include "frmSecurity.h"
 #include "mpiViewDelegates.h"
-#include "calculations.h"
 
 frmSecurity::frmSecurity(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent):
-        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security)
+        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security),
+        m_modelHistory(0)
 {
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.symbol));
@@ -30,7 +30,9 @@ void frmSecurity::loadDropDowns()
 
 void frmSecurity::connectSlots()
 {
-    connect(ui.btnHistorical, SIGNAL(toggled(bool)), ui.gpHistorical, SLOT(setVisible(bool)));
+    connect(ui.btnHistorical, SIGNAL(toggled(bool)), this, SLOT(historyToggled(bool)));
+    connect(ui.sortHistorical, SIGNAL(toggled(bool)), this, SLOT(historySortToggled()));
+    connect(ui.cmbHistorical, SIGNAL(currentIndexChanged(int)), this, SLOT(historyIndexChange(int)));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.btnAddAnother, SIGNAL(clicked()), this, SLOT(accept()));
@@ -158,4 +160,28 @@ void frmSecurity::resetExpense()
 void frmSecurity::customContextMenuRequested(const QPoint&)
 {
     ui.tradesPopup->popup(QCursor::pos());
+}
+
+void frmSecurity::historyIndexChange(int index)
+{
+    QAbstractItemModel *oldModel = ui.history->model();
+
+    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, m_data.executedTrades.value(m_security.id),
+        prices::instance().history(m_security.symbol), ui.sortHistorical->isChecked(), ui.history);
+    ui.history->setModel(m_modelHistory);
+    ui.history->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+
+    delete oldModel;
+}
+
+void frmSecurity::historyToggled(bool checked)
+{
+    ui.gpHistorical->setVisible(checked);
+    if (!checked)
+        return;
+
+    ui.cmbHistorical->blockSignals(true);
+    ui.cmbHistorical->setCurrentIndex(0);
+    historyIndexChange(0);
+    ui.cmbHistorical->blockSignals(false);
 }

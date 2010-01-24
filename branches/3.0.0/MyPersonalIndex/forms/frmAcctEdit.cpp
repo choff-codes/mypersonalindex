@@ -4,7 +4,7 @@ frmAcctEdit::frmAcctEdit(const int &portfolioID, QWidget *parent, const account 
     : QDialog(parent), m_portfolioID(portfolioID), m_acct(acct), m_acctOriginal(acct)
 {
     ui.setupUI(this);
-    this->setWindowTitle("Edit Account");
+    this->setWindowTitle(QString("%1 Account").arg(acct.id == -1 ? "Add" : "Edit"));
 
     ui.txtDesc->setText(m_acct.description);
     ui.sbTaxRate->setValue(m_acct.taxRate);

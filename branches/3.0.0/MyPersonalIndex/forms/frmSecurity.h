@@ -5,6 +5,7 @@
 #include "frmSecurity_UI.h"
 #include "securityAAModel.h"
 #include "securityTradeModel.h"
+#include "securityHistoryModel.h"
 #include "security.h"
 #include "portfolio.h"
 
@@ -13,15 +14,13 @@ class frmSecurity : public QDialog
     Q_OBJECT
 
 public:
-    enum securityHistoryChoice { history_All, history_Change, history_Dividends, history_Splits, history_Trades };
-
     const security& getReturnValuesSecurity() const { return m_security; }
     const int& getReturnValuesMinDate() const { return m_minDate; }
     //const int &getSecurityID() const { return m_security.id; }
     const QMap<int, security::security>& getCashAccounts() const { return m_data.securities; }
 
     frmSecurity(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent = 0);
-    ~frmSecurity() { delete m_modelTrade; delete m_modelAA; }
+    ~frmSecurity() { delete m_modelTrade; delete m_modelAA; delete m_modelHistory; }
 
 private:
 
@@ -32,6 +31,7 @@ private:
     security m_securityOriginal;
     securityTradeModel *m_modelTrade;
     securityAAModel *m_modelAA;
+    securityHistoryModel *m_modelHistory;
     int m_minDate;
 
     void connectSlots();
@@ -45,6 +45,9 @@ private slots:
     void addAA();
     void updateAAPercentage();
     void customContextMenuRequested(const QPoint&);
+    void historyIndexChange(int index);
+    void historyToggled(bool checked);
+    void historySortToggled() { historyIndexChange(ui.cmbHistorical->currentIndex()); }
 };
 
 #endif // FRMSECURITY_H

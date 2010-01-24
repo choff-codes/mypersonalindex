@@ -84,9 +84,13 @@ private slots:
     void beginNAV(const int &portfolioID = -1, const int &minDate = 0);
     void finishNAV();
     void statusUpdate(const QString &message);
-    void holdingsExport() { functions::exportTable(ui.holdings, this); }
-    void aaExport() { functions::exportTable(ui.aa, this); }
-    void acctExport() { functions::exportTable(ui.accounts, this); }
+    void holdingsExport() { functions::exportTable(ui.holdings->model(), false, this); }
+    void aaExport() { functions::exportTable(ui.aa->model(), false, this); }
+    void acctExport() { functions::exportTable(ui.accounts->model(), false, this); }
+    void performanceExport() { functions::exportTable(ui.performance->model(), false, this); }
+    void statExport() { functions::exportTable(ui.stat->model(), true, this); }
+    void correlationExport() { functions::exportTable(ui.correlations->model(), true, this); }
+    void chartExport();
     bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames);
     void holdingsModifyColumns();
     void holdingsSortChanged(int index);

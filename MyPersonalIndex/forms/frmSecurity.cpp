@@ -107,7 +107,7 @@ void frmSecurity::accept()
     bool newSecurity = m_security.id == -1;
 
     if (sender() == ui.btnAddAnother)
-        result++;
+        ++result;
 
     m_security.symbol = ui.txtSymbol->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();

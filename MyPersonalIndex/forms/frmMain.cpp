@@ -79,9 +79,11 @@ void frmMain::connectSlots()
     connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
 
     connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(resetPortfolioPerformance()));
+    connect(ui.performanceExport, SIGNAL(triggered()), this, SLOT(performanceExport()));
 
     connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
     connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
+    connect(ui.chartExport, SIGNAL(triggered()), this, SLOT(chartExport()));
 
     connect(ui.aaAdd, SIGNAL(triggered()), this, SLOT(addAA()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(editAA()));
@@ -106,10 +108,12 @@ void frmMain::connectSlots()
     connect(ui.statEdit, SIGNAL(triggered()), this, SLOT(editStat()));
     connect(ui.statStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
     connect(ui.statEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
+    connect(ui.statExport, SIGNAL(triggered()), this, SLOT(statExport()));
 
     connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
+    connect(ui.correlationsExport, SIGNAL(triggered()), this, SLOT(correlationExport()));
 }
 
 void frmMain::resetSortDropDowns()
@@ -692,25 +696,14 @@ void frmMain::options()
 
 void frmMain::addAA()
 {
-    int resultcode;
-    bool change = false;
-    do
+    frmAAEdit f(m_currentPortfolio->info.id, this);
+    if (f.exec());
     {
-        frmAAEdit f(m_currentPortfolio->info.id, this);
-        resultcode = f.exec();
-        if (resultcode == QDialog::Accepted || resultcode == QDialog::Accepted + 1)
-        {
-            change = true;
-            assetAllocation aa = f.getReturnValues();
-            m_currentPortfolio->data.aa[aa.id] = aa;
-        }
+        assetAllocation aa = f.getReturnValues();
+        m_currentPortfolio->data.aa[aa.id] = aa;
+
+        resetSecurityRelatedTabs(-1);
     }
-    while (resultcode == QDialog::Accepted + 1);
-
-    if (!change)
-        return;
-
-    resetSecurityRelatedTabs(-1);
 }
 
 int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
@@ -791,25 +784,14 @@ void frmMain::deleteAA()
 
 void frmMain::addAcct()
 {
-    int resultcode;
-    bool change = false;
-    do
+    frmAcctEdit f(m_currentPortfolio->info.id, this);
+    if(f.exec())
     {
-        frmAcctEdit f(m_currentPortfolio->info.id, this);
-        resultcode = f.exec();
-        if (resultcode == QDialog::Accepted || resultcode == QDialog::Accepted + 1)
-        {
-            change = true;
-            account acct = f.getReturnValues();
-            m_currentPortfolio->data.acct[acct.id] = acct;
-        }
+        account acct = f.getReturnValues();
+        m_currentPortfolio->data.acct[acct.id] = acct;
+
+         resetSecurityRelatedTabs(-1);
     }
-    while (resultcode == QDialog::Accepted + 1);
-
-    if (!change)
-        return;
-
-    resetSecurityRelatedTabs(-1);
 }
 
 void frmMain::editAcct()
@@ -1031,4 +1013,28 @@ void frmMain::acctSortChanged(int index)
 {
     sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.acctSort, acctRow::fieldNames());
     resetPortfolioAcct();
+}
+
+void frmMain::chartExport()
+{
+    //http://www.qtcentre.org/threads/17616-Saving-qwt-plot-as-image?p=88077#post88077
+    QPixmap qPix = QPixmap::grabWidget(ui.chart);
+
+    QString fileType, filePath;
+    filePath = QFileDialog::getSaveFileName(this, "Export to...", QDir::homePath(),
+        "JPEG (*.jpeg);;PNG (*.png);;24-bit Bitmap (*.bmp)", &fileType);
+
+    if (filePath.isEmpty())
+        return;
+
+    bool success = false;
+    if (fileType.contains("JPEG"))
+        success = qPix.save(filePath, "JPEG");
+    else if (fileType.contains("PNG"))
+        success = qPix.save(filePath, "PNG");
+    else
+        success = qPix.save(filePath, "BMP");
+
+    if (!success)
+        QMessageBox::critical(this, "Error!", "Could not save file, the file path cannot be opened!");
 }

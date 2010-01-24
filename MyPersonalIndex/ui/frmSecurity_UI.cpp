@@ -9,8 +9,6 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     mainLayout = new QGridLayout(dialog);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 
-    QLabel *tmp; // fake labels to add to form layout to get proper sizing
-
     topSectionLayout = new QHBoxLayout();
     gpSecurity = new QGroupBox("Security", dialog);
     securityLayout = new QFormLayout(gpSecurity);
@@ -44,21 +42,17 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     expenseLayout->addWidget(btnExpenseClear);
     securityLayout->setWidget(2, QFormLayout::LabelRole, expense);
     securityLayout->setLayout(2, QFormLayout::FieldRole, expenseLayout);
-    tmp = new QLabel(gpSecurity);
     chkReinvest = new QCheckBox("Reinvest Dividends", gpSecurity);
-    securityLayout->setWidget(3, QFormLayout::LabelRole, tmp);
+    securityLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(3, QFormLayout::FieldRole, chkReinvest);
-    tmp = new QLabel(gpSecurity);
     chkCash = new QCheckBox("Cash Account", gpSecurity);
-    securityLayout->setWidget(4, QFormLayout::LabelRole, tmp);
+    securityLayout->setWidget(4, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(4, QFormLayout::FieldRole, chkCash);
-    tmp = new QLabel(gpSecurity);
     chkInclude = new QCheckBox("Include in Calculations", gpSecurity);
-    securityLayout->setWidget(5, QFormLayout::LabelRole, tmp);
+    securityLayout->setWidget(5, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(5, QFormLayout::FieldRole, chkInclude);
-    tmp = new QLabel(gpSecurity);
     chkHide = new QCheckBox("Hide in Portfolio", gpSecurity);
-    securityLayout->setWidget(6, QFormLayout::LabelRole, tmp);
+    securityLayout->setWidget(6, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(6, QFormLayout::FieldRole, chkHide);
 
     gpAA = new QGroupBox("Asset Allocation", dialog);

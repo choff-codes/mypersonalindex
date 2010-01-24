@@ -28,7 +28,7 @@ void nav::calculateNAVValues(portfolio *currentPortfolio)
     deleteOldValues(currentPortfolio, calculationDate, portfolioStartDate);
 
     QList<int>::const_iterator previousDate = qLowerBound(m_dates, calculationDate) - 1;
-    if (previousDate == m_dates.constEnd() || *previousDate == m_dates.last())
+    if (m_dates.isEmpty() || previousDate == m_dates.constEnd() || *previousDate == m_dates.last())
         return;
 
     navTrades trades = calculateExecutedTrades(currentPortfolio, calculationDate, portfolioStartDate);

@@ -63,11 +63,60 @@ double functions::stringToDouble(const QString &value, bool *ok)
     return s.remove('%').replace("None", "-1", Qt::CaseInsensitive).toDouble(ok);
 }
 
-void functions::exportTable(const QTableView *table, QMainWindow *parent)
+void functions::exportTable(const QAbstractItemModel *table, const bool &includeRowLabels, QMainWindow *parent)
 {
+    if (!table)
+        return;
+
     QString fileType, filePath;
     filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
         "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
+
+    if (filePath.isEmpty())
+        return;
+
+    QString delimter = fileType.contains("Tab") ? "\t" : fileType.contains("Pipe") ? "|" : ",";
+
+    QFile data(filePath);
+    if (!data.open(QFile::WriteOnly | QFile::Truncate | QIODevice::Text))
+    {
+        QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
+        return;
+    }
+
+    QTextStream out(&data);
+    QStringList line, lines;
+
+    if (includeRowLabels)
+        line.append("");
+
+    for(int i = 0; i < table->columnCount(); ++i)
+        line.append(exportClean(table->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimter));
+
+    lines.append(line.join(delimter));
+
+    for(int x = 0; x < table->rowCount(); ++x)
+    {
+        line.clear();
+        if (includeRowLabels)
+            line.append(exportClean(table->headerData(x, Qt::Vertical, Qt::DisplayRole), delimter));
+        for (int i = 0; i < table->columnCount(); ++i)
+        {
+            QVariant v = table->data(table->index(x, i), Qt::CheckStateRole);
+            if (v.isNull())
+                line.append(exportClean(table->data(table->index(x, i), Qt::DisplayRole), delimter));
+            else
+                line.append(v.toInt() == Qt::Checked ? "Yes" : "No");
+        }
+        lines.append(line.join(delimter));
+    }
+
+    out << lines.join("\n");
+}
+
+QString functions::exportClean(const QVariant &v, const QString &delimiter)
+{
+    return v.toString().remove(delimiter).replace("\n", " ");
 }
 
 bool functions::lessThan(const QVariant &left, const QVariant &right, const QVariant &type)

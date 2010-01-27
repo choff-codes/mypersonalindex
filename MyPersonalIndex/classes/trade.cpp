@@ -47,8 +47,10 @@ QString trade::tradeTypeToString(const tradeType &type)
             return "Reinvestment";
         case tradeType_Interest:
             return "Interest";
-        case tradeType_Fixed:
-            return "Fixed Amount";
+        case tradeType_FixedPurchase:
+            return "Fixed Purchase";
+        case tradeType_FixedSale:
+            return "Fixed Sale";
         case tradeType_TotalValue:
             return "% of Portfolio";
         case tradeType_AA:
@@ -89,7 +91,8 @@ QString trade::valueToString(const tradeType &type, const double &value)
         case tradeType_DivReinvest:
             return functions::doubleToLocalFormat(value);
         case tradeType_Interest:
-        case tradeType_Fixed:
+        case tradeType_FixedPurchase:
+        case tradeType_FixedSale:
             return functions::doubleToCurrency(value);
         case tradeType_TotalValue:
         case tradeType_AA:

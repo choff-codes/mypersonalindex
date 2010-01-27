@@ -10,7 +10,7 @@
 #include "mainCorrelationModel.h"
 #include "mainStatisticModel.h"
 
-frmMain::frmMain(QWidget *parent) : QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
 {
     ui.setupUI(this);
 
@@ -716,17 +716,14 @@ int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
 int frmMain::aaMinDate(const int &aaID, int currentMinDate)
 {
     foreach(const security &s, m_currentPortfolio->data.securities)
-        foreach(const assetAllocationTarget &target, s.aa)
-            if(target.id == aaID)
-            {
-                foreach(const trade &t, s.trades)
-                    if (t.type == trade::tradeType_AA)
-                    {
-                        currentMinDate = securityMinDate(currentMinDate, s.firstTradeDate());
-                        break;
-                    }
-                break;
-            }
+        if(s.aa.contains(aaID))
+            foreach(const trade &t, s.trades)
+                if (t.type == trade::tradeType_AA)
+                {
+                    currentMinDate = securityMinDate(currentMinDate, s.firstTradeDate());
+                    break;
+                }
+
     return currentMinDate;
 }
 
@@ -774,6 +771,8 @@ void frmMain::deleteAA()
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems())
     {
         assetAllocation aa = m_currentPortfolio->data.aa.value(row->values.at(aaRow::row_ID).toInt());
+        for(QMap<int, security>::iterator i = m_currentPortfolio->data.securities.begin(); i != m_currentPortfolio->data.securities.end(); ++i)
+            i->removeAATarget(aa.id);
         minDate = aaMinDate(aa.id, minDate);
         aa.remove();
         m_currentPortfolio->data.aa.remove(aa.id);
@@ -827,6 +826,8 @@ void frmMain::deleteAcct()
     foreach(baseRow *row, static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems())
     {
         account acct = m_currentPortfolio->data.acct.value(row->values.at(acctRow::row_ID).toInt());
+        for(QMap<int, security>::iterator i = m_currentPortfolio->data.securities.begin(); i != m_currentPortfolio->data.securities.end(); ++i)
+            i->removeAccount(acct.id, m_currentPortfolio->info.id);
         acct.remove();
         m_currentPortfolio->data.acct.remove(acct.id);
     }

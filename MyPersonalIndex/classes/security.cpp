@@ -48,11 +48,11 @@ void security::saveAATargets() const
 {
     QVariantList securityID, aaID, percent;
 
-    foreach(const assetAllocationTarget &aa, this->aa)
+    for(QMap<int, double>::const_iterator i = this->aa.constBegin(); i != this->aa.constEnd(); ++i)
     {
         securityID.append(this->id);
-        aaID.append(aa.id);
-        percent.append(aa.target);
+        aaID.append(i.key());
+        percent.append(i.value());
     }
 
     QMap<QString, QVariantList> tableValues;
@@ -71,4 +71,22 @@ void security::remove() const
     queries::deleteSecurityItems(queries::table_SecurityAA, this->id);
     queries::deleteSecurityItems(queries::table_SecurityTrades, this->id);
     queries::deleteSecurityItems(queries::table_ExecutedTrades, this->id);
+}
+
+void security::removeAATarget(const int &aaID)
+{
+    if (!this->aa.contains(aaID))
+        return;
+
+    this->aa.remove(aaID);
+    saveAATargets();
+}
+
+void security::removeAccount(const int &accountID, const int &portfolioID)
+{
+    if (this->account != accountID)
+        return;
+
+    this->account = -1;
+    save(portfolioID);
 }

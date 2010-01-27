@@ -3,19 +3,13 @@
 #include "frmSecurity.h"
 #include <QtGui>
 
-frmTrade::frmTrade(QWidget *parent, const trade &trade): QDialog(parent), m_trade(trade)
+frmTrade::frmTrade(const QMap<int, security> &cashAccounts, QWidget *parent, const trade &trade): QDialog(parent), m_trade(trade)
 {
     ui.setupUI(this);
     this->setWindowTitle("Edit Trade");
     ui.cmbCash->addItem("(None)", -1);
 
-    //int id = static_cast<frmTicker*>(parent)->getTickerID();
-
-    // cannot pass cash accounts in constructor since it does not match the format
-    // of mpiModelBase edit function
-    foreach(const security &sec, static_cast<frmSecurity*>(parent)->getCashAccounts())
-        // may add again in future, but this could cause issues with copy/paste if this tickerID is pasted,
-        // but now will show up as no cash account selected
+    foreach(const security &sec, cashAccounts)
         if (sec.cashAccount) // && sec.id != id)
             ui.cmbCash->addItem(sec.symbol, sec.id);
 
@@ -37,7 +31,7 @@ void frmTrade::connectSlots()
 void frmTrade::loadTrade()
 {
     ui.cmbType->setCurrentIndex((int)m_trade.type);
-    //if (m_trade.value >= 0)
+    if (m_trade.value >= 0)
         ui.txtShares->setText(QString::number(m_trade.value, 'f', 4));
     if (m_trade.price >= 0)
     {
@@ -152,7 +146,8 @@ void frmTrade::typeChange(int index)
         case trade::tradeType_Interest:
             ui.shares->setText("Amount ($):");
             break;
-        case trade::tradeType_Fixed:
+        case trade::tradeType_FixedPurchase:
+        case trade::tradeType_FixedSale:
             ui.shares->setText("Amount ($):");
             break;
         case trade::tradeType_TotalValue:

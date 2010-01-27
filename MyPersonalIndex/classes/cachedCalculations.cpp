@@ -33,16 +33,14 @@ dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &a
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
         }
-        else
-            foreach(const assetAllocationTarget &target, s.aa)
-                if (target.id == aa.id)
-                {
-                    included = true;
-                    securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
-                    info.totalValue += sv.totalValue * target.target / 100;
-                    info.costBasis += sv.costBasis;
-                    info.taxLiability += sv.taxLiability;
-                }
+        else if (s.aa.contains(aa.id))
+        {
+            included = true;
+            securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
+            info.totalValue += sv.totalValue * s.aa.value(aa.id) / 100;
+            info.costBasis += sv.costBasis;
+            info.taxLiability += sv.taxLiability;
+        }
 
         if (included)
             ++info.count;

@@ -41,8 +41,8 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA
     QStringList aaList;
-    foreach(const assetAllocationTarget &target, s.aa)
-        aaList.append(QString("%1 - %2").arg(aa.value(target.id).description, functions::doubleToPercentage(target.target)));
+    for(QMap<int, double>::const_iterator i = s.aa.constBegin(); i != s.aa.constEnd(); ++i)
+        aaList.append(QString("%1 - %2").arg(aa.value(i.key()).description, functions::doubleToPercentage(i.value())));
     this->values.append(aaList.join(", "));
     //row_TaxLiability
     this->values.append(value.taxLiability == 0 ? QVariant() : value.taxLiability);

@@ -178,12 +178,10 @@ void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portf
 {
     while(q.next())
         portfolioList[q.value(queries::securityAAColumns_Count).toInt()]->data.securities[q.value(queries::securityAAColumns_SecurityID).toInt()]
-            .aa.append(
-                assetAllocationTarget(
+            .aa.insert(
                     q.value(queries::securityAAColumns_AAID).toInt(),
                     q.value(queries::securityAAColumns_Percent).toDouble()
-                )
-        );
+            );
 }
 
 void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)

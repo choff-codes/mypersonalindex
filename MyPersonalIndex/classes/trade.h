@@ -8,7 +8,7 @@
 class trade
 {
 public:
-    enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_DivReinvest, tradeType_Interest, tradeType_Fixed, tradeType_TotalValue, tradeType_AA, tradeType_Count };
+    enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_FixedPurchase, tradeType_FixedSale, tradeType_DivReinvest, tradeType_Interest, tradeType_TotalValue, tradeType_AA, tradeType_Count };
     enum tradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly, tradeFreq_Count };
 
     int id;

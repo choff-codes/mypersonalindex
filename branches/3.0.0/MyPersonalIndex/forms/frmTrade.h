@@ -13,7 +13,7 @@ public:
 
     const trade& getReturnValues() const { return m_trade; }
 
-    frmTrade(QWidget *parent = 0, const trade &trade = trade());
+    frmTrade(const QMap<int, security> &cashAccounts, QWidget *parent = 0, const trade &trade = trade());
 
 private:
 

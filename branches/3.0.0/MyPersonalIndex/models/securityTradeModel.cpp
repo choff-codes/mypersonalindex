@@ -202,7 +202,7 @@ void securityTradeModel::editSelected()
     foreach(const QModelIndex &q, il)
     {
         int i = q.row();
-        frmTrade f(m_dialog, m_trades.at(i));
+        frmTrade f(m_cashAccounts, m_dialog, m_trades.at(i));
 
         if (f.exec())
         {
@@ -217,7 +217,7 @@ void securityTradeModel::editSelected()
 
 void securityTradeModel::addNew()
 {
-    frmTrade f(m_dialog);
+    frmTrade f(m_cashAccounts, m_dialog);
 
     if (f.exec())
     {

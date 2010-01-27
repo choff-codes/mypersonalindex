@@ -2,8 +2,7 @@
 #include "mpiViewDelegates.h"
 
 frmSecurity::frmSecurity(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent):
-        QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security),
-        m_modelHistory(0)
+    QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_modelHistory(0)
 {
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.symbol));
@@ -62,7 +61,7 @@ void frmSecurity::loadSecurity()
     ui.chkInclude->setChecked(m_security.includeInCalc);
     ui.btnHistorical->setDisabled(m_security.id == -1);
 
-    m_modelAA = new securityAAModel(m_security.aa, m_data.aa, 2, ui.aa);
+    m_modelAA = new securityAAModel(m_security.aa, m_data.aa, ui.aa);
     installAAModel();
 
     m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.securities,  ui.trades, this);
@@ -76,7 +75,6 @@ void frmSecurity::updateAAPercentage()
 {
     ui.gpAA->setTitle(QString("Asset Allocation (%L1%)").arg(m_modelAA->totalPercentage(), 0, 'f', 2));
 }
-
 
 void frmSecurity::addAA()
 {
@@ -142,13 +140,9 @@ void frmSecurity::accept()
     else
         m_minDate = -1;
 
-    if(m_security.aa == m_securityOriginal.aa)
-    {
-        QDialog::done(result);
-        return;
-    }
+    if(m_security.aa != m_securityOriginal.aa)
+        m_security.saveAATargets();
 
-    m_security.saveAATargets();
     QDialog::done(result);
 }
 

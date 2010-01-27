@@ -17,9 +17,10 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     cmbType = new QComboBox(gpTrade);
     cmbType->addItem("Purchase");
     cmbType->addItem("Sale");
+    cmbType->addItem("Fixed Purchase");
+    cmbType->addItem("Fixed Sale");
     cmbType->addItem("Reinvestment");
     cmbType->addItem("Interest");
-    cmbType->addItem("Fixed Amount");
     cmbType->addItem("% of Portfolio");
     cmbType->addItem("% of AA Target");
     tradeLayout->setWidget(0, QFormLayout::LabelRole, type);

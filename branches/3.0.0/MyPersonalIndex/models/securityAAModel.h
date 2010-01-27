@@ -11,22 +11,22 @@ class securityAAModel: public QAbstractTableModel
 
 public:
 
-    QList<assetAllocationTarget> getList() { return m_list; }
+    QMap<int, double> getList() { return m_list; }
 
-    securityAAModel(const QList<assetAllocationTarget> &values, const QMap<int, assetAllocation> &aaValues, const int &cols, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_columns(cols), m_list(values) {}
+    securityAAModel(const QMap<int, double> &values, const QMap<int, assetAllocation> &aaValues, QTableView *parent = 0):
+            QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_list(values), m_keys(values.keys()) {}
 
     double totalPercentage();
 
 private:
     const QMap<int, assetAllocation> &m_aaValues;
     QTableView *m_parent;
-    int m_columns;
-    QList<assetAllocationTarget> m_list;
+    QMap<int, double> m_list;
+    QList<int> m_keys;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
-    int rowCount(const QModelIndex&) const { return m_list.count(); }
-    int columnCount (const QModelIndex&) const { return m_columns; }
+    int rowCount(const QModelIndex&) const { return m_keys.count(); }
+    int columnCount (const QModelIndex&) const { return 2; }
 
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int, Qt::Orientation, int) const { return QVariant(); }

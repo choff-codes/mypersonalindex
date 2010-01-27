@@ -377,9 +377,12 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                 sharesToBuy = t.singleTrade->value;
                 code = "I";
                 break;
-            case trade::tradeType_Fixed:
+            case trade::tradeType_FixedPurchase:
+            case trade::tradeType_FixedSale:
                 if (s.close != 0)
                     sharesToBuy = t.singleTrade->value / (s.close / s.split);
+                if (t.singleTrade->type == trade::tradeType_FixedSale)
+                    sharesToBuy *= -1;
                 code = "F";
                 break;
             case trade::tradeType_TotalValue:
@@ -389,14 +392,18 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                 break;
             case trade::tradeType_AA:
                 if (previousInfo && s.close != 0)
-                    foreach(const assetAllocationTarget &aa, currentPortfolio->data.securities.value(t.securityID).aa)
+                {
+                    QMap<int, double> aaList = currentPortfolio->data.securities.value(t.securityID).aa;
+                    for(QMap<int, double>::const_iterator i = aaList.constBegin(); i != aaList.constEnd(); ++i)
                     {
-                        if (currentPortfolio->data.aa.value(aa.id).target <= 0)
+                        int aa = i.key();
+                        if (currentPortfolio->data.aa.value(aa).target <= 0)
                             continue;
 
-                        sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa.id).target * aa.target / 100)) -
+                        sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target * i.value() / 100)) -
                             previousInfo->securitiesInfo.value(t.securityID).totalValue) / (s.close / s.split);
                     }
+                }
                 code = "A";
                 break;
             default:

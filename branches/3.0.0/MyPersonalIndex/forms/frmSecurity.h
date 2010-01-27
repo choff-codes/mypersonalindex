@@ -16,8 +16,6 @@ class frmSecurity : public QDialog
 public:
     const security& getReturnValuesSecurity() const { return m_security; }
     const int& getReturnValuesMinDate() const { return m_minDate; }
-    //const int &getSecurityID() const { return m_security.id; }
-    const QMap<int, security::security>& getCashAccounts() const { return m_data.securities; }
 
     frmSecurity(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent = 0);
     ~frmSecurity() { delete m_modelTrade; delete m_modelAA; delete m_modelHistory; }

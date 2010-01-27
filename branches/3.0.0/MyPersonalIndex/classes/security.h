@@ -3,7 +3,6 @@
 
 #include <QtGui>
 #include "trade.h"
-#include "assetAllocationTarget.h"
 #include "queries.h"
 
 class security
@@ -17,7 +16,7 @@ public:
     bool cashAccount;
     bool includeInCalc;
     bool hide;
-    QList<assetAllocationTarget> aa;
+    QMap<int, double> aa;
     QMap<int, trade> trades;
 
     security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false), includeInCalc(true), hide(false) {}
@@ -29,6 +28,8 @@ public:
     void save(const int &portfolioID);
     void saveAATargets() const;
     void remove() const;
+    void removeAATarget(const int &aaID);
+    void removeAccount(const int &accountID, const int &portfolioID);
 };
 
 #endif // SECURITY_H

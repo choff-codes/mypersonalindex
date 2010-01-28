@@ -38,6 +38,7 @@ public:
     void remove(const QStringList &removedSymbols);
 
     void insertCashSecurity(const QString &symbol) { m_cashSecurities.insert(symbol); }
+    void removeCashSecurity(const QString &symbol) { m_cashSecurities.remove(symbol); }
     bool isCashSecurity(const QString &symbol) { return m_cashSecurities.contains(symbol); }
 
 private:

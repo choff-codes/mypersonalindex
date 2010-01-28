@@ -119,6 +119,31 @@ QString functions::exportClean(const QVariant &v, const QString &delimiter)
     return v.toString().remove(delimiter).replace("\n", " ");
 }
 
+void functions::exportChart(QwtPlot *chart, QMainWindow *parent)
+{
+    //http://www.qtcentre.org/threads/17616-Saving-qwt-plot-as-image?p=88077#post88077
+    QPixmap qPix = QPixmap::grabWidget(chart);
+
+    QString fileType, filePath;
+    filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
+        "JPEG (*.jpeg);;PNG (*.png);;24-bit Bitmap (*.bmp)", &fileType);
+
+    if (filePath.isEmpty())
+        return;
+
+    bool success = false;
+    if (fileType.contains("JPEG"))
+        success = qPix.save(filePath, "JPEG");
+    else if (fileType.contains("PNG"))
+        success = qPix.save(filePath, "PNG");
+    else
+        success = qPix.save(filePath, "BMP");
+
+    if (!success)
+        QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
+}
+
+
 bool functions::lessThan(const QVariant &left, const QVariant &right, const QVariant &type)
 {
     if ((left.isNull() && right.isNull()) || right.isNull())

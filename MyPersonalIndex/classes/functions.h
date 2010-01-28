@@ -2,6 +2,7 @@
 #define FUNCTIONS_H
 
 #include <QtGui>
+#include "qwt_plot.h"
 
 class functions
 {
@@ -17,6 +18,7 @@ public:
     static double stringToDouble(const QString &value, bool *ok);
     static void exportTable(const QAbstractItemModel *table, const bool &includeRowLabels, QMainWindow *parent);
     static QString exportClean(const QVariant &s, const QString &delimiter);
+    static void exportChart(QwtPlot *chart, QMainWindow *parent);
     static bool lessThan(const QVariant &left, const QVariant &right, const QVariant &type);
     static bool greaterThan(const QVariant &left, const QVariant &right, const QVariant &type);
     static bool equal(const QVariant &left, const QVariant &right, const QVariant &type);

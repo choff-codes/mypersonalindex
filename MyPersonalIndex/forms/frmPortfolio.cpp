@@ -31,18 +31,18 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.startDate));
 }
 
-bool frmPortfolio::getErrors()
+bool frmPortfolio::hasValidationErrors()
 {
     if (ui.txtDesc->text().isEmpty())
     {
         QMessageBox::critical(this, "Error", "Set a name before saving!");
-        return false;
+        return true;
     }
 
     if (ui.txtStartValue->text().isEmpty())
     {
         QMessageBox::critical(this, "Error", "Index Start Value must be number!");
-        return false;
+        return true;
     }
 
     bool tmp; int i;
@@ -50,21 +50,21 @@ bool frmPortfolio::getErrors()
     if (!tmp)
     {
         QMessageBox::critical(this, "Error", "Index Start Value must be number!");
-        return false;
+        return true;
     }
 
     if (i < 1 || i > 1000000)
     {
         QMessageBox::critical(this, "Error", "Index Start Value must be between 1 and 1000000!");
-        return false;
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 void frmPortfolio::accept()
 {
-    if (!getErrors())
+    if (hasValidationErrors())
         return;
 
     m_portfolio.description = ui.txtDesc->text();

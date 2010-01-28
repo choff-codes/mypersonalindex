@@ -561,7 +561,7 @@ void frmMain::addSecurity()
 
     do
     {
-        frmSecurity f(m_currentPortfolio->info.id, m_currentPortfolio->data, security(), this);
+        frmSecurity f(m_currentPortfolio->info.id, m_portfolios, security(), this);
         resultcode = f.exec();
         if (resultcode >= QDialog::Accepted)
         {
@@ -596,7 +596,7 @@ void frmMain::editSecurity()
     foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         int securityID = row->values.at(holdingsRow::row_ID).toInt();
-        frmSecurity f(m_currentPortfolio->info.id, m_currentPortfolio->data, m_currentPortfolio->data.securities.value(securityID), this);
+        frmSecurity f(m_currentPortfolio->info.id, m_portfolios, m_currentPortfolio->data.securities.value(securityID), this);
         if (f.exec())
         {
             change = true;
@@ -1014,28 +1014,4 @@ void frmMain::acctSortChanged(int index)
 {
     sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.acctSort, acctRow::fieldNames());
     resetPortfolioAcct();
-}
-
-void frmMain::chartExport()
-{
-    //http://www.qtcentre.org/threads/17616-Saving-qwt-plot-as-image?p=88077#post88077
-    QPixmap qPix = QPixmap::grabWidget(ui.chart);
-
-    QString fileType, filePath;
-    filePath = QFileDialog::getSaveFileName(this, "Export to...", QDir::homePath(),
-        "JPEG (*.jpeg);;PNG (*.png);;24-bit Bitmap (*.bmp)", &fileType);
-
-    if (filePath.isEmpty())
-        return;
-
-    bool success = false;
-    if (fileType.contains("JPEG"))
-        success = qPix.save(filePath, "JPEG");
-    else if (fileType.contains("PNG"))
-        success = qPix.save(filePath, "PNG");
-    else
-        success = qPix.save(filePath, "BMP");
-
-    if (!success)
-        QMessageBox::critical(this, "Error!", "Could not save file, the file path cannot be opened!");
 }

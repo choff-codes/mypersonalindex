@@ -90,7 +90,7 @@ private slots:
     void performanceExport() { functions::exportTable(ui.performance->model(), false, this); }
     void statExport() { functions::exportTable(ui.stat->model(), true, this); }
     void correlationExport() { functions::exportTable(ui.correlations->model(), true, this); }
-    void chartExport();
+    void chartExport() { functions::exportChart(ui.chart, this); }
     bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames);
     void holdingsModifyColumns();
     void holdingsSortChanged(int index);

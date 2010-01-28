@@ -22,7 +22,7 @@ private:
     portfolioInfo m_portfolioOriginal;
 
     void loadPortfolioAttributes();
-    bool getErrors();
+    bool hasValidationErrors();
 
 private slots:
     void accept();

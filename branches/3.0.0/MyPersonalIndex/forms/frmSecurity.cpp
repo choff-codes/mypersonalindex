@@ -1,7 +1,7 @@
 #include "frmSecurity.h"
 #include "mpiViewDelegates.h"
 
-frmSecurity::frmSecurity(const int &portfolioID, const portfolioData &data, const security& security, QWidget *parent):
+frmSecurity::frmSecurity(const int &portfolioID, const QMap<int, portfolio*> &data, const security& security, QWidget *parent):
     QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_modelHistory(0)
 {
     ui.setupUI(this);
@@ -19,11 +19,11 @@ frmSecurity::frmSecurity(const int &portfolioID, const portfolioData &data, cons
 
 void frmSecurity::loadDropDowns()
 {
-    foreach(const assetAllocation &value, m_data.aa)
+    foreach(const assetAllocation &value, m_data.value(m_portfolioID)->data.aa)
         ui.cmbAA->addItem(value.description, value.id);
 
     ui.cmbAcct->addItem("(None)", -1);
-    foreach(const account &value, m_data.acct)
+    foreach(const account &value, m_data.value(m_portfolioID)->data.acct)
         ui.cmbAcct->addItem(value.description, value.id);
 }
 
@@ -61,10 +61,10 @@ void frmSecurity::loadSecurity()
     ui.chkInclude->setChecked(m_security.includeInCalc);
     ui.btnHistorical->setDisabled(m_security.id == -1);
 
-    m_modelAA = new securityAAModel(m_security.aa, m_data.aa, ui.aa);
+    m_modelAA = new securityAAModel(m_security.aa, m_data.value(m_portfolioID)->data.aa, ui.aa);
     installAAModel();
 
-    m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.securities,  ui.trades, this);
+    m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.value(m_portfolioID)->data.securities,  ui.trades, this);
     ui.trades->setModel(m_modelTrade);
     // HACK: could not get the model to resize correctly without this time
     QTimer::singleShot(0, m_modelTrade, SLOT(autoResize()));
@@ -116,6 +116,10 @@ void frmSecurity::accept()
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
     m_security.hide = ui.chkHide->isChecked();
+
+    if (hasValidationErrors())
+        return;
+
     if (!newSecurity)
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
     m_security.aa = m_modelAA->getList();
@@ -127,6 +131,10 @@ void frmSecurity::accept()
     }
 
     m_security.save(m_portfolioID);
+    if (m_security.cashAccount)
+        prices::instance().insertCashSecurity(m_security.symbol);
+    else
+        prices::instance().removeCashSecurity(m_security.symbol);
 
     if (newSecurity)
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
@@ -146,6 +154,28 @@ void frmSecurity::accept()
     QDialog::done(result);
 }
 
+bool frmSecurity::hasValidationErrors()
+{
+    if (ui.txtSymbol->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Symbol", "The symbol cannot be blank!");
+        return true;
+    }
+
+    foreach(const portfolio *p, m_data)
+        foreach(const security &s, p->data.securities)
+            if (s.id != m_security.id && m_security.symbol == s.symbol && m_security.cashAccount != s.cashAccount)
+            {
+                QString message = m_security.cashAccount ?
+                    "This symbol is currently not cash in another security. You cannot save this security as cash." :
+                    "This symbol is currently cash in another security. You must save this security as cash.";
+                QMessageBox::critical(this, "Cash Account", message);
+                return true;
+            }
+
+    return false;
+}
+
 void frmSecurity::resetExpense()
 {
     ui.sbExpense->setValue(-1);
@@ -160,7 +190,7 @@ void frmSecurity::historyIndexChange(int index)
 {
     QAbstractItemModel *oldModel = ui.history->model();
 
-    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, m_data.executedTrades.value(m_security.id),
+    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, m_data.value(m_portfolioID)->data.executedTrades.value(m_security.id),
         prices::instance().history(m_security.symbol), ui.sortHistorical->isChecked(), ui.history);
     ui.history->setModel(m_modelHistory);
     ui.history->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);

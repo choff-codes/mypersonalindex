@@ -86,7 +86,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         int count = existingTrades.count();
         // set up calculation variables
         QList<sharePricePair> filteredTrades;
-        QMap<int, double> splits = prices::instance().split(s.symbol);
+        const QMap<int, double> splits = prices::instance().split(s.symbol);
         QMap<int, double>::const_iterator i;
         double shares = 0; double total = 0; double splitRatio = 1;
 

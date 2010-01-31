@@ -404,7 +404,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                 case trade::tradeType_AA:
                     if (previousInfo && close != 0)
                     {
-                        QMap<int, double> aaList = currentPortfolio->data.securities.value(securityID).aa;
+                        const QMap<int, double> aaList = currentPortfolio->data.securities.value(securityID).aa;
                         for(QMap<int, double>::const_iterator x = aaList.constBegin(); x != aaList.constEnd(); ++x)
                         {
                             int aa = x.key();

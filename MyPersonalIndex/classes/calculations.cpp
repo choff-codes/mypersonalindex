@@ -4,7 +4,7 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
 {
     securityInfo value;
     securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
-    QMap<int, double> splits = prices::instance().split(s.symbol);
+    const QMap<int, double> splits = prices::instance().split(s.symbol);
     QMap<int, double>::const_iterator i;
     double ratio = 1;
 

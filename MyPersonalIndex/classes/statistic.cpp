@@ -154,7 +154,7 @@ double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
 double statistic::weightedExpenseRatio(const statisticInfo &statInfo)
 {
     double er = 0;
-    QMap<int, securityInfo> securities = statInfo.endInfo()->securitiesInfo;
+    const QMap<int, securityInfo> securities = statInfo.endInfo()->securitiesInfo;
     double totalValue = statInfo.endTotalValue();
 
     foreach(const security &s, statInfo.securities())

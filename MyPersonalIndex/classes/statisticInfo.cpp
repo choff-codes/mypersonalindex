@@ -16,7 +16,7 @@ statisticInfo::statisticInfo(const portfolio *currentPortfolio, const dailyInfoP
 
 void statisticInfo::setNAV()
 {
-    QMap<int, double> navHistory = m_portfolio->data.nav.navHistory();
+    const QMap<int, double> navHistory = m_portfolio->data.nav.navHistory();
     if (navHistory.isEmpty())
         return;
 
@@ -94,7 +94,7 @@ void statisticInfo::calculateChanges(QMap<int, double>::const_iterator startNav,
 
 void statisticInfo::setTotalValue()
 {
-    QMap<int, double> totalValueHistory = m_portfolio->data.nav.totalValueHistory();
+    const QMap<int, double> totalValueHistory = m_portfolio->data.nav.totalValueHistory();
     if (totalValueHistory.isEmpty())
         return;
 

@@ -40,7 +40,7 @@ void updatePrices::updateMissingPrices()
 
     foreach(const QString &symbol, prices::instance().symbols())
     {
-        QMap<int, double> prices = prices::instance().price(symbol);
+        const QMap<int, double> prices = prices::instance().price(symbol);
 
         if (prices.count() <= 2)
             continue;

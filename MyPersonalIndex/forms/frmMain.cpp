@@ -659,9 +659,8 @@ bool frmMain::invalidNAVDates()
         return true;
 
     foreach(portfolio *p, m_portfolios)
-        if (p != m_currentPortfolio)
-            if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < firstDate)
-                return true;
+        if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < firstDate)
+            return true;
 
     return false;
 }

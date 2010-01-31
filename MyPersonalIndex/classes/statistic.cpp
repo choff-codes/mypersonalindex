@@ -130,6 +130,9 @@ double statistic::returnPercent(const statisticInfo &statInfo, const double &div
 
 double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
 {
+    if (statInfo.days() < 2)
+        return 0;
+
     //http://www.sitmo.com/doc/Calculating_the_Cumulative_Normal_Distribution
     const double b1 =  0.319381530;
     const double b2 = -0.356563782;

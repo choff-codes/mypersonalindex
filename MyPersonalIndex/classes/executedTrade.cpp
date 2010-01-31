@@ -4,11 +4,10 @@ void executedTradeList::remove(const int &portfolioID, const int &startDate)
 {
     for(iterator i = begin(); i != end(); ++i)
     {
-        QList<executedTrade> &list = i.value();
-        QList<executedTrade>::iterator trade = list.begin();
-        while (trade != list.end())
+        QList<executedTrade>::iterator trade = i->begin();
+        while (trade != i->end())
             if (trade->date >= startDate)
-                trade = list.erase(trade);
+                trade = i->erase(trade);
             else
                 ++trade;
     }

@@ -8,7 +8,10 @@ frmSecurity::frmSecurity(const int &portfolioID, const QMap<int, portfolio*> &da
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.symbol));
 
     if (m_security.id != -1)
+    {
         ui.btnAddAnother->setVisible(false);
+        ui.txtSymbol->setEnabled(false);
+    }
 
     m_minDate = m_security.firstTradeDate();
 
@@ -71,6 +74,17 @@ void frmSecurity::loadSecurity()
 
 }
 
+void frmSecurity::saveSecurity()
+{
+    m_security.symbol = ui.txtSymbol->text();
+    m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
+    m_security.expense = ui.sbExpense->value();
+    m_security.divReinvest = ui.chkReinvest->isChecked();
+    m_security.cashAccount = ui.chkCash->isChecked();
+    m_security.includeInCalc = ui.chkInclude->isChecked();
+    m_security.hide = ui.chkHide->isChecked();
+}
+
 void frmSecurity::updateAAPercentage()
 {
     ui.gpAA->setTitle(QString("Asset Allocation (%L1%)").arg(m_modelAA->totalPercentage(), 0, 'f', 2));
@@ -103,24 +117,14 @@ void frmSecurity::installAAModel()
 
 void frmSecurity::accept()
 {
-    int result = QDialog::Accepted;
-    bool newSecurity = m_security.id == -1;
-
-    if (sender() == ui.btnAddAnother)
-        ++result;
-
-    m_security.symbol = ui.txtSymbol->text();
-    m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
-    m_security.expense = ui.sbExpense->value();
-    m_security.divReinvest = ui.chkReinvest->isChecked();
-    m_security.cashAccount = ui.chkCash->isChecked();
-    m_security.includeInCalc = ui.chkInclude->isChecked();
-    m_security.hide = ui.chkHide->isChecked();
+    saveSecurity();
 
     if (hasValidationErrors())
         return;
 
-    if (!newSecurity)
+    int result = (sender() == ui.btnAddAnother) ? QDialog::Accepted + 1 : QDialog::Accepted;
+
+    if (m_security.id != -1) // can't save trades until there is a valid ID
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
     m_security.aa = m_modelAA->getList();
 
@@ -136,7 +140,7 @@ void frmSecurity::accept()
     else
         prices::instance().removeCashSecurity(m_security.symbol);
 
-    if (newSecurity)
+    if (m_securityOriginal.id == -1) // now there is an ID to save trades with
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
 
     if (m_security.trades != m_securityOriginal.trades)
@@ -148,7 +152,7 @@ void frmSecurity::accept()
     else
         m_minDate = -1;
 
-    if(m_security.aa != m_securityOriginal.aa)
+    if (m_security.aa != m_securityOriginal.aa)
         m_security.saveAATargets();
 
     QDialog::done(result);

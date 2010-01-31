@@ -20,10 +20,9 @@ struct securityInfo
     double shares;
     double costBasis;
     double dividendAmount;
-    double commission;
     double taxLiability;
 
-    securityInfo(): totalValue(0), shares(0), costBasis(0), dividendAmount(0), commission(0), taxLiability(0) {}
+    securityInfo(): totalValue(0), shares(0), costBasis(0), dividendAmount(0), taxLiability(0) {}
 };
 
 struct dailyInfoPortfolio
@@ -34,10 +33,9 @@ struct dailyInfoPortfolio
     double totalValue;
     double costBasis;
     double dividends;
-    double commission;
     double taxLiability;
 
-    dailyInfoPortfolio(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), commission(0), taxLiability(0) {}
+    dailyInfoPortfolio(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), taxLiability(0) {}
 };
 
 #endif // CALCULATIONINFO_H

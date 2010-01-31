@@ -195,8 +195,7 @@ void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &p
         t.value = q.value(queries::securityTradeColumns_Value).toDouble();
         if (!q.value(queries::securityTradeColumns_Price).isNull())
             t.price = q.value(queries::securityTradeColumns_Price).toDouble();
-        if (!q.value(queries::securityTradeColumns_Commission).isNull())
-            t.commission = q.value(queries::securityTradeColumns_Commission).toDouble();
+        t.commission = q.value(queries::securityTradeColumns_Commission).toDouble();
         if (!q.value(queries::securityTradeColumns_CashAccountID).isNull())
             t.cashAccount = q.value(queries::securityTradeColumns_CashAccountID).toInt();
         t.frequency = (trade::tradeFreq)q.value(queries::securityTradeColumns_Frequency).toInt();

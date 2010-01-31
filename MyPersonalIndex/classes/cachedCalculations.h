@@ -13,8 +13,8 @@ public:
     dailyInfoPortfolio* portfolioValues(const int &date);
     void setPortfolio(const portfolio *p_portfolio) { calculations::setPortfolio(p_portfolio); clearCache(); }
     void clearCache() { m_cache.clear(); }
-    dailyInfo aaValues(const int &date, const assetAllocation &aa);
-    dailyInfo acctValues(const int &date, const account &acct);
+    dailyInfo aaValues(const int &date, const int &aaID);
+    dailyInfo acctValues(const int &date, const int &acctID);
 
 protected:
     QCache<int, dailyInfoPortfolio> m_cache;

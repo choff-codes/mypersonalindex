@@ -13,7 +13,7 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     : baseRow(sort)
 {
     securityInfo value = info->securitiesInfo.value(s.id);
-
+    double costBasis = info->avgPrices.value(s.id) * value.shares;
     //row_Active
     this->values.append((int)s.includeInCalc);
     //row_Symbol
@@ -28,15 +28,15 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     //row_Avg
     this->values.append(value.shares == 0 ? QVariant() : info->avgPrices.value(s.id));
     //row_Cost
-    this->values.append(value.shares == 0 ? QVariant() : value.costBasis);
+    this->values.append(value.shares == 0 ? QVariant() : costBasis);
     //row_Value
     this->values.append(value.shares == 0 ? QVariant() : value.totalValue);
     //row_ValueP
     this->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue * 100);
     //row_Gain
-    this->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.costBasis);
+    this->values.append(value.shares == 0 ? QVariant() : value.totalValue - costBasis);
     //row_GainP
-    this->values.append(value.shares == 0 || value.costBasis == 0 ? QVariant() : ((value.totalValue / value.costBasis) - 1) * 100);
+    this->values.append(value.shares == 0 || costBasis == 0 ? QVariant() : ((value.totalValue / costBasis) - 1) * 100);
     //row_Acct
     this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA

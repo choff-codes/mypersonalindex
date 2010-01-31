@@ -20,7 +20,7 @@ void trade::save(const int &securityID)
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Type), (int)this->type);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Value), this->value);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Price), functions::doubleToNull(this->price));
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Commission), functions::doubleToNull(this->commission));
+    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Commission), this->commission);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount));
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Frequency), (int)this->frequency);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Date), functions::dateToNull(this->date));

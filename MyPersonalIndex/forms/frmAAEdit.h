@@ -20,6 +20,8 @@ private:
     assetAllocation m_aa;
     assetAllocation m_aaOriginal;
 
+    bool hasValidationErrors();
+
 private slots:
     void accept();
     void adjustSpinBox(double);

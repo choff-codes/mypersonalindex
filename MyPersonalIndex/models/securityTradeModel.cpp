@@ -23,7 +23,7 @@ QVariant securityTradeModel::data(const QModelIndex &index, int role) const
                 return t.price < 0 ? "Prev Close" : functions::doubleToCurrency(t.price);
                 break;
             case 3:
-                return t.commission < 0 ? "" : functions::doubleToCurrency(t.commission);
+                return t.commission <= 0 ? "" : functions::doubleToCurrency(t.commission);
                 break;
             case 4:
                 return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).symbol : "";

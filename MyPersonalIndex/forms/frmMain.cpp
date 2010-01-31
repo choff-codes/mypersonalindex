@@ -294,7 +294,7 @@ void frmMain::resetPortfolioAA()
         m_currentPortfolio->data.aa.insert(-1, assetAllocation("Blank"));
 
     foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa.id), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
 
     m_currentPortfolio->data.aa.remove(-1); // remove blank aa
 
@@ -319,7 +319,7 @@ void frmMain::resetPortfolioAcct()
         m_currentPortfolio->data.acct.insert(-1, account("(Blank)"));
 
     foreach(const account &acct, m_currentPortfolio->data.acct)
-        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct), acct, m_currentPortfolio->info.acctSort));
+        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct.id), acct, m_currentPortfolio->info.acctSort));
 
     m_currentPortfolio->data.acct.remove(-1); // remove blank aa
 
@@ -492,6 +492,9 @@ void frmMain::editPortfolio()
         bool reCalcChange = info.startValue != m_currentPortfolio->info.startValue
                             || info.startDate != m_currentPortfolio->info.startDate
                             || info.dividends != m_currentPortfolio->info.dividends;
+
+        if (!reCalcChange && info.description != m_currentPortfolio->info.description)
+            resetPortfolioChart();
 
         m_currentPortfolio->info = info;
 

@@ -23,7 +23,6 @@ public:
 protected:
     const portfolio *m_portfolio;
 
-    double splitRatio(const QString &symbol, const int &startDate, const int &endDate);
     securityInfo specificSecurityValue(const security &s, const int &date);
 };
 

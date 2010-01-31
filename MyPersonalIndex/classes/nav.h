@@ -2,7 +2,6 @@
 #define NAV_H
 
 #include "queries.h"
-#include "navTrade.h"
 #include "calculations.h"
 #include "prices.h"
 #include "portfolio.h"
@@ -31,24 +30,28 @@ private:
     QVariantList m_ExecutedTrades_SecurityID, m_ExecutedTrades_Dates, m_ExecutedTrades_Shares, m_ExecutedTrades_Price, m_ExecutedTrades_Commission, m_ExecutedTrades_Code;
     calculations m_calculations;
 
+    typedef QMap<int, trade>::const_iterator navTradePointer;
+    typedef QMap<int, QList<navTradePointer> > navTradeList;
+
+    navTradeList appendNavTrades(const navTradeList &first, const navTradeList &second);
     void addToNAVList(portfolio *currentPortfolio, const int &date, const double &totalValue, const double &nav);
     void addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission, const QString &code);
     void clearVariantLists();
     void insertVariantLists();
-    void deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &portfolioStartDate);
+    void deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &calculateFromStartDate);
     int checkCalculationDate(const portfolio *currentPortfolio, int calculationDate, bool *calcuateFromStartDate);
     void calculateNAVValues(portfolio *currentPortfolio);
-    bool getCurrentDateOrNext(int &date);
-    navTrades calculateExecutedTrades(const portfolio *currentPortfolio, const int &minDate, const bool &portfolioStartDate);
+    bool getCurrentDateOrNext(int *date);
+    QMap<int, navTradeList> calculateExecutedTrades(const portfolio *currentPortfolio, const int &minDate, const bool &calculateFromStartDate);
     QList<int> getPortfolioSecurityReinvestment(const portfolio *currentPortfolio);
-    QList<int> computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &portfolioStartDate);
+    QList<int> computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate);
     QList<int> computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate);
     QList<int> computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate);
     QList<int> computeYearlyTrades(const int &tradeDate, const int &minDate, const int &maxDate);
     void insertPortfolioReinvestments(portfolio *currentPortfolio, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio *previousInfo);
     void insertPortfolioCashTrade(portfolio *currentPortfolio, const int &cashAccount, const dailyInfoPortfolio *previousInfo, const int &date, const double &reverseTradeValue);
     void insertPortfolioTrades(portfolio *currentPortfolio, const int &date, const dailyInfoPortfolio *previousInfo, const navTradeList &trades);
-    void insertFirstPortfolioTrades(portfolio *currentPortfolio, const int &startDate, const navTrades &allTrades);
+    void insertFirstPortfolioTrades(portfolio *currentPortfolio, const int &startDate, const QMap<int, navTradeList> &allTrades);
 };
 
 #endif // NAV_H

@@ -17,7 +17,7 @@ dailyInfoPortfolio* cachedCalculations::portfolioValues(const int &date)
     return info;
 }
 
-dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &aa)
+dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
 {
     dailyInfo info(date);
 
@@ -25,7 +25,7 @@ dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &a
     {
         bool included = false;
 
-        if (aa.id == -1 and s.aa.isEmpty())
+        if (aaID == -1 and s.aa.isEmpty())
         {
             included = true;
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
@@ -33,11 +33,11 @@ dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &a
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
         }
-        else if (s.aa.contains(aa.id))
+        else if (s.aa.contains(aaID))
         {
             included = true;
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
-            info.totalValue += sv.totalValue * s.aa.value(aa.id) / 100;
+            info.totalValue += sv.totalValue * s.aa.value(aaID) / 100;
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
         }
@@ -49,12 +49,12 @@ dailyInfo cachedCalculations::aaValues(const int &date, const assetAllocation &a
     return info;
 }
 
-dailyInfo cachedCalculations::acctValues(const int &date, const account &acct)
+dailyInfo cachedCalculations::acctValues(const int &date, const int &acctID)
 {
     dailyInfo info(date);
 
     foreach(const security &s,  m_portfolio->data.securities)
-        if (acct.id == s.account)
+        if (acctID == s.account)
         {
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
             info.totalValue += sv.totalValue;
@@ -68,9 +68,12 @@ dailyInfo cachedCalculations::acctValues(const int &date, const account &acct)
 
 QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDate)
 {
+    QTime t;
+    t.start();
+
     QMap<int, double> returnValues;
-    const executedTradeList &trades = m_portfolio->data.executedTrades;
-    const QMap<int, security> &securities = m_portfolio->data.securities;
+    const executedTradeList trades = m_portfolio->data.executedTrades;
+    const QMap<int, security> securities = m_portfolio->data.securities;
     portfolioInfo::avgPriceCalculation calcType = m_portfolio->info.avgPriceCalc;
 
     for(executedTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
@@ -79,11 +82,17 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         int securityID = i.key();
         security s = securities.value(securityID);
         // get all trades for this security
-        const QList<executedTrade> &existingTrades = i.value();
+        const QList<executedTrade> existingTrades = i.value();
         int count = existingTrades.count();
         // set up calculation variables
         QList<sharePricePair> filteredTrades;
+        QMap<int, double> splits = prices::instance().split(s.symbol);
+        QMap<int, double>::const_iterator i;
         double shares = 0; double total = 0; double splitRatio = 1;
+
+        for(i = splits.constBegin(); i != splits.constEnd() && i.key() <= calculationDate; ++i)
+            splitRatio *= i.value();
+        i = splits.constBegin();
 
         if (s.cashAccount)
         {
@@ -100,16 +109,20 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             if (calcType == portfolioInfo::avgPriceCalculation_AVG && t.shares < 0) // avg price averages only positive trades
                 continue;
 
-            // check for any pre-existing splits
-            splitRatio = calculations::splitRatio(s.symbol, t.date, calculationDate);
-            t.price = t.price / splitRatio;
-            t.shares = t.shares * splitRatio;
+            while (i != splits.constEnd() && t.date >= i.key())
+            {
+                splitRatio /= i.value();
+                ++i;
+            }
+
+            t.price /= splitRatio;
+            t.shares *= splitRatio;
 
             if (t.shares < 0) // sold shares, need to remove from filteredTrades at the beginning or end depending on LIFO or FIFO
             {
                 while (t.shares != 0 && !filteredTrades.isEmpty()) // still shares to sell
                 {
-                    int z = calcType == portfolioInfo::avgPriceCalculation_LIFO ? filteredTrades.count() - 1 : 0;
+                    int z = (calcType == portfolioInfo::avgPriceCalculation_LIFO) ? filteredTrades.count() - 1 : 0;
                     sharePricePair pair = filteredTrades.at(z);
 
                     if (pair.first <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
@@ -139,6 +152,8 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         if (shares > 0)
             returnValues.insert(securityID, total / shares); // insert avg price for this securityID
     }
+
+    qDebug("Time elapsed (avg price): %d ms", t.elapsed());
 
     return returnValues;
 }

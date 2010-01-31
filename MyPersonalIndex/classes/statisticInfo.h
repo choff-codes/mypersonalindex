@@ -4,7 +4,6 @@
 #include <QtCore>
 #include "portfolio.h"
 #include "calculations.h"
-#include "security.h"
 
 class statisticInfo
 {

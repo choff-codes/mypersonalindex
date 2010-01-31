@@ -104,7 +104,7 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
 
     QSqlQuery query(db);
     QStringList parameters, columns;
-    QList<QVariantList> binds = values.values();
+    const QList<QVariantList> binds = values.values();
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
     foreach(const QString &column, values.keys())

@@ -164,7 +164,7 @@ int nav::checkCalculationDate(const portfolio *currentPortfolio, int calculation
 }
 
 
-bool nav::getCurrentDateOrNext(int *date)
+bool nav::getCurrentDateOrNext(int *date) const
 {
     QList<int>::const_iterator place = qLowerBound(m_dates, *date);
     if (place == m_dates.constEnd())
@@ -222,7 +222,7 @@ QMap<int, nav::navTradeList> nav::calculateExecutedTrades(const portfolio *curre
     return trades;
 }
 
-QList<int> nav::computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate)
+QList<int> nav::computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate) const
 {
     QList<int> dates;
     int date = singleTade.date;
@@ -238,7 +238,7 @@ QList<int> nav::computeOnceTrades(const trade &singleTade, const int &minDate, c
     return dates;
 }
 
-QList<int> nav::computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate)
+QList<int> nav::computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
 {
     QList<int> dates;
 
@@ -259,7 +259,7 @@ QList<int> nav::computeWeeklyTrades(const int &tradeDate, const int &minDate, co
     return dates;
 }
 
-QList<int> nav::computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate)
+QList<int> nav::computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
 {
     QList<int> dates;
 
@@ -292,7 +292,7 @@ QList<int> nav::computeMonthlyTrades(const int &tradeDate, const int &minDate, c
     return dates;
 }
 
-QList<int> nav::computeYearlyTrades(const int &tradeDate, const int &minDate, const int &maxDate)
+QList<int> nav::computeYearlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
 {
     QList<int> dates;
 

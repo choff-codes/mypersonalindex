@@ -23,7 +23,7 @@ void prices::insertDate(const int &date)
 }
 
 
-QMap<int, double> prices::price(const QString &symbol)
+QMap<int, double> prices::price(const QString &symbol) const
 {
     if (isCashSecurity(symbol))
         return m_cashPrices.prices;
@@ -31,7 +31,7 @@ QMap<int, double> prices::price(const QString &symbol)
     return history(symbol).prices;
 }
 
-QMap<int, double> prices::dividend(const QString &symbol)
+QMap<int, double> prices::dividend(const QString &symbol) const
 {
     if (isCashSecurity(symbol))
         return m_cashPrices.dividends;
@@ -39,7 +39,7 @@ QMap<int, double> prices::dividend(const QString &symbol)
     return history(symbol).dividends;
 }
 
-QMap<int, double> prices::split(const QString &symbol)
+QMap<int, double> prices::split(const QString &symbol) const
 {
     if (isCashSecurity(symbol))
         return m_cashPrices.splits;

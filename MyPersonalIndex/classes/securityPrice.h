@@ -25,6 +25,4 @@ struct securityPrices
     securityPrice dailyPriceInfo(const int &date) const { return securityPrice(price(date), dividend(date), split(date)); }
 };
 
-typedef QHash<QString, securityPrices> securityPriceList;
-
 #endif // SECURITYPRICE_H

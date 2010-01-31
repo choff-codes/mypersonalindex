@@ -21,28 +21,28 @@ public:
     void insertDividend(const QString &symbol, const int &date, const double &dividend) { m_securityPriceList[symbol].dividends.insert(date, dividend); }
     void insertSplit(const QString &symbol, const int &date, const double &split) { m_securityPriceList[symbol].splits.insert(date, split); }
 
-    QMap<int, double> price(const QString &symbol);
-    QMap<int, double> dividend(const QString &symbol);
-    QMap<int, double> split(const QString &symbol);
-    securityPrices history(const QString &symbol) { return m_securityPriceList.value(symbol); }
+    QMap<int, double> price(const QString &symbol) const;
+    QMap<int, double> dividend(const QString &symbol) const;
+    QMap<int, double> split(const QString &symbol) const;
+    securityPrices history(const QString &symbol) const { return m_securityPriceList.value(symbol); }
 
-    double price(const QString &symbol, const int &date) { return history(symbol).price(date); }
-    double dividend(const QString &symbol, const int &date) { return history(symbol).dividend(date); }
-    double split(const QString &symbol, const int &date) { return history(symbol).split(date); }
+    double price(const QString &symbol, const int &date) const { return history(symbol).price(date); }
+    double dividend(const QString &symbol, const int &date) const { return history(symbol).dividend(date); }
+    double split(const QString &symbol, const int &date) const { return history(symbol).split(date); }
 
-    int firstDate() { return m_dates.isEmpty() ? 0 : m_dates.first(); }
-    int lastDate() { return m_dates.isEmpty() ? 0 : m_dates.last(); }
+    int firstDate() const { return m_dates.isEmpty() ? 0 : m_dates.first(); }
+    int lastDate() const { return m_dates.isEmpty() ? 0 : m_dates.last(); }
 
-    securityPrice dailyPriceInfo(const QString &symbol, const int &date) { return history(symbol).dailyPriceInfo(date); }
+    securityPrice dailyPriceInfo(const QString &symbol, const int &date) const { return history(symbol).dailyPriceInfo(date); }
 
     void remove(const QStringList &removedSymbols);
 
     void insertCashSecurity(const QString &symbol) { m_cashSecurities.insert(symbol); }
     void removeCashSecurity(const QString &symbol) { m_cashSecurities.remove(symbol); }
-    bool isCashSecurity(const QString &symbol) { return m_cashSecurities.contains(symbol); }
+    bool isCashSecurity(const QString &symbol) const { return m_cashSecurities.contains(symbol); }
 
 private:
-    securityPriceList m_securityPriceList;
+    QHash<QString, securityPrices> m_securityPriceList;
     QList<int> m_dates;
     QSet<QString> m_cashSecurities;
     securityPrices m_cashPrices;

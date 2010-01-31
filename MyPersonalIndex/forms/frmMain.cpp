@@ -42,6 +42,7 @@ frmMain::~frmMain()
     delete ui.accounts->model();
     delete ui.correlations->model();
     delete ui.performance->model();
+    delete ui.stat->model();
 }
 
 void frmMain::closeEvent(QCloseEvent *event)
@@ -931,7 +932,7 @@ void frmMain::statusUpdate(const QString &message)
 
 int frmMain::currentDateOrPrevious(int date)
 {
-    QList<int> dates = prices::instance().dates();
+    const QList<int> dates = prices::instance().dates();
     QList<int>::const_iterator place = qLowerBound(dates, date);
     if (*place != date && place != dates.constBegin())
         return *(place - 1);

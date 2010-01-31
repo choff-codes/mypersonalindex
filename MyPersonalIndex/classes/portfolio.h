@@ -1,7 +1,7 @@
 #ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
-#include <QtGui>
+#include <QtCore>
 #include "executedTrade.h"
 #include "navInfo.h"
 #include "security.h"

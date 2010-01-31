@@ -1,47 +1,43 @@
 #include "calculations.h"
 
-double calculations::splitRatio(const QString &symbol, const int &startDate, const int &endDate)
-{
-    double ratio = 1;
-
-    QMap<int, double> s = prices::instance().split(symbol);
-
-    for(QMap<int, double>::const_iterator i = s.lowerBound(startDate); i != s.constEnd(); ++i)
-    {
-        if (i.key() > endDate)
-            break;
-        ratio = ratio * i.value();
-    }
-
-    return ratio;
-}
-
 securityInfo calculations::specificSecurityValue(const security::security &s, const int &date)
 {
     securityInfo value;
     securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
+    QMap<int, double> splits = prices::instance().split(s.symbol);
+    QMap<int, double>::const_iterator i;
+    double ratio = 1;
+
+    for(i = splits.constBegin(); i != splits.constEnd() && i.key() <= date; ++i)
+        ratio *= i.value();
+    i = splits.constBegin();
 
     foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
     {
         if (t.date > date)
             break;
 
-        value.shares += t.shares * splitRatio(s.symbol, t.date, date);
-        value.commission += t.commission;
-        value.costBasis += t.shares * t.price;
+        while (i != splits.constEnd() && t.date >= i.key())
+        {
+            ratio /= i.value();
+            ++i;
+        }
+
+        value.shares += t.shares * ratio;
+        value.costBasis += t.shares * t.price + t.commission;
     }
 
     value.dividendAmount = value.shares * price.dividend;
     value.totalValue = value.shares * price.close;
 
-    account::account acct = m_portfolio->data.acct.value(s.account);
+    account acct = m_portfolio->data.acct.value(s.account);
     if (acct.taxRate == -1)
         return value;
 
     if (acct.taxDeferred)
         value.taxLiability = value.totalValue * acct.taxRate / 100;
     else if (value.totalValue > value.costBasis)
-        value.taxLiability = (value.totalValue - value.costBasis) * acct.taxRate / 100.00;
+        value.taxLiability = (value.totalValue - value.costBasis) * acct.taxRate / 100;
 
     return value;
 }
@@ -64,7 +60,6 @@ dailyInfoPortfolio* calculations::portfolioValues(const int &date)
         info->costBasis += value.costBasis;
         info->totalValue += value.totalValue;
         info->dividends += value.dividendAmount;
-        info->commission += value.commission;
         info->taxLiability += value.taxLiability;
     }
 
@@ -133,7 +128,7 @@ double calculations::correlation(const securityPrices &price1, const securityPri
 double calculations::change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV)
 {
     double nav;
-    dailyActivity = dailyActivity - dividends;
+    dailyActivity -= dividends;
     if (dailyActivity < 0)
         nav = (totalValue - dailyActivity) / (previousTotalValue / previousNAV);
     else

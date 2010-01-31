@@ -22,7 +22,7 @@ public:
     int startDate;
     int endDate;
 
-    trade(): id(-1), type(tradeType_Purchase), value(-1), price(-1), commission(-1), cashAccount(-1), frequency(tradeFreq_Once), date(0), startDate(0), endDate(0) {}
+    trade(): id(-1), type(tradeType_Purchase), value(-1), price(-1), commission(0), cashAccount(-1), frequency(tradeFreq_Once), date(0), startDate(0), endDate(0) {}
 
     bool operator==(const trade &other) const;
     bool operator!=(const trade &other) const { return !(*this == other); }

@@ -34,6 +34,7 @@ private:
 
     void connectSlots();
     void loadSecurity();
+    void saveSecurity();
     void loadDropDowns();
     void installAAModel();
     bool hasValidationErrors();

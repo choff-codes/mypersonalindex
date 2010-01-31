@@ -38,8 +38,7 @@ void frmTrade::loadTrade()
         ui.chkPrice->setChecked(true);
         ui.txtPrice->setText(QString::number(m_trade.price, 'f', 4));
     }
-    if (m_trade.commission >= 0)
-        ui.txtCommission->setText(QString::number(m_trade.commission, 'f', 4));
+    ui.txtCommission->setText(QString::number(m_trade.commission, 'f', 4));
     if (m_trade.cashAccount > 0)
         for(int i = 0; i < ui.cmbCash->count(); ++i)
             if (ui.cmbCash->itemData(i).toInt() == m_trade.cashAccount)
@@ -76,10 +75,13 @@ void frmTrade::togglePrice(bool checked)
 
 void frmTrade::accept()
 {
+    if (hasValidationErrors())
+        return;
+
     m_trade.type = (trade::tradeType)ui.cmbType->currentIndex();
     m_trade.value = ui.txtShares->text().toDouble();
     m_trade.price = ui.chkPrice->isChecked() && !ui.txtPrice->text().isEmpty() ? ui.txtPrice->text().toDouble() : -1;
-    m_trade.commission = !ui.txtCommission->text().isEmpty() ? ui.txtCommission->text().toDouble() : -1;
+    m_trade.commission = ui.txtCommission->text().isEmpty() ? 0 : ui.txtCommission->text().toDouble();
     m_trade.cashAccount = ui.cmbCash->itemData(ui.cmbCash->currentIndex()).toInt();
     m_trade.frequency = (trade::tradeFreq)ui.cmbFreq->currentIndex();
     m_trade.date = ui.deDate->isEnabled() ? ui.deDate->date().toJulianDay() : 0;
@@ -87,6 +89,35 @@ void frmTrade::accept()
     m_trade.endDate = ui.deEnding->isEnabled() ? ui.deEnding->date().toJulianDay() : 0;
 
     QDialog::accept();
+}
+
+bool frmTrade::hasValidationErrors()
+{
+    if (ui.txtShares->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Value", "The shares/amount/percentage of the trade cannot be blank!");
+        return true;
+    }
+
+    if (ui.txtShares->text().toDouble() < 0)
+    {
+        QMessageBox::critical(this, "Value", "The shares/amount/percentage cannot be negative!");
+        return true;
+    }
+
+    if (ui.chkPrice->isChecked() && ui.txtPrice->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Price", "The price cannot be blank!");
+        return true;
+    }
+
+    if (ui.txtPrice->text().toDouble() < 0)
+    {
+        QMessageBox::critical(this, "Price", "The price cannot be negative!");
+        return true;
+    }
+
+    return false;
 }
 
 void frmTrade::freqChange(int index)

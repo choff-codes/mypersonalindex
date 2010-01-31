@@ -19,6 +19,9 @@ frmAcctEdit::frmAcctEdit(const int &portfolioID, QWidget *parent, const account 
 
 void frmAcctEdit::accept()
 {
+    if (hasValidationErrors())
+        return;
+
     m_acct.description = ui.txtDesc->text();
     m_acct.taxRate = ui.sbTaxRate->value();
     m_acct.taxDeferred = ui.chkTaxDeferred->isChecked();
@@ -31,6 +34,17 @@ void frmAcctEdit::accept()
 
     m_acct.save(m_portfolioID);
     QDialog::accept();
+}
+
+bool frmAcctEdit::hasValidationErrors()
+{
+    if (ui.txtDesc->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Description", "The description cannot be blank!");
+        return true;
+    }
+
+    return false;
 }
 
 void frmAcctEdit::adjustSpinBox(double d)

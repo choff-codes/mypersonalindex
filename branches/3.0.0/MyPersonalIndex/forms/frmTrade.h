@@ -23,6 +23,7 @@ private:
 
     void connectSlots();
     void loadTrade();
+    bool hasValidationErrors();
 
 private slots:
     void togglePrice(bool);

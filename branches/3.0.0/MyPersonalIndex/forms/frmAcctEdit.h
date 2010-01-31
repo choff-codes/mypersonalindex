@@ -20,6 +20,8 @@ private:
     account m_acct;
     account m_acctOriginal;
 
+    bool hasValidationErrors();
+
 private slots:
     void accept();
     void adjustSpinBox(double);

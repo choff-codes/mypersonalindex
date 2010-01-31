@@ -18,6 +18,9 @@ frmAAEdit::frmAAEdit(const int &portfolioID, QWidget *parent, const assetAllocat
 
 void frmAAEdit::accept()
 {
+    if (hasValidationErrors())
+        return;
+
     m_aa.description = ui.txtDesc->text();
     m_aa.target = ui.sbTarget->value();
 
@@ -29,6 +32,17 @@ void frmAAEdit::accept()
 
     m_aa.save(m_portfolioID);
     QDialog::accept();
+}
+
+bool frmAAEdit::hasValidationErrors()
+{
+    if (ui.txtDesc->text().isEmpty())
+    {
+        QMessageBox::critical(this, "Description", "The description cannot be blank!");
+        return true;
+    }
+
+    return false;
 }
 
 void frmAAEdit::adjustSpinBox(double d)

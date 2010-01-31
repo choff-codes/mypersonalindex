@@ -112,7 +112,7 @@ void securityTradeModel::paste()
 
 void securityTradeModel::copy()
 {
-    QList<int> indexes = getSelectedRows();
+    const QList<int> indexes = getSelectedRows();
     if(indexes.isEmpty())
         return;
 
@@ -233,7 +233,7 @@ void securityTradeModel::addNew()
 
 void securityTradeModel::deleteSelected()
 {
-    QList<int> indexes = getSelectedRows();
+    const QList<int> indexes = getSelectedRows();
     if(indexes.isEmpty())
         return;
 

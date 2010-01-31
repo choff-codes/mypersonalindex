@@ -1,7 +1,7 @@
 #ifndef ASSETALLOCATION_H
 #define ASSETALLOCATION_H
 
-#include <QtGui>
+#include <QtCore>
 #include "queries.h"
 #include "functions.h"
 

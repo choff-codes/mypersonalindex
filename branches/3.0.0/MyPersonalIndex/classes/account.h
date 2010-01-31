@@ -1,7 +1,7 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include <QtGui>
+#include <QtCore>
 #include "queries.h"
 #include "functions.h"
 

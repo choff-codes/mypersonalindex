@@ -4,8 +4,6 @@
 #include <QtCore>
 #include "calculationInfo.h"
 #include "prices.h"
-#include "security.h"
-#include "account.h"
 #include "portfolio.h"
 
 class calculations

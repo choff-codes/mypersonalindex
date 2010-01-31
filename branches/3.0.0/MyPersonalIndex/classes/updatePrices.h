@@ -36,15 +36,16 @@ private:
     static const char stockDividends = 'v';
 
     void run();
-    QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
-    QString getSplitAddress(const QString &symbol);
-    QList<QByteArray>* downloadFile(const QUrl&);
-    QMap<QString, updateInfo> getUpdateInfo();
+    QMap<QString, updateInfo> getUpdateInfo() const;
     bool getPrices(const QString &symbol, const int &minDate, int &earliestUpdate);
     void getDividends(const QString&symbol, const int &minDate, int &earliestUpdate);
     void getSplits(const QString &symbol, const int &minDate, int &earliestUpdate);
     void updateMissingPrices();
     void insertUpdates();
+
+    static QList<QByteArray>* downloadFile(const QUrl&);
+    static QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
+    static QString getSplitAddress(const QString &symbol);
 
 private slots:
     void calcuationFinished();

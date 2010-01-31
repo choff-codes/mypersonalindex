@@ -36,7 +36,7 @@ void updatePrices::run()
 
 void updatePrices::updateMissingPrices()
 {
-    QList<int> dates = prices::instance().dates();
+    const QList<int> dates = prices::instance().dates();
 
     foreach(const QString &symbol, prices::instance().symbols())
     {
@@ -94,7 +94,7 @@ void updatePrices::insertUpdates()
     }
 }
 
-QMap<QString, updateInfo> updatePrices::getUpdateInfo()
+QMap<QString, updateInfo> updatePrices::getUpdateInfo() const
 {
     QMap<QString, updateInfo> returnList;
     foreach(portfolio* p, m_data)

@@ -6,7 +6,7 @@ statisticInfo::statisticInfo(const portfolio *currentPortfolio, const dailyInfoP
     m_maxChangePositiveDay(0), m_maxChangeNegative(0), m_maxChangeNegativeDay(0), m_minNAVValue(0), m_minNAVValueDay(0), m_maxNAVValue(0),
     m_maxNAVValueDay(0), m_minTotalValue(0), m_minTotalValueDay(0), m_maxTotalValue(0), m_maxTotalValueDay(0)
 {    
-    QList<int> dates = prices::instance().dates();
+    const QList<int> dates = prices::instance().dates();
     if (!dates.isEmpty())
         m_count = qLowerBound(dates, info->date) - qLowerBound(dates, startDate) + 1;
 

@@ -23,5 +23,5 @@ void navInfo::remove(const int &portfolioID)
 {
     m_nav.clear();
     m_totalValue.clear();
-    queries::deletePortfolioItems(queries::table_NAV, portfolioID, 0);
+    queries::deletePortfolioItems(queries::table_NAV, portfolioID);
 }

@@ -2,14 +2,19 @@
 
 prices::prices()
 {
+
+#ifdef CLOCKTIME
     QTime t;
     t.start();
+#endif
     
-    loadPrices(queries::select(queries::table_ClosingPrices, queries::closingPricesColumns));
-    loadDividends(queries::select(queries::table_Dividends, queries::dividendsColumns));
-    loadSplits(queries::select(queries::table_Splits, queries::splitsColumns));
+    loadPrices();
+    loadDividends();
+    loadSplits();
 
+#ifdef CLOCKTIME
     qDebug("Time elapsed (prices): %d ms", t.elapsed());
+#endif
 }
 
 void prices::insertDate(const int &date)
@@ -47,20 +52,23 @@ QMap<int, double> prices::split(const QString &symbol) const
     return history(symbol).splits;
 }
 
-void prices::loadPrices(QSqlQuery q)
+void prices::loadPrices()
 {
+    QSqlQuery q = queries::select(queries::table_ClosingPrices, queries::closingPricesColumns);
     while(q.next())
         insertPrice(q.value(queries::closingPricesColumns_Symbol).toString(), q.value(queries::closingPricesColumns_Date).toInt(), q.value(queries::closingPricesColumns_Price).toDouble());
 }
 
-void prices::loadDividends(QSqlQuery q)
+void prices::loadDividends()
 {
+    QSqlQuery q = queries::select(queries::table_Dividends, queries::dividendsColumns);
     while(q.next())
         insertDividend(q.value(queries::dividendsColumns_Symbol).toString(), q.value(queries::dividendsColumns_Date).toInt(), q.value(queries::dividendsColumns_Amount).toDouble());
 }
 
-void prices::loadSplits(QSqlQuery q)
+void prices::loadSplits()
 {
+    QSqlQuery q = queries::select(queries::table_Splits, queries::splitsColumns);
     while(q.next())
         insertSplit(q.value(queries::splitsColumns_Symbol).toString(), q.value(queries::splitsColumns_Date).toInt(), q.value(queries::splitsColumns_Ratio).toDouble());
 }
@@ -78,6 +86,9 @@ void prices::remove(const QStringList &removedSymbols)
 
     foreach(const QString &s, symbols())
     {
+        if (isCashSecurity(s))
+            continue;
+
         const QMap<int, double> priceHistory = history(s).prices;
         QMap<int, double>::const_iterator i;
         for(i = priceHistory.constBegin(); i != priceHistory.constEnd(); ++i)

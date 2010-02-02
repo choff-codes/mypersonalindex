@@ -2,22 +2,28 @@
 
 settings::settings settings::loadSettings()
 {
+
+#ifdef CLOCKTIME
     QTime t;
     t.start();
+#endif
 
     settings s;
 
-    loadSettingsInfo(s, queries::select(queries::table_Settings, queries::settingsColumns));
-    loadSettingsColumns(s, queries::select(queries::table_SettingsColumns, queries::settingsColumnsColumns,
-        queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence)));
+    loadSettingsInfo(s);
+    loadSettingsColumns(s);
 
+#ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (settings)", t.elapsed());
+#endif
 
     return s;
 }
 
-void settings::loadSettingsInfo(settings &s, QSqlQuery q)
+void settings::loadSettingsInfo(settings &s)
 {
+    QSqlQuery q = queries::select(queries::table_Settings, queries::settingsColumns);
+
     if (!q.first())
         return;
 
@@ -38,8 +44,11 @@ void settings::loadSettingsInfo(settings &s, QSqlQuery q)
         s.lastPortfolio = q.value(queries::settingsColumns_LastPortfolio).toInt();
 }
 
-void settings::loadSettingsColumns(settings &s, QSqlQuery q)
+void settings::loadSettingsColumns(settings &s)
 {
+    QSqlQuery q = queries::select(queries::table_SettingsColumns, queries::settingsColumnsColumns,
+        queries::settingsColumnsColumns.at(queries::settingsColumnsColumns_Sequence));
+
     while(q.next())
         s.viewableColumns[q.value(queries::settingsColumnsColumns_ID).toInt()].append(
                 q.value(queries::settingsColumnsColumns_ColumnID).toInt());

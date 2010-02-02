@@ -20,7 +20,7 @@ QMap<int, QString> statistic::statisticList()
 {
     QMap<int, QString> stats;
     for (int i = 0; i < statisticDisplayNames.count(); ++i)
-        stats[i] = QString(statisticDisplayNames.at(i));
+        stats[i] = statisticDisplayNames.at(i);
 
     return stats;
 }

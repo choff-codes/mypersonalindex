@@ -18,5 +18,5 @@ void executedTradeList::remove(const int &portfolioID, const int &startDate)
 void executedTradeList::remove(const int &portfolioID)
 {
     clear();
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, 0, true);
+    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, true);
 }

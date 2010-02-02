@@ -43,7 +43,7 @@ private:
     double m_startTotalValue;
     double m_endNAV;
     double m_endTotalValue;
-    double m_count;
+    int m_count;
     double m_stdDev;
     double m_maxChangePositive;
     int m_maxChangePositiveDay;

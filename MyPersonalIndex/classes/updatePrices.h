@@ -37,9 +37,9 @@ private:
 
     void run();
     QMap<QString, updateInfo> getUpdateInfo() const;
-    bool getPrices(const QString &symbol, const int &minDate, int &earliestUpdate);
-    void getDividends(const QString&symbol, const int &minDate, int &earliestUpdate);
-    void getSplits(const QString &symbol, const int &minDate, int &earliestUpdate);
+    bool getPrices(const QString &symbol, const int &minDate, int *earliestUpdate);
+    void getDividends(const QString&symbol, const int &minDate, int *earliestUpdate);
+    void getSplits(const QString &symbol, const int &minDate, int *earliestUpdate);
     void updateMissingPrices();
     void insertUpdates();
 

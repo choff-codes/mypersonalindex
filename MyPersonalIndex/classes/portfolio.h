@@ -64,15 +64,15 @@ public:
     static QMap<int, portfolio*> loadPortfolios();
 
 private:
-    static void loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
-    static void loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q);
+    static void loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList);
+    static void loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList);
 };
 
 #endif // PORTFOLIO_H

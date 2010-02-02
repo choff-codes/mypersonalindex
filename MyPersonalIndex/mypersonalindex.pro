@@ -17,6 +17,8 @@ unix{
         else: LIBS += shared/qwt/lib/libqwt.so
 }
 
+CONFIG(debug, debug|release): DEFINES += CLOCKTIME
+
 RESOURCES += icons/icons.qrc
 
 QT += sql \

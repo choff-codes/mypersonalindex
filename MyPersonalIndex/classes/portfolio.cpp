@@ -64,30 +64,34 @@ void portfolioInfo::save()
 
 QMap<int, portfolio::portfolio*> portfolio::loadPortfolios()
 {
+
+#ifdef CLOCKTIME
     QTime t;
     t.start();
+#endif
 
     QMap<int, portfolio::portfolio*> portfolioList;
 
-    loadPortfoliosInfo(portfolioList, queries::select(queries::table_Portfolios, queries::portfoliosColumns));
-    loadPortfoliosAA(portfolioList, queries::select(queries::table_AA, queries::aaColumns));
-    loadPortfoliosAcct(portfolioList, queries::select(queries::table_Acct, queries::acctColumns));
-    loadPortfoliosStat(portfolioList, queries::select(queries::table_StatMapping, queries::statMappingColumns,
-        queries::statMappingColumns.at(queries::statMappingColumns_Sequence)));
-    loadPortfoliosSecurity(portfolioList, queries::select(queries::table_Security, queries::SecurityColumns));
-    loadPortfoliosSecurityAA(portfolioList, queries::select(queries::table_SecurityAA, queries::SecurityAAColumns, QString(), true));
-    loadPortfoliosSecurityTrades(portfolioList, queries::select(queries::table_SecurityTrades, queries::SecurityTradeColumns, QString(), true));
-    loadPortfoliosExecutedTrades(portfolioList, queries::select(queries::table_ExecutedTrades, queries::executedTradesColumns,
-        queries::executedTradesColumns.at(queries::executedTradesColumns_Date), true));
-    loadPortfoliosNAV(portfolioList, queries::select(queries::table_NAV, queries::navColumns));
+    loadPortfoliosInfo(portfolioList);
+    loadPortfoliosAA(portfolioList);
+    loadPortfoliosAcct(portfolioList);
+    loadPortfoliosStat(portfolioList);
+    loadPortfoliosSecurity(portfolioList);
+    loadPortfoliosSecurityAA(portfolioList);
+    loadPortfoliosSecurityTrades(portfolioList);
+    loadPortfoliosExecutedTrades(portfolioList);
+    loadPortfoliosNAV(portfolioList);
 
+#ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
+#endif
 
     return portfolioList;
 }
 
-void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_Portfolios, queries::portfoliosColumns);
     while(q.next())
     {
         portfolioInfo p;
@@ -113,8 +117,9 @@ void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioLi
     }
 }
 
-void portfolio::loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_AA, queries::aaColumns);
     while(q.next())
     {
         assetAllocation aa;
@@ -128,8 +133,9 @@ void portfolio::loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList
     }
 }
 
-void portfolio::loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_Acct, queries::acctColumns);
     while(q.next())
     {
         account acct;
@@ -144,15 +150,19 @@ void portfolio::loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioLi
     }
 }
 
-void portfolio::loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_StatMapping, queries::statMappingColumns,
+        queries::statMappingColumns.at(queries::statMappingColumns_Sequence));
+
     while(q.next())
         portfolioList[q.value(queries::statMappingColumns_PortfolioID).toInt()]->data.stats.append(
             q.value(queries::statMappingColumns_StatID).toInt());
 }
 
-void portfolio::loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_Security, queries::SecurityColumns);
     while(q.next())
     {
         security sec;
@@ -174,8 +184,9 @@ void portfolio::loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfol
     }
 }
 
-void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_SecurityAA, queries::SecurityAAColumns, QString(), true);
     while(q.next())
         portfolioList[q.value(queries::securityAAColumns_Count).toInt()]->data.securities[q.value(queries::securityAAColumns_SecurityID).toInt()]
             .aa.insert(
@@ -184,8 +195,9 @@ void portfolio::loadPortfoliosSecurityAA(QMap<int, portfolio::portfolio*> &portf
             );
 }
 
-void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_SecurityTrades, queries::SecurityTradeColumns, QString(), true);
     while(q.next())
     {
         trade t;
@@ -211,8 +223,11 @@ void portfolio::loadPortfoliosSecurityTrades(QMap<int, portfolio::portfolio*> &p
     }
 }
 
-void portfolio::loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_ExecutedTrades, queries::executedTradesColumns,
+        queries::executedTradesColumns.at(queries::executedTradesColumns_Date), true);
+
     while(q.next())
     {
         executedTrade t;
@@ -226,8 +241,9 @@ void portfolio::loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &p
     }
 }
 
-void portfolio::loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList, QSqlQuery q)
+void portfolio::loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList)
 {
+    QSqlQuery q = queries::select(queries::table_NAV, queries::navColumns);
     while(q.next())
         portfolioList[q.value(queries::navColumns_PortfolioID).toInt()]->data.nav.insert(q.value(queries::navColumns_Date).toInt(),
             q.value(queries::navColumns_NAV).toDouble(), q.value(queries::navColumns_TotalValue).toDouble());

@@ -57,12 +57,6 @@ QString functions::doubleToLocalFormat(const double &value, const int &precision
     return QString("%L1").arg(value, 0, 'f', precision);
 }
 
-double functions::stringToDouble(const QString &value, bool *ok)
-{
-    QString s = value;
-    return s.remove('%').replace("None", "-1", Qt::CaseInsensitive).toDouble(ok);
-}
-
 void functions::exportTable(const QAbstractItemModel *table, const bool &includeRowLabels, QMainWindow *parent)
 {
     if (!table)
@@ -161,26 +155,6 @@ bool functions::lessThan(const QVariant &left, const QVariant &right, const QVar
         case QVariant::String:
         default:
             return left.toString().compare(right.toString(), Qt::CaseInsensitive) < 0;
-    };
-}
-
-bool functions::greaterThan(const QVariant &left, const QVariant &right, const QVariant &type)
-{
-    if ((left.isNull() && right.isNull()) || left.isNull())
-        return false;
-
-    if (right.isNull())
-        return true;
-
-    switch (type.type())
-    {
-        case QVariant::Double:
-            return left.toDouble() > right.toDouble();
-        case QVariant::Int:
-            return left.toInt() > right.toInt();
-        case QVariant::String:
-        default:
-            return left.toString().compare(right.toString(), Qt::CaseInsensitive) > 0;
     };
 }
 

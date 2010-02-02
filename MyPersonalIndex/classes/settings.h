@@ -38,8 +38,8 @@ public:
     bool operator!=(const settings &other) const { return !(*this == other); }
 
 private:
-    static void loadSettingsInfo(settings &s, QSqlQuery q);
-    static void loadSettingsColumns(settings &s, QSqlQuery q);
+    static void loadSettingsInfo(settings &s);
+    static void loadSettingsColumns(settings &s);
 };
 
 #endif // SETTINGS_H

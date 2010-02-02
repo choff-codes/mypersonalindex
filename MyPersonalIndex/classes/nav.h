@@ -42,7 +42,7 @@ private:
     int checkCalculationDate(const portfolio *currentPortfolio, int calculationDate, bool *calcuateFromStartDate);
     void calculateNAVValues(portfolio *currentPortfolio);
     bool getCurrentDateOrNext(int *date) const;
-    QMap<int, navTradeList> calculateExecutedTrades(const portfolio *currentPortfolio, const int &minDate, const bool &calculateFromStartDate);
+    QMap<int, navTradeList> calculateExecutedTrades(const portfolio *currentPortfolio, const int &calculationDate, const bool &calculateFromStartDate);
     QList<int> getPortfolioSecurityReinvestment(const portfolio *currentPortfolio);
     QList<int> computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate) const;
     QList<int> computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;

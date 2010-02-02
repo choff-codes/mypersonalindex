@@ -209,8 +209,10 @@ void frmMain::loadPortfolio()
 
     m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
 
+#ifdef CLOCKTIME
     QTime t;
     t.start();
+#endif
 
     m_calculations.setPortfolio(m_currentPortfolio);
     resetPortfolioSettings();
@@ -223,7 +225,10 @@ void frmMain::loadPortfolio()
     resetPortfolioCorrelation();
     resetPortfolioStat();
 
+#ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
+#endif
+
 }
 
 void frmMain::resetCalendars()

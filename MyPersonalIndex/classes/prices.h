@@ -47,9 +47,9 @@ private:
     QSet<QString> m_cashSecurities;
     securityPrices m_cashPrices;
 
-    void loadPrices(QSqlQuery);
-    void loadDividends(QSqlQuery);
-    void loadSplits(QSqlQuery);
+    void loadPrices();
+    void loadDividends();
+    void loadSplits();
     void insertDate(const int &date);
 
     prices();

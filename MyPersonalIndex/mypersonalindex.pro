@@ -25,6 +25,7 @@ QT += sql \
     network
 
 SOURCES += main.cpp
+RC_FILE = mypersonalindex.rc
 
 unix {
     # in debug mode...

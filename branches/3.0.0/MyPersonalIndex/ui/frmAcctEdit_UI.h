@@ -14,6 +14,8 @@ public:
     QHBoxLayout *taxRateLayout;
     QDoubleSpinBox *sbTaxRate;
     QToolButton *btnClearTaxRate;
+    QLabel *costBasis;
+    QComboBox *cmbCostBasis;
     QCheckBox *chkTaxDeferred;
     QDialogButtonBox *btnOkCancel;
 

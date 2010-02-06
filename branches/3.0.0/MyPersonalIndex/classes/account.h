@@ -8,12 +8,15 @@
 class account
 {
 public:
+    enum costBasisType { costBasisType_None, costBasisType_FIFO, costBasisType_LIFO, costBasisType_AVG };
+
     int id;
     QString description;
     double taxRate;
     bool taxDeferred;
+    costBasisType costBasis;
 
-    account(const QString &p_description = QString()): id(-1), description(p_description), taxRate(-1), taxDeferred(false) {}
+    account(const QString &p_description = QString()): id(-1), description(p_description), taxRate(-1), taxDeferred(false), costBasis(costBasisType_None) {}
 
     bool operator==(const account &other) const;
     bool operator!=(const account &other) const { return !(*this == other); }

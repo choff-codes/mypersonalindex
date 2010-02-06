@@ -40,7 +40,7 @@ public:
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum { aaColumns_ID, aaColumns_PortfolioID, aaColumns_Description, aaColumns_Target };
 
-    enum { acctColumns_ID, acctColumns_PortfolioID, acctColumns_Description, acctColumns_TaxRate, acctColumns_TaxDeferred, acctColumns_Count};
+    enum { acctColumns_ID, acctColumns_PortfolioID, acctColumns_Description, acctColumns_TaxRate, acctColumns_TaxDeferred, acctColumns_CostBasis, acctColumns_Count};
 
     enum { closingPricesColumns_Date, closingPricesColumns_Symbol, closingPricesColumns_Price, closingPricesColumns_Count };
 
@@ -49,7 +49,7 @@ public:
     enum { navColumns_PortfolioID, navColumns_Date, navColumns_TotalValue, navColumns_NAV, navColumns_Count };
 
     enum { portfoliosColumns_ID, portfoliosColumns_Description, portfoliosColumns_StartValue, portfoliosColumns_AAThreshold, portfoliosColumns_ThresholdMethod,
-           portfoliosColumns_CostCalc, portfoliosColumns_StartDate, portfoliosColumns_Dividends, portfoliosColumns_HoldingsShowHidden, portfoliosColumns_HoldingsSort,
+           portfoliosColumns_CostBasis, portfoliosColumns_StartDate, portfoliosColumns_Dividends, portfoliosColumns_HoldingsShowHidden, portfoliosColumns_HoldingsSort,
            portfoliosColumns_AAShowBlank, portfoliosColumns_AASort, portfoliosColumns_CorrelationShowHidden, portfoliosColumns_AcctShowBlank, portfoliosColumns_AcctSort,
            portfoliosColumns_NAVSortDesc, portfoliosColumns_Count };
 

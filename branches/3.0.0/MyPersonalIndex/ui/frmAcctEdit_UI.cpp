@@ -35,13 +35,25 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     taxRateLayout->addWidget(btnClearTaxRate);
     formLayout->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
 
-    formLayout->setWidget(2, QFormLayout::LabelRole, new QLabel(dialog));
+    costBasis = new QLabel("&Cost Basis Method:", dialog);
+    formLayout->setWidget(2, QFormLayout::LabelRole, costBasis);
+
+    cmbCostBasis = new QComboBox(dialog);
+    cmbCostBasis->addItem("Portfolio Default");
+    cmbCostBasis->addItem("FIFO");
+    cmbCostBasis->addItem("LIFO");
+    cmbCostBasis->addItem("Average");
+    formLayout->setWidget(2, QFormLayout::FieldRole, cmbCostBasis);
+
+    formLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(dialog));
 
     chkTaxDeferred = new QCheckBox("Tax Deferred", dialog);
-    formLayout->setWidget(2, QFormLayout::FieldRole, chkTaxDeferred);
+    formLayout->setWidget(3, QFormLayout::FieldRole, chkTaxDeferred);
 
     mainLayout->addLayout(formLayout);
     mainLayout->addWidget(btnOkCancel);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
+
+    costBasis->setBuddy(cmbCostBasis);
 }
 

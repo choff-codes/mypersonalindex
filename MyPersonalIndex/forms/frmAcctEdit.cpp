@@ -9,6 +9,7 @@ frmAcctEdit::frmAcctEdit(const int &portfolioID, QWidget *parent, const account 
     ui.txtDesc->setText(m_acct.description);
     ui.sbTaxRate->setValue(m_acct.taxRate);
     ui.chkTaxDeferred->setChecked(m_acct.taxDeferred);
+    ui.cmbCostBasis->setCurrentIndex(m_acct.costBasis);
     ui.txtDesc->setFocus();
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
@@ -25,6 +26,7 @@ void frmAcctEdit::accept()
     m_acct.description = ui.txtDesc->text();
     m_acct.taxRate = ui.sbTaxRate->value();
     m_acct.taxDeferred = ui.chkTaxDeferred->isChecked();
+    m_acct.costBasis = (account::costBasisType)ui.cmbCostBasis->currentIndex();
 
     if (m_acct == m_acctOriginal)
     {

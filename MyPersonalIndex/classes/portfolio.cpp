@@ -1,6 +1,6 @@
 #include "portfolio.h"
 
-portfolioInfo::portfolioInfo(): id(-1), dividends(true), avgPriceCalc(avgPriceCalculation_FIFO), startValue(100),
+portfolioInfo::portfolioInfo(): id(-1), dividends(true), costBasis(account::costBasisType_FIFO), startValue(100),
     aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
     holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true)
 {
@@ -11,7 +11,7 @@ bool portfolioInfo::operator==(const portfolioInfo &other) const
     return this->id == other.id
             && this->description == other.description
             && this->dividends == other.dividends
-            && this->avgPriceCalc == other.avgPriceCalc
+            && this->costBasis == other.costBasis
             && this->startValue == other.startValue
             && this->aaThreshold == other.aaThreshold
             && this->aaThresholdMethod == other.aaThresholdMethod
@@ -47,7 +47,7 @@ void portfolioInfo::save()
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartValue), this->startValue);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AAThreshold), this->aaThreshold);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)this->aaThresholdMethod);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostCalc), (int)this->avgPriceCalc);
+    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostBasis), (int)this->costBasis);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartDate), this->startDate);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Dividends), (int)this->dividends);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)this->holdingsShowHidden);
@@ -100,7 +100,7 @@ void portfolio::loadPortfoliosInfo(QMap<int, portfolio::portfolio*> &portfolioLi
         p.description = q.value(queries::portfoliosColumns_Description).toString();
         p.startDate = q.value(queries::portfoliosColumns_StartDate).toInt();
         p.dividends = q.value(queries::portfoliosColumns_Dividends).toBool();
-        p.avgPriceCalc = (portfolioInfo::avgPriceCalculation)q.value(queries::portfoliosColumns_CostCalc).toInt();
+        p.costBasis = (account::costBasisType)q.value(queries::portfoliosColumns_CostBasis).toInt();
         p.startValue = q.value(queries::portfoliosColumns_StartValue).toInt();
         p.aaThreshold = q.value(queries::portfoliosColumns_AAThreshold).toInt();
         p.aaThresholdMethod = (portfolioInfo::thesholdMethod)q.value(queries::portfoliosColumns_ThresholdMethod).toInt();
@@ -145,6 +145,7 @@ void portfolio::loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioLi
         if (!q.value(queries::acctColumns_TaxRate).isNull())
             acct.taxRate = q.value(queries::acctColumns_TaxRate).toDouble();
         acct.taxDeferred = q.value(queries::acctColumns_TaxDeferred).toBool();
+        acct.costBasis = (account::costBasisType)q.value(queries::acctColumns_CostBasis).toInt();
 
         portfolioList[q.value(queries::acctColumns_PortfolioID).toInt()]->data.acct.insert(acct.id, acct);
     }

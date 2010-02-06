@@ -25,12 +25,11 @@ class portfolioInfo
 {
 public:
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
-    enum avgPriceCalculation { avgPriceCalculation_FIFO, avgPriceCalculation_LIFO, avgPriceCalculation_AVG };
 
     int id;
     QString description;
     bool dividends;
-    avgPriceCalculation avgPriceCalc;
+    account::costBasisType costBasis;
     int startValue;
     int aaThreshold;
     thesholdMethod aaThresholdMethod;

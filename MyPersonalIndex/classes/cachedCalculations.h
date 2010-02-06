@@ -19,9 +19,16 @@ public:
 protected:
     QCache<int, dailyInfoPortfolio> m_cache;
 
-    typedef QPair<double,double> sharePricePair;
-
     QMap<int, double> avgPricePerShare(const int &calculationDate);
+
+private:
+    struct sharePricePair
+    {
+        sharePricePair(const double &p_shares, const double &p_price): shares(p_shares), price(p_price) {}
+
+        double shares;
+        double price;
+    };
 };
 
 #endif // CACHEDCALCULATIONS_H

@@ -3,8 +3,8 @@
 //enum { aaColumns_ID, aaColumns_PortfolioID, aaColumns_Description, aaColumns_Target };
 const QStringList queries::aaColumns = QStringList() << "ID" << "PortfolioID" << "Description" << "Target";
 
-//enum { acctColumns_ID, acctColumns_PortfolioID, acctColumns_Description, acctColumns_TaxRate, acctColumns_TaxDeferred };
-const QStringList queries::acctColumns = QStringList() << "ID" << "PortfolioID" << "Description" << "TaxRate" << "TaxDeferred";
+//enum { acctColumns_ID, acctColumns_PortfolioID, acctColumns_Description, acctColumns_TaxRate, acctColumns_TaxDeferred, acctColumns_CostBasis };
+const QStringList queries::acctColumns = QStringList() << "ID" << "PortfolioID" << "Description" << "TaxRate" << "TaxDeferred" << "CostBasis";
 
 //enum { closingPricesColumns_Date, closingPricesColumns_Symbol, closingPricesColumns_Price, closingPricesColumns_Change };
 const QStringList queries::closingPricesColumns = QStringList() << "Date" << "Symbol" << "Price";
@@ -16,11 +16,11 @@ const QStringList queries::dividendsColumns = QStringList() << "Date" << "Symbol
 const QStringList queries::navColumns = QStringList() << "PortfolioID" << "Date" << "TotalValue" << "NAV";
 
 //enum { portfoliosColumns_ID, portfoliosColumns_Description, portfoliosColumns_StartValue, portfoliosColumns_AAThreshold, portfoliosColumns_ThresholdMethod,
-//       portfoliosColumns_CostCalc, portfoliosColumns_StartDate, portfoliosColumns_Dividends, portfoliosColumns_HoldingsShowHidden, portfoliosColumns_HoldingsSort,
+//       portfoliosColumns_CostBasis, portfoliosColumns_StartDate, portfoliosColumns_Dividends, portfoliosColumns_HoldingsShowHidden, portfoliosColumns_HoldingsSort,
 //       portfoliosColumns_AAShowBlank, portfoliosColumns_AASort, portfoliosColumns_CorrelationShowHidden, portfoliosColumns_AcctShowBlank, portfoliosColumns_AcctSort,
 //       portfoliosColumns_NAVSortDesc };
 const QStringList queries::portfoliosColumns = QStringList() << "ID" << "Description" << "StartValue" << "AAThreshold" << "ThresholdMethod"
-    << "CostCalc" << "StartDate" << "Dividends" << "HoldingsShowHidden" << "HoldingsSort" << "AAShowBlank" << "AASort" << "CorrelationShowHidden"
+    << "CostBasis" << "StartDate" << "Dividends" << "HoldingsShowHidden" << "HoldingsSort" << "AAShowBlank" << "AASort" << "CorrelationShowHidden"
     << "AcctShowBlank" << "AcctSort" << "NAVSortDesc";
 
 //enum { settingsColumns_DataStartDate, settingsColumns_LastPortfolio, settingsColumns_Version, settingsColumns_WindowX, settingsColumns_WindowY,

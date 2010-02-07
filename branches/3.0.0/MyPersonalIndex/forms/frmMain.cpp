@@ -78,9 +78,11 @@ void frmMain::connectSlots()
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(holdingsSortChanged(int)));
     connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
+    connect(ui.holdingsCopyShortcut, SIGNAL(activated()), this, SLOT(holdingsCopy()));
 
     connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(resetPortfolioPerformance()));
     connect(ui.performanceExport, SIGNAL(triggered()), this, SLOT(performanceExport()));
+    connect(ui.performanceCopyShortcut, SIGNAL(activated()), this, SLOT(performanceCopy()));
 
     connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
     connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
@@ -95,6 +97,7 @@ void frmMain::connectSlots()
     connect(ui.aaReorderColumns, SIGNAL(triggered()), this, SLOT(aaModifyColumns()));
     connect(ui.aaSortCombo, SIGNAL(activated(int)), this, SLOT(aaSortChanged(int)));
     connect(ui.aaExport, SIGNAL(triggered()), this, SLOT(aaExport()));
+    connect(ui.aaCopyShortcut, SIGNAL(activated()), this, SLOT(aaCopy()));
 
     connect(ui.accountsAdd, SIGNAL(triggered()), this, SLOT(addAcct()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(editAcct()));
@@ -105,16 +108,19 @@ void frmMain::connectSlots()
     connect(ui.accountsReorderColumns, SIGNAL(triggered()), this, SLOT(acctModifyColumns()));
     connect(ui.accountsSortCombo, SIGNAL(activated(int)), this, SLOT(acctSortChanged(int)));
     connect(ui.accountsExport, SIGNAL(triggered()), this, SLOT(acctExport()));
+    connect(ui.accountsCopyShortcut, SIGNAL(activated()), this, SLOT(acctCopy()));
 
     connect(ui.statEdit, SIGNAL(triggered()), this, SLOT(editStat()));
     connect(ui.statStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
     connect(ui.statEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
     connect(ui.statExport, SIGNAL(triggered()), this, SLOT(statExport()));
+    connect(ui.statCopyShortcut, SIGNAL(activated()), this, SLOT(statCopy()));
 
     connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsExport, SIGNAL(triggered()), this, SLOT(correlationExport()));
+    connect(ui.correlationsCopyShortcut, SIGNAL(activated()), this, SLOT(correlationCopy()));
 }
 
 void frmMain::resetSortDropDowns()
@@ -408,7 +414,7 @@ void frmMain::resetPortfolioChart()
         if (startValue == -1)
             startValue = i.value();
 
-        m_chartInfo.append(i.key(), (i.value() / startValue * 100) - 100);
+        m_chartInfo.append(i.key(), (i.value() / startValue) - 1);
     }
 
     if (m_chartInfo.count() != 0)

@@ -12,8 +12,7 @@ public:
     enum historyChoice { historyChoice_All, historyChoice_Change, historyChoice_Dividends, historyChoice_Splits, historyChoice_Trades };
 
     securityHistoryModel(const historyChoice &choice, const QList<executedTrade> &trades, const securityPrices &history, const bool &descending, QTableView *parent = 0):
-        QAbstractTableModel(parent), m_choice(choice), m_trades(trades), m_history(history), m_descending(descending), m_dates(history.prices.keys()),
-        m_datesDividends(history.dividends.keys()), m_datesSplits(history.splits.keys())
+        QAbstractTableModel(parent), m_choice(choice), m_trades(trades), m_history(history), m_descending(descending)
     {
         insertRows(0, rowCount(QModelIndex()));
     }
@@ -28,9 +27,6 @@ private:
     const QList<executedTrade> m_trades;
     const securityPrices m_history;
     const bool m_descending;
-    const QList<int> m_dates;
-    const QList<int> m_datesDividends;
-    const QList<int> m_datesSplits;
 };
 
 #endif // SECURITYHISTORYMODEL_H

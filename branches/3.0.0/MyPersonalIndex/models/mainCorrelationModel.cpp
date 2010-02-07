@@ -9,12 +9,12 @@ QVariant mainCorrelationModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if(index.column() == index.row())
-        return functions::doubleToPercentage(100);
+        return functions::doubleToPercentage(1);
     
     int row = index.column() > index.row() ? index.column() : index.row();
     int column = index.column() > index.row() ? index.row() : index.column();
 
-    return functions::doubleToPercentage(m_correlationList.value(m_symbols.at(column)).value(m_symbols.at(row)) * 100);
+    return functions::doubleToPercentage(m_correlationList.value(m_symbols.at(column)).value(m_symbols.at(row)));
 }
 
 QVariant mainCorrelationModel::headerData(int section, Qt::Orientation /* not used */, int role) const

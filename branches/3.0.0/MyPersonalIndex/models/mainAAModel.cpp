@@ -19,19 +19,19 @@ aaRow::aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioI
     //row_Value
     this->values.append(aaInfo.totalValue);
     //row_ValueP
-    this->values.append(info->totalValue == 0 ? QVariant() : 100.0 * aaInfo.totalValue / info->totalValue);
+    this->values.append(info->totalValue == 0 ? QVariant() : aaInfo.totalValue / info->totalValue);
     //row_Gain
     this->values.append(aaInfo.totalValue - aaInfo.costBasis);
     //row_GainP
-    this->values.append(aaInfo.costBasis == 0 ? QVariant() : ((aaInfo.totalValue / aaInfo.costBasis) - 1) * 100);
+    this->values.append(aaInfo.costBasis == 0 ? QVariant() : (aaInfo.totalValue / aaInfo.costBasis) - 1);
     //row_Target
     this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Offset
-    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : 100.0 *
-        (method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info->totalValue * aa.target / 100.0)) - 1) :
-        (aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
+    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() :
+        method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info->totalValue * aa.target)) - 1) :
+        (aaInfo.totalValue / info->totalValue) - aa.target);
     //row_OffsetAmount
-    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : info->totalValue * ((aaInfo.totalValue / info->totalValue) - (aa.target / 100.0)));
+    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : info->totalValue * ((aaInfo.totalValue / info->totalValue) - aa.target));
     //row_Holdings
     this->values.append(aaInfo.count);
     //row_ID
@@ -55,10 +55,11 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     int column = m_viewableColumns.at(index.column());
+    QVariant value = m_rows.at(index.row())->values.at(column);
 
     if (role == Qt::DisplayRole)
     {
-        if (m_rows.at(index.row())->values.at(column).isNull())
+        if (value.isNull())
             return QVariant();
 
         switch (column)
@@ -67,30 +68,24 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
             case aaRow::row_CostBasis:
             case aaRow::row_Gain:
             case aaRow::row_OffsetAmount:
-                return functions::doubleToCurrency(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToCurrency(value.toDouble());
             case aaRow::row_ValueP:
             case aaRow::row_Target:
             case aaRow::row_Offset:
             case aaRow::row_GainP:
-                return functions::doubleToPercentage(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToPercentage(value.toDouble());
         }
 
-        return m_rows.at(index.row())->values.at(column);
+        return value;
     }
 
     if (role == Qt::TextColorRole && column == aaRow::row_Offset)
-    {
-        double value = m_rows.at(index.row())->values.at(column).toDouble();
-        return qAbs(value) <= m_threshold ? QVariant() :
-            value > m_threshold ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
-    }
+        return qAbs(value.toDouble()) <= m_threshold ? QVariant() :
+            value.toDouble() > m_threshold ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
 
     if (role == Qt::TextColorRole && column == aaRow::row_GainP)
-    {
-        double value = m_rows.at(index.row())->values.at(column).toDouble();
-        return value == 0 ? QVariant() :
-            value > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
-    }
+        return value.toDouble() == 0 ? QVariant() :
+            value.toDouble() > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
 
     return QVariant();
 }
@@ -118,6 +113,9 @@ QVariant mainAAModel::headerData(int section, Qt::Orientation orientation, int r
             break;
         case aaRow::row_Gain:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
+            break;
+        case aaRow::row_GainP:
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage((m_totalValue - m_costBasis) / m_costBasis));
             break;
     }
 

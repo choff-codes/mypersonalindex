@@ -47,31 +47,31 @@ QVariant securityHistoryModel::data(const QModelIndex &index, int role) const
         { 
             if (m_descending)
                 row = m_history.prices.count() - row - 1;
-            int date = m_dates.at(row);
+
+            QMap<int, double>::const_iterator i = m_history.prices.constBegin() + row;
 
             if (column == 0)
-                return QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate);
+                return QDate::fromJulianDay(i.key()).toString(Qt::SystemLocaleShortDate);
             else if (column == 1)
-                return functions::doubleToLocalFormat(m_history.price(date));
+                return functions::doubleToLocalFormat(*i);
             else if (column == 2)
             {
                 if (row == 0)
                     return QVariant();
                 else
-                    return functions::doubleToPercentage(100 * ((m_history.price(date) * m_history.split(date))
-                                                                / m_history.price(m_dates.at(row - 1)) - 1));
+                    return functions::doubleToPercentage((i.value() * m_history.split(i.key())) / (i-1).value() - 1);
             }
             else if (column == 3)
             {
-                if(m_history.dividends.contains(date))
-                    return functions::doubleToLocalFormat(m_history.dividend(date));
+                if(m_history.dividends.contains(i.key()))
+                    return functions::doubleToLocalFormat(m_history.dividend(i.key()));
                 else
                     return QVariant();
             }
             else if (column == 4)
             {
-                if(m_history.splits.contains(date))
-                    return functions::doubleToLocalFormat(m_history.split(date));
+                if(m_history.splits.contains(i.key()))
+                    return functions::doubleToLocalFormat(m_history.split(i.key()));
                 else
                     return QVariant();
             }
@@ -81,17 +81,17 @@ QVariant securityHistoryModel::data(const QModelIndex &index, int role) const
         {
             if (m_descending)
                 row = m_history.prices.count() - row - 1;
-            int date = m_dates.at(row);
+
+            QMap<int, double>::const_iterator i = m_history.prices.constBegin() + row;
 
             if (column == 0)
-                return QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate);
+                return QDate::fromJulianDay(i.key()).toString(Qt::SystemLocaleShortDate);
             else if (column == 1)
             {
                 if (row == 0)
                     return QVariant();
                 else
-                    return functions::doubleToPercentage(100 * ((m_history.price(date) * m_history.split(date))
-                                                                / m_history.price(m_dates.at(row - 1)) - 1));
+                    return functions::doubleToPercentage((i.value() * m_history.split(i.key())) / (i-1).value() - 1);
             }
             break;
         }
@@ -99,12 +99,12 @@ QVariant securityHistoryModel::data(const QModelIndex &index, int role) const
         {
             if (m_descending)
                 row = m_history.dividends.count() - row - 1;
-            int date = m_datesDividends.at(row);
+            QMap<int, double>::const_iterator i = m_history.dividends.constBegin() + row;
 
             if (column == 0)
-                return QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate);
+                return QDate::fromJulianDay(i.key()).toString(Qt::SystemLocaleShortDate);
             else if (column == 1)
-                return functions::doubleToLocalFormat(m_history.dividend(date));
+                return functions::doubleToLocalFormat(i.value());
 
             break;
         }
@@ -112,12 +112,12 @@ QVariant securityHistoryModel::data(const QModelIndex &index, int role) const
         {
             if (m_descending)
                 row = m_history.splits.count() - row - 1;
-            int date = m_datesSplits.at(row);
+            QMap<int, double>::const_iterator i = m_history.splits.constBegin() + row;
 
             if (column == 0)
-                return QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate);
+                return QDate::fromJulianDay(i.key()).toString(Qt::SystemLocaleShortDate);
             else if (column == 1)
-                return functions::doubleToLocalFormat(m_history.split(date));
+                return functions::doubleToLocalFormat(i.value());
 
             break;
         }

@@ -45,6 +45,7 @@ public:
     QLabel *holdingsSortLabel;
     QComboBox *holdingsSortCombo;
     QTableView *holdings;
+    QShortcut *holdingsCopyShortcut;
 
     QVBoxLayout *statGrid;
     QToolBar *statToolbar;
@@ -55,6 +56,7 @@ public:
     QLabel *statEndDate;
     QDateEdit *statEndDateDropDown;
     QTableView *stat;
+    QShortcut *statCopyShortcut;
 
     QVBoxLayout *chartGrid;
     QToolBar *chartToolbar;
@@ -72,6 +74,7 @@ public:
     QAction *performanceSortDesc;
     QAction *performanceExport;
     QTableView *performance;
+    QShortcut *performanceCopyShortcut;
 
     QVBoxLayout *correlationsGrid;
     QToolBar *correlationsToolbar;
@@ -82,6 +85,7 @@ public:
     QLabel *correlationsEndDate;
     QDateEdit *correlationsEndDateDropDown;
     QTableView *correlations;
+    QShortcut *correlationsCopyShortcut;
 
     QVBoxLayout *accountsGrid;
     QToolBar *accountsToolbar;
@@ -96,6 +100,7 @@ public:
     QLabel *accountsSortLabel;
     QComboBox *accountsSortCombo;
     QTableView *accounts;
+    QShortcut *accountsCopyShortcut;
 
     QVBoxLayout *aaGrid;
     QToolBar *aaToolbar;
@@ -110,6 +115,7 @@ public:
     QLabel *aaSortLabel;
     QComboBox *aaSortCombo;
     QTableView *aa;
+    QShortcut *aaCopyShortcut;
 
     QTabWidget *tab;
     QWidget *tab_holdings;

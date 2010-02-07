@@ -35,9 +35,9 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
         return value;
 
     if (acct.taxDeferred)
-        value.taxLiability = value.totalValue * acct.taxRate / 100;
+        value.taxLiability = value.totalValue * acct.taxRate;
     else if (value.totalValue > value.costBasis)
-        value.taxLiability = (value.totalValue - value.costBasis) * acct.taxRate / 100;
+        value.taxLiability = (value.totalValue - value.costBasis) * acct.taxRate;
 
     return value;
 }

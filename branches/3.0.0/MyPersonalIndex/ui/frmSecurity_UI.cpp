@@ -13,21 +13,21 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     gpSecurity = new QGroupBox("Security", dialog);
     securityLayout = new QFormLayout(gpSecurity);
 
-    symbol = new QLabel("Symbol:", gpSecurity);
+    symbol = new QLabel("&Symbol:", gpSecurity);
     symbolLayout = new QHBoxLayout();
     txtSymbol = new QLineEdit(gpSecurity);
     btnHistorical = new QToolButton(gpSecurity);
-    btnHistorical->setText("History->");
+    btnHistorical->setText("&History->");
     btnHistorical->setCheckable(true);
     symbolLayout->addWidget(txtSymbol, 1);
     symbolLayout->addWidget(btnHistorical);
     securityLayout->setWidget(0, QFormLayout::LabelRole, symbol);
     securityLayout->setLayout(0, QFormLayout::FieldRole, symbolLayout);
-    acct = new QLabel("Account:", gpSecurity);
+    acct = new QLabel("&Account:", gpSecurity);
     cmbAcct = new QComboBox(gpSecurity);
     securityLayout->setWidget(1, QFormLayout::LabelRole, acct);
     securityLayout->setWidget(1, QFormLayout::FieldRole, cmbAcct);
-    expense = new QLabel("Expense:", gpSecurity);
+    expense = new QLabel("&Expense:", gpSecurity);
     expenseLayout = new QHBoxLayout();
     sbExpense = new QDoubleSpinBox(gpSecurity);
     sbExpense->setMinimum(-0.01);
@@ -37,21 +37,21 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     sbExpense->setSuffix("%");
 
     btnExpenseClear = new QToolButton(gpSecurity);
-    btnExpenseClear->setText("Clear");
+    btnExpenseClear->setText("&Clear");
     expenseLayout->addWidget(sbExpense, 1);
     expenseLayout->addWidget(btnExpenseClear);
     securityLayout->setWidget(2, QFormLayout::LabelRole, expense);
     securityLayout->setLayout(2, QFormLayout::FieldRole, expenseLayout);
-    chkReinvest = new QCheckBox("Reinvest Dividends", gpSecurity);
+    chkReinvest = new QCheckBox("&Reinvest Dividends", gpSecurity);
     securityLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(3, QFormLayout::FieldRole, chkReinvest);
-    chkCash = new QCheckBox("Cash Account", gpSecurity);
+    chkCash = new QCheckBox("Cash Acc&ount", gpSecurity);
     securityLayout->setWidget(4, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(4, QFormLayout::FieldRole, chkCash);
-    chkInclude = new QCheckBox("Include in Calculations", gpSecurity);
+    chkInclude = new QCheckBox("Incl&ude in Calculations", gpSecurity);
     securityLayout->setWidget(5, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(5, QFormLayout::FieldRole, chkInclude);
-    chkHide = new QCheckBox("Hide in Portfolio", gpSecurity);
+    chkHide = new QCheckBox("Hide in Port&folio", gpSecurity);
     securityLayout->setWidget(6, QFormLayout::LabelRole, new QLabel(gpSecurity));
     securityLayout->setWidget(6, QFormLayout::FieldRole, chkHide);
 
@@ -66,8 +66,8 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
 
     aaLayoutBottom = new QGridLayout();
     cmbAA = new QComboBox(gpAA);
-    btnAAAdd = new QPushButton("Add", gpAA);
-    btnAADelete = new QPushButton("Delete", gpAA);
+    btnAAAdd = new QPushButton("A&dd", gpAA);
+    btnAADelete = new QPushButton("De&lete", gpAA);
     aaLayoutBottom->addWidget(cmbAA, 0, 0, 1, 2);
     aaLayoutBottom->addWidget(btnAAAdd, 1, 0);
     aaLayoutBottom->addWidget(btnAADelete, 1, 1);
@@ -99,9 +99,9 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     trades->setContextMenuPolicy(Qt::CustomContextMenu);
 
     tradesLayoutButtons = new QHBoxLayout();
-    btnTradesAdd = new QPushButton("Add New", gpTrades);
-    btnTradesEdit = new QPushButton("Edit", gpTrades);
-    btnTradesDelete = new QPushButton("Delete", gpTrades);
+    btnTradesAdd = new QPushButton("Add &New", gpTrades);
+    btnTradesEdit = new QPushButton("Ed&it", gpTrades);
+    btnTradesDelete = new QPushButton("Dele&te", gpTrades);
     tradesLayoutButtons->addWidget(btnTradesAdd);
     tradesLayoutButtons->addWidget(btnTradesEdit);
     tradesLayoutButtons->addWidget(btnTradesDelete);

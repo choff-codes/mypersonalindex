@@ -49,7 +49,7 @@ QString functions::doubleToCurrency(const double &value)
 
 QString functions::doubleToPercentage(const double &value)
 {
-    return QString("%L1%").arg(value, 0, 'f', 2);
+    return QString("%L1%").arg(value * 100, 0, 'f', 2);
 }
 
 QString functions::doubleToLocalFormat(const double &value, const int &precision)
@@ -57,55 +57,77 @@ QString functions::doubleToLocalFormat(const double &value, const int &precision
     return QString("%L1").arg(value, 0, 'f', precision);
 }
 
-void functions::exportTable(const QAbstractItemModel *table, const bool &includeRowLabels, QMainWindow *parent)
+void functions::exportTable(const QTableView *table, const bool &includeRowLabels, QMainWindow *parent)
 {
     if (!table)
         return;
 
+    QList<int> rows;
     QString fileType, filePath;
-    filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
-        "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
+    QString delimiter = "\t";
 
-    if (filePath.isEmpty())
-        return;
-
-    QString delimter = fileType.contains("Tab") ? "\t" : fileType.contains("Pipe") ? "|" : ",";
-
-    QFile data(filePath);
-    if (!data.open(QFile::WriteOnly | QFile::Truncate | QIODevice::Text))
+    if (parent) // export
     {
-        QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
-        return;
+        for(int i = 0; i < table->model()->rowCount(); ++i)
+            rows.append(i);
+
+        filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
+            "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
+
+        if (filePath.isEmpty())
+            return;
+
+        delimiter = fileType.contains("Tab") ? "\t" : fileType.contains("Pipe") ? "|" : ",";
+    }
+    else // copy
+    {
+        foreach(const QModelIndex &q, table->selectionModel()->selectedRows())
+            rows.append(q.row());
+
+        if (rows.isEmpty())
+            return;
     }
 
-    QTextStream out(&data);
     QStringList line, lines;
 
     if (includeRowLabels)
         line.append("");
 
-    for(int i = 0; i < table->columnCount(); ++i)
-        line.append(exportClean(table->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimter));
+    for(int i = 0; i < table->model()->columnCount(); ++i)
+        line.append(exportClean(table->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimiter));
 
-    lines.append(line.join(delimter));
+    lines.append(line.join(delimiter));
 
-    for(int x = 0; x < table->rowCount(); ++x)
+    for(int x = 0; x < rows.count(); ++x)
     {
         line.clear();
         if (includeRowLabels)
-            line.append(exportClean(table->headerData(x, Qt::Vertical, Qt::DisplayRole), delimter));
-        for (int i = 0; i < table->columnCount(); ++i)
+            line.append(exportClean(table->model()->headerData(rows.at(x), Qt::Vertical, Qt::DisplayRole), delimiter));
+        for (int i = 0; i < table->model()->columnCount(); ++i)
         {
-            QVariant v = table->data(table->index(x, i), Qt::CheckStateRole);
+            QVariant v = table->model()->data(table->model()->index(rows.at(x), i), Qt::CheckStateRole);
             if (v.isNull())
-                line.append(exportClean(table->data(table->index(x, i), Qt::DisplayRole), delimter));
+                line.append(exportClean(table->model()->data(table->model()->index(rows.at(x), i), Qt::DisplayRole), delimiter));
             else
                 line.append(v.toInt() == Qt::Checked ? "Yes" : "No");
         }
-        lines.append(line.join(delimter));
+        lines.append(line.join(delimiter));
     }
 
-    out << lines.join("\n");
+    if (parent) // export
+    {
+        QFile data(filePath);
+        if (!data.open(QFile::WriteOnly | QFile::Truncate | QIODevice::Text))
+        {
+            QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
+            return;
+        }
+
+        QTextStream out(&data);
+        out << lines.join("\n");
+    }
+    else // clipboard
+        QApplication::clipboard()->setText(lines.join("\n"));
 }
 
 QString functions::exportClean(const QVariant &v, const QString &delimiter)

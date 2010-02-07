@@ -15,7 +15,7 @@ public:
     static QString doubleToCurrency(const double &value);
     static QString doubleToPercentage(const double &value);
     static QString doubleToLocalFormat(const double &value, const int &precision = 2);
-    static void exportTable(const QAbstractItemModel *table, const bool &includeRowLabels, QMainWindow *parent);
+    static void exportTable(const QTableView *table, const bool &includeRowLabels, QMainWindow *parent = 0);
     static QString exportClean(const QVariant &s, const QString &delimiter);
     static void exportChart(QwtPlot *chart, QMainWindow *parent);
     static bool lessThan(const QVariant &left, const QVariant &right, const QVariant &type);

@@ -410,7 +410,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                             if (currentPortfolio->data.aa.value(aa).target <= 0)
                                 continue;
 
-                            sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target / 100 * x.value() / 100)) -
+                            sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target * x.value() / 100)) -
                                 previousInfo->securitiesInfo.value(securityID).totalValue) / close;
                         }
                     }

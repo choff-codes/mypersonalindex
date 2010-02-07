@@ -87,6 +87,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsToolbar = new QToolBar(tab_holdings);
 
     holdings = new QTableView(tab_holdings);
+    holdingsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, holdings);
 
     int fntHeight = holdings->fontMetrics().height() + 2; // add small buffer
 
@@ -139,6 +140,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statToolbar = new QToolBar(tab_stat);
 
     stat = new QTableView(tab_stat);
+    statCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, stat);
     stat->setSelectionMode(QAbstractItemView::ExtendedSelection);
     stat->setSelectionBehavior(QAbstractItemView::SelectRows);
     stat->setAlternatingRowColors(true);
@@ -229,6 +231,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     performanceToolbar = new QToolBar(tab_performance);
 
     performance = new QTableView(tab_performance);
+    performanceCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, performance);
     performance->verticalHeader()->hide();
     performance->setSelectionMode(QAbstractItemView::ExtendedSelection);
     performance->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -254,6 +257,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsToolbar = new QToolBar(tab_correlations);
 
     correlations = new QTableView(tab_correlations);
+    correlationsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, correlations);
     correlations->setSelectionMode(QAbstractItemView::ExtendedSelection);
     correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
     correlations->setAlternatingRowColors(true);
@@ -288,6 +292,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsToolbar = new QToolBar(tab_accounts);
 
     accounts = new QTableView(tab_accounts);
+    accountsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, accounts);
     accounts->verticalHeader()->hide();
     accounts->setSelectionMode(QAbstractItemView::ExtendedSelection);
     accounts->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -337,6 +342,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaToolbar = new QToolBar(tab_aa);
 
     aa = new QTableView(tab_aa);
+    aaCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, aa);
     aa->verticalHeader()->hide();
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
     aa->setSelectionBehavior(QAbstractItemView::SelectRows);

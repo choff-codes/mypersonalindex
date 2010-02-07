@@ -32,11 +32,11 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     //row_Value
     this->values.append(value.shares == 0 ? QVariant() : value.totalValue);
     //row_ValueP
-    this->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue * 100);
+    this->values.append(info->totalValue == 0 ? QVariant() : value.totalValue / info->totalValue);
     //row_Gain
     this->values.append(value.shares == 0 ? QVariant() : value.totalValue - costBasis);
     //row_GainP
-    this->values.append(value.shares == 0 || costBasis == 0 ? QVariant() : ((value.totalValue / costBasis) - 1) * 100);
+    this->values.append(value.shares == 0 || costBasis == 0 ? QVariant() : (value.totalValue / costBasis) - 1);
     //row_Acct
     this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA
@@ -69,10 +69,11 @@ QVariant mainHoldingsModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     int column = m_viewableColumns.at(index.column());
+    QVariant value = m_rows.at(index.row())->values.at(column);
 
     if (role == Qt::DisplayRole)
     {
-        if (m_rows.at(index.row())->values.at(column).isNull() || column == holdingsRow::row_Active || column == holdingsRow::row_Cash)
+        if (value.isNull() || column == holdingsRow::row_Active || column == holdingsRow::row_Cash)
             return QVariant();
 
         switch (column)
@@ -84,28 +85,25 @@ QVariant mainHoldingsModel::data(const QModelIndex &index, int role) const
             case holdingsRow::row_Value:
             case holdingsRow::row_TaxLiability:
             case holdingsRow::row_NetValue:
-                return functions::doubleToCurrency(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToCurrency(value.toDouble());
             case holdingsRow::row_GainP:
             case holdingsRow::row_ValueP:
-                return functions::doubleToPercentage(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToPercentage(value.toDouble());
             case holdingsRow::row_Shares:
-                return functions::doubleToLocalFormat(m_rows.at(index.row())->values.at(column).toDouble(), 4);
+                return functions::doubleToLocalFormat(value.toDouble(), 4);
         }
 
-        return m_rows.at(index.row())->values.at(column);
+        return value;
     }
 
     if (role == Qt::CheckStateRole && (column == holdingsRow::row_Active || column == holdingsRow::row_Cash))
     {
-        return m_rows.at(index.row())->values.at(column).toInt() == 1 ? Qt::Checked : Qt::Unchecked;
+        return value.toInt() == 1 ? Qt::Checked : Qt::Unchecked;
     }
 
     if (role == Qt::TextColorRole && column == holdingsRow::row_GainP)
-    {
-        double value = m_rows.at(index.row())->values.at(column).toDouble();
-        return value == 0 ? QVariant() :
-            value > 0 ?  qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
-    }
+        return value.toDouble() == 0 ? QVariant() :
+            value.toDouble() > 0 ?  qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
 
     return QVariant();
 }
@@ -133,6 +131,9 @@ QVariant mainHoldingsModel::headerData(int section, Qt::Orientation orientation,
             break;
         case holdingsRow::row_Gain:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
+            break;
+        case holdingsRow::row_GainP:
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage((m_totalValue - m_costBasis) / m_costBasis));
             break;
         case holdingsRow::row_TaxLiability:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_taxLiability));

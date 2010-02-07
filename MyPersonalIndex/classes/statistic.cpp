@@ -82,7 +82,7 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_NetChange:
             return functions::doubleToCurrency(statInfo.endTotalValue() - statInfo.startTotalValue());
         case stat_OverallReturn:
-            return functions::doubleToPercentage(100 * ((statInfo.endNAV() / statInfo.startNAV()) - 1));
+            return functions::doubleToPercentage((statInfo.endNAV() / statInfo.startNAV()) - 1);
         case stat_TaxLiability:
             return functions::doubleToCurrency(statInfo.endInfo()->taxLiability);
         case stat_MaxPercentDown:
@@ -110,9 +110,9 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_MaximumPortfolioValueDay:
             return QDate::fromJulianDay(statInfo.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_ProbabilityOfYearlyGain:
-            return functions::doubleToPercentage(100 * cumulativeNormalDistribution(statInfo));
+            return functions::doubleToPercentage(cumulativeNormalDistribution(statInfo));
         case stat_ProbabilityOfYearlyLoss:
-            return functions::doubleToPercentage(100 - (100 * cumulativeNormalDistribution(statInfo)));
+            return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statInfo));
         case stat_WeightedExpenseRatio:
             return functions::doubleToPercentage(weightedExpenseRatio(statInfo));
         default:
@@ -125,7 +125,7 @@ double statistic::returnPercent(const statisticInfo &statInfo, const double &div
     if (statInfo.days() == 0 || statInfo.startNAV() == 0)
         return 0;
 
-    return 100 * (pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1);
+    return pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1;
 }
 
 double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)

@@ -63,7 +63,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing
     layout->setWidget(6, QFormLayout::LabelRole, tmp);
 
-    chkIncludeDiv = new QCheckBox("Include &Dividends", dialog);
+    chkIncludeDiv = new QCheckBox("I&nclude Dividends", dialog);
     layout->setWidget(6, QFormLayout::FieldRole, chkIncludeDiv);
 
     mainLayout->addLayout(layout);

@@ -11,15 +11,18 @@ class securityAAModel: public QAbstractTableModel
 
 public:
 
-    QMap<int, double> getList() { return m_list; }
+    QMap<int, double> getList() const { return m_list; }
 
     securityAAModel(const QMap<int, double> &values, const QMap<int, assetAllocation> &aaValues, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_list(values), m_keys(values.keys()) {}
+            QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_list(values), m_keys(values.keys())
+    {
+        insertRows(0, m_list.count());
+    }
 
-    double totalPercentage();
+    double totalPercentage() const;
 
 private:
-    const QMap<int, assetAllocation> &m_aaValues;
+    const QMap<int, assetAllocation> m_aaValues;
     QTableView *m_parent;
     QMap<int, double> m_list;
     QList<int> m_keys;

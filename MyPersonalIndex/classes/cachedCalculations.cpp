@@ -25,7 +25,7 @@ dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
         if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
         {
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
-            info.totalValue += sv.totalValue * (aaID == -1 ? 1 : s.aa.value(aaID) / 100);
+            info.totalValue += sv.totalValue * (aaID == -1 ? 1 : s.aa.value(aaID));
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
              ++info.count;

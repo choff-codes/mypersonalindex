@@ -10,13 +10,13 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     mainLayout = new QVBoxLayout(dialog);
     formLayout = new QFormLayout();
 
-    desc = new QLabel("Description:", dialog);
+    desc = new QLabel("&Description:", dialog);
     formLayout->setWidget(0, QFormLayout::LabelRole, desc);
 
     txtDesc = new QLineEdit(dialog);
     formLayout->setWidget(0, QFormLayout::FieldRole, txtDesc);
 
-    taxrate = new QLabel("Tax Rate:", dialog);
+    taxrate = new QLabel("&Tax Rate:", dialog);
     formLayout->setWidget(1, QFormLayout::LabelRole, taxrate);
 
     taxRateLayout = new QHBoxLayout();
@@ -29,7 +29,7 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     sbTaxRate->setSpecialValueText("None");
     sbTaxRate->setValue(-1);
     btnClearTaxRate = new QToolButton(dialog);
-    btnClearTaxRate->setText("Clear");
+    btnClearTaxRate->setText("C&lear");
 
     taxRateLayout->addWidget(sbTaxRate, 1);
     taxRateLayout->addWidget(btnClearTaxRate);
@@ -47,13 +47,15 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
 
     formLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(dialog));
 
-    chkTaxDeferred = new QCheckBox("Tax Deferred", dialog);
+    chkTaxDeferred = new QCheckBox("T&ax Deferred", dialog);
     formLayout->setWidget(3, QFormLayout::FieldRole, chkTaxDeferred);
 
     mainLayout->addLayout(formLayout);
     mainLayout->addWidget(btnOkCancel);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
 
+    desc->setBuddy(txtDesc);
+    taxrate->setBuddy(sbTaxRate);
     costBasis->setBuddy(cmbCostBasis);
 }
 

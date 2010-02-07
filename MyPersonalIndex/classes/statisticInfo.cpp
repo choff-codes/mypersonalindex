@@ -56,14 +56,14 @@ void statisticInfo::calculateChanges(QMap<int, double>::const_iterator startNav,
         double newNav = i.value();
         double change = newNav / previousNAV - 1;
 
-        if (change * 100 > m_maxChangePositive || count == 1)
+        if (change > m_maxChangePositive || count == 1)
         {
-            m_maxChangePositive = change * 100;
+            m_maxChangePositive = change;
             m_maxChangePositiveDay = i.key();
         }
-        if (change * 100 < m_maxChangeNegative || count == 1)
+        if (change < m_maxChangeNegative || count == 1)
         {
-            m_maxChangeNegative = change * 100;
+            m_maxChangeNegative = change;
             m_maxChangeNegativeDay = i.key();
         }
         if (newNav > m_maxNAVValue)
@@ -89,7 +89,7 @@ void statisticInfo::calculateChanges(QMap<int, double>::const_iterator startNav,
 
     // standard deviation
     if (--count != 1)
-        m_stdDev = 100 * sqrt(newS / (count - 1));
+        m_stdDev = sqrt(newS / (count - 1));
 }
 
 void statisticInfo::setTotalValue()

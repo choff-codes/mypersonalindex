@@ -18,11 +18,11 @@ acctRow::acctRow(const dailyInfoPortfolio *info, const dailyInfo &acctInfo, cons
     //row_Value
     this->values.append(acctInfo.totalValue);
     //row_ValueP
-    this->values.append(info->totalValue == 0 ? QVariant() : 100.0 * acctInfo.totalValue / info->totalValue);
+    this->values.append(info->totalValue == 0 ? QVariant() : acctInfo.totalValue / info->totalValue);
     //row_Gain
     this->values.append(acctInfo.totalValue - acctInfo.costBasis);
     //row_GainP
-    this->values.append(acctInfo.costBasis == 0 ? QVariant() : ((acctInfo.totalValue / acctInfo.costBasis) - 1) * 100);
+    this->values.append(acctInfo.costBasis == 0 ? QVariant() : (acctInfo.totalValue / acctInfo.costBasis) - 1);
     //row_TaxRate
     this->values.append(acct.taxRate < 0 ? QVariant() : acct.taxRate);
     //row_TaxLiability
@@ -52,10 +52,11 @@ QVariant mainAcctModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     int column = m_viewableColumns.at(index.column());
+    QVariant value = m_rows.at(index.row())->values.at(column);
 
     if (role == Qt::DisplayRole)
     {
-        if (m_rows.at(index.row())->values.at(column).isNull())
+        if (value.isNull())
             return QVariant();
 
         switch (column)
@@ -65,29 +66,26 @@ QVariant mainAcctModel::data(const QModelIndex &index, int role) const
             case acctRow::row_Gain:
             case acctRow::row_TaxLiability:
             case acctRow::row_Net:
-                return functions::doubleToCurrency(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToCurrency(value.toDouble());
             case acctRow::row_ValueP:
             case acctRow::row_GainP:
             case acctRow::row_TaxRate:
-                return functions::doubleToPercentage(m_rows.at(index.row())->values.at(column).toDouble());
+                return functions::doubleToPercentage(value.toDouble());
         }
 
-        return m_rows.at(index.row())->values.at(column);
+        return value;
     }
 
     if (role == Qt::TextColorRole && column == acctRow::row_GainP)
-    {
-        double value = m_rows.at(index.row())->values.at(column).toDouble();
-        return value == 0 ? QVariant() :
-            value > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
-    }
+        return value.toDouble() == 0 ? QVariant() :
+            value.toDouble() > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
 
     return QVariant();
 }
 
 QVariant mainAcctModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-     if (section >= m_viewableColumns.count())
+    if (section >= m_viewableColumns.count())
         return QVariant();
 
     if (role == Qt::TextAlignmentRole)
@@ -108,6 +106,9 @@ QVariant mainAcctModel::headerData(int section, Qt::Orientation orientation, int
             break;
         case acctRow::row_Gain:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
+            break;
+        case acctRow::row_GainP:
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage((m_totalValue - m_costBasis) / m_costBasis));
             break;
         case acctRow::row_Net:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_taxLiability));

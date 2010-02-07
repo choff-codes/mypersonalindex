@@ -57,7 +57,7 @@ void frmSecurity::loadSecurity()
 {
     ui.txtSymbol->setText(m_security.symbol);
     ui.cmbAcct->setCurrentIndex(ui.cmbAcct->findData(m_security.account));
-    ui.sbExpense->setValue(m_security.expense);
+    ui.sbExpense->setValue(m_security.expense * 100);
     ui.chkReinvest->setChecked(m_security.divReinvest);
     ui.chkHide->setChecked(m_security.hide);
     ui.chkCash->setChecked(m_security.cashAccount);
@@ -78,7 +78,7 @@ void frmSecurity::saveSecurity()
 {
     m_security.symbol = ui.txtSymbol->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
-    m_security.expense = ui.sbExpense->value();
+    m_security.expense = ui.sbExpense->value() / 100;
     m_security.divReinvest = ui.chkReinvest->isChecked();
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
@@ -87,7 +87,7 @@ void frmSecurity::saveSecurity()
 
 void frmSecurity::updateAAPercentage()
 {
-    ui.gpAA->setTitle(QString("Asset Allocation (%L1%)").arg(m_modelAA->totalPercentage(), 0, 'f', 2));
+    ui.gpAA->setTitle(QString("Asset Allocation (%1)").arg(functions::doubleToPercentage(m_modelAA->totalPercentage())));
 }
 
 void frmSecurity::addAA()

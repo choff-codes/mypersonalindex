@@ -1,6 +1,6 @@
 #include "securityAAModel.h"
 
-double securityAAModel::totalPercentage()
+double securityAAModel::totalPercentage() const
 {
     double total = 0;
 
@@ -42,7 +42,7 @@ QVariant securityAAModel::data(const QModelIndex &index, int role) const
             return m_aaValues.value(m_keys.at(index.row())).description;
 
         if (index.column() == 1)
-            return m_list.value(m_keys.at(index.row()));
+            return m_list.value(m_keys.at(index.row())) * 100;
     }
 
     return QVariant();
@@ -52,7 +52,7 @@ bool securityAAModel::setData(const QModelIndex &index, const QVariant &value, i
 {
     if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
     {
-        m_list[m_keys.at(index.row())] = value.toDouble();
+        m_list[m_keys.at(index.row())] = value.toDouble() / 100;
         emit updateHeader();
         return true;
     }
@@ -67,7 +67,7 @@ void securityAAModel::addNew(const int &id)
 
     beginInsertRows(QModelIndex(), m_keys.count(), m_keys.count());
     double total = totalPercentage();
-    m_list.insert(id, total >= 100 ? 0 : 100 - total);
+    m_list.insert(id, total >= 1 ? 0 : 1 - total);
     m_keys.append(id);
     endInsertRows();
     emit updateHeader();

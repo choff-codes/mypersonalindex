@@ -7,8 +7,9 @@ frmAAEdit::frmAAEdit(const int &portfolioID, QWidget *parent, const assetAllocat
     this->setWindowTitle(QString("%1 AA").arg(aa.id == -1 ? "Add" : "Edit"));
 
     ui.txtDesc->setText(m_aa.description);
-    ui.sbTarget->setValue(m_aa.target);
+    ui.sbTarget->setValue(m_aa.target * 100);
     ui.txtDesc->setFocus();
+    ui.txtDesc->selectAll();
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
@@ -22,7 +23,7 @@ void frmAAEdit::accept()
         return;
 
     m_aa.description = ui.txtDesc->text();
-    m_aa.target = ui.sbTarget->value();
+    m_aa.target = ui.sbTarget->value() / 100;
 
     if (m_aa == m_aaOriginal)
     {

@@ -10,13 +10,13 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     mainLayout = new QVBoxLayout(dialog);
     formLayout = new QFormLayout();
 
-    desc = new QLabel("Description:", dialog);
+    desc = new QLabel("&Description:", dialog);
     formLayout->setWidget(0, QFormLayout::LabelRole, desc);
 
     txtDesc = new QLineEdit(dialog);
     formLayout->setWidget(0, QFormLayout::FieldRole, txtDesc);
 
-    target = new QLabel("Target:", dialog);
+    target = new QLabel("&Target:", dialog);
     formLayout->setWidget(1, QFormLayout::LabelRole, target);
 
     targetLayout = new QHBoxLayout();
@@ -29,7 +29,7 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     sbTarget->setSpecialValueText("None");
     sbTarget->setValue(-1);
     btnClearTarget = new QToolButton(dialog);
-    btnClearTarget->setText("Clear");
+    btnClearTarget->setText("&Clear");
 
     targetLayout->addWidget(sbTarget, 1);
     targetLayout->addWidget(btnClearTarget);
@@ -39,4 +39,7 @@ void frmAAEdit_UI::setupUI(QDialog *dialog)
     mainLayout->addLayout(formLayout);
     mainLayout->addWidget(btnOkCancel);
     mainLayout->setSizeConstraint(QLayout::SetFixedSize);
+
+    desc->setBuddy(txtDesc);
+    target->setBuddy(sbTarget);
 }

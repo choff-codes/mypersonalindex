@@ -29,7 +29,7 @@ void settings::loadSettingsInfo(settings &s)
 
     s.dataStartDate = q.value(queries::settingsColumns_DataStartDate).toInt();
     s.splits = q.value(queries::settingsColumns_Splits).toBool();
-    s.securitiesIncludeDividends = q.value(queries::settingsColumns_SecuritiesIncludeDividends).toBool();
+    s.compareIncludeDividends = q.value(queries::settingsColumns_CompareIncludeDividends).toBool();
     s.version = q.value(queries::settingsColumns_Version).toInt();
     if (!q.value(queries::settingsColumns_WindowState).isNull())
     {
@@ -59,7 +59,7 @@ void settings::save()
     QMap<QString, QVariant> values;
     values.insert(queries::settingsColumns.at(queries::settingsColumns_Splits), (int)this->splits);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_DataStartDate), this->dataStartDate);
-    values.insert(queries::settingsColumns.at(queries::settingsColumns_SecuritiesIncludeDividends), (int)this->securitiesIncludeDividends);
+    values.insert(queries::settingsColumns.at(queries::settingsColumns_CompareIncludeDividends), (int)this->compareIncludeDividends);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_LastPortfolio), this->lastPortfolio);
     values.insert(queries::settingsColumns.at(queries::settingsColumns_WindowState), (int)this->state);
 

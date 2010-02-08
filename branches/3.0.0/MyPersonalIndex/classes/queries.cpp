@@ -24,9 +24,9 @@ const QStringList queries::portfoliosColumns = QStringList() << "ID" << "Descrip
     << "AcctShowBlank" << "AcctSort" << "NAVSortDesc";
 
 //enum { settingsColumns_DataStartDate, settingsColumns_LastPortfolio, settingsColumns_Version, settingsColumns_WindowX, settingsColumns_WindowY,
-//       settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_SecuritiesIncludeDividends };
+//       settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_CompareIncludeDividends };
 const QStringList queries::settingsColumns = QStringList() << "DataStartDate" << "LastPortfolio" << "Version" << "WindowX" << "WindowY"
-    << "WindowHeight" << "WindowWidth" << "WindowState" << "Splits" << "SecuritiesIncludeDividends";
+    << "WindowHeight" << "WindowWidth" << "WindowState" << "Splits" << "CompareIncludeDividends";
 
 //enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence };
 const QStringList queries::settingsColumnsColumns = QStringList() << "ID" << "ColumnID" << "Sequence";

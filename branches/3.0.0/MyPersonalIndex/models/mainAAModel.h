@@ -23,7 +23,7 @@ class mainAAModel: public mpiViewModelBase
 public:
 
     mainAAModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const dailyInfoPortfolio *info, const double &aaThreshold, QTableView *parent = 0):
-        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold), m_costBasis(info->costBasis) { }
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold / 100.0), m_costBasis(info->costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;

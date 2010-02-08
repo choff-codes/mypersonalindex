@@ -215,6 +215,12 @@ void frmMain::loadPortfolio()
 
     m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
 
+    if (!m_currentPortfolio)
+    {
+        ui.tab->setDisabled(true);
+        return;
+    }
+
 #ifdef CLOCKTIME
     QTime t;
     t.start();

@@ -16,14 +16,14 @@ public:
     int dataStartDate;
     bool splits;
     int version;
-    bool securitiesIncludeDividends;
+    bool compareIncludeDividends;
     QVariant lastPortfolio;
     QSize windowSize;
     QPoint windowLocation;
     Qt::WindowState state;
     columns viewableColumns;
 
-    settings(): version(0), lastPortfolio(QVariant()), state(Qt::WindowActive) {}
+    settings(): dataStartDate(0), splits(true), version(0), compareIncludeDividends(true), state(Qt::WindowNoState) {}
     void save();
 
     static void saveColumns(const int &columnsID, const QList<int> &columns);

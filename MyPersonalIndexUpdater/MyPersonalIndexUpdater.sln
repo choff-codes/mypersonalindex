@@ -1,0 +1,19 @@
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyPersonalIndexUpdater", "MyPersonalIndexUpdater\MyPersonalIndexUpdater.csproj", "{96F9A2DE-95B7-4A60-9346-E3CA5252963D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96F9A2DE-95B7-4A60-9346-E3CA5252963D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96F9A2DE-95B7-4A60-9346-E3CA5252963D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96F9A2DE-95B7-4A60-9346-E3CA5252963D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96F9A2DE-95B7-4A60-9346-E3CA5252963D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

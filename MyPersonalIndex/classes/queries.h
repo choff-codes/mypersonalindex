@@ -54,7 +54,7 @@ public:
            portfoliosColumns_NAVSortDesc, portfoliosColumns_Count };
 
     enum { settingsColumns_DataStartDate, settingsColumns_LastPortfolio, settingsColumns_Version, settingsColumns_WindowX, settingsColumns_WindowY,
-           settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_SecuritiesIncludeDividends,
+           settingsColumns_WindowHeight, settingsColumns_WindowWidth, settingsColumns_WindowState, settingsColumns_Splits, settingsColumns_CompareIncludeDividends,
            settingsColumns_Count };
 
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence, settingsColumnsColumns_Count };

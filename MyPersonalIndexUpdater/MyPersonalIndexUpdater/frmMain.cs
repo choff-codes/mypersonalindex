@@ -14,6 +14,14 @@ namespace MyPersonalIndexUpdater
 {
     public partial class frmMain : Form
     {
+        // old c#
+        public enum DynamicTradeType { Shares, Fixed, TotalValue, AA };
+        public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
+
+        // new c++
+        enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_FixedPurchase, tradeType_FixedSale, tradeType_DivReinvest, tradeType_Interest, tradeType_TotalValue, tradeType_AA, tradeType_Count };
+        enum tradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly, tradeFreq_Count };
+
         private SqlCeConnection cnCe;
         private SQLiteConnection cnLite;
 
@@ -184,6 +192,100 @@ namespace MyPersonalIndexUpdater
                         }
                     }
                 }
+ 
+                using (SqlCeResultSet rs = ExecuteResultSet("SELECT * FROM Trades WHERE Custom IS NULL"))
+                {
+                    foreach (SqlCeUpdatableRecord rec in rs)
+                    {
+                        DateTime TradeDate = rec.GetDateTime(rec.GetOrdinal("Date"));
+                        int TickerID = rec.GetInt32(rec.GetOrdinal("TickerID"));
+                        decimal Shares = rec.GetDecimal(rec.GetOrdinal("Shares"));
+                        decimal Price = rec.GetDecimal(rec.GetOrdinal("Price"));
+
+                        using (SQLiteCommand c = new SQLiteCommand("INSERT INTO SecurityTrades (SecurityID, Type, Value, Price, Frequency, Date) " +
+                            " VALUES (@SecurityID, @Type, @Value, @Price, @Frequency, @Date)", cnLite))
+                        {
+                            c.Parameters.AddWithValue("@SecurityID", securityMapping[TickerID]);
+                            c.Parameters.AddWithValue("@Type", Shares <  0 ? 1 : 0);
+                            c.Parameters.AddWithValue("@Value", Math.Abs(Shares));
+                            c.Parameters.AddWithValue("@Price", Price);
+                            c.Parameters.AddWithValue("@Frequency", 0);
+                            c.Parameters.AddWithValue("@Date", ConvertDateToJulian(TradeDate));
+                            c.ExecuteNonQuery();
+                        }
+                    }
+                }
+
+                using (SqlCeResultSet rs = ExecuteResultSet("SELECT * FROM CustomTrades"))
+                {
+                    foreach (SqlCeUpdatableRecord rec in rs)
+                    {
+                        string Dates = rec.GetString(rec.GetOrdinal("Dates"));
+                        int TickerID = rec.GetInt32(rec.GetOrdinal("TickerID"));
+                        int TradeType = rec.GetInt32(rec.GetOrdinal("TradeType"));
+                        int Frequency = rec.GetInt32(rec.GetOrdinal("Frequency"));
+                        decimal Value = rec.GetDecimal(rec.GetOrdinal("Value"));
+
+                        tradeType newTradeType = tradeType.tradeType_Purchase;
+                        tradeFreq newFrequency = tradeFreq.tradeFreq_Once;
+
+                        List<DateTime> ConvertedDates = new List<DateTime>();
+                        switch ((DynamicTradeFreq)Frequency)
+                        {
+                            case DynamicTradeFreq.Daily:
+                                ConvertedDates.Add(DateTime.MinValue);
+                                newFrequency = tradeFreq.tradeFreq_Daily;
+                                break;
+                            case DynamicTradeFreq.Monthly:
+                                ConvertedDates.Add(new DateTime(2009, 1, Convert.ToInt32(Dates)));
+                                newFrequency = tradeFreq.tradeFreq_Monthly;
+                                break;
+                            case DynamicTradeFreq.Weekly:
+                                ConvertedDates.Add(new DateTime(2009, 1, 4 + Convert.ToInt32(Dates)));
+                                newFrequency = tradeFreq.tradeFreq_Weekly;
+                                break;
+                            case DynamicTradeFreq.Yearly:
+                                ConvertedDates.Add(new DateTime(2009, 1, 1).AddDays(Convert.ToInt32(Dates) - 1));
+                                newFrequency = tradeFreq.tradeFreq_Yearly;
+                                break;
+                            case DynamicTradeFreq.Once:
+                                foreach (string s in Dates.Split('|'))
+                                {
+                                    ConvertedDates.Add(new DateTime(Convert.ToInt32(s.Substring(0, 4)), Convert.ToInt32(s.Substring(4, 2)), Convert.ToInt32(s.Substring(6, 2))));
+                                }
+                                newFrequency = tradeFreq.tradeFreq_Once;
+                                break;
+                        }
+
+                        switch ((DynamicTradeType)TradeType)
+                        {
+                            case DynamicTradeType.AA:
+                                newTradeType = tradeType.tradeType_AA;
+                                break;
+                            case DynamicTradeType.Fixed:
+                                newTradeType = Value < 0 ? tradeType.tradeType_FixedSale : tradeType.tradeType_FixedPurchase;
+                                break;
+                            case DynamicTradeType.Shares:
+                                newTradeType = Value < 0 ? tradeType.tradeType_Sale : tradeType.tradeType_Purchase;
+                                break;
+                            case DynamicTradeType.TotalValue:
+                                newTradeType = tradeType.tradeType_TotalValue;
+                                break;
+                        }
+
+                        foreach (DateTime d in ConvertedDates)
+                            using (SQLiteCommand c = new SQLiteCommand("INSERT INTO SecurityTrades (SecurityID, Type, Value, Frequency, Date) " +
+                                " VALUES (@SecurityID, @Type, @Value, @Frequency, @Date)", cnLite))
+                            {
+                                c.Parameters.AddWithValue("@SecurityID", securityMapping[TickerID]);
+                                c.Parameters.AddWithValue("@Type", (int)newTradeType);
+                                c.Parameters.AddWithValue("@Value", Math.Abs(Value));
+                                c.Parameters.AddWithValue("@Frequency", (int)newFrequency);
+                                c.Parameters.AddWithValue("@Date", d == DateTime.MinValue ? (object)System.DBNull.Value : ConvertDateToJulian(d));
+                                c.ExecuteNonQuery();
+                            }
+                    }
+                }
 
                 // Settings
 
@@ -236,7 +338,7 @@ namespace MyPersonalIndexUpdater
             {
                 cnCe.Close();
                 cnLite.Close();
-                Application.Exit();
+                throw new Exception();
             }
         }
 

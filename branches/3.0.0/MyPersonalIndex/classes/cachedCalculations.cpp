@@ -118,8 +118,8 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
                     else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
                     {
                         previousTrades[z].shares += t.shares;
-                        shares -= t.shares;
-                        total -= t.shares * pair.price;
+                        shares += t.shares;
+                        total += t.shares * pair.price;
                         break;
                     }
                 }

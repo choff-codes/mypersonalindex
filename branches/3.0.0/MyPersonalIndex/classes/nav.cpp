@@ -301,12 +301,12 @@ QList<int> nav::computeYearlyTrades(const int &tradeDate, const int &minDate, co
     do
     {
         QDate yearday = minQDate;
-        int leapDayofYear = dayOfYear + (QDate::isLeapYear(yearday.year()) ? 1 : 0);
+        int leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearday.year()) ? 1 : 0);
 
         if (yearday.dayOfYear() > leapDayofYear)
         {
             yearday = yearday.addYears(1);
-            leapDayofYear = dayOfYear + (QDate::isLeapYear(yearday.year()) ? 1 : 0);
+            leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearday.year()) ? 1 : 0);
         }
 
         int date = QDate(yearday.year(), 1, 1).toJulianDay() + leapDayofYear - 1;
@@ -410,7 +410,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                             if (currentPortfolio->data.aa.value(aa).target <= 0)
                                 continue;
 
-                            sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target * x.value() / 100)) -
+                            sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target * x.value() * singleTrade->value / 100)) -
                                 previousInfo->securitiesInfo.value(securityID).totalValue) / close;
                         }
                     }

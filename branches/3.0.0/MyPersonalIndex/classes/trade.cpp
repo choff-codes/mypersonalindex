@@ -96,7 +96,7 @@ QString trade::valueToString(const tradeType &type, const double &value)
             return functions::doubleToCurrency(value);
         case tradeType_TotalValue:
         case tradeType_AA:
-            return functions::doubleToPercentage(value);
+            return functions::doubleToPercentage(value / 100);
         default:
             return "";
     }

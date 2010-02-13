@@ -52,8 +52,8 @@ const QStringList queries::SecurityTradeColumns = QStringList() << "ID" << "Secu
     << "CashAccountID" << "Frequency" << "Date" << "StartDate" << "EndDate";
 
 //enum { executedTradesColumns_SecurityID, executedTradesColumns_Date, executedTradesColumns_Shares, executedTradesColumns_Price, executedTradesColumns_Commission,
-//       executedTradesColumns_Code, executedTradesColumns_Count };
-const QStringList queries::executedTradesColumns = QStringList() << "SecurityID" << "Date" << "Shares" << "Price" << "Commission" << "Code";
+//       executedTradesColumns_Count };
+const QStringList queries::executedTradesColumns = QStringList() << "SecurityID" << "Date" << "Shares" << "Price" << "Commission";
 
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Acct";

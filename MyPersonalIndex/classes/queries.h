@@ -73,7 +73,7 @@ public:
            securityTradeColumns_Count };
 
     enum { executedTradesColumns_SecurityID, executedTradesColumns_Date, executedTradesColumns_Shares, executedTradesColumns_Price, executedTradesColumns_Commission,
-           executedTradesColumns_Code, executedTradesColumns_Count };
+           executedTradesColumns_Count };
 
     static QString getDatabaseLocation();
 

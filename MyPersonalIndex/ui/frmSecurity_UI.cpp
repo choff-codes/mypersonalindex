@@ -142,6 +142,7 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     historicalLayout->addWidget(tbHistorical);
 
     history = new QTableView(gpHistorical);
+    historyCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, history);
     history->setSelectionMode(QAbstractItemView::ExtendedSelection);
     history->setSelectionBehavior(QAbstractItemView::SelectRows);
     history->setAlternatingRowColors(true);

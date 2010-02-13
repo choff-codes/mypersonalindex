@@ -24,7 +24,7 @@ public:
     QMap<int, double> price(const QString &symbol) const;
     QMap<int, double> dividend(const QString &symbol) const;
     QMap<int, double> split(const QString &symbol) const;
-    securityPrices history(const QString &symbol) const { return m_securityPriceList.value(symbol); }
+    securityPrices history(const QString &symbol) const { return isCashSecurity(symbol) ? m_cashPrices : m_securityPriceList.value(symbol); }
 
     double price(const QString &symbol, const int &date) const { return history(symbol).price(date); }
     double dividend(const QString &symbol, const int &date) const { return history(symbol).dividend(date); }

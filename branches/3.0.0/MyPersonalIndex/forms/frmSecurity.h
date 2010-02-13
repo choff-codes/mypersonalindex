@@ -6,7 +6,6 @@
 #include "securityAAModel.h"
 #include "securityTradeModel.h"
 #include "securityHistoryModel.h"
-#include "security.h"
 #include "portfolio.h"
 
 class frmSecurity : public QDialog
@@ -47,7 +46,8 @@ private slots:
     void customContextMenuRequested(const QPoint&);
     void historyIndexChange(int index);
     void historyToggled(bool checked);
-    void historySortToggled() { historyIndexChange(ui.cmbHistorical->currentIndex()); }
+    void historySortToggled();
+    void copyPressed();
 };
 
 #endif // FRMSECURITY_H

@@ -27,7 +27,7 @@ private:
     int m_calculationDate;
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;
-    QVariantList m_ExecutedTrades_SecurityID, m_ExecutedTrades_Dates, m_ExecutedTrades_Shares, m_ExecutedTrades_Price, m_ExecutedTrades_Commission, m_ExecutedTrades_Code;
+    QVariantList m_ExecutedTrades_SecurityID, m_ExecutedTrades_Dates, m_ExecutedTrades_Shares, m_ExecutedTrades_Price, m_ExecutedTrades_Commission;
     calculations m_calculations;
 
     typedef QMap<int, trade>::const_iterator navTradePointer;
@@ -35,7 +35,7 @@ private:
 
     navTradeList appendNavTrades(const navTradeList &first, const navTradeList &second);
     void addToNAVList(portfolio *currentPortfolio, const int &date, const double &totalValue, const double &nav);
-    void addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission, const QString &code);
+    void addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission);
     void clearVariantLists();
     void insertVariantLists();
     void deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &calculateFromStartDate);

@@ -129,8 +129,8 @@ void securityTradeModel::copy()
 QString securityTradeModel::internalCopy(const trade &item)
 {
     return QString("%1\t%2\t%3\t%4\t%5\t%6\t%7\t%8\t%9").arg(
-           QString::number((int)item.type), functions::doubleToLocalFormat(item.value), functions::doubleToLocalFormat(item.price),
-           functions::doubleToLocalFormat(item.commission), QString::number(item.cashAccount),
+           QString::number((int)item.type), functions::doubleToLocalFormat(item.value, 4), functions::doubleToLocalFormat(item.price, 4),
+           functions::doubleToLocalFormat(item.commission, 4), QString::number(item.cashAccount),
            QString::number((int)item.frequency), QString::number(item.date),
            QString::number(item.startDate), QString::number(item.endDate));
 }
@@ -150,13 +150,13 @@ trade securityTradeModel::internalPaste(const QStringList &value, bool *ok)
         item.type = (trade::tradeType)i;
 
     if (*ok)
-        item.value = value.at(1).toDouble(ok);
+        item.value = QLocale().toDouble(value.at(1), ok);
 
     if (*ok)
-        item.price = value.at(2).toDouble(ok);
+        item.price = QLocale().toDouble(value.at(2), ok);
 
     if (*ok)
-        item.commission = value.at(3).toDouble(ok);
+        item.commission = QLocale().toDouble(value.at(3), ok);
 
     if (*ok)
         item.cashAccount = value.at(4).toInt(ok);

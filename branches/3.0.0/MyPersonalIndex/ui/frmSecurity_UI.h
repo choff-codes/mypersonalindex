@@ -51,6 +51,7 @@ public:
     QComboBox *cmbHistorical;
     QAction *sortHistorical;
     QTableView *history;
+    QShortcut *historyCopyShortcut;
 
     void setupUI(QDialog* dialog);
 };

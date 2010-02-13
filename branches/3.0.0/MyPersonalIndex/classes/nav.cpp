@@ -102,7 +102,6 @@ void nav::insertVariantLists()
         tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Shares), m_ExecutedTrades_Shares);
         tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Price), m_ExecutedTrades_Price);
         tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Commission), m_ExecutedTrades_Commission);
-        tableValues.insert(queries::executedTradesColumns.at(queries::executedTradesColumns_Code), m_ExecutedTrades_Code);
         queries::executeTableUpdate(queries::table_ExecutedTrades, tableValues);
     }
 }
@@ -118,7 +117,6 @@ void nav::clearVariantLists()
     m_ExecutedTrades_Shares.clear();
     m_ExecutedTrades_Price.clear();
     m_ExecutedTrades_Commission.clear();
-    m_ExecutedTrades_Code.clear();
 }
 
 void nav::deleteOldValues(portfolio *currentPortfolio, const int &calculationDate, const bool &calculateFromStartDate)
@@ -334,7 +332,7 @@ void nav::insertPortfolioReinvestments(portfolio *currentPortfolio, const int &d
             continue;
 
         double split = prices::instance().split(symbol, date);
-        addToExecutedTradeList(currentPortfolio, securityID, date, s.dividend / s.close, s.close / split, -1, "R");
+        addToExecutedTradeList(currentPortfolio, securityID, date, (s.dividend * previousInfo->securitiesInfo.value(securityID).shares) / s.close, s.close / split, -1);
     }
 }
 
@@ -349,7 +347,7 @@ void nav::insertPortfolioCashTrade(portfolio *currentPortfolio, const int &cashA
     if (close == 0)
         return;
 
-    addToExecutedTradeList(currentPortfolio, cashAccount, date, -1 * tradeValue / close, close, -1, "C");
+    addToExecutedTradeList(currentPortfolio, cashAccount, date, -1 * tradeValue / close, close, -1);
 }
 
 void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, const dailyInfoPortfolio *previousInfo, const navTradeList &trades)
@@ -368,24 +366,19 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                 continue;
 
             double sharesToBuy = 0;
-            QString code;
             switch(singleTrade->type)
             {
                 case trade::tradeType_Purchase:
                     sharesToBuy = singleTrade->value;
-                    code = "P";
                     break;
                 case trade::tradeType_Sale:
                     sharesToBuy = singleTrade->value * -1;
-                    code = "S";
                     break;
                 case trade::tradeType_DivReinvest:
                     sharesToBuy = singleTrade->value;
-                    code = "R";
                     break;
                 case trade::tradeType_Interest:
                     sharesToBuy = singleTrade->value;
-                    code = "I";
                     break;
                 case trade::tradeType_FixedPurchase:
                 case trade::tradeType_FixedSale:
@@ -393,12 +386,10 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                         sharesToBuy = singleTrade->value / close;
                     if (singleTrade->type == trade::tradeType_FixedSale)
                         sharesToBuy *= -1;
-                    code = "F";
                     break;
                 case trade::tradeType_TotalValue:
                     if (previousInfo && close != 0)
                         sharesToBuy = (previousInfo->totalValue * (singleTrade->value / 100)) / close;
-                    code = "T";
                     break;
                 case trade::tradeType_AA:
                     if (previousInfo && close != 0)
@@ -414,7 +405,6 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                                 previousInfo->securitiesInfo.value(securityID).totalValue) / close;
                         }
                     }
-                    code = "A";
                     break;
                 default:
                     break;
@@ -424,7 +414,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                                                 singleTrade->price >= 0 ? singleTrade->price :
                                                 close;
 
-            addToExecutedTradeList(currentPortfolio, securityID, date, sharesToBuy, price, singleTrade->commission, code);
+            addToExecutedTradeList(currentPortfolio, securityID, date, sharesToBuy, price, singleTrade->commission);
 
             if (singleTrade->cashAccount != -1 && previousInfo)
                 insertPortfolioCashTrade(currentPortfolio, singleTrade->cashAccount, previousInfo, date, sharesToBuy * price);
@@ -448,14 +438,13 @@ void nav::insertFirstPortfolioTrades(portfolio *currentPortfolio, const int &sta
     }
 }
 
-void nav::addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission, const QString &code)
+void nav::addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission)
 {
     m_ExecutedTrades_SecurityID.append(securityID);
     m_ExecutedTrades_Dates.append(date);
     m_ExecutedTrades_Shares.append(shares);
     m_ExecutedTrades_Price.append(price);
     m_ExecutedTrades_Commission.append(commission);
-    m_ExecutedTrades_Code.append(code);
 
     currentPortfolio->data.executedTrades[securityID].append(executedTrade(date, shares, price, commission));
 }

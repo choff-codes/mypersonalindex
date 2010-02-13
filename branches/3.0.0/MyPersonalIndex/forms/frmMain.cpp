@@ -571,6 +571,7 @@ void frmMain::resetSecurityRelatedTabs(const int &minDate)
     resetPortfolioAA();
     resetPortfolioAcct();
     resetPortfolioStat();
+    resetPortfolioCorrelation();
 }
 
 void frmMain::addSecurity()

@@ -35,6 +35,7 @@ void frmSecurity::connectSlots()
     connect(ui.btnHistorical, SIGNAL(toggled(bool)), this, SLOT(historyToggled(bool)));
     connect(ui.sortHistorical, SIGNAL(toggled(bool)), this, SLOT(historySortToggled()));
     connect(ui.cmbHistorical, SIGNAL(currentIndexChanged(int)), this, SLOT(historyIndexChange(int)));
+    connect(ui.historyCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.btnAddAnother, SIGNAL(clicked()), this, SLOT(accept()));
@@ -43,7 +44,7 @@ void frmSecurity::connectSlots()
     connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), m_modelTrade, SLOT(editSelected()));
     connect(ui.btnTradesDelete, SIGNAL(clicked()), m_modelTrade, SLOT(deleteSelected()));
     connect(ui.tradesCopy, SIGNAL(triggered()), m_modelTrade, SLOT(copy()));
-    connect(ui.tradesCopyShortcut, SIGNAL(activated()), m_modelTrade, SLOT(copy()));
+    connect(ui.tradesCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
     connect(ui.tradesPaste, SIGNAL(triggered()), m_modelTrade, SLOT(paste()));
     connect(ui.tradesPasteShortcut, SIGNAL(activated()), m_modelTrade, SLOT(paste()));
     connect(ui.trades, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
@@ -51,6 +52,19 @@ void frmSecurity::connectSlots()
     connect(ui.btnAAAdd, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui.btnAADelete, SIGNAL(clicked()), m_modelAA, SLOT(deleteSelected()));
     connect(m_modelAA, SIGNAL(updateHeader()), this, SLOT(updateAAPercentage()));
+}
+
+void frmSecurity::historySortToggled()
+{
+    historyIndexChange(ui.cmbHistorical->currentIndex());
+}
+
+void frmSecurity::copyPressed() // this is ambigious between the history table view and the trade table view
+{
+    if (ui.history->hasFocus())
+        functions::exportTable(ui.history, false);
+    else
+        m_modelTrade->copy();
 }
 
 void frmSecurity::loadSecurity()
@@ -154,6 +168,9 @@ void frmSecurity::accept()
 
     if (m_security.aa != m_securityOriginal.aa)
         m_security.saveAATargets();
+
+    if (m_security.divReinvest != m_securityOriginal.divReinvest || m_security.includeInCalc != m_securityOriginal.includeInCalc || m_security.cashAccount != m_securityOriginal.cashAccount)
+        m_minDate = 0;
 
     QDialog::done(result);
 }

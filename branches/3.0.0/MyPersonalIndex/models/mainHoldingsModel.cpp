@@ -13,7 +13,7 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     : baseRow(sort)
 {
     securityInfo value = info->securitiesInfo.value(s.id);
-    double costBasis = info->avgPrices.value(s.id) * value.shares;
+    double costBasis = s.cashAccount ? value.costBasis : info->avgPrices.value(s.id) * value.shares;
     //row_Active
     this->values.append((int)s.includeInCalc);
     //row_Symbol

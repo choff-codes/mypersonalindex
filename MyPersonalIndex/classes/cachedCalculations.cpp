@@ -63,17 +63,12 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
 
     for(executedTradeList::const_iterator tradeList = m_portfolio->data.executedTrades.constBegin(); tradeList != m_portfolio->data.executedTrades.constEnd(); ++tradeList)
     {
-        int securityID = tradeList.key();
-        security s = m_portfolio->data.securities.value(securityID);
-        account acct = m_portfolio->data.acct.value(s.account);
+        security s = m_portfolio->data.securities.value(tradeList.key());
+        account::costBasisType costCalc = m_portfolio->data.acct.value(s.account).costBasis;
         
-        if (s.cashAccount)
-        {
-            returnValues.insert(securityID, 1); // cash account is always $1
-            continue;
-        }
-        
-        account::costBasisType costCalc = acct.costBasis != account::costBasisType_None ? acct.costBasis : m_portfolio->info.costBasis;
+        if (costCalc == account::costBasisType_None)
+            costCalc = m_portfolio->info.costBasis;
+
         QList<sharePricePair> previousTrades;
         const QMap<int, double> splits = prices::instance().split(s.symbol);
         QMap<int, double>::const_iterator i;
@@ -89,7 +84,9 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             if (t.date > calculationDate) // trade date outside of calculation date
                 break;
 
-            if (costCalc == account::costBasisType_AVG && t.shares < 0) // avg price averages only positive trades
+            // cash should always calculate at average price
+            // avg price averages only positive trades
+            if ((costCalc == account::costBasisType_AVG || s.cashAccount) && t.shares < 0)
                 continue;
 
             while (i != splits.constEnd() && t.date >= i.key())
@@ -133,7 +130,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
         }
 
         if (shares > 0)
-            returnValues.insert(securityID, total / shares); // insert avg price for this securityID
+            returnValues.insert(tradeList.key(), total / shares); // insert avg price for this securityID
     }
 
 #ifdef CLOCKTIME

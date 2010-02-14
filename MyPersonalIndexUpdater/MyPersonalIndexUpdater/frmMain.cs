@@ -19,7 +19,8 @@ namespace MyPersonalIndexUpdater
         public enum DynamicTradeFreq { Once, Daily, Weekly, Monthly, Yearly };
 
         // new c++
-        enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_FixedPurchase, tradeType_FixedSale, tradeType_DivReinvest, tradeType_Interest, tradeType_TotalValue, tradeType_AA, tradeType_Count };
+        enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_FixedPurchase, tradeType_FixedSale, tradeType_DivReinvest, tradeType_Interest,
+                         tradeType_InterestPercent, tradeType_Value, tradeType_TotalValue, tradeType_AA, tradeType_Count };
         enum tradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly, tradeFreq_Count };
 
         private SqlCeConnection cnCe;

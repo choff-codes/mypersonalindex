@@ -387,6 +387,11 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                     if (singleTrade->type == trade::tradeType_FixedSale)
                         sharesToBuy *= -1;
                     break;
+                case trade::tradeType_Value:
+                case trade::tradeType_InterestPercent:
+                    if (previousInfo && close != 0)
+                        sharesToBuy = (previousInfo->securitiesInfo.value(securityID).totalValue * (singleTrade->value / 100)) / close;
+                    break;
                 case trade::tradeType_TotalValue:
                     if (previousInfo && close != 0)
                         sharesToBuy = (previousInfo->totalValue * (singleTrade->value / 100)) / close;
@@ -410,7 +415,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                     break;
             }
 
-            double price = singleTrade->type == trade::tradeType_Interest ? 0 :
+            double price = singleTrade->type == trade::tradeType_Interest || singleTrade->type == trade::tradeType_InterestPercent ? 0 :
                                                 singleTrade->price >= 0 ? singleTrade->price :
                                                 close;
 

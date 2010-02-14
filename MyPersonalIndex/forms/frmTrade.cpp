@@ -181,8 +181,14 @@ void frmTrade::typeChange(int index)
         case trade::tradeType_FixedSale:
             ui.shares->setText("Amount ($):");
             break;
-        case trade::tradeType_TotalValue:
+        case trade::tradeType_Value:
             ui.shares->setText("% of Value:");
+            break;
+        case trade::tradeType_InterestPercent:
+            ui.shares->setText("Rate (%):");
+            break;
+        case trade::tradeType_TotalValue:
+            ui.shares->setText("% of Total");
             break;
         case trade::tradeType_AA:
             ui.shares->setText("% of Target:");

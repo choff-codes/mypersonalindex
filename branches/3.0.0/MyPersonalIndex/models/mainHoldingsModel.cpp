@@ -13,7 +13,7 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     : baseRow(sort)
 {
     securityInfo value = info->securitiesInfo.value(s.id);
-    double costBasis = s.cashAccount ? value.costBasis : info->avgPrices.value(s.id) * value.shares;
+    double costBasis = info->avgPrices.value(s.id) * value.shares;
     //row_Active
     this->values.append((int)s.includeInCalc);
     //row_Symbol
@@ -26,7 +26,7 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     //row_Shares
     this->values.append(value.shares);
     //row_Avg
-    this->values.append(value.shares == 0 ? QVariant() : info->avgPrices.value(s.id));
+    this->values.append(value.shares == 0 ? QVariant() : s.cashAccount ? 1 : info->avgPrices.value(s.id));
     //row_Cost
     this->values.append(value.shares == 0 ? QVariant() : costBasis);
     //row_Value

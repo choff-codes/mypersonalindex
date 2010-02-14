@@ -1,6 +1,6 @@
 #include "frmTrade_UI.h"
 #include "functions.h"
-#include <QtGui>
+#include "trade.h"
 
 void frmTrade_UI::setupUI(QDialog *dialog)
 {
@@ -15,14 +15,10 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     validator = new mpiDoubleValidator(-100000000, 100000000, 4, dialog);
     type = new QLabel("&Type:", gpTrade);
     cmbType = new QComboBox(gpTrade);
-    cmbType->addItem("Purchase");
-    cmbType->addItem("Sale");
-    cmbType->addItem("Fixed Purchase");
-    cmbType->addItem("Fixed Sale");
-    cmbType->addItem("Reinvestment");
-    cmbType->addItem("Interest");
-    cmbType->addItem("% of Portfolio");
-    cmbType->addItem("% of AA Target");
+
+    for(int i = 0; i < trade::tradeType_Count; ++i)
+        cmbType->addItem(trade::tradeTypeToString((trade::tradeType)i));
+
     tradeLayout->setWidget(0, QFormLayout::LabelRole, type);
     tradeLayout->setWidget(0, QFormLayout::FieldRole, cmbType);
     shares = new QLabel("&Shares:", gpTrade);
@@ -51,11 +47,10 @@ void frmTrade_UI::setupUI(QDialog *dialog)
 
     freq = new QLabel("&Frequency:", gpDate);
     cmbFreq = new QComboBox(gpDate);
-    cmbFreq->addItem("Once");
-    cmbFreq->addItem("Daily");
-    cmbFreq->addItem("Weekly");
-    cmbFreq->addItem("Monthly");
-    cmbFreq->addItem("Yearly");
+
+    for(int i = 0; i < trade::tradeFreq_Count; ++i)
+        cmbFreq->addItem(trade::frequencyToString((trade::tradeFreq)i));
+
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, cmbFreq);
     date = new QLabel("&Date:", gpDate);

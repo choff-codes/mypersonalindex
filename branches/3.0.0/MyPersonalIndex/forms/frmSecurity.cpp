@@ -183,6 +183,12 @@ bool frmSecurity::hasValidationErrors()
         return true;
     }
 
+    if (ui.txtSymbol->text().startsWith('`'))
+    {
+        QMessageBox::critical(this, "Symbol", "The symbol cannot start with \"`\"!");
+        return true;
+    }
+
     foreach(const portfolio *p, m_data)
         foreach(const security &s, p->data.securities)
             if (s.id != m_security.id && m_security.symbol == s.symbol && m_security.cashAccount != s.cashAccount)

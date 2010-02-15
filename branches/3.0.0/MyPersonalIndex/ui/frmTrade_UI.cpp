@@ -27,7 +27,7 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     tradeLayout->setWidget(1, QFormLayout::LabelRole, shares);
     tradeLayout->setWidget(1, QFormLayout::FieldRole, txtShares);
     chkPrice = new QCheckBox("&Price:", gpTrade);
-    txtPrice = new QLineEdit("Previous Close", gpTrade);
+    txtPrice = new QLineEdit("Close", gpTrade);
     txtPrice->setEnabled(false);  
     txtPrice->setValidator(validator);
     tradeLayout->setWidget(2, QFormLayout::LabelRole, chkPrice);

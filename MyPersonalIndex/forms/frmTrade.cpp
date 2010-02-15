@@ -10,7 +10,7 @@ frmTrade::frmTrade(const QMap<int, security> &cashAccounts, QWidget *parent, con
     ui.cmbCash->addItem("(None)", -1);
 
     foreach(const security &sec, cashAccounts)
-        if (sec.cashAccount) // && sec.id != id)
+        if (sec.cashAccount)
             ui.cmbCash->addItem(sec.symbol, sec.id);
 
     connectSlots();
@@ -67,7 +67,7 @@ void frmTrade::togglePrice(bool checked)
     if (!checked)
     {
         m_oldPrice = ui.txtPrice->text();
-        ui.txtPrice->setText("Previous Close");
+        ui.txtPrice->setText("Close");
     }
     else
         ui.txtPrice->setText(m_oldPrice);

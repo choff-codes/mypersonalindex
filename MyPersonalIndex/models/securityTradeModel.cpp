@@ -21,7 +21,7 @@ QVariant securityTradeModel::data(const QModelIndex &index, int role) const
                 break;
             case 2:
                 return t.type == trade::tradeType_Interest || t.type == trade::tradeType_InterestPercent ? "" :
-                       t.price < 0 ? "Prev Close" : functions::doubleToCurrency(t.price);
+                       t.price < 0 ? "Close" : functions::doubleToCurrency(t.price);
                 break;
             case 3:
                 return t.commission <= 0 ? "" : functions::doubleToCurrency(t.commission);

@@ -28,7 +28,7 @@ int securityHistoryModel::columnCount (const QModelIndex&) const
         case historyChoice_Splits:
             return 2;
         case historyChoice_Trades:
-            return 4;
+            return 5;
     }
     return 0;
 }
@@ -133,6 +133,8 @@ QVariant securityHistoryModel::data(const QModelIndex &index, int role) const
             else if (column == 2)
                 return functions::doubleToLocalFormat(m_trades.at(row).shares, 4);
             else if (column == 3)
+                return functions::doubleToCurrency(m_trades.at(row).shares * m_trades.at(row).price);
+            else if (column == 4)
             {
                 if (m_trades.at(row).commission > 0)
                     return functions::doubleToLocalFormat(m_trades.at(row).commission);
@@ -184,7 +186,9 @@ QVariant securityHistoryModel::headerData(int section, Qt::Orientation orientati
             else if (section == 2)
                 return "Shares";
             else if (section == 3)
-                return "Commission";
+                return "Value";
+            else if (section == 4)
+                return "Comm.";
             break;
     }
     return QVariant();

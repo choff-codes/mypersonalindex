@@ -115,7 +115,7 @@ QVariant mainAAModel::headerData(int section, Qt::Orientation orientation, int r
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
             break;
         case aaRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage((m_totalValue - m_costBasis) / m_costBasis));
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_costBasis == 0 ? 0 : (m_totalValue - m_costBasis) / m_costBasis));
             break;
     }
 

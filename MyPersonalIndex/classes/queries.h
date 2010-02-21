@@ -2,7 +2,7 @@
 #define QUERIES_H
 
 #include <QtSql>
-#include <QtGui>
+#include <QtCore>
 
 class queries
 {

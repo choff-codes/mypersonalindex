@@ -10,7 +10,17 @@
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
+#include "mainPerformanceModel.h"
+#include "mainCorrelationModel.h"
+#include "mainStatisticModel.h"
 #include "chartInfo.h"
+#include "frmPortfolio.h"
+#include "frmSecurity.h"
+#include "frmOptions.h"
+#include "frmAAEdit.h"
+#include "frmAcctEdit.h"
+#include "frmColumns.h"
+#include "frmSort.h"
 
 class frmMain : public QMainWindow
 {
@@ -25,8 +35,7 @@ private:
     QMap<int, portfolio*> m_portfolios;
     portfolio *m_currentPortfolio;
     settings m_settings;
-    updatePrices *m_updateThread;
-    nav *m_navThread;
+    bool m_calculationInProgress;
     chartInfo m_chartInfo;
     cachedCalculations m_calculations;
 
@@ -54,6 +63,9 @@ private:
     int aaMinDate(const int &aaID, int currentMinDate);
     int securityMinDate(int currentMinDate, const int &firstTradeDate);
     QStringList selectedRows(const int &column, mpiViewModelBase *model);
+    void beginNAV(const int &portfolioID = -1, const int &minDate = 0);
+    bool finishThread();
+    void statusUpdate(const QString &message);
 
 private slots:
     void addPortfolio();
@@ -80,10 +92,6 @@ private slots:
     void deleteAcct();
     void editStat();
     void beginUpdate();
-    void finishUpdate(const QStringList &invalidSecurities);
-    void beginNAV(const int &portfolioID = -1, const int &minDate = 0);
-    void finishNAV();
-    void statusUpdate(const QString &message);
     void holdingsExport() { functions::exportTable(ui.holdings, false, this); }
     void aaExport() { functions::exportTable(ui.aa, false, this); }
     void acctExport() { functions::exportTable(ui.accounts, false, this); }
@@ -104,6 +112,7 @@ private slots:
     void aaSortChanged(int index);
     void acctModifyColumns();
     void acctSortChanged(int index);
+    void tabChanged(int index) { if (index == 2) resetPortfolioChart(); } // hack for now, QWT doesn't render the chart correctly the first time
 };
 
 #endif // FRMMAIN_H

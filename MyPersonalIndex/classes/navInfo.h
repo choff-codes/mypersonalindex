@@ -1,7 +1,7 @@
 #ifndef NAVINFO_H
 #define NAVINFO_H
 
-#include <QtGui>
+#include <QtCore>
 #include "queries.h"
 
 class navInfo

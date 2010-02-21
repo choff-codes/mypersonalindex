@@ -1,7 +1,6 @@
 #ifndef MAINHOLDINGSMODEL_H
 #define MAINHOLDINGSMODEL_H
 
-#include <QtGui>
 #include "mpiViewModelBase.h"
 #include "prices.h"
 #include "cachedCalculations.h"

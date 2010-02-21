@@ -1,7 +1,7 @@
 #ifndef STATISTIC_H
 #define STATISTIC_H
 
-#include <QtGui>
+#include <QtCore>
 #include "statisticInfo.h"
 #include "portfolio.h"
 #include "calculations.h"

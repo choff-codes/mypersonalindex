@@ -1,7 +1,6 @@
 #ifndef MAINACCTMODEL_H
 #define MAINACCTMODEL_H
 
-#include <QtGui>
 #include "mpiViewModelBase.h"
 #include "cachedCalculations.h"
 

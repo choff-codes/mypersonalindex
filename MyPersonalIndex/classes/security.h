@@ -1,9 +1,10 @@
 #ifndef SECURITY_H
 #define SECURITY_H
 
-#include <QtGui>
+#include <QtCore>
 #include "trade.h"
 #include "queries.h"
+#include "functions.h"
 
 class security
 {

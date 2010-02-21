@@ -12,12 +12,8 @@ void nav::run()
     {
         portfolio *currentPortfolio = m_data.value(p);
         m_calculations.setPortfolio(currentPortfolio);
-        emit statusUpdate(QString("Calculating '%1'").arg(currentPortfolio->info.description));
         calculateNAVValues(currentPortfolio);
     }
-
-    emit calculationFinished();
-    exec();
 }
 
 void nav::calculateNAVValues(portfolio *currentPortfolio)
@@ -361,10 +357,12 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
 
         foreach(const navTradePointer &singleTrade, i.value())
         {
-            if (singleTrade->price == -1 && close == 0)
-                continue;
+            double price = singleTrade->type == trade::tradeType_Interest || singleTrade->type == trade::tradeType_InterestPercent ? 0 :
+                                                singleTrade->price >= 0 ? singleTrade->price :
+                                                close;
 
             double sharesToBuy = 0;
+
             switch(singleTrade->type)
             {
                 case trade::tradeType_Purchase:
@@ -381,22 +379,22 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                     break;
                 case trade::tradeType_FixedPurchase:
                 case trade::tradeType_FixedSale:
-                    if (close != 0)
-                        sharesToBuy = singleTrade->value / close;
+                    if (price != 0)
+                        sharesToBuy = singleTrade->value / price;
                     if (singleTrade->type == trade::tradeType_FixedSale)
                         sharesToBuy *= -1;
                     break;
                 case trade::tradeType_Value:
                 case trade::tradeType_InterestPercent:
-                    if (previousInfo && close != 0)
-                        sharesToBuy = (previousInfo->securitiesInfo.value(securityID).totalValue * (singleTrade->value / 100)) / close;
+                    if (previousInfo && price != 0)
+                        sharesToBuy = (previousInfo->securitiesInfo.value(securityID).totalValue * (singleTrade->value / 100)) / price;
                     break;
                 case trade::tradeType_TotalValue:
-                    if (previousInfo && close != 0)
-                        sharesToBuy = (previousInfo->totalValue * (singleTrade->value / 100)) / close;
+                    if (previousInfo && price != 0)
+                        sharesToBuy = (previousInfo->totalValue * (singleTrade->value / 100)) / price;
                     break;
                 case trade::tradeType_AA:
-                    if (previousInfo && close != 0)
+                    if (previousInfo && price != 0)
                     {
                         const QMap<int, double> aaList = currentPortfolio->data.securities.value(securityID).aa;
                         for(QMap<int, double>::const_iterator x = aaList.constBegin(); x != aaList.constEnd(); ++x)
@@ -406,7 +404,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                                 continue;
 
                             sharesToBuy += ((previousInfo->totalValue * (currentPortfolio->data.aa.value(aa).target * x.value() * singleTrade->value / 100)) -
-                                previousInfo->securitiesInfo.value(securityID).totalValue) / close;
+                                previousInfo->securitiesInfo.value(securityID).totalValue) / price;
                         }
                     }
                     break;
@@ -414,13 +412,9 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                     break;
             }
 
-            double price = singleTrade->type == trade::tradeType_Interest || singleTrade->type == trade::tradeType_InterestPercent ? 0 :
-                                                singleTrade->price >= 0 ? singleTrade->price :
-                                                close;
-
             addToExecutedTradeList(currentPortfolio, securityID, date, sharesToBuy, price, singleTrade->commission);
 
-            if (singleTrade->cashAccount != -1 && previousInfo)
+            if (singleTrade->cashAccount != -1 && previousInfo && sharesToBuy != 0)
                 insertPortfolioCashTrade(currentPortfolio, singleTrade->cashAccount, previousInfo, date, sharesToBuy * price);
         }
     }
@@ -444,6 +438,9 @@ void nav::insertFirstPortfolioTrades(portfolio *currentPortfolio, const int &sta
 
 void nav::addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission)
 {
+    if (shares == 0)
+        return;
+
     m_ExecutedTrades_SecurityID.append(securityID);
     m_ExecutedTrades_Dates.append(date);
     m_ExecutedTrades_Shares.append(shares);

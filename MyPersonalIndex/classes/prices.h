@@ -1,7 +1,7 @@
 #ifndef PRICES_H
 #define PRICES_H
 
-#include <QtGui>
+#include <QtCore>
 #include "securityPrice.h"
 #include "queries.h"
 

@@ -35,7 +35,6 @@ void frmSecurity::connectSlots()
     connect(ui.btnHistorical, SIGNAL(toggled(bool)), this, SLOT(historyToggled(bool)));
     connect(ui.sortHistorical, SIGNAL(toggled(bool)), this, SLOT(historySortToggled()));
     connect(ui.cmbHistorical, SIGNAL(currentIndexChanged(int)), this, SLOT(historyIndexChange(int)));
-    connect(ui.historyCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui.btnAddAnother, SIGNAL(clicked()), this, SLOT(accept()));
@@ -44,7 +43,7 @@ void frmSecurity::connectSlots()
     connect(ui.trades, SIGNAL(doubleClicked(QModelIndex)), m_modelTrade, SLOT(editSelected()));
     connect(ui.btnTradesDelete, SIGNAL(clicked()), m_modelTrade, SLOT(deleteSelected()));
     connect(ui.tradesCopy, SIGNAL(triggered()), m_modelTrade, SLOT(copy()));
-    connect(ui.tradesCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
+    connect(ui.tradesCopyShortcut, SIGNAL(activated()), this, SLOT(copyPressed()));
     connect(ui.tradesPaste, SIGNAL(triggered()), m_modelTrade, SLOT(paste()));
     connect(ui.tradesPasteShortcut, SIGNAL(activated()), m_modelTrade, SLOT(paste()));
     connect(ui.trades, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
@@ -229,8 +228,15 @@ void frmSecurity::historyToggled(bool checked)
 {
     ui.gpHistorical->setVisible(checked);
     if (!checked)
+    {
+        connect(ui.historyCopyShortcut, SIGNAL(activated()), this, SLOT(copyPressed()));
+        disconnect(ui.historyCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
         return;
+    }
 
+    disconnect(ui.historyCopyShortcut, SIGNAL(activated()), this, SLOT(copyPressed()));
+    connect(ui.historyCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
+    connect(ui.tradesCopyShortcut, SIGNAL(activatedAmbiguously()), this, SLOT(copyPressed()));
     ui.cmbHistorical->blockSignals(true);
     ui.cmbHistorical->setCurrentIndex(0);
     historyIndexChange(0);

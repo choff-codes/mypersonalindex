@@ -1,6 +1,7 @@
 #ifndef SECURITYTRADEMODEL_H
 #define SECURITYTRADEMODEL_H
 
+#include <QtGui>
 #include "functions.h"
 #include "frmTrade.h"
 #include "security.h"

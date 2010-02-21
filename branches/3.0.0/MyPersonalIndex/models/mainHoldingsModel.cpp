@@ -133,7 +133,7 @@ QVariant mainHoldingsModel::headerData(int section, Qt::Orientation orientation,
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_totalValue - m_costBasis));
             break;
         case holdingsRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage((m_totalValue - m_costBasis) / m_costBasis));
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_costBasis == 0 ? 0 : (m_totalValue - m_costBasis) / m_costBasis));
             break;
         case holdingsRow::row_TaxLiability:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_taxLiability));

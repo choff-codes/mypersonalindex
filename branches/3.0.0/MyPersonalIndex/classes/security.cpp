@@ -1,5 +1,4 @@
 #include "security.h"
-#include "functions.h"
 
 bool security::operator==(const security &other) const
 {

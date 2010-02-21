@@ -1,7 +1,6 @@
 #ifndef MAINAAMODEL_H
 #define MAINAAMODEL_H
 
-#include <QtGui>
 #include "mpiViewModelBase.h"
 #include "cachedCalculations.h"
 

@@ -1,16 +1,6 @@
 #include "frmMain.h"
-#include "frmPortfolio.h"
-#include "frmSecurity.h"
-#include "frmOptions.h"
-#include "frmAAEdit.h"
-#include "frmAcctEdit.h"
-#include "frmColumns.h"
-#include "frmSort.h"
-#include "mainPerformanceModel.h"
-#include "mainCorrelationModel.h"
-#include "mainStatisticModel.h"
 
-frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m_updateThread(0), m_navThread(0)
+frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m_calculationInProgress(false)
 {
     ui.setupUI(this);
 
@@ -47,13 +37,14 @@ frmMain::~frmMain()
 
 void frmMain::closeEvent(QCloseEvent *event)
 {
-    if (m_updateThread || m_navThread)
+    if (m_calculationInProgress)
     {
         this->setWindowTitle(QString("%1 - %2").arg(ui.WINDOW_TITLE, ui.BUSY));
         event->ignore();
         return;
     }
 
+    this->hide();
     savePortfolio();
     savePortfolios();
     saveSettings();
@@ -121,6 +112,8 @@ void frmMain::connectSlots()
     connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsExport, SIGNAL(triggered()), this, SLOT(correlationExport()));
     connect(ui.correlationsCopyShortcut, SIGNAL(activated()), this, SLOT(correlationCopy()));
+
+    connect(ui.tab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int))); // hack for now, QWT doesn't render the chart correctly the first time
 }
 
 void frmMain::resetSortDropDowns()
@@ -200,6 +193,8 @@ void frmMain::disableItems(bool disabled)
     ui.accountsToolbar->setDisabled(disabled);
     ui.aaToolbar->setDisabled(disabled);
     ui.holdings->blockSignals(disabled);
+    ui.aa->blockSignals(disabled);
+    ui.accounts->blockSignals(disabled);
 }
 
 void frmMain::loadPortfolio()
@@ -878,69 +873,63 @@ void frmMain::beginUpdate()
         return;
     }
 
+    m_calculationInProgress = true;
+    statusUpdate("Updating Prices...");
     ui.stbProgress->setMaximum(0);
-    m_updateThread = new updatePrices(m_portfolios, m_settings, this);
-    connect(m_updateThread, SIGNAL(updateFinished(QStringList)), this, SLOT(finishUpdate(QStringList)), Qt::QueuedConnection);
-    connect(m_updateThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)), Qt::QueuedConnection);
-    m_updateThread->start();
-}
 
-void frmMain::finishUpdate(const QStringList &invalidSecurities)
-{
-    ui.stbProgress->setMaximum(100);
-    ui.stbProgress->setValue(0);
-    statusUpdate("");
+    QFutureWatcher<void> w;
+    QEventLoop q;
 
-    if (!invalidSecurities.isEmpty())
-        QMessageBox::information(this,
-            "Update Error", "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
-            invalidSecurities.join(", "));
+    connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
+    updatePrices updateThread(m_portfolios, m_settings);
+    QFuture<updatePricesReturnValue> future = QtConcurrent::run(&updateThread, &updatePrices::run);
+    w.setFuture(future);
 
-    m_updateThread->quit();
-    m_updateThread->wait();
-    m_updateThread->disconnect();
-    delete m_updateThread;
-    m_updateThread = 0;
+    q.exec();
 
-    if (this->windowTitle().contains("task"))
-    {
-        this->close();
-        return;
-    }
-
-    loadPortfolio();
-    disableItems(false);
+    if (future.result().earliestUpdate <= QDate::currentDate().toJulianDay())
+        beginNAV(-1, future.result().earliestUpdate);
+    else
+        if (finishThread() && !future.result().updateFailures.isEmpty())
+            QMessageBox::information(this,
+                "Update Error", "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
+                future.result().updateFailures.join(", "));
 }
 
 void frmMain::beginNAV(const int &portfolioID, const int &minDate)
 {
+    m_calculationInProgress = true;
     disableItems(true);
+    statusUpdate("Calculating Portfolios...");
     ui.stbProgress->setMaximum(0);
-    m_navThread = new nav(m_portfolios, minDate, this, portfolioID);
-    connect(m_navThread, SIGNAL(calculationFinished()), this, SLOT(finishNAV()), Qt::QueuedConnection);
-    connect(m_navThread, SIGNAL(statusUpdate(QString)), this, SLOT(statusUpdate(QString)), Qt::QueuedConnection);
-    m_navThread->start();
+
+    QFutureWatcher<void> w;
+    QEventLoop q;
+
+    connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
+    nav navThread(m_portfolios, minDate, portfolioID);
+    QFuture<void> future = QtConcurrent::run(&navThread, &nav::run);
+
+    w.setFuture(future);
+    q.exec();
+    finishThread();
 }
 
-void frmMain::finishNAV()
+bool frmMain::finishThread()
 {
-    ui.stbProgress->setMaximum(100);
-    ui.stbProgress->setValue(0);
-    statusUpdate("");
-    m_navThread->quit();
-    m_navThread->wait();
-    m_navThread->disconnect();
-    delete m_navThread;
-    m_navThread = 0;
-
+    m_calculationInProgress = false;
     if (this->windowTitle().contains("task"))
     {
         this->close();
-        return;
+        return false;
     }
 
     loadPortfolio();
     disableItems(false);
+    statusUpdate("");
+    ui.stbProgress->setMaximum(100);
+    ui.stbProgress->setValue(0); 
+    return true;
 }
 
 void frmMain::statusUpdate(const QString &message)

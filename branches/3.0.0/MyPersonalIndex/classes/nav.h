@@ -7,19 +7,13 @@
 #include "prices.h"
 #include "portfolio.h"
 
-class nav: public QThread
+class nav
 {
-    Q_OBJECT
-
 public:
-    nav(const QMap<int, portfolio*> &data, const int &calculationDate, QObject *parent = 0, const int &portfolioID = -1):
-        QThread(parent), m_data(data), m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID) {}
+    nav(const QMap<int, portfolio*> &data, const int &calculationDate, const int &portfolioID = -1):
+        m_data(data), m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID) {}
 
     void run();
-
-signals:
-    void calculationFinished();
-    void statusUpdate(const QString &message);
 
 private:
     const QMap<int, portfolio*> m_data;

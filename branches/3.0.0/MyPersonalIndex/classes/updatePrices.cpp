@@ -1,37 +1,26 @@
 #include "updatePrices.h"
-#include "queries.h"
-#include <QtNetwork>
-#include <QtSql>
 
-void updatePrices::run()
+updatePricesReturnValue updatePrices::run()
 {
-    emit statusUpdate("Updating Prices");
-
     QMap<QString, updateInfo> securities = getUpdateInfo();
-    int earliestUpdate = QDate::currentDate().toJulianDay() + 1; // track earliest date saved to database for recalc
+    updatePricesReturnValue returnValue;
+
+    returnValue.earliestUpdate = QDate::currentDate().toJulianDay() + 1; // track earliest date saved to database for recalc
 
     foreach(const updateInfo &info, securities)
-        if (getPrices(info.symbol, info.lastPrice, &earliestUpdate))  // check if symbol exists
+        if (getPrices(info.symbol, info.lastPrice, &returnValue.earliestUpdate))  // check if symbol exists
         {
-            getDividends(info.symbol, info.lastDividend, &earliestUpdate);
+            getDividends(info.symbol, info.lastDividend, &returnValue.earliestUpdate);
             if (m_downloadSplits)
-                getSplits(info.symbol, info.lastSplit, &earliestUpdate);
+                getSplits(info.symbol, info.lastSplit, &returnValue.earliestUpdate);
         }
+        else
+            returnValue.updateFailures.append(info.symbol);
 
     updateMissingPrices();
     insertUpdates();
 
-    if (earliestUpdate == QDate::currentDate().toJulianDay() + 1)
-        emit updateFinished(m_updateFailures);
-    else
-    {
-        m_nav = new nav(m_data, earliestUpdate);
-        connect(m_nav, SIGNAL(calculationFinished()), this, SLOT(calcuationFinished()), Qt::QueuedConnection);
-        connect(m_nav, SIGNAL(statusUpdate(QString)), this, SIGNAL(statusUpdate(QString)), Qt::QueuedConnection);
-        m_nav->start();
-    }
-
-    exec();
+    return returnValue;
 }
 
 void updatePrices::updateMissingPrices()
@@ -139,7 +128,7 @@ QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
     QEventLoop loop;
     QNetworkRequest request(url);
     QNetworkReply *reply = manager.get(request);
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
 
     loop.exec();
 
@@ -158,11 +147,7 @@ bool updatePrices::getPrices(const QString &symbol, const int &minDate, int *ear
 
     QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
     if (!lines)
-    {
-        m_updateFailures.append(symbol);
-        delete lines;
         return false;
-    }
 
     if (lines->count() > 2)
     {
@@ -290,14 +275,4 @@ bool updatePrices::isInternetConnection()
         return true;
 
     return false;
-}
-
-void updatePrices::calcuationFinished()
-{
-    m_nav->quit();
-    m_nav->wait();
-    m_nav->disconnect();
-    delete m_nav;
-
-    emit updateFinished(m_updateFailures);
 }

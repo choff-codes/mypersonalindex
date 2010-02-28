@@ -2,9 +2,11 @@
 #define FRMMAIN_UI_H
 
 #include <QtGui>
-#include <qwt_plot.h>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
+#include "mpiDateEdit.h"
+#include "mpiTableView.h"
+#include "mpiChart.h"
 
 class frmMain_UI
 {
@@ -41,10 +43,10 @@ public:
     QAction *holdingsReorderColumns;
     QAction *holdingsExport;
     QLabel *holdingsDate;
-    QDateEdit *holdingsDateDropDown;
+    mpiDateEdit *holdingsDateDropDown;
     QLabel *holdingsSortLabel;
     QComboBox *holdingsSortCombo;
-    QTableView *holdings;
+    mpiTableView *holdings;
     QShortcut *holdingsCopyShortcut;
 
     QVBoxLayout *statGrid;
@@ -52,20 +54,20 @@ public:
     QAction *statEdit;
     QAction *statExport;
     QLabel *statStartDate;
-    QDateEdit *statStartDateDropDown;
+    mpiDateEdit *statStartDateDropDown;
     QLabel *statEndDate;
-    QDateEdit *statEndDateDropDown;
-    QTableView *stat;
+    mpiDateEdit *statEndDateDropDown;
+    mpiTableView *stat;
     QShortcut *statCopyShortcut;
 
     QVBoxLayout *chartGrid;
     QToolBar *chartToolbar;
     QAction *chartExport;
     QLabel *chartStartDate;
-    QDateEdit *chartStartDateDropDown;
+    mpiDateEdit *chartStartDateDropDown;
     QLabel *chartEndDate;
-    QDateEdit *chartEndDateDropDown;
-    QwtPlot *chart;
+    mpiDateEdit *chartEndDateDropDown;
+    mpiChart *chart;
     QwtPlotGrid *chartGridLines;
     QwtPlotZoomer *chartZoomer;
 
@@ -73,7 +75,7 @@ public:
     QToolBar *performanceToolbar;
     QAction *performanceSortDesc;
     QAction *performanceExport;
-    QTableView *performance;
+    mpiTableView *performance;
     QShortcut *performanceCopyShortcut;
 
     QVBoxLayout *correlationsGrid;
@@ -81,10 +83,10 @@ public:
     QAction *correlationsShowHidden;
     QAction *correlationsExport;
     QLabel *correlationsStartDate;
-    QDateEdit *correlationsStartDateDropDown;
+    mpiDateEdit *correlationsStartDateDropDown;
     QLabel *correlationsEndDate;
-    QDateEdit *correlationsEndDateDropDown;
-    QTableView *correlations;
+    mpiDateEdit *correlationsEndDateDropDown;
+    mpiTableView *correlations;
     QShortcut *correlationsCopyShortcut;
 
     QVBoxLayout *accountsGrid;
@@ -96,10 +98,10 @@ public:
     QAction *accountsReorderColumns;
     QAction *accountsExport;
     QLabel *accountsDate;
-    QDateEdit *accountsDateDropDown;
+    mpiDateEdit *accountsDateDropDown;
     QLabel *accountsSortLabel;
     QComboBox *accountsSortCombo;
-    QTableView *accounts;
+    mpiTableView *accounts;
     QShortcut *accountsCopyShortcut;
 
     QVBoxLayout *aaGrid;
@@ -111,10 +113,10 @@ public:
     QAction *aaReorderColumns;
     QAction *aaExport;
     QLabel *aaDate;
-    QDateEdit *aaDateDropDown;
+    mpiDateEdit *aaDateDropDown;
     QLabel *aaSortLabel;
     QComboBox *aaSortCombo;
-    QTableView *aa;
+    mpiTableView *aa;
     QShortcut *aaCopyShortcut;
 
     QTabWidget *tab;

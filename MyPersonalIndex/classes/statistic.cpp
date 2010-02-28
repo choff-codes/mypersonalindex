@@ -25,26 +25,6 @@ QMap<int, QString> statistic::statisticList()
     return stats;
 }
 
-void statistic::saveSelectedStats(const int &portfolioID, const QList<int> &stats)
-{
-    QVariantList portfolio, statID, sequence;
-    for(int i = 0; i < stats.count(); ++i)
-    {
-        portfolio.append(portfolioID);
-        statID.append(stats.at(i));
-        sequence.append(i);
-    }
-
-    QMap<QString, QVariantList> tableValues;
-    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_PortfolioID), portfolio);
-    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_StatID), statID);
-    tableValues.insert(queries::statMappingColumns.at(queries::statMappingColumns_Sequence), sequence);
-
-    queries::deletePortfolioItems(queries::table_StatMapping, portfolioID);
-    if (!statID.isEmpty())
-        queries::executeTableUpdate(queries::table_StatMapping, tableValues);
-}
-
 QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
 {
     switch(statistic)

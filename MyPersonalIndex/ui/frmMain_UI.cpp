@@ -86,7 +86,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsGrid->setMargin(1);
     holdingsToolbar = new QToolBar(tab_holdings);
 
-    holdings = new QTableView(tab_holdings);
+    holdings = new mpiTableView(false, tab_holdings);
     holdingsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, holdings);
 
     int fntHeight = holdings->fontMetrics().height() + 2; // add small buffer
@@ -114,7 +114,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     holdingsExport = new QAction("Export...", tab_holdings);
     holdingsExport->setIconText("Export...");
     holdingsDate = new QLabel(" Date: ", tab_holdings);
-    holdingsDateDropDown = functions::createDateEdit(tab_holdings);
+    holdingsDateDropDown = new mpiDateEdit(tab_holdings);
     holdingsSortLabel = new QLabel(" Sort By: ", tab_holdings);
     holdingsSortCombo = new QComboBox(tab_holdings);
     holdingsSortCombo->setMinimumSize(QSize(100, 0));
@@ -139,7 +139,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statGrid->setMargin(1);
     statToolbar = new QToolBar(tab_stat);
 
-    stat = new QTableView(tab_stat);
+    stat = new mpiTableView(true, tab_stat);
     statCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, stat);
     stat->setSelectionMode(QAbstractItemView::ExtendedSelection);
     stat->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -156,9 +156,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     statExport = new QAction("Export...", tab_stat);
     statExport->setIconText("Export...");
     statStartDate = new QLabel(" Start Date: ", tab_stat);
-    statStartDateDropDown = functions::createDateEdit(tab_stat);
+    statStartDateDropDown = new mpiDateEdit(tab_stat);
     statEndDate = new QLabel(" End Date: ", tab_stat);
-    statEndDateDropDown = functions::createDateEdit(tab_stat);
+    statEndDateDropDown = new mpiDateEdit(tab_stat);
     statToolbar->addAction(statEdit);
     statToolbar->addSeparator();
     statToolbar->addWidget(statStartDate);
@@ -172,7 +172,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     chartGrid->setSpacing(0);
     chartGrid->setMargin(1);
     chartToolbar = new QToolBar(tab_chart);
-    chart = new QwtPlot(tab_chart);
+    chart = new mpiChart(tab_chart);
     chart->setAxisScaleDraw(QwtPlot::xBottom, new mpiDateScale());
     chart->setAxisScaleDraw(QwtPlot::yLeft, new mpiPercentScale());
     chart->plotLayout()->setCanvasMargin(20);
@@ -214,9 +214,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     chartExport = new QAction("Export...", tab_chart);
     chartExport->setIconText("Export...");
     chartStartDate = new QLabel(" Start Date: ", tab_chart);
-    chartStartDateDropDown = functions::createDateEdit(tab_chart);
+    chartStartDateDropDown = new mpiDateEdit(tab_chart);
     chartEndDate = new QLabel(" End Date: ", tab_chart);
-    chartEndDateDropDown = functions::createDateEdit(tab_chart);
+    chartEndDateDropDown = new mpiDateEdit(tab_chart);
 
     chartToolbar->addWidget(chartStartDate);
     chartToolbar->addWidget(chartStartDateDropDown);
@@ -230,7 +230,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     performanceGrid->setMargin(1);
     performanceToolbar = new QToolBar(tab_performance);
 
-    performance = new QTableView(tab_performance);
+    performance = new mpiTableView(false, tab_performance);
     performanceCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, performance);
     performance->verticalHeader()->hide();
     performance->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -256,7 +256,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsGrid->setMargin(1);
     correlationsToolbar = new QToolBar(tab_correlations);
 
-    correlations = new QTableView(tab_correlations);
+    correlations = new mpiTableView(true, tab_correlations);
     correlationsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, correlations);
     correlations->setSelectionMode(QAbstractItemView::ExtendedSelection);
     correlations->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -273,9 +273,9 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     correlationsExport = new QAction("Export...", tab_correlations);
     correlationsExport->setIconText("Export...");
     correlationsStartDate = new QLabel(" Start Date: ", tab_correlations);
-    correlationsStartDateDropDown = functions::createDateEdit(tab_correlations);
+    correlationsStartDateDropDown = new mpiDateEdit(tab_correlations);
     correlationsEndDate = new QLabel(" End Date: ", tab_correlations);
-    correlationsEndDateDropDown = functions::createDateEdit(tab_correlations);
+    correlationsEndDateDropDown = new mpiDateEdit(tab_correlations);
 
     correlationsToolbar->addWidget(correlationsStartDate);
     correlationsToolbar->addWidget(correlationsStartDateDropDown);
@@ -291,7 +291,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsGrid->setMargin(1);
     accountsToolbar = new QToolBar(tab_accounts);
 
-    accounts = new QTableView(tab_accounts);
+    accounts = new mpiTableView(false, tab_accounts);
     accountsCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, accounts);
     accounts->verticalHeader()->hide();
     accounts->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -316,7 +316,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     accountsExport = new QAction("Export...", tab_accounts);
     accountsExport->setIconText("Export...");
     accountsDate = new QLabel(" Date: ", tab_accounts);
-    accountsDateDropDown = functions::createDateEdit(tab_accounts);
+    accountsDateDropDown = new mpiDateEdit(tab_accounts);
     accountsSortLabel = new QLabel(" Sort By: ", tab_accounts);
     accountsSortCombo = new QComboBox(tab_accounts);
     accountsSortCombo->setMinimumSize(QSize(100, 0));
@@ -341,7 +341,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaGrid->setMargin(1);
     aaToolbar = new QToolBar(tab_aa);
 
-    aa = new QTableView(tab_aa);
+    aa = new mpiTableView(false, tab_aa);
     aaCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, aa);
     aa->verticalHeader()->hide();
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -366,7 +366,7 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaExport = new QAction("Export...", tab_aa);
     aaExport->setIconText("Export...");
     aaDate = new QLabel(" Date: ", tab_aa);
-    aaDateDropDown = functions::createDateEdit(tab_aa);
+    aaDateDropDown = new mpiDateEdit(tab_aa);
     aaSortLabel = new QLabel(" Sort By: ", tab_aa);
     aaSortCombo = new QComboBox(tab_aa);
     aaSortCombo->setMinimumSize(QSize(100, 0));

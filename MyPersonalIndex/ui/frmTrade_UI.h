@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "mpiValidator.h"
+#include "mpiDateEdit.h"
 
 class frmTrade_UI
 {
@@ -26,11 +27,11 @@ public:
     QLabel *freq;
     QComboBox *cmbFreq;
     QLabel *date;
-    QDateEdit *deDate;
+    mpiDateEdit *deDate;
     QCheckBox *chkStarting;
-    QDateEdit *deStarting;
+    mpiDateEdit *deStarting;
     QCheckBox *chkEnding;
-    QDateEdit *deEnding;
+    mpiDateEdit *deEnding;
     QDialogButtonBox *btnOkCancel;
 
     void setupUI(QDialog* dialog);

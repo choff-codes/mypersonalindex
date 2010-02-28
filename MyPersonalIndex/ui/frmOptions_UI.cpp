@@ -13,7 +13,7 @@ void frmOptions_UI::setupUI(QDialog *dialog)
 
     topLayout = new QFormLayout();
     downloadFrom = new QLabel("&Download Data From:", dialog);
-    deDownloadDate = functions::createDateEdit(dialog);
+    deDownloadDate = new mpiDateEdit(dialog);
     topLayout->setWidget(0, QFormLayout::LabelRole, downloadFrom);
     topLayout->setWidget(0, QFormLayout::FieldRole, deDownloadDate);
 

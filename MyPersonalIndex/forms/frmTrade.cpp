@@ -67,7 +67,7 @@ void frmTrade::togglePrice(bool checked)
     if (!checked)
     {
         m_oldPrice = ui.txtPrice->text();
-        ui.txtPrice->setText("Close");
+        ui.txtPrice->setText("Previous Close");
     }
     else
         ui.txtPrice->setText(m_oldPrice);

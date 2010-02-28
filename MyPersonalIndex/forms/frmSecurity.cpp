@@ -61,7 +61,7 @@ void frmSecurity::historySortToggled()
 void frmSecurity::copyPressed() // this is ambigious between the history table view and the trade table view
 {
     if (ui.history->hasFocus())
-        functions::exportTable(ui.history, false);
+        ui.history->copyTable();
     else
         m_modelTrade->copy();
 }

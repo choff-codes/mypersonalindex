@@ -34,9 +34,6 @@ const QStringList queries::settingsColumnsColumns = QStringList() << "ID" << "Co
 //enum { splitsColumns_Date, splitsColumns_Symbol, splitsColumns_Ratio };
 const QStringList queries::splitsColumns = QStringList() << "Date" << "Symbol" << "Ratio";
 
-//enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence };
-const QStringList queries::statMappingColumns = QStringList() << "PortfolioID" << "StatID" << "Sequence";
-
 //enum {securityColumns_ID, securityColumns_PortfolioID, securityColumns_Symbol, securityColumns_Account, securityColumns_Expense, securityColumns_DivReinvest,
 //      securityColumns_CashAccount, securityColumns_IncludeInCalc, securityColumns_Hide, securityColumns_Count };
 const QStringList queries::SecurityColumns = QStringList() << "ID" << "PortfolioID" << "Symbol" << "Account" << "Expense" << "DivReinvest"
@@ -64,7 +61,6 @@ const QString queries::table_Portfolios = "Portfolios";
 const QString queries::table_Settings = "Settings";
 const QString queries::table_SettingsColumns = "SettingsColumns";
 const QString queries::table_Splits = "Splits";
-const QString queries::table_StatMapping = "StatMapping";
 const QString queries::table_Security = "Security";
 const QString queries::table_SecurityAA = "SecurityAA";
 const QString queries::table_SecurityTrades = "SecurityTrades";

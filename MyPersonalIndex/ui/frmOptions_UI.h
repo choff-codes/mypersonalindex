@@ -2,6 +2,7 @@
 #define FRMOPTIONS_UI_H
 
 #include <QtGui>
+#include "mpiDateEdit.h"
 
 class frmOptions_UI
 {
@@ -10,7 +11,7 @@ public:
     QDialogButtonBox *btnOkCancel;
     QFormLayout *topLayout;
     QLabel *downloadFrom;
-    QDateEdit *deDownloadDate;
+    mpiDateEdit *deDownloadDate;
     QCheckBox *chkSplits;
 
     void setupUI(QDialog* dialog);

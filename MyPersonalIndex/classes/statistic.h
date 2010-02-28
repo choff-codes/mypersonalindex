@@ -31,7 +31,6 @@ public:
     static double weightedExpenseRatio(const statisticInfo &statInfo);
 
     static QMap<int, QString> statisticList();
-    static void saveSelectedStats(const int &portfolioID, const QList<int> &stats);
 };
 
 #endif // STATISTIC_H

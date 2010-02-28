@@ -16,6 +16,6 @@ void chartInfo::attach(QwtPlot *chart)
 {
     if (!m_curve)
         return;
-    m_curve->setRawData(&m_xData[0], &m_yData[0], count());
+    m_curve->setRawSamples(&m_xData[0], &m_yData[0], count());
     m_curve->attach(chart);
 }

@@ -1,29 +1,5 @@
 #include "functions.h"
 
-QDateEdit* functions::createDateEdit(QWidget* parent)
-{
-    QDateEdit *d = new QDateEdit(parent);
-    d->setDate(QDate::currentDate());
-    d->setCalendarPopup(true);
-    d->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
-    return d;
-}
-
-void functions::showWelcomeMessage(QWidget *parent)
-{
-    QString welcomeMessage = "Welcome to My Personal Index!\n\nThere is no documentation yet,"
-                             " but I recommend starting in the following way:\n\n1. Set the start date under options (on the top toolbar).\n"
-                             "2. Add a new Portfolio\n3. Set your asset allocation \n4. Set your accounts\n5. Add holdings\n"
-                             "6. Add relevant portfolio statistics\n7. Update prices!";
-    QMessageBox msg(QMessageBox::Information, "My Personal Index", welcomeMessage, QMessageBox::Ok, parent);
-    QPushButton *copyButton = msg.addButton("Copy To Clipboard", QMessageBox::RejectRole);
-
-    msg.exec();
-
-    if (msg.clickedButton() == copyButton)
-        QApplication::clipboard()->setText(welcomeMessage);
-}
-
 QVariant functions::doubleToNull(const double &value)
 {
     return value < 0 ? QVariant(QVariant::Double) : value;
@@ -57,108 +33,10 @@ QString functions::doubleToLocalFormat(const double &value, const int &precision
     return QString("%L1").arg(value, 0, 'f', precision);
 }
 
-void functions::exportTable(const QTableView *table, const bool &includeRowLabels, QMainWindow *parent)
-{
-    if (!table)
-        return;
-
-    QList<int> rows;
-    QString fileType, filePath;
-    QString delimiter = "\t";
-
-    if (parent) // export
-    {
-        for(int i = 0; i < table->model()->rowCount(); ++i)
-            rows.append(i);
-
-        filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
-            "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
-
-        if (filePath.isEmpty())
-            return;
-
-        delimiter = fileType.contains("Tab") ? "\t" : fileType.contains("Pipe") ? "|" : ",";
-    }
-    else // copy
-    {
-        foreach(const QModelIndex &q, table->selectionModel()->selectedRows())
-            rows.append(q.row());
-
-        if (rows.isEmpty())
-            return;
-    }
-
-    QStringList line, lines;
-
-    if (includeRowLabels)
-        line.append("");
-
-    for(int i = 0; i < table->model()->columnCount(); ++i)
-        line.append(exportClean(table->model()->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimiter));
-
-    lines.append(line.join(delimiter));
-
-    for(int x = 0; x < rows.count(); ++x)
-    {
-        line.clear();
-        if (includeRowLabels)
-            line.append(exportClean(table->model()->headerData(rows.at(x), Qt::Vertical, Qt::DisplayRole), delimiter));
-        for (int i = 0; i < table->model()->columnCount(); ++i)
-        {
-            QVariant v = table->model()->data(table->model()->index(rows.at(x), i), Qt::CheckStateRole);
-            if (v.isNull())
-                line.append(exportClean(table->model()->data(table->model()->index(rows.at(x), i), Qt::DisplayRole), delimiter));
-            else
-                line.append(v.toInt() == Qt::Checked ? "Yes" : "No");
-        }
-        lines.append(line.join(delimiter));
-    }
-
-    if (parent) // export
-    {
-        QFile data(filePath);
-        if (!data.open(QFile::WriteOnly | QFile::Truncate | QIODevice::Text))
-        {
-            QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
-            return;
-        }
-
-        QTextStream out(&data);
-        out << lines.join("\n");
-    }
-    else // clipboard
-        QApplication::clipboard()->setText(lines.join("\n"));
-}
-
-QString functions::exportClean(const QVariant &v, const QString &delimiter)
+QString functions::replaceDelimiter(const QVariant &v, const QString &delimiter)
 {
     return v.toString().remove(delimiter).replace("\n", " ");
 }
-
-void functions::exportChart(QwtPlot *chart, QMainWindow *parent)
-{
-    //http://www.qtcentre.org/threads/17616-Saving-qwt-plot-as-image?p=88077#post88077
-    QPixmap qPix = QPixmap::grabWidget(chart);
-
-    QString fileType, filePath;
-    filePath = QFileDialog::getSaveFileName(parent, "Export to...", QDir::homePath(),
-        "JPEG (*.jpeg);;PNG (*.png);;24-bit Bitmap (*.bmp)", &fileType);
-
-    if (filePath.isEmpty())
-        return;
-
-    bool success = false;
-    if (fileType.contains("JPEG"))
-        success = qPix.save(filePath, "JPEG");
-    else if (fileType.contains("PNG"))
-        success = qPix.save(filePath, "PNG");
-    else
-        success = qPix.save(filePath, "BMP");
-
-    if (!success)
-        QMessageBox::critical(parent, "Error!", "Could not save file, the file path cannot be opened!");
-}
-
 
 bool functions::lessThan(const QVariant &left, const QVariant &right, const QVariant &type)
 {
@@ -197,7 +75,7 @@ bool functions::equal(const QVariant &left, const QVariant &right, const QVarian
     };
 }
 
-QStringList functions::exceptLeft(const QStringList &left, const QStringList &right)
+QStringList functions::inLeftNotRight(const QStringList &left, const QStringList &right)
 {
     QStringList returnList;
     foreach(const QString &s, left)

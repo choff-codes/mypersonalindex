@@ -2,6 +2,7 @@
 #define FRMSECURITY_UI_H
 
 #include <QtGui>
+#include "mpiTableView.h"
 
 class frmSecurity_UI
 {
@@ -26,14 +27,14 @@ public:
     QCheckBox *chkHide;
     QGroupBox *gpAA;
     QVBoxLayout *aaLayout;
-    QTableView *aa;
+    mpiTableView *aa;
     QGridLayout *aaLayoutBottom;
     QComboBox *cmbAA;
     QPushButton *btnAAAdd;
     QPushButton *btnAADelete;
     QGroupBox *gpTrades;
     QVBoxLayout *tradesLayout;
-    QTableView *trades;
+    mpiTableView *trades;
     QHBoxLayout *tradesLayoutButtons;
     QPushButton *btnTradesAdd;
     QPushButton *btnTradesEdit;
@@ -50,7 +51,7 @@ public:
     QToolBar *tbHistorical;
     QComboBox *cmbHistorical;
     QAction *sortHistorical;
-    QTableView *history;
+    mpiTableView *history;
     QShortcut *historyCopyShortcut;
 
     void setupUI(QDialog* dialog);

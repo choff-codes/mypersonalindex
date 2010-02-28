@@ -98,34 +98,33 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             t.price /= splitRatio;
             t.shares *= splitRatio;
 
-            if (t.shares < 0) // sold shares, need to remove at the beginning or end depending on LIFO or FIFO
-            {
-                while (t.shares != 0 && !previousTrades.isEmpty()) // still shares to sell
-                {
-                    int z = (costCalc == account::costBasisType_LIFO) ? previousTrades.count() - 1 : 0;
-                    sharePricePair pair = previousTrades.at(z);
-
-                    if (pair.shares <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
-                    {
-                        t.shares += pair.shares;
-                        shares -= pair.shares;
-                        total -= pair.shares * pair.price;
-                        previousTrades.removeAt(z);
-                    }
-                    else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
-                    {
-                        previousTrades[z].shares += t.shares;
-                        shares += t.shares;
-                        total += t.shares * pair.price;
-                        break;
-                    }
-                }
-            }
-            else // this is a buy, just add the trade
+            if (t.shares >= 0) // this is a buy, just add the trade
             {
                 previousTrades.append(sharePricePair(t.shares, t.price));
                 shares += t.shares;
                 total += t.shares * t.price;
+                continue;
+            }
+
+            while (t.shares != 0 && !previousTrades.isEmpty()) // still shares to sell
+            {
+                int z = (costCalc == account::costBasisType_LIFO) ? previousTrades.count() - 1 : 0;
+                sharePricePair pair = previousTrades.at(z);
+
+                if (pair.shares <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
+                {
+                    t.shares += pair.shares;
+                    shares -= pair.shares;
+                    total -= pair.shares * pair.price;
+                    previousTrades.removeAt(z);
+                }
+                else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
+                {
+                    previousTrades[z].shares += t.shares;
+                    shares += t.shares;
+                    total += t.shares * pair.price;
+                    break;
+                }
             }
         }
 

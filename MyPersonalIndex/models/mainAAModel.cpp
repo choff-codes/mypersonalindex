@@ -49,6 +49,13 @@ QMap<int, QString> aaRow::fieldNames()
     return names;
 }
 
+mainAAModel::mainAAModel(const QList<baseRow *> &rows, QList<int>viewableColumns, const dailyInfoPortfolio *info, const double &aaThreshold, QTableView *parent):
+    mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold / 100.0), m_costBasis(info->costBasis), m_target(0)
+{
+    foreach(const baseRow *r, rows)
+        m_target += r->values.at(aaRow::row_Target).toDouble();
+}
+
 QVariant mainAAModel::data(const QModelIndex &index, int role) const
 {
     if (!index.isValid())
@@ -116,6 +123,9 @@ QVariant mainAAModel::headerData(int section, Qt::Orientation orientation, int r
             break;
         case aaRow::row_GainP:
             extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_costBasis == 0 ? 0 : (m_totalValue - m_costBasis) / m_costBasis));
+            break;
+        case aaRow::row_Target:
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_target));
             break;
     }
 

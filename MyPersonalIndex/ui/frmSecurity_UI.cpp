@@ -92,7 +92,8 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     int fntHeight = trades->fontMetrics().height() + 2; // add small buffer
     trades->verticalHeader()->setDefaultSectionSize(fntHeight);
     trades->horizontalHeader()->setFixedHeight(fntHeight);
-    trades->setMaximumHeight(fntHeight * 6);
+    trades->setMaximumHeight(fntHeight * 10);
+    trades->setMinimumWidth(trades->fontMetrics().width('W') * 60);
     trades->horizontalHeader()->setStyleSheet("QHeaderView::section {border: none;}");
     trades->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     trades->verticalHeader()->hide();
@@ -106,7 +107,7 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     tradesLayoutButtons->addWidget(btnTradesEdit);
     tradesLayoutButtons->addWidget(btnTradesDelete);
     tradesLayout->addWidget(trades, 1);
-    tradesLayout->addLayout(tradesLayoutButtons);
+    tradesLayout->addLayout(tradesLayoutButtons);  
 
     tradesPopup = new QMenu(trades);
     tradesCopy = new QAction("Copy", tradesPopup);

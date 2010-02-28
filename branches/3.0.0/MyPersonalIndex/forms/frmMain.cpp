@@ -141,7 +141,7 @@ void frmMain::resetSortDropDowns()
 void frmMain::resetSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown)
 {
     dropDown->blockSignals(true);
-    dropDown->addItem("", -1);
+    dropDown->addItem("(None)", -1);
 
     for (QMap<int, QString>::const_iterator i = fieldNames.constBegin(); i != fieldNames.constEnd(); ++i)
         dropDown->addItem(i.value(), i.key());
@@ -602,7 +602,7 @@ void frmMain::addSecurity()
             m_currentPortfolio->data.securities[s.id] = s;
             minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount && !prices::instance().symbols().contains(s.symbol))
+            if (!s.cashAccount)
                 showUpdatePrices = true;
         }
     }
@@ -1014,8 +1014,6 @@ void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<i
 
     if (f.exec())
         sortString = f.getReturnValues();
-
-    setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
 }
 
 void frmMain::holdingsSortChanged(int index)

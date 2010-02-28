@@ -16,7 +16,6 @@ public:
     QMap<int, security> securities;
     QMap<int, assetAllocation> aa;
     QMap<int, account> acct;
-    QList<int> stats;
     executedTradeList executedTrades;
     navInfo nav;
 };
@@ -70,7 +69,6 @@ private:
     static void loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &portfolioList);
     static void loadPortfoliosAA(QMap<int, portfolio::portfolio*> &portfolioList);
     static void loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioList);
-    static void loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList);
     static void loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList);
 };
 

@@ -57,7 +57,7 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     startDate = new QLabel("&Start Date:", dialog);
     layout->setWidget(5, QFormLayout::LabelRole, startDate);
 
-    dateStartDate = functions::createDateEdit(dialog);
+    dateStartDate = new mpiDateEdit(dialog);
     layout->setWidget(5, QFormLayout::FieldRole, dateStartDate);
 
     QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing

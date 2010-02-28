@@ -57,7 +57,7 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
 
     gpAA = new QGroupBox("Asset Allocation", dialog);
     aaLayout = new QVBoxLayout(gpAA);
-    aa = new QTableView(gpAA);
+    aa = new mpiTableView(false, gpAA);
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
     aa->setSelectionBehavior(QAbstractItemView::SelectRows);
     aa->setAlternatingRowColors(true);
@@ -84,7 +84,7 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
 
     gpTrades = new QGroupBox("Trades", dialog);
     tradesLayout = new QVBoxLayout(gpTrades);
-    trades = new QTableView(gpTrades);
+    trades = new mpiTableView(false, gpTrades);
     trades->setSelectionMode(QAbstractItemView::ExtendedSelection);
     trades->setSelectionBehavior(QAbstractItemView::SelectRows);
     trades->setAlternatingRowColors(true);
@@ -141,7 +141,7 @@ void frmSecurity_UI::setupUI(QDialog *dialog)
     tbHistorical->addAction(sortHistorical);
     historicalLayout->addWidget(tbHistorical);
 
-    history = new QTableView(gpHistorical);
+    history = new mpiTableView(false, gpHistorical);
     historyCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, history);
     history->setSelectionMode(QAbstractItemView::ExtendedSelection);
     history->setSelectionBehavior(QAbstractItemView::SelectRows);

@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "mpiValidator.h"
+#include "mpiDateEdit.h"
 
 class frmPortfolio_UI
 {
@@ -22,7 +23,7 @@ public:
     QLabel *costBasis;
     QComboBox *cmbCostBasis;
     QLabel *startDate;
-    QDateEdit *dateStartDate;
+    mpiDateEdit *dateStartDate;
     QCheckBox *chkIncludeDiv;
 
     void setupUI(QDialog* dialog);

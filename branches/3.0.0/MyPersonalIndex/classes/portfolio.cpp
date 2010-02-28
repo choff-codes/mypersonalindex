@@ -32,7 +32,6 @@ void portfolio::remove() const
     queries::deletePortfolioItems(queries::table_AA, this->info.id);
     queries::deletePortfolioItems(queries::table_Acct, this->info.id);
     queries::deletePortfolioItems(queries::table_NAV, this->info.id);
-    queries::deletePortfolioItems(queries::table_StatMapping, this->info.id);
     queries::deletePortfolioItems(queries::table_SecurityAA, this->info.id, true);
     queries::deletePortfolioItems(queries::table_SecurityTrades, this->info.id, true);
     queries::deletePortfolioItems(queries::table_ExecutedTrades, this->info.id, true);
@@ -75,7 +74,6 @@ QMap<int, portfolio::portfolio*> portfolio::loadPortfolios()
     loadPortfoliosInfo(portfolioList);
     loadPortfoliosAA(portfolioList);
     loadPortfoliosAcct(portfolioList);
-    loadPortfoliosStat(portfolioList);
     loadPortfoliosSecurity(portfolioList);
     loadPortfoliosSecurityAA(portfolioList);
     loadPortfoliosSecurityTrades(portfolioList);
@@ -149,16 +147,6 @@ void portfolio::loadPortfoliosAcct(QMap<int, portfolio::portfolio*> &portfolioLi
 
         portfolioList[q.value(queries::acctColumns_PortfolioID).toInt()]->data.acct.insert(acct.id, acct);
     }
-}
-
-void portfolio::loadPortfoliosStat(QMap<int, portfolio::portfolio*> &portfolioList)
-{
-    QSqlQuery q = queries::select(queries::table_StatMapping, queries::statMappingColumns,
-        queries::statMappingColumns.at(queries::statMappingColumns_Sequence));
-
-    while(q.next())
-        portfolioList[q.value(queries::statMappingColumns_PortfolioID).toInt()]->data.stats.append(
-            q.value(queries::statMappingColumns_StatID).toInt());
 }
 
 void portfolio::loadPortfoliosSecurity(QMap<int, portfolio::portfolio*> &portfolioList)

@@ -31,7 +31,7 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
     value.totalValue = value.shares * price.close;
 
     account acct = m_portfolio->data.acct.value(s.account);
-    if (acct.taxRate == -1)
+    if (acct.taxRate <= 0)
         return value;
 
     if (acct.taxDeferred)
@@ -103,8 +103,8 @@ double calculations::correlation(const securityPrices &price1, const securityPri
         if (currentPrice1.close == 0 || currentPrice2.close == 0)
             break;
 
-        double change1 = change(currentPrice1.close * currentPrice1.split, previousPrice1.close, 0, currentPrice1.dividend * -1) - 1;
-        double change2 = change(currentPrice2.close * currentPrice2.split, previousPrice2.close, 0, currentPrice2.dividend * -1) - 1;
+        double change1 = change(currentPrice1.close * currentPrice1.split, previousPrice1.close, 0, currentPrice1.dividend) - 1;
+        double change2 = change(currentPrice2.close * currentPrice2.split, previousPrice2.close, 0, currentPrice2.dividend) - 1;
 
         security1Sum += change1;
         security2Sum += change2;

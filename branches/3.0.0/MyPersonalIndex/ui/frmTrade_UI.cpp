@@ -27,7 +27,7 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     tradeLayout->setWidget(1, QFormLayout::LabelRole, shares);
     tradeLayout->setWidget(1, QFormLayout::FieldRole, txtShares);
     chkPrice = new QCheckBox("&Price:", gpTrade);
-    txtPrice = new QLineEdit("Close", gpTrade);
+    txtPrice = new QLineEdit("Previous Close", gpTrade);
     txtPrice->setEnabled(false);  
     txtPrice->setValidator(validator);
     tradeLayout->setWidget(2, QFormLayout::LabelRole, chkPrice);
@@ -54,16 +54,16 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, cmbFreq);
     date = new QLabel("&Date:", gpDate);
-    deDate = functions::createDateEdit(gpDate);
+    deDate = new mpiDateEdit(gpDate);
     dateLayout->setWidget(1, QFormLayout::LabelRole, date);
     dateLayout->setWidget(1, QFormLayout::FieldRole, deDate);
     chkStarting = new QCheckBox("St&arting:", gpDate);
-    deStarting = functions::createDateEdit(gpDate);
+    deStarting = new mpiDateEdit(gpDate);
     deStarting->setEnabled(false);
     dateLayout->setWidget(2, QFormLayout::LabelRole, chkStarting);
     dateLayout->setWidget(2, QFormLayout::FieldRole, deStarting);
     chkEnding = new QCheckBox("&Ending:", gpDate);
-    deEnding = functions::createDateEdit(gpDate);
+    deEnding = new mpiDateEdit(gpDate);
     deEnding->setEnabled(false);
     dateLayout->setWidget(3, QFormLayout::LabelRole, chkEnding);
     dateLayout->setWidget(3, QFormLayout::FieldRole, deEnding);

@@ -15,7 +15,7 @@ frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m
             this->setWindowState(this->windowState() | m_settings.state);
     }
     else
-        functions::showWelcomeMessage(this); // first time being run
+        showWelcomeMessage(); // first time being run
 
     resetSortDropDowns();
     resetLastDate();
@@ -68,16 +68,16 @@ void frmMain::connectSlots()
     connect(ui.holdingsShowHidden, SIGNAL(changed()), this, SLOT(resetPortfolioHoldings()));
     connect(ui.holdingsReorderColumns, SIGNAL(triggered()), this, SLOT(holdingsModifyColumns()));
     connect(ui.holdingsSortCombo, SIGNAL(activated(int)), this, SLOT(holdingsSortChanged(int)));
-    connect(ui.holdingsExport, SIGNAL(triggered()), this, SLOT(holdingsExport()));
-    connect(ui.holdingsCopyShortcut, SIGNAL(activated()), this, SLOT(holdingsCopy()));
+    connect(ui.holdingsExport, SIGNAL(triggered()), ui.holdings, SLOT(exportTable()));
+    connect(ui.holdingsCopyShortcut, SIGNAL(activated()), ui.holdings, SLOT(copyTable()));
 
     connect(ui.performanceSortDesc, SIGNAL(triggered()), this, SLOT(resetPortfolioPerformance()));
-    connect(ui.performanceExport, SIGNAL(triggered()), this, SLOT(performanceExport()));
-    connect(ui.performanceCopyShortcut, SIGNAL(activated()), this, SLOT(performanceCopy()));
+    connect(ui.performanceExport, SIGNAL(triggered()), ui.performance, SLOT(exportTable()));
+    connect(ui.performanceCopyShortcut, SIGNAL(activated()), ui.performance, SLOT(copyTable()));
 
     connect(ui.chartEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
     connect(ui.chartStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioChart()));
-    connect(ui.chartExport, SIGNAL(triggered()), this, SLOT(chartExport()));
+    connect(ui.chartExport, SIGNAL(triggered()), ui.chart, SLOT(exportChart()));
 
     connect(ui.aaAdd, SIGNAL(triggered()), this, SLOT(addAA()));
     connect(ui.aaEdit, SIGNAL(triggered()), this, SLOT(editAA()));
@@ -87,8 +87,8 @@ void frmMain::connectSlots()
     connect(ui.aaShowBlank, SIGNAL(changed()), this, SLOT(resetPortfolioAA()));
     connect(ui.aaReorderColumns, SIGNAL(triggered()), this, SLOT(aaModifyColumns()));
     connect(ui.aaSortCombo, SIGNAL(activated(int)), this, SLOT(aaSortChanged(int)));
-    connect(ui.aaExport, SIGNAL(triggered()), this, SLOT(aaExport()));
-    connect(ui.aaCopyShortcut, SIGNAL(activated()), this, SLOT(aaCopy()));
+    connect(ui.aaExport, SIGNAL(triggered()), ui.aa, SLOT(exportTable()));
+    connect(ui.aaCopyShortcut, SIGNAL(activated()), ui.aa, SLOT(copyTable()));
 
     connect(ui.accountsAdd, SIGNAL(triggered()), this, SLOT(addAcct()));
     connect(ui.accountsEdit, SIGNAL(triggered()), this, SLOT(editAcct()));
@@ -98,22 +98,37 @@ void frmMain::connectSlots()
     connect(ui.accountsShowBlank, SIGNAL(changed()), this, SLOT(resetPortfolioAcct()));
     connect(ui.accountsReorderColumns, SIGNAL(triggered()), this, SLOT(acctModifyColumns()));
     connect(ui.accountsSortCombo, SIGNAL(activated(int)), this, SLOT(acctSortChanged(int)));
-    connect(ui.accountsExport, SIGNAL(triggered()), this, SLOT(acctExport()));
-    connect(ui.accountsCopyShortcut, SIGNAL(activated()), this, SLOT(acctCopy()));
+    connect(ui.accountsExport, SIGNAL(triggered()), ui.accounts, SLOT(exportTable()));
+    connect(ui.accountsCopyShortcut, SIGNAL(activated()), ui.accounts, SLOT(copyTable()));
 
     connect(ui.statEdit, SIGNAL(triggered()), this, SLOT(editStat()));
     connect(ui.statStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
     connect(ui.statEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioStat()));
-    connect(ui.statExport, SIGNAL(triggered()), this, SLOT(statExport()));
-    connect(ui.statCopyShortcut, SIGNAL(activated()), this, SLOT(statCopy()));
+    connect(ui.statExport, SIGNAL(triggered()), ui.stat, SLOT(exportTable()));
+    connect(ui.statCopyShortcut, SIGNAL(activated()), ui.stat, SLOT(copyTable()));
 
     connect(ui.correlationsShowHidden, SIGNAL(triggered()), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsStartDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
     connect(ui.correlationsEndDateDropDown, SIGNAL(dateChanged(QDate)), this, SLOT(resetPortfolioCorrelation()));
-    connect(ui.correlationsExport, SIGNAL(triggered()), this, SLOT(correlationExport()));
-    connect(ui.correlationsCopyShortcut, SIGNAL(activated()), this, SLOT(correlationCopy()));
+    connect(ui.correlationsExport, SIGNAL(triggered()), ui.correlations, SLOT(exportTable()));
+    connect(ui.correlationsCopyShortcut, SIGNAL(activated()), ui.correlations, SLOT(copyTable()));
 
     connect(ui.tab, SIGNAL(currentChanged(int)), this, SLOT(tabChanged(int))); // hack for now, QWT doesn't render the chart correctly the first time
+}
+
+void frmMain::showWelcomeMessage()
+{
+    QString welcomeMessage = "Welcome to My Personal Index!\n\nThere is no documentation yet,"
+                             " but I recommend starting in the following way:\n\n1. Set the start date under options (on the top toolbar).\n"
+                             "2. Add a new Portfolio\n3. Set your asset allocation \n4. Set your accounts\n5. Add holdings\n"
+                             "6. Add relevant portfolio statistics\n7. Update prices!";
+    QMessageBox msg(QMessageBox::Information, "My Personal Index", welcomeMessage, QMessageBox::Ok, this);
+    QPushButton *copyButton = msg.addButton("Copy To Clipboard", QMessageBox::RejectRole);
+
+    msg.exec();
+
+    if (msg.clickedButton() == copyButton)
+        QApplication::clipboard()->setText(welcomeMessage);
 }
 
 void frmMain::resetSortDropDowns()
@@ -304,7 +319,7 @@ void frmMain::resetPortfolioAA()
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
-        m_currentPortfolio->data.aa.insert(-1, assetAllocation("Blank"));
+        m_currentPortfolio->data.aa.insert(-1, assetAllocation());
 
     foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
         rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa.id), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
@@ -329,7 +344,7 @@ void frmMain::resetPortfolioAcct()
 
     QList<baseRow*> rows;
     if (ui.accountsShowBlank->isChecked()) // insert blank acct
-        m_currentPortfolio->data.acct.insert(-1, account("(Blank)"));
+        m_currentPortfolio->data.acct.insert(-1, account());
 
     foreach(const account &acct, m_currentPortfolio->data.acct)
         rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct.id), acct, m_currentPortfolio->info.acctSort));
@@ -442,10 +457,10 @@ void frmMain::resetPortfolioStat()
     statisticInfo s(m_currentPortfolio, info, startDate, previousDay);
 
     QList<QString> statisticValues;
-    foreach(const int &i, m_currentPortfolio->data.stats)
+    foreach(const int &i, m_settings.viewableColumns.value(settings::columns_Stat))
         statisticValues.append(statistic::calculate((statistic::stat)i, s));
 
-    mainStatisticModel *model = new mainStatisticModel(statisticValues, m_currentPortfolio->data.stats, ui.stat);
+    mainStatisticModel *model = new mainStatisticModel(statisticValues, m_settings.viewableColumns.value(settings::columns_Stat), ui.stat);
     ui.stat->setModel(model);
     ui.stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui.stat->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
@@ -662,7 +677,7 @@ void frmMain::deleteUnusedSymbols()
             symbols.append(s.symbol);
     symbols.removeDuplicates();
 
-    prices::instance().remove(functions::exceptLeft(prices::instance().symbols(), symbols));
+    prices::instance().remove(functions::inLeftNotRight(prices::instance().symbols(), symbols));
     resetLastDate();
 }
 
@@ -851,17 +866,6 @@ void frmMain::deleteAcct()
     resetSecurityRelatedTabs(-1);
 }
 
-void frmMain::editStat()
-{
-    frmColumns f(m_currentPortfolio->data.stats, statistic::statisticList(), this);
-    if (f.exec())
-    {
-        m_currentPortfolio->data.stats = f.getReturnValues();
-        statistic::saveSelectedStats(m_currentPortfolio->info.id, m_currentPortfolio->data.stats);
-        resetPortfolioStat();
-    }
-}
-
 void frmMain::beginUpdate()
 {
     disableItems(true);
@@ -984,6 +988,12 @@ void frmMain::acctModifyColumns()
 {
     if (modifyColumns(settings::columns_Acct, acctRow::fieldNames()))
         resetPortfolioHoldings();
+}
+
+void frmMain::editStat()
+{
+    if (modifyColumns(settings::columns_Stat, statistic::statisticList()))
+        resetPortfolioStat();
 }
 
 void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames)

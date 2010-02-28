@@ -8,8 +8,8 @@ include(usercontrols/usercontrols.pri)
 INCLUDEPATH += shared/qwt
 
 win32{
-    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd5.a
-        else: LIBS += shared/qwt/lib/libqwt5.a
+    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd6.a
+        else: LIBS += shared/qwt/lib/libqwt6.a
 }
 
 unix{

@@ -16,7 +16,6 @@ public:
     static const QString table_Settings;
     static const QString table_SettingsColumns;
     static const QString table_Splits;
-    static const QString table_StatMapping;
     static const QString table_Security;
     static const QString table_SecurityAA;
     static const QString table_SecurityTrades;
@@ -31,7 +30,6 @@ public:
     static const QStringList settingsColumns;
     static const QStringList settingsColumnsColumns;
     static const QStringList splitsColumns;
-    static const QStringList statMappingColumns;
     static const QStringList SecurityColumns;
     static const QStringList SecurityAAColumns;
     static const QStringList SecurityTradeColumns;
@@ -60,8 +58,6 @@ public:
     enum { settingsColumnsColumns_ID, settingsColumnsColumns_ColumnID, settingsColumnsColumns_Sequence, settingsColumnsColumns_Count };
 
     enum { splitsColumns_Date, splitsColumns_Symbol, splitsColumns_Ratio, splitsColumns_Count };
-
-    enum { statMappingColumns_PortfolioID, statMappingColumns_StatID, statMappingColumns_Sequence, statMappingColumns_Count };
 
     enum {securityColumns_ID, securityColumns_PortfolioID, securityColumns_Symbol, securityColumns_Account, securityColumns_Expense, securityColumns_DivReinvest,
           securityColumns_CashAccount, securityColumns_IncludeInCalc, securityColumns_Hide, securityColumns_Count };

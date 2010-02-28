@@ -10,8 +10,8 @@
 class settings
 {
 public:
-    typedef QMap<int, QList<int> > columns;
-    enum { columns_Holdings, columns_AA, columns_Acct };
+    typedef QHash<int, QList<int> > columns;
+    enum { columns_Holdings, columns_AA, columns_Acct, columns_Stat };
 
     int dataStartDate;
     bool splits;

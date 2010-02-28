@@ -16,7 +16,7 @@ public:
     bool taxDeferred;
     costBasisType costBasis;
 
-    account(const QString &p_description = QString()): id(-1), description(p_description), taxRate(-1), taxDeferred(false), costBasis(costBasisType_None) {}
+    account(const QString &p_description = "(Blank)"): id(-1), description(p_description), taxRate(-1), taxDeferred(false), costBasis(costBasisType_None) {}
 
     bool operator==(const account &other) const;
     bool operator!=(const account &other) const { return !(*this == other); }

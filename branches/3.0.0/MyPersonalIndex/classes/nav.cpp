@@ -327,7 +327,9 @@ void nav::insertPortfolioReinvestments(portfolio *currentPortfolio, const int &d
         if (s.dividend == 0 || s.close == 0)
             continue;
 
-        addToExecutedTradeList(currentPortfolio, securityID, date, (s.dividend * previousInfo->securitiesInfo.value(securityID).shares) / s.close, s.close, 0);
+        double split = prices::instance().split(symbol, date);
+
+        addToExecutedTradeList(currentPortfolio, securityID, date, (s.dividend * previousInfo->securitiesInfo.value(securityID).shares) / s.close, s.close / split, 0);
     }
 }
 
@@ -337,7 +339,7 @@ void nav::insertPortfolioCashTrade(portfolio *currentPortfolio, const int &cashA
         return;
 
     QString symbol = currentPortfolio->data.securities.value(cashAccount).symbol;
-    double close = prices::instance().price(symbol, date);
+    double close = prices::instance().price(symbol, previousInfo->date) / prices::instance().split(symbol, date);
 
     if (close == 0)
         return;
@@ -353,7 +355,7 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
         QString symbol = currentPortfolio->data.securities.value(securityID).symbol;
         double close = 0;
         if (previousInfo)
-            close = prices::instance().price(symbol, date);
+            close = prices::instance().price(symbol, previousInfo->date) / prices::instance().split(symbol, date);
 
         foreach(const navTradePointer &singleTrade, i.value())
         {

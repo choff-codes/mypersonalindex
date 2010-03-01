@@ -759,12 +759,15 @@ int frmMain::aaMinDate(const int &aaID, int currentMinDate)
 }
 
 void frmMain::editAA()
-{
+{    
     bool change = false;
     int minDate = -1;
     foreach(baseRow *row, static_cast<mainAAModel*>(ui.aa->model())->selectedItems())
     {
         int aaID = row->values.at(aaRow::row_ID).toInt();
+        if (aaID == -1)
+            continue;
+
         frmAAEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.aa.value(aaID));
         if (f.exec())
         {
@@ -830,6 +833,9 @@ void frmMain::editAcct()
     foreach(baseRow *row, static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems())
     {
         int accountID = row->values.at(acctRow::row_ID).toInt();
+        if (accountID == -1)
+            continue;
+
         frmAcctEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.acct.value(accountID));
         if (f.exec())
         {

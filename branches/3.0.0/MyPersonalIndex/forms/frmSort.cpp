@@ -4,6 +4,9 @@ frmSort::frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget
 {
     ui.setupUI(this);
 
+    connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
+
     ui.sort1->addItem("", -1);
     ui.sort2->addItem("", -1);
     ui.sort3->addItem("", -1);
@@ -40,9 +43,6 @@ frmSort::frmSort(const QString &sort, const QMap<int, QString> &columns, QWidget
                 break;
         }
     }
-
-    connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
 }
 
 void frmSort::accept()

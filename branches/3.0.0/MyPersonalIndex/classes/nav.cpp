@@ -2,6 +2,11 @@
 
 void nav::run()
 {
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+
     QList<int> portfolios;
     if (m_portfolioID == -1)
         portfolios.append(m_data.keys());
@@ -14,6 +19,10 @@ void nav::run()
         m_calculations.setPortfolio(currentPortfolio);
         calculateNAVValues(currentPortfolio);
     }
+
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (nav): %d ms", t.elapsed());
+#endif
 }
 
 void nav::calculateNAVValues(portfolio *currentPortfolio)
@@ -194,7 +203,10 @@ QMap<int, nav::navTradeList> nav::calculateExecutedTrades(const portfolio *curre
                         break;
                     case trade::tradeFreq_Daily:
                         // -1 applies to every trading day
-                        dates.append(-1);
+                        if (startDate == calculationDate && endDate == lastDate)
+                            dates.append(-1);
+                        else
+                            dates = computeDailyTrade(startDate, endDate);
                         break;
                     case trade::tradeFreq_Weekly:
                         dates = computeWeeklyTrades(singleTrade->date, startDate, endDate);
@@ -227,6 +239,20 @@ QList<int> nav::computeOnceTrades(const trade &singleTade, const int &minDate, c
         dates.append(date);
     else if (date >= minDate && getCurrentDateOrNext(&date))
         dates.append(date);
+
+    return dates;
+}
+
+QList<int> nav::computeDailyTrade(const int &minDate, const int &maxDate) const
+{
+    QList<int> dates;
+
+    QList<int>::const_iterator end = qLowerBound(m_dates, maxDate);
+    if (end != m_dates.constEnd())
+        ++end;
+
+    for(QList<int>::const_iterator i = qLowerBound(m_dates, minDate); i != end && i != m_dates.constEnd(); ++i)
+        dates.append(*i);
 
     return dates;
 }
@@ -368,13 +394,16 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
             switch(singleTrade->type)
             {
                 case trade::tradeType_Purchase:
-                    sharesToBuy = singleTrade->value;
+                    if (price != 0)
+                        sharesToBuy = singleTrade->value;
                     break;
                 case trade::tradeType_Sale:
-                    sharesToBuy = singleTrade->value * -1;
+                    if (price != 0)
+                        sharesToBuy = singleTrade->value * -1;
                     break;
                 case trade::tradeType_DivReinvest:
-                    sharesToBuy = singleTrade->value;
+                    if (price != 0)
+                        sharesToBuy = singleTrade->value;
                     break;
                 case trade::tradeType_Interest:
                     sharesToBuy = singleTrade->value;
@@ -382,9 +411,11 @@ void nav::insertPortfolioTrades(portfolio *currentPortfolio, const int &date, co
                 case trade::tradeType_FixedPurchase:
                 case trade::tradeType_FixedSale:
                     if (price != 0)
+                    {
                         sharesToBuy = singleTrade->value / price;
-                    if (singleTrade->type == trade::tradeType_FixedSale)
-                        sharesToBuy *= -1;
+                        if (singleTrade->type == trade::tradeType_FixedSale)
+                            sharesToBuy *= -1;
+                    }
                     break;
                 case trade::tradeType_Value:
                 case trade::tradeType_InterestPercent:

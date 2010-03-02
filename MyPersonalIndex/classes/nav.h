@@ -38,6 +38,7 @@ private:
     bool getCurrentDateOrNext(int *date) const;
     QMap<int, navTradeList> calculateExecutedTrades(const portfolio *currentPortfolio, const int &calculationDate, const bool &calculateFromStartDate);
     QList<int> getPortfolioSecurityReinvestment(const portfolio *currentPortfolio);
+    QList<int> computeDailyTrade(const int &minDate, const int &maxDate) const;
     QList<int> computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate) const;
     QList<int> computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;
     QList<int> computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;

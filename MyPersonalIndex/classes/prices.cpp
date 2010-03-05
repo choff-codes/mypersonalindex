@@ -19,9 +19,15 @@ prices::prices()
 
 void prices::insertDate(const int &date)
 {
-    QList<int>::iterator i = qLowerBound(m_dates.begin(), m_dates.end(), date);
-    if (*i == date)
-        return;
+    QList<int>::iterator i;
+    if(m_dates.isEmpty())
+        i = m_dates.begin();
+    else
+    {
+        i = qLowerBound(m_dates.begin(), m_dates.end(), date);
+        if (*i == date)
+            return;
+    }
 
     m_dates.insert(i, date);
     m_cashPrices.prices.insert(date, 1);

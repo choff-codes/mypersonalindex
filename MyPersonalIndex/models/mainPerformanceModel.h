@@ -1,9 +1,9 @@
 #ifndef MAINPERFORMANCEMODEL_H
 #define MAINPERFORMANCEMODEL_H
 
-#include <QtGui>
+#include <QtCore>
 #include "functions.h"
-#include "cachedCalculations.h"
+#include "navInfo.h"
 
 class mainPerformanceModel: public QAbstractTableModel
 {

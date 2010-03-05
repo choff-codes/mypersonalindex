@@ -87,7 +87,7 @@ QString queries::getDatabaseLocation()
 
 void queries::executeNonQuery(const QString &query)
 {
-    QSqlQuery result(query, instance());
+    QSqlQuery(query, instance());
 }
 
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)

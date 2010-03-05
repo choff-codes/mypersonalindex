@@ -1,7 +1,7 @@
 #ifndef MPIDATESCALE_H
 #define MPIDATESCALE_H
 
-#include <QtGui>
+#include <QtCore>
 #include <qwt_scale_draw.h>
 
 class mpiDateScale: public QwtScaleDraw

@@ -218,22 +218,25 @@ void portfolio::loadPortfoliosExecutedTrades(QMap<int, portfolio::portfolio*> &p
         queries::executedTradesColumns.at(queries::executedTradesColumns_Date), true);
 
     while(q.next())
-    {
-        executedTrade t;
-
-        t.date = q.value(queries::executedTradesColumns_Date).toInt();
-        t.shares = q.value(queries::executedTradesColumns_Shares).toDouble();
-        t.price = q.value(queries::executedTradesColumns_Price).toDouble();
-        t.commission = q.value(queries::executedTradesColumns_Commission).toDouble();
-
-        portfolioList[q.value(queries::executedTradesColumns_Count).toInt()]->data.executedTrades[q.value(queries::executedTradesColumns_SecurityID).toInt()].append(t);
-    }
+        portfolioList[q.value(queries::executedTradesColumns_Count).toInt()]->data.executedTrades[q.value(queries::executedTradesColumns_SecurityID).toInt()].append
+            (
+                executedTrade(
+                        q.value(queries::executedTradesColumns_Date).toInt(),
+                        q.value(queries::executedTradesColumns_Shares).toDouble(),
+                        q.value(queries::executedTradesColumns_Price).toDouble(),
+                        q.value(queries::executedTradesColumns_Commission).toDouble()
+                )
+            );
 }
 
 void portfolio::loadPortfoliosNAV(QMap<int, portfolio::portfolio*> &portfolioList)
 {
     QSqlQuery q = queries::select(queries::table_NAV, queries::navColumns);
     while(q.next())
-        portfolioList[q.value(queries::navColumns_PortfolioID).toInt()]->data.nav.insert(q.value(queries::navColumns_Date).toInt(),
-            q.value(queries::navColumns_NAV).toDouble(), q.value(queries::navColumns_TotalValue).toDouble());
+        portfolioList[q.value(queries::navColumns_PortfolioID).toInt()]->data.nav.insert
+            (
+                q.value(queries::navColumns_Date).toInt(),
+                q.value(queries::navColumns_NAV).toDouble(),
+                q.value(queries::navColumns_TotalValue).toDouble()
+            );
 }

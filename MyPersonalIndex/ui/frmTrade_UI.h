@@ -4,6 +4,7 @@
 #include <QtGui>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
+#include "trade.h"
 
 class frmTrade_UI
 {

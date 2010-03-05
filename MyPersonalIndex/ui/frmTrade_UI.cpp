@@ -1,6 +1,4 @@
 #include "frmTrade_UI.h"
-#include "functions.h"
-#include "trade.h"
 
 void frmTrade_UI::setupUI(QDialog *dialog)
 {

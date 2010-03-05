@@ -1,10 +1,4 @@
 #include "frmMain_UI.h"
-#include "functions.h"
-#include "mpiDateScale.h"
-#include "mpiPercentScale.h"
-#include "qwt_plot_layout.h"
-#include "qwt_plot_canvas.h"
-#include "qwt_text_engine.h"
 
 const QString frmMain_UI::LAST_UPDATED_TEXT = "Last Updated: ";
 const QString frmMain_UI::INDEX_START_TEXT = "Index Start Date: ";
@@ -15,37 +9,37 @@ const QString frmMain_UI::END_DATE = "End Date: ";
 const QString frmMain_UI::WINDOW_TITLE = "My Personal Index";
 const QString frmMain_UI::BUSY = "Finishing current task...";
 
-void frmMain_UI::setupUI(QMainWindow *MainWindow)
+void frmMain_UI::setupUI(QMainWindow *mainWindow)
 {
     QString shortDate = QLocale().dateFormat(QLocale::ShortFormat);
 
-    MainWindow->setWindowTitle(WINDOW_TITLE);
-    MainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
-    MainWindow->resize(800, 600);
-    MainWindow->setContextMenuPolicy(Qt::NoContextMenu);
-    MainWindow->setIconSize(QSize(16, 16));
-    MainWindow->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    mainWindow->setWindowTitle(WINDOW_TITLE);
+    mainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
+    mainWindow->resize(800, 600);
+    mainWindow->setContextMenuPolicy(Qt::NoContextMenu);
+    mainWindow->setIconSize(QSize(16, 16));
+    mainWindow->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
 
-    mainToolbar = new QToolBar(MainWindow);
+    mainToolbar = new QToolBar(mainWindow);
     mainToolbar->setMovable(false);
     mainToolbar->setFloatable(false);
-    MainWindow->addToolBar(Qt::TopToolBarArea, mainToolbar);
+    mainWindow->addToolBar(Qt::TopToolBarArea, mainToolbar);
 
-    centralwidget = new QWidget(MainWindow);
-    MainWindow->setCentralWidget(centralwidget);
+    centralwidget = new QWidget(mainWindow);
+    mainWindow->setCentralWidget(centralwidget);
     centralgrid = new QHBoxLayout(centralwidget);
     centralgrid->setMargin(2);
 
-    mainUpdatePrices = new QAction(QIcon(":/icons/refresh.png"), "Update Prices", MainWindow);
-    mainCompare = new QAction(QIcon(":/icons/chart.png"), "Compare...", MainWindow);
+    mainUpdatePrices = new QAction(QIcon(":/icons/refresh.png"), "Update Prices", mainWindow);
+    mainCompare = new QAction(QIcon(":/icons/chart.png"), "Compare...", mainWindow);
     mainCompare->setIconText("Compare...");
-    mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit", MainWindow);
-    mainDelete = new QAction(QIcon(":/icons/delete.png"), "Delete", MainWindow);
-    mainAdd = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", MainWindow);
-    mainOptions = new QAction(QIcon(":/icons/options.png"), "Options", MainWindow);
-    mainAbout = new QAction(QIcon(":/icons/about.png"), "About", MainWindow);
-    mainPortfolioLabel = new QLabel("Portfolio: ", MainWindow);
-    mainPortfolioCombo = new QComboBox(MainWindow);
+    mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit", mainWindow);
+    mainDelete = new QAction(QIcon(":/icons/delete.png"), "Delete", mainWindow);
+    mainAdd = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", mainWindow);
+    mainOptions = new QAction(QIcon(":/icons/options.png"), "Options", mainWindow);
+    mainAbout = new QAction(QIcon(":/icons/about.png"), "About", mainWindow);
+    mainPortfolioLabel = new QLabel("Portfolio: ", mainWindow);
+    mainPortfolioCombo = new QComboBox(mainWindow);
     mainPortfolioCombo->setMinimumSize(QSize(100, 0));
     mainPortfolioCombo->setMaximumSize(QSize(100, 16777215));
 
@@ -386,13 +380,13 @@ void frmMain_UI::setupUI(QMainWindow *MainWindow)
     aaToolbar->addAction(aaReorderColumns);
     aaToolbar->addAction(aaExport);
 
-    status = new QStatusBar(MainWindow);
-    MainWindow->setStatusBar(status);
-    stbLastUpdated = new QLabel(LAST_UPDATED_TEXT, MainWindow);
-    stbStartDate = new QLabel(/*INDEX_START_TEXT,*/ MainWindow);
-    stbStatus = new QLabel(STATUS_TEXT, MainWindow);
+    status = new QStatusBar(mainWindow);
+    mainWindow->setStatusBar(status);
+    stbLastUpdated = new QLabel(LAST_UPDATED_TEXT, mainWindow);
+    stbStartDate = new QLabel(/*INDEX_START_TEXT,*/ mainWindow);
+    stbStatus = new QLabel(STATUS_TEXT, mainWindow);
     stbStatus->setAlignment(Qt::AlignRight);
-    stbProgress = new QProgressBar(MainWindow);
+    stbProgress = new QProgressBar(mainWindow);
     stbProgress->setMinimum(0);
     stbProgress->setMaximum(100);
     stbProgress->setTextVisible(false);

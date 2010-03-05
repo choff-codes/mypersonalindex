@@ -381,8 +381,8 @@ void frmMain::resetPortfolioCorrelation()
             correlations.insert(s.symbol, QHash<QString, double>());
 
     QStringList symbols = correlations.keys();
-    correlations.insert(QString(m_currentPortfolio->info.description).append(mainCorrelationModel::portfolioIndicator), QHash<QString, double>());
-    symbols.insert(0, QString(m_currentPortfolio->info.description).append(mainCorrelationModel::portfolioIndicator));
+    correlations.insert(m_currentPortfolio->info.description, QHash<QString, double>());
+    symbols.insert(0, m_currentPortfolio->info.description);
     
     int count = symbols.count();
     for(int i = 0; i < count; ++i)

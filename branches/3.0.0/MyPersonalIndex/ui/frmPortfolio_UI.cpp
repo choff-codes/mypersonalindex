@@ -1,6 +1,4 @@
 #include "frmPortfolio_UI.h"
-#include "functions.h"
-#include "mpiValidator.h"
 
 void frmPortfolio_UI::setupUI(QDialog *dialog)
 {

@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Data.SQLite;
 using System.Data.SqlServerCe;
 using System.Globalization;
+using System.IO;
 
 namespace MyPersonalIndexUpdater
 {
@@ -30,13 +31,26 @@ namespace MyPersonalIndexUpdater
         {
             InitializeComponent();
 
+            if (!File.Exists(string.Format("{0}\\MyPersonalIndex\\MPI.sqlite", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData))))
+            {
+                MessageBox.Show("Error updating! Please run MyPersonalIndex version 3.0 (and then close it) before using this upgrade program.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                throw new Exception();
+            }
+
+            if (!File.Exists(string.Format("{0}\\MyPersonalIndex\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData))))
+            {
+                MessageBox.Show("Error updating! It does not appear you have MyPersonalIndex version 2.0 or later installed.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                throw new Exception();
+            }
+
             try
             {
+                cnLite = new SQLiteConnection(string.Format("Data Source={0}\\MyPersonalIndex\\MPI.sqlite", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 cnCe = new SqlCeConnection(string.Format("Data Source={0}\\MyPersonalIndex\\MPI.sdf", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
+
                 if (cnCe.State == ConnectionState.Closed)
                     cnCe.Open();
 
-                cnLite = new SQLiteConnection(string.Format("Data Source={0}\\MyPersonalIndex\\MPI.sqlite", Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)));
                 if (cnLite.State == ConnectionState.Closed)
                     cnLite.Open();
 
@@ -44,6 +58,12 @@ namespace MyPersonalIndexUpdater
                     c.ExecuteNonQuery();
 
                 // Portfolios
+
+                if (Convert.ToDouble(ExecuteScalar("SELECT Version FROM Settings")) < 2.01)
+                {
+                    MessageBox.Show("Error updating! Upgrade to version 2.0.1 before running this installer.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                    throw new Exception();
+                }
 
                 Dictionary<int, int> portfolioMapping = new Dictionary<int,int>();
 

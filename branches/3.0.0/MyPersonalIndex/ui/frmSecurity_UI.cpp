@@ -1,6 +1,4 @@
 #include "frmSecurity_UI.h"
-#include <QtGui>
-
 
 void frmSecurity_UI::setupUI(QDialog *dialog)
 {

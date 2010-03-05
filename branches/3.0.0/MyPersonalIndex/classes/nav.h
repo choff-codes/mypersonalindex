@@ -27,7 +27,7 @@ private:
     typedef QMap<int, trade>::const_iterator navTradePointer;
     typedef QMap<int, QList<navTradePointer> > navTradeList;
 
-    navTradeList appendNavTrades(const navTradeList &first, const navTradeList &second);
+    navTradeList appendNavTradeLists(const navTradeList &first, const navTradeList &second);
     void addToNAVList(portfolio *currentPortfolio, const int &date, const double &totalValue, const double &nav);
     void addToExecutedTradeList(portfolio *currentPortfolio, const int &securityID, const int &date, const double &shares, const double &price, const double &commission);
     void clearVariantLists();

@@ -123,6 +123,7 @@ double calculations::correlation(const securityPrices &price1, const securityPri
     // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]
     double coefficient = (productSquare - (security1Sum * security2Sum / count)) /
                          sqrt((security1Square - (security1Sum * security1Sum / count)) * (security2Square - (security2Sum * security2Sum / count)));
+
     return (isnan(coefficient) || isinf(coefficient)) ? 0 : coefficient;
 }
 

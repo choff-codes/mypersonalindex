@@ -1,5 +1,4 @@
 #include "frmOptions_UI.h"
-#include "functions.h"
 
 void frmOptions_UI::setupUI(QDialog *dialog)
 {

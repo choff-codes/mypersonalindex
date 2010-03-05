@@ -4,9 +4,14 @@
 #include <QtGui>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
+#include "qwt_plot_layout.h"
+#include "qwt_plot_canvas.h"
+#include "qwt_text_engine.h"
 #include "mpiDateEdit.h"
 #include "mpiTableView.h"
 #include "mpiChart.h"
+#include "mpiDateScale.h"
+#include "mpiPercentScale.h"
 
 class frmMain_UI
 {
@@ -134,7 +139,7 @@ public:
     QLabel *stbStatus;
     QProgressBar *stbProgress;
 
-    void setupUI(QMainWindow *MainWindow);
+    void setupUI(QMainWindow *mainWindow);
 
     ~frmMain_UI() { delete chartGridLines; delete chartZoomer; }
 };

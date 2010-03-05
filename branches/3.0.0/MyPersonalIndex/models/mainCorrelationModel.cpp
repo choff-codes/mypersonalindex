@@ -23,5 +23,5 @@ QVariant mainCorrelationModel::headerData(int section, Qt::Orientation /* not us
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    return QString(m_symbols.at(section)).remove(portfolioIndicator);
+    return m_symbols.at(section);
 }

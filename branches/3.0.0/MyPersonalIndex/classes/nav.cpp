@@ -54,7 +54,7 @@ void nav::calculateNAVValues(portfolio *currentPortfolio)
     {
         int date = *currentDate;
         insertPortfolioReinvestments(currentPortfolio, date, securityReinvestments, previousInfo);
-        insertPortfolioTrades(currentPortfolio, date, previousInfo, appendNavTrades(trades.value(date), trades.value(-1)));
+        insertPortfolioTrades(currentPortfolio, date, previousInfo, appendNavTradeLists(trades.value(date), trades.value(-1)));
 
         dailyInfoPortfolio *info = m_calculations.portfolioValues(date);
         navValue = calculations::change(info->totalValue, previousInfo->totalValue, info->costBasis - previousInfo->costBasis, currentPortfolio->info.dividends ? info->dividends : 0, navValue);
@@ -70,7 +70,7 @@ void nav::calculateNAVValues(portfolio *currentPortfolio)
     clearVariantLists();
 }
 
-nav::navTradeList nav::appendNavTrades(const navTradeList &first, const navTradeList &second)
+nav::navTradeList nav::appendNavTradeLists(const navTradeList &first, const navTradeList &second)
 {
     navTradeList returnList = first;
     for(navTradeList::const_iterator i = second.constBegin(); i != second.constEnd(); ++i)
@@ -247,12 +247,13 @@ QList<int> nav::computeDailyTrade(const int &minDate, const int &maxDate) const
 {
     QList<int> dates;
 
-    QList<int>::const_iterator end = qLowerBound(m_dates, maxDate);
-    if (end != m_dates.constEnd())
-        ++end;
+    for(QList<int>::const_iterator i = qLowerBound(m_dates, minDate); i != m_dates.constEnd(); ++i)
+    {
+        if (*i > maxDate)
+            break;
 
-    for(QList<int>::const_iterator i = qLowerBound(m_dates, minDate); i != end && i != m_dates.constEnd(); ++i)
         dates.append(*i);
+    }
 
     return dates;
 }

@@ -1,7 +1,7 @@
 #ifndef SECURITYAAMODEL_H
 #define SECURITYAAMODEL_H
 
-#include <QtGui>
+#include <QtCore>
 #include "functions.h"
 #include "security.h"
 #include "assetAllocation.h"

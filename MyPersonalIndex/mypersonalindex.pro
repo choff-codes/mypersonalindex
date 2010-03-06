@@ -12,9 +12,14 @@ win32{
         else: LIBS += shared/qwt/lib/libqwt6.a
 }
 
-unix{
+unix:!macx{
     CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd.so
         else: LIBS += shared/qwt/lib/libqwt.so
+}
+
+macx{
+    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwt.dylib
+        else: LIBS += shared/qwt/lib/libqwt.dylib
 }
 
 CONFIG(debug, debug|release): DEFINES += CLOCKTIME

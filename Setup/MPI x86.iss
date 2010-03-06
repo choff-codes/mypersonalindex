@@ -32,7 +32,7 @@ Source: ..\MyPersonalIndex\release\QtGui4.dll; DestDir: {app}; Flags: ignorevers
 Source: ..\MyPersonalIndex\release\QtNetwork4.dll; DestDir: {app}; Flags: ignoreversion
 Source: ..\MyPersonalIndex\release\QtSql4.dll; DestDir: {app}; Flags: ignoreversion
 Source: ..\MyPersonalIndex\sqldrivers\qsqlite4.dll; DestDir: {app}\sqldrivers; Flags: ignoreversion
-Source: ..\MyPersonalIndex\release\qwt5.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\MyPersonalIndex\release\qwt6.dll; DestDir: {app}; Flags: ignoreversion
 Source: ..\MyPersonalIndex\MPI.sqlite; DestDir: {app}; Flags: ignoreversion
 Source: ..\Setup\License.txt; DestDir: {app}; Flags: ignoreversion
 

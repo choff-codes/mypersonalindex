@@ -1,1 +1,1 @@
-Add SQLCe 32-bit DLLs here.
+Add SQLCe/Sqlite 32-bit DLLs here.

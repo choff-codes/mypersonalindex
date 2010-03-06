@@ -602,7 +602,7 @@ void frmMain::addSecurity()
             m_currentPortfolio->data.securities[s.id] = s;
             minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount)
+            if (!s.cashAccount && !prices::instance().symbols().contains(s.symbol))
                 showUpdatePrices = true;
         }
     }

@@ -1,19 +1,5 @@
 #include "portfolio.h"
 
-void portfolio::remove(const int &portfolioID)
-{
-    queries::deleteItem(queries::table_Portfolios, portfolioID);
-    queries::deletePortfolioItems(queries::table_AA, portfolioID);
-    queries::deletePortfolioItems(queries::table_Acct, portfolioID);
-    queries::deletePortfolioItems(queries::table_NAV, portfolioID);
-    queries::deletePortfolioItems(queries::table_SecurityAA, portfolioID, true);
-    queries::deletePortfolioItems(queries::table_SecurityTrades, portfolioID, true);
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, true);
-    // this must come last due to the joinToSecurities above
-    queries::deletePortfolioItems(queries::table_Security, portfolioID);
-    m_portfolios.remove(portfolioID);
-}
-
 portfolio::portfolio()
 {
 
@@ -60,7 +46,7 @@ void portfolio::loadPortfoliosInfo()
         info.aaSort = q.value(queries::portfoliosColumns_AASort).toString();
         info.acctSort = q.value(queries::portfoliosColumns_AcctSort).toString();
 
-        m_portfolios[info.id].info = info;
+        insert(info);
     }
 }
 
@@ -76,7 +62,7 @@ void portfolio::loadPortfoliosAA()
         if (!q.value(queries::aaColumns_Target).isNull())
             aa.target = q.value(queries::aaColumns_Target).toDouble();
 
-        m_portfolios[q.value(queries::aaColumns_PortfolioID).toInt()].aa.insert(aa.id, aa);
+        insert(q.value(queries::aaColumns_PortfolioID).toInt(), aa);
     }
 }
 
@@ -94,7 +80,7 @@ void portfolio::loadPortfoliosAcct()
         acct.taxDeferred = q.value(queries::acctColumns_TaxDeferred).toBool();
         acct.costBasis = (account::costBasisType)q.value(queries::acctColumns_CostBasis).toInt();
 
-        m_portfolios[q.value(queries::acctColumns_PortfolioID).toInt()].acct.insert(acct.id, acct);
+        insert(q.value(queries::acctColumns_PortfolioID).toInt(), acct);
     }
 }
 
@@ -118,7 +104,7 @@ void portfolio::loadPortfoliosSecurity()
         sec.includeInCalc = q.value(queries::securityColumns_IncludeInCalc).toBool();
         sec.hide = q.value(queries::securityColumns_Hide).toBool();
 
-        m_portfolios[q.value(queries::securityColumns_PortfolioID).toInt()].securities.insert(sec.id, sec);
+        insert(q.value(queries::securityColumns_PortfolioID).toInt(), sec);
     }
 }
 
@@ -126,11 +112,8 @@ void portfolio::loadPortfoliosSecurityAA()
 {
     QSqlQuery q = queries::select(queries::table_SecurityAA, queries::SecurityAAColumns, QString(), true);
     while(q.next())
-        m_portfolios[q.value(queries::securityAAColumns_Count).toInt()].securities[q.value(queries::securityAAColumns_SecurityID).toInt()]
-            .aa.insert(
-                    q.value(queries::securityAAColumns_AAID).toInt(),
-                    q.value(queries::securityAAColumns_Percent).toDouble()
-            );
+        insertAAPercentage(q.value(queries::securityAAColumns_Count).toInt(), q.value(queries::securityAAColumns_SecurityID).toInt(),
+            q.value(queries::securityAAColumns_AAID).toInt(), q.value(queries::securityAAColumns_Percent).toDouble());
 }
 
 void portfolio::loadPortfoliosSecurityTrades()
@@ -156,8 +139,7 @@ void portfolio::loadPortfoliosSecurityTrades()
         if (!q.value(queries::securityTradeColumns_EndDate).isNull())
             t.endDate = q.value(queries::securityTradeColumns_EndDate).toInt();
 
-        m_portfolios[q.value(queries::securityTradeColumns_Count).toInt()].securities[q.value(queries::securityTradeColumns_SecurityID).toInt()]
-            .trades.insert(t.id, t);
+        insertTrade(q.value(queries::securityTradeColumns_Count).toInt(), q.value(queries::securityTradeColumns_SecurityID).toInt(), t);
     }
 }
 
@@ -167,25 +149,103 @@ void portfolio::loadPortfoliosExecutedTrades()
         queries::executedTradesColumns.at(queries::executedTradesColumns_Date), true);
 
     while(q.next())
-        m_portfolios[q.value(queries::executedTradesColumns_Count).toInt()].executedTrades[q.value(queries::executedTradesColumns_SecurityID).toInt()].append
-            (
-                executedTrade(
-                        q.value(queries::executedTradesColumns_Date).toInt(),
-                        q.value(queries::executedTradesColumns_Shares).toDouble(),
-                        q.value(queries::executedTradesColumns_Price).toDouble(),
-                        q.value(queries::executedTradesColumns_Commission).toDouble()
-                )
-            );
+        insertExecutedTrade(q.value(queries::executedTradesColumns_Count).toInt(), q.value(queries::executedTradesColumns_SecurityID).toInt(),
+            executedTrade(
+                q.value(queries::executedTradesColumns_Date).toInt(),
+                q.value(queries::executedTradesColumns_Shares).toDouble(),
+                q.value(queries::executedTradesColumns_Price).toDouble(),
+                q.value(queries::executedTradesColumns_Commission).toDouble()
+            )
+        );
 }
 
 void portfolio::loadPortfoliosNAV()
 {
     QSqlQuery q = queries::select(queries::table_NAV, queries::navColumns);
     while(q.next())
-        m_portfolios[q.value(queries::navColumns_PortfolioID).toInt()].nav.insert
-            (
-                q.value(queries::navColumns_Date).toInt(),
-                q.value(queries::navColumns_NAV).toDouble(),
-                q.value(queries::navColumns_TotalValue).toDouble()
-            );
+        insertNAV(q.value(queries::navColumns_PortfolioID).toInt(), q.value(queries::navColumns_Date).toInt(),
+            q.value(queries::navColumns_NAV).toDouble(), q.value(queries::navColumns_TotalValue).toDouble());
+}
+
+QStringList portfolio::symbols() const
+{
+    QStringList list;
+    foreach(const portfolioData &d, m_portfolios)
+        foreach(const security &s, d.securities)
+            list.append(s.symbol);
+    list.removeDuplicates();
+    return list;
+}
+
+bool portfolio::datesOutsidePriceData() const
+{
+    int firstDate = prices::instance().firstDate();
+    if (firstDate == 0)
+        return true;
+
+    foreach(const portfolioData &d, m_portfolios)
+        if (!d.nav.isEmpty() && d.nav.firstDate() < firstDate)
+            return true;
+
+    return false;
+}
+
+void portfolio::remove(const int &portfolioID)
+{
+    queries::deleteItem(queries::table_Portfolios, portfolioID);
+    queries::deletePortfolioItems(queries::table_AA, portfolioID);
+    queries::deletePortfolioItems(queries::table_Acct, portfolioID);
+    queries::deletePortfolioItems(queries::table_NAV, portfolioID);
+    queries::deletePortfolioItems(queries::table_SecurityAA, portfolioID, true);
+    queries::deletePortfolioItems(queries::table_SecurityTrades, portfolioID, true);
+    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, true);
+    // this must come last due to the joinToSecurities above
+    queries::deletePortfolioItems(queries::table_Security, portfolioID);
+    m_portfolios.remove(portfolioID);
+}
+
+void portfolio::remove(const int &portfolioID, const assetAllocation &aa)
+{
+    aa.remove();
+    m_portfolios[portfolioID].aa.remove(aa.id);
+    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.begin(); ++i)
+        i->removeAATarget(aa.id);
+}
+
+void portfolio::remove(const int &portfolioID, const account &acct)
+{
+    acct.remove();
+    m_portfolios[portfolioID].acct.remove(acct.id);
+    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.begin(); ++i)
+        i->removeAccount(acct.id, portfolioID);
+}
+
+void portfolio::remove(const int &portfolioID, const security &sec)
+{
+    sec.remove();
+    m_portfolios[portfolioID].securities.remove(sec.id);
+}
+
+int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &date)
+{
+    int returnDate = currentMinimumDate;
+    if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
+        returnDate = date;
+
+    return returnDate;
+}
+
+int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa)
+{
+    int returnDate = currentMinimumDate;
+    foreach(const security &s, securities(portfolioID))
+        if(s.aa.contains(aa.id))
+            foreach(const trade &t, s.trades)
+                if (t.type == trade::tradeType_AA)
+                {
+                    returnDate = minimumDateBetweenTrades(currentMinimumDate, s.firstTradeDate());
+                    break;
+                }
+
+    return returnDate;
 }

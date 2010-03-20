@@ -439,7 +439,7 @@ void frmMain::resetPortfolioStat()
 {
     int startDate = dateDropDownDate(ui.statStartDateDropDown);
     int endDate = dateDropDownDate(ui.statEndDateDropDown);
-    int previousDay = currentDateOrPrevious(startDate - 1);
+    int previousDay = prices::instance().currentDateOrPrevious(startDate - 1);
 
     QAbstractItemModel *oldModel = ui.stat->model();
     dailyInfoPortfolio *info = m_calculations.portfolioValues(endDate);
@@ -479,7 +479,7 @@ void frmMain::savePortfolio()
     info.correlationShowHidden = ui.correlationsShowHidden->isChecked();
     info.acctShowBlank = ui.accountsShowBlank->isChecked();
 
-    portfolios.update(info);
+    portfolios.insert(info);
 }
 
 void frmMain::addPortfolio()
@@ -512,7 +512,7 @@ void frmMain::editPortfolio()
         if (!reCalcChange && info.description != origInfo.description)
             resetPortfolioChart();
 
-        portfolios.update(info);
+        portfolios.insert(info);
 
         resetSecurityRelatedTabs(reCalcChange ? 0 : -1);
         resetPortfolioDropDown(m_portfolioID);
@@ -531,7 +531,8 @@ void frmMain::deletePortfolio()
     portfolios.remove(m_portfolioID);
     m_portfolioID = -1;
 
-    deleteUnusedSymbols();
+    prices::instance().removeUnusedSymbols(portfolios.symbols());
+    resetLastDate();
 
     int row = ui.mainPortfolioCombo->currentIndex(); // select another portfolio
     if (portfolios.count() == row)
@@ -541,7 +542,7 @@ void frmMain::deletePortfolio()
     if (!portfolios.isEmpty())
         ui.mainPortfolioCombo->setCurrentIndex(row);
 
-    if (portfolios.invalidNAVDates())
+    if (portfolios.datesOutsidePriceData())
         beginNAV();
 }
 
@@ -586,9 +587,9 @@ void frmMain::addSecurity()
             change = true;
             security s = f.getReturnValuesSecurity();
             portfolios.insert(m_portfolioID, s);
-            minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
+            minDate = portfolios.minimumDateBetweenTrades(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount && !prices::instance().symbols().contains(s.symbol))
+            if (!s.cashAccount && !prices::instance().exists(s.symbol))
                 showUpdatePrices = true;
         }
     }
@@ -619,7 +620,7 @@ void frmMain::editSecurity()
         {
             change = true;
             portfolios.insert(m_portfolioID, f.getReturnValuesSecurity());
-            minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
+            minDate = portfolios.minimumDateBetweenTrades(minDate, f.getReturnValuesMinDate());
         }
     }
 
@@ -631,7 +632,7 @@ void frmMain::editSecurity()
 
 void frmMain::deleteSecurity()
 {
-    QStringList securities = selectedRows(holdingsRow::row_Symbol, static_cast<mpiViewModelBase*>(ui.holdings->model()));
+    QStringList securities = static_cast<mpiViewModelBase*>(ui.holdings->model())->selectedItems(holdingsRow::row_Symbol);
     if (securities.isEmpty())
         return;
 
@@ -643,21 +644,17 @@ void frmMain::deleteSecurity()
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.holdings->model())->selectedItems())
     {
         security s = portfolios.securities(m_portfolioID, row->values.at(holdingsRow::row_ID).toInt());
-        minDate = securityMinDate(minDate, s.firstTradeDate());
+        minDate = portfolios.minimumDateBetweenTrades(minDate, s.firstTradeDate());
         portfolios.remove(m_portfolioID, s);
     }
 
-    deleteUnusedSymbols();
-    if (portfolios.invalidNAVDates())
+    prices::instance().removeUnusedSymbols(portfolios.symbols());
+    resetLastDate();
+
+    if (portfolios.datesOutsidePriceData())
         beginNAV();
     else
         resetSecurityRelatedTabs(minDate);
-}
-
-void frmMain::deleteUnusedSymbols()
-{
-    prices::instance().remove(functions::inLeftNotRight(prices::instance().symbols(), portfolios.symbols()));
-    resetLastDate();
 }
 
 void frmMain::options()
@@ -678,7 +675,8 @@ void frmMain::options()
             if (info.startDate < m_settings.dataStartDate)
             {
                 info.startDate = m_settings.dataStartDate;
-                portfolios.update(info);
+                portfolios.insert(info);
+                info.save();
             }
             portfolios.removeNAV(info.id);
             portfolios.removeExecutedTrades(info.id);
@@ -701,27 +699,6 @@ void frmMain::addAA()
     }
 }
 
-int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
-{
-    if (firstTradeDate != -1 && (firstTradeDate < currentMinDate || currentMinDate == -1))
-        currentMinDate = firstTradeDate;
-    return currentMinDate;
-}
-
-int frmMain::aaMinDate(const int &aaID, int currentMinDate)
-{
-    foreach(const security &s, portfolios.securities(m_portfolioID))
-        if(s.aa.contains(aaID))
-            foreach(const trade &t, s.trades)
-                if (t.type == trade::tradeType_AA)
-                {
-                    currentMinDate = securityMinDate(currentMinDate, s.firstTradeDate());
-                    break;
-                }
-
-    return currentMinDate;
-}
-
 void frmMain::editAA()
 {    
     bool change = false;
@@ -736,8 +713,9 @@ void frmMain::editAA()
         if (f.exec())
         {
             change = true;
-            portfolios.insert(m_portfolioID, f.getReturnValues());
-            minDate = aaMinDate(aaID, minDate);
+            assetAllocation aa = f.getReturnValues();
+            portfolios.insert(m_portfolioID, aa);
+            minDate = portfolios.minimumDateBetweenTrades(minDate, m_portfolioID, aa);
         }
     }
 
@@ -747,17 +725,9 @@ void frmMain::editAA()
     resetSecurityRelatedTabs(minDate);
 }
 
-QStringList frmMain::selectedRows(const int &column, mpiViewModelBase *model)
-{
-    QStringList returnList;
-    foreach(baseRow *row, model->selectedItems())
-        returnList.append(row->values.at(column).toString());
-    return returnList;
-}
-
 void frmMain::deleteAA()
 {
-    QStringList selectedAA = selectedRows(aaRow::row_Description, static_cast<mpiViewModelBase*>(ui.aa->model()));
+    QStringList selectedAA = static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems(aaRow::row_Description);
     if (selectedAA.isEmpty())
         return;
 
@@ -769,7 +739,7 @@ void frmMain::deleteAA()
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems())
     {
         assetAllocation aa = portfolios.aa(m_portfolioID, row->values.at(aaRow::row_ID).toInt());
-        minDate = aaMinDate(aa.id, minDate);
+        minDate = portfolios.minimumDateBetweenTrades(minDate, m_portfolioID, aa);
         portfolios.remove(m_portfolioID, aa);
     }
 
@@ -813,7 +783,7 @@ void frmMain::editAcct()
 
 void frmMain::deleteAcct()
 {
-    QStringList selectedAcct = selectedRows(acctRow::row_Description, static_cast<mpiViewModelBase*>(ui.accounts->model()));
+    QStringList selectedAcct = static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems(acctRow::row_Description);
     if (selectedAcct.isEmpty())
         return;
 
@@ -900,24 +870,9 @@ bool frmMain::finishThread()
     return true;
 }
 
-void frmMain::statusUpdate(const QString &message)
-{
-    ui.stbStatus->setText(QString("Status: ").append(message));
-}
-
-int frmMain::currentDateOrPrevious(int date)
-{
-    const QList<int> dates = prices::instance().dates();
-    QList<int>::const_iterator place = qLowerBound(dates, date);
-    if (*place != date && place != dates.constBegin())
-        return *(place - 1);
-    else
-        return *place;
-}
-
 int frmMain::dateDropDownDate(QDateEdit *dateDropDown)
 {
-    int currentDate = qMax(currentDateOrPrevious(dateDropDown->date().toJulianDay()), portfolios.startDate(m_portfolioID));
+    int currentDate = qMax(prices::instance().currentDateOrPrevious(dateDropDown->date().toJulianDay()), portfolios.startDate(m_portfolioID));
     dateDropDown->blockSignals(true);
     dateDropDown->setDate(QDate::fromJulianDay(currentDate));
     dateDropDown->blockSignals(false);
@@ -984,7 +939,7 @@ void frmMain::holdingsSortChanged(int index)
 {
     portfolioInfo info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(), &info.holdingsSort, holdingsRow::fieldNames());
-    portfolios.update(info);
+    portfolios.insert(info);
     resetPortfolioHoldings();
 }
 
@@ -992,7 +947,7 @@ void frmMain::aaSortChanged(int index)
 {
     portfolioInfo info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(), &info.aaSort, aaRow::fieldNames());
-    portfolios.update(info);
+    portfolios.insert(info);
     resetPortfolioAA();
 }
 
@@ -1000,7 +955,7 @@ void frmMain::acctSortChanged(int index)
 {
     portfolioInfo info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), &info.acctSort, acctRow::fieldNames());
-    portfolios.update(info);
+    portfolios.insert(info);
     resetPortfolioAcct();
 }
 

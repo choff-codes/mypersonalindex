@@ -15,6 +15,7 @@ public:
     }
 
     QStringList symbols() { return m_securityPriceList.keys(); }
+    bool exists(const QString &symbol) { return m_securityPriceList.contains(symbol); }
     QList<int> dates() { return m_dates; }
 
     void insertPrice(const QString &symbol, const int &date, const double &price) { m_securityPriceList[symbol].prices.insert(date, price); insertDate(date);}
@@ -32,10 +33,12 @@ public:
 
     int firstDate() const { return m_dates.isEmpty() ? 0 : m_dates.first(); }
     int lastDate() const { return m_dates.isEmpty() ? 0 : m_dates.last(); }
+    int currentDateOrPrevious(int date);
 
     securityPrice dailyPriceInfo(const QString &symbol, const int &date) const { return history(symbol).dailyPriceInfo(date); }
 
     void remove(const QStringList &removedSymbols);
+    void removeUnusedSymbols(const QStringList &currentSymbols);
 
     void insertCashSecurity(const QString &symbol) { m_cashSecurities.insert(symbol); }
     void removeCashSecurity(const QString &symbol) { m_cashSecurities.remove(symbol); }

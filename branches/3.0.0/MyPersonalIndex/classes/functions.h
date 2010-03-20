@@ -16,7 +16,6 @@ public:
     static QString replaceDelimiter(const QVariant &s, const QString &delimiter);
     static bool lessThan(const QVariant &left, const QVariant &right, const QVariant &type);
     static bool equal(const QVariant &left, const QVariant &right, const QVariant &type);
-    static QStringList inLeftNotRight(const QStringList &list1, const QStringList &list2);
 };
 
 #endif // FUNCTIONS_H

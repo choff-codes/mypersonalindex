@@ -35,6 +35,7 @@ public:
     int rowCount(const QModelIndex&) const { return m_rows.count(); }
     int columnCount (const QModelIndex&) const { return m_viewableColumns.count(); }
     QList<baseRow*> selectedItems();
+    QStringList selectedItems(const int &column);
 
 protected:
     QTableView *m_parent;

@@ -35,3 +35,11 @@ QList<baseRow*> mpiViewModelBase::selectedItems()
 
     return items;
 }
+
+QStringList mpiViewModelBase::selectedItems(const int &column)
+{
+    QStringList returnList;
+    foreach(baseRow *row, selectedItems())
+        returnList.append(row->values.at(column).toString());
+    return returnList;
+}

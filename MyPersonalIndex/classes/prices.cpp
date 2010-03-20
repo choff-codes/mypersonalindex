@@ -33,6 +33,14 @@ void prices::insertDate(const int &date)
     m_cashPrices.prices.insert(date, 1);
 }
 
+int prices::currentDateOrPrevious(int date)
+{
+    QList<int>::const_iterator place = qLowerBound(m_dates, date);
+    if (*place != date && place != m_dates.constBegin())
+        return *(place - 1);
+    else
+        return *place;
+}
 
 QMap<int, double> prices::price(const QString &symbol) const
 {
@@ -105,4 +113,14 @@ void prices::remove(const QStringList &removedSymbols)
         for(i = priceHistory.constBegin(); i != priceHistory.constEnd(); ++i)
             insertDate(i.key());
     }
+}
+
+void prices::removeUnusedSymbols(const QStringList &currentSymbols)
+{
+    QStringList symbolsToRemove;
+    foreach(const QString &s, symbols())
+        if (!currentSymbols.contains(s))
+            symbolsToRemove.append(s);
+
+    remove(symbolsToRemove);
 }

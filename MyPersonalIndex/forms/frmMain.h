@@ -46,7 +46,6 @@ private:
     void resetPortfolioSettings();
     void savePortfolio();
     void disableItems(bool disabled);
-    int currentDateOrPrevious(int date);
     int dateDropDownDate(QDateEdit *dateDropDown);
     void resetSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
     void setSortDropDown(const QString &sort, QComboBox *dropDown);
@@ -55,14 +54,11 @@ private:
     void resetCalendars();
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
-    void deleteUnusedSymbols();
-    int aaMinDate(const int &aaID, int currentMinDate);
-    int securityMinDate(int currentMinDate, const int &firstTradeDate);
-    QStringList selectedRows(const int &column, mpiViewModelBase *model);
     void beginNAV(const int &portfolioID = -1, const int &minDate = 0);
     bool finishThread();
-    void statusUpdate(const QString &message);
+    void statusUpdate(const QString &message) { ui.stbStatus->setText(QString("Status: ").append(message)); }
     void showWelcomeMessage();
+    bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames, const QString &title);
 
 private slots:
     void addPortfolio();
@@ -89,7 +85,6 @@ private slots:
     void deleteAcct();
     void editStat();
     void beginUpdate();
-    bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames, const QString &title);
     void holdingsModifyColumns();
     void holdingsSortChanged(int index);
     void aaModifyColumns();

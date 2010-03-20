@@ -74,13 +74,3 @@ bool functions::equal(const QVariant &left, const QVariant &right, const QVarian
             return left.toString().compare(right.toString(), Qt::CaseInsensitive) == 0;
     };
 }
-
-QStringList functions::inLeftNotRight(const QStringList &left, const QStringList &right)
-{
-    QStringList returnList;
-    foreach(const QString &s, left)
-        if (!right.contains(s))
-            returnList.append(s);
-
-    return returnList;
-}

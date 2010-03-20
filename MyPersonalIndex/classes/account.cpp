@@ -23,5 +23,8 @@ void account::save(const int &portfolioID)
 
 void account::remove() const
 {
+    if (this->id == -1)
+        return;
+
     queries::deleteItem(queries::table_Acct, this->id);
 }

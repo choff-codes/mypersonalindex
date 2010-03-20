@@ -12,12 +12,14 @@ class frmColumns : public QDialog
 public:
     const QList<int>& getReturnValues() const { return m_selectedColumns; }
 
-    frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, QWidget *parent = 0);
+    frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, const QString &title,
+        const QDialog::DialogCode &resultNoChange, QWidget *parent = 0);
 
 private:
     frmColumns_UI ui;
     QList<int> m_selectedColumns;
     QMap<int, QString> m_columns;
+    QDialog::DialogCode m_resultNoChange;
 
 private slots:
     void accept();

@@ -11,7 +11,7 @@ public:
     virtual ~cachedCalculations() {}
 
     dailyInfoPortfolio* portfolioValues(const int &date);
-    void setPortfolio(const portfolio *p_portfolio) { calculations::setPortfolio(p_portfolio); clearCache(); }
+    void setPortfolio(const int &portfolioID) { calculations::setPortfolio(portfolioID); clearCache(); }
     void clearCache() { m_cache.clear(); }
     dailyInfo aaValues(const int &date, const int &aaID);
     dailyInfo acctValues(const int &date, const int &acctID);

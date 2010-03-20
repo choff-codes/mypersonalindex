@@ -1,8 +1,8 @@
 #include "statisticInfo.h"
 
-statisticInfo::statisticInfo(const portfolio *currentPortfolio, const dailyInfoPortfolio *info, const int &startDate, const int &previousClose):
-    m_portfolio(currentPortfolio), m_endInfo(info), m_startDate(startDate), m_previousClose(previousClose), m_startNAV(currentPortfolio->info.startValue),
-    m_startTotalValue(0), m_endNAV(currentPortfolio->info.startValue), m_endTotalValue(0), m_count(0), m_stdDev(0), m_maxChangePositive(0),
+statisticInfo::statisticInfo(const int &portfolioID, const dailyInfoPortfolio *info, const int &startDate, const int &previousClose):
+    m_portfolioID(portfolioID), m_endInfo(info), m_startDate(startDate), m_previousClose(previousClose), m_startNAV(portfolio::instance().startValue(portfolioID)),
+    m_startTotalValue(0), m_endNAV(portfolio::instance().startValue(portfolioID)), m_endTotalValue(0), m_count(0), m_stdDev(0), m_maxChangePositive(0),
     m_maxChangePositiveDay(0), m_maxChangeNegative(0), m_maxChangeNegativeDay(0), m_minNAVValue(0), m_minNAVValueDay(0), m_maxNAVValue(0),
     m_maxNAVValueDay(0), m_minTotalValue(0), m_minTotalValueDay(0), m_maxTotalValue(0), m_maxTotalValueDay(0)
 {    
@@ -16,7 +16,7 @@ statisticInfo::statisticInfo(const portfolio *currentPortfolio, const dailyInfoP
 
 void statisticInfo::setNAV()
 {
-    const QMap<int, double> navHistory = m_portfolio->data.nav.navHistory();
+    const QMap<int, double> navHistory = portfolio::instance().nav(m_portfolioID).navHistory();
     if (navHistory.isEmpty())
         return;
 
@@ -94,7 +94,7 @@ void statisticInfo::calculateChanges(QMap<int, double>::const_iterator startNav,
 
 void statisticInfo::setTotalValue()
 {
-    const QMap<int, double> totalValueHistory = m_portfolio->data.nav.totalValueHistory();
+    const QMap<int, double> totalValueHistory = portfolio::instance().nav(m_portfolioID).totalValueHistory();
     if (totalValueHistory.isEmpty())
         return;
 

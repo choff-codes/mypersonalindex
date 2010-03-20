@@ -16,14 +16,13 @@ public:
     const security& getReturnValuesSecurity() const { return m_security; }
     const int& getReturnValuesMinDate() const { return m_minDate; }
 
-    frmSecurity(const int &portfolioID, const QMap<int, portfolio*> &data, const security& security, QWidget *parent = 0);
+    frmSecurity(const int &portfolioID, const security& security, QWidget *parent = 0);
     ~frmSecurity() { delete m_modelTrade; delete m_modelAA; delete m_modelHistory; }
 
 private:
 
     frmSecurity_UI ui;
     int m_portfolioID;
-    const QMap<int, portfolio*> m_data;
     security m_security;
     security m_securityOriginal;
     securityTradeModel *m_modelTrade;

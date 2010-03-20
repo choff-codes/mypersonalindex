@@ -1,8 +1,8 @@
 #include "frmSecurity.h"
 #include "mpiViewDelegates.h"
 
-frmSecurity::frmSecurity(const int &portfolioID, const QMap<int, portfolio*> &data, const security& security, QWidget *parent):
-    QDialog(parent), m_portfolioID(portfolioID),  m_data(data), m_security(security), m_securityOriginal(security), m_modelHistory(0)
+frmSecurity::frmSecurity(const int &portfolioID, const security& security, QWidget *parent):
+    QDialog(parent), m_portfolioID(portfolioID), m_security(security), m_securityOriginal(security), m_modelHistory(0)
 {
     ui.setupUI(this);
     this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.symbol));
@@ -22,11 +22,11 @@ frmSecurity::frmSecurity(const int &portfolioID, const QMap<int, portfolio*> &da
 
 void frmSecurity::loadDropDowns()
 {
-    foreach(const assetAllocation &value, m_data.value(m_portfolioID)->data.aa)
+    foreach(const assetAllocation &value, portfolio::instance().aa(m_portfolioID))
         ui.cmbAA->addItem(value.description, value.id);
 
     ui.cmbAcct->addItem("(None)", -1);
-    foreach(const account &value, m_data.value(m_portfolioID)->data.acct)
+    foreach(const account &value, portfolio::instance().acct(m_portfolioID))
         ui.cmbAcct->addItem(value.description, value.id);
 }
 
@@ -77,10 +77,10 @@ void frmSecurity::loadSecurity()
     ui.chkInclude->setChecked(m_security.includeInCalc);
     ui.btnHistorical->setDisabled(m_security.id == -1);
 
-    m_modelAA = new securityAAModel(m_security.aa, m_data.value(m_portfolioID)->data.aa, ui.aa);
+    m_modelAA = new securityAAModel(m_security.aa, portfolio::instance().aa(m_portfolioID), ui.aa);
     installAAModel();
 
-    m_modelTrade = new securityTradeModel(m_security.trades.values(), m_data.value(m_portfolioID)->data.securities,  ui.trades, this);
+    m_modelTrade = new securityTradeModel(m_security.trades.values(), portfolio::instance().securities(m_portfolioID),  ui.trades, this);
     ui.trades->setModel(m_modelTrade);
     // HACK: could not get the model to resize correctly without this time
     QTimer::singleShot(0, m_modelTrade, SLOT(autoResize()));
@@ -188,8 +188,8 @@ bool frmSecurity::hasValidationErrors()
         return true;
     }
 
-    foreach(const portfolio *p, m_data)
-        foreach(const security &s, p->data.securities)
+    foreach(const int &i, portfolio::instance().ids())
+        foreach(const security &s, portfolio::instance().securities(i))
             if (s.id != m_security.id && m_security.symbol == s.symbol && m_security.cashAccount != s.cashAccount)
             {
                 QString message = m_security.cashAccount ?
@@ -216,7 +216,7 @@ void frmSecurity::historyIndexChange(int index)
 {
     QAbstractItemModel *oldModel = ui.history->model();
 
-    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, m_data.value(m_portfolioID)->data.executedTrades.value(m_security.id),
+    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, portfolio::instance().executedTrades(m_portfolioID).value(m_security.id),
         prices::instance().history(m_security.symbol), ui.sortHistorical->isChecked(), ui.history);
     ui.history->setModel(m_modelHistory);
     ui.history->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);

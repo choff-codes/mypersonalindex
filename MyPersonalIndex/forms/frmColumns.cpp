@@ -1,9 +1,11 @@
 #include "frmColumns.h"
 
-frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, QWidget *parent):
-        QDialog(parent), m_selectedColumns(selectedColumns), m_columns(columns)
+frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, const QString &title,
+    const QDialog::DialogCode &resultNoChange, QWidget *parent): QDialog(parent), m_selectedColumns(selectedColumns), m_columns(columns),
+    m_resultNoChange(resultNoChange)
 {
     ui.setupUI(this);
+    this->setWindowTitle(title);
 
     for(QMap<int, QString>::const_iterator i = m_columns.constBegin(); i != m_columns.constEnd(); ++i)
     {
@@ -39,9 +41,9 @@ void frmColumns::accept()
 
     if (selected == m_selectedColumns)
     {
-       QDialog::reject();
-       return;
-   }
+        QDialog::done(m_resultNoChange);
+        return;
+    }
 
     m_selectedColumns = selected;
     QDialog::accept();

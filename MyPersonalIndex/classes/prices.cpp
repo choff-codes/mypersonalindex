@@ -83,6 +83,11 @@ void prices::remove(const QStringList &removedSymbols)
 {
     foreach(const QString &s, removedSymbols)
     {
+        if (isCashSecurity(s))
+        {
+            removeCashSecurity(s);
+            continue;
+        }
         m_securityPriceList.remove(s);
         queries::deleteSymbolItems(s);
     }

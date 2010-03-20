@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/icons" >
+    <qresource prefix="/icons">
         <file>about.png</file>
         <file>add.png</file>
         <file>chart.png</file>
@@ -10,5 +10,6 @@
         <file>refresh.png</file>
         <file>report.png</file>
         <file>table.png</file>
+        <file>import.png</file>
     </qresource>
 </RCC>

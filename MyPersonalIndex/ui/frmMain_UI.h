@@ -32,6 +32,7 @@ public:
     QAction *mainUpdatePrices;
     QAction *mainCompare;
     QAction *mainEdit;
+    QAction *mainImport;
     QAction *mainDelete;
     QAction *mainAdd;
     QAction *mainOptions;

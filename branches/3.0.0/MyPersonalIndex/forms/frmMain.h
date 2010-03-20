@@ -28,12 +28,10 @@ class frmMain : public QMainWindow
 
 public:
     frmMain(QWidget *parent = 0);
-    ~frmMain();
 
 private:
     frmMain_UI ui;
-    QMap<int, portfolio*> m_portfolios;
-    portfolio *m_currentPortfolio;
+    int m_portfolioID;
     settings m_settings;
     bool m_calculationInProgress;
     chartInfo m_chartInfo;
@@ -47,19 +45,17 @@ private:
     void resetSortDropDowns();
     void resetPortfolioSettings();
     void savePortfolio();
-    void savePortfolios();
     void disableItems(bool disabled);
     int currentDateOrPrevious(int date);
     int dateDropDownDate(QDateEdit *dateDropDown);
     void resetSortDropDown(const QMap<int, QString> &fieldNames, QComboBox *dropDown);
     void setSortDropDown(const QString &sort, QComboBox *dropDown);
-    void sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames);
+    void sortDropDownChange(int columnID, QString *sortString, const QMap<int, QString> &fieldNames);
     void resetSecurityRelatedTabs(const int &minDate);
     void resetCalendars();
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendar);
     void resetCalendar(const int &date, const int &minDate, QDateEdit *calendarStart, QDateEdit *calendarEnd);
     void deleteUnusedSymbols();
-    bool invalidNAVDates();
     int aaMinDate(const int &aaID, int currentMinDate);
     int securityMinDate(int currentMinDate, const int &firstTradeDate);
     QStringList selectedRows(const int &column, mpiViewModelBase *model);
@@ -93,13 +89,14 @@ private slots:
     void deleteAcct();
     void editStat();
     void beginUpdate();
-    bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames);
+    bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames, const QString &title);
     void holdingsModifyColumns();
     void holdingsSortChanged(int index);
     void aaModifyColumns();
     void aaSortChanged(int index);
     void acctModifyColumns();
     void acctSortChanged(int index);
+    void import();
     void tabChanged(int index) { if (index == 2) resetPortfolioChart(); } // hack for now, QWT doesn't render the chart correctly the first time
 };
 

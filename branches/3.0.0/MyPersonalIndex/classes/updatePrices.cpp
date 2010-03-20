@@ -86,24 +86,23 @@ void updatePrices::insertUpdates()
 QMap<QString, updateInfo> updatePrices::getUpdateInfo() const
 {
     QMap<QString, updateInfo> returnList;
-    foreach(portfolio* p, m_data)
-        foreach(const security &sec, p->data.securities)
-            if (!returnList.contains(sec.symbol) && !sec.cashAccount)
-            {
-                updateInfo u(sec.symbol, m_dataStartDate);
-                securityPrices history = prices::instance().history(sec.symbol);
+    foreach(const QString &symbol, portfolio::instance().symbols())
+        if (!returnList.contains(symbol) && !prices::instance().isCashSecurity(symbol))
+        {
+            updateInfo u(symbol, m_dataStartDate);
+            securityPrices history = prices::instance().history(symbol);
 
-                if (!history.prices.isEmpty())
-                    u.lastPrice = (history.prices.constEnd() - 1).key();
+            if (!history.prices.isEmpty())
+                u.lastPrice = (history.prices.constEnd() - 1).key();
 
-                if (!history.dividends.isEmpty())
-                    u.lastDividend = (history.dividends.constEnd() - 1).key();
+            if (!history.dividends.isEmpty())
+                u.lastDividend = (history.dividends.constEnd() - 1).key();
 
-                if (!history.splits.isEmpty())
-                    u.lastSplit = (history.splits.constEnd() - 1).key();
+            if (!history.splits.isEmpty())
+                u.lastSplit = (history.splits.constEnd() - 1).key();
 
-                returnList.insert(sec.symbol, u);
-            }
+            returnList.insert(symbol, u);
+        }
 
     return returnList;
 }

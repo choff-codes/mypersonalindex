@@ -18,14 +18,12 @@ struct updatePricesReturnValue
 class updatePrices
 {
 public:
-    updatePrices(const QMap<int, portfolio*> &data, const settings &settings):
-       m_data(data), m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
+    updatePrices(const settings &settings): m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
 
     static bool isInternetConnection();
     updatePricesReturnValue run();
 
 private:
-    const QMap<int, portfolio*> m_data;
     bool m_downloadSplits;
     int m_dataStartDate;
     QVariantList m_pricesDate, m_pricesSymbol, m_pricesPrice;

@@ -9,17 +9,17 @@
 class calculations
 {
 public:
-    calculations(): m_portfolio(0) {}
+    calculations() {}
     virtual ~calculations() {}
 
-    virtual void setPortfolio(const portfolio *p_portfolio) { m_portfolio = p_portfolio; }
+    virtual void setPortfolio(const int portfolioID) { m_portfolioID = portfolioID; }
     virtual dailyInfoPortfolio* portfolioValues(const int &date);
 
     static double correlation(const securityPrices &price1, const securityPrices &price2, const int &startDate, const int &endDate);
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 protected:
-    const portfolio *m_portfolio;
+    int m_portfolioID;
 
     securityInfo specificSecurityValue(const security &s, const int &date);
 };

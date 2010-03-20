@@ -3,16 +3,16 @@
 void frmColumns_UI::setupUI(QDialog *dialog)
 {
     dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
-    dialog->setWindowTitle("Modify Columns");
 
     btnOkCancel = new QDialogButtonBox(dialog);
     btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
     mainLayout = new QVBoxLayout(dialog);
-    gpMain = new QGroupBox("Columns", dialog);
+    gpMain = new QGroupBox("Add/Remove", dialog);
     groupLayout = new QHBoxLayout(gpMain);
 
     removedColumns = new QListWidget(gpMain);
+    removedColumns->setSelectionMode(QAbstractItemView::ExtendedSelection);
     groupLayout->addWidget(removedColumns);
 
     moveLayout = new QVBoxLayout();
@@ -27,6 +27,7 @@ void frmColumns_UI::setupUI(QDialog *dialog)
     groupLayout->addLayout(moveLayout);
 
     addedColumns = new QListWidget(gpMain);
+    addedColumns->setSelectionMode(QAbstractItemView::ExtendedSelection);
     groupLayout->addWidget(addedColumns);
 
     reorderLayout = new QVBoxLayout();

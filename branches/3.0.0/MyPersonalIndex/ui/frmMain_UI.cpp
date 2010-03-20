@@ -33,9 +33,13 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     mainUpdatePrices = new QAction(QIcon(":/icons/refresh.png"), "Update Prices", mainWindow);
     mainCompare = new QAction(QIcon(":/icons/chart.png"), "Compare...", mainWindow);
     mainCompare->setIconText("Compare...");
-    mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit", mainWindow);
+    mainEdit = new QAction(QIcon(":/icons/edit.png"), "Edit...", mainWindow);
+    mainEdit->setIconText("Edit...");
+    mainImport = new QAction(QIcon(":/icons/import.png"), "Import...", mainWindow);
+    mainImport->setIconText("Import...");
     mainDelete = new QAction(QIcon(":/icons/delete.png"), "Delete", mainWindow);
-    mainAdd = new QAction(QIcon(":/icons/add.png"), "Add Portfolio", mainWindow);
+    mainAdd = new QAction(QIcon(":/icons/add.png"), "Add Portfolio...", mainWindow);
+    mainAdd->setIconText("Add Portfolio...");
     mainOptions = new QAction(QIcon(":/icons/options.png"), "Options", mainWindow);
     mainAbout = new QAction(QIcon(":/icons/about.png"), "About", mainWindow);
     mainPortfolioLabel = new QLabel("Portfolio: ", mainWindow);
@@ -50,6 +54,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     mainToolbar->addWidget(mainPortfolioLabel);
     mainToolbar->addWidget(mainPortfolioCombo);
     mainToolbar->addAction(mainEdit);
+    mainToolbar->addAction(mainImport);
     mainToolbar->addAction(mainDelete);
     mainToolbar->addSeparator();
     mainToolbar->addAction(mainAdd);

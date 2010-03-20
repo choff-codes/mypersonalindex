@@ -12,7 +12,7 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
         ratio *= i.value();
     i = splits.constBegin();
 
-    foreach(const executedTrade &t, m_portfolio->data.executedTrades.value(s.id))
+    foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID).value(s.id))
     {
         if (t.date > date)
             break;
@@ -30,7 +30,7 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
     value.dividendAmount = value.shares * price.dividend;
     value.totalValue = value.shares * price.close;
 
-    account acct = m_portfolio->data.acct.value(s.account);
+    account acct = portfolio::instance().acct(m_portfolioID).value(s.account);
     if (acct.taxRate <= 0)
         return value;
 
@@ -44,12 +44,9 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
 
 dailyInfoPortfolio* calculations::portfolioValues(const int &date)
 {
-    if (!m_portfolio)
-        return 0;
-
     dailyInfoPortfolio *info = new dailyInfoPortfolio(date);
 
-    foreach(const security::security &s, m_portfolio->data.securities)
+    foreach(const security::security &s, portfolio::instance().securities(m_portfolioID))
     {
         if (!s.includeInCalc)
             continue;

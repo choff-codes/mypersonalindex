@@ -1,10 +1,10 @@
+#define portfolios portfolio::instance()
 #include "frmMain.h"
 
-frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m_calculationInProgress(false)
+frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_calculationInProgress(false)
 {
     ui.setupUI(this);
 
-    m_portfolios = portfolio::loadPortfolios();
     m_settings = settings::loadSettings();
 
     if (m_settings.state != Qt::WindowActive)
@@ -24,17 +24,6 @@ frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_currentPortfolio(0), m
     connectSlots();
 }
 
-frmMain::~frmMain()
-{
-    qDeleteAll(m_portfolios);
-    delete ui.holdings->model();
-    delete ui.aa->model();
-    delete ui.accounts->model();
-    delete ui.correlations->model();
-    delete ui.performance->model();
-    delete ui.stat->model();
-}
-
 void frmMain::closeEvent(QCloseEvent *event)
 {
     if (m_calculationInProgress)
@@ -46,7 +35,7 @@ void frmMain::closeEvent(QCloseEvent *event)
 
     this->hide();
     savePortfolio();
-    savePortfolios();
+    portfolios.save();
     saveSettings();
 }
 
@@ -54,6 +43,7 @@ void frmMain::connectSlots()
 {
     connect(ui.mainAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui.mainEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
+    connect(ui.mainImport, SIGNAL(triggered()), this, SLOT(import()));
     connect(ui.mainDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
@@ -173,8 +163,8 @@ void frmMain::resetLastDate()
 void frmMain::saveSettings()
 {
     QVariant portfolio(QVariant::Int);
-    if (m_currentPortfolio)
-        portfolio = m_currentPortfolio->info.id;
+    if (portfolios.exists(m_portfolioID))
+        portfolio = m_portfolioID;
 
     m_settings.lastPortfolio = portfolio;
     m_settings.windowSize = size();
@@ -188,8 +178,8 @@ void frmMain::resetPortfolioDropDown(const int &portfolioID = -1)
     ui.mainPortfolioCombo->blockSignals(true);
     ui.mainPortfolioCombo->clear();
 
-    foreach(const portfolio *p, m_portfolios)
-        ui.mainPortfolioCombo->addItem(p->info.description, p->info.id);
+    foreach(const portfolioInfo &info, portfolios.info())
+        ui.mainPortfolioCombo->addItem(info.description, info.id);
 
     int row = portfolioID == -1 ? 0 : ui.mainPortfolioCombo->findData(portfolioID);
     ui.mainPortfolioCombo->setCurrentIndex(row);
@@ -214,7 +204,7 @@ void frmMain::disableItems(bool disabled)
 
 void frmMain::loadPortfolio()
 {
-    if (m_portfolios.isEmpty()) // no portfolios to load
+    if (portfolios.isEmpty()) // no portfolios to load
     {
         ui.tab->setDisabled(true);
         return;
@@ -223,9 +213,9 @@ void frmMain::loadPortfolio()
     savePortfolio();
     ui.tab->setDisabled(false);
 
-    m_currentPortfolio = m_portfolios.value(ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt());
+    m_portfolioID = ui.mainPortfolioCombo->itemData(ui.mainPortfolioCombo->currentIndex()).toInt();
 
-    if (!m_currentPortfolio)
+    if (!portfolios.exists(m_portfolioID))
     {
         ui.tab->setDisabled(true);
         return;
@@ -236,7 +226,7 @@ void frmMain::loadPortfolio()
     t.start();
 #endif
 
-    m_calculations.setPortfolio(m_currentPortfolio);
+    m_calculations.setPortfolio(m_portfolioID);
     resetPortfolioSettings();
     resetCalendars();
     resetPortfolioHoldings();
@@ -259,7 +249,7 @@ void frmMain::resetCalendars()
     if (date == 0)
         date = m_settings.dataStartDate;
 
-    int start = m_currentPortfolio->info.startDate;
+    int start = portfolios.startDate(m_portfolioID);
     int end = date < start ? start : date;
 
     resetCalendar(end, start, ui.holdingsDateDropDown);
@@ -297,9 +287,9 @@ void frmMain::resetPortfolioHoldings()
     dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
-    foreach(const security &s, m_currentPortfolio->data.securities)
+    foreach(const security &s, portfolios.securities(m_portfolioID))
         if (ui.holdingsShowHidden->isChecked() || !s.hide)
-            rows.append(new holdingsRow(s, info, m_currentPortfolio->data.acct, m_currentPortfolio->data.aa, m_currentPortfolio->info.holdingsSort));
+            rows.append(new holdingsRow(s, info, portfolios.acct(m_portfolioID), portfolios.aa(m_portfolioID), portfolios.info(m_portfolioID).holdingsSort));
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -307,7 +297,7 @@ void frmMain::resetPortfolioHoldings()
     ui.holdings->setModel(model);
     ui.holdings->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-    setSortDropDown(m_currentPortfolio->info.holdingsSort, ui.holdingsSortCombo);
+    setSortDropDown(portfolios.info(m_portfolioID).holdingsSort, ui.holdingsSortCombo);
     delete oldModel;
 }
 
@@ -319,20 +309,20 @@ void frmMain::resetPortfolioAA()
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
-        m_currentPortfolio->data.aa.insert(-1, assetAllocation());
+        portfolios.insert(m_portfolioID, assetAllocation());
 
-    foreach(const assetAllocation &aa, m_currentPortfolio->data.aa)
-        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa.id), m_currentPortfolio->info.aaThresholdMethod, aa, m_currentPortfolio->info.aaSort));
+    foreach(const assetAllocation &aa, portfolios.aa(m_portfolioID))
+        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa.id), portfolios.info(m_portfolioID).aaThresholdMethod, aa, portfolios.info(m_portfolioID).aaSort));
 
-    m_currentPortfolio->data.aa.remove(-1); // remove blank aa
+    portfolios.remove(m_portfolioID, assetAllocation()); // remove blank aa
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
-    mainAAModel *model = new mainAAModel(rows, m_settings.viewableColumns.value(settings::columns_AA), info, m_currentPortfolio->info.aaThreshold, ui.aa);
+    mainAAModel *model = new mainAAModel(rows, m_settings.viewableColumns.value(settings::columns_AA), info, portfolios.info(m_portfolioID).aaThreshold, ui.aa);
     ui.aa->setModel(model);
     ui.aa->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-    setSortDropDown(m_currentPortfolio->info.aaSort, ui.aaSortCombo);
+    setSortDropDown(portfolios.info(m_portfolioID).aaSort, ui.aaSortCombo);
     delete oldModel;
 }
 
@@ -343,13 +333,13 @@ void frmMain::resetPortfolioAcct()
     dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
-    if (ui.accountsShowBlank->isChecked()) // insert blank acct
-        m_currentPortfolio->data.acct.insert(-1, account());
+    if (ui.accountsShowBlank->isChecked()) // insert blank account
+         portfolios.insert(m_portfolioID, account());
 
-    foreach(const account &acct, m_currentPortfolio->data.acct)
-        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct.id), acct, m_currentPortfolio->info.acctSort));
+    foreach(const account &acct, portfolios.acct(m_portfolioID))
+        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct.id), acct, portfolios.info(m_portfolioID).acctSort));
 
-    m_currentPortfolio->data.acct.remove(-1); // remove blank aa
+    portfolios.remove(m_portfolioID, account()); // remove blank account
 
     qStableSort(rows.begin(), rows.end(), baseRow::baseRowSort);
 
@@ -357,14 +347,14 @@ void frmMain::resetPortfolioAcct()
     ui.accounts->setModel(model);
     ui.accounts->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 
-    setSortDropDown(m_currentPortfolio->info.acctSort, ui.accountsSortCombo);
+    setSortDropDown(portfolios.info(m_portfolioID).acctSort, ui.accountsSortCombo);
     delete oldModel;
 }
 
 void frmMain::resetPortfolioPerformance()
 {
     QAbstractItemModel *oldModel = ui.performance->model();
-    mainPerformanceModel *model = new mainPerformanceModel(m_currentPortfolio->data.nav, ui.performanceSortDesc->isChecked(), m_currentPortfolio->info.startValue, ui.performance);
+    mainPerformanceModel *model = new mainPerformanceModel(portfolios.nav(m_portfolioID), ui.performanceSortDesc->isChecked(), portfolios.info(m_portfolioID).startValue, ui.performance);
     ui.performance->setModel(model);
     delete oldModel;
 }
@@ -376,13 +366,13 @@ void frmMain::resetPortfolioCorrelation()
     int endDate = dateDropDownDate(ui.correlationsEndDateDropDown);
 
     mainCorrelationModel::correlationList correlations;
-    foreach(const security &s, m_currentPortfolio->data.securities)
+    foreach(const security &s, portfolios.securities(m_portfolioID))
         if (ui.correlationsShowHidden->isChecked() || !s.hide)
             correlations.insert(s.symbol, QHash<QString, double>());
 
     QStringList symbols = correlations.keys();
-    correlations.insert(m_currentPortfolio->info.description, QHash<QString, double>());
-    symbols.insert(0, m_currentPortfolio->info.description);
+    correlations.insert(portfolios.info(m_portfolioID).description, QHash<QString, double>());
+    symbols.insert(0, portfolios.info(m_portfolioID).description);
     
     int count = symbols.count();
     for(int i = 0; i < count; ++i)
@@ -392,7 +382,7 @@ void frmMain::resetPortfolioCorrelation()
         securityPrices security1history;
 
         if (i == 0) // always current portfolio
-            security1history.prices = m_currentPortfolio->data.nav.navHistory();
+            security1history.prices = portfolios.nav(m_portfolioID).navHistory();
         else
             security1history = prices::instance().history(security1);
 
@@ -409,11 +399,10 @@ void frmMain::resetPortfolioCorrelation()
 
 void frmMain::resetPortfolioChart()
 {
-    const QMap<int, double> nav = m_currentPortfolio->data.nav.navHistory();
-    ui.chart->setTitle(m_currentPortfolio->info.description);
+    const QMap<int, double> nav = portfolios.nav(m_portfolioID).navHistory();
+    ui.chart->setTitle(portfolios.info(m_portfolioID).description);
 
     QwtPlotCurve *newLine = new QwtPlotCurve();
-    newLine->setCurveAttribute(QwtPlotCurve::Fitted, true);
     QPen p(Qt::red); p.setWidth(3);
     newLine->setPen(p);
 
@@ -439,7 +428,7 @@ void frmMain::resetPortfolioChart()
         ui.chart->setAxisScale(QwtPlot::xBottom, m_chartInfo.firstX(), m_chartInfo.lastX(), 0);
     }
     else
-        ui.chart->setAxisScale(QwtPlot::xBottom, m_currentPortfolio->info.startDate, m_currentPortfolio->info.startDate, 0);
+        ui.chart->setAxisScale(QwtPlot::xBottom, portfolios.startDate(m_portfolioID), portfolios.startDate(m_portfolioID), 0);
 
     ui.chart->setAxisAutoScale(QwtPlot::yLeft);
     ui.chart->replot();
@@ -454,7 +443,7 @@ void frmMain::resetPortfolioStat()
 
     QAbstractItemModel *oldModel = ui.stat->model();
     dailyInfoPortfolio *info = m_calculations.portfolioValues(endDate);
-    statisticInfo s(m_currentPortfolio, info, startDate, previousDay);
+    statisticInfo s(m_portfolioID, info, startDate, previousDay);
 
     QList<QString> statisticValues;
     foreach(const int &i, m_settings.viewableColumns.value(settings::columns_Stat))
@@ -469,30 +458,28 @@ void frmMain::resetPortfolioStat()
 
 void frmMain::resetPortfolioSettings()
 {
-    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, QDate::fromJulianDay(m_currentPortfolio->info.startDate).toString(Qt::SystemLocaleShortDate)));
-    ui.holdingsShowHidden->setChecked(m_currentPortfolio->info.holdingsShowHidden);
-    ui.performanceSortDesc->setChecked(m_currentPortfolio->info.navSortDesc);
-    ui.aaShowBlank->setChecked(m_currentPortfolio->info.aaShowBlank);
-    ui.correlationsShowHidden->setChecked(m_currentPortfolio->info.correlationShowHidden);
-    ui.accountsShowBlank->setChecked(m_currentPortfolio->info.acctShowBlank);
+    ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, QDate::fromJulianDay(portfolios.startDate(m_portfolioID)).toString(Qt::SystemLocaleShortDate)));
+    portfolioInfo info = portfolios.info(m_portfolioID);
+    ui.holdingsShowHidden->setChecked(info.holdingsShowHidden);
+    ui.performanceSortDesc->setChecked(info.navSortDesc);
+    ui.aaShowBlank->setChecked(info.aaShowBlank);
+    ui.correlationsShowHidden->setChecked(info.correlationShowHidden);
+    ui.accountsShowBlank->setChecked(info.acctShowBlank);
 }
 
 void frmMain::savePortfolio()
 {
-    if (!m_currentPortfolio)
+    if (!portfolios.exists(m_portfolioID))
         return;
 
-    m_currentPortfolio->info.holdingsShowHidden = ui.holdingsShowHidden->isChecked();
-    m_currentPortfolio->info.navSortDesc = ui.performanceSortDesc->isChecked();
-    m_currentPortfolio->info.aaShowBlank = ui.aaShowBlank->isChecked();
-    m_currentPortfolio->info.correlationShowHidden = ui.correlationsShowHidden->isChecked();
-    m_currentPortfolio->info.acctShowBlank = ui.accountsShowBlank->isChecked();
-}
+    portfolioInfo info = portfolios.info(m_portfolioID);
+    info.holdingsShowHidden = ui.holdingsShowHidden->isChecked();
+    info.navSortDesc = ui.performanceSortDesc->isChecked();
+    info.aaShowBlank = ui.aaShowBlank->isChecked();
+    info.correlationShowHidden = ui.correlationsShowHidden->isChecked();
+    info.acctShowBlank = ui.accountsShowBlank->isChecked();
 
-void frmMain::savePortfolios()
-{
-    foreach(portfolio *p, m_portfolios)
-        p->info.save();
+    portfolios.update(info);
 }
 
 void frmMain::addPortfolio()
@@ -502,7 +489,7 @@ void frmMain::addPortfolio()
     {
         portfolioInfo p = f.getReturnValues();
 
-        m_portfolios.insert(p.id, new portfolio(p));
+        portfolios.insert(p);
         resetPortfolioDropDown(p.id);
         loadPortfolio();
     };
@@ -510,52 +497,51 @@ void frmMain::addPortfolio()
 
 void frmMain::editPortfolio()
 {
-    if (!m_currentPortfolio)
+    if (!portfolios.exists(m_portfolioID))
         return;
 
-    frmPortfolio f(m_currentPortfolio->info, m_settings.dataStartDate, this);
+    portfolioInfo origInfo = portfolios.info(m_portfolioID);
+    frmPortfolio f(origInfo, m_settings.dataStartDate, this);
     if (f.exec())
     {
         portfolioInfo info = f.getReturnValues();
-        bool reCalcChange = info.startValue != m_currentPortfolio->info.startValue
-                            || info.startDate != m_currentPortfolio->info.startDate
-                            || info.dividends != m_currentPortfolio->info.dividends;
+        bool reCalcChange = info.startValue != origInfo.startValue
+                            || info.startDate != origInfo.startDate
+                            || info.dividends != origInfo.dividends;
 
-        if (!reCalcChange && info.description != m_currentPortfolio->info.description)
+        if (!reCalcChange && info.description != origInfo.description)
             resetPortfolioChart();
 
-        m_currentPortfolio->info = info;
+        portfolios.update(info);
 
         resetSecurityRelatedTabs(reCalcChange ? 0 : -1);
-        resetPortfolioDropDown(m_currentPortfolio->info.id);
+        resetPortfolioDropDown(m_portfolioID);
     }
 }
 
 void frmMain::deletePortfolio()
 {
-    if (!m_currentPortfolio)
+    if (!portfolios.exists(m_portfolioID))
         return;
 
-    if (QMessageBox::question(this, "Delete Portfolio?", QString("Are you sure you want to delete %1?").arg(m_currentPortfolio->info.description),
+    if (QMessageBox::question(this, "Delete Portfolio?", QString("Are you sure you want to delete %1?").arg(portfolios.info(m_portfolioID).description),
         QMessageBox::Yes, QMessageBox::No) != QMessageBox::Yes)
         return;
 
-    m_portfolios.remove(m_currentPortfolio->info.id);
-    m_currentPortfolio->remove();
-    delete m_currentPortfolio;
-    m_currentPortfolio = 0;
+    portfolios.remove(m_portfolioID);
+    m_portfolioID = -1;
 
     deleteUnusedSymbols();
 
     int row = ui.mainPortfolioCombo->currentIndex(); // select another portfolio
-    if (m_portfolios.count() == row)
+    if (portfolios.count() == row)
         row--;
 
     resetPortfolioDropDown(-1);
-    if (!m_portfolios.isEmpty())
+    if (!portfolios.isEmpty())
         ui.mainPortfolioCombo->setCurrentIndex(row);
 
-    if (invalidNAVDates())
+    if (portfolios.invalidNAVDates())
         beginNAV();
 }
 
@@ -572,7 +558,7 @@ void frmMain::resetSecurityRelatedTabs(const int &minDate)
 {
     if (minDate != -1)
     {
-        beginNAV(m_currentPortfolio->info.id, minDate);
+        beginNAV(m_portfolioID, minDate);
         return;
     }
 
@@ -593,13 +579,13 @@ void frmMain::addSecurity()
 
     do
     {
-        frmSecurity f(m_currentPortfolio->info.id, m_portfolios, security(), this);
+        frmSecurity f(m_portfolioID, security(), this);
         resultcode = f.exec();
         if (resultcode >= QDialog::Accepted)
         {
             change = true;
             security s = f.getReturnValuesSecurity();
-            m_currentPortfolio->data.securities[s.id] = s;
+            portfolios.insert(m_portfolioID, s);
             minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
 
             if (!s.cashAccount && !prices::instance().symbols().contains(s.symbol))
@@ -628,11 +614,11 @@ void frmMain::editSecurity()
     foreach(baseRow *row, static_cast<mainHoldingsModel*>(ui.holdings->model())->selectedItems())
     {
         int securityID = row->values.at(holdingsRow::row_ID).toInt();
-        frmSecurity f(m_currentPortfolio->info.id, m_portfolios, m_currentPortfolio->data.securities.value(securityID), this);
+        frmSecurity f(m_portfolioID, portfolios.securities(m_portfolioID, securityID), this);
         if (f.exec())
         {
             change = true;
-            m_currentPortfolio->data.securities[securityID] = f.getReturnValuesSecurity();
+            portfolios.insert(m_portfolioID, f.getReturnValuesSecurity());
             minDate = securityMinDate(minDate, f.getReturnValuesMinDate());
         }
     }
@@ -656,14 +642,13 @@ void frmMain::deleteSecurity()
     int minDate = -1;
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.holdings->model())->selectedItems())
     {
-        security s = m_currentPortfolio->data.securities.value(row->values.at(holdingsRow::row_ID).toInt());
+        security s = portfolios.securities(m_portfolioID, row->values.at(holdingsRow::row_ID).toInt());
         minDate = securityMinDate(minDate, s.firstTradeDate());
-        s.remove();
-        m_currentPortfolio->data.securities.remove(s.id);
+        portfolios.remove(m_portfolioID, s);
     }
 
     deleteUnusedSymbols();
-    if (invalidNAVDates())
+    if (portfolios.invalidNAVDates())
         beginNAV();
     else
         resetSecurityRelatedTabs(minDate);
@@ -671,27 +656,8 @@ void frmMain::deleteSecurity()
 
 void frmMain::deleteUnusedSymbols()
 {
-    QStringList symbols;
-    foreach(portfolio* p, m_portfolios)
-        foreach(const security &s, p->data.securities)
-            symbols.append(s.symbol);
-    symbols.removeDuplicates();
-
-    prices::instance().remove(functions::inLeftNotRight(prices::instance().symbols(), symbols));
+    prices::instance().remove(functions::inLeftNotRight(prices::instance().symbols(), portfolios.symbols()));
     resetLastDate();
-}
-
-bool frmMain::invalidNAVDates()
-{
-    int firstDate = prices::instance().firstDate();
-    if (firstDate == 0)
-        return true;
-
-    foreach(portfolio *p, m_portfolios)
-        if (!p->data.nav.isEmpty() && p->data.nav.firstDate() < firstDate)
-            return true;
-
-    return false;
 }
 
 void frmMain::options()
@@ -707,15 +673,15 @@ void frmMain::options()
 
         m_settings = f.getReturnValues();
         prices::instance().remove(prices::instance().symbols());
-        foreach(portfolio *p, m_portfolios)
+        foreach(portfolioInfo info, portfolios.info())
         {
-            if (p->info.startDate < m_settings.dataStartDate)
+            if (info.startDate < m_settings.dataStartDate)
             {
-                p->info.startDate = m_settings.dataStartDate;
-                p->info.save();
+                info.startDate = m_settings.dataStartDate;
+                portfolios.update(info);
             }
-            p->data.nav.remove(p->info.id);
-            p->data.executedTrades.remove(p->info.id);
+            portfolios.removeNAV(info.id);
+            portfolios.removeExecutedTrades(info.id);
         }
 
         if (QMessageBox::question(this, "Update Prices", "Would you like to update prices from the new data start date?", QMessageBox::Yes | QMessageBox::No, QMessageBox::No) == QMessageBox::Yes)
@@ -727,12 +693,10 @@ void frmMain::options()
 
 void frmMain::addAA()
 {
-    frmAAEdit f(m_currentPortfolio->info.id, this);
+    frmAAEdit f(m_portfolioID, this);
     if (f.exec())
     {
-        assetAllocation aa = f.getReturnValues();
-        m_currentPortfolio->data.aa[aa.id] = aa;
-
+        portfolios.insert(m_portfolioID, f.getReturnValues());
         resetSecurityRelatedTabs(-1);
     }
 }
@@ -746,7 +710,7 @@ int frmMain::securityMinDate(int currentMinDate, const int &firstTradeDate)
 
 int frmMain::aaMinDate(const int &aaID, int currentMinDate)
 {
-    foreach(const security &s, m_currentPortfolio->data.securities)
+    foreach(const security &s, portfolios.securities(m_portfolioID))
         if(s.aa.contains(aaID))
             foreach(const trade &t, s.trades)
                 if (t.type == trade::tradeType_AA)
@@ -768,11 +732,11 @@ void frmMain::editAA()
         if (aaID == -1)
             continue;
 
-        frmAAEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.aa.value(aaID));
+        frmAAEdit f(m_portfolioID, this, portfolios.aa(m_portfolioID, aaID));
         if (f.exec())
         {
             change = true;
-            m_currentPortfolio->data.aa[aaID] = f.getReturnValues();
+            portfolios.insert(m_portfolioID, f.getReturnValues());
             minDate = aaMinDate(aaID, minDate);
         }
     }
@@ -804,12 +768,9 @@ void frmMain::deleteAA()
     int minDate = -1;
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems())
     {
-        assetAllocation aa = m_currentPortfolio->data.aa.value(row->values.at(aaRow::row_ID).toInt());
-        for(QMap<int, security>::iterator i = m_currentPortfolio->data.securities.begin(); i != m_currentPortfolio->data.securities.end(); ++i)
-            i->removeAATarget(aa.id);
+        assetAllocation aa = portfolios.aa(m_portfolioID, row->values.at(aaRow::row_ID).toInt());
         minDate = aaMinDate(aa.id, minDate);
-        aa.remove();
-        m_currentPortfolio->data.aa.remove(aa.id);
+        portfolios.remove(m_portfolioID, aa);
     }
 
     resetSecurityRelatedTabs(minDate);
@@ -817,13 +778,13 @@ void frmMain::deleteAA()
 
 void frmMain::addAcct()
 {
-    frmAcctEdit f(m_currentPortfolio->info.id, this);
+    frmAcctEdit f(m_portfolioID, this);
     if(f.exec())
     {
         account acct = f.getReturnValues();
-        m_currentPortfolio->data.acct[acct.id] = acct;
+        portfolios.insert(m_portfolioID, acct);
 
-         resetSecurityRelatedTabs(-1);
+        resetSecurityRelatedTabs(-1);
     }
 }
 
@@ -836,11 +797,11 @@ void frmMain::editAcct()
         if (accountID == -1)
             continue;
 
-        frmAcctEdit f(m_currentPortfolio->info.id, this, m_currentPortfolio->data.acct.value(accountID));
+        frmAcctEdit f(m_portfolioID, this, portfolios.acct(m_portfolioID, accountID));
         if (f.exec())
         {
             change = true;
-            m_currentPortfolio->data.acct[accountID] = f.getReturnValues();
+            portfolios.insert(m_portfolioID, f.getReturnValues());
         }
     }
 
@@ -862,11 +823,8 @@ void frmMain::deleteAcct()
 
     foreach(baseRow *row, static_cast<mainAcctModel*>(ui.accounts->model())->selectedItems())
     {
-        account acct = m_currentPortfolio->data.acct.value(row->values.at(acctRow::row_ID).toInt());
-        for(QMap<int, security>::iterator i = m_currentPortfolio->data.securities.begin(); i != m_currentPortfolio->data.securities.end(); ++i)
-            i->removeAccount(acct.id, m_currentPortfolio->info.id);
-        acct.remove();
-        m_currentPortfolio->data.acct.remove(acct.id);
+        account acct = portfolios.acct(m_portfolioID, row->values.at(acctRow::row_ID).toInt());
+        portfolios.remove(m_portfolioID, acct);
     }
 
     resetSecurityRelatedTabs(-1);
@@ -891,7 +849,7 @@ void frmMain::beginUpdate()
     QEventLoop q;
 
     connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
-    updatePrices updateThread(m_portfolios, m_settings);
+    updatePrices updateThread(m_settings);
     QFuture<updatePricesReturnValue> future = QtConcurrent::run(&updateThread, &updatePrices::run);
     w.setFuture(future);
 
@@ -917,7 +875,7 @@ void frmMain::beginNAV(const int &portfolioID, const int &minDate)
     QEventLoop q;
 
     connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
-    nav navThread(m_portfolios, minDate, portfolioID);
+    nav navThread(minDate, portfolioID);
     QFuture<void> future = QtConcurrent::run(&navThread, &nav::run);
 
     w.setFuture(future);
@@ -959,16 +917,16 @@ int frmMain::currentDateOrPrevious(int date)
 
 int frmMain::dateDropDownDate(QDateEdit *dateDropDown)
 {
-    int currentDate = qMax(currentDateOrPrevious(dateDropDown->date().toJulianDay()), m_currentPortfolio->info.startDate);
+    int currentDate = qMax(currentDateOrPrevious(dateDropDown->date().toJulianDay()), portfolios.startDate(m_portfolioID));
     dateDropDown->blockSignals(true);
     dateDropDown->setDate(QDate::fromJulianDay(currentDate));
     dateDropDown->blockSignals(false);
     return currentDate;
 }
 
-bool frmMain::modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames)
+bool frmMain::modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames, const QString &title)
 {
-    frmColumns f(m_settings.viewableColumns.value(columnID), fieldNames, this);
+    frmColumns f(m_settings.viewableColumns.value(columnID), fieldNames, title, QDialog::Rejected, this);
     if (f.exec())
     {
         m_settings.viewableColumns[columnID] = f.getReturnValues();
@@ -980,62 +938,177 @@ bool frmMain::modifyColumns(const int &columnID, const QMap<int, QString> &field
 
 void frmMain::holdingsModifyColumns()
 {
-    if (modifyColumns(settings::columns_Holdings, holdingsRow::fieldNames()))
+    if (modifyColumns(settings::columns_Holdings, holdingsRow::fieldNames(), "Modify Columns"))
         resetPortfolioHoldings();
 }
 
 void frmMain::aaModifyColumns()
 {
-    if (modifyColumns(settings::columns_AA, aaRow::fieldNames()))
+    if (modifyColumns(settings::columns_AA, aaRow::fieldNames(), "Modify Columns"))
         resetPortfolioAA();
 }
 
 void frmMain::acctModifyColumns()
 {
-    if (modifyColumns(settings::columns_Acct, acctRow::fieldNames()))
+    if (modifyColumns(settings::columns_Acct, acctRow::fieldNames(), "Modify Columns"))
         resetPortfolioHoldings();
 }
 
 void frmMain::editStat()
 {
-    if (modifyColumns(settings::columns_Stat, statistic::statisticList()))
+    if (modifyColumns(settings::columns_Stat, statistic::statisticList(), "Modify Statistics"))
         resetPortfolioStat();
 }
 
-void frmMain::sortDropDownChange(int columnID, QString &sortString, const QMap<int, QString> &fieldNames)
+void frmMain::sortDropDownChange(int columnID, QString *sortString, const QMap<int, QString> &fieldNames)
 {
     if (columnID == -1)
     {
-        sortString.clear();
+        sortString->clear();
         return;
     }
 
     if (columnID != -2)
     {
-        sortString = QString::number(columnID);
+        *sortString = QString::number(columnID);
         return;
     }
 
-    frmSort f(sortString, fieldNames, this);
+    frmSort f(*sortString, fieldNames, this);
 
     if (f.exec())
-        sortString = f.getReturnValues();
+        *sortString = f.getReturnValues();
 }
 
 void frmMain::holdingsSortChanged(int index)
 {
-    sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.holdingsSort, holdingsRow::fieldNames());
+    portfolioInfo info = portfolios.info(m_portfolioID);
+    sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(), &info.holdingsSort, holdingsRow::fieldNames());
+    portfolios.update(info);
     resetPortfolioHoldings();
 }
 
 void frmMain::aaSortChanged(int index)
 {
-    sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(), m_currentPortfolio->info.aaSort, aaRow::fieldNames());
+    portfolioInfo info = portfolios.info(m_portfolioID);
+    sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(), &info.aaSort, aaRow::fieldNames());
+    portfolios.update(info);
     resetPortfolioAA();
 }
 
 void frmMain::acctSortChanged(int index)
 {
-    sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), m_currentPortfolio->info.acctSort, acctRow::fieldNames());
+    portfolioInfo info = portfolios.info(m_portfolioID);
+    sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), &info.acctSort, acctRow::fieldNames());
+    portfolios.update(info);
     resetPortfolioAcct();
+}
+
+void frmMain::import()
+{
+
+//    struct portfolioMapping
+//    {
+//        int portfolioID;
+//        int id;
+//
+//        portfolioMapping(const int &p_portfolioID, const int &p_id): portfolioID(p_portfolioID), id(p_id) {}
+//    };
+
+//    QList<portfolioMapping> selectedSecurities;
+//    QList<portfolioMapping> selectedAccounts;
+//    QList<portfolioMapping> selectedAA;
+//
+//    QMap<int, portfolioMapping> securitiesMapping;
+//    QMap<int, QString> securities;
+//    int i = 0;
+//    foreach(portfolio *p, m_portfolios)
+//        foreach(const security s, p->data.securities)
+//        {
+//            securitiesMapping.insert(i, portfolioMapping(p->info.id, s.id));
+//            securities.insert(i, QString("%1: %2").arg(p->info.description, s.symbol));
+//            ++i;
+//        }
+//
+//    frmColumns f(QList<int>(), securities, "Import Securities", QDialog::Accepted, this);
+//    if (f.exec())
+//    {
+//        foreach(const int &x, f.getReturnValues())
+//            selectedSecurities.append(securitiesMapping.value(x));
+//    }
+//    else
+//        return;
+//
+//
+//    QMap<int, portfolioMapping> accountMapping;
+//    QMap<int, QString> accounts;
+//    QList<int> accountsToInclude;
+//    i = 0;
+
+//    foreach(const portfolioMapping &x, selectedSecurities)
+//    {
+//        int acctToAdd = m_portfolios.value(x.portfolioID)->data.securities.value(x).account;
+//        if (acctToAdd != -1)
+//            if (!accountsToInclude.contains(acctToAdd))
+//                accountsToInclude.append(acctToAdd);
+//    }
+//
+//    foreach(portfolio *p, m_portfolios)
+//        foreach(const account acct, p->data.acct)
+//        {
+//            accountMapping.insert(i, acct.id);
+//            accounts.insert(i, QString("%1: %2").arg(p->info.description, acct.description));
+//            if (accountsToInclude.contains(acct.id))
+//                selectedAccounts.append(i);
+//            ++i;
+//        }
+//
+//    frmColumns f2(selectedAccounts, accounts, "Import Accounts", QDialog::Accepted, this);
+//    if (f2.exec())
+//    {
+//        selectedAccounts.clear();
+//        foreach(int x, f2.getReturnValues())
+//            selectedAccounts.append(accountMapping.value(x));
+//    }
+//    else
+//        return;
+//
+//    QMap<int, int> aaMapping;
+//    QMap<int, QString> assetAllocations;
+//    QList<int> aaToInclude;
+//    i = 0;
+//
+//    foreach(const int &x, selectedSecurities)
+//        foreach(portfolio *p, m_portfolios)
+//            if (p->data.securities.contains(x))
+//                foreach(const int &z, p->data.securities.value(x).aa.keys())
+//                    if (!aaToInclude.contains(z))
+//                        aaToInclude.append(z);
+//
+//    foreach(portfolio *p, m_portfolios)
+//        foreach(const assetAllocation aa, p->data.aa)
+//        {
+//            aaMapping.insert(i, aa.id);
+//            assetAllocations.insert(i, QString("%1: %2").arg(p->info.description, aa.description));
+//            if (aaToInclude.contains(aa.id))
+//                selectedAA.append(i);
+//            ++i;
+//        }
+//
+//    frmColumns f3(selectedAA, assetAllocations, "Import Asset Allocations", QDialog::Accepted, this);
+//    if (f3.exec())
+//    {
+//        selectedAA.clear();
+//        foreach(int x, f3.getReturnValues())
+//            selectedAA.append(aaMapping.value(x));
+//    }
+//    else
+//        return;
+//
+//    securitiesMapping.clear();
+//    aaMapping.clear();
+//    accountMapping.clear();
+//
+//    foreach(const int &x, selectedAccounts)
+
 }

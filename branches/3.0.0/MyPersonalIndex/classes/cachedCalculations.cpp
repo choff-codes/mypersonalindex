@@ -21,7 +21,7 @@ dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
 {
     dailyInfo info(date);
 
-    foreach(const security &s, m_portfolio->data.securities)
+    foreach(const security &s, portfolio::instance().securities(m_portfolioID))
         if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
         {
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
@@ -38,7 +38,7 @@ dailyInfo cachedCalculations::acctValues(const int &date, const int &acctID)
 {
     dailyInfo info(date);
 
-    foreach(const security &s,  m_portfolio->data.securities)
+    foreach(const security &s,  portfolio::instance().securities(m_portfolioID))
         if (acctID == s.account)
         {
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
@@ -60,14 +60,16 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
 #endif
 
     QMap<int, double> returnValues;
+    const executedTradeList trades = portfolio::instance().executedTrades(m_portfolioID);
+    account::costBasisType portfolioCostCalc = portfolio::instance().info(m_portfolioID).costBasis;
 
-    for(executedTradeList::const_iterator tradeList = m_portfolio->data.executedTrades.constBegin(); tradeList != m_portfolio->data.executedTrades.constEnd(); ++tradeList)
+    for(executedTradeList::const_iterator tradeList = trades.constBegin(); tradeList != trades.constEnd(); ++tradeList)
     {
-        security s = m_portfolio->data.securities.value(tradeList.key());
-        account::costBasisType costCalc = m_portfolio->data.acct.value(s.account).costBasis;
+        security s = portfolio::instance().securities(m_portfolioID, tradeList.key());
+        account::costBasisType costCalc = portfolio::instance().acct(m_portfolioID, s.account).costBasis;
         
         if (costCalc == account::costBasisType_None)
-            costCalc = m_portfolio->info.costBasis;
+            costCalc = portfolioCostCalc;
 
         QList<sharePricePair> previousTrades;
         const QMap<int, double> splits = prices::instance().split(s.symbol);

@@ -19,5 +19,8 @@ void assetAllocation::save(const int &portfolioID)
 
 void assetAllocation::remove() const
 {
+    if (this->id == -1)
+        return;
+
     queries::deleteItem(queries::table_AA, this->id);
 }

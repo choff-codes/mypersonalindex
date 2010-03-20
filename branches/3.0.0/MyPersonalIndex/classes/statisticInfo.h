@@ -8,7 +8,7 @@
 class statisticInfo
 {
 public:
-    statisticInfo(const portfolio *currentPortfolio, const dailyInfoPortfolio *info, const int &startDate, const int &previousClose);
+    statisticInfo(const int &portfolioID, const dailyInfoPortfolio *info, const int &startDate, const int &previousClose);
 
     const dailyInfoPortfolio* endInfo() const { return m_endInfo; }
     int startDate() const { return m_startDate; }
@@ -32,10 +32,10 @@ public:
     int minTotalValueDay() const { return m_minTotalValueDay; }
     double maxTotalValue() const { return m_maxTotalValue; }
     int maxTotalValueDay() const { return m_maxTotalValueDay; }
-    QMap<int, security> securities() const { return m_portfolio->data.securities; }
+    QMap<int, security> securities() const { return portfolio::instance().securities(m_portfolioID); }
 
 private:
-    const portfolio *m_portfolio;
+    int m_portfolioID;
     const dailyInfoPortfolio *m_endInfo;
     const int m_startDate;
     const int m_previousClose;

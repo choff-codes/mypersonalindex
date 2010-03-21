@@ -11,9 +11,9 @@ void frmColumns_UI::setupUI(QDialog *dialog)
     gpMain = new QGroupBox("Add/Remove", dialog);
     groupLayout = new QHBoxLayout(gpMain);
 
-    removedColumns = new QListWidget(gpMain);
-    removedColumns->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    groupLayout->addWidget(removedColumns);
+    removedItems = new QListWidget(gpMain);
+    removedItems->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    groupLayout->addWidget(removedItems);
 
     moveLayout = new QVBoxLayout();
     btnAdd = new QToolButton(gpMain);
@@ -26,9 +26,9 @@ void frmColumns_UI::setupUI(QDialog *dialog)
     moveLayout->addStretch();
     groupLayout->addLayout(moveLayout);
 
-    addedColumns = new QListWidget(gpMain);
-    addedColumns->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    groupLayout->addWidget(addedColumns);
+    addedItems = new QListWidget(gpMain);
+    addedItems->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    groupLayout->addWidget(addedItems);
 
     reorderLayout = new QVBoxLayout();
     btnMoveUp = new QToolButton(gpMain);

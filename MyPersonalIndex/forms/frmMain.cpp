@@ -43,7 +43,7 @@ void frmMain::connectSlots()
 {
     connect(ui.mainAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui.mainEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
-    connect(ui.mainImport, SIGNAL(triggered()), this, SLOT(import()));
+    connect(ui.mainImport, SIGNAL(triggered()), this, SLOT(beginImport()));
     connect(ui.mainDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui.mainAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
@@ -959,111 +959,35 @@ void frmMain::acctSortChanged(int index)
     resetPortfolioAcct();
 }
 
-void frmMain::import()
+bool frmMain::importPrompt(import::importData *data, const QString &title)
 {
+    if (!data)
+        return false;
 
-//    struct portfolioMapping
-//    {
-//        int portfolioID;
-//        int id;
-//
-//        portfolioMapping(const int &p_portfolioID, const int &p_id): portfolioID(p_portfolioID), id(p_id) {}
-//    };
+    frmColumns f(data->selected, data->values, title, QDialog::Accepted, this);
+    if (f.exec())
+    {
+        data->selected = f.getReturnValues();
+        return true;
+    }
+    return false;
+}
 
-//    QList<portfolioMapping> selectedSecurities;
-//    QList<portfolioMapping> selectedAccounts;
-//    QList<portfolioMapping> selectedAA;
-//
-//    QMap<int, portfolioMapping> securitiesMapping;
-//    QMap<int, QString> securities;
-//    int i = 0;
-//    foreach(portfolio *p, m_portfolios)
-//        foreach(const security s, p->data.securities)
-//        {
-//            securitiesMapping.insert(i, portfolioMapping(p->info.id, s.id));
-//            securities.insert(i, QString("%1: %2").arg(p->info.description, s.symbol));
-//            ++i;
-//        }
-//
-//    frmColumns f(QList<int>(), securities, "Import Securities", QDialog::Accepted, this);
-//    if (f.exec())
-//    {
-//        foreach(const int &x, f.getReturnValues())
-//            selectedSecurities.append(securitiesMapping.value(x));
-//    }
-//    else
-//        return;
-//
-//
-//    QMap<int, portfolioMapping> accountMapping;
-//    QMap<int, QString> accounts;
-//    QList<int> accountsToInclude;
-//    i = 0;
+void frmMain::beginImport()
+{
+    import i;
 
-//    foreach(const portfolioMapping &x, selectedSecurities)
-//    {
-//        int acctToAdd = m_portfolios.value(x.portfolioID)->data.securities.value(x).account;
-//        if (acctToAdd != -1)
-//            if (!accountsToInclude.contains(acctToAdd))
-//                accountsToInclude.append(acctToAdd);
-//    }
-//
-//    foreach(portfolio *p, m_portfolios)
-//        foreach(const account acct, p->data.acct)
-//        {
-//            accountMapping.insert(i, acct.id);
-//            accounts.insert(i, QString("%1: %2").arg(p->info.description, acct.description));
-//            if (accountsToInclude.contains(acct.id))
-//                selectedAccounts.append(i);
-//            ++i;
-//        }
-//
-//    frmColumns f2(selectedAccounts, accounts, "Import Accounts", QDialog::Accepted, this);
-//    if (f2.exec())
-//    {
-//        selectedAccounts.clear();
-//        foreach(int x, f2.getReturnValues())
-//            selectedAccounts.append(accountMapping.value(x));
-//    }
-//    else
-//        return;
-//
-//    QMap<int, int> aaMapping;
-//    QMap<int, QString> assetAllocations;
-//    QList<int> aaToInclude;
-//    i = 0;
-//
-//    foreach(const int &x, selectedSecurities)
-//        foreach(portfolio *p, m_portfolios)
-//            if (p->data.securities.contains(x))
-//                foreach(const int &z, p->data.securities.value(x).aa.keys())
-//                    if (!aaToInclude.contains(z))
-//                        aaToInclude.append(z);
-//
-//    foreach(portfolio *p, m_portfolios)
-//        foreach(const assetAllocation aa, p->data.aa)
-//        {
-//            aaMapping.insert(i, aa.id);
-//            assetAllocations.insert(i, QString("%1: %2").arg(p->info.description, aa.description));
-//            if (aaToInclude.contains(aa.id))
-//                selectedAA.append(i);
-//            ++i;
-//        }
-//
-//    frmColumns f3(selectedAA, assetAllocations, "Import Asset Allocations", QDialog::Accepted, this);
-//    if (f3.exec())
-//    {
-//        selectedAA.clear();
-//        foreach(int x, f3.getReturnValues())
-//            selectedAA.append(aaMapping.value(x));
-//    }
-//    else
-//        return;
-//
-//    securitiesMapping.clear();
-//    aaMapping.clear();
-//    accountMapping.clear();
-//
-//    foreach(const int &x, selectedAccounts)
+    if(!importPrompt(&i.securities, "Import Securities"))
+        return;
 
+    i.updateBasedOnSelectedSecurities();
+
+    if(!importPrompt(&i.accounts, "Import Accounts"))
+        return;
+
+    if(!importPrompt(&i.assetAllocations, "Import Asset Allocations"))
+        return;
+
+    i.save(m_portfolioID);
+    loadPortfolio();
 }

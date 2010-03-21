@@ -118,7 +118,7 @@ void prices::remove(const QStringList &removedSymbols)
 void prices::removeUnusedSymbols(const QStringList &currentSymbols)
 {
     QStringList symbolsToRemove;
-    foreach(const QString &s, symbols())
+    foreach(const QString &s, m_securityPriceList.keys() + m_cashSecurities.values())
         if (!currentSymbols.contains(s))
             symbolsToRemove.append(s);
 

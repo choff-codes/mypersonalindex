@@ -21,6 +21,7 @@
 #include "frmAcctEdit.h"
 #include "frmColumns.h"
 #include "frmSort.h"
+#include "import.h"
 
 class frmMain : public QMainWindow
 {
@@ -59,6 +60,7 @@ private:
     void statusUpdate(const QString &message) { ui.stbStatus->setText(QString("Status: ").append(message)); }
     void showWelcomeMessage();
     bool modifyColumns(const int &columnID, const QMap<int, QString> &fieldNames, const QString &title);
+    bool importPrompt(import::importData *data, const QString &title);
 
 private slots:
     void addPortfolio();
@@ -91,7 +93,7 @@ private slots:
     void aaSortChanged(int index);
     void acctModifyColumns();
     void acctSortChanged(int index);
-    void import();
+    void beginImport();
     void tabChanged(int index) { if (index == 2) resetPortfolioChart(); } // hack for now, QWT doesn't render the chart correctly the first time
 };
 

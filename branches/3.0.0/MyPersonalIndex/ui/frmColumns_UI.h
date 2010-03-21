@@ -9,8 +9,8 @@ public:
     QVBoxLayout *mainLayout;
     QGroupBox *gpMain;
     QHBoxLayout *groupLayout;
-    QListWidget *removedColumns;
-    QListWidget *addedColumns;
+    QListWidget *removedItems;
+    QListWidget *addedItems;
     QVBoxLayout *moveLayout;
     QToolButton *btnAdd;
     QToolButton *btnRemove;

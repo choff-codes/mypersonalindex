@@ -190,6 +190,15 @@ bool portfolio::datesOutsidePriceData() const
     return false;
 }
 
+const security portfolio::securityFromID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.securities.contains(id))
+            return d.securities.value(id);
+
+    return security();
+}
+
 void portfolio::remove(const int &portfolioID)
 {
     queries::deleteItem(queries::table_Portfolios, portfolioID);

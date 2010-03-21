@@ -10,23 +10,25 @@ class frmColumns : public QDialog
     Q_OBJECT
 
 public:
-    const QList<int>& getReturnValues() const { return m_selectedColumns; }
+    const QList<int>& getReturnValues() const { return m_selected; }
 
-    frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, const QString &title,
+    frmColumns(const QList<int> &selected, const QMap<int, QString> &values, const QString &title,
         const QDialog::DialogCode &resultNoChange, QWidget *parent = 0);
 
 private:
     frmColumns_UI ui;
-    QList<int> m_selectedColumns;
-    QMap<int, QString> m_columns;
+    QList<int> m_selected;
+    QMap<int, QString> m_values;
     QDialog::DialogCode m_resultNoChange;
+
+    void switchSelected(QListWidget *from, QListWidget* to);
 
 private slots:
     void accept();
-    void moveColumnDown();
-    void moveColumnUp();
-    void removeColumn();
-    void addColumn();
+    void moveDown();
+    void moveUp();
+    void remove() { switchSelected(ui.addedItems, ui.removedItems); }
+    void add() { switchSelected(ui.removedItems, ui.addedItems); }
 };
 
 #endif // FRMCOLUMNS_H

@@ -1,100 +1,116 @@
 #include "frmColumns.h"
 
-frmColumns::frmColumns(const QList<int> &selectedColumns, const QMap<int, QString> &columns, const QString &title,
-    const QDialog::DialogCode &resultNoChange, QWidget *parent): QDialog(parent), m_selectedColumns(selectedColumns), m_columns(columns),
+frmColumns::frmColumns(const QList<int> &selected, const QMap<int, QString> &values, const QString &title,
+    const QDialog::DialogCode &resultNoChange, QWidget *parent): QDialog(parent), m_selected(selected), m_values(values),
     m_resultNoChange(resultNoChange)
 {
     ui.setupUI(this);
     this->setWindowTitle(title);
 
-    for(QMap<int, QString>::const_iterator i = m_columns.constBegin(); i != m_columns.constEnd(); ++i)
+    for(QMap<int, QString>::const_iterator i = m_values.constBegin(); i != m_values.constEnd(); ++i)
     {
-        QListWidgetItem *item = new QListWidgetItem(i.value(), ui.removedColumns);
+        QListWidgetItem *item = new QListWidgetItem(i.value(), ui.removedItems);
         item->setData(Qt::UserRole, i.key());
     }
 
-    foreach(const int &columnID, m_selectedColumns)
-        for(int i = 0; i < ui.removedColumns->count(); ++i)
-            if (ui.removedColumns->item(i)->data(Qt::UserRole).toInt() == columnID)
+    foreach(const int &columnID, m_selected)
+        for(int i = 0; i < ui.removedItems->count(); ++i)
+            if (ui.removedItems->item(i)->data(Qt::UserRole).toInt() == columnID)
             {
-                QListWidgetItem *item = ui.removedColumns->item(i);
-                QListWidgetItem *addedItem = new QListWidgetItem(item->text(), ui.addedColumns);
+                QListWidgetItem *item = ui.removedItems->item(i);
+                QListWidgetItem *addedItem = new QListWidgetItem(item->text(), ui.addedItems);
                 addedItem->setData(Qt::UserRole, item->data(Qt::UserRole));
-                ui.addedColumns->addItem(addedItem);
+                ui.addedItems->addItem(addedItem);
                 delete item;
                 break;
             }
 
     connect(ui.btnOkCancel, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.btnOkCancel, SIGNAL(rejected()), this, SLOT(reject()));
-    connect(ui.btnAdd, SIGNAL(clicked()), this, SLOT(addColumn()));
-    connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(removeColumn()));
-    connect(ui.btnMoveUp, SIGNAL(clicked()), this, SLOT(moveColumnUp()));
-    connect(ui.btnMoveDown, SIGNAL(clicked()), this, SLOT(moveColumnDown()));
+    connect(ui.btnAdd, SIGNAL(clicked()), this, SLOT(add()));
+    connect(ui.btnRemove, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(ui.btnMoveUp, SIGNAL(clicked()), this, SLOT(moveUp()));
+    connect(ui.btnMoveDown, SIGNAL(clicked()), this, SLOT(moveDown()));
 }
 
 void frmColumns::accept()
 {
     QList<int> selected;
-    for(int i = 0; i < ui.addedColumns->count(); ++i)
-        selected.append(ui.addedColumns->item(i)->data(Qt::UserRole).toInt());
+    for(int i = 0; i < ui.addedItems->count(); ++i)
+        selected.append(ui.addedItems->item(i)->data(Qt::UserRole).toInt());
 
-    if (selected == m_selectedColumns)
+    if (selected == m_selected)
     {
         QDialog::done(m_resultNoChange);
         return;
     }
 
-    m_selectedColumns = selected;
+    m_selected = selected;
     QDialog::accept();
 }
 
-void frmColumns::addColumn()
+void frmColumns::switchSelected(QListWidget *from, QListWidget* to)
 {
-    if (ui.removedColumns->currentIndex().row() < 0)
+    QList<QListWidgetItem*> toAdd = from->selectedItems();
+    if (toAdd.isEmpty())
         return;
 
-    QListWidgetItem *item = ui.removedColumns->item(ui.removedColumns->currentIndex().row());
-    QListWidgetItem *addedItem = new QListWidgetItem(item->text(), ui.addedColumns);
-    addedItem->setData(Qt::UserRole, item->data(Qt::UserRole));
-    ui.addedColumns->addItem(addedItem);
-    delete item;
-    ui.addedColumns->setCurrentItem(addedItem);
+    to->clearSelection();
+    foreach(QListWidgetItem* item, toAdd)
+    {
+        QListWidgetItem *addedItem = new QListWidgetItem(item->text(), to);
+        addedItem->setData(Qt::UserRole, item->data(Qt::UserRole));
+        to->addItem(addedItem);
+        delete item;
+        to->setCurrentItem(addedItem);
+    }
+    to->setFocus();
 }
 
-void frmColumns::removeColumn()
+void frmColumns::moveDown()
 {
-    if (ui.addedColumns->currentIndex().row() < 0)
+    QList<int> toMove;
+    foreach(QListWidgetItem* item, ui.addedItems->selectedItems())
+        toMove.append(ui.addedItems->row(item));
+
+    if (toMove.isEmpty())
         return;
 
-    QListWidgetItem *item = ui.addedColumns->item(ui.addedColumns->currentIndex().row());
-    QListWidgetItem *addedItem = new QListWidgetItem(item->text(), ui.removedColumns);
-    addedItem->setData(Qt::UserRole, item->data(Qt::UserRole));
-    ui.removedColumns->addItem(addedItem);
-    delete item;
-    ui.removedColumns->setCurrentItem(addedItem);
+    qSort(toMove);
+    ui.addedItems->clearSelection();
+    int x = ui.addedItems->count() - 1;
+
+    for(int i = toMove.count() - 1; i >= 0; --i, --x)
+    {
+        int row = toMove.at(i);
+        int spacesToMove = row == x ? 0 : 1;
+
+        QListWidgetItem* moving = ui.addedItems->takeItem(row);
+        ui.addedItems->insertItem(row + spacesToMove, moving);
+        ui.addedItems->setCurrentRow(row + spacesToMove);
+    }
 }
 
-void frmColumns::moveColumnDown()
+void frmColumns::moveUp()
 {
-    int i = ui.addedColumns->currentIndex().row();
+    QList<int> toMove;
+    foreach(QListWidgetItem* item, ui.addedItems->selectedItems())
+        toMove.append(ui.addedItems->row(item));
 
-    if (i < 0 || i == ui.addedColumns->count() - 1)
+    if (toMove.isEmpty())
         return;
 
-    QListWidgetItem *item = ui.addedColumns->takeItem(i);
-    ui.addedColumns->insertItem(i + 1, item);
-    ui.addedColumns->setCurrentItem(item);
-}
+    qSort(toMove);
+    ui.addedItems->clearSelection();
+    int x = 0;
 
-void frmColumns::moveColumnUp()
-{
-    int i = ui.addedColumns->currentIndex().row();
+    for(int i = 0; i < toMove.count(); ++i, ++x)
+    {
+        int row = toMove.at(i);
+        int spacesToMove = row == x ? 0 : -1;
 
-    if (i < 1)
-        return;
-
-    QListWidgetItem *item = ui.addedColumns->takeItem(i);
-    ui.addedColumns->insertItem(i - 1, item);
-    ui.addedColumns->setCurrentItem(item);
+        QListWidgetItem* moving = ui.addedItems->takeItem(row);
+        ui.addedItems->insertItem(row + spacesToMove, moving);
+        ui.addedItems->setCurrentRow(row + spacesToMove);
+    }
 }

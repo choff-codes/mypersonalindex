@@ -198,6 +198,23 @@ const security portfolio::securityFromID(const int &id) const
 
     return security();
 }
+const assetAllocation portfolio::assetAllocationFromID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.aa.contains(id))
+            return d.aa.value(id);
+
+    return assetAllocation();
+}
+
+const account portfolio::accountFromID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.acct.contains(id))
+            return d.acct.value(id);
+
+    return account();
+}
 
 void portfolio::remove(const int &portfolioID)
 {
@@ -235,7 +252,7 @@ void portfolio::remove(const int &portfolioID, const security &sec)
     m_portfolios[portfolioID].securities.remove(sec.id);
 }
 
-int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &date)
+int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &date) const
 {
     int returnDate = currentMinimumDate;
     if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
@@ -244,7 +261,7 @@ int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int
     return returnDate;
 }
 
-int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa)
+int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
 {
     int returnDate = currentMinimumDate;
     foreach(const security &s, securities(portfolioID))

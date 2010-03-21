@@ -989,5 +989,5 @@ void frmMain::beginImport()
         return;
 
     i.save(m_portfolioID);
-    loadPortfolio();
+    beginNAV(m_portfolioID);
 }

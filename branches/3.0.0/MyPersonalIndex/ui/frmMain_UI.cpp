@@ -11,8 +11,6 @@ const QString frmMain_UI::BUSY = "Finishing current task...";
 
 void frmMain_UI::setupUI(QMainWindow *mainWindow)
 {
-    QString shortDate = QLocale().dateFormat(QLocale::ShortFormat);
-
     mainWindow->setWindowTitle(WINDOW_TITLE);
     mainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
     mainWindow->resize(800, 600);

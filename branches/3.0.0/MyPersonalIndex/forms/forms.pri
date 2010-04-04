@@ -7,7 +7,8 @@ SOURCES += $$PWD/frmSecurity.cpp \
     $$PWD/frmAAEdit.cpp \
     $$PWD/frmAcctEdit.cpp \
     $$PWD/frmColumns.cpp \
-    $$PWD/frmSort.cpp
+    $$PWD/frmSort.cpp \
+    $$PWD/frmCompare.cpp
 HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmMain.h \
     $$PWD/frmSecurity.h \
@@ -16,4 +17,5 @@ HEADERS += $$PWD/frmPortfolio.h \
     $$PWD/frmAAEdit.h \
     $$PWD/frmAcctEdit.h \
     $$PWD/frmColumns.h \
-    $$PWD/frmSort.h
+    $$PWD/frmSort.h \
+    $$PWD/frmCompare.h

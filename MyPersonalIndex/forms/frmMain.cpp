@@ -49,6 +49,7 @@ void frmMain::connectSlots()
     connect(ui.mainOptions, SIGNAL(triggered()), this, SLOT(options()));
     connect(ui.mainUpdatePrices, SIGNAL(triggered()), this, SLOT(beginUpdate()));
     connect(ui.mainPortfolioCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(loadPortfolio()));
+    connect(ui.mainCompare, SIGNAL(triggered()), this, SLOT(compare()));
 
     connect(ui.holdingsAdd, SIGNAL(triggered()), this, SLOT(addSecurity()));
     connect(ui.holdingsEdit, SIGNAL(triggered()), this, SLOT(editSecurity()));

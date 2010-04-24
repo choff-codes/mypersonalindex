@@ -10,32 +10,26 @@ struct dailyInfo
     double totalValue;
     double costBasis;
     double taxLiability;
-
-    dailyInfo(const int &p_date): date(p_date), count(0), totalValue(0), costBasis(0), taxLiability(0) {}
-};
-
-struct securityInfo
-{
-    double totalValue;
-    double shares;
-    double costBasis;
     double dividendAmount;
-    double taxLiability;
+    double expenseRatio;
 
-    securityInfo(): totalValue(0), shares(0), costBasis(0), dividendAmount(0), taxLiability(0) {}
+    dailyInfo(const int &p_date): date(p_date), count(0), totalValue(0), costBasis(0), taxLiability(0), dividendAmount(0), expenseRatio(0) {}
 };
 
-struct dailyInfoPortfolio
+struct securityInfo: public dailyInfo
 {
-    int date;
+    double shares;
+
+    securityInfo(): dailyInfo(0), shares(0) { count = 1; }
+    securityInfo(const int &p_date): dailyInfo(p_date), shares(0) { count = 1; }
+};
+
+struct dailyInfoPortfolio: public dailyInfo
+{
     QMap<int, double> avgPrices;
     QMap<int, securityInfo> securitiesInfo;
-    double totalValue;
-    double costBasis;
-    double dividends;
-    double taxLiability;
 
-    dailyInfoPortfolio(const int &p_date): date(p_date), totalValue(0), costBasis(0), dividends(0), taxLiability(0) {}
+    dailyInfoPortfolio(const int &p_date): dailyInfo(p_date) { count = 1; }
 };
 
 #endif // CALCULATIONINFO_H

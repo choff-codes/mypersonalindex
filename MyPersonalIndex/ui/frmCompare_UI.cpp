@@ -7,16 +7,49 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     dialog->setMinimumSize(720, 500);
     mainLayout = new QGridLayout(dialog);
 
-    lstSelected = new QTreeWidget(dialog);
-    mainLayout->addWidget(lstSelected, 0, 0, 2, 1);
+    tree = new QTreeWidget(dialog);
+    tree->setHeaderHidden(true);
+    mainLayout->addWidget(tree, 0, 0, 2, 1);
+
+    treePortfolios = new QTreeWidgetItem(tree);
+    treePortfolios->setText(0, "Portfolios");
+    treePortfolios->setCheckState(0, Qt::Unchecked);
+    treePortfolios->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
+    treeAccounts = new QTreeWidgetItem(tree);
+    treeAccounts->setText(0, "Accounts");
+    treeAccounts->setCheckState(0, Qt::Unchecked);
+    treeAccounts->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
+    treeAssetAllocations = new QTreeWidgetItem(tree);
+    treeAssetAllocations->setText(0, "Acset Allocations");
+    treeAssetAllocations->setCheckState(0, Qt::Unchecked);
+    treeAssetAllocations->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
+    treeSecurities = new QTreeWidgetItem(tree);
+    treeSecurities->setText(0, "Securities");
+    treeSecurities->setCheckState(0, Qt::Unchecked);
+    treeSecurities->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
+    treeSymbols = new QTreeWidgetItem(tree);
+    treeSymbols->setText(0, "Symbols");
+    treeSymbols->setCheckState(0, Qt::Unchecked);
+    treeSymbols->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
 
     mainToolbar = new QToolBar(dialog);
     mainToolbar->setIconSize(QSize(16, 16));
     mainToolbar->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
     mainRefresh = new QAction(QIcon(":/icons/refresh.png"), "Refresh", dialog);
+    mainStartDate = new QLabel(" Start Date: ", dialog);
+    mainStartDateDropDown = new mpiDateEdit(dialog);
+    mainEndDate = new QLabel(" End Date: ", dialog);
+    mainEndDateDropDown = new mpiDateEdit(dialog);
+    mainExport = new QAction("Export...", dialog);
     mainIncludeDividends = new QAction("Include dividends in securities", dialog);
     mainToolbar->addAction(mainRefresh);
     mainToolbar->addSeparator();
+    mainToolbar->addWidget(mainStartDate);
+    mainToolbar->addWidget(mainStartDateDropDown);
+    mainToolbar->addWidget(mainEndDate);
+    mainToolbar->addWidget(mainEndDateDropDown);
+    mainToolbar->addSeparator();
+    mainToolbar->addAction(mainExport);
     mainToolbar->addAction(mainIncludeDividends);
     mainLayout->addWidget(mainToolbar, 0, 1);
 

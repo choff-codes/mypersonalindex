@@ -5,6 +5,7 @@
 #include "calculationInfo.h"
 #include "prices.h"
 #include "portfolio.h"
+#include "splits.h"
 
 class calculations
 {
@@ -19,6 +20,14 @@ public:
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 protected:
+    struct expensePair
+    {
+        expensePair(const double &p_totalValue, const double &p_expenseRatio): totalValue(p_totalValue), expenseRatio(p_expenseRatio) {}
+
+        double totalValue;
+        double expenseRatio;
+    };
+
     int m_portfolioID;
 
     securityInfo specificSecurityValue(const security &s, const int &date);

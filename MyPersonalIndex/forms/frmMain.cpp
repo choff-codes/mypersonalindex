@@ -285,7 +285,7 @@ void frmMain::resetPortfolioHoldings()
 {
     int currentDate = dateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
-    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate, true);
 
     QList<baseRow*> rows;
     foreach(const security &s, portfolios.securities(m_portfolioID))
@@ -588,7 +588,7 @@ void frmMain::addSecurity()
             change = true;
             security s = f.getReturnValuesSecurity();
             portfolios.insert(m_portfolioID, s);
-            minDate = portfolios.minimumDateBetweenTrades(minDate, f.getReturnValuesMinDate());
+            minDate = portfolios.minimumDate(minDate, f.getReturnValuesMinDate());
 
             if (!s.cashAccount && !prices::instance().exists(s.symbol))
                 showUpdatePrices = true;
@@ -621,7 +621,7 @@ void frmMain::editSecurity()
         {
             change = true;
             portfolios.insert(m_portfolioID, f.getReturnValuesSecurity());
-            minDate = portfolios.minimumDateBetweenTrades(minDate, f.getReturnValuesMinDate());
+            minDate = portfolios.minimumDate(minDate, f.getReturnValuesMinDate());
         }
     }
 
@@ -645,7 +645,7 @@ void frmMain::deleteSecurity()
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.holdings->model())->selectedItems())
     {
         security s = portfolios.securities(m_portfolioID, row->values.at(holdingsRow::row_ID).toInt());
-        minDate = portfolios.minimumDateBetweenTrades(minDate, s.firstTradeDate());
+        minDate = portfolios.minimumDate(minDate, s.firstTradeDate());
         portfolios.remove(m_portfolioID, s);
     }
 
@@ -716,7 +716,7 @@ void frmMain::editAA()
             change = true;
             assetAllocation aa = f.getReturnValues();
             portfolios.insert(m_portfolioID, aa);
-            minDate = portfolios.minimumDateBetweenTrades(minDate, m_portfolioID, aa);
+            minDate = portfolios.minimumDate(minDate, m_portfolioID, aa);
         }
     }
 
@@ -740,7 +740,7 @@ void frmMain::deleteAA()
     foreach(baseRow *row, static_cast<mpiViewModelBase*>(ui.aa->model())->selectedItems())
     {
         assetAllocation aa = portfolios.aa(m_portfolioID, row->values.at(aaRow::row_ID).toInt());
-        minDate = portfolios.minimumDateBetweenTrades(minDate, m_portfolioID, aa);
+        minDate = portfolios.minimumDate(minDate, m_portfolioID, aa);
         portfolios.remove(m_portfolioID, aa);
     }
 

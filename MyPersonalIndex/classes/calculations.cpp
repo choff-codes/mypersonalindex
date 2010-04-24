@@ -1,34 +1,24 @@
 #include "calculations.h"
 
-securityInfo calculations::specificSecurityValue(const security::security &s, const int &date)
+securityInfo calculations::specificSecurityValue(const security &s, const int &date)
 {
     securityInfo value;
     securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
-    const QMap<int, double> splits = prices::instance().split(s.symbol);
-    QMap<int, double>::const_iterator i;
-    double ratio = 1;
-
-    for(i = splits.constBegin(); i != splits.constEnd() && i.key() <= date; ++i)
-        ratio *= i.value();
-    i = splits.constBegin();
+    splits splitRatio(s.symbol, date);
 
     foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID).value(s.id))
     {
         if (t.date > date)
             break;
 
-        while (i != splits.constEnd() && t.date >= i.key())
-        {
-            ratio /= i.value();
-            ++i;
-        }
-
-        value.shares += t.shares * ratio;
+        value.shares += t.shares * splitRatio.ratio(t.date);
         value.costBasis += t.shares * t.price + t.commission;
     }
 
     value.dividendAmount = value.shares * price.dividend;
     value.totalValue = value.shares * price.close;
+    if (s.expense > 0)
+        value.expenseRatio = s.expense;
 
     account acct = portfolio::instance().acct(m_portfolioID).value(s.account);
     if (acct.taxRate <= 0)
@@ -45,6 +35,7 @@ securityInfo calculations::specificSecurityValue(const security::security &s, co
 dailyInfoPortfolio* calculations::portfolioValues(const int &date)
 {
     dailyInfoPortfolio *info = new dailyInfoPortfolio(date);
+    QList<expensePair> addedSecurities;
 
     foreach(const security::security &s, portfolio::instance().securities(m_portfolioID))
     {
@@ -56,9 +47,14 @@ dailyInfoPortfolio* calculations::portfolioValues(const int &date)
         info->securitiesInfo.insert(s.id, value);
         info->costBasis += value.costBasis;
         info->totalValue += value.totalValue;
-        info->dividends += value.dividendAmount;
+        info->dividendAmount += value.dividendAmount;
         info->taxLiability += value.taxLiability;
+        if (s.expense > 0)
+            addedSecurities.append(expensePair(value.totalValue, s.expense));
     }
+
+    foreach(const expensePair &pair, addedSecurities)
+        info->expenseRatio += (pair.totalValue / info->totalValue) * pair.expenseRatio;
 
     return info;
 }

@@ -2,12 +2,13 @@
 
 //enum { row_Active, row_Symbol, row_Cash, row_Price, row_Shares, row_Avg, row_Cost, row_Value, row_ValueP, row_Gain, row_GainP, row_Acct, row_TaxLiability, row_NetValue, row_ID };
 const QStringList holdingsRow::columns = QStringList() << "Active" << "Symbol" << "Cash" << "Closing Price" << "Shares" << "Avg Price\nPer Share"
-     << "Cost Basis" << "Total Value" << "% of\nPortfolio" << "Gain/Loss" << "% Gain/Loss" << "Account" << "Asset Allocation" << "Tax Liability" << "After Tax Value" << "ID";
+     << "Cost Basis" << "Total Value" << "% of\nPortfolio" << "Gain/Loss" << "% Gain/Loss" << "Account" << "Asset Allocation" << "Tax Liability" << "After Tax Value" << "ID"
+     << "Reinvest\nDividends";
 
 const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVariant::Int) << QVariant(QVariant::String) << QVariant(QVariant::Int)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
-     << QVariant(QVariant::Double) << QVariant(QVariant::Double);
+     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Int);
 
 holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
     : baseRow(sort)
@@ -50,6 +51,8 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     this->values.append(value.shares == 0 ? QVariant() : value.totalValue - value.taxLiability);
     //row_ID
     this->values.append(s.id);
+    //row_ReinvestDividends
+    this->values.append((int)s.divReinvest);
 }
 
 QMap<int, QString> holdingsRow::fieldNames()
@@ -73,7 +76,7 @@ QVariant mainHoldingsModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::DisplayRole)
     {
-        if (value.isNull() || column == holdingsRow::row_Active || column == holdingsRow::row_Cash)
+        if (value.isNull() || column == holdingsRow::row_Active || column == holdingsRow::row_Cash || column == holdingsRow::row_ReinvestDividends)
             return QVariant();
 
         switch (column)
@@ -96,7 +99,7 @@ QVariant mainHoldingsModel::data(const QModelIndex &index, int role) const
         return value;
     }
 
-    if (role == Qt::CheckStateRole && (column == holdingsRow::row_Active || column == holdingsRow::row_Cash))
+    if (role == Qt::CheckStateRole && (column == holdingsRow::row_Active || column == holdingsRow::row_Cash || column == holdingsRow::row_ReinvestDividends))
     {
         return value.toInt() == 1 ? Qt::Checked : Qt::Unchecked;
     }

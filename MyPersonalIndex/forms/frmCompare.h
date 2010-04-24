@@ -3,6 +3,7 @@
 
 #include <QtGui>
 #include "frmCompare_UI.h"
+#include "portfolio.h"
 
 class frmCompare : public QDialog
 {
@@ -13,6 +14,8 @@ public:
 
 private:
     frmCompare_UI ui;
+
+    void correlatation();
 };
 
 #endif // FRMCOMPARE_H

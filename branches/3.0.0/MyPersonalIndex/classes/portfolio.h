@@ -55,7 +55,7 @@ public:
     const account accountFromID(const int &id) const;
 
     const executedTradeList executedTrades(const int &id) const { return m_portfolios.value(id).executedTrades; }
-    const navInfo nav(const int &id) const { return m_portfolios.value(id).nav; }
+    const navInfoPortfolio nav(const int &id) const { return m_portfolios.value(id).nav; }
 
     portfolioInfo info(const int &id) const { return m_portfolios.value(id).info; }
     QList<portfolioInfo> info() const { QList<portfolioInfo> list; foreach(const portfolioData &d, m_portfolios) list.append(d.info); return list; }
@@ -63,8 +63,8 @@ public:
     int startDate(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startDate; }
     double startValue(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startValue; }
 
-    int minimumDateBetweenTrades(const int &currentMinimumDate, const int &date) const;
-    int minimumDateBetweenTrades(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const;
+    int minimumDate(const int &currentMinimumDate, const int &date) const;
+    int minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const;
 
 private:
     QMap<int, portfolioData> m_portfolios;

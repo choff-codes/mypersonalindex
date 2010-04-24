@@ -1,17 +1,22 @@
 #include "cachedCalculations.h"
 
-dailyInfoPortfolio* cachedCalculations::portfolioValues(const int &date)
+dailyInfoPortfolio* cachedCalculations::portfolioValues(const int &date, const bool &calcAveragePrices)
 {
-    dailyInfoPortfolio* info = m_cache.object(date);
+    dailyInfoPortfolio* info = m_cache.value(date);
     if (info)
+    {
+        if (calcAveragePrices && info->avgPrices.isEmpty())
+            info->avgPrices = avgPricePerShare(date);
         return info;
+    }
 
     info = calculations::portfolioValues(date);
 
     if (!info)
         return 0;
 
-    info->avgPrices = avgPricePerShare(date);
+    if (calcAveragePrices)
+        info->avgPrices = avgPricePerShare(date);
     m_cache.insert(date, info);
 
     return info;
@@ -20,16 +25,23 @@ dailyInfoPortfolio* cachedCalculations::portfolioValues(const int &date)
 dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
 {
     dailyInfo info(date);
+    QList<expensePair> addedSecurities;
 
     foreach(const security &s, portfolio::instance().securities(m_portfolioID))
         if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
         {
             securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
-            info.totalValue += sv.totalValue * (aaID == -1 ? 1 : s.aa.value(aaID));
+            double value = sv.totalValue * (aaID == -1 ? 1 : s.aa.value(aaID));
+            info.totalValue += value;
+            if (s.expense > 0)
+                addedSecurities.append(expensePair(value, s.expense));
             info.costBasis += sv.costBasis;
             info.taxLiability += sv.taxLiability;
              ++info.count;
         }
+
+    foreach(const expensePair &pair, addedSecurities)
+        info.expenseRatio += (pair.totalValue / info.totalValue) * pair.expenseRatio;
 
     return info;
 }
@@ -37,6 +49,7 @@ dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
 dailyInfo cachedCalculations::acctValues(const int &date, const int &acctID)
 {
     dailyInfo info(date);
+    QList<expensePair> addedSecurities;
 
     foreach(const security &s,  portfolio::instance().securities(m_portfolioID))
         if (acctID == s.account)
@@ -45,10 +58,123 @@ dailyInfo cachedCalculations::acctValues(const int &date, const int &acctID)
             info.totalValue += sv.totalValue;
             info.taxLiability += sv.taxLiability;
             info.costBasis += sv.costBasis;
+            if (s.expense > 0)
+                addedSecurities.append(expensePair(sv.totalValue, s.expense));
             ++info.count;
         }
 
+    foreach(const expensePair &pair, addedSecurities)
+        info.expenseRatio += (pair.totalValue / info.totalValue) * pair.expenseRatio;
+
     return info;
+}
+
+dailyInfo cachedCalculations::getDailyInfoByType(const int &date, const int &id, const changeType &type)
+{
+    switch(type)
+    {
+        case changeType_AA:
+            return aaValues(date, id);
+        case changeType_Acct:
+            return acctValues(date, id);
+        case changeType_Portfolio:
+            return static_cast<dailyInfo>(*portfolioValues(date));
+        case changeType_Security:
+            return static_cast<dailyInfo>(portfolioValues(date)->securitiesInfo.value(id));
+    }
+
+    return dailyInfo(0);
+}
+
+navInfoStatistic cachedCalculations::changeOverTime(const changeType &type, const int &id, const int &startDate, const int &endDate, const bool &dividends)
+{
+    navInfoStatistic returnValue;
+
+    const QList<int> dates = prices::instance().dates();
+    const navInfoPortfolio nav = portfolio::instance().nav(m_portfolioID);
+
+    if (dates.isEmpty() || nav.count() < 2)
+        return returnValue;
+
+    QList<int>::const_iterator i = qLowerBound(dates, qMax(nav.firstDate() + 1, startDate));
+    if (i != dates.constBegin())
+        --i;
+
+    dailyInfo previousPrice = getDailyInfoByType(*i, id, type);
+
+    for(++i; i != dates.constEnd(); ++i)
+    {
+        int date = *i;
+        if (date > endDate)
+            break;
+
+        dailyInfo currentPrice = getDailyInfoByType(date, id, type);
+
+        returnValue.insert(date, change(currentPrice.totalValue, previousPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis, dividends ? currentPrice.dividendAmount : 0), currentPrice.totalValue);
+        previousPrice = currentPrice;
+    }
+
+    returnValue.costBasis = previousPrice.costBasis;
+
+    return returnValue;
+}
+
+navInfoStatistic cachedCalculations::securityChange(const int &securityID, const int &startDate, const int &endDate, const bool &dividends)
+{
+    return changeOverTime(changeType_Security, securityID, startDate, endDate, dividends);
+}
+
+navInfoStatistic cachedCalculations::aaChange(const int &aaID, const int &startDate, const int &endDate, const bool &dividends)
+{
+    return changeOverTime(changeType_AA, aaID, startDate, endDate, dividends);
+}
+
+navInfoStatistic cachedCalculations::acctChange(const int &acctID, const int &startDate, const int &endDate, const bool &dividends)
+{
+    return changeOverTime(changeType_Acct, acctID, startDate, endDate, dividends);
+}
+
+navInfoStatistic cachedCalculations::portfolioChange(const int &portfolioID, const int &startDate, const int &endDate, const bool &dividends)
+{
+    return changeOverTime(changeType_Portfolio, portfolioID, startDate, endDate, dividends);
+}
+
+navInfoStatistic cachedCalculations::symbolChange(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends)
+{
+    navInfoStatistic returnValue;
+    const QList<int> dates = prices::instance().dates();
+    const securityPrices price1 = prices::instance().history(symbol);
+    splits splitRatio(symbol, endDate);
+
+    if (dates.isEmpty() || price1.prices.count() < 2)
+        return returnValue;
+
+    QList<int>::const_iterator i = qLowerBound(dates, qMax(price1.prices.constBegin().key() + 1, startDate));
+    if (i != dates.constBegin())
+        --i;
+
+    securityPrice previousPrice = price1.dailyPriceInfo(*i);
+    if (previousPrice.close == 0)
+        return returnValue;
+
+    returnValue.costBasis = previousPrice.close;
+
+    for(++i; i != dates.constEnd(); ++i)
+    {
+        int date = *i;
+        if (date > endDate)
+            break;
+
+        securityPrice currentPrice = price1.dailyPriceInfo(date);
+
+        if (currentPrice.close == 0)
+            break;
+
+        returnValue.insert(date, change(currentPrice.close * currentPrice.split, previousPrice.close, 0, dividends ? currentPrice.dividend : 0), currentPrice.close / splitRatio.ratio(date));
+        previousPrice = currentPrice;
+    }
+
+    return returnValue;
 }
 
 QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDate)
@@ -72,13 +198,8 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             costCalc = portfolioCostCalc;
 
         QList<sharePricePair> previousTrades;
-        const QMap<int, double> splits = prices::instance().split(s.symbol);
-        QMap<int, double>::const_iterator i;
-        double shares = 0; double total = 0; double splitRatio = 1;
-
-        for(i = splits.constBegin(); i != splits.constEnd() && i.key() <= calculationDate; ++i)
-            splitRatio *= i.value();
-        i = splits.constBegin();
+        splits splitRatio(s.symbol, calculationDate);
+        double shares = 0; double total = 0;
 
         for(int x = 0; x < tradeList->count(); ++x)
         {
@@ -91,14 +212,8 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             if ((costCalc == account::costBasisType_AVG || s.cashAccount) && t.shares < 0)
                 continue;
 
-            while (i != splits.constEnd() && t.date >= i.key())
-            {
-                splitRatio /= i.value();
-                ++i;
-            }
-
-            t.price /= splitRatio;
-            t.shares *= splitRatio;
+            t.price /= splitRatio.ratio(t.date);
+            t.shares *= splitRatio.ratio();
 
             if (t.shares >= 0) // this is a buy, just add the trade
             {

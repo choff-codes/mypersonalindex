@@ -119,7 +119,7 @@ QString updatePrices::getSplitAddress(const QString &symbol)
     return QString("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s=%1").arg(symbol);
 }
 
-QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
+QList<QByteArray> updatePrices::downloadFile(const QUrl &url, const bool &splitOnLineBreak)
 {
     //http://lists.trolltech.com/qt-interest/2007-11/thread00759-0.html
 
@@ -131,9 +131,14 @@ QList<QByteArray>* updatePrices::downloadFile(const QUrl &url)
 
     loop.exec();
 
-    QList<QByteArray> *lines = 0;
+    QList<QByteArray> lines;
     if (reply->error() == QNetworkReply::NoError)
-        lines = new QList<QByteArray>(reply->readAll().split('\n'));
+    {
+        if (splitOnLineBreak)
+            lines = reply->readAll().split('\n');
+        else
+            lines.append(reply->readAll());
+    }
 
     delete reply;
     return lines;
@@ -144,34 +149,34 @@ bool updatePrices::getPrices(const QString &symbol, const int &minDate, int *ear
     if (minDate == QDate::currentDate().toJulianDay() || !earliestUpdate)
         return true;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
-    if (!lines)
+    QList<QByteArray> lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockPrices))));
+
+    if (lines.empty())
         return false;
 
-    if (lines->count() > 2)
+    if (lines.count() <= 2)
+        return true;
+
+    lines.removeFirst();
+    lines.removeLast();
+
+    foreach(const QByteArray &s, lines)
     {
-        lines->removeFirst();
-        lines->removeLast();
+        QList<QByteArray> line = s.split(',');
 
-        foreach(const QByteArray &s, *lines)
-        {
-            QList<QByteArray> line = s.split(',');
+        int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
+        if (date < *earliestUpdate)
+            *earliestUpdate = date;
 
-            int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            if (date < *earliestUpdate)
-                *earliestUpdate = date;
+        double price = line.at(4).toDouble();
 
-            double price = line.at(4).toDouble();
+        m_pricesDate.append(date);
+        m_pricesSymbol.append(symbol);
+        m_pricesPrice.append(price);
 
-            m_pricesDate.append(date);
-            m_pricesSymbol.append(symbol);
-            m_pricesPrice.append(price);
-
-            prices::instance().insertPrice(symbol, date, price);
-        }
+        prices::instance().insertPrice(symbol, date, price);
     }
 
-    delete lines;
     return true;
 }
 
@@ -180,32 +185,30 @@ void updatePrices::getDividends(const QString &symbol, const int &minDate, int *
     if (minDate == QDate::currentDate().toJulianDay() || !earliestUpdate)
         return;
 
-    QList<QByteArray> *lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockDividends))));
+    QList<QByteArray> lines = downloadFile(QUrl(getCSVAddress(symbol, QDate::fromJulianDay(minDate + 1), QDate::currentDate(), QString(stockDividends))));
 
-    if (lines && lines->count() > 2)
+    if (lines.isEmpty() || lines.count() <= 2)
+        return;
+
+    lines.removeFirst();
+    lines.removeLast();
+
+    foreach(const QByteArray &s, lines)
     {
-        lines->removeFirst();
-        lines->removeLast();
+        QList<QByteArray> line = s.split(',');
 
-        foreach(const QByteArray &s, *lines)
-        {
-            QList<QByteArray> line = s.split(',');
+        int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
+        if (date < *earliestUpdate)
+            *earliestUpdate = date;
 
-            int date = QDate::fromString(line.at(0), Qt::ISODate).toJulianDay();
-            if (date < *earliestUpdate)
-                *earliestUpdate = date;
+        double price = line.at(1).toDouble();
 
-            double price = line.at(1).toDouble();
+        m_divDate.append(date);
+        m_divSymbol.append(symbol);
+        m_divAmount.append(price);
 
-            m_divDate.append(date);
-            m_divSymbol.append(symbol);
-            m_divAmount.append(price);
-
-            prices::instance().insertDividend(symbol, date, price);
-        }
+        prices::instance().insertDividend(symbol, date, price);
     }
-
-    delete lines;
 }
 
 void updatePrices::getSplits(const QString &symbol, const int &minDate,  int *earliestUpdate)
@@ -213,37 +216,39 @@ void updatePrices::getSplits(const QString &symbol, const int &minDate,  int *ea
     if (minDate == QDate::currentDate().toJulianDay() || !earliestUpdate)
         return;
 
-    const QString htmlSplitStart = "<br><center>Splits:";  // text starting splits
-    const QString htmlSplitTrue = "<br><center>Splits:<nobr>";  // same line, but signifying splits
+    const QString htmlSplitTrue = "<br><center>Splits:<nobr>";  // but signifying splits
     const QString htmlSplitNone = "<br><center>Splits:none</center>"; // same line, but signifying no splits
-    QList<QByteArray> *lines = downloadFile(QUrl(getSplitAddress(symbol)));
+    QList<QByteArray> lines = downloadFile(QUrl(getSplitAddress(symbol)), false);
 
-    if (!lines)
+    if (lines.isEmpty())
         return;
 
-    QString splitLine;
-    foreach(const QByteArray &s, *lines)
-        if (QString(s).contains(htmlSplitStart, Qt::CaseInsensitive))
-        {
-            splitLine = s;
-            break;
-        }
+    QString line(lines.at(0));
+    line.replace("\n", "").replace(" ", "");
 
-    if (splitLine.isEmpty() || splitLine.contains(htmlSplitNone, Qt::CaseInsensitive))
+    if (line.contains(htmlSplitNone, Qt::CaseInsensitive))
         return;
 
-    int i = splitLine.indexOf(htmlSplitTrue, 0, Qt::CaseInsensitive) + htmlSplitTrue.length();
-    splitLine = splitLine.mid(i, splitLine.indexOf("</center>", i, Qt::CaseInsensitive) - i); // read up to </center> tag
-    QStringList splits = splitLine.split("</nobr>, <nobr>");
-    //the last split is missing the ", <nobr>", so we have to strip off the </nobr>"
+    int i = line.indexOf(htmlSplitTrue, 0, Qt::CaseInsensitive);
+    if (i == -1)
+        return;
+    else
+        i += htmlSplitTrue.length();
+
+    line = line.mid(i, line.indexOf("</center>", i, Qt::CaseInsensitive) - i); // read up to </center> tag
+    QStringList splits = line.split("</nobr>,<nobr>");
+    //the last split is missing the ",<nobr>", so we have to strip off the </nobr>"
     splits.append(splits.takeLast().replace("</nobr>", ""));
 
     foreach(const QString &s, splits)
     {
-        QStringList split = s.split(' ');
-        QDate d = QDate::fromString(split.first(), "dd-MMM-yy");
-        if (d.year() - 1900 <= QDate::currentDate().year() - 2000) // defaults to 19xx
-            d = d.addYears(100);
+        QStringList split = s.split('[');
+        QDate d = QDate::fromString(split.first(), Qt::ISODate); // try ISO format first
+        if (!d.isValid()) // probably in the following format then
+            d = QDate::fromString(split.first(), "MMMd,yyyy");
+
+        if (!d.isValid())
+            continue;
 
         int date = d.toJulianDay();
         if (date <= minDate && minDate != m_dataStartDate) // if this is the first run, add all previous splits
@@ -252,18 +257,19 @@ void updatePrices::getSplits(const QString &symbol, const int &minDate,  int *ea
         if (date < *earliestUpdate)
             *earliestUpdate = date;
 
-        // ratio looks like [2:1], so strip off the brackets
-        QStringList divisor = QString(split.at(1).mid(1, split.at(1).length() - 2)).split(':');
-        double ratio = divisor.at(0).toDouble() / divisor.at(1).toDouble();
+        // ratio looks like 2:1], so strip off the last bracket
+        QStringList divisor = QString(split.at(1).left(split.at(1).length() - 1)).split(':');
 
+        if (divisor.at(0).toDouble() == 0 || divisor.at(1).toDouble() == 0) // just in case
+            continue;
+
+        double ratio = divisor.at(0).toDouble() / divisor.at(1).toDouble();
         m_splitDate.append(date);
         m_splitRatio.append(ratio);
         m_splitSymbol.append(symbol);
 
         prices::instance().insertSplit(symbol, date, ratio);
     }
-
-    delete lines;
 }
 
 bool updatePrices::isInternetConnection()

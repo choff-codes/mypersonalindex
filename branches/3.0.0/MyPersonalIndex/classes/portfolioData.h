@@ -16,7 +16,7 @@ public:
     QMap<int, assetAllocation> aa;
     QMap<int, account> acct;
     executedTradeList executedTrades;
-    navInfo nav;
+    navInfoPortfolio nav;
     portfolioInfo info;
 };
 

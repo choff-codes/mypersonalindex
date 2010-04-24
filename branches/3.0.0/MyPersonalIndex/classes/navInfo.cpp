@@ -6,7 +6,7 @@ void navInfo::insert(const int &date, const double &nav, const double &totalValu
     m_totalValue.insert(date, totalValue);
 }
 
-void navInfo::remove(const int &portfolioID, const int &startDate)
+void navInfoPortfolio::remove(const int &portfolioID, const int &startDate)
 {
     QMap<int, double>::iterator i = m_nav.lowerBound(startDate);
     while (i != m_nav.end())
@@ -19,7 +19,7 @@ void navInfo::remove(const int &portfolioID, const int &startDate)
     queries::deletePortfolioItems(queries::table_NAV, portfolioID, startDate);
 }
 
-void navInfo::remove(const int &portfolioID)
+void navInfoPortfolio::remove(const int &portfolioID)
 {
     m_nav.clear();
     m_totalValue.clear();

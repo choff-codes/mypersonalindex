@@ -40,7 +40,7 @@ private:
     void updateMissingPrices();
     void insertUpdates();
 
-    static QList<QByteArray>* downloadFile(const QUrl&);
+    QList<QByteArray> downloadFile(const QUrl &url, const bool &splitOnLineBreak = true);
     static QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
     static QString getSplitAddress(const QString &symbol);
 };

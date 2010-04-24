@@ -58,7 +58,7 @@ void nav::calculateNAVValues(const int &portfolioID)
         insertPortfolioTrades(portfolioID, date, previousInfo, appendNavTradeLists(trades.value(date), trades.value(-1)));
 
         dailyInfoPortfolio *currentInfo = m_calculations.portfolioValues(date);
-        navValue = calculations::change(currentInfo->totalValue, previousInfo->totalValue, currentInfo->costBasis - previousInfo->costBasis, info.dividends ? currentInfo->dividends : 0, navValue);
+        navValue = calculations::change(currentInfo->totalValue, previousInfo->totalValue, currentInfo->costBasis - previousInfo->costBasis, info.dividends ? currentInfo->dividendAmount : 0, navValue);
 
         addToNAVList(portfolioID, date, currentInfo->totalValue, navValue);
 

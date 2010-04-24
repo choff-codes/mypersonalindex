@@ -234,7 +234,7 @@ void portfolio::remove(const int &portfolioID, const assetAllocation &aa)
 {
     aa.remove();
     m_portfolios[portfolioID].aa.remove(aa.id);
-    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.begin(); ++i)
+    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.end(); ++i)
         i->removeAATarget(aa.id);
 }
 
@@ -242,7 +242,7 @@ void portfolio::remove(const int &portfolioID, const account &acct)
 {
     acct.remove();
     m_portfolios[portfolioID].acct.remove(acct.id);
-    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.begin(); ++i)
+    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.end(); ++i)
         i->removeAccount(acct.id, portfolioID);
 }
 
@@ -252,7 +252,7 @@ void portfolio::remove(const int &portfolioID, const security &sec)
     m_portfolios[portfolioID].securities.remove(sec.id);
 }
 
-int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &date) const
+int portfolio::minimumDate(const int &currentMinimumDate, const int &date) const
 {
     int returnDate = currentMinimumDate;
     if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
@@ -261,7 +261,7 @@ int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int
     return returnDate;
 }
 
-int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
+int portfolio::minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
 {
     int returnDate = currentMinimumDate;
     foreach(const security &s, securities(portfolioID))
@@ -269,7 +269,7 @@ int portfolio::minimumDateBetweenTrades(const int &currentMinimumDate, const int
             foreach(const trade &t, s.trades)
                 if (t.type == trade::tradeType_AA)
                 {
-                    returnDate = minimumDateBetweenTrades(currentMinimumDate, s.firstTradeDate());
+                    returnDate = minimumDate(currentMinimumDate, s.firstTradeDate());
                     break;
                 }
 

@@ -19,7 +19,8 @@ public:
     navInfoStatistic symbolChange(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends);
     navInfoStatistic aaChange(const int &aaID, const int &startDate, const int &endDate, const bool &dividends);
     navInfoStatistic acctChange(const int &acctID, const int &startDate, const int &endDate, const bool &dividends);
-    navInfoStatistic portfolioChange(const int &portfolioID, const int &startDate, const int &endDate, const bool &dividends);
+    navInfoStatistic portfolioChange(const int &startDate, const int &endDate, const bool &dividends);
+    navInfoStatistic portfolioChange(const int &startDate, const int &endDate);
 
 protected:
     QHash<int, dailyInfoPortfolio*> m_cache;

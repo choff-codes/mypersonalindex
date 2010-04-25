@@ -34,26 +34,40 @@ public:
     void remove(const int &portfolioID, const int &startDate);
 };
 
-class navInfoStatistic: public navInfo
+class navInfoStatistic
 {
 public:
+    struct navPair
+    {
+        double nav;
+        double totalValue;
+
+        navPair(): nav(0), totalValue(0) {}
+        navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
+    };
+
     double costBasis;
     double expenseRatio;
+    double taxLiability;
 
-    navInfoStatistic(): costBasis(0), expenseRatio(0) {}
+    navInfoStatistic(): costBasis(0), expenseRatio(0), taxLiability(0), m_firstDate(0), m_lastDate(0) {}
 
-    /*
-        Since non-virtual functions are dispatched based on the static type of the pointer/reference rather than the dynamic type
-        of the pointed-to/referenced object, the client-visible effects must be identical.
-        http://www.parashift.com/c++-faq-lite/strange-inheritance.html#faq-23.12
-    */
-    double change(const int &date) const { return navInfo::nav(date); }
-    QMap<int, double> changeHistory() const { return navInfo::navHistory(); }
-    void insert(const int &date, const double &change, const double &totalValue) { navInfo::insert(date, change, totalValue); }
+    void insert(const int &date, const double &nav, const double &totalValue);
+
+    double nav(const int &date) const { return m_nav.value(date).nav; }
+    double totalValue(const int &date) const { return m_nav.value(date).totalValue; }
+
+    int count() const { return m_nav.count(); }
+    bool isEmpty() const { return m_nav.isEmpty(); }
+
+    // must check IsEmpty first when calling
+    int firstDate() const { return m_firstDate; }
+    int lastDate() const { return m_lastDate; }
 
 private:
-    double nav(const int &date) const;
-    QMap<int, double> navHistory() const;
+    QHash<int, navPair> m_nav;
+    int m_firstDate;
+    int m_lastDate;
 };
 
 

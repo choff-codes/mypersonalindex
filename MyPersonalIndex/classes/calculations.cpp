@@ -59,45 +59,34 @@ dailyInfoPortfolio* calculations::portfolioValues(const int &date)
     return info;
 }
 
-double calculations::correlation(const securityPrices &price1, const securityPrices &price2, const int &startDate, const int &endDate)
+double calculations::correlation(const navInfoStatistic &info1, const navInfoStatistic &info2)
 {
+    if (info1.isEmpty() || info2.isEmpty())
+        return 0;
+
+    int endDate = qMin(info1.lastDate(), info2.lastDate());
+    int startDate = qMax(info1.firstDate(), info2.firstDate());
+
     const QList<int> dates = prices::instance().dates();
-
-    if (dates.isEmpty() || price1.prices.isEmpty() || price2.prices.isEmpty())
-        return 0;
-
+    QList<int>::const_iterator i = qLowerBound(dates, startDate);
     QList<int>::const_iterator end = dates.constEnd();
-    // use day after first date to get day over day change
-    int date = qMax(price1.prices.constBegin().key() + 1, price2.prices.constBegin().key() + 1);
-
-    QList<int>::const_iterator i = qLowerBound(dates, qMax(date, startDate));
-    if (i != dates.constBegin())
-        i--;
-
-    date = *i;
-    securityPrice previousPrice1 = price1.dailyPriceInfo(date);
-    securityPrice previousPrice2 = price2.dailyPriceInfo(date);
-
-    if (previousPrice1.close == 0 || previousPrice2.close == 0)
-        return 0;
 
     double security1Sum = 0, security2Sum = 0, security1Square = 0, security2Square = 0, productSquare = 0;
     int count = 0;
+    double previousNav1 = info1.nav(*i);
+    double previousNav2 = info2.nav(*i);
 
     for(++i; i != end; ++i)
     {
-        date = *i;
+        int date = *i;
         if (date > endDate)
             break;
 
-        securityPrice currentPrice1 = price1.dailyPriceInfo(date);
-        securityPrice currentPrice2 = price2.dailyPriceInfo(date);
+        double nav1 = info1.nav(date);
+        double nav2 = info2.nav(date);
 
-        if (currentPrice1.close == 0 || currentPrice2.close == 0)
-            break;
-
-        double change1 = change(currentPrice1.close * currentPrice1.split, previousPrice1.close, 0, currentPrice1.dividend) - 1;
-        double change2 = change(currentPrice2.close * currentPrice2.split, previousPrice2.close, 0, currentPrice2.dividend) - 1;
+        double change1 = nav1 / previousNav1 - 1;
+        double change2 = nav2 / previousNav2 - 1;
 
         security1Sum += change1;
         security2Sum += change2;
@@ -106,8 +95,8 @@ double calculations::correlation(const securityPrices &price1, const securityPri
         productSquare += change1 * change2;
         count++;
 
-        previousPrice1 = currentPrice1;
-        previousPrice2 = currentPrice2;
+        previousNav1 = nav1;
+        previousNav2 = nav2;
     }
 
     if (count <= 1)

@@ -38,7 +38,7 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_CurrentValue:
             return functions::doubleToCurrency(statInfo.endTotalValue());
         case stat_CostBasis:
-            return functions::doubleToCurrency(statInfo.endInfo()->costBasis);
+            return functions::doubleToCurrency(statInfo.endInfo().costBasis);
         case stat_DailyStandardDeviation:
             return functions::doubleToPercentage(statInfo.standardDeviation());
         case stat_MonthlyStandardDeviation:
@@ -50,7 +50,7 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_Date:
             return QDate::fromJulianDay(statInfo.endDate()).toString(Qt::SystemLocaleShortDate);
         case stat_GainLoss:
-            return functions::doubleToCurrency(statInfo.endInfo()->totalValue - statInfo.endInfo()->costBasis);
+            return functions::doubleToCurrency(statInfo.endInfo().totalValue(statInfo.endDate()) - statInfo.endInfo().costBasis);
         case stat_DailyReturn:
             return functions::doubleToPercentage(returnPercent(statInfo, 1));
         case stat_HourlyReturn:
@@ -64,7 +64,7 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_OverallReturn:
             return functions::doubleToPercentage((statInfo.endNAV() / statInfo.startNAV()) - 1);
         case stat_TaxLiability:
-            return functions::doubleToCurrency(statInfo.endInfo()->taxLiability);
+            return functions::doubleToCurrency(statInfo.endInfo().taxLiability);
         case stat_MaxPercentDown:
             return functions::doubleToPercentage(statInfo.maxChangeNegative());
         case stat_MaxPercentDownDay:
@@ -94,7 +94,7 @@ QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
         case stat_ProbabilityOfYearlyLoss:
             return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statInfo));
         case stat_WeightedExpenseRatio:
-            return functions::doubleToPercentage(weightedExpenseRatio(statInfo));
+            return functions::doubleToPercentage(statInfo.expenseRatio());
         default:
             return QString();
     }
@@ -132,17 +132,4 @@ double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
 
     t = 1.0 / ( 1.0 - p * x );
     return ( c * exp( -x * x / 2.0 ) * t * ( t *( t * ( t * ( t * b5 + b4 ) + b3 ) + b2 ) + b1 ));
-}
-
-double statistic::weightedExpenseRatio(const statisticInfo &statInfo)
-{
-    double er = 0;
-    const QMap<int, securityInfo> securities = statInfo.endInfo()->securitiesInfo;
-    double totalValue = statInfo.endTotalValue();
-
-    foreach(const security &s, statInfo.securities())
-        if (s.expense > 0)
-            er += s.expense * (securities.value(s.id).totalValue / totalValue);
-
-    return er;
 }

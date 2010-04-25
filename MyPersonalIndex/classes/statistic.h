@@ -28,7 +28,6 @@ public:
 
     static double returnPercent(const statisticInfo &statInfo, const double &divisor);
     static double cumulativeNormalDistribution(const statisticInfo &statInfo);
-    static double weightedExpenseRatio(const statisticInfo &statInfo);
 
     static QMap<int, QString> statisticList();
 };

@@ -2,18 +2,17 @@
 #define STATISTICINFO_H
 
 #include <QtCore>
-#include "portfolio.h"
-#include "calculations.h"
+#include "navInfo.h"
+#include "prices.h"
 
 class statisticInfo
 {
 public:
-    statisticInfo(const int &portfolioID, const dailyInfoPortfolio *info, const int &startDate, const int &previousClose);
+    statisticInfo(const navInfoStatistic &info, const double &startNav = 1);
 
-    const dailyInfoPortfolio* endInfo() const { return m_endInfo; }
-    int startDate() const { return m_startDate; }
-    int previousCloseDate() const { return m_previousClose; }
-    int endDate() const { return m_endInfo->date; }
+    const navInfoStatistic endInfo() const { return m_endInfo; }
+    int startDate() const { return m_endInfo.firstDate(); }
+    int endDate() const { return m_endInfo.lastDate(); }
     double startNAV() const { return m_startNAV; }
     double endNAV() const { return m_endNAV; }
     double startTotalValue() const { return m_startTotalValue; }
@@ -32,13 +31,10 @@ public:
     int minTotalValueDay() const { return m_minTotalValueDay; }
     double maxTotalValue() const { return m_maxTotalValue; }
     int maxTotalValueDay() const { return m_maxTotalValueDay; }
-    QMap<int, security> securities() const { return portfolio::instance().securities(m_portfolioID); }
+    double expenseRatio() const { return m_endInfo.expenseRatio; }
 
 private:
-    int m_portfolioID;
-    const dailyInfoPortfolio *m_endInfo;
-    const int m_startDate;
-    const int m_previousClose;
+    const navInfoStatistic m_endInfo;
     double m_startNAV;
     double m_startTotalValue;
     double m_endNAV;
@@ -57,10 +53,6 @@ private:
     int m_minTotalValueDay;
     double m_maxTotalValue;
     int m_maxTotalValueDay;
-
-    void setNAV();
-    void calculateChanges(QMap<int, double>::const_iterator startNav, QMap<int, double>::const_iterator endNav);
-    void setTotalValue();
 };
 
 #endif // STATISTICINFO_H

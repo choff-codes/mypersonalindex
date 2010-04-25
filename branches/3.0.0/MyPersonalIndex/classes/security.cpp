@@ -74,7 +74,7 @@ void security::remove() const
 
 void security::removeAATarget(const int &aaID)
 {
-    if (!this->aa.contains(aaID))
+    if (aaID == -1 || !this->aa.contains(aaID))
         return;
 
     this->aa.remove(aaID);
@@ -83,7 +83,7 @@ void security::removeAATarget(const int &aaID)
 
 void security::removeAccount(const int &accountID, const int &portfolioID)
 {
-    if (this->account != accountID)
+    if (accountID == -1 || this->account != accountID)
         return;
 
     this->account = -1;

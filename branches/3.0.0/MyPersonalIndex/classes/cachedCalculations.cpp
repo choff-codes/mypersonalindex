@@ -101,6 +101,8 @@ navInfoStatistic cachedCalculations::changeOverTime(const changeType &type, cons
         --i;
 
     dailyInfo previousPrice = getDailyInfoByType(*i, id, type);
+    double currentNav = 1;
+    returnValue.insert(*i, 1, previousPrice.totalValue);
 
     for(++i; i != dates.constEnd(); ++i)
     {
@@ -109,12 +111,14 @@ navInfoStatistic cachedCalculations::changeOverTime(const changeType &type, cons
             break;
 
         dailyInfo currentPrice = getDailyInfoByType(date, id, type);
-
-        returnValue.insert(date, change(currentPrice.totalValue, previousPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis, dividends ? currentPrice.dividendAmount : 0), currentPrice.totalValue);
+        currentNav = change(currentPrice.totalValue, previousPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis, dividends ? currentPrice.dividendAmount : 0, currentNav);
+        returnValue.insert(date, currentNav, currentPrice.totalValue);
         previousPrice = currentPrice;
     }
 
     returnValue.costBasis = previousPrice.costBasis;
+    returnValue.expenseRatio = previousPrice.expenseRatio;
+    returnValue.taxLiability = previousPrice.taxLiability;
 
     return returnValue;
 }
@@ -134,9 +138,32 @@ navInfoStatistic cachedCalculations::acctChange(const int &acctID, const int &st
     return changeOverTime(changeType_Acct, acctID, startDate, endDate, dividends);
 }
 
-navInfoStatistic cachedCalculations::portfolioChange(const int &portfolioID, const int &startDate, const int &endDate, const bool &dividends)
+navInfoStatistic cachedCalculations::portfolioChange(const int &startDate, const int &endDate, const bool &dividends)
 {
-    return changeOverTime(changeType_Portfolio, portfolioID, startDate, endDate, dividends);
+    return changeOverTime(changeType_Portfolio, m_portfolioID, startDate, endDate, dividends);
+}
+
+navInfoStatistic cachedCalculations::portfolioChange(const int &startDate, const int &endDate)
+{
+    navInfoStatistic returnValue;
+    const QList<int> dates = prices::instance().dates();
+    const navInfoPortfolio info = portfolio::instance().nav(m_portfolioID);
+    QList<int>::const_iterator i = qLowerBound(dates, startDate);
+    if (i != dates.constBegin())
+        --i;
+
+    while (i != dates.constEnd() && *i <= endDate)
+    {
+        returnValue.insert(*i, info.nav(*i), info.totalValue(*i));
+        ++i;
+    }
+
+    dailyInfoPortfolio *p = portfolioValues(endDate);
+    returnValue.costBasis = p->costBasis;
+    returnValue.expenseRatio = p->expenseRatio;
+    returnValue.taxLiability = p->taxLiability;
+
+    return returnValue;
 }
 
 navInfoStatistic cachedCalculations::symbolChange(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends)
@@ -158,6 +185,8 @@ navInfoStatistic cachedCalculations::symbolChange(const QString &symbol, const i
         return returnValue;
 
     returnValue.costBasis = previousPrice.close;
+    double nav = 1;
+    returnValue.insert(*i, nav, previousPrice.close);
 
     for(++i; i != dates.constEnd(); ++i)
     {
@@ -170,7 +199,8 @@ navInfoStatistic cachedCalculations::symbolChange(const QString &symbol, const i
         if (currentPrice.close == 0)
             break;
 
-        returnValue.insert(date, change(currentPrice.close * currentPrice.split, previousPrice.close, 0, dividends ? currentPrice.dividend : 0), currentPrice.close / splitRatio.ratio(date));
+        nav = change(currentPrice.close * currentPrice.split, previousPrice.close, 0, dividends ? currentPrice.dividend : 0, nav);
+        returnValue.insert(date, nav, currentPrice.close / splitRatio.ratio(date));
         previousPrice = currentPrice;
     }
 

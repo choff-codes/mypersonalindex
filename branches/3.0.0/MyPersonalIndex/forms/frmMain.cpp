@@ -376,19 +376,18 @@ void frmMain::resetPortfolioCorrelation()
     symbols.insert(0, portfolios.info(m_portfolioID).description);
     
     int count = symbols.count();
-    for(int i = 0; i < count; ++i)
+    for(int i = 0; i < count - 1; ++i)  // once we reach count - 1, all combinations will already be calculated
     {
         QString security1 = symbols.at(i);
-        QHash<QString, double> &list = correlations[security1];
-        securityPrices security1history;
+        navInfoStatistic security1history;
 
         if (i == 0) // always current portfolio
-            security1history.prices = portfolios.nav(m_portfolioID).navHistory();
+            security1history = m_calculations.portfolioChange(startDate, endDate);
         else
-            security1history = prices::instance().history(security1);
+            security1history = m_calculations.symbolChange(security1, startDate, endDate, true);
 
         for (int x = i + 1; x < count; ++x)
-            list.insert(symbols.at(x), calculations::correlation(security1history, prices::instance().history(symbols.at(x)), startDate, endDate));
+            correlations[security1].insert(symbols.at(x), calculations::correlation(security1history, m_calculations.symbolChange(symbols.at(x), startDate, endDate, true)));
     }
 
     mainCorrelationModel *model = new mainCorrelationModel(correlations, symbols, ui.correlations);
@@ -440,11 +439,9 @@ void frmMain::resetPortfolioStat()
 {
     int startDate = dateDropDownDate(ui.statStartDateDropDown);
     int endDate = dateDropDownDate(ui.statEndDateDropDown);
-    int previousDay = prices::instance().currentDateOrPrevious(startDate - 1);
 
     QAbstractItemModel *oldModel = ui.stat->model();
-    dailyInfoPortfolio *info = m_calculations.portfolioValues(endDate);
-    statisticInfo s(m_portfolioID, info, startDate, previousDay);
+    statisticInfo s(m_calculations.portfolioChange(startDate, endDate), portfolios.startValue(m_portfolioID));
 
     QList<QString> statisticValues;
     foreach(const int &i, m_settings.viewableColumns.value(settings::columns_Stat))

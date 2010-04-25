@@ -16,6 +16,7 @@ public:
     virtual void setPortfolio(const int portfolioID) { m_portfolioID = portfolioID; }
     virtual dailyInfoPortfolio* portfolioValues(const int &date);
 
+    static double correlation(const navInfoStatistic &info1, const navInfoStatistic &info2);
     static double correlation(const securityPrices &price1, const securityPrices &price2, const int &startDate, const int &endDate);
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 

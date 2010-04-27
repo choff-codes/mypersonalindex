@@ -1,7 +1,7 @@
 #ifndef MAINPERFORMANCEMODEL_H
 #define MAINPERFORMANCEMODEL_H
 
-#include <QtCore>
+#include <QtGui>
 #include "functions.h"
 #include "navInfo.h"
 

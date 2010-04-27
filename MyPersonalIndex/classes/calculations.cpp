@@ -2,7 +2,7 @@
 
 securityInfo calculations::specificSecurityValue(const security &s, const int &date)
 {
-    securityInfo value;
+    securityInfo value(date);
     securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
     splits splitRatio(s.symbol, date);
 

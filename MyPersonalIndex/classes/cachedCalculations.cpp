@@ -26,11 +26,12 @@ dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
 {
     dailyInfo info(date);
     QList<expensePair> addedSecurities;
+    dailyInfoPortfolio *portfolioInfo = portfolioValues(date);
 
     foreach(const security &s, portfolio::instance().securities(m_portfolioID))
         if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
         {
-            securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
+            securityInfo sv = portfolioInfo->securitiesInfo.value(s.id);
             double value = sv.totalValue * (aaID == -1 ? 1 : s.aa.value(aaID));
             info.totalValue += value;
             if (s.expense > 0)
@@ -50,11 +51,12 @@ dailyInfo cachedCalculations::acctValues(const int &date, const int &acctID)
 {
     dailyInfo info(date);
     QList<expensePair> addedSecurities;
+    dailyInfoPortfolio *portfolioInfo = portfolioValues(date);
 
     foreach(const security &s,  portfolio::instance().securities(m_portfolioID))
         if (acctID == s.account)
         {
-            securityInfo sv = portfolioValues(date)->securitiesInfo.value(s.id);
+            securityInfo sv = portfolioInfo->securitiesInfo.value(s.id);
             info.totalValue += sv.totalValue;
             info.taxLiability += sv.taxLiability;
             info.costBasis += sv.costBasis;

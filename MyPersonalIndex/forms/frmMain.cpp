@@ -222,26 +222,48 @@ void frmMain::loadPortfolio()
         return;
     }
 
-#ifdef CLOCKTIME
-    QTime t;
-    t.start();
-#endif
-
     m_calculations.setPortfolio(m_portfolioID);
     resetPortfolioSettings();
     resetCalendars();
-    resetPortfolioHoldings();
-    resetPortfolioPerformance();
-    resetPortfolioChart();
-    resetPortfolioAA();
-    resetPortfolioAcct();
-    resetPortfolioCorrelation();
-    resetPortfolioStat();
-
 #ifdef CLOCKTIME
-    qDebug("Time elapsed: %d ms (frmMain)", t.elapsed());
+    QTime t;
+    qDebug("Loading portfolio...");
+    t.start();
+#endif
+    resetPortfolioHoldings();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (holdings tab)", t.elapsed());
+    t.restart();
+#endif
+    resetPortfolioPerformance();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (performance tab)", t.elapsed());
 #endif
 
+    resetPortfolioChart();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (chart tab)", t.elapsed());
+    t.restart();
+#endif
+    resetPortfolioAA();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (aa tab)", t.elapsed());
+    t.restart();
+#endif
+    resetPortfolioAcct();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (account tab)", t.elapsed());
+    t.restart();
+#endif
+    resetPortfolioCorrelation();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (correlation tab)", t.elapsed());
+    t.restart();
+#endif
+    resetPortfolioStat();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (statistics tab)", t.elapsed());
+#endif
 }
 
 void frmMain::resetCalendars()
@@ -369,28 +391,34 @@ void frmMain::resetPortfolioCorrelation()
     mainCorrelationModel::correlationList correlations;
     foreach(const security &s, portfolios.securities(m_portfolioID))
         if (ui.correlationsShowHidden->isChecked() || !s.hide)
-            correlations.insert(s.symbol, QHash<QString, double>());
+            correlations.insert(objectKey(objectType_Symbol, s.id, s.symbol), QHash<objectKey, double>());
 
-    QStringList symbols = correlations.keys();
-    correlations.insert(portfolios.info(m_portfolioID).description, QHash<QString, double>());
-    symbols.insert(0, portfolios.info(m_portfolioID).description);
+    objectKey key = objectKey(objectType_Portfolio, m_portfolioID, portfolios.info(m_portfolioID).description);
+    correlations.insert(key, QHash<objectKey, double>());
     
-    int count = symbols.count();
+    QHash<objectKey, navInfoStatistic> cache;
+    foreach(const objectKey &key, correlations.keys())
+        if (key.type == objectType_Portfolio)
+            cache.insert(key, m_calculations.portfolioChange(startDate, endDate));
+        else
+            cache.insert(key, m_calculations.symbolChange(key.description, startDate, endDate, true));
+
+    int count = correlations.count();
     for(int i = 0; i < count - 1; ++i)  // once we reach count - 1, all combinations will already be calculated
     {
-        QString security1 = symbols.at(i);
-        navInfoStatistic security1history;
-
-        if (i == 0) // always current portfolio
-            security1history = m_calculations.portfolioChange(startDate, endDate);
-        else
-            security1history = m_calculations.symbolChange(security1, startDate, endDate, true);
+        objectKey key = (correlations.constBegin() + i).key();
+        navInfoStatistic security1history = cache.value(key);
 
         for (int x = i + 1; x < count; ++x)
-            correlations[security1].insert(symbols.at(x), calculations::correlation(security1history, m_calculations.symbolChange(symbols.at(x), startDate, endDate, true)));
+        {
+            objectKey key2 = (correlations.constBegin() + x).key();
+            navInfoStatistic security2history = cache.value(key2);
+
+            correlations[key].insert(key2, calculations::correlation(security1history, security2history));
+        }
     }
 
-    mainCorrelationModel *model = new mainCorrelationModel(correlations, symbols, ui.correlations);
+    mainCorrelationModel *model = new mainCorrelationModel(correlations, ui.correlations);
     ui.correlations->setModel(model);
     ui.correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui.correlations->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);

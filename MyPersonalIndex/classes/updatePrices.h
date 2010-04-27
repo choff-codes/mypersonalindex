@@ -5,7 +5,6 @@
 #include <QtNetwork>
 #include "updateInfo.h"
 #include "queries.h"
-#include "nav.h"
 #include "portfolio.h"
 #include "settings.h"
 

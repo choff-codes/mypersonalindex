@@ -95,7 +95,7 @@ private slots:
     void acctModifyColumns();
     void acctSortChanged(int index);
     void beginImport();
-    void compare() { frmCompare().exec(); }
+    void compare() { frmCompare(&m_settings).exec(); }
     void tabChanged(int index) { if (index == 2) resetPortfolioChart(); } // hack for now, QWT doesn't render the chart correctly the first time
 };
 

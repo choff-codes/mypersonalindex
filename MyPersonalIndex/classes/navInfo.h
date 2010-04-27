@@ -37,15 +37,6 @@ public:
 class navInfoStatistic
 {
 public:
-    struct navPair
-    {
-        double nav;
-        double totalValue;
-
-        navPair(): nav(0), totalValue(0) {}
-        navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
-    };
-
     double costBasis;
     double expenseRatio;
     double taxLiability;
@@ -65,10 +56,18 @@ public:
     int lastDate() const { return m_lastDate; }
 
 private:
+    struct navPair
+    {
+        double nav;
+        double totalValue;
+
+        navPair(): nav(0), totalValue(0) {}
+        navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
+    };
+
     QHash<int, navPair> m_nav;
     int m_firstDate;
     int m_lastDate;
 };
-
 
 #endif // NAVINFO_H

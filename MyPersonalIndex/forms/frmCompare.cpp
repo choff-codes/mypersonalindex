@@ -68,6 +68,7 @@ frmCompare::~frmCompare()
 QHash<objectKey, navInfoStatistic> frmCompare::selected()
 {
     QHash<objectKey, navInfoStatistic> items;
+    QMap<int, QList<objectKey> > itemsByPortfolio;
     int startDate = ui.mainStartDateDropDown->date().toJulianDay();
     int endDate = ui.mainEndDateDropDown->date().toJulianDay();
 
@@ -85,26 +86,51 @@ QHash<objectKey, navInfoStatistic> frmCompare::selected()
                 switch(key.type)
                 {
                     case objectType_AA:
-                        calc.setPortfolio(portfolio::instance().portfolioIDFromAssetAllocationID(id));
-                        items.insert(key, calc.aaChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                        itemsByPortfolio[portfolio::instance().portfolioIDFromAssetAllocationID(id)].append(key);
                         break;
                     case objectType_Account:
-                        calc.setPortfolio(portfolio::instance().portfolioIDFromAccountID(id));
-                        items.insert(key, calc.acctChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                        itemsByPortfolio[portfolio::instance().portfolioIDFromAccountID(id)].append(key);
                         break;
                     case objectType_Security:
-                        calc.setPortfolio(portfolio::instance().portfolioIDFromSecurityID(id));
-                        items.insert(key, calc.securityChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                        itemsByPortfolio[portfolio::instance().portfolioIDFromSecurityID(id)].append(key);
                         break;
                     case objectType_Portfolio:
-                        calc.setPortfolio(id);
-                        items.insert(key, calc.portfolioChange(startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                        itemsByPortfolio[id].append(key);
                         break;
                     case objectType_Symbol:
-                        items.insert(key, calc.symbolChange(key.description, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                        itemsByPortfolio[-1].append(key);
                         break;
                 }
             }
+    }
+
+    cachedCalculations calc;
+    for(QMap<int, QList<objectKey> >::const_iterator i = itemsByPortfolio.constBegin(); i != itemsByPortfolio.constEnd(); ++i)
+    {
+        if (i.key() != -1)
+            calc.setPortfolio(i.key());
+
+        foreach(const objectKey &key, i.value())
+        {
+            switch(key.type)
+            {
+                case objectType_AA:
+                    items.insert(key, calc.aaChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                    break;
+                case objectType_Account:
+                    items.insert(key, calc.acctChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                    break;
+                case objectType_Security:
+                    items.insert(key, calc.securityChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                    break;
+                case objectType_Portfolio:
+                    items.insert(key, calc.portfolioChange(startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                    break;
+                case objectType_Symbol:
+                    items.insert(key, calc.symbolChange(key.description, startDate, endDate, ui.mainIncludeDividends->isChecked()));
+                    break;
+            }
+        }
     }
 
     return items;

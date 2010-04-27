@@ -220,7 +220,7 @@ const assetAllocation portfolio::assetAllocationFromID(const int &id) const
 int portfolio::portfolioIDFromAssetAllocationID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)
-        if (d.acct.contains(id))
+        if (d.aa.contains(id))
             return d.info.id;
 
     return -1;

@@ -1,7 +1,7 @@
 #ifndef SECURITYHISTORYMODEL_H
 #define SECURITYHISTORYMODEL_H
 
-#include <QtCore>
+#include <QtGui>
 #include "prices.h"
 #include "executedTrade.h"
 #include "functions.h"

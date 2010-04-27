@@ -1,8 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include <QtGui>
-#include "qwt_plot.h"
+#include <QtCore>
 
 class functions
 {

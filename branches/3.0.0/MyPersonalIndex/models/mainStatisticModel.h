@@ -1,7 +1,7 @@
 #ifndef MAINSTATISTICMODEL_H
 #define MAINSTATISTICMODEL_H
 
-#include <QtCore>
+#include <QtGui>
 #include "statistic.h"
 
 class mainStatisticModel: public QAbstractTableModel

@@ -45,14 +45,17 @@ public:
     const QMap<int, security> securities(const int &portfolioID) const { return m_portfolios.value(portfolioID).securities; }
     const security securities(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).securities.value(id); }
     const security securityFromID(const int &id) const;
+    int portfolioIDFromSecurityID(const int &id) const;
 
     const QMap<int, assetAllocation> aa(const int &portfolioID) const { return m_portfolios.value(portfolioID).aa; }
     const assetAllocation aa(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).aa.value(id); }
     const assetAllocation assetAllocationFromID(const int &id) const;
+    int portfolioIDFromAssetAllocationID(const int &id) const;
 
     const QMap<int, account> acct(const int &portfolioID) const { return m_portfolios.value(portfolioID).acct; }
     const account acct(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).acct.value(id); }
     const account accountFromID(const int &id) const;
+    int portfolioIDFromAccountID(const int &id) const;
 
     const executedTradeList executedTrades(const int &id) const { return m_portfolios.value(id).executedTrades; }
     const navInfoPortfolio nav(const int &id) const { return m_portfolios.value(id).nav; }

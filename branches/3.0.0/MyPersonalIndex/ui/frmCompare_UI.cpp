@@ -20,7 +20,7 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     treeAccounts->setCheckState(0, Qt::Unchecked);
     treeAccounts->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
     treeAssetAllocations = new QTreeWidgetItem(tree);
-    treeAssetAllocations->setText(0, "Acset Allocations");
+    treeAssetAllocations->setText(0, "Asset Allocations");
     treeAssetAllocations->setCheckState(0, Qt::Unchecked);
     treeAssetAllocations->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
     treeSecurities = new QTreeWidgetItem(tree);
@@ -41,8 +41,11 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     mainEndDate = new QLabel(" End Date: ", dialog);
     mainEndDateDropDown = new mpiDateEdit(dialog);
     mainExport = new QAction("Export...", dialog);
-    mainIncludeDividends = new QAction("Include dividends in securities", dialog);
+    mainIncludeDividends = new QAction("Include dividends", dialog);
+    mainIncludeDividends->setCheckable(true);
     mainToolbar->addAction(mainRefresh);
+    mainToolbar->addSeparator();
+    mainToolbar->addAction(mainIncludeDividends);
     mainToolbar->addSeparator();
     mainToolbar->addWidget(mainStartDate);
     mainToolbar->addWidget(mainStartDateDropDown);
@@ -50,7 +53,6 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     mainToolbar->addWidget(mainEndDateDropDown);
     mainToolbar->addSeparator();
     mainToolbar->addAction(mainExport);
-    mainToolbar->addAction(mainIncludeDividends);
     mainLayout->addWidget(mainToolbar, 0, 1);
 
     tab = new QTabWidget(dialog);

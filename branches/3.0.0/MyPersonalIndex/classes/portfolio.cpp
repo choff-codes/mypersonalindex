@@ -198,6 +198,16 @@ const security portfolio::securityFromID(const int &id) const
 
     return security();
 }
+
+int portfolio::portfolioIDFromSecurityID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.securities.contains(id))
+            return d.info.id;
+
+    return -1;
+}
+
 const assetAllocation portfolio::assetAllocationFromID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)
@@ -207,6 +217,16 @@ const assetAllocation portfolio::assetAllocationFromID(const int &id) const
     return assetAllocation();
 }
 
+int portfolio::portfolioIDFromAssetAllocationID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.acct.contains(id))
+            return d.info.id;
+
+    return -1;
+}
+
+
 const account portfolio::accountFromID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)
@@ -214,6 +234,15 @@ const account portfolio::accountFromID(const int &id) const
             return d.acct.value(id);
 
     return account();
+}
+
+int portfolio::portfolioIDFromAccountID(const int &id) const
+{
+    foreach(const portfolioData &d, m_portfolios)
+        if (d.acct.contains(id))
+            return d.info.id;
+
+    return -1;
 }
 
 void portfolio::remove(const int &portfolioID)

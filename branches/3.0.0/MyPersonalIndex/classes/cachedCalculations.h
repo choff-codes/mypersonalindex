@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include "calculations.h"
+#include "objectKey.h"
 
 class cachedCalculations: public calculations
 {
@@ -10,16 +11,14 @@ public:
     cachedCalculations(): calculations() {}
     virtual ~cachedCalculations() { clearCache(); }
 
-    dailyInfoPortfolio* portfolioValues(const int &date, const bool &calcAveragePrices = false);
     void setPortfolio(const int &portfolioID) { calculations::setPortfolio(portfolioID); clearCache(); }
     void clearCache() { qDeleteAll(m_cache); m_cache.clear(); }
+
+    dailyInfoPortfolio* portfolioValues(const int &date, const bool &calcAveragePrices = false);
     dailyInfo aaValues(const int &date, const int &aaID);
     dailyInfo acctValues(const int &date, const int &acctID);
-    navInfoStatistic securityChange(const int &securityID, const int &startDate, const int &endDate, const bool &dividends);
-    navInfoStatistic symbolChange(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends);
-    navInfoStatistic aaChange(const int &aaID, const int &startDate, const int &endDate, const bool &dividends);
-    navInfoStatistic acctChange(const int &acctID, const int &startDate, const int &endDate, const bool &dividends);
-    navInfoStatistic portfolioChange(const int &startDate, const int &endDate, const bool &dividends);
+
+    navInfoStatistic changeOverTime(const objectKey &key, const int &startDate, const int &endDate, const bool &dividends);
     navInfoStatistic portfolioChange(const int &startDate, const int &endDate);
 
 protected:
@@ -36,10 +35,9 @@ private:
         double price;
     };
 
-    enum changeType { changeType_Security, changeType_AA, changeType_Acct, changeType_Portfolio };
+    navInfoStatistic changeOverTime(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends);
+    dailyInfo getDailyInfoByKey(const int &date, const objectKey &key);
 
-    dailyInfo getDailyInfoByType(const int &date, const int &id, const changeType &type);
-    navInfoStatistic changeOverTime(const changeType &type, const int &id, const int &startDate, const int &endDate, const bool &dividends);
 };
 
 #endif // CACHEDCALCULATIONS_H

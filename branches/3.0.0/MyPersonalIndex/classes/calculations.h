@@ -17,7 +17,6 @@ public:
     virtual dailyInfoPortfolio* portfolioValues(const int &date);
 
     static double correlation(const navInfoStatistic &info1, const navInfoStatistic &info2);
-    static double correlation(const securityPrices &price1, const securityPrices &price2, const int &startDate, const int &endDate);
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 protected:
@@ -31,7 +30,7 @@ protected:
 
     int m_portfolioID;
 
-    securityInfo specificSecurityValue(const security &s, const int &date);
+    securityInfo securityValues(const security &s, const int &date);
 };
 
 

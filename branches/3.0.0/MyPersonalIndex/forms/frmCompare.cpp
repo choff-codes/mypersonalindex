@@ -52,8 +52,15 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
     ui.treeSecurities->setExpanded(true);
     ui.treeSymbols->setExpanded(true);
 
+    ui.correlations->setModel(new QStandardItemModel(ui.correlations));
+    ui.stats->setModel(new QStandardItemModel(ui.stats));
+
     connect(ui.btnOk, SIGNAL(accepted()), this, SLOT(accept()));
-    connect(ui.mainIncludeDividends, SIGNAL(triggered()), this, SLOT(correlatation()));
+    connect(ui.mainIncludeDividends, SIGNAL(triggered()), this, SLOT(refresh()));
+    connect(ui.mainRefresh, SIGNAL(triggered()), this, SLOT(refresh()));
+    connect(ui.mainExport, SIGNAL(triggered()), this, SLOT(exportTab()));
+    connect(ui.correlationsCopyShortcut, SIGNAL(activated()), ui.correlations, SLOT(copyTable()));
+    connect(ui.statsCopyShortcut, SIGNAL(activated()), ui.stats, SLOT(copyTable()));
 }
 
 frmCompare::~frmCompare()
@@ -63,6 +70,45 @@ frmCompare::~frmCompare()
         m_settings->compareIncludeDividends = ui.mainIncludeDividends->isChecked();
         m_settings->save();
     }
+}
+
+void frmCompare::exportTab()
+{
+    switch(ui.tab->currentIndex())
+    {
+        case 0:
+            ui.correlations->exportTable(false);
+        case 2:
+            ui.stats->exportTable(false);
+    }
+}
+
+void frmCompare::refresh()
+{
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+    QHash<objectKey, navInfoStatistic> items = selected();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (selected)", t.elapsed());
+    t.restart();
+#endif
+    correlatation(items);
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (correlation)", t.elapsed());
+    t.restart();
+#endif
+    stat(items);
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (stat)", t.elapsed());
+    t.restart();
+#endif
+    chart(items);
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (chart)", t.elapsed());
+    t.restart();
+#endif
 }
 
 QHash<objectKey, navInfoStatistic> frmCompare::selected()
@@ -111,37 +157,17 @@ QHash<objectKey, navInfoStatistic> frmCompare::selected()
             calc.setPortfolio(i.key());
 
         foreach(const objectKey &key, i.value())
-        {
-            switch(key.type)
-            {
-                case objectType_AA:
-                    items.insert(key, calc.aaChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
-                    break;
-                case objectType_Account:
-                    items.insert(key, calc.acctChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
-                    break;
-                case objectType_Security:
-                    items.insert(key, calc.securityChange(key.id, startDate, endDate, ui.mainIncludeDividends->isChecked()));
-                    break;
-                case objectType_Portfolio:
-                    items.insert(key, calc.portfolioChange(startDate, endDate, ui.mainIncludeDividends->isChecked()));
-                    break;
-                case objectType_Symbol:
-                    items.insert(key, calc.symbolChange(key.description, startDate, endDate, ui.mainIncludeDividends->isChecked()));
-                    break;
-            }
-        }
+            items.insert(key, calc.changeOverTime(key, startDate, endDate, ui.mainIncludeDividends->isChecked()));
     }
 
     return items;
 }
 
-void frmCompare::correlatation()
+void frmCompare::correlatation(const QHash<objectKey, navInfoStatistic> &items)
 {
     QAbstractItemModel *oldModel = ui.correlations->model();
 
     mainCorrelationModel::correlationList correlations;
-    QHash<objectKey, navInfoStatistic> items = selected();
     foreach(const objectKey &key, items.keys())
         correlations.insert(key, QHash<objectKey, double>());
 
@@ -165,4 +191,70 @@ void frmCompare::correlatation()
     ui.correlations->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui.correlations->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     delete oldModel;
+}
+
+void frmCompare::stat(const QHash<objectKey, navInfoStatistic> &items)
+{
+    QAbstractItemModel *oldModel = ui.stats->model();
+
+    QMap<objectKey, QStringList> statisticMap;
+
+    for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+    {
+        statisticInfo s(i.value());
+        QStringList statisticValues;
+        foreach(const int &x, m_settings->viewableColumns.value(settings::columns_Stat))
+            statisticValues.append(statistic::calculate((statistic::stat)x, s));
+        statisticMap.insert(i.key(), statisticValues);
+    }
+
+    mainStatisticModel *model = new mainStatisticModel(statisticMap, m_settings->viewableColumns.value(settings::columns_Stat), ui.stats);
+    ui.stats->setModel(model);
+    ui.stats->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    ui.stats->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    delete oldModel;
+}
+
+void frmCompare::chart(const QHash<objectKey, navInfoStatistic> &items)
+{
+    //ui.chart->setTitle("Comparison");
+
+    foreach(QwtPlotCurve *curve, m_curves)
+        curve->detach();
+    qDeleteAll(m_curves);
+    m_curves.clear();
+
+    const QList<int> dates = prices::instance().dates();
+
+    for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+    {
+        //chartInfo c;
+        QwtPlotCurve *newLine = new QwtPlotCurve();
+        QVector<double> xValues, yValues;
+        //m_curves.append(newLine);
+        //http://idlebox.net/2010/apidocs/qt-everywhere-opensource-4.6.1.zip/widgets-tooltips.html - randomItemColor()
+        QPen p(QColor::fromHsv(qrand() % 256, 255, 190)); p.setWidth(3);
+        newLine->setPen(p);
+
+        //c.setCurve(newLine);
+
+        int endDate = i.value().lastDate();
+        for(QList<int>::const_iterator x = qLowerBound(dates, i.value().firstDate()); x != dates.constEnd() && *x <= endDate ; ++x)
+        {
+            xValues.append(*x);
+            yValues.append(i.value().nav(*x));
+        }
+            //c.append(*x, i.value().nav(*x) - 1);
+
+        newLine->setRawSamples(&xValues[0], &yValues[0], xValues.count());
+        newLine->attach(ui.chart);
+
+        //if (c.count() != 0)
+        //    c.attach(ui.chart);
+    }
+
+    ui.chart->setAxisScale(QwtPlot::xBottom, ui.mainStartDateDropDown->date().toJulianDay(), ui.mainEndDateDropDown->date().toJulianDay(), 0);
+    ui.chart->setAxisAutoScale(QwtPlot::yLeft);
+    ui.chart->replot();
+    ui.chartZoomer->setZoomBase();
 }

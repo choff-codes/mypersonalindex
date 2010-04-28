@@ -9,7 +9,6 @@ class chartInfo
 {
 public:
     chartInfo(): m_curve(0) {}
-    ~chartInfo() { delete m_curve; }
 
     void setCurve(QwtPlotCurve *curve);
     void attach(QwtPlot *chart);

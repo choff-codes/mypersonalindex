@@ -6,7 +6,7 @@ QVariant mainStatisticModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     if (role == Qt::DisplayRole)
-        return m_statistics.at(index.row());
+        return (m_statistics.constBegin() + index.column()).value().at(index.row());
 
     return QVariant();
 }
@@ -17,7 +17,7 @@ QVariant mainStatisticModel::headerData(int section, Qt::Orientation orientation
         return QVariant();
 
     if (orientation != Qt::Vertical)
-        return "Results";
+        return (m_statistics.constBegin() + section).key().description;
 
     if (section < m_rowNames.count())
         return statistic::statisticDisplayNames.at(m_rowNames.at(section));

@@ -46,7 +46,7 @@ void nav::calculateNAVValues(const int &portfolioID)
 
     QList<int> securityReinvestments = getPortfolioSecurityReinvestment(portfolioID);
     dailyInfoPortfolio *previousInfo = m_calculations.portfolioValues(*previousDate);
-    double navValue = calculateFromStartDate ? info.startValue : portfolios.nav(portfolioID).nav(*previousDate);
+    double navValue = calculateFromStartDate ? info.startValue : portfolios.nav(portfolioID).nav(*previousDate).nav;
 
     if (calculateFromStartDate)
         addToNAVList(portfolioID, *previousDate, previousInfo->totalValue, navValue);

@@ -11,30 +11,27 @@ QVariant mainPerformanceModel::data(const QModelIndex &index, int role) const
         if (m_desc)
             row = m_nav.count() - row - 1;
 
-        QMap<int, double>::const_iterator nav = m_nav.navHistory().constBegin() + row;
+        QMap<int, navPair>::const_iterator nav = m_nav.constBegin() + row;
 
         switch (index.column())
         {
             case row_Date:
                 return QDate::fromJulianDay(nav.key()).toString(Qt::SystemLocaleShortDate);
             case row_TotalValue:
-            {
-                QMap<int, double>::const_iterator totalValue = m_nav.totalValueHistory().constBegin() + row;
-                return functions::doubleToLocalFormat(*totalValue);
-            }
+                return functions::doubleToLocalFormat(nav.value().totalValue);
             case row_Index:
-                return functions::doubleToLocalFormat(*nav);
+                return functions::doubleToLocalFormat(nav.value().nav);
             case row_Change:
             case row_Gain:
             {
                 if (row == 0)
                     return QVariant();
 
-                double previousNav = *(nav - 1);
+                double previousNav = (nav - 1).value().nav;
                 if (previousNav == 0)
                     return QVariant();
 
-                return functions::doubleToPercentage((*nav / (index.column() == row_Change ? previousNav : m_startValue)) - 1);
+                return functions::doubleToPercentage((nav.value().nav / (index.column() == row_Change ? previousNav : m_startValue)) - 1);
             }
         };
     }

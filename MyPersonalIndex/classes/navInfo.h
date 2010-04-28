@@ -4,17 +4,23 @@
 #include <QtCore>
 #include "queries.h"
 
-class navInfo
+struct navPair
+{
+    double nav;
+    double totalValue;
+
+    navPair(): nav(0), totalValue(0) {}
+    navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
+};
+
+class navInfoPortfolio
 {
 public:
     void insert(const int &date, const double &nav, const double &totalValue);
 
-    QMap<int, double> navHistory() const { return m_nav; }
-    QMap<int, double> totalValueHistory() const { return m_totalValue; }
-    double nav(const int &date) const { return m_nav.value(date); }
-    double totalValue(const int &date) const { return m_totalValue.value(date); }
+    QMap<int, navPair> navHistory() const { return m_nav; }
+    navPair nav(const int &date) const { return m_nav.value(date); }
 
-    QList<int> dates() const { return m_nav.keys(); }
     int count() const { return m_nav.count(); }
     bool isEmpty() const { return m_nav.isEmpty(); }
 
@@ -22,16 +28,11 @@ public:
     int firstDate() const { return m_nav.constBegin().key(); }
     int lastDate() const { return (m_nav.constEnd() - 1).key(); }
 
-protected:
-    QMap<int, double> m_nav;
-    QMap<int, double> m_totalValue;
-};
-
-class navInfoPortfolio: public navInfo
-{
-public:
     void remove(const int &portfolioID);
     void remove(const int &portfolioID, const int &startDate);
+
+private:
+    QMap<int, navPair> m_nav;
 };
 
 class navInfoStatistic
@@ -56,15 +57,6 @@ public:
     int lastDate() const { return m_lastDate; }
 
 private:
-    struct navPair
-    {
-        double nav;
-        double totalValue;
-
-        navPair(): nav(0), totalValue(0) {}
-        navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
-    };
-
     QHash<int, navPair> m_nav;
     int m_firstDate;
     int m_lastDate;

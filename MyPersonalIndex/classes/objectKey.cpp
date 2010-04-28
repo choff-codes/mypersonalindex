@@ -12,10 +12,10 @@ bool objectKey::operator<(const objectKey &other) const
     if (this->type < other.type)
         return true;
 
-    if ((int)this->type == (int)other.type && this->description < other.description)
+    if (this->type == other.type && this->description < other.description)
         return true;
 
-    if ((int)this->type == (int)other.type && this->description == other.description && this->id < other.id)
+    if (this->type == other.type && this->description == other.description && this->id < other.id)
         return true;
 
     return false;

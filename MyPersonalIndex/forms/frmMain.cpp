@@ -377,7 +377,7 @@ void frmMain::resetPortfolioAcct()
 void frmMain::resetPortfolioPerformance()
 {
     QAbstractItemModel *oldModel = ui.performance->model();
-    mainPerformanceModel *model = new mainPerformanceModel(portfolios.nav(m_portfolioID), ui.performanceSortDesc->isChecked(), portfolios.info(m_portfolioID).startValue, ui.performance);
+    mainPerformanceModel *model = new mainPerformanceModel(portfolios.nav(m_portfolioID).navHistory(), ui.performanceSortDesc->isChecked(), portfolios.info(m_portfolioID).startValue, ui.performance);
     ui.performance->setModel(model);
     delete oldModel;
 }
@@ -401,7 +401,7 @@ void frmMain::resetPortfolioCorrelation()
         if (key.type == objectType_Portfolio)
             cache.insert(key, m_calculations.portfolioChange(startDate, endDate));
         else
-            cache.insert(key, m_calculations.symbolChange(key.description, startDate, endDate, true));
+            cache.insert(key, m_calculations.changeOverTime(key, startDate, endDate, true));
 
     int count = correlations.count();
     for(int i = 0; i < count - 1; ++i)  // once we reach count - 1, all combinations will already be calculated
@@ -427,7 +427,7 @@ void frmMain::resetPortfolioCorrelation()
 
 void frmMain::resetPortfolioChart()
 {
-    const QMap<int, double> nav = portfolios.nav(m_portfolioID).navHistory();
+    const QMap<int, navPair> nav = portfolios.nav(m_portfolioID).navHistory();
     ui.chart->setTitle(portfolios.info(m_portfolioID).description);
 
     QwtPlotCurve *newLine = new QwtPlotCurve();
@@ -439,15 +439,15 @@ void frmMain::resetPortfolioChart()
     int startDate = dateDropDownDate(ui.chartStartDateDropDown);
     int endDate = dateDropDownDate(ui.chartEndDateDropDown);
     double startValue = -1;
-    for(QMap<int, double>::const_iterator i = nav.lowerBound(startDate); i != nav.constEnd(); ++i)
+    for(QMap<int, navPair>::const_iterator i = nav.lowerBound(startDate); i != nav.constEnd(); ++i)
     {
         if (i.key() > endDate)
             break;
 
         if (startValue == -1)
-            startValue = i.value();
+            startValue = i.value().nav;
 
-        m_chartInfo.append(i.key(), (i.value() / startValue) - 1);
+        m_chartInfo.append(i.key(), (i.value().nav / startValue) - 1);
     }
 
     if (m_chartInfo.count() != 0)
@@ -471,11 +471,13 @@ void frmMain::resetPortfolioStat()
     QAbstractItemModel *oldModel = ui.stat->model();
     statisticInfo s(m_calculations.portfolioChange(startDate, endDate), portfolios.startValue(m_portfolioID));
 
-    QList<QString> statisticValues;
+    QMap<objectKey, QStringList> statisticMap;
+    QStringList statisticValues;
     foreach(const int &i, m_settings.viewableColumns.value(settings::columns_Stat))
         statisticValues.append(statistic::calculate((statistic::stat)i, s));
+    statisticMap.insert(objectKey(objectType_Portfolio, m_portfolioID, "Results"), statisticValues);
 
-    mainStatisticModel *model = new mainStatisticModel(statisticValues, m_settings.viewableColumns.value(settings::columns_Stat), ui.stat);
+    mainStatisticModel *model = new mainStatisticModel(statisticMap, m_settings.viewableColumns.value(settings::columns_Stat), ui.stat);
     ui.stat->setModel(model);
     ui.stat->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     ui.stat->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);

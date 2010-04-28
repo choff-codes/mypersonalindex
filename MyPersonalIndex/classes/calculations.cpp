@@ -1,6 +1,6 @@
 #include "calculations.h"
 
-securityInfo calculations::specificSecurityValue(const security &s, const int &date)
+securityInfo calculations::securityValues(const security &s, const int &date)
 {
     securityInfo value(date);
     securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
@@ -42,7 +42,7 @@ dailyInfoPortfolio* calculations::portfolioValues(const int &date)
         if (!s.includeInCalc)
             continue;
 
-        securityInfo value = specificSecurityValue(s, date);
+        securityInfo value = securityValues(s, date);
 
         info->securitiesInfo.insert(s.id, value);
         info->costBasis += value.costBasis;

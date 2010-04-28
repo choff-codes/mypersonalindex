@@ -6,11 +6,8 @@ statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNa
     m_minNAVValue(0), m_minNAVValueDay(0), m_maxNAVValue(0), m_maxNAVValueDay(0), m_minTotalValue(0), m_minTotalValueDay(0),
     m_maxTotalValue(0), m_maxTotalValueDay(0)
 {    
-    const QList<int> dates = prices::instance().dates();
-    if (!dates.isEmpty())
-        m_count = qLowerBound(dates, info.lastDate()) - qLowerBound(dates, info.firstDate());
-
-    if (info.count() < 2)
+    m_count = info.count() - 1; // first is baseline nav, so discard
+    if (m_count == 0)
         return;
 
     m_startNAV = info.nav(info.firstDate());
@@ -35,6 +32,7 @@ statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNa
     double newS = 0;
     int count = 1;
 
+    const QList<int> dates = prices::instance().dates();
     for(QList<int>::const_iterator i = qLowerBound(dates, info.firstDate()) + 1; i != dates.constEnd(); ++i)
     {
         int date = *i;

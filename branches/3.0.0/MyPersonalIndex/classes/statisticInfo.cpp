@@ -7,7 +7,7 @@ statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNa
     m_maxTotalValue(0), m_maxTotalValueDay(0)
 {    
     m_count = info.count() - 1; // first is baseline nav, so discard
-    if (m_count == 0)
+    if (m_count <= 0)
         return;
 
     m_startNAV = info.nav(info.firstDate());

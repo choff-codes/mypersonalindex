@@ -71,12 +71,15 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     tabChart = new QWidget(dialog);
     tab->addTab(tabChart, "Chart");
     chartLayout = new QVBoxLayout(tabChart);
-    chart = new QwtPlot(tabChart);
+    chart = new mpiChart(tabChart);
     chart->setAxisScaleDraw(QwtPlot::xBottom, new mpiDateScale());
     chart->setAxisScaleDraw(QwtPlot::yLeft, new mpiPercentScale());
     chart->plotLayout()->setCanvasMargin(20);
     chart->plotLayout()->setMargin(20);
     chartZoomer = new QwtPlotZoomer(chart->canvas(), false);
+    chartLegend = new QwtLegend(chart);
+    chart->insertLegend(chartLegend, QwtPlot::RightLegend);
+
 
     QLinearGradient grad(0, 0, 1, 1);
     grad.setCoordinateMode(QGradient::StretchToDeviceMode);

@@ -1,50 +1,43 @@
 #include "frmCompare.h"
 
+const QStringList frmCompare::m_colors = QStringList() << "mediumorchid" << "tomato" << "darkslategray"  << "mediumaquamarine"
+    << "goldenrod" << "lightseagreen" << "olivedrab" << "darkred" << "plum" << "violet" << "lightsalmon" << "seagreen"
+    << "gainsboro" << "darkviolet" << "orchid" << "deeppink" << "beige" << "darkgoldenrod" << "lightgrey" << "mediumslateblue"
+    << "steelblue" << "maroon" << "darkolivegreen" << "gray" << "salmon" << "palegoldenrod" << "darkkhaki" << "thistle"
+    << "cyan" << "slategray" << "deepskyblue" << "darkslateblue"  << "burlywood" << "lightslategray" << "green"
+    << "crimson" << "yellowgreen" << "khaki" << "lightcoral" << "chartreuse" << "darkseagreen" << "yellow" << "saddlebrown"
+    << "darkorange" << "indianred" << "purple"  << "darkgray" << "firebrick" << "lime" << "blueviolet" << "lightskyblue"
+    << "mediumseagreen" << "lawngreen" << "darkmagenta" << "mediumpurple" << "hotpink" << "mediumvioletred" << "aquamarine"
+    << "coral" << "antiquewhite" << "peachpuff" << "orange" << "azure" << "lightgreen" << "pink" << "sandybrown"
+    << "dodgerblue" << "orangered" << "royalblue" << "lightcyan" << "fuscia" << "olive" << "sienna" << "limegreen"
+    << "blue" << "cadetblue" << "palevioletred" << "darkgreen" << "darksalmon" << "palegreen"  << "black" << "lightpink"
+    << "gold" << "cornflowerblue" << "darkblue" << "fuchsia" << "linen" << "silver" << "lightsteelblue" << "tan"
+    << "rosybrown" << "oldlace" << "chocolate" << "midnightblue" << "greenyellow" << "brown" << "navy" << "turquoise"
+    << "darkcyan" << "powderblue" << "mediumturquoise" << "skyblue" << "magenta" << "peru" << "bisque" << "indigo"
+    << "lightblue" << "forestgreen" << "red";
+
 frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
 {
     ui.setupUI(this);
 
     foreach(const portfolioInfo &i, portfolio::instance().info())
     {
-        QTreeWidgetItem *item = new QTreeWidgetItem(ui.treePortfolios);
-        item->setText(0, i.description);
-        item->setCheckState(0, Qt::Unchecked);
-        item->setData(0, Qt::UserRole, i.id);
+        addTreeItem(ui.treePortfolios, i.description, i.id);
 
         foreach(const account &acct, portfolio::instance().acct(i.id))
-        {
-            QTreeWidgetItem *item = new QTreeWidgetItem(ui.treeAccounts);
-            item->setText(0, QString("%1: %2").arg(i.description, acct.description));
-            item->setCheckState(0, Qt::Unchecked);
-            item->setData(0, Qt::UserRole, acct.id);
-        }
+            addTreeItem(ui.treeAccounts, QString("%1: %2").arg(i.description, acct.description), acct.id);
 
         foreach(const assetAllocation &aa, portfolio::instance().aa(i.id))
-        {
-            QTreeWidgetItem *item = new QTreeWidgetItem(ui.treeAssetAllocations);
-            item->setText(0, QString("%1: %2").arg(i.description, aa.description));
-            item->setCheckState(0, Qt::Unchecked);
-            item->setData(0, Qt::UserRole, aa.id);
-        }
+            addTreeItem(ui.treeAssetAllocations, QString("%1: %2").arg(i.description, aa.description), aa.id);
 
         foreach(const security &sec, portfolio::instance().securities(i.id))
-        {
-            QTreeWidgetItem *item = new QTreeWidgetItem(ui.treeSecurities);
-            item->setText(0, QString("%1: %2").arg(i.description, sec.symbol));
-            item->setCheckState(0, Qt::Unchecked);
-            item->setData(0, Qt::UserRole, sec.id);
-        }
+            addTreeItem(ui.treeSecurities, QString("%1: %2").arg(i.description, sec.symbol), sec.id);
     }
 
     QStringList symbols = prices::instance().symbols();
     symbols.sort();
     foreach(const QString &s, symbols)
-    {
-        QTreeWidgetItem *item = new QTreeWidgetItem(ui.treeSymbols);
-        item->setText(0, s);
-        item->setCheckState(0, Qt::Unchecked);
-        item->setData(0, Qt::UserRole, s);
-    }
+        addTreeItem(ui.treeSymbols, s, s);
 
     ui.treePortfolios->setExpanded(true);
     ui.treeAccounts->setExpanded(true);
@@ -52,8 +45,21 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
     ui.treeSecurities->setExpanded(true);
     ui.treeSymbols->setExpanded(true);
 
-    ui.correlations->setModel(new QStandardItemModel(ui.correlations));
-    ui.stats->setModel(new QStandardItemModel(ui.stats));
+    refresh();
+    if (m_settings)
+        ui.mainIncludeDividends->setChecked(m_settings->compareIncludeDividends);
+
+    int date = prices::instance().lastDate();
+    if (date == 0)
+        date = m_settings->dataStartDate;
+
+    QDate startDate = QDate::fromJulianDay(m_settings->dataStartDate);
+    QDate endDate = QDate::fromJulianDay(date);
+
+    ui.mainStartDateDropDown->setMinimumDate(startDate);
+    ui.mainStartDateDropDown->setDate(startDate);
+    ui.mainEndDateDropDown->setDate(endDate);
+    ui.mainEndDateDropDown->setMinimumDate(startDate);
 
     connect(ui.btnOk, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui.mainIncludeDividends, SIGNAL(triggered()), this, SLOT(refresh()));
@@ -65,11 +71,18 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
 
 frmCompare::~frmCompare()
 {
-    if (m_settings)
-    {
-        m_settings->compareIncludeDividends = ui.mainIncludeDividends->isChecked();
-        m_settings->save();
-    }
+    if (!m_settings)
+        return;
+
+    m_settings->compareIncludeDividends = ui.mainIncludeDividends->isChecked();
+}
+
+void frmCompare::addTreeItem(QTreeWidgetItem *parent, const QString &description, const QVariant &data)
+{
+    QTreeWidgetItem *item = new QTreeWidgetItem(parent);
+    item->setText(0, description);
+    item->setCheckState(0, Qt::Unchecked);
+    item->setData(0, Qt::UserRole, data);
 }
 
 void frmCompare::exportTab()
@@ -78,8 +91,13 @@ void frmCompare::exportTab()
     {
         case 0:
             ui.correlations->exportTable(false);
+            break;
+        case 1:
+            ui.chart->exportChart();
+            break;
         case 2:
             ui.stats->exportTable(false);
+            break;
     }
 }
 
@@ -89,7 +107,7 @@ void frmCompare::refresh()
     QTime t;
     t.start();
 #endif
-    QHash<objectKey, navInfoStatistic> items = selected();
+    QHash<objectKey, navInfoStatistic> items = selectedNavInfo();
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (selected)", t.elapsed());
     t.restart();
@@ -111,12 +129,9 @@ void frmCompare::refresh()
 #endif
 }
 
-QHash<objectKey, navInfoStatistic> frmCompare::selected()
+frmCompare::selectionMap frmCompare::selectedByPortfolio()
 {
-    QHash<objectKey, navInfoStatistic> items;
-    QMap<int, QList<objectKey> > itemsByPortfolio;
-    int startDate = ui.mainStartDateDropDown->date().toJulianDay();
-    int endDate = ui.mainEndDateDropDown->date().toJulianDay();
+    selectionMap itemsByPortfolio;
 
     for(int i = 0; i < ui.tree->topLevelItemCount(); ++i)
     {
@@ -127,7 +142,6 @@ QHash<objectKey, navInfoStatistic> frmCompare::selected()
                 int id = item->child(x)->data(0, Qt::UserRole).toInt();
                 QString description = item->child(x)->text(0);
                 objectKey key((objectType)i, id, description);
-                cachedCalculations calc;
 
                 switch(key.type)
                 {
@@ -150,7 +164,17 @@ QHash<objectKey, navInfoStatistic> frmCompare::selected()
             }
     }
 
+    return itemsByPortfolio;
+}
+
+QHash<objectKey, navInfoStatistic> frmCompare::selectedNavInfo()
+{
+    selectionMap itemsByPortfolio = selectedByPortfolio();
+    int startDate = ui.mainStartDateDropDown->date().toJulianDay();
+    int endDate = ui.mainEndDateDropDown->date().toJulianDay();
+    QHash<objectKey, navInfoStatistic> items;
     cachedCalculations calc;
+
     for(QMap<int, QList<objectKey> >::const_iterator i = itemsByPortfolio.constBegin(); i != itemsByPortfolio.constEnd(); ++i)
     {
         if (i.key() != -1)
@@ -198,7 +222,6 @@ void frmCompare::stat(const QHash<objectKey, navInfoStatistic> &items)
     QAbstractItemModel *oldModel = ui.stats->model();
 
     QMap<objectKey, QStringList> statisticMap;
-
     for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
     {
         statisticInfo s(i.value());
@@ -217,40 +240,34 @@ void frmCompare::stat(const QHash<objectKey, navInfoStatistic> &items)
 
 void frmCompare::chart(const QHash<objectKey, navInfoStatistic> &items)
 {
-    //ui.chart->setTitle("Comparison");
-
-    foreach(QwtPlotCurve *curve, m_curves)
-        curve->detach();
     qDeleteAll(m_curves);
     m_curves.clear();
+    int colorCount = 0;
 
     const QList<int> dates = prices::instance().dates();
-
     for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
     {
-        //chartInfo c;
+        chartInfo *c = new chartInfo();
         QwtPlotCurve *newLine = new QwtPlotCurve();
-        QVector<double> xValues, yValues;
-        //m_curves.append(newLine);
-        //http://idlebox.net/2010/apidocs/qt-everywhere-opensource-4.6.1.zip/widgets-tooltips.html - randomItemColor()
-        QPen p(QColor::fromHsv(qrand() % 256, 255, 190)); p.setWidth(3);
-        newLine->setPen(p);
+        m_curves.append(c);
+        QPen p(QColor(m_colors.at(colorCount))); // random color
+        p.setWidth(3);
 
-        //c.setCurve(newLine);
+        newLine->setPen(p);
+        newLine->setTitle(i.key().description);
+        c->setCurve(newLine);
 
         int endDate = i.value().lastDate();
         for(QList<int>::const_iterator x = qLowerBound(dates, i.value().firstDate()); x != dates.constEnd() && *x <= endDate ; ++x)
+            c->append(*x, i.value().nav(*x) - 1);
+
+        if (c->count() != 0)
         {
-            xValues.append(*x);
-            yValues.append(i.value().nav(*x));
+            c->attach(ui.chart);
+            ++colorCount;
+            if (colorCount > m_colors.count() - 1)
+                colorCount = 0;
         }
-            //c.append(*x, i.value().nav(*x) - 1);
-
-        newLine->setRawSamples(&xValues[0], &yValues[0], xValues.count());
-        newLine->attach(ui.chart);
-
-        //if (c.count() != 0)
-        //    c.attach(ui.chart);
     }
 
     ui.chart->setAxisScale(QwtPlot::xBottom, ui.mainStartDateDropDown->date().toJulianDay(), ui.mainEndDateDropDown->date().toJulianDay(), 0);

@@ -19,11 +19,16 @@ public:
     ~frmCompare();
 
 private:
+    typedef QMap<int, QList<objectKey> > selectionMap;
+    static const QStringList m_colors;
+
     frmCompare_UI ui;
     settings *m_settings;
-    QList<QwtPlotCurve*> m_curves;
+    QList<chartInfo*> m_curves;
 
-    QHash<objectKey, navInfoStatistic> selected();
+    QHash<objectKey, navInfoStatistic> selectedNavInfo();
+    selectionMap selectedByPortfolio();
+    void addTreeItem(QTreeWidgetItem *parent, const QString &description, const QVariant &data);
     void correlatation(const QHash<objectKey, navInfoStatistic> &items);
     void stat(const QHash<objectKey, navInfoStatistic> &items);
     void chart(const QHash<objectKey, navInfoStatistic> &items);

@@ -6,10 +6,12 @@
 #include "qwt_plot_grid.h"
 #include "qwt_plot_zoomer.h"
 #include "qwt_plot_layout.h"
+#include "qwt_legend.h"
 #include "mpiDateEdit.h"
 #include "mpiTableView.h"
 #include "mpiDateScale.h"
 #include "mpiPercentScale.h"
+#include "mpiChart.h"
 
 class frmCompare_UI
 {
@@ -27,9 +29,10 @@ public:
     QShortcut *correlationsCopyShortcut;
     mpiTableView *stats;
     QShortcut *statsCopyShortcut;
-    QwtPlot *chart;
+    mpiChart *chart;
     QwtPlotGrid *chartGridLines;
     QwtPlotZoomer *chartZoomer;
+    QwtLegend *chartLegend;
     QDialogButtonBox *btnOk;
     QToolBar *mainToolbar;
     QAction *mainRefresh;

@@ -145,8 +145,9 @@ navInfoStatistic cachedCalculations::changeOverTime(const QString &symbol, const
         return returnValue;
 
     double nav = 1;
-    returnValue.costBasis = previousPrice.close;
-    returnValue.insert(i.key(), nav, previousPrice.close);
+    double totalValue = previousPrice.close / splitRatio.ratio(i.key());
+    returnValue.costBasis = totalValue;
+    returnValue.insert(i.key(), nav, totalValue);
 
     for(++i; i != historicalPrices.constEnd(); ++i)
     {

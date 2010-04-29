@@ -3,16 +3,11 @@
 
 #include <QtCore>
 #include "statisticInfo.h"
-#include "portfolio.h"
-#include "calculations.h"
 #include "functions.h"
 
 class statistic
 {
 public:
-    enum outputFormat { format_Currency, format_Percentage, format_Decimal, format_Integer, format_ShortDate, format_LongDate, format_None };
-    enum statVariables { stat_Portfolio, stat_PortfolioName, stat_StartDate, stat_EndDate, stat_PreviousDay, stat_TotalValue };
-
     enum stat {
         stat_BeginningIndexValue, stat_BeginningValue, stat_CostBasis, stat_CurrentIndexValue, stat_CurrentValue, stat_DailyReturn,
         stat_DailyStandardDeviation, stat_Date, stat_DaysInvested, stat_GainLoss, stat_HourlyReturn, stat_MaxPercentDown, stat_MaxPercentDownDay,
@@ -25,11 +20,11 @@ public:
     static const QStringList statisticDisplayNames;
 
     static QString calculate(stat statistic, const statisticInfo &statInfo);
-
-    static double returnPercent(const statisticInfo &statInfo, const double &divisor);
-    static double cumulativeNormalDistribution(const statisticInfo &statInfo);
-
     static QMap<int, QString> statisticList();
+
+private:
+    static double returnPercent(const statisticInfo &statInfo, const double &divisor);
+    static double cumulativeNormalDistribution(const statisticInfo &statInfo); 
 };
 
 #endif // STATISTIC_H

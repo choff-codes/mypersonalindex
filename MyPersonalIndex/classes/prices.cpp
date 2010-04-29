@@ -25,7 +25,7 @@ void prices::insertDate(const int &date)
     else
     {
         i = qLowerBound(m_dates.begin(), m_dates.end(), date);
-        if (*i == date)
+        if (i != m_dates.end() && *i == date)
             return;
     }
 

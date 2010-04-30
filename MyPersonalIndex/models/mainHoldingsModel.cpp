@@ -8,7 +8,7 @@ const QStringList holdingsRow::columns = QStringList() << "Active" << "Symbol" <
 const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVariant::Int) << QVariant(QVariant::String) << QVariant(QVariant::Int)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
-     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Int);
+     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
     : baseRow(sort)

@@ -20,7 +20,7 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     treeAccounts->setCheckState(0, Qt::Unchecked);
     treeAccounts->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
     treeAssetAllocations = new QTreeWidgetItem(tree);
-    treeAssetAllocations->setText(0, "Asset Allocations");
+    treeAssetAllocations->setText(0, "Asset Classes");
     treeAssetAllocations->setCheckState(0, Qt::Unchecked);
     treeAssetAllocations->setFlags(treePortfolios->flags() | Qt::ItemIsTristate);
     treeSecurities = new QTreeWidgetItem(tree);
@@ -41,6 +41,7 @@ void frmCompare_UI::setupUI(QDialog *dialog)
     mainEndDate = new QLabel(" End Date: ", dialog);
     mainEndDateDropDown = new mpiDateEdit(dialog);
     mainExport = new QAction("Export...", dialog);
+    mainExport->setIconText("Export...");
     mainIncludeDividends = new QAction("Include dividends", dialog);
     mainIncludeDividends->setCheckable(true);
     mainToolbar->addAction(mainRefresh);

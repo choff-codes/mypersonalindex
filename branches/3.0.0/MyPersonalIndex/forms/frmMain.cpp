@@ -391,7 +391,7 @@ void frmMain::resetPortfolioCorrelation()
     mainCorrelationModel::correlationList correlations;
     foreach(const security &s, portfolios.securities(m_portfolioID))
         if (ui.correlationsShowHidden->isChecked() || !s.hide)
-            correlations.insert(objectKey(objectType_Symbol, s.id, s.symbol), QHash<objectKey, double>());
+            correlations.insert(objectKey(objectType_Symbol, 0, s.symbol), QHash<objectKey, double>());
 
     objectKey key = objectKey(objectType_Portfolio, m_portfolioID, portfolios.info(m_portfolioID).description);
     correlations.insert(key, QHash<objectKey, double>());

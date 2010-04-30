@@ -15,6 +15,9 @@ securityInfo calculations::securityValues(const security &s, const int &date)
         value.costBasis += t.shares * t.price + t.commission;
     }
 
+    if (value.shares < EPSILON)
+        value.shares = 0;
+
     value.dividendAmount = value.shares * price.dividend;
     value.totalValue = value.shares * price.close;
     if (s.expense > 0)

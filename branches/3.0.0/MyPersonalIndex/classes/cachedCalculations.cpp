@@ -32,13 +32,13 @@ dailyInfo cachedCalculations::aaValues(const int &date, const int &aaID)
         if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
         {
             securityInfo sv = portfolioInfo->securitiesInfo.value(s.id);
-            double value = sv.totalValue * s.aa.value(aaID, 1);
-            info.totalValue += value;
-            info.costBasis += sv.costBasis;
-            info.taxLiability += sv.taxLiability;
+            double percentage = s.aa.value(aaID, 1);
+            info.totalValue += sv.totalValue * percentage;
+            info.costBasis += sv.costBasis * percentage;
+            info.taxLiability += sv.taxLiability * percentage;
              ++info.count;
             if (s.expense > 0)
-                addedSecurities.append(expensePair(value, s.expense));
+                addedSecurities.append(expensePair(sv.totalValue * percentage, s.expense));
         }
 
     foreach(const expensePair &pair, addedSecurities)
@@ -258,7 +258,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             }
         }
 
-        if (shares > 0)
+        if (shares >= EPSILON)
             returnValues.insert(tradeList.key(), total / shares); // insert avg price for this securityID
     }
 

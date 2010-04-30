@@ -7,6 +7,10 @@
 #include "portfolio.h"
 #include "splits.h"
 
+#ifndef EPSILON
+#define EPSILON 0.00001
+#endif
+
 class calculations
 {
 public:

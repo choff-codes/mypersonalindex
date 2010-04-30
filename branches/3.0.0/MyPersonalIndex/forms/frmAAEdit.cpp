@@ -4,7 +4,7 @@ frmAAEdit::frmAAEdit(const int &portfolioID, QWidget *parent, const assetAllocat
     : QDialog(parent), m_portfolioID(portfolioID), m_aa(aa), m_aaOriginal(aa)
 {
     ui.setupUI(this);
-    this->setWindowTitle(QString("%1 AA").arg(aa.id == -1 ? "Add" : "Edit"));
+    this->setWindowTitle(QString("%1 Asset Class").arg(aa.id == -1 ? "Add" : "Edit"));
 
     ui.txtDesc->setText(m_aa.description);
     ui.sbTarget->setValue(m_aa.target * 100);

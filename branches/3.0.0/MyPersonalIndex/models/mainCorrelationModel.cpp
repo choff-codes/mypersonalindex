@@ -18,11 +18,11 @@ QVariant mainCorrelationModel::data(const QModelIndex &index, int role) const
     if(role == Qt::DisplayRole)
         return functions::doubleToPercentage(value);
 
-    value *= 100;
+    value *= 127;
     if (value < 0) // Background Role
-        return QColor(255, 255 + (int)value, 255);
+        return QColor((int)(255 + value), 255, (int)(255 + value));
     else
-        return QColor(255 - (int)value, 255, 255);
+        return QColor(255, (int)(255 - value), (int)(255 - value));
 }
 
 QVariant mainCorrelationModel::headerData(int section, Qt::Orientation /* not used */, int role) const

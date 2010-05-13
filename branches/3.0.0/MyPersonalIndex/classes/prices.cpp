@@ -35,7 +35,11 @@ void prices::insertDate(const int &date)
 
 int prices::currentDateOrPrevious(int date)
 {
+    if (m_dates.isEmpty())
+        return 0;
+
     QList<int>::const_iterator place = qLowerBound(m_dates, date);
+
     if (*place != date && place != m_dates.constBegin())
         return *(place - 1);
     else

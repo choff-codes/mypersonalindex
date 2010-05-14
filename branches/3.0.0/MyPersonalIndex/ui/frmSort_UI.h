@@ -1,7 +1,15 @@
 #ifndef FRMSORT_UI_H
 #define FRMSORT_UI_H
 
-#include <QtGui>
+#include <QVBoxLayout>
+#include <QGroupBox>
+#include <QComboBox>
+#include <QGridLayout>
+#include <QButtonGroup>
+#include <QRadioButton>
+#include <QButtonGroup>
+#include <QDialogButtonBox>
+#include <QDialog>
 
 class frmSort_UI
 {

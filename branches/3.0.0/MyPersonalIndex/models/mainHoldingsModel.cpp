@@ -18,11 +18,11 @@ holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio *info, cons
     //row_Active
     this->values.append((int)s.includeInCalc);
     //row_Symbol
-    this->values.append(s.symbol);
+    this->values.append(s.description);
     //row_Cash
     this->values.append((int)s.cashAccount);
     //row_Price
-    double price = prices::instance().price(s.symbol, info->date);
+    double price = prices::instance().price(s.description, info->date);
     this->values.append(price == 0 ? QVariant() : price);
     //row_Shares
     this->values.append(value.shares);

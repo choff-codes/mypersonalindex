@@ -1,7 +1,15 @@
 #ifndef FRMPORTFOLIO_UI_H
 #define FRMPORTFOLIO_UI_H
 
-#include <QtGui>
+#include <QVBoxLayout>
+#include <QDialogButtonBox>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QSpinBox>
+#include <QComboBox>
+#include <QCheckBox>
+#include <QDialog>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 

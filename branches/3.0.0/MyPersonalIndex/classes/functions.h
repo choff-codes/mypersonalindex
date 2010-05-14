@@ -1,7 +1,7 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-#include <QtCore>
+#include <QVariant>
 
 class functions
 {

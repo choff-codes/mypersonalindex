@@ -1,7 +1,7 @@
 #ifndef EXECUTEDTRADE_H
 #define EXECUTEDTRADE_H
 
-#include <QtCore>
+#include <QMap>
 #include "queries.h"
 
 class executedTrade

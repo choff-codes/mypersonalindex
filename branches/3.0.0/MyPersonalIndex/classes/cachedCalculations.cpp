@@ -211,7 +211,7 @@ QMap<int, double> cachedCalculations::avgPricePerShare(const int &calculationDat
             costCalc = portfolioCostCalc;
 
         QList<sharePricePair> previousTrades;
-        splits splitRatio(s.symbol, calculationDate);
+        splits splitRatio(s.description, calculationDate);
         double shares = 0; double total = 0;
 
         for(int x = 0; x < tradeList->count(); ++x)

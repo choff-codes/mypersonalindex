@@ -15,7 +15,7 @@ void import::getSecurities()
         {
             securities.mapping.insert(i, s.id);
             securities.reverseMapping.insert(s.id, i);
-            securities.values.insert(i, QString("%1: %2").arg(info.description, s.symbol));
+            securities.values.insert(i, QString("%1: %2").arg(info.description, s.description));
             ++i;
         }
 }

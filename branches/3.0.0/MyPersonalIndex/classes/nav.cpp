@@ -351,7 +351,7 @@ void nav::insertPortfolioReinvestments(const int &portfolioID, const int &date, 
     
     foreach(const int &securityID, securityReinvestments)
     {
-        QString symbol = portfolios.securities(portfolioID, securityID).symbol;
+        QString symbol = portfolios.securities(portfolioID, securityID).description;
         securityPrice s = prices::instance().dailyPriceInfo(symbol, previousInfo->date);
         if (s.dividend == 0 || s.close == 0)
             continue;
@@ -367,7 +367,7 @@ void nav::insertPortfolioCashTrade(const int &portfolioID, const int &cashAccoun
     if (!previousInfo || !portfolios.securities(portfolioID).contains(cashAccount))
         return;
 
-    QString symbol = portfolios.securities(portfolioID, cashAccount).symbol;
+    QString symbol = portfolios.securities(portfolioID, cashAccount).description;
     double close = prices::instance().price(symbol, previousInfo->date) / prices::instance().split(symbol, date);
 
     if (close == 0)
@@ -381,7 +381,7 @@ void nav::insertPortfolioTrades(const int &portfolioID, const int &date, const d
     for(navTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
         int securityID = i.key();
-        QString symbol = portfolios.securities(portfolioID, securityID).symbol;
+        QString symbol = portfolios.securities(portfolioID, securityID).description;
         double close = 0;
         if (previousInfo)
             close = prices::instance().price(symbol, previousInfo->date) / prices::instance().split(symbol, date);

@@ -391,10 +391,9 @@ void frmMain::resetPortfolioCorrelation()
     mainCorrelationModel::correlationList correlations;
     foreach(const security &s, portfolios.securities(m_portfolioID))
         if (ui.correlationsShowHidden->isChecked() || !s.hide)
-            correlations.insert(objectKey(objectType_Symbol, 0, s.symbol), QHash<objectKey, double>());
+            correlations.insert(objectKey(s.description), QHash<objectKey, double>());
 
-    objectKey key = objectKey(objectType_Portfolio, m_portfolioID, portfolios.info(m_portfolioID).description);
-    correlations.insert(key, QHash<objectKey, double>());
+    correlations.insert(portfolios.key(m_portfolioID), QHash<objectKey, double>());
     
     QHash<objectKey, navInfoStatistic> cache;
     foreach(const objectKey &key, correlations.keys())
@@ -475,7 +474,10 @@ void frmMain::resetPortfolioStat()
     QStringList statisticValues;
     foreach(const int &i, m_settings.viewableColumns.value(settings::columns_Stat))
         statisticValues.append(statistic::calculate((statistic::stat)i, s));
-    statisticMap.insert(objectKey(objectType_Portfolio, m_portfolioID, "Results"), statisticValues);
+
+    objectKey key = portfolios.key(m_portfolioID);
+    key.description = "Results"; // ignore portfolio name
+    statisticMap.insert(key, statisticValues);
 
     mainStatisticModel *model = new mainStatisticModel(statisticMap, m_settings.viewableColumns.value(settings::columns_Stat), ui.stat);
     ui.stat->setModel(model);
@@ -617,7 +619,7 @@ void frmMain::addSecurity()
             portfolios.insert(m_portfolioID, s);
             minDate = portfolios.minimumDate(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount && !prices::instance().exists(s.symbol))
+            if (!s.cashAccount && !prices::instance().exists(s.description))
                 showUpdatePrices = true;
         }
     }

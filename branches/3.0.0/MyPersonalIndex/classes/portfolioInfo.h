@@ -1,17 +1,17 @@
 #ifndef PORTFOLIOINFO_H
 #define PORTFOLIOINFO_H
 
-#include <QtCore>
+#include <QString>
+#include <QDate>
 #include "queries.h"
 #include "account.h"
+#include "objectKey.h"
 
-class portfolioInfo
+class portfolioInfo: public objectKey
 {
 public:
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
 
-    int id;
-    QString description;
     bool dividends;
     account::costBasisType costBasis;
     int startValue;

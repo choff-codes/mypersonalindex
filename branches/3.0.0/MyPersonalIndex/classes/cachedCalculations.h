@@ -1,9 +1,15 @@
 #ifndef CACHEDCALCULATIONS_H
 #define CACHEDCALCULATIONS_H
 
-#include <QtCore>
+#include <QString>
+#include <QMap>
+#include <QHash>
 #include "calculations.h"
 #include "objectKey.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class cachedCalculations: public calculations
 {

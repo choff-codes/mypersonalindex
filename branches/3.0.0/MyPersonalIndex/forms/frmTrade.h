@@ -1,7 +1,9 @@
 #ifndef FRMTRADE_H
 #define FRMTRADE_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMap>
+#include <QString>
 #include "frmTrade_UI.h"
 #include "security.h"
 

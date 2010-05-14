@@ -1,7 +1,7 @@
 #ifndef CALCULATIONINFO_H
 #define CALCULATIONINFO_H
 
-#include <QtCore>
+#include <QMap>
 
 struct dailyInfo
 {

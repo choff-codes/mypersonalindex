@@ -1,7 +1,7 @@
 #ifndef CHARTINFO_H
 #define CHARTINFO_H
 
-#include <QtCore>
+#include <QVector>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 

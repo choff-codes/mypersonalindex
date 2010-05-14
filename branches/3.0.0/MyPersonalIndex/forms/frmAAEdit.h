@@ -1,7 +1,8 @@
 #ifndef FRMAAEDIT_H
 #define FRMAAEDIT_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMessageBox>
 #include "frmAAEdit_UI.h"
 #include "assetAllocation.h"
 

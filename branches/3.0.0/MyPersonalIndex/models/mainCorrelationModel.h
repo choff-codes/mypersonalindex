@@ -1,7 +1,10 @@
 #ifndef MAINCORRELATIONMODEL_H
 #define MAINCORRELATIONMODEL_H
 
-#include <QtGui>
+#include <QAbstractTableModel>
+#include <QTableView>
+#include <QMap>
+#include <QHash>
 #include "functions.h"
 #include "objectKey.h"
 

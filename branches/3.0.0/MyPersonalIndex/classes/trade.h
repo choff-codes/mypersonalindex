@@ -1,7 +1,9 @@
 #ifndef TRADE_H
 #define TRADE_H
 
-#include <QtCore>
+#include <QString>
+#include <QMap>
+#include <QDate>
 #include "queries.h"
 #include "functions.h"
 

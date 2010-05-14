@@ -2,8 +2,7 @@
 
 bool security::operator==(const security &other) const
 {
-    return this->id == other.id
-            && this->symbol == other.symbol
+    return this->key() == other.key()
             && this->account == other.account
             && this->expense == other.expense
             && this->divReinvest == other.divReinvest
@@ -32,7 +31,7 @@ void security::save(const int &portfolioID)
 {
     QMap<QString, QVariant> values;
     values.insert(queries::SecurityColumns.at(queries::securityColumns_PortfolioID), portfolioID);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_Symbol), this->symbol);
+    values.insert(queries::SecurityColumns.at(queries::securityColumns_Symbol), this->description);
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Account), functions::intToNull(this->account));
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Expense), functions::doubleToNull(this->expense));
     values.insert(queries::SecurityColumns.at(queries::securityColumns_DivReinvest), (int)this->divReinvest);

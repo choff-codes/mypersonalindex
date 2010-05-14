@@ -1,7 +1,8 @@
 #ifndef SPLITS_H
 #define SPLITS_H
 
-#include <QtCore>
+#include <QMap>
+#include <QString>
 #include "prices.h"
 
 class splits

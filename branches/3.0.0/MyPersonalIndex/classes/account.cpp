@@ -2,8 +2,7 @@
 
 bool account::operator==(const account &other) const
 {
-    return this->id == other.id
-            && this->description == other.description
+    return this->key() == other.key()
             && this->taxRate == other.taxRate
             && this->taxDeferred == other.taxDeferred
             && this->costBasis == other.costBasis;

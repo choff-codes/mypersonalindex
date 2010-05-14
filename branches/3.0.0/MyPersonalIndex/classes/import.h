@@ -1,7 +1,7 @@
 #ifndef IMPORT_H
 #define IMPORT_H
 
-#include <QtCore>
+#include <QMap>
 #include "portfolio.h"
 
 class import

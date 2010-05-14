@@ -1,15 +1,14 @@
 #include "portfolioInfo.h"
 
-portfolioInfo::portfolioInfo(): id(-1), dividends(true), costBasis(account::costBasisType_FIFO), startValue(100),
-    aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
+portfolioInfo::portfolioInfo(): objectKey(objectType_Portfolio, QString()), dividends(true), costBasis(account::costBasisType_FIFO),
+    startValue(100), aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
     holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true)
 {
 }
 
 bool portfolioInfo::operator==(const portfolioInfo &other) const
 {
-    return this->id == other.id
-            && this->description == other.description
+    return this->key() == other.key()
             && this->dividends == other.dividends
             && this->costBasis == other.costBasis
             && this->startValue == other.startValue

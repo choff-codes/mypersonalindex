@@ -1,9 +1,16 @@
 #ifndef PRICES_H
 #define PRICES_H
 
-#include <QtCore>
+#include <QMap>
+#include <QHash>
+#include <QSet>
+#include <QDate>
 #include "securityPrice.h"
 #include "queries.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class prices
 {

@@ -11,7 +11,7 @@ frmTrade::frmTrade(const QMap<int, security> &cashAccounts, QWidget *parent, con
 
     foreach(const security &sec, cashAccounts)
         if (sec.cashAccount)
-            ui.cmbCash->addItem(sec.symbol, sec.id);
+            ui.cmbCash->addItem(sec.description, sec.id);
 
     connectSlots();
     loadTrade();

@@ -22,22 +22,22 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
 
     foreach(const portfolioInfo &i, portfolio::instance().info())
     {
-        addTreeItem(ui.treePortfolios, i.description, i.id);
+        addTreeItem(ui.treePortfolios, i.description, i.key());
 
         foreach(const account &acct, portfolio::instance().acct(i.id))
-            addTreeItem(ui.treeAccounts, QString("%1: %2").arg(i.description, acct.description), acct.id);
+            addTreeItem(ui.treeAccounts, QString("%1: %2").arg(i.description, acct.description), acct.key());
 
         foreach(const assetAllocation &aa, portfolio::instance().aa(i.id))
-            addTreeItem(ui.treeAssetAllocations, QString("%1: %2").arg(i.description, aa.description), aa.id);
+            addTreeItem(ui.treeAssetAllocations, QString("%1: %2").arg(i.description, aa.description), aa.key());
 
         foreach(const security &sec, portfolio::instance().securities(i.id))
-            addTreeItem(ui.treeSecurities, QString("%1: %2").arg(i.description, sec.symbol), sec.id);
+            addTreeItem(ui.treeSecurities, QString("%1: %2").arg(i.description, sec.description), sec.key());
     }
 
     QStringList symbols = prices::instance().symbols();
     symbols.sort();
     foreach(const QString &s, symbols)
-        addTreeItem(ui.treeSymbols, s, s);
+        addTreeItem(ui.treeSymbols, s, objectKey(s));
 
     ui.treePortfolios->setExpanded(true);
     ui.treeAccounts->setExpanded(true);
@@ -77,12 +77,15 @@ frmCompare::~frmCompare()
     m_settings->compareIncludeDividends = ui.mainIncludeDividends->isChecked();
 }
 
-void frmCompare::addTreeItem(QTreeWidgetItem *parent, const QString &description, const QVariant &data)
+void frmCompare::addTreeItem(QTreeWidgetItem *parent, const QString &description, const objectKey &key)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(parent);
     item->setText(0, description);
     item->setCheckState(0, Qt::Unchecked);
-    item->setData(0, Qt::UserRole, data);
+
+    objectKey updatedKey = key;
+    updatedKey.description = description;
+    item->setData(0, Qt::UserRole, qVariantFromValue(updatedKey));
 }
 
 void frmCompare::exportTab()
@@ -139,28 +142,8 @@ frmCompare::selectionMap frmCompare::selectedByPortfolio()
         for(int x = 0; x < item->childCount(); ++x)
             if(item->child(x)->checkState(0) == Qt::Checked)
             {
-                int id = item->child(x)->data(0, Qt::UserRole).toInt();
-                QString description = item->child(x)->text(0);
-                objectKey key((objectType)i, id, description);
-
-                switch(key.type)
-                {
-                    case objectType_AA:
-                        itemsByPortfolio[portfolio::instance().portfolioIDFromAssetAllocationID(id)].append(key);
-                        break;
-                    case objectType_Account:
-                        itemsByPortfolio[portfolio::instance().portfolioIDFromAccountID(id)].append(key);
-                        break;
-                    case objectType_Security:
-                        itemsByPortfolio[portfolio::instance().portfolioIDFromSecurityID(id)].append(key);
-                        break;
-                    case objectType_Portfolio:
-                        itemsByPortfolio[id].append(key);
-                        break;
-                    case objectType_Symbol:
-                        itemsByPortfolio[-1].append(key);
-                        break;
-                }
+                objectKey key = item->child(x)->data(0, Qt::UserRole).value<objectKey>();
+                itemsByPortfolio[portfolio::instance().portfolioIDFromKey(key)].append(key);
             }
     }
 

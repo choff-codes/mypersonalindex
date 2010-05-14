@@ -4,8 +4,15 @@
 #define VERSION 300 // UPDATE EACH RELEASE
 #define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
 
-#include <QtCore>
+#include <QVariant>
+#include <QSize>
+#include <QPoint>
+#include <QMap>
 #include "queries.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class settings
 {

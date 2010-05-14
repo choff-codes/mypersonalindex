@@ -27,7 +27,7 @@ QVariant securityTradeModel::data(const QModelIndex &index, int role) const
                 return t.commission <= 0 ? "" : functions::doubleToCurrency(t.commission);
                 break;
             case 4:
-                return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).symbol : "";
+                return m_cashAccounts.contains(t.cashAccount) ? m_cashAccounts.value(t.cashAccount).description : "";
                 break;
             case 5:
                 return trade::frequencyToString(t.frequency);

@@ -2,8 +2,7 @@
 
 bool assetAllocation::operator==(const assetAllocation &other) const
 {
-    return this->id == other.id
-            && this->description == other.description
+    return this->key() == other.key()
             && this->target == other.target;
 }
 

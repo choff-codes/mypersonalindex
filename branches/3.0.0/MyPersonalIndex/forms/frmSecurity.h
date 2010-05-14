@@ -1,7 +1,9 @@
 #ifndef FRMSECURITY_H
 #define FRMSECURITY_H
 
-#include <QtGui>
+#include <QObject>
+#include <QTimer>
+#include <QMessageBox>
 #include "frmSecurity_UI.h"
 #include "securityAAModel.h"
 #include "securityTradeModel.h"

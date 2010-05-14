@@ -1,7 +1,9 @@
 #ifndef FRMCOLUMNS_H
 #define FRMCOLUMNS_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMap>
+#include <QString>
 #include "frmColumns_UI.h"
 #include "settings.h"
 

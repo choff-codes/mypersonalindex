@@ -1,7 +1,8 @@
 #ifndef FRMACCTEDIT_H
 #define FRMACCTEDIT_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMessageBox>
 #include "frmAcctEdit_UI.h"
 #include "account.h"
 

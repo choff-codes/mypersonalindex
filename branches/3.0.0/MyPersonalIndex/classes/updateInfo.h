@@ -1,7 +1,7 @@
 #ifndef UPDATEINFO_H
 #define UPDATEINFO_H
 
-#include <QtCore>
+#include <QString>
 
 class updateInfo
 {

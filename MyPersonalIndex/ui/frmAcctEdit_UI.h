@@ -1,7 +1,17 @@
 #ifndef FRMACCTEDIT_UI_H
 #define FRMACCTEDIT_UI_H
 
-#include <QtGui>
+#include <QVBoxLayout>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QHBoxLayout>
+#include <QDoubleSpinBox>
+#include <QDialogButtonBox>
+#include <QToolButton>
+#include <QDialog>
+#include <QComboBox>
+#include <QCheckBox>
 
 class frmAcctEdit_UI
 {

@@ -1,7 +1,8 @@
 #ifndef STATISTICINFO_H
 #define STATISTICINFO_H
 
-#include <QtCore>
+#include <qmath.h>
+#include <qnumeric.h>
 #include "navInfo.h"
 #include "prices.h"
 

@@ -1,16 +1,16 @@
 #ifndef SECURITY_H
 #define SECURITY_H
 
-#include <QtCore>
+#include <QString>
+#include <QMap>
 #include "trade.h"
 #include "queries.h"
 #include "functions.h"
+#include "objectKey.h"
 
-class security
+class security: public objectKey
 {
 public:
-    int id;
-    QString symbol;
     int account;
     double expense;
     bool divReinvest;
@@ -20,7 +20,8 @@ public:
     QMap<int, double> aa;
     QMap<int, trade> trades;
 
-    security(): id(-1), account(-1), expense(-1), divReinvest(false), cashAccount(false), includeInCalc(true), hide(false) {}
+    security(): objectKey(objectType_Security, QString()), account(-1), expense(-1),
+        divReinvest(false), cashAccount(false), includeInCalc(true), hide(false) {}
 
     bool operator==(const security &other) const;
     bool operator!=(const security &other) const { return !(*this == other); }

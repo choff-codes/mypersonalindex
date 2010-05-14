@@ -1,10 +1,14 @@
 #ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
-#include <QtCore>
+#include <QMap>
 #include "portfolioData.h"
 #include "queries.h"
 #include "prices.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class portfolio
 {
@@ -45,23 +49,22 @@ public:
     const QMap<int, security> securities(const int &portfolioID) const { return m_portfolios.value(portfolioID).securities; }
     const security securities(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).securities.value(id); }
     const security securityFromID(const int &id) const;
-    int portfolioIDFromSecurityID(const int &id) const;
 
     const QMap<int, assetAllocation> aa(const int &portfolioID) const { return m_portfolios.value(portfolioID).aa; }
     const assetAllocation aa(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).aa.value(id); }
     const assetAllocation assetAllocationFromID(const int &id) const;
-    int portfolioIDFromAssetAllocationID(const int &id) const;
 
     const QMap<int, account> acct(const int &portfolioID) const { return m_portfolios.value(portfolioID).acct; }
     const account acct(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).acct.value(id); }
     const account accountFromID(const int &id) const;
-    int portfolioIDFromAccountID(const int &id) const;
 
     const executedTradeList executedTrades(const int &id) const { return m_portfolios.value(id).executedTrades; }
     const navInfoPortfolio nav(const int &id) const { return m_portfolios.value(id).nav; }
 
     portfolioInfo info(const int &id) const { return m_portfolios.value(id).info; }
     QList<portfolioInfo> info() const { QList<portfolioInfo> list; foreach(const portfolioData &d, m_portfolios) list.append(d.info); return list; }
+    objectKey key(const int &id) const { return m_portfolios.value(id).info.key(); }
+    int portfolioIDFromKey(const objectKey &key) const;
 
     int startDate(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startDate; }
     double startValue(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startValue; }
@@ -87,6 +90,10 @@ private:
     void loadPortfoliosAA();
     void loadPortfoliosAcct();
     void loadPortfoliosNAV();
+
+    int portfolioIDFromAccountID(const int &id) const;
+    int portfolioIDFromSecurityID(const int &id) const;
+    int portfolioIDFromAssetAllocationID(const int &id) const;
 };
 
 #endif // PORTFOLIO_H

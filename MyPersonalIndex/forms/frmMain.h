@@ -1,7 +1,13 @@
 #ifndef FRMMAIN_H
 #define FRMMAIN_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMap>
+#include <QString>
+#include <QMainWindow>
+#include <QCloseEvent>
+#include <QApplication>
+#include <QClipboard>
 #include "frmMain_UI.h"
 #include "functions.h"
 #include "updatePrices.h"

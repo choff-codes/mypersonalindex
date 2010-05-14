@@ -1,7 +1,10 @@
 #ifndef MPIVIEWMODELBASE_H
 #define MPIVIEWMODELBASE_H
 
-#include <QtGui>
+#include <QList>
+#include <QStringList>
+#include <QAbstractTableModel>
+#include <QTableView>
 #include "functions.h"
 
 class baseRow

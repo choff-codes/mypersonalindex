@@ -1,7 +1,10 @@
 #ifndef FRMCOMPARE_H
 #define FRMCOMPARE_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMap>
+#include <QMap>
+#include <QStringList>
 #include "frmCompare_UI.h"
 #include "portfolio.h"
 #include "settings.h"
@@ -9,6 +12,10 @@
 #include "mainStatisticModel.h"
 #include "chartInfo.h"
 #include "cachedCalculations.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class frmCompare : public QDialog
 {
@@ -28,7 +35,7 @@ private:
 
     QHash<objectKey, navInfoStatistic> selectedNavInfo();
     selectionMap selectedByPortfolio();
-    void addTreeItem(QTreeWidgetItem *parent, const QString &description, const QVariant &data);
+    void addTreeItem(QTreeWidgetItem *parent, const QString &description, const objectKey &key);
     void correlatation(const QHash<objectKey, navInfoStatistic> &items);
     void stat(const QHash<objectKey, navInfoStatistic> &items);
     void chart(const QHash<objectKey, navInfoStatistic> &items);

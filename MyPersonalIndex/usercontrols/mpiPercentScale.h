@@ -1,7 +1,6 @@
 #ifndef MPIPERCENTSCALE_H
 #define MPIPERCENTSCALE_H
 
-#include <QtCore>
 #include <qwt_scale_draw.h>
 #include "functions.h"
 

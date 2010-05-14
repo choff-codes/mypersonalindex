@@ -1,7 +1,8 @@
 #ifndef MPIVALIDATOR_H
 #define MPIVALIDATOR_H
 
-#include <QtGui>
+#include <QDoubleValidator>
+#include <QIntValidator>
 
 class mpiDoubleValidator: public QDoubleValidator
 {

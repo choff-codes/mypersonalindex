@@ -1,7 +1,8 @@
 #ifndef CALCULATIONS_H
 #define CALCULATIONS_H
 
-#include <QtCore>
+#include <qmath.h>
+#include <qnumeric.h>
 #include "calculationInfo.h"
 #include "prices.h"
 #include "portfolio.h"

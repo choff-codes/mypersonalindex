@@ -1,7 +1,10 @@
 #ifndef MAINPERFORMANCEMODEL_H
 #define MAINPERFORMANCEMODEL_H
 
-#include <QtGui>
+#include <QAbstractTableModel>
+#include <QTableView>
+#include <QMap>
+#include <QDate>
 #include "functions.h"
 #include "navInfo.h"
 

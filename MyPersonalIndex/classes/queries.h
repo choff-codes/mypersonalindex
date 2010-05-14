@@ -1,8 +1,13 @@
 #ifndef QUERIES_H
 #define QUERIES_H
 
-#include <QtSql>
-#include <QtCore>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QMap>
+#include <QString>
+#include <QStringList>
+#include <QSettings>
+#include <QFileInfo>
 
 class queries
 {

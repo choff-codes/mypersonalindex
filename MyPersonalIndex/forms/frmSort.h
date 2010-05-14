@@ -1,7 +1,9 @@
 #ifndef FRMSORT_H
 #define FRMSORT_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMap>
+#include <QString>
 #include "frmSort_UI.h"
 
 class frmSort : public QDialog

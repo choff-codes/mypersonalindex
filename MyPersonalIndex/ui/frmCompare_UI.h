@@ -1,7 +1,17 @@
 #ifndef FRMCOMPARE_UI_H
 #define FRMCOMPARE_UI_H
 
-#include <QtGui>
+#include <QGridLayout>
+#include <QTreeWidget>
+#include <QTabWidget>
+#include <QVBoxLayout>
+#include <QShortcut>
+#include <QDialogButtonBox>
+#include <QToolBar>
+#include <QAction>
+#include <QLabel>
+#include <QTreeWidgetItem>
+#include <QDialog>
 #include "qwt_plot.h"
 #include "qwt_plot_grid.h"
 #include "qwt_plot_zoomer.h"

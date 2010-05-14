@@ -1,7 +1,15 @@
 #ifndef FRMTRADE_UI_H
 #define FRMTRADE_UI_H
 
-#include <QtGui>
+#include <QGridLayout>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QLabel>
+#include <QComboBox>
+#include <QLineEdit>
+#include <QCheckBox>
+#include <QDialogButtonBox>
+#include <QDialog>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 #include "trade.h"

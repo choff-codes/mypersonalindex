@@ -1,4 +1,5 @@
-#include <QtCore>
+#include <QMessageBox>
+#include <QString>
 #include "frmMain.h"
 #include "qtsingleapplication.h"
 

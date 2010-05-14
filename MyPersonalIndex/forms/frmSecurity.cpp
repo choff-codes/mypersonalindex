@@ -5,7 +5,7 @@ frmSecurity::frmSecurity(const int &portfolioID, const security& security, QWidg
     QDialog(parent), m_portfolioID(portfolioID), m_security(security), m_securityOriginal(security), m_modelHistory(0)
 {
     ui.setupUI(this);
-    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.symbol));
+    this->setWindowTitle(QString("%1 Properties").arg(security.id == -1 ? "New Security" : m_security.description));
 
     if (m_security.id != -1)
     {
@@ -68,7 +68,7 @@ void frmSecurity::copyPressed() // this is ambigious between the history table v
 
 void frmSecurity::loadSecurity()
 {
-    ui.txtSymbol->setText(m_security.symbol);
+    ui.txtSymbol->setText(m_security.description);
     ui.cmbAcct->setCurrentIndex(ui.cmbAcct->findData(m_security.account));
     ui.sbExpense->setValue(m_security.expense * 100);
     ui.chkReinvest->setChecked(m_security.divReinvest);
@@ -89,7 +89,7 @@ void frmSecurity::loadSecurity()
 
 void frmSecurity::saveSecurity()
 {
-    m_security.symbol = ui.txtSymbol->text();
+    m_security.description = ui.txtSymbol->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
     m_security.expense = ui.sbExpense->value() / 100;
     m_security.divReinvest = ui.chkReinvest->isChecked();
@@ -149,9 +149,9 @@ void frmSecurity::accept()
 
     m_security.save(m_portfolioID);
     if (m_security.cashAccount)
-        prices::instance().insertCashSecurity(m_security.symbol);
+        prices::instance().insertCashSecurity(m_security.description);
     else
-        prices::instance().removeCashSecurity(m_security.symbol);
+        prices::instance().removeCashSecurity(m_security.description);
 
     if (m_securityOriginal.id == -1) // now there is an ID to save trades with
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
@@ -190,7 +190,7 @@ bool frmSecurity::hasValidationErrors()
 
     foreach(const int &i, portfolio::instance().ids())
         foreach(const security &s, portfolio::instance().securities(i))
-            if (s.id != m_security.id && m_security.symbol == s.symbol && m_security.cashAccount != s.cashAccount)
+            if (s.id != m_security.id && m_security.description == s.description && m_security.cashAccount != s.cashAccount)
             {
                 QString message = m_security.cashAccount ?
                     "This symbol is currently not cash in another security. You cannot save this security as cash." :
@@ -217,7 +217,7 @@ void frmSecurity::historyIndexChange(int index)
     QAbstractItemModel *oldModel = ui.history->model();
 
     m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, portfolio::instance().executedTrades(m_portfolioID).value(m_security.id),
-        prices::instance().history(m_security.symbol), ui.sortHistorical->isChecked(), ui.history);
+        prices::instance().history(m_security.description), ui.sortHistorical->isChecked(), ui.history);
     ui.history->setModel(m_modelHistory);
     ui.history->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
 

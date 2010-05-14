@@ -1,7 +1,22 @@
 #ifndef FRMSECURITY_UI_H
 #define FRMSECURITY_UI_H
 
-#include <QtGui>
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QGroupBox>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
+#include <QToolButton>
+#include <QComboBox>
+#include <QDoubleSpinBox>
+#include <QCheckBox>
+#include <QDialogButtonBox>
+#include <QToolBar>
+#include <QShortcut>
+#include <QPushButton>
+#include <QDialog>
+#include <QMenu>
 #include "mpiTableView.h"
 
 class frmSecurity_UI

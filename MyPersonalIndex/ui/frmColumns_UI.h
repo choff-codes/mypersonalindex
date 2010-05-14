@@ -1,7 +1,13 @@
 #ifndef FRMCOLUMNS_UI_H
 #define FRMCOLUMNS_UI_H
 
-#include <QtGui>
+#include <QVBoxLayout>
+#include <QGroupBox>
+#include <QHBoxLayout>
+#include <QListWidget>
+#include <QToolButton>
+#include <QDialogButtonBox>
+#include <QDialog>
 
 class frmColumns_UI
 {

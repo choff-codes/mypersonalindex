@@ -1,7 +1,9 @@
 #ifndef SECURITYAAMODEL_H
 #define SECURITYAAMODEL_H
 
-#include <QtGui>
+#include <QAbstractTableModel>
+#include <QTableView>
+#include <QMap>
 #include "functions.h"
 #include "security.h"
 #include "assetAllocation.h"

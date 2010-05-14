@@ -92,7 +92,7 @@ void portfolio::loadPortfoliosSecurity()
         security sec;
 
         sec.id = q.value(queries::securityColumns_ID).toInt();
-        sec.symbol = q.value(queries::securityColumns_Symbol).toString();
+        sec.description = q.value(queries::securityColumns_Symbol).toString();
         if (!q.value(queries::securityColumns_Account).isNull())
             sec.account = q.value(queries::securityColumns_Account).toInt();
         if (!q.value(queries::securityColumns_Expense).isNull())
@@ -100,7 +100,7 @@ void portfolio::loadPortfoliosSecurity()
         sec.divReinvest = q.value(queries::securityColumns_DivReinvest).toBool();
         sec.cashAccount = q.value(queries::securityColumns_CashAccount).toBool();
         if (sec.cashAccount)
-            prices::instance().insertCashSecurity(sec.symbol);
+            prices::instance().insertCashSecurity(sec.description);
         sec.includeInCalc = q.value(queries::securityColumns_IncludeInCalc).toBool();
         sec.hide = q.value(queries::securityColumns_Hide).toBool();
 
@@ -172,7 +172,7 @@ QStringList portfolio::symbols() const
     QStringList list;
     foreach(const portfolioData &d, m_portfolios)
         foreach(const security &s, d.securities)
-            list.append(s.symbol);
+            list.append(s.description);
     list.removeDuplicates();
     return list;
 }
@@ -188,6 +188,23 @@ bool portfolio::datesOutsidePriceData() const
             return true;
 
     return false;
+}
+
+int portfolio::portfolioIDFromKey(const objectKey &key) const
+{
+    switch(key.type)
+    {
+        case objectType_AA:
+            return portfolioIDFromAssetAllocationID(key.id);
+        case objectType_Account:
+            return portfolioIDFromAccountID(key.id);
+        case objectType_Security:
+            return portfolioIDFromSecurityID(key.id);
+        case objectType_Portfolio:
+            return key.id;
+        default:
+            return -1;
+    }
 }
 
 const security portfolio::securityFromID(const int &id) const

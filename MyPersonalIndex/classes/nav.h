@@ -1,11 +1,15 @@
 #ifndef NAV_H
 #define NAV_H
 
-#include <QtCore>
+#include <QMap>
 #include "queries.h"
 #include "calculations.h"
 #include "prices.h"
 #include "portfolio.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 class nav
 {

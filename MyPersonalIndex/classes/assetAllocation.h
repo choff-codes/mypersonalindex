@@ -1,18 +1,18 @@
 #ifndef ASSETALLOCATION_H
 #define ASSETALLOCATION_H
 
-#include <QtCore>
+#include <QString>
 #include "queries.h"
 #include "functions.h"
+#include "objectKey.h"
 
-class assetAllocation
+class assetAllocation: public objectKey
 {
 public:
-    int id;
-    QString description;
     double target;
 
-    assetAllocation(const QString &p_description = "(Blank)"): id(-1), description(p_description), target(-1) {}
+    assetAllocation(const QString &p_description = "(Blank)"):
+        objectKey(objectType_AA, p_description), target(-1) {}
 
     bool operator==(const assetAllocation &other) const;
     bool operator!=(const assetAllocation &other) const { return !(*this == other); }

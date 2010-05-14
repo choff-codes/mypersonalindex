@@ -1,7 +1,13 @@
 #ifndef SECURITYTRADEMODEL_H
 #define SECURITYTRADEMODEL_H
 
-#include <QtCore>
+#include <QAbstractTableModel>
+#include <QTableView>
+#include <QHeaderView>
+#include <QMap>
+#include <QApplication>
+#include <QMessageBox>
+#include <QClipboard>
 #include "functions.h"
 #include "frmTrade.h"
 #include "security.h"

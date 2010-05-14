@@ -1,7 +1,7 @@
 #ifndef SECURITYPRICE_H
 #define SECURITYPRICE_H
 
-#include <QtCore>
+#include <QMap>
 
 struct securityPrice
 {

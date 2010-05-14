@@ -1,7 +1,8 @@
 #ifndef FRMOPTIONS_H
 #define FRMOPTIONS_H
 
-#include <QtGui>
+#include <QObject>
+#include <QMessageBox>
 #include "frmOptions_UI.h"
 #include "settings.h"
 

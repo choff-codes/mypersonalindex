@@ -1,7 +1,9 @@
 #ifndef MAINSTATISTICMODEL_H
 #define MAINSTATISTICMODEL_H
 
-#include <QtGui>
+#include <QAbstractTableModel>
+#include <QTableView>
+#include <QMap>
 #include "statistic.h"
 #include "objectKey.h"
 

@@ -1,7 +1,8 @@
 #ifndef STATISTIC_H
 #define STATISTIC_H
 
-#include <QtCore>
+#include <QMap>
+#include <QString>
 #include "statisticInfo.h"
 #include "functions.h"
 

@@ -1,7 +1,8 @@
 #ifndef NAVINFO_H
 #define NAVINFO_H
 
-#include <QtCore>
+#include <QMap>
+#include <QHash>
 #include "queries.h"
 
 struct navPair

@@ -1,7 +1,9 @@
 #ifndef UPDATEPRICES_H
 #define UPDATEPRICES_H
 
-#include <QtCore>
+#include <QMap>
+#include <QString>
+#include <QDate>
 #include <QtNetwork>
 #include "updateInfo.h"
 #include "queries.h"
@@ -34,7 +36,7 @@ private:
 
     QMap<QString, updateInfo> getUpdateInfo() const;
     bool getPrices(const QString &symbol, const int &minDate, int *earliestUpdate);
-    void getDividends(const QString&symbol, const int &minDate, int *earliestUpdate);
+    void getDividends(const QString &symbol, const int &minDate, int *earliestUpdate);
     void getSplits(const QString &symbol, const int &minDate, int *earliestUpdate);
     void updateMissingPrices();
     void insertUpdates();

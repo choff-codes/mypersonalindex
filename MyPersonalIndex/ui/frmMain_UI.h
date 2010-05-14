@@ -1,7 +1,15 @@
 #ifndef FRMMAIN_UI_H
 #define FRMMAIN_UI_H
 
-#include <QtGui>
+#include <QHBoxLayout>
+#include <QToolBar>
+#include <QAction>
+#include <QLabel>
+#include <QComboBox>
+#include <QStatusBar>
+#include <QProgressBar>
+#include <QMainWindow>
+#include <QShortcut>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
 #include "qwt_plot_layout.h"

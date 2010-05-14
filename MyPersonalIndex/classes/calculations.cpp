@@ -3,8 +3,8 @@
 securityInfo calculations::securityValues(const security &s, const int &date)
 {
     securityInfo value(date);
-    securityPrice price = prices::instance().dailyPriceInfo(s.symbol, date);
-    splits splitRatio(s.symbol, date);
+    securityPrice price = prices::instance().dailyPriceInfo(s.description, date);
+    splits splitRatio(s.description, date);
 
     foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID).value(s.id))
     {

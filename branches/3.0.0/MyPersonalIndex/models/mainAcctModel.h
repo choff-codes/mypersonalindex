@@ -2,7 +2,7 @@
 #define MAINACCTMODEL_H
 
 #include "mpiViewModelBase.h"
-#include "cachedCalculations.h"
+#include "calculations.h"
 
 class acctRow: public baseRow
 {
@@ -11,7 +11,7 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    acctRow(const dailyInfoPortfolio *info, const dailyInfo &acctInfo, const account &acct, const QString &sort);
+    acctRow(const dailyInfoPortfolio &info, const dailyInfo &acctInfo, const account &acct, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();
@@ -21,8 +21,8 @@ class mainAcctModel: public mpiViewModelBase
 {
 public:
 
-    mainAcctModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const dailyInfoPortfolio *info, QTableView *parent = 0):
-        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_taxLiability(info->taxLiability), m_costBasis(info->costBasis) { }
+    mainAcctModel(const QList<baseRow*> &rows, QList<int> viewableColumns, const dailyInfoPortfolio &info, QTableView *parent = 0):
+        mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info.totalValue), m_taxLiability(info.taxLiability), m_costBasis(info.costBasis) { }
 
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;

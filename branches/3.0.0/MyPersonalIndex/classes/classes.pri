@@ -3,7 +3,6 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/queries.cpp \
     $$PWD/nav.cpp \
     $$PWD/prices.cpp \
-    $$PWD/cachedCalculations.cpp \
     $$PWD/calculations.cpp \
     $$PWD/functions.cpp \
     $$PWD/navInfo.cpp \
@@ -31,7 +30,6 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/nav.h \
     $$PWD/calculations.h \
     $$PWD/prices.h \
-    $$PWD/cachedCalculations.h \
     $$PWD/navInfo.h \
     $$PWD/assetAllocation.h \
     $$PWD/account.h \

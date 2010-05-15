@@ -24,9 +24,9 @@ public:
     void save(const int &portfolioID);
 
 private:
-    void getSecurities();
-    void getAcct();
-    void getAA();
+    template <class T> int getMappings(const QMap<int, T> &values, importData *data, const QString &portfolioDescription, const int &startID);
+    template <class T> int saveObject(const int &portfolioID, T object);
+
 };
 
 #endif // IMPORT_H

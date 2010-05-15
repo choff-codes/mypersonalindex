@@ -25,7 +25,6 @@ private:
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;
     QVariantList m_ExecutedTrades_SecurityID, m_ExecutedTrades_Dates, m_ExecutedTrades_Shares, m_ExecutedTrades_Price, m_ExecutedTrades_Commission;
-    calculations m_calculations;
 
     typedef QMap<int, trade>::const_iterator navTradePointer;
     typedef QMap<int, QList<navTradePointer> > navTradeList;
@@ -46,9 +45,9 @@ private:
     QList<int> computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;
     QList<int> computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;
     QList<int> computeYearlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const;
-    void insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio *previousInfo);
-    void insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const dailyInfoPortfolio *previousInfo, const int &date, const double &reverseTradeValue);
-    void insertPortfolioTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio *previousInfo, const navTradeList &trades);
+    void insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio &previousInfo);
+    void insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const dailyInfoPortfolio &previousInfo, const int &date, const double &reverseTradeValue);
+    void insertPortfolioTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio &previousInfo, const navTradeList &trades);
     void insertFirstPortfolioTrades(const int &portfolioID, const int &startDate, const QMap<int, navTradeList> &allTrades);
 };
 

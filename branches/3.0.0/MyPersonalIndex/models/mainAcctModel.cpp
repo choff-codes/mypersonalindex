@@ -8,7 +8,7 @@ const QVariantList acctRow::columnsType = QVariantList() << QVariant(QVariant::S
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
      << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
-acctRow::acctRow(const dailyInfoPortfolio *info, const dailyInfo &acctInfo, const account &acct, const QString &sort)
+acctRow::acctRow(const dailyInfoPortfolio &info, const dailyInfo &acctInfo, const account &acct, const QString &sort)
     : baseRow(sort)
 {
     //row_Description
@@ -18,7 +18,7 @@ acctRow::acctRow(const dailyInfoPortfolio *info, const dailyInfo &acctInfo, cons
     //row_Value
     this->values.append(acctInfo.totalValue);
     //row_ValueP
-    this->values.append(info->totalValue == 0 ? QVariant() : acctInfo.totalValue / info->totalValue);
+    this->values.append(info.totalValue == 0 ? QVariant() : acctInfo.totalValue / info.totalValue);
     //row_Gain
     this->values.append(acctInfo.totalValue - acctInfo.costBasis);
     //row_GainP

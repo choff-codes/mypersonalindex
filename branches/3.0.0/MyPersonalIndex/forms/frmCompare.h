@@ -11,7 +11,7 @@
 #include "mainCorrelationModel.h"
 #include "mainStatisticModel.h"
 #include "chartInfo.h"
-#include "cachedCalculations.h"
+#include "calculations.h"
 
 #ifdef CLOCKTIME
 #include <QTime>

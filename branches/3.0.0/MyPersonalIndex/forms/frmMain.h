@@ -12,7 +12,7 @@
 #include "functions.h"
 #include "updatePrices.h"
 #include "nav.h"
-#include "cachedCalculations.h"
+#include "calculations.h"
 #include "mainHoldingsModel.h"
 #include "mainAAModel.h"
 #include "mainAcctModel.h"
@@ -43,7 +43,7 @@ private:
     settings m_settings;
     bool m_calculationInProgress;
     chartInfo m_chartInfo;
-    cachedCalculations m_calculations;
+    calculations m_calculations;
 
     void closeEvent(QCloseEvent *event);
     void connectSlots();

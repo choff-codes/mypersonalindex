@@ -156,12 +156,10 @@ QHash<objectKey, navInfoStatistic> frmCompare::selectedNavInfo()
     int startDate = ui.mainStartDateDropDown->date().toJulianDay();
     int endDate = ui.mainEndDateDropDown->date().toJulianDay();
     QHash<objectKey, navInfoStatistic> items;
-    cachedCalculations calc;
 
     for(QMap<int, QList<objectKey> >::const_iterator i = itemsByPortfolio.constBegin(); i != itemsByPortfolio.constEnd(); ++i)
     {
-        if (i.key() != -1)
-            calc.setPortfolio(i.key());
+        calculations calc(i.key());
 
         foreach(const objectKey &key, i.value())
             items.insert(key, calc.changeOverTime(key, startDate, endDate, ui.mainIncludeDividends->isChecked()));

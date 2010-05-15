@@ -1,7 +1,7 @@
 #define portfolios portfolio::instance()
 #include "frmMain.h"
 
-frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_calculationInProgress(false)
+frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_calculationInProgress(false), m_calculations(-1)
 {
     ui.setupUI(this);
 
@@ -222,7 +222,7 @@ void frmMain::loadPortfolio()
         return;
     }
 
-    m_calculations.setPortfolio(m_portfolioID);
+    m_calculations = calculations(m_portfolioID);
     resetPortfolioSettings();
     resetCalendars();
 #ifdef CLOCKTIME
@@ -307,7 +307,7 @@ void frmMain::resetPortfolioHoldings()
 {
     int currentDate = dateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
-    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate, true);
+    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate, true);
 
     QList<baseRow*> rows;
     foreach(const security &s, portfolios.securities(m_portfolioID))
@@ -328,7 +328,7 @@ void frmMain::resetPortfolioAA()
 {
     int currentDate = dateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
-    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
@@ -353,7 +353,7 @@ void frmMain::resetPortfolioAcct()
 {
     int currentDate = dateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
-    dailyInfoPortfolio *info = m_calculations.portfolioValues(currentDate);
+    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate);
 
     QList<baseRow*> rows;
     if (ui.accountsShowBlank->isChecked()) // insert blank account
@@ -398,7 +398,7 @@ void frmMain::resetPortfolioCorrelation()
     QHash<objectKey, navInfoStatistic> cache;
     foreach(const objectKey &key, correlations.keys())
         if (key.type == objectType_Portfolio)
-            cache.insert(key, m_calculations.portfolioChange(startDate, endDate));
+            cache.insert(key, m_calculations.changeOverTime(startDate, endDate));
         else
             cache.insert(key, m_calculations.changeOverTime(key, startDate, endDate, true));
 
@@ -468,7 +468,7 @@ void frmMain::resetPortfolioStat()
     int endDate = dateDropDownDate(ui.statEndDateDropDown);
 
     QAbstractItemModel *oldModel = ui.stat->model();
-    statisticInfo s(m_calculations.portfolioChange(startDate, endDate), portfolios.startValue(m_portfolioID));
+    statisticInfo s(m_calculations.changeOverTime(startDate, endDate), portfolios.startValue(m_portfolioID));
 
     QMap<objectKey, QStringList> statisticMap;
     QStringList statisticValues;

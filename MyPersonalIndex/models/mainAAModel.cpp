@@ -9,7 +9,7 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 
-aaRow::aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
+aaRow::aaRow(const dailyInfoPortfolio &info, const dailyInfo &aaInfo, portfolioInfo::thesholdMethod method,
     const assetAllocation &aa, const QString &sort): baseRow(sort)
 {
     //row_Description
@@ -19,7 +19,7 @@ aaRow::aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioI
     //row_Value
     this->values.append(aaInfo.totalValue);
     //row_ValueP
-    this->values.append(info->totalValue == 0 ? QVariant() : aaInfo.totalValue / info->totalValue);
+    this->values.append(info.totalValue == 0 ? QVariant() : aaInfo.totalValue / info.totalValue);
     //row_Gain
     this->values.append(aaInfo.totalValue - aaInfo.costBasis);
     //row_GainP
@@ -27,11 +27,11 @@ aaRow::aaRow(const dailyInfoPortfolio *info, const dailyInfo &aaInfo, portfolioI
     //row_Target
     this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Offset
-    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() :
-        method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info->totalValue * aa.target)) - 1) :
-        (aaInfo.totalValue / info->totalValue) - aa.target);
+    this->values.append(info.totalValue == 0 || aa.target < 0 ? QVariant() :
+        method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info.totalValue * aa.target)) - 1) :
+        (aaInfo.totalValue / info.totalValue) - aa.target);
     //row_OffsetAmount
-    this->values.append(info->totalValue == 0 || aa.target < 0 ? QVariant() : info->totalValue * ((aaInfo.totalValue / info->totalValue) - aa.target));
+    this->values.append(info.totalValue == 0 || aa.target < 0 ? QVariant() : info.totalValue * ((aaInfo.totalValue / info.totalValue) - aa.target));
     //row_Holdings
     this->values.append(aaInfo.count);
     //row_ID
@@ -49,8 +49,8 @@ QMap<int, QString> aaRow::fieldNames()
     return names;
 }
 
-mainAAModel::mainAAModel(const QList<baseRow *> &rows, QList<int>viewableColumns, const dailyInfoPortfolio *info, const double &aaThreshold, QTableView *parent):
-    mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info->totalValue), m_threshold(aaThreshold / 100.0), m_costBasis(info->costBasis), m_target(0)
+mainAAModel::mainAAModel(const QList<baseRow *> &rows, QList<int>viewableColumns, const dailyInfoPortfolio &info, const double &aaThreshold, QTableView *parent):
+    mpiViewModelBase(rows, viewableColumns, parent), m_totalValue(info.totalValue), m_threshold(aaThreshold / 100.0), m_costBasis(info.costBasis), m_target(0)
 {
     foreach(const baseRow *r, rows)
         m_target += r->values.at(aaRow::row_Target).toDouble();

@@ -1,3 +1,4 @@
+#define priceManager prices::instance()
 #include "frmCompare.h"
 
 const QStringList frmCompare::m_colors = QStringList() << "mediumorchid" << "tomato" << "darkslategray"  << "mediumaquamarine"
@@ -34,7 +35,7 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
             addTreeItem(ui.treeSecurities, QString("%1: %2").arg(i.description, sec.description), sec.key());
     }
 
-    QStringList symbols = prices::instance().symbols();
+    QStringList symbols = priceManager.symbols();
     symbols.sort();
     foreach(const QString &s, symbols)
         addTreeItem(ui.treeSymbols, s, objectKey(s));
@@ -49,7 +50,7 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
     if (m_settings)
         ui.mainIncludeDividends->setChecked(m_settings->compareIncludeDividends);
 
-    int date = prices::instance().lastDate();
+    int date = priceManager.lastDate();
     if (date == 0)
         date = m_settings->dataStartDate;
 
@@ -225,7 +226,6 @@ void frmCompare::chart(const QHash<objectKey, navInfoStatistic> &items)
     m_curves.clear();
     int colorCount = 0;
 
-    const QList<int> dates = prices::instance().dates();
     for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
     {
         chartInfo *c = new chartInfo();
@@ -239,7 +239,7 @@ void frmCompare::chart(const QHash<objectKey, navInfoStatistic> &items)
         c->setCurve(newLine);
 
         int endDate = i.value().lastDate();
-        for(QList<int>::const_iterator x = qLowerBound(dates, i.value().firstDate()); x != dates.constEnd() && *x <= endDate ; ++x)
+        for(QList<int>::const_iterator x = priceManager.iteratorCurrentDateOrNext(i.value().firstDate()); x != priceManager.iteratorEnd() && *x <= endDate ; ++x)
             c->append(*x, i.value().nav(*x) - 1);
 
         if (c->count() != 0)

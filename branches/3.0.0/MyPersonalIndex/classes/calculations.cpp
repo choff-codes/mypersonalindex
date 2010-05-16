@@ -1,3 +1,4 @@
+#define priceManager prices::instance()
 #include "calculations.h"
 
 securityInfo calculations::securityValues(const int &securityID, const int &date)
@@ -7,7 +8,7 @@ securityInfo calculations::securityValues(const int &securityID, const int &date
         return securityInfo();
 
     securityInfo value(date);
-    securityPrice price = prices::instance().dailyPriceInfo(s.description, date);
+    securityPrice price = priceManager.dailyPriceInfo(s.description, date);
     splits splitRatio(s.description, date);
 
     foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID).value(s.id))
@@ -144,7 +145,7 @@ navInfoStatistic calculations::changeOverTime(const objectKey &key, const int &s
 navInfoStatistic calculations::changeOverTime(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends)
 {
     navInfoStatistic returnValue;
-    const securityPrices historicalInfo = prices::instance().history(symbol);
+    const securityPrices historicalInfo = priceManager.history(symbol);
     const QMap<int, double> historicalPrices = historicalInfo.prices;
     splits splitRatio(symbol, endDate);
 
@@ -215,9 +216,8 @@ double calculations::correlation(const navInfoStatistic &info1, const navInfoSta
     int endDate = qMin(info1.lastDate(), info2.lastDate());
     int startDate = qMax(info1.firstDate(), info2.firstDate());
 
-    const QList<int> dates = prices::instance().dates();
-    QList<int>::const_iterator i = qLowerBound(dates, startDate);
-    QList<int>::const_iterator end = dates.constEnd();
+    QList<int>::const_iterator i = priceManager.iteratorCurrentDateOrNext(startDate);
+    QList<int>::const_iterator end = priceManager.iteratorEnd();
 
     if (i == end)
         return 0;

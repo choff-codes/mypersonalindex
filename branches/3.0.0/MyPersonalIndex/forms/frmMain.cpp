@@ -1,4 +1,5 @@
 #define portfolios portfolio::instance()
+#define priceManager prices::instance()
 #include "frmMain.h"
 
 frmMain::frmMain(QWidget *parent): QMainWindow(parent), m_calculationInProgress(false), m_calculations(-1)
@@ -156,7 +157,7 @@ void frmMain::setSortDropDown(const QString &sort, QComboBox *dropDown)
 
 void frmMain::resetLastDate()
 {
-    int lastDate = prices::instance().lastDate();
+    int lastDate = priceManager.lastDate();
     ui.stbLastUpdated->setText(QString(" %1%2 ").arg(ui.LAST_UPDATED_TEXT,
         lastDate == 0 ? "Never" : QDate::fromJulianDay(lastDate).toString(Qt::SystemLocaleShortDate)));
 }
@@ -268,7 +269,7 @@ void frmMain::loadPortfolio()
 
 void frmMain::resetCalendars()
 {
-    int date = prices::instance().lastDate();
+    int date = priceManager.lastDate();
     if (date == 0)
         date = m_settings.dataStartDate;
 
@@ -561,7 +562,7 @@ void frmMain::deletePortfolio()
     portfolios.remove(m_portfolioID);
     m_portfolioID = -1;
 
-    prices::instance().removeUnusedSymbols(portfolios.symbols());
+    priceManager.removeUnusedSymbols(portfolios.symbols());
     resetLastDate();
 
     int row = ui.mainPortfolioCombo->currentIndex(); // select another portfolio
@@ -619,7 +620,7 @@ void frmMain::addSecurity()
             portfolios.insert(m_portfolioID, s);
             minDate = portfolios.minimumDate(minDate, f.getReturnValuesMinDate());
 
-            if (!s.cashAccount && !prices::instance().exists(s.description))
+            if (!s.cashAccount && !priceManager.exists(s.description))
                 showUpdatePrices = true;
         }
     }
@@ -678,7 +679,7 @@ void frmMain::deleteSecurity()
         portfolios.remove(m_portfolioID, s);
     }
 
-    prices::instance().removeUnusedSymbols(portfolios.symbols());
+    priceManager.removeUnusedSymbols(portfolios.symbols());
     resetLastDate();
 
     if (portfolios.datesOutsidePriceData())
@@ -699,7 +700,7 @@ void frmMain::options()
         }
 
         m_settings = f.getReturnValues();
-        prices::instance().remove(prices::instance().symbols());
+        priceManager.remove(priceManager.symbols());
         foreach(portfolioInfo info, portfolios.info())
         {
             if (info.startDate < m_settings.dataStartDate)
@@ -902,7 +903,7 @@ bool frmMain::finishThread()
 
 int frmMain::dateDropDownDate(QDateEdit *dateDropDown)
 {
-    int currentDate = qMax(prices::instance().currentDateOrPrevious(dateDropDown->date().toJulianDay()), portfolios.startDate(m_portfolioID));
+    int currentDate = qMax(priceManager.currentDateOrPrevious(dateDropDown->date().toJulianDay()), portfolios.startDate(m_portfolioID));
     dateDropDown->blockSignals(true);
     dateDropDown->setDate(QDate::fromJulianDay(currentDate));
     dateDropDown->blockSignals(false);

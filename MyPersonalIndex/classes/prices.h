@@ -23,7 +23,6 @@ public:
 
     QStringList symbols() { return m_securityPriceList.keys(); }
     bool exists(const QString &symbol) { return m_securityPriceList.contains(symbol); }
-    QList<int> dates() { return m_dates; }
 
     void insertPrice(const QString &symbol, const int &date, const double &price) { m_securityPriceList[symbol].prices.insert(date, price); insertDate(date);}
     void insertDividend(const QString &symbol, const int &date, const double &dividend) { m_securityPriceList[symbol].dividends.insert(date, dividend); }
@@ -40,7 +39,13 @@ public:
 
     int firstDate() const { return m_dates.isEmpty() ? 0 : m_dates.first(); }
     int lastDate() const { return m_dates.isEmpty() ? 0 : m_dates.last(); }
-    int currentDateOrPrevious(int date);
+    QList<int>::const_iterator iteratorFirstDate() const { return m_dates.constBegin(); }
+    QList<int>::const_iterator iteratorLastDate() const { return m_dates.isEmpty() ? m_dates.constEnd() : m_dates.constEnd() - 1; }
+    QList<int>::const_iterator iteratorEnd() const { return m_dates.constEnd(); }
+    QList<int>::const_iterator iteratorPreviousDate(int date) const { return iteratorCurrentDateOrPrevious(date - 1); }
+    QList<int>::const_iterator iteratorCurrentDateOrNext(int date) const { return qLowerBound(m_dates, date); }
+    QList<int>::const_iterator iteratorCurrentDateOrPrevious(int date) const;
+    int currentDateOrPrevious(int date) const { return *iteratorCurrentDateOrPrevious(date); };
 
     securityPrice dailyPriceInfo(const QString &symbol, const int &date) const { return history(symbol).dailyPriceInfo(date); }
 

@@ -33,17 +33,16 @@ void prices::insertDate(const int &date)
     m_cashPrices.prices.insert(date, 1);
 }
 
-int prices::currentDateOrPrevious(int date)
+QList<int>::const_iterator prices::iteratorCurrentDateOrPrevious(int date) const
 {
     if (m_dates.isEmpty())
-        return 0;
+        return iteratorEnd();
 
-    QList<int>::const_iterator place = qLowerBound(m_dates, date);
+    QList<int>::const_iterator place = iteratorCurrentDateOrNext(date);
+    if (place == iteratorEnd() || (*place != date && place != iteratorFirstDate()))
+        return place - 1;
 
-    if (*place != date && place != m_dates.constBegin())
-        return *(place - 1);
-    else
-        return *place;
+    return place;
 }
 
 QMap<int, double> prices::price(const QString &symbol) const

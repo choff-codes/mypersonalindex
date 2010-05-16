@@ -14,13 +14,10 @@
 class nav
 {
 public:
-    nav(const int &calculationDate, const int &portfolioID = -1):
-        m_dates(prices::instance().dates()), m_calculationDate(calculationDate), m_portfolioID(portfolioID) {}
-
+    nav(const int &calculationDate, const int &portfolioID = -1): m_calculationDate(calculationDate), m_portfolioID(portfolioID) {}
     void run();
 
 private:
-    const QList<int> m_dates;
     int m_calculationDate;
     int m_portfolioID;
     QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;
@@ -32,8 +29,8 @@ private:
     navTradeList appendNavTradeLists(const navTradeList &first, const navTradeList &second);
     void addToNAVList(const int &portfolioID, const int &date, const double &totalValue, const double &nav);
     void addToExecutedTradeList(const int &portfolioID, const int &securityID, const int &date, const double &shares, const double &price, const double &commission);
-    void clearVariantLists();
-    void insertVariantLists();
+    void clearNAVValues();
+    void insertNAVValues();
     void deleteOldValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool *calcuateFromStartDate);
     void calculateNAVValues(const int &portfolioID);

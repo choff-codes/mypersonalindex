@@ -1,3 +1,4 @@
+#define priceManager prices::instance()
 #include "statisticInfo.h"
 
 statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNav):
@@ -32,8 +33,7 @@ statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNa
     double newS = 0;
     int count = 1;
 
-    const QList<int> dates = prices::instance().dates();
-    for(QList<int>::const_iterator i = qLowerBound(dates, info.firstDate()) + 1; i != dates.constEnd(); ++i)
+    for(QList<int>::const_iterator i = priceManager.iteratorCurrentDateOrNext(info.firstDate() + 1); i != priceManager.iteratorEnd(); ++i)
     {
         int date = *i;
         if (date > info.lastDate())

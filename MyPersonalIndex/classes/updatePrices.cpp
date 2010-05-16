@@ -1,3 +1,4 @@
+#define priceManager prices::instance()
 #include "updatePrices.h"
 
 updatePricesReturnValue updatePrices::run()
@@ -25,16 +26,14 @@ updatePricesReturnValue updatePrices::run()
 
 void updatePrices::updateMissingPrices()
 {
-    const QList<int> dates = prices::instance().dates();
-
-    foreach(const QString &symbol, prices::instance().symbols())
+    foreach(const QString &symbol, priceManager.symbols())
     {
-        const QMap<int, double> prices = prices::instance().price(symbol);
+        const QMap<int, double> prices = priceManager.price(symbol);
 
         if (prices.count() <= 2)
             continue;
 
-        for(QList<int>::const_iterator x = qLowerBound(dates, (prices.constBegin() + 1).key()); x != dates.constEnd(); ++x)
+        for(QList<int>::const_iterator x = priceManager.iteratorCurrentDateOrNext((prices.constBegin() + 1).key()); x != priceManager.iteratorEnd(); ++x)
         {
             int date = *x;
             QMap<int, double>::const_iterator z = prices.lowerBound(date);
@@ -44,7 +43,7 @@ void updatePrices::updateMissingPrices()
 
             if (z.key() != date)
             {
-                prices::instance().insertPrice(symbol, date, (z - 1).value());
+                priceManager.insertPrice(symbol, date, (z - 1).value());
                 m_pricesSymbol.append(symbol);
                 m_pricesDate.append(date);
                 m_pricesPrice.append((z - 1).value());
@@ -87,10 +86,10 @@ QMap<QString, updateInfo> updatePrices::getUpdateInfo() const
 {
     QMap<QString, updateInfo> returnList;
     foreach(const QString &symbol, portfolio::instance().symbols())
-        if (!returnList.contains(symbol) && !prices::instance().isCashSecurity(symbol))
+        if (!returnList.contains(symbol) && !priceManager.isCashSecurity(symbol))
         {
             updateInfo u(symbol, m_dataStartDate);
-            securityPrices history = prices::instance().history(symbol);
+            securityPrices history = priceManager.history(symbol);
 
             if (!history.prices.isEmpty())
                 u.lastPrice = (history.prices.constEnd() - 1).key();
@@ -174,7 +173,7 @@ bool updatePrices::getPrices(const QString &symbol, const int &minDate, int *ear
         m_pricesSymbol.append(symbol);
         m_pricesPrice.append(price);
 
-        prices::instance().insertPrice(symbol, date, price);
+        priceManager.insertPrice(symbol, date, price);
     }
 
     return true;
@@ -207,7 +206,7 @@ void updatePrices::getDividends(const QString &symbol, const int &minDate, int *
         m_divSymbol.append(symbol);
         m_divAmount.append(price);
 
-        prices::instance().insertDividend(symbol, date, price);
+        priceManager.insertDividend(symbol, date, price);
     }
 }
 
@@ -268,7 +267,7 @@ void updatePrices::getSplits(const QString &symbol, const int &minDate,  int *ea
         m_splitRatio.append(ratio);
         m_splitSymbol.append(symbol);
 
-        prices::instance().insertSplit(symbol, date, ratio);
+        priceManager.insertSplit(symbol, date, ratio);
     }
 }
 

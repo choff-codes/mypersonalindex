@@ -58,7 +58,8 @@ public:
     const account acct(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).acct.value(id); }
     const account accountFromID(const int &id) const;
 
-    const executedTradeList executedTrades(const int &id) const { return m_portfolios.value(id).executedTrades; }
+    const executedTradeList executedTrades(const int &portfolioID) const { return m_portfolios.value(portfolioID).executedTrades; }
+    const QList<executedTrade> executedTrades(const int &portfolioID, const int &securityID) const { return m_portfolios.value(portfolioID).executedTrades.value(securityID); }
     const navInfoPortfolio nav(const int &id) const { return m_portfolios.value(id).nav; }
 
     portfolioInfo info(const int &id) const { return m_portfolios.value(id).info; }

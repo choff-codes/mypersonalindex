@@ -82,7 +82,11 @@ QSqlDatabase queries::instance()
 
 QString queries::getDatabaseLocation()
 {
+#if defined(Q_OS_LINUX)
+    return "MPI.sqlite";
+#else
     return QFileInfo(QSettings(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI").fileName()).absolutePath().append("/MPI.sqlite");
+#endif
 }
 
 void queries::executeNonQuery(const QString &query)

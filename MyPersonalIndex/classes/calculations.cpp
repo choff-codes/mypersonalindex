@@ -11,7 +11,7 @@ securityInfo calculations::securityValues(const int &securityID, const int &date
     securityPrice price = priceManager.dailyPriceInfo(s.description, date);
     splits splitRatio(s.description, date);
 
-    foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID).value(s.id))
+    foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID, s.id))
     {
         if (t.date > date)
             break;

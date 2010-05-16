@@ -34,7 +34,7 @@ void nav::calculateNAVValues(const int &portfolioID)
     portfolioInfo info = portfolios.info(portfolioID);
     calculations calc(portfolioID);
 
-    deleteOldValues(portfolioID, calculationDate, calculateFromStartDate);
+    deleteNAVValues(portfolioID, calculationDate, calculateFromStartDate);
 
     QList<int>::const_iterator dateIterator = priceManager.iteratorPreviousDate(calculationDate);
     if (priceManager.iteratorEnd() - dateIterator <= 1) // cannot calculate day over day change
@@ -119,7 +119,7 @@ void nav::clearNAVValues()
     m_ExecutedTrades_Commission.clear();
 }
 
-void nav::deleteOldValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate)
+void nav::deleteNAVValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate)
 {
     if (calculateFromStartDate)
     {

@@ -31,7 +31,7 @@ private:
     void addToExecutedTradeList(const int &portfolioID, const int &securityID, const int &date, const double &shares, const double &price, const double &commission);
     void clearNAVValues();
     void insertNAVValues();
-    void deleteOldValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
+    void deleteNAVValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool *calcuateFromStartDate);
     void calculateNAVValues(const int &portfolioID);
     bool getCurrentDateOrNext(int *date) const;

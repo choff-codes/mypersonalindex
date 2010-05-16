@@ -216,7 +216,7 @@ void frmSecurity::historyIndexChange(int index)
 {
     QAbstractItemModel *oldModel = ui.history->model();
 
-    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, portfolio::instance().executedTrades(m_portfolioID).value(m_security.id),
+    m_modelHistory = new securityHistoryModel((securityHistoryModel::historyChoice)index, portfolio::instance().executedTrades(m_portfolioID, m_security.id),
         prices::instance().history(m_security.description), ui.sortHistorical->isChecked(), ui.history);
     ui.history->setModel(m_modelHistory);
     ui.history->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);

@@ -8,6 +8,7 @@
 #include <QStringList>
 #include <QSettings>
 #include <QFileInfo>
+#include <QCoreApplication>
 
 class queries
 {

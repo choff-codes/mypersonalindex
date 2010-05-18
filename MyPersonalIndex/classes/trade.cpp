@@ -126,3 +126,83 @@ QString trade::dateToString(const tradeFreq &freq, const int &date)
             return "";
     }
 }
+
+double trade::shares(const double &price, const double &securityValue, const double &portfolioValue,
+                     const QMap<int, double> securityAA, const QMap<int, assetAllocation>  &portfolioAA) const
+{
+    switch(type)
+    {
+        case trade::tradeType_Purchase:
+        case trade::tradeType_DivReinvest:
+        case trade::tradeType_Interest:
+            return value;
+        case trade::tradeType_Sale:
+            return value * -1;
+        case trade::tradeType_FixedPurchase:
+        case trade::tradeType_FixedSale:
+            if (price == 0) return 0;
+            return value / price * (type == tradeType_FixedSale ? -1 : 1);
+        case trade::tradeType_Value:
+        case trade::tradeType_InterestPercent:
+            if (price == 0) return 0;
+            return (securityValue * (value / 100)) / price;
+        case trade::tradeType_TotalValue:
+            if (price == 0) return 0;
+            return (portfolioValue * (value / 100)) / price;
+        case trade::tradeType_AA:
+        {
+            if (price == 0) return 0;
+            double shares = 0;
+            for(QMap<int, double>::const_iterator i = securityAA.constBegin(); i != securityAA.constEnd(); ++i)
+            {
+                double target =  portfolioAA.value(i.key()).target;
+                if (target <= 0)
+                    continue;
+
+                shares += ((portfolioValue * (target * i.value() * value / 100)) - securityValue) / price;
+            }
+        }
+        default:
+          return 0;
+    }
+}
+
+double trade::purchasePrice(const double &currentSecurityPrice) const
+{
+    return type == tradeType_Interest || type == tradeType_InterestPercent ? 0 :
+        price >= 0 ? price :
+        currentSecurityPrice;
+}
+
+QList<int> trade::tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const
+{
+    if(dates.isEmpty())
+        return QList<int>();
+
+    int startDate = qMax(this->startDate, calculationDate);;
+    int endDate = this->endDate == 0 ? dates.last() : qMin(this->endDate, dates.last());
+
+    switch(frequency)
+    {
+        case trade::tradeFreq_Once:
+            // these are not calculated on the fly and trades before the start date need to be inserted
+            if (date < startDate && calculatingFromStartDate)
+                return QList<int>() << this->date;
+
+            return functions::singleTrade(dates, this->date, startDate, endDate);
+        case trade::tradeFreq_Daily:
+            // -1 applies to every trading day
+            if (startDate == calculationDate && endDate == dates.last())
+                return QList<int>() << -1;
+            else
+                return functions::dailyTrades(dates, startDate, endDate);
+        case trade::tradeFreq_Weekly:
+            return functions::weeklyTrades(dates, this->date, startDate, endDate);
+        case trade::tradeFreq_Monthly:
+            return functions::monthlyTrades(dates, this->date, startDate, endDate);
+        case trade::tradeFreq_Yearly:
+            return functions::yearlyTrades(dates, this->date, startDate, endDate);
+        default:
+            return QList<int>();
+    }
+}

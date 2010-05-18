@@ -225,6 +225,16 @@ int portfolio::portfolioIDFromSecurityID(const int &id) const
     return -1;
 }
 
+const QList<int> portfolio::securityReinvestments(const int &portfolioID)
+{
+    QList<int> securityIDs;
+    foreach(const security &s, securities(portfolioID))
+        if (s.includeInCalc && s.divReinvest && !s.cashAccount)
+            securityIDs.append(s.id);
+
+    return securityIDs;
+}
+
 const assetAllocation portfolio::assetAllocationFromID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)

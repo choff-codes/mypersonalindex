@@ -49,6 +49,7 @@ public:
     const QMap<int, security> securities(const int &portfolioID) const { return m_portfolios.value(portfolioID).securities; }
     const security securities(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).securities.value(id); }
     const security securityFromID(const int &id) const;
+    const QList<int> securityReinvestments(const int &portfolioID);
 
     const QMap<int, assetAllocation> aa(const int &portfolioID) const { return m_portfolios.value(portfolioID).aa; }
     const assetAllocation aa(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).aa.value(id); }

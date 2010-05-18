@@ -56,7 +56,7 @@ void import::save(const int &portfolioID)
     foreach(const int &i, securities.selected)
     {
         security sec = portfolio::instance().securityFromID(securities.mapping.value(i));
-        sec.id = -1;
+        sec.clearID();
         sec.account = newAcctIDs.contains(sec.account) ? newAcctIDs.value(sec.account) : -1;
         sec.save(portfolioID);
 
@@ -70,7 +70,7 @@ void import::save(const int &portfolioID)
 
         foreach(const int &x, sec.trades.keys())
         {
-            sec.trades[x].id = -1;
+            sec.trades[x].clearID();
             sec.trades[x].save(sec.id);
         }
 
@@ -81,7 +81,7 @@ void import::save(const int &portfolioID)
 template <class T>
 int import::saveObject(const int &portfolioID, T object)
 {
-    object.id = -1;
+    object.clearID();
     object.save(portfolioID);
     portfolio::instance().insert(portfolioID, object);
     return object.id;

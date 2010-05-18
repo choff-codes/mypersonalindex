@@ -40,10 +40,10 @@ void nav::calculateNAVValues(const int &portfolioID)
     if (priceManager.iteratorEnd() - dateIterator <= 1) // cannot calculate day over day change
         return;
 
-    QMap<int, navTradeList> trades = calculateExecutedTrades(portfolioID, calculationDate, calculateFromStartDate);
-    QList<int> securityReinvestments = getPortfolioSecurityReinvestment(portfolioID);
+    const QMap<int, navTradeList> trades = calculateExecutedTrades(portfolioID, calculationDate, calculateFromStartDate);
+    const QList<int> securityReinvestments = portfolios.securityReinvestments(portfolioID);
     if (calculateFromStartDate)
-        insertFirstPortfolioTrades(portfolioID, calculationDate, trades);
+        insertExecutedTradesPreStartDate(portfolioID, calculationDate, trades);
 
     int date = *dateIterator;
     dailyInfoPortfolio previousInfo = calc.portfolioValues(date);
@@ -56,7 +56,7 @@ void nav::calculateNAVValues(const int &portfolioID)
     {
         date = *dateIterator;
         insertPortfolioReinvestments(portfolioID, date, securityReinvestments, previousInfo);
-        insertPortfolioTrades(portfolioID, date, previousInfo, appendNavTradeLists(trades.value(date), trades.value(-1)));
+        insertExecutedTrades(portfolioID, date, previousInfo, appendNavTradeLists(trades.value(date), trades.value(-1)));
 
         const dailyInfoPortfolio currentInfo = calc.portfolioValues(date);
         navValue = calculations::change(currentInfo.totalValue, previousInfo.totalValue, currentInfo.costBasis - previousInfo.costBasis, info.dividends ? currentInfo.dividendAmount : 0, navValue);
@@ -132,16 +132,6 @@ void nav::deleteNAVValues(const int &portfolioID, const int &calculationDate, co
     portfolios.removeNAV(portfolioID, calculationDate);
 }
 
-QList<int> nav::getPortfolioSecurityReinvestment(const int &portfolioID)
-{
-    QList<int> securities;
-    foreach(const security &s, portfolios.securities(portfolioID))
-        if (s.includeInCalc && s.divReinvest && !s.cashAccount)
-            securities.append(s.id);
-
-    return securities;
-}
-
 int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool *calcuateFromStartDate)
 {
     int lastNavDate = portfolios.nav(portfolioID).isEmpty() ? -1 : portfolios.nav(portfolioID).lastDate();
@@ -159,175 +149,17 @@ int nav::checkCalculationDate(const int &portfolioID, int calculationDate, bool 
     return calculationDate;
 }
 
-bool nav::getCurrentDateOrNext(int *date) const
-{
-    QList<int>::const_iterator place = priceManager.iteratorCurrentDateOrNext(*date);
-    if (place == priceManager.iteratorEnd())
-        return false;
-
-    *date = *place;
-    return true;
-}
-
-QMap<int, nav::navTradeList> nav::calculateExecutedTrades(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate)
+const QMap<int, nav::navTradeList> nav::calculateExecutedTrades(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate)
 {
     QMap<int, navTradeList> trades;
-    int lastDate = priceManager.lastDate();
 
     foreach(const security &s, portfolios.securities(portfolioID))
         if (s.includeInCalc)
             for(navTradePointer singleTrade = s.trades.constBegin(); singleTrade != s.trades.constEnd(); ++singleTrade)
-            {
-                int startDate = qMax(singleTrade->startDate, calculationDate);;
-                int endDate = singleTrade->endDate == 0 ? lastDate : qMin(singleTrade->endDate, lastDate);
-
-                QList<int> dates;
-                switch(singleTrade->frequency)
-                {
-                    case trade::tradeFreq_Once:
-                        // this takes minDate instead of start date since these are not calculated on the fly and trades before the start date need to be inserted
-                        dates = computeOnceTrades(singleTrade.value(), calculationDate, endDate, calculateFromStartDate);
-                        break;
-                    case trade::tradeFreq_Daily:
-                        // -1 applies to every trading day
-                        if (startDate == calculationDate && endDate == lastDate)
-                            dates.append(-1);
-                        else
-                            dates = computeDailyTrade(startDate, endDate);
-                        break;
-                    case trade::tradeFreq_Weekly:
-                        dates = computeWeeklyTrades(singleTrade->date, startDate, endDate);
-                        break;
-                    case trade::tradeFreq_Monthly:
-                        dates = computeMonthlyTrades(singleTrade->date, startDate, endDate);
-                        break;
-                    case trade::tradeFreq_Yearly:
-                        dates = computeYearlyTrades(singleTrade->date, startDate, endDate);
-                        break;
-                    default:
-                        break;
-                }
-                foreach(const int &i, dates)
+                foreach(const int &i, singleTrade->tradeDates(priceManager.dates(), calculationDate, calculateFromStartDate))
                     trades[i][s.id].append(singleTrade);
-            }
 
     return trades;
-}
-
-QList<int> nav::computeOnceTrades(const trade &singleTade, const int &minDate, const int &maxDate, const bool &calculateFromStartDate) const
-{
-    QList<int> dates;
-    int date = singleTade.date;
-
-    if (date < singleTade.startDate)
-        return dates;
-
-    if (date < minDate && calculateFromStartDate)
-        dates.append(date);
-    else
-        if (date >= minDate && getCurrentDateOrNext(&date))
-            if (date <= maxDate)
-                dates.append(date);
-
-    return dates;
-}
-
-QList<int> nav::computeDailyTrade(const int &minDate, const int &maxDate) const
-{
-    QList<int> dates;
-    for(QList<int>::const_iterator i = priceManager.iteratorCurrentDateOrNext(minDate); i != priceManager.iteratorEnd(); ++i)
-    {
-        if (*i > maxDate)
-            break;
-
-        dates.append(*i);
-    }
-
-    return dates;
-}
-
-QList<int> nav::computeWeeklyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
-{
-    QList<int> dates;
-
-    int firstWeekDay = minDate;
-    while (firstWeekDay % 7 != tradeDate % 7)
-        ++firstWeekDay;
-
-    do
-    {
-        int date = firstWeekDay;
-        if (getCurrentDateOrNext(&date))
-            if (date >= minDate && date <= maxDate)
-                dates.append(date);
-        firstWeekDay += 7;
-    }
-    while (firstWeekDay <= maxDate);
-
-    return dates;
-}
-
-QList<int> nav::computeMonthlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
-{
-    QList<int> dates;
-
-    QDate minQDate = QDate::fromJulianDay(minDate);
-    int dayOfMonth = QDate::fromJulianDay(tradeDate).day();
-
-    do
-    {
-        QDate monthday = minQDate;
-        if (monthday.day() > dayOfMonth)
-            monthday = monthday.addMonths(1);
-
-        if (dayOfMonth > monthday.daysInMonth())
-        {
-            monthday = monthday.addMonths(1);
-            monthday = QDate(monthday.year(), monthday.month(), 1);
-        }
-        else
-            monthday = QDate(monthday.year(), monthday.month(), dayOfMonth);
-
-        int date = monthday.toJulianDay();
-        if (getCurrentDateOrNext(&date))
-            if (date >= minDate && date <= maxDate)
-                dates.append(date);
-
-        minQDate = minQDate.addMonths(1);
-    }
-    while (minQDate.toJulianDay() <= maxDate);
-
-    return dates;
-}
-
-QList<int> nav::computeYearlyTrades(const int &tradeDate, const int &minDate, const int &maxDate) const
-{
-    QList<int> dates;
-
-    QDate minQDate = QDate::fromJulianDay(minDate);
-    int dayOfYear = QDate::fromJulianDay(tradeDate).dayOfYear();
-
-    do
-    {
-        QDate yearday = minQDate;
-        int leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearday.year()) ? 1 : 0);
-
-        if (yearday.dayOfYear() > leapDayofYear)
-        {
-            yearday = yearday.addYears(1);
-            leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearday.year()) ? 1 : 0);
-        }
-
-        int date = QDate(yearday.year(), 1, 1).toJulianDay() + leapDayofYear - 1;
-        if (getCurrentDateOrNext(&date))
-            if (date >= minDate && date <= maxDate)
-                dates.append(date);
-
-        minQDate = minQDate.addYears(1);
-    }
-    while (minQDate.toJulianDay() <= maxDate);
-
-    return dates;
 }
 
 void nav::insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio &previousInfo)
@@ -358,78 +190,22 @@ void nav::insertPortfolioCashTrade(const int &portfolioID, const int &cashAccoun
     addToExecutedTradeList(portfolioID, cashAccount, date, -1 * tradeValue / close, close, 0);
 }
 
-void nav::insertPortfolioTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio &previousInfo, const navTradeList &trades)
+void nav::insertExecutedTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio &previousInfo, const navTradeList &trades)
 {
     for(navTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
         int securityID = i.key();
-        QString symbol = portfolios.securities(portfolioID, securityID).description;
-        double close = 0;
-        if (!previousInfo.isNull())
-            close = priceManager.price(symbol, previousInfo.date) / priceManager.split(symbol, date);
+        const security s = portfolios.securities(portfolioID, securityID);
+        double close = previousInfo.isNull() ? 0 : priceManager.price(s.description, previousInfo.date) / priceManager.split(s.description, date);
 
         foreach(const navTradePointer &singleTrade, i.value())
         {
-            double price = singleTrade->type == trade::tradeType_Interest || singleTrade->type == trade::tradeType_InterestPercent ? 0 :
-                                                singleTrade->price >= 0 ? singleTrade->price :
-                                                close;
-            double sharesToBuy = 0;
+            double price = singleTrade->purchasePrice(close);
+            double sharesToBuy = singleTrade->shares(price, previousInfo.securitiesInfo.value(securityID).totalValue, previousInfo.totalValue,
+                s.aa, portfolios.aa(portfolioID));
 
-            switch(singleTrade->type)
-            {
-                case trade::tradeType_Purchase:
-                    if (price != 0)
-                        sharesToBuy = singleTrade->value;
-                    break;
-                case trade::tradeType_Sale:
-                    if (price != 0)
-                        sharesToBuy = singleTrade->value * -1;
-                    break;
-                case trade::tradeType_DivReinvest:
-                    if (price != 0)
-                        sharesToBuy = singleTrade->value;
-                    break;
-                case trade::tradeType_Interest:
-                    sharesToBuy = singleTrade->value;
-                    break;
-                case trade::tradeType_FixedPurchase:
-                case trade::tradeType_FixedSale:
-                    if (price != 0)
-                    {
-                        sharesToBuy = singleTrade->value / price;
-                        if (singleTrade->type == trade::tradeType_FixedSale)
-                            sharesToBuy *= -1;
-                    }
-                    break;
-                case trade::tradeType_Value:
-                case trade::tradeType_InterestPercent:
-                    if (!previousInfo.isNull() && price != 0)
-                        sharesToBuy = (previousInfo.securitiesInfo.value(securityID).totalValue * (singleTrade->value / 100)) / price;
-                    break;
-                case trade::tradeType_TotalValue:
-                    if (!previousInfo.isNull() && price != 0)
-                        sharesToBuy = (previousInfo.totalValue * (singleTrade->value / 100)) / price;
-                    break;
-                case trade::tradeType_AA:
-                    if (!previousInfo.isNull() && price != 0)
-                    {
-                        const QMap<int, double> aaList = portfolios.securities(portfolioID, securityID).aa;
-                        for(QMap<int, double>::const_iterator x = aaList.constBegin(); x != aaList.constEnd(); ++x)
-                        {
-                            double target =  portfolios.aa(portfolioID, x.key()).target;
-                            if (target <= 0)
-                                continue;
-
-                            sharesToBuy += ((previousInfo.totalValue * (target * x.value() * singleTrade->value / 100)) -
-                                previousInfo.securitiesInfo.value(securityID).totalValue) / price;
-                        }
-                    }
-                    break;
-                default:
-                    break;
-            }
-
-            addToExecutedTradeList(portfolioID, securityID, date, sharesToBuy, price, singleTrade->commission);
+            if (price > 0 && sharesToBuy != 0)
+                addToExecutedTradeList(portfolioID, securityID, date, sharesToBuy, price, singleTrade->commission);
 
             if (singleTrade->cashAccount != -1 && !previousInfo.isNull() && sharesToBuy > 0)
                 insertPortfolioCashTrade(portfolioID, singleTrade->cashAccount, previousInfo, date, sharesToBuy * price);
@@ -437,7 +213,7 @@ void nav::insertPortfolioTrades(const int &portfolioID, const int &date, const d
     }
 }
 
-void nav::insertFirstPortfolioTrades(const int &portfolioID, const int &startDate, const QMap<int, navTradeList> &allTrades)
+void nav::insertExecutedTradesPreStartDate(const int &portfolioID, const int &startDate, const QMap<int, navTradeList> &allTrades)
 {
     for(QMap<int, navTradeList>::const_iterator i = allTrades.begin(); i != allTrades.end(); ++i)
     {
@@ -449,7 +225,7 @@ void nav::insertFirstPortfolioTrades(const int &portfolioID, const int &startDat
         if (date == -1)
             continue;
 
-        insertPortfolioTrades(portfolioID, date, 0, i.value());
+        insertExecutedTrades(portfolioID, date, 0, i.value());
     }
 }
 

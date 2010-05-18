@@ -20,6 +20,7 @@ public:
         type(objectType_Symbol), description(p_symbol), id(-1) {}
 
     objectKey key() const { return *this; }
+    void clearID() { id = -1; }
 
     bool operator==(const objectKey &other) const;
     bool operator!=(const objectKey &other) const { return !(*this == other); }

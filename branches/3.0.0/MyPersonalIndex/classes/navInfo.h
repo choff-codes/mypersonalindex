@@ -19,7 +19,7 @@ class navInfoPortfolio
 public:
     void insert(const int &date, const double &nav, const double &totalValue);
 
-    QMap<int, navPair> navHistory() const { return m_nav; }
+    const QMap<int, navPair> navHistory() const { return m_nav; }
     navPair nav(const int &date) const { return m_nav.value(date); }
 
     int count() const { return m_nav.count(); }

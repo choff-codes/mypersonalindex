@@ -21,8 +21,9 @@ public:
         return m_instance;
     }
 
-    QStringList symbols() { return m_securityPriceList.keys(); }
-    bool exists(const QString &symbol) { return m_securityPriceList.contains(symbol); }
+    QStringList symbols() const { return m_securityPriceList.keys(); }
+    bool exists(const QString &symbol) const { return m_securityPriceList.contains(symbol); }
+    const QList<int> dates() const { return m_dates; }
 
     void insertPrice(const QString &symbol, const int &date, const double &price) { m_securityPriceList[symbol].prices.insert(date, price); insertDate(date);}
     void insertDividend(const QString &symbol, const int &date, const double &dividend) { m_securityPriceList[symbol].dividends.insert(date, dividend); }

@@ -6,6 +6,7 @@
 #include <QDate>
 #include "queries.h"
 #include "functions.h"
+#include "assetAllocation.h"
 
 class trade
 {
@@ -32,6 +33,12 @@ public:
 
     void save(const int &securityID);
     void remove() const;
+    void clearID() { id = -1; }
+
+    double shares(const double &price, const double &securityValue, const double &portfolioValue,
+        const QMap<int, double> securityAA, const QMap<int, assetAllocation>  &portfolioAA) const;
+    double purchasePrice(const double &currentSecurityPrice) const;
+    QList<int> tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const;
 
     static QString tradeTypeToString(const tradeType &type);
     static QString frequencyToString(const tradeFreq &freq);

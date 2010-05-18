@@ -117,6 +117,12 @@ bool frmTrade::hasValidationErrors()
         return true;
     }
 
+    if ((trade::tradeFreq)ui.cmbFreq->currentIndex() == trade::tradeFreq_Once && ui.deStarting->isEnabled() && ui.deStarting->date() > ui.deDate->date())
+    {
+        QMessageBox::critical(this, "Dates", "The start date cannot be after the trade date!");
+        return true;
+    }
+
     return false;
 }
 

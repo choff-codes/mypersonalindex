@@ -45,8 +45,8 @@ public:
     QMap<int, double> avgPrices;
     QMap<int, securityInfo> securitiesInfo;
 
-    dailyInfoPortfolio(): dailyInfo(0) { count = 1; }
-    dailyInfoPortfolio(const int &p_date): dailyInfo(p_date) { count = 1; }
+    dailyInfoPortfolio(): dailyInfo(0) {}
+    dailyInfoPortfolio(const int &p_date): dailyInfo(p_date) {}
 };
 
 #endif // CALCULATIONINFO_H

@@ -9,7 +9,7 @@
 class account: public objectKey
 {
 public:
-    enum costBasisType { costBasisType_None, costBasisType_FIFO, costBasisType_LIFO, costBasisType_AVG };
+    enum costBasisType { costBasisType_None, costBasisType_FIFO, costBasisType_LIFO, costBasisType_AVG, costBasisType_HIFO };
 
     double taxRate;
     bool taxDeferred;

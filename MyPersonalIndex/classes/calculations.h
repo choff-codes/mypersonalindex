@@ -8,13 +8,11 @@
 #include "prices.h"
 #include "portfolio.h"
 #include "splits.h"
+#include "epsilon.h"
+#include "avgPricePerShare.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
-#endif
-
-#ifndef EPSILON
-#define EPSILON 0.00001
 #endif
 
 class calculations
@@ -36,7 +34,6 @@ public:
     static double change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV = 1);
 
 private:
-    typedef QPair<double /* shares */, double /* price */> sharePricePair;
     int m_portfolioID;
     QHash<int, dailyInfoPortfolio> m_cache;
 

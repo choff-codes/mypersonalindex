@@ -12,6 +12,7 @@
 #include <QDialog>
 #include <QComboBox>
 #include <QCheckBox>
+#include "account.h"
 
 class frmAcctEdit_UI
 {

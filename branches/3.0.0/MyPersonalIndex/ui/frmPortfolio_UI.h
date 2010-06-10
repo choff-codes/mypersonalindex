@@ -12,6 +12,7 @@
 #include <QDialog>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
+#include "account.h"
 
 class frmPortfolio_UI
 {

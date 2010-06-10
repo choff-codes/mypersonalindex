@@ -9,7 +9,7 @@ frmAcctEdit::frmAcctEdit(const int &portfolioID, QWidget *parent, const account 
     ui.txtDesc->setText(m_acct.description);
     ui.sbTaxRate->setValue(m_acct.taxRate * 100);
     ui.chkTaxDeferred->setChecked(m_acct.taxDeferred);
-    ui.cmbCostBasis->setCurrentIndex(m_acct.costBasis);
+    ui.cmbCostBasis->setCurrentIndex(ui.cmbCostBasis->findData(m_acct.costBasis));
     ui.txtDesc->setFocus();
     ui.txtDesc->selectAll();
 
@@ -27,7 +27,7 @@ void frmAcctEdit::accept()
     m_acct.description = ui.txtDesc->text();
     m_acct.taxRate = ui.sbTaxRate->value() / 100;
     m_acct.taxDeferred = ui.chkTaxDeferred->isChecked();
-    m_acct.costBasis = (account::costBasisType)ui.cmbCostBasis->currentIndex();
+    m_acct.costBasis = (account::costBasisType)ui.cmbCostBasis->itemData(ui.cmbCostBasis->currentIndex(), Qt::UserRole).toInt();
 
     if (m_acct == m_acctOriginal)
     {

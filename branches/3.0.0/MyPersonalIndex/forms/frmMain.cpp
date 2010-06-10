@@ -580,7 +580,7 @@ void frmMain::deletePortfolio()
 void frmMain::about()
 {
     QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString(VERSIONTEXT) + "</h2>"
-        "<p>Copyright &copy; 2009"
+        "<p>Copyright &copy; 2010"
         "<p>By Matthew Wikler"
         "<p>Create personal indexes and perform analysis to make better investing decisions."
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");

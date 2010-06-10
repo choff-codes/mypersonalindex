@@ -38,13 +38,16 @@ dailyInfoPortfolio calculations::portfolioValues(const int &date, const bool &ca
     dailyInfoPortfolio info = m_cache.value(date);
     if (!info.isNull())
     {
-       if (calcAveragePrices && info.avgPrices.isEmpty())
-           info.avgPrices = avgPricePerShare(date);
-       return info;
+        if (calcAveragePrices && info.avgPrices.isEmpty())
+        {
+            info.avgPrices = avgPricePerShare(date);
+            m_cache.insert(date, info);
+        }
+        return info;
     }
 
     info = dailyInfoPortfolio(date);
-    foreach(const security::security &s, portfolio::instance().securities(m_portfolioID))
+    foreach(const security &s, portfolio::instance().securities(m_portfolioID))
     {
         securityInfo value = securityValues(s.id, date);
         if (value.isNull())
@@ -94,9 +97,9 @@ dailyInfo calculations::getDailyInfoByKey(const int &date, const objectKey &key)
         case objectType_Account:
             return acctValues(date, key.id);
         case objectType_Portfolio:
-            return static_cast<dailyInfo>(portfolioValues(date));
+            return portfolioValues(date);
         case objectType_Security:
-            return static_cast<dailyInfo>(portfolioValues(date).securitiesInfo.value(key.id)); // may be cached
+            return portfolioValues(date).securitiesInfo.value(key.id); // may be cached
         default:
             return dailyInfo(0);
     }
@@ -274,7 +277,6 @@ double calculations::change(double totalValue, double previousTotalValue, double
 
 QMap<int, double> calculations::avgPricePerShare(const int &calculationDate)
 {
-
 #ifdef CLOCKTIME
     QTime t;
     t.start();
@@ -287,61 +289,17 @@ QMap<int, double> calculations::avgPricePerShare(const int &calculationDate)
     for(executedTradeList::const_iterator tradeList = trades.constBegin(); tradeList != trades.constEnd(); ++tradeList)
     {
         security s = portfolio::instance().securities(m_portfolioID, tradeList.key());
-        account::costBasisType costCalc = portfolio::instance().acct(m_portfolioID, s.account).costBasis;
+        account::costBasisType type = portfolio::instance().acct(m_portfolioID, s.account).costBasis;
 
-        if (costCalc == account::costBasisType_None)
-            costCalc = portfolioCostCalc;
+        if (type == account::costBasisType_None)
+            type = portfolioCostCalc;
 
-        QList<sharePricePair> previousTrades;
-        splits splitRatio(s.description, calculationDate);
-        double shares = 0; double total = 0;
+        if (s.cashAccount)
+            type = account::costBasisType_AVG;
 
-        for(int x = 0; x < tradeList->count(); ++x)
-        {
-            executedTrade t = tradeList->at(x);
-            if (t.date > calculationDate) // trade date outside of calculation date
-                break;
-
-            // cash should always calculate at average price
-            // avg price averages only positive trades
-            if ((costCalc == account::costBasisType_AVG || s.cashAccount) && t.shares < 0)
-                continue;
-
-            t.price /= splitRatio.ratio(t.date);
-            t.shares *= splitRatio.ratio();
-
-            if (t.shares >= 0) // this is a buy, just add the trade
-            {
-                previousTrades.append(qMakePair(t.shares, t.price));
-                shares += t.shares;
-                total += t.shares * t.price;
-                continue;
-            }
-
-            while (t.shares != 0 && !previousTrades.isEmpty()) // still shares to sell
-            {
-                int z = (costCalc == account::costBasisType_LIFO) ? previousTrades.count() - 1 : 0;
-                sharePricePair pair = previousTrades.at(z);
-
-                if (pair.first <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
-                {
-                    t.shares += pair.first;
-                    shares -= pair.first;
-                    total -= pair.first * pair.second;
-                    previousTrades.removeAt(z);
-                }
-                else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
-                {
-                    previousTrades[z].first += t.shares;
-                    shares += t.shares;
-                    total += t.shares * pair.second;
-                    break;
-                }
-            }
-        }
-
-        if (shares >= EPSILON)
-            returnValues.insert(tradeList.key(), total / shares); // insert avg price for this securityID
+        double price = avgPricePerShare::calculate(s.description, *tradeList, type, calculationDate);
+        if (price > 0)
+            returnValues.insert(s.id, price);
     }
 
 #ifdef CLOCKTIME

@@ -47,9 +47,10 @@ void frmPortfolio_UI::setupUI(QDialog *dialog)
     layout->setWidget(4, QFormLayout::LabelRole, costBasis);
 
     cmbCostBasis = new QComboBox(dialog);
-    cmbCostBasis->addItem("FIFO");
-    cmbCostBasis->addItem("LIFO");
-    cmbCostBasis->addItem("Average");
+    cmbCostBasis->addItem("FIFO", account::costBasisType_FIFO);
+    cmbCostBasis->addItem("LIFO", account::costBasisType_LIFO);
+    cmbCostBasis->addItem("HIFO", account::costBasisType_HIFO);
+    cmbCostBasis->addItem("Average", account::costBasisType_AVG);
     layout->setWidget(4, QFormLayout::FieldRole, cmbCostBasis);
 
     startDate = new QLabel("&Start Date:", dialog);

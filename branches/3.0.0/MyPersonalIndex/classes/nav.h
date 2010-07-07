@@ -36,10 +36,10 @@ private:
     void calculateNAVValues(const int &portfolioID);
 
     const QMap<int, navTradeList> calculateExecutedTrades(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
-    void insertExecutedTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio &previousInfo, const navTradeList &trades);
+    void insertExecutedTrades(const int &portfolioID, const int &date, const snapshotPortfolio &previousInfo, const navTradeList &trades);
     void insertExecutedTradesPreStartDate(const int &portfolioID, const int &startDate, const QMap<int, navTradeList> &allTrades);
-    void insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio &previousInfo);
-    void insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const dailyInfoPortfolio &previousInfo, const int &date, const double &reverseTradeValue);
+    void insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const snapshotPortfolio &previousInfo);
+    void insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const snapshotPortfolio &previousInfo, const int &date, const double &reverseTradeValue);
 
     int checkCalculationDate(const int &portfolioID, int calculationDate, bool *calcuateFromStartDate);
 };

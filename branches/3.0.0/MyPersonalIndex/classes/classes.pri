@@ -13,7 +13,7 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/statistic.cpp \
     $$PWD/portfolio.cpp \
     $$PWD/chartInfo.cpp \
-    $$PWD/calculationInfo.cpp \
+    $$PWD/snapshot.cpp \
     $$PWD/executedTrade.cpp \
     $$PWD/securityPrice.cpp \
     $$PWD/trade.cpp \
@@ -40,7 +40,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/statistic.h \
     $$PWD/portfolio.h \
     $$PWD/chartInfo.h \
-    $$PWD/calculationInfo.h \
+    $$PWD/snapshot.h \
     $$PWD/executedTrade.h \
     $$PWD/securityPrice.h \
     $$PWD/trade.h \
@@ -54,4 +54,5 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/avgPricePerShare.h \
     $$PWD/epsilon.h \
     $$PWD/objectBase.h \
-    $$PWD/tradeDateCalendar.h
+    $$PWD/tradeDateCalendar.h \
+    $$PWD/costBasis.h

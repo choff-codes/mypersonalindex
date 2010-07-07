@@ -66,7 +66,6 @@ public:
     portfolioInfo info(const int &id) const { return m_portfolios.value(id).info; }
     QList<portfolioInfo> info() const { QList<portfolioInfo> list; foreach(const portfolioData &d, m_portfolios) list.append(d.info); return list; }
     objectKey key(const int &id) const { return m_portfolios.value(id).info.key(); }
-    int portfolioIDFromKey(const objectKey &key) const;
 
     int startDate(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startDate; }
     double startValue(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startValue; }
@@ -92,10 +91,6 @@ private:
     void loadPortfoliosAA();
     void loadPortfoliosAcct();
     void loadPortfoliosNAV();
-
-    int portfolioIDFromAccountID(const int &id) const;
-    int portfolioIDFromSecurityID(const int &id) const;
-    int portfolioIDFromAssetAllocationID(const int &id) const;
 };
 
 #endif // PORTFOLIO_H

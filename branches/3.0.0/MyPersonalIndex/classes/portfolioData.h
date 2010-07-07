@@ -18,6 +18,12 @@ public:
     executedTradeList executedTrades;
     navInfoPortfolio nav;
     portfolioInfo info;
+
+    portfolioData(const int &id_):
+            executedTrades(executedTradeList(id_)),
+            info(portfolioInfo(id_)),
+            nav(navInfoPortfolio(id_))
+    {}
 };
 
 #endif // PORTFOLIODATA_H

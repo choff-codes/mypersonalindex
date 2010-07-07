@@ -1,6 +1,6 @@
 #include "portfolioInfo.h"
 
-portfolioInfo::portfolioInfo(): objectKey(objectType_Portfolio, QString()), dividends(true), costBasis(account::costBasisType_FIFO),
+portfolioInfo::portfolioInfo(const int &id_ = -1): objectKey(objectType_Portfolio, QString(), id_), dividends(true), costBasis(account::costBasisType_FIFO),
     startValue(100), aaThreshold(5), aaThresholdMethod(threshold_Portfolio), startDate(QDate::currentDate().toJulianDay()),
     holdingsShowHidden (true), navSortDesc(true), aaShowBlank(true), correlationShowHidden(true), acctShowBlank(true)
 {
@@ -25,7 +25,7 @@ bool portfolioInfo::operator==(const portfolioInfo &other) const
             && this->acctSort == other.acctSort;
 }
 
-void portfolioInfo::save()
+void portfolioInfo::save(const queries &dataSource)
 {
     QMap<QString, QVariant> values;
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Description), this->description);
@@ -44,5 +44,5 @@ void portfolioInfo::save()
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AcctSort), this->acctSort);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_NAVSortDesc), (int)this->navSortDesc);
 
-    this->id = queries::insert(queries::table_Portfolios, values, this->id);
+    this->id = dataSource.insert(queries::table_Portfolios, values, this->id);
 }

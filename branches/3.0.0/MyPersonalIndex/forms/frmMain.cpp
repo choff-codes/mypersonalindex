@@ -308,7 +308,7 @@ void frmMain::resetPortfolioHoldings()
 {
     int currentDate = dateDropDownDate(ui.holdingsDateDropDown);
     QAbstractItemModel *oldModel = ui.holdings->model();
-    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate, true);
+    snapshotPortfolio info = m_calculations.portfolioSnapshot(currentDate, true);
 
     QList<baseRow*> rows;
     foreach(const security &s, portfolios.securities(m_portfolioID))
@@ -329,14 +329,15 @@ void frmMain::resetPortfolioAA()
 {
     int currentDate = dateDropDownDate(ui.aaDateDropDown);
     QAbstractItemModel *oldModel = ui.aa->model();
-    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate);
+    snapshotPortfolio info = m_calculations.portfolioSnapshot(currentDate);
 
     QList<baseRow*> rows;
     if (ui.aaShowBlank->isChecked()) // insert blank aa
         portfolios.insert(m_portfolioID, assetAllocation());
 
     foreach(const assetAllocation &aa, portfolios.aa(m_portfolioID))
-        rows.append(new aaRow(info, m_calculations.aaValues(currentDate, aa.id), portfolios.info(m_portfolioID).aaThresholdMethod, aa, portfolios.info(m_portfolioID).aaSort));
+        if (ui.aaShowBlank->isChecked() || (!ui.aaShowBlank->isChecked() && aa.target > EPSILON))
+            rows.append(new aaRow(info, m_calculations.assetAllocationSnapshot(currentDate, aa.id), portfolios.info(m_portfolioID).aaThresholdMethod, aa, portfolios.info(m_portfolioID).aaSort));
 
     portfolios.remove(m_portfolioID, assetAllocation()); // remove blank aa
 
@@ -354,14 +355,14 @@ void frmMain::resetPortfolioAcct()
 {
     int currentDate = dateDropDownDate(ui.accountsDateDropDown);
     QAbstractItemModel *oldModel = ui.accounts->model();
-    dailyInfoPortfolio info = m_calculations.portfolioValues(currentDate);
+    snapshotPortfolio info = m_calculations.portfolioSnapshot(currentDate);
 
     QList<baseRow*> rows;
     if (ui.accountsShowBlank->isChecked()) // insert blank account
          portfolios.insert(m_portfolioID, account());
 
     foreach(const account &acct, portfolios.acct(m_portfolioID))
-        rows.append(new acctRow(info, m_calculations.acctValues(currentDate, acct.id), acct, portfolios.info(m_portfolioID).acctSort));
+        rows.append(new acctRow(info, m_calculations.accountSnapshot(currentDate, acct.id), acct, portfolios.info(m_portfolioID).acctSort));
 
     portfolios.remove(m_portfolioID, account()); // remove blank account
 
@@ -937,7 +938,7 @@ void frmMain::aaModifyColumns()
 void frmMain::acctModifyColumns()
 {
     if (modifyColumns(settings::columns_Acct, acctRow::fieldNames(), "Modify Columns"))
-        resetPortfolioHoldings();
+        resetPortfolioAcct();
 }
 
 void frmMain::editStat()

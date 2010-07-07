@@ -77,34 +77,28 @@ public:
     enum { executedTradesColumns_SecurityID, executedTradesColumns_Date, executedTradesColumns_Shares, executedTradesColumns_Price, executedTradesColumns_Commission,
            executedTradesColumns_Count };
 
-    static QString getDatabaseLocation();
+    queries(const QString &databaseLocation);
 
-    static void executeNonQuery(const QString&);
-    static void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
-    static int insert(const QString &tableName, QMap<QString, QVariant> values, const int &id);
-    static void update(const QString &tableName, QMap<QString, QVariant> values, const int &id = -1);
-    static QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString(), bool joinToSecurity = false);
+    static QString getDefaultDatabaseLocation();
 
-    static int getIdentity();
-    static int getVersion();
+    void executeNonQuery(const QString&) const;
+    void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
+    int insert(const QString &tableName, QMap<QString, QVariant> values, const int &id) const;
+    void update(const QString &tableName, QMap<QString, QVariant> values, const int &id = -1) const;
+    QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString(), bool joinToSecurity = false) const;
 
-    static void deleteTable(const QString &table);
-    static void deleteItem(const QString &table, const int &id);
-    static void deleteSecurityItems(const QString &table, const int &securityID);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity = false);
-    static void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity = false);
-    static void deleteSymbolItems(const QString &symbol);
+    int getIdentity() const;
+    int getDatabaseVersion() const;
+
+    void deleteTable(const QString &table) const;
+    void deleteItem(const QString &table, const int &id) const;
+    void deleteSecurityItems(const QString &table, const int &securityID) const;
+    void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity = false) const;
+    void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity = false) const;
+    void deleteSymbolItems(const QString &symbol) const;
 
 private:
-    queries();
-    // Dont forget to declare these two. You want to make sure they
-    // are unaccessable otherwise you may accidently get copies of
-    // your singelton appearing.
-    queries(queries const&);  // Don't Implement
-    void operator=(queries const&); // Don't implement
-
-    static QSqlDatabase instance();
-
+    QSqlDatabase m_database;
 };
 
 #endif // QUERIES_H

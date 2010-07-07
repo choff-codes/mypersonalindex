@@ -2,15 +2,12 @@
 #define SPLITS_H
 
 #include <QMap>
-#include <QString>
-#include "prices.h"
 
 class splits
 {
 public:
-    splits(const QString &symbol, const int &endDate);
-    double ratio (const int &date); // must be called in date ascending order only!
-    double ratio() { return m_ratio; } // does not increment, call after running the overload above
+    splits(const QMap<int, double> &splits_, const int &date_);
+    double ratio (const int &date_); // must be called in date ascending order only!
 
 private:
     const QMap<int, double> m_splits;

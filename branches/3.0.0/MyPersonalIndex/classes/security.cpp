@@ -27,10 +27,13 @@ int security::firstTradeDate() const
     return minDate;
 }
 
-void security::save(const int &portfolioID)
+void security::saveSecurity(const queries &dataSource)
 {
+    if (!this->hasParent())
+        return;
+
     QMap<QString, QVariant> values;
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_PortfolioID), portfolioID);
+    values.insert(queries::SecurityColumns.at(queries::securityColumns_PortfolioID), this->parent);
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Symbol), this->description);
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Account), functions::intToNull(this->account));
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Expense), functions::doubleToNull(this->expense));
@@ -39,10 +42,12 @@ void security::save(const int &portfolioID)
     values.insert(queries::SecurityColumns.at(queries::securityColumns_IncludeInCalc), (int)this->includeInCalc);
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Hide), (int)this->hide);
 
-    this->id = queries::insert(queries::table_Security, values, this->id);
+    this->id = dataSource.insert(queries::table_Security, values, this->id);
+
+    saveAATargets();
 }
 
-void security::saveAATargets() const
+void security::saveAATargets(const queries &dataSource) const
 {
     QVariantList securityID, aaID, percent;
 
@@ -58,33 +63,30 @@ void security::saveAATargets() const
     tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_AAID), aaID);
     tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_Percent), percent);
 
-    queries::deleteSecurityItems(queries::table_SecurityAA, this->id);
+    dataSource.deleteSecurityItems(queries::table_SecurityAA, this->id);
     if (!securityID.isEmpty())
-        queries::executeTableUpdate(queries::table_SecurityAA, tableValues);
+        dataSource.executeTableUpdate(queries::table_SecurityAA, tableValues);
 }
 
-void security::remove() const
+void security::remove(const queries &dataSource) const
 {
-    queries::deleteItem(queries::table_Security, this->id);
-    queries::deleteSecurityItems(queries::table_SecurityAA, this->id);
-    queries::deleteSecurityItems(queries::table_SecurityTrades, this->id);
-    queries::deleteSecurityItems(queries::table_ExecutedTrades, this->id);
+    dataSource.deleteItem(queries::table_Security, this->id);
 }
 
-void security::removeAATarget(const int &aaID)
+void security::removeAATarget(const queries &dataSource, const int &aaID)
 {
-    if (aaID == -1 || !this->aa.contains(aaID))
+    if (aaID == UNASSIGNED || !this->aa.contains(aaID))
         return;
 
     this->aa.remove(aaID);
-    saveAATargets();
+    saveAATargets(dataSource);
 }
 
-void security::removeAccount(const int &accountID, const int &portfolioID)
+void security::removeAccount(const queries &dataSource, const int &accountID)
 {
-    if (accountID == -1 || this->account != accountID)
+    if (accountID == UNASSIGNED || this->account != accountID)
         return;
 
-    this->account = -1;
-    save(portfolioID);
+    this->account = UNASSIGNED;
+    saveSecurity(dataSource);
 }

@@ -46,7 +46,7 @@ void nav::calculateNAVValues(const int &portfolioID)
         insertExecutedTradesPreStartDate(portfolioID, calculationDate, trades);
 
     int date = *dateIterator;
-    dailyInfoPortfolio previousInfo = calc.portfolioValues(date);
+    snapshotPortfolio previousInfo = calc.portfolioSnapshot(date);
     double navValue = calculateFromStartDate ? info.startValue : portfolios.nav(portfolioID).nav(date).nav;
 
     if (calculateFromStartDate)
@@ -58,8 +58,8 @@ void nav::calculateNAVValues(const int &portfolioID)
         insertPortfolioReinvestments(portfolioID, date, securityReinvestments, previousInfo);
         insertExecutedTrades(portfolioID, date, previousInfo, appendNavTradeLists(trades.value(date), trades.value(-1)));
 
-        const dailyInfoPortfolio currentInfo = calc.portfolioValues(date);
-        navValue = calculations::change(currentInfo.totalValue, previousInfo.totalValue, currentInfo.costBasis - previousInfo.costBasis, info.dividends ? currentInfo.dividendAmount : 0, navValue);
+        const snapshotPortfolio currentInfo = calc.portfolioSnapshot(date);
+        navValue = calculations::change(previousInfo.totalValue, currentInfo.totalValue, currentInfo.costBasis - previousInfo.costBasis, info.dividends ? currentInfo.dividendAmount : 0, navValue);
         addToNAVList(portfolioID, date, currentInfo.totalValue, navValue);
         previousInfo = currentInfo;
     }
@@ -162,7 +162,7 @@ const QMap<int, nav::navTradeList> nav::calculateExecutedTrades(const int &portf
     return trades;
 }
 
-void nav::insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const dailyInfoPortfolio &previousInfo)
+void nav::insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const snapshotPortfolio &previousInfo)
 {
     foreach(const int &securityID, securityReinvestments)
     {
@@ -176,7 +176,7 @@ void nav::insertPortfolioReinvestments(const int &portfolioID, const int &date, 
     }
 }
 
-void nav::insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const dailyInfoPortfolio &previousInfo, const int &date, const double &tradeValue)
+void nav::insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const snapshotPortfolio &previousInfo, const int &date, const double &tradeValue)
 {
     if (!portfolios.securities(portfolioID).contains(cashAccount))
         return;
@@ -190,7 +190,7 @@ void nav::insertPortfolioCashTrade(const int &portfolioID, const int &cashAccoun
     addToExecutedTradeList(portfolioID, cashAccount, date, -1 * tradeValue / close, close, 0);
 }
 
-void nav::insertExecutedTrades(const int &portfolioID, const int &date, const dailyInfoPortfolio &previousInfo, const navTradeList &trades)
+void nav::insertExecutedTrades(const int &portfolioID, const int &date, const snapshotPortfolio &previousInfo, const navTradeList &trades)
 {
     for(navTradeList::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {

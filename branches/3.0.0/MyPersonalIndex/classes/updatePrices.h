@@ -19,7 +19,10 @@ struct updatePricesReturnValue
 class updatePrices
 {
 public:
-    updatePrices(const settings &settings): m_downloadSplits(settings.splits), m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */) { }
+    updatePrices(const settings &settings):
+            m_downloadSplits(settings.splits),
+            m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */)
+    {}
 
     static bool isInternetConnection();
     updatePricesReturnValue run();

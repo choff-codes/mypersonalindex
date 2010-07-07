@@ -190,23 +190,6 @@ bool portfolio::datesOutsidePriceData() const
     return false;
 }
 
-int portfolio::portfolioIDFromKey(const objectKey &key) const
-{
-    switch(key.type)
-    {
-        case objectType_AA:
-            return portfolioIDFromAssetAllocationID(key.id);
-        case objectType_Account:
-            return portfolioIDFromAccountID(key.id);
-        case objectType_Security:
-            return portfolioIDFromSecurityID(key.id);
-        case objectType_Portfolio:
-            return key.id;
-        default:
-            return -1;
-    }
-}
-
 const security portfolio::securityFromID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)
@@ -214,15 +197,6 @@ const security portfolio::securityFromID(const int &id) const
             return d.securities.value(id);
 
     return security();
-}
-
-int portfolio::portfolioIDFromSecurityID(const int &id) const
-{
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.securities.contains(id))
-            return d.info.id;
-
-    return -1;
 }
 
 const QList<int> portfolio::securityReinvestments(const int &portfolioID)
@@ -244,16 +218,6 @@ const assetAllocation portfolio::assetAllocationFromID(const int &id) const
     return assetAllocation();
 }
 
-int portfolio::portfolioIDFromAssetAllocationID(const int &id) const
-{
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.aa.contains(id))
-            return d.info.id;
-
-    return -1;
-}
-
-
 const account portfolio::accountFromID(const int &id) const
 {
     foreach(const portfolioData &d, m_portfolios)
@@ -263,26 +227,9 @@ const account portfolio::accountFromID(const int &id) const
     return account();
 }
 
-int portfolio::portfolioIDFromAccountID(const int &id) const
-{
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.acct.contains(id))
-            return d.info.id;
-
-    return -1;
-}
-
 void portfolio::remove(const int &portfolioID)
 {
     queries::deleteItem(queries::table_Portfolios, portfolioID);
-    queries::deletePortfolioItems(queries::table_AA, portfolioID);
-    queries::deletePortfolioItems(queries::table_Acct, portfolioID);
-    queries::deletePortfolioItems(queries::table_NAV, portfolioID);
-    queries::deletePortfolioItems(queries::table_SecurityAA, portfolioID, true);
-    queries::deletePortfolioItems(queries::table_SecurityTrades, portfolioID, true);
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, true);
-    // this must come last due to the joinToSecurities above
-    queries::deletePortfolioItems(queries::table_Security, portfolioID);
     m_portfolios.remove(portfolioID);
 }
 

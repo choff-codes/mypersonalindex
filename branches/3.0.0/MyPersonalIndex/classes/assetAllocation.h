@@ -11,14 +11,16 @@ class assetAllocation: public objectKey
 public:
     double target;
 
-    assetAllocation(const QString &p_description = "(Blank)"):
-        objectKey(objectType_AA, p_description), target(-1) {}
+    assetAllocation(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = "(Blank)"):
+        objectKey(objectType_AA, description_, id_, parent_),
+        target(-1)
+    {}
 
     bool operator==(const assetAllocation &other) const;
     bool operator!=(const assetAllocation &other) const { return !(*this == other); }
 
-    void save(const int &portfolioID);
-    void remove() const;
+    void save(const queries &dataSource);
+    void remove(const queries &dataSource) const;
 };
 
 #endif // ASSETALLOCATION_H

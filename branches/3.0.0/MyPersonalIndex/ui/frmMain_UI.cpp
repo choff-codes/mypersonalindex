@@ -356,7 +356,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     aaEdit = new QAction("Edit...", tab_aa);
     aaEdit->setIconText("Edit...");
     aaDelete = new QAction("Delete", tab_aa);
-    aaShowBlank = new QAction("Show (Blank)", tab_aa);
+    aaShowBlank = new QAction("Show 0% Targets", tab_aa);
     aaShowBlank->setCheckable(true);
     aaReorderColumns = new QAction("Modify Columns...", tab_aa);
     aaReorderColumns->setIconText("Modify Columns...");

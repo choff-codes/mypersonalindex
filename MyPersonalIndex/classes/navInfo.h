@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QHash>
 #include "queries.h"
+#include "objectBase.h"
 
 struct navPair
 {
@@ -14,9 +15,13 @@ struct navPair
     navPair(const double &p_nav, const double &p_totalValue): nav(p_nav), totalValue(p_totalValue) {}
 };
 
-class navInfoPortfolio
+class navInfoPortfolio: public objectBase
 {
 public:
+    navInfoPortfolio(const int &parent_):
+            objectBase(parent_)
+    {}
+
     void insert(const int &date, const double &nav, const double &totalValue);
 
     const QMap<int, navPair> navHistory() const { return m_nav; }
@@ -29,8 +34,8 @@ public:
     int firstDate() const { return m_nav.constBegin().key(); }
     int lastDate() const { return (m_nav.constEnd() - 1).key(); }
 
-    void remove(const int &portfolioID);
-    void remove(const int &portfolioID, const int &startDate);
+    void remove(const queries &dataSource);
+    void remove(const queries &dataSource, const int &startDate);
 
 private:
     QMap<int, navPair> m_nav;

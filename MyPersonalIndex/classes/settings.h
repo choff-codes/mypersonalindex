@@ -18,7 +18,12 @@ class settings
 {
 public:
     typedef QHash<int, QList<int> > columns;
-    enum { columns_Holdings, columns_AA, columns_Acct, columns_Stat };
+    enum {
+        columns_Holdings,
+        columns_AA,
+        columns_Acct,
+        columns_Stat
+    };
 
     int dataStartDate;
     bool splits;
@@ -30,7 +35,14 @@ public:
     Qt::WindowState state;
     columns viewableColumns;
 
-    settings(): dataStartDate(0), splits(true), version(0), compareIncludeDividends(true), state(Qt::WindowActive) {}
+    settings():
+            dataStartDate(0),
+            splits(true),
+            version(0),
+            compareIncludeDividends(true),
+            state(Qt::WindowActive)
+    {}
+
     void save();
 
     static void saveColumns(const int &columnsID, const QList<int> &columns);

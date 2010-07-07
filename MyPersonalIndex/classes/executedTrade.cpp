@@ -1,6 +1,6 @@
 #include "executedTrade.h"
 
-void executedTradeList::remove(const int &portfolioID, const int &startDate)
+void executedTradeList::remove(const queries &dataSource, const int &startDate)
 {
     for(iterator i = begin(); i != end(); ++i)
     {
@@ -12,11 +12,13 @@ void executedTradeList::remove(const int &portfolioID, const int &startDate)
                 ++trade;
     }
 
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, startDate, true);
+    if (this->hasParent())
+        dataSource.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, startDate, true);
 }
 
-void executedTradeList::remove(const int &portfolioID)
+void executedTradeList::remove(const queries &dataSource)
 {
     clear();
-    queries::deletePortfolioItems(queries::table_ExecutedTrades, portfolioID, true);
+    if (this->hasParent())
+        dataSource.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, true);
 }

@@ -8,14 +8,32 @@
 #include "functions.h"
 #include "assetAllocation.h"
 
-class trade
+class trade: public objectKey
 {
 public:
-    enum tradeType { tradeType_Purchase, tradeType_Sale, tradeType_FixedPurchase, tradeType_FixedSale, tradeType_DivReinvest, tradeType_Interest,
-                     tradeType_InterestPercent, tradeType_Value, tradeType_TotalValue, tradeType_AA, tradeType_Count };
-    enum tradeFreq { tradeFreq_Once, tradeFreq_Daily, tradeFreq_Weekly, tradeFreq_Monthly, tradeFreq_Yearly, tradeFreq_Count };
+    enum tradeType {
+        tradeType_Purchase,
+        tradeType_Sale,
+        tradeType_FixedPurchase,
+        tradeType_FixedSale,
+        tradeType_DivReinvest,
+        tradeType_Interest,
+        tradeType_InterestPercent,
+        tradeType_Value,
+        tradeType_TotalValue,
+        tradeType_AA,
+        tradeType_Count
+    };
 
-    int id;
+    enum tradeFreq {
+        tradeFreq_Once,
+        tradeFreq_Daily,
+        tradeFreq_Weekly,
+        tradeFreq_Monthly,
+        tradeFreq_Yearly,
+        tradeFreq_Count
+    };
+
     tradeType type;
     double value;
     double price;
@@ -26,18 +44,30 @@ public:
     int startDate;
     int endDate;
 
-    trade(): id(-1), type(tradeType_Purchase), value(-1), price(-1), commission(0), cashAccount(-1), frequency(tradeFreq_Once), date(0), startDate(0), endDate(0) {}
+    trade(const int &id_, const int &parent_):
+        objectKey(objectType_Trade, QString(), id_, parent_),
+        type(tradeType_Purchase),
+        value(-1),
+        price(-1),
+        commission(0),
+        cashAccount(-1),
+        frequency(tradeFreq_Once),
+        date(0),
+        startDate(0),
+        endDate(0)
+    {}
 
     bool operator==(const trade &other) const;
     bool operator!=(const trade &other) const { return !(*this == other); }
 
-    void save(const int &securityID);
-    void remove() const;
-    void clearID() { id = -1; }
+    void save(const queries &dataSource);
+    void remove(const queries &dataSource) const;
 
     double shares(const double &price, const double &securityValue, const double &portfolioValue,
         const QMap<int, double> securityAA, const QMap<int, assetAllocation>  &portfolioAA) const;
+
     double purchasePrice(const double &currentSecurityPrice) const;
+
     QList<int> tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const;
 
     static QString tradeTypeToString(const tradeType &type);

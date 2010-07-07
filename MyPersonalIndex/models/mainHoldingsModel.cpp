@@ -10,10 +10,10 @@ const QVariantList holdingsRow::columnsType = QVariantList() << QVariant(QVarian
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::String) << QVariant(QVariant::String)
      << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
-holdingsRow::holdingsRow(const security &s, const dailyInfoPortfolio &info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
+holdingsRow::holdingsRow(const security &s, const snapshotPortfolio &info, const QMap<int, account> &accounts, const QMap<int, assetAllocation> &aa, const QString &sort)
     : baseRow(sort)
 {
-    securityInfo value = info.securitiesInfo.value(s.id);
+    snapshotSecurity value = info.securitiesInfo.value(s.id);
     double costBasis = info.avgPrices.value(s.id) * value.shares;
     //row_Active
     this->values.append((int)s.includeInCalc);

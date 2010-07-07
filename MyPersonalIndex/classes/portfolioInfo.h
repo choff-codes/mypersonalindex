@@ -27,8 +27,8 @@ public:
     QString aaSort;
     QString acctSort;
 
-    portfolioInfo();
-    void save();
+    portfolioInfo(const int &id_ = -1);
+    void save(const queries &dataSource);
 
     bool operator==(const portfolioInfo &other) const;
     bool operator!=(const portfolioInfo &other) const { return !(*this == other); }

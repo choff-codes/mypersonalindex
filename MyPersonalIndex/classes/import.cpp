@@ -56,7 +56,7 @@ void import::save(const int &portfolioID)
     foreach(const int &i, securities.selected)
     {
         security sec = portfolio::instance().securityFromID(securities.mapping.value(i));
-        sec.clearID();
+        sec.clearIdentity();
         sec.account = newAcctIDs.contains(sec.account) ? newAcctIDs.value(sec.account) : -1;
         sec.save(portfolioID);
 

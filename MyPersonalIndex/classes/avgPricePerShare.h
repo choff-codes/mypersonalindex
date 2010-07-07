@@ -2,23 +2,28 @@
 #define AVGPRICEPERSHARE_H
 
 #include <QList>
-#include <QPair>
+#include <QMap>
 #include "executedTrade.h"
-#include "account.h"
+#include "costBasis.h"
 #include "splits.h"
 #include "epsilon.h"
 
 class avgPricePerShare
 {
 public:
-    static double calculate(const QString &symbol, const QList<executedTrade> &trades, const account::costBasisType &type, const int &date);
+    static double calculate(const int &date_, const QList<executedTrade> &trades_, const costBasis &costBasis_, const splits &splits_);
 
 private:
-    typedef QPair<double /* shares */, double /* price */> sharePricePair;
+    struct sharePricePair
+    {
+        double shares;
+        double price;
 
-    static double firstOut(const QString &symbol, const QList<executedTrade> &trades, const account::costBasisType &type, const int &date);
-    static double average(const QString &symbol, const QList<executedTrade> &trades, const int &date);
-    static double hifo(const QString &symbol, const QList<executedTrade> &trades, const int &date);
+        sharePricePair(const double &shares_, const double &price):
+                shares(shares_),
+                price(price_)
+        {}
+    };
 };
 
 #endif // AVGPRICEPERSHARE_H

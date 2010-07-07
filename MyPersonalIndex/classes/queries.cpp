@@ -66,21 +66,18 @@ const QString queries::table_SecurityAA = "SecurityAA";
 const QString queries::table_SecurityTrades = "SecurityTrades";
 const QString queries::table_ExecutedTrades = "ExecutedTrades";
 
-QSqlDatabase queries::instance()
+queries::queries(const QString &databaseLocation)
 {
-    QSqlDatabase db = QSqlDatabase::database();
+    m_database = QSqlDatabase::database(databaseLocation);
+    if (m_database.isOpen())
+        return;
 
-    if (db.isOpen())
-        return db;
-
-    db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(getDatabaseLocation());
+    m_database = QSqlDatabase::addDatabase("QSQLITE", databaseLocation);
+    db.setDatabaseName(databaseLocation);
     db.open();
-
-    return db;
 }
 
-QString queries::getDatabaseLocation()
+QString queries::getDefaultDatabaseLocation()
 {
 #if defined(Q_OS_LINUX)
     return QCoreApplication::applicationDirPath().append("/MPI.sqlite");
@@ -89,9 +86,9 @@ QString queries::getDatabaseLocation()
 #endif
 }
 
-void queries::executeNonQuery(const QString &query)
+void queries::executeNonQuery(const QString &query) const
 {
-    QSqlQuery(query, instance());
+    QSqlQuery(query, m_database);
 }
 
 void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
@@ -99,10 +96,9 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
     if (tableName.isEmpty() || values.isEmpty())
         return;
 
-    QSqlDatabase db = instance();
-    db.transaction();
+    m_database.transaction();
 
-    QSqlQuery query(db);
+    QSqlQuery query(m_database);
     QStringList parameters, columns;
     const QList<QVariantList> binds = values.values();
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
@@ -123,10 +119,10 @@ void queries::executeTableUpdate(const QString &tableName, const QMap<QString /*
         query.exec();
     }
 
-    db.commit();
+    m_database.commit();
 }
 
-int queries::insert(const QString &tableName, QMap<QString, QVariant> values, const int &id)
+int queries::insert(const QString &tableName, QMap<QString, QVariant> values, const int &id) const
 {
     if (tableName.isEmpty() || values.isEmpty())
         return id;
@@ -137,7 +133,7 @@ int queries::insert(const QString &tableName, QMap<QString, QVariant> values, co
         return id;
     }
 
-    QSqlQuery query(instance());
+    QSqlQuery query(m_database);
     QStringList parameters, columns;
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
@@ -156,9 +152,9 @@ int queries::insert(const QString &tableName, QMap<QString, QVariant> values, co
     return getIdentity();
 }
 
-void queries::update(const QString &tableName, QMap<QString, QVariant> values, const int &id)
+void queries::update(const QString &tableName, QMap<QString, QVariant> values, const int &id) const
 {
-    QSqlQuery query(instance());
+    QSqlQuery query(m_database);
     QStringList columns;
     QString sql("UPDATE %1 SET %2");
     if (id != -1)
@@ -175,32 +171,20 @@ void queries::update(const QString &tableName, QMap<QString, QVariant> values, c
     query.exec();
 }
 
-QSqlQuery queries::select(const QString &tableName, QStringList columns, QString sortBy, bool joinToSecurity)
+QSqlQuery queries::select(const QString &tableName, QStringList columns, QString sortBy) const
 {
     QSqlQuery resultSet(instance());
     QString sql("SELECT %1 FROM %2%3%4");
 
-    if (joinToSecurity)
-    {
-        QString insertString = QString(tableName).append('.');
-        for(int i = 0; i < columns.count(); ++i)
-            columns[i].prepend(insertString);
-        if (!sortBy.isEmpty())
-            sortBy.prepend(insertString);
-        columns.append("Security.PortfolioID");
-    }
-
     resultSet.setForwardOnly(true);
-    resultSet.exec(sql.arg(columns.join(","), tableName,
-        joinToSecurity ? QString(" INNER JOIN Security ON Security.ID = %1.SecurityID").arg(tableName) : "",
-        sortBy.isEmpty() ? "" : QString(" ORDER BY %1").arg(sortBy)));
+    resultSet.exec(sql.arg(columns.join(","), tableName, sortBy.isEmpty() ? "" : QString(" ORDER BY %1").arg(sortBy)));
 
     return resultSet;
 }
 
-int queries::getIdentity()
+int queries::getIdentity() const
 {
-    QSqlQuery query("SELECT last_insert_rowid()", instance());
+    QSqlQuery query("SELECT last_insert_rowid()", m_database);
 
     if (query.isActive() && query.first())
         return query.value(0).toInt();
@@ -208,9 +192,9 @@ int queries::getIdentity()
     return -1;
 }
 
-int queries::getVersion()
+int queries::getDatabaseVersion() const
 {
-    QSqlQuery query("SELECT Version FROM Settings", instance());
+    QSqlQuery query("SELECT Version FROM Settings", m_database);
 
     if (query.isActive() && query.first())
         return query.value(0).toInt();
@@ -218,38 +202,32 @@ int queries::getVersion()
     return -1;
 }
 
-void queries::deleteTable(const QString &table)
+void queries::deleteTable(const QString &table) const
 {
     executeNonQuery(QString("DELETE FROM %1").arg(table));
 }
 
-void queries::deleteItem(const QString &table, const int &id)
+void queries::deleteItem(const QString &table, const int &id) const
 {
     executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table, QString::number(id)));
 }
 
-void queries::deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity)
+void queries::deletePortfolioItems(const QString &table, const int &portfolioID) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE %2").arg(table,
-       joinToSecurity ?
-           QString("%1.SecurityID IN (SELECT ID FROM Security WHERE PortfolioID = %2)").arg(table, QString::number(portfolioID)):
-           QString("PortfolioID = %1").arg(QString::number(portfolioID))));
+    executeNonQuery(QString("DELETE FROM %1 WHERE PortfolioID = %2").arg(table, QString::number(portfolioID)));
 }
 
-void queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity)
+void queries::deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE %2").arg(table,
-        joinToSecurity ?
-            QString("%1.SecurityID IN (SELECT ID FROM Security WHERE PortfolioID = %2) AND %1.Date >= %3").arg(table, QString::number(portfolioID), QString::number(startingDate)):
-            QString("PortfolioID = %1 AND Date >= %2").arg(QString::number(portfolioID), QString::number(startingDate))));
+    executeNonQuery(QString("DELETE FROM %1 WHERE PortfolioID = %2 AND Date >= %3").arg(table, QString::number(portfolioID), QString::number(startingDate)));
 }
 
-void queries::deleteSecurityItems(const QString &table, const int &securityID)
+void queries::deleteSecurityItems(const QString &table, const int &securityID) const
 {
     executeNonQuery(QString("DELETE FROM %1 WHERE SecurityID = %2").arg(table, QString::number(securityID)));
 }
 
-void queries::deleteSymbolItems(const QString &symbol)
+void queries::deleteSymbolItems(const QString &symbol) const
 {
     QString sql = "DELETE FROM %1 WHERE Symbol = '%2'";
     executeNonQuery(sql.arg(table_ClosingPrices, symbol));

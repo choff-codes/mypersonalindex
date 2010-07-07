@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
         return 0;
      }
 
-    QString location = queries::getDatabaseLocation();
+    QString location = queries::getDefaultDatabaseLocation();
     if (!QFile::exists(location))
         if (!QDir().mkpath(QFileInfo(location).absolutePath()) ||
             !QFile::copy(QCoreApplication::applicationDirPath().append("/MPI.sqlite"), location))

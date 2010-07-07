@@ -13,10 +13,10 @@ bool trade::operator==(const trade &other) const
             && this->endDate == other.endDate;
 }
 
-void trade::save(const int &securityID)
+void trade::save(const queries &dataSource)
 {
     QMap<QString, QVariant> values;
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_SecurityID), securityID);
+    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_SecurityID), this->parent);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Type), (int)this->type);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Value), this->value);
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Price), functions::doubleToNull(this->price));
@@ -27,12 +27,12 @@ void trade::save(const int &securityID)
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_StartDate), functions::dateToNull(this->startDate));
     values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_EndDate), functions::dateToNull(this->endDate));
 
-    this->id = queries::insert(queries::table_SecurityTrades, values, this->id);
+    this->id = dataSource.insert(queries::table_SecurityTrades, values, this->id);
 }
 
-void trade::remove() const
+void trade::remove(const queries &dataSource) const
 {
-    queries::deleteItem(queries::table_SecurityTrades, this->id);
+    dataSource.deleteItem(queries::table_SecurityTrades, this->id);
 }
 
 QString trade::tradeTypeToString(const tradeType &type)
@@ -56,7 +56,7 @@ QString trade::tradeTypeToString(const tradeType &type)
         case tradeType_Value:
             return "% of Value";
         case tradeType_TotalValue:
-            return "% of Total";
+            return "% of Portfolio";
         case tradeType_AA:
             return "% of AA Target";
         default:

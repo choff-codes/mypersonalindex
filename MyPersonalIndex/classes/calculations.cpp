@@ -1,17 +1,47 @@
-#define priceManager prices::instance()
 #include "calculations.h"
 
-securityInfo calculations::securityValues(const int &securityID, const int &date)
+snapshotPortfolio calculations::portfolioSnapshot(const int &date_, const bool &calcAveragePrices_)
 {
-    security s = portfolio::instance().securities(m_portfolioID, securityID);
+    snapshotPortfolio info = m_cache.value(date_);
+    if (!info.isNull())
+    {
+        if (calcAveragePrices_ && info.avgPrices.isEmpty())
+        {
+            info.avgPrices = avgPricePerShare(date_);
+            m_cache.insert(date_, info);
+        }
+        return info;
+    }
+
+    info = snapshotPortfolio(date_);
+    foreach(const security &s, m_portfolio.securities)
+    {
+        snapshotSecurity value = securitySnapshot(date_, s);
+        if (value.isNull())
+            continue;
+
+        info.securitiesInfo.insert(s.id, value);
+        info.add(value);
+    }
+
+    if (calcAveragePrices_)
+       info.avgPrices = avgPricePerShare(date_);
+
+    m_cache.insert(date_, info);
+    return info;
+}
+
+snapshotSecurity calculations::securitySnapshot(const int &date_, const int &id_)
+{
+    security s = m_portfolio.securities.value(id_);
+
     if(!s.includeInCalc)
-        return securityInfo();
+        return snapshotSecurity();
 
-    securityInfo value(date);
-    securityPrice price = priceManager.dailyPriceInfo(s.description, date);
-    splits splitRatio(s.description, date);
+    snapshotSecurity value(date_);
+    splits splitRatio(s.splits, date_);
 
-    foreach(const executedTrade &t, portfolio::instance().executedTrades(m_portfolioID, s.id))
+    foreach(const executedTrade &t, m_portfolio.executedTrades.value(s.id))
     {
         if (t.date > date)
             break;
@@ -23,117 +53,89 @@ securityInfo calculations::securityValues(const int &securityID, const int &date
     if (value.shares < EPSILON)
         value.shares = 0;
 
-    value.dividendAmount = value.shares * price.dividend;
-    value.totalValue = value.shares * price.close;
-    value.setExpenseRatio(s.expense);
+    value.dividendAmount = value.shares * s.dividend(date_);
+    value.totalValue = value.shares * s.price(date_);
+    value.expenseRatio = s.expense;
 
-    account acct = portfolio::instance().acct(m_portfolioID).value(s.account);
+    account acct = m_portfolio.accounts.value(s.account);
     value.setTaxLiability(acct.taxRate, acct.taxDeferred);
 
     return value;
 }
 
-dailyInfoPortfolio calculations::portfolioValues(const int &date, const bool &calcAveragePrices)
+snapshot calculations::assetAllocationSnapshot(const int &date_, const int &id_)
 {
-    dailyInfoPortfolio info = m_cache.value(date);
-    if (!info.isNull())
-    {
-        if (calcAveragePrices && info.avgPrices.isEmpty())
-        {
-            info.avgPrices = avgPricePerShare(date);
-            m_cache.insert(date, info);
-        }
-        return info;
-    }
+    snapshot value(date_);
+    snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
-    info = dailyInfoPortfolio(date);
-    foreach(const security &s, portfolio::instance().securities(m_portfolioID))
-    {
-        securityInfo value = securityValues(s.id, date);
-        if (value.isNull())
-            continue;
+    foreach(const security &s, m_portfolio.securities)
+        if (s.aa.contains(id_) || (id_ == -1 && s.aa.isEmpty()))
+            value.add(portfolioValue.securitiesInfo.value(s.id), s.aa.value(id_, 1));
 
-        info.securitiesInfo.insert(s.id, value);
-        info.add(value);
-    }
-
-    if (calcAveragePrices)
-       info.avgPrices = avgPricePerShare(date);
-
-    m_cache.insert(date, info);
-    return info;
+    return value;
 }
 
-dailyInfo calculations::aaValues(const int &date, const int &aaID)
+snapshot calculations::accountSnapshot(const int &date_, const int &id_)
 {
-    dailyInfo info(date);
-    dailyInfoPortfolio portfolioInfo = portfolioValues(date);
+    snapshot value(date_);
+    snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
-    foreach(const security &s, portfolio::instance().securities(m_portfolioID))
-        if (s.aa.contains(aaID) || (aaID == -1 && s.aa.isEmpty()))
-            info.add(portfolioInfo.securitiesInfo.value(s.id), s.aa.value(aaID, 1));
+    foreach(const security &s, m_portfolio.securities)
+        if (id_ == s.account)
+            value.add(portfolioValue.securitiesInfo.value(s.id));
 
-    return info;
+    return value;
 }
 
-dailyInfo calculations::acctValues(const int &date, const int &acctID)
+snapshot calculations::snapshotByKey(const int &date_, const objectKey &key_)
 {
-    dailyInfo info(date);
-    dailyInfoPortfolio portfolioInfo = portfolioValues(date);
-
-    foreach(const security &s,  portfolio::instance().securities(m_portfolioID))
-        if (acctID == s.account)
-            info.add(portfolioInfo.securitiesInfo.value(s.id));
-
-    return info;
-}
-
-dailyInfo calculations::getDailyInfoByKey(const int &date, const objectKey &key)
-{
-    switch(key.type)
+    switch(key_.type)
     {
         case objectType_AA:
-            return aaValues(date, key.id);
+            return assetAllocationSnapshot(date_, key_.id);
         case objectType_Account:
-            return acctValues(date, key.id);
+            return accountSnapshot(date_, key_.id);
         case objectType_Portfolio:
-            return portfolioValues(date);
+            return portfolioSnapshot(date_);
         case objectType_Security:
-            return portfolioValues(date).securitiesInfo.value(key.id); // may be cached
+            if (m_cache.contains(date_)) // may be cached
+                return portfolioSnapshot(date_).securitiesInfo.value(key_.id);
+            else
+                return securitySnapshot(date_, key_.id);
         default:
-            return dailyInfo(0);
+            return snapshot(0);
     }
 }
 
-navInfoStatistic calculations::changeOverTime(const objectKey &key, const int &startDate, const int &endDate, const bool &dividends)
+navInfoStatistic calculations::changeOverTime(const objectKey &key_, const int &beginDate_, const int &endDate_, const bool &dividends_)
 {
-    if (key.type == objectType_Symbol) // calculated differently
-        return changeOverTime(key.description, startDate, endDate, dividends);
+    if (key_.type == objectType_Symbol) // calculated differently
+        return changeOverTime(key_.description, beginDate_, endDate_, dividends_);
 
     navInfoStatistic returnValue;
-    const QMap<int, navPair> nav = portfolio::instance().nav(m_portfolioID).navHistory();
+    const QMap<int, navPair> nav = m_portfolio.nav.navHistory();
 
     if (nav.count() < 2)
         return returnValue;
 
-    QMap<int, navPair>::const_iterator i = nav.lowerBound(qMax((nav.constBegin() + 1).key(), startDate));
+    QMap<int, navPair>::const_iterator i = nav.lowerBound(qMax((nav.constBegin() + 1).key(), beginDate_));
     if (i != nav.constBegin())
         --i;
 
     int date = i.key();
     double currentNav = 1;
-    dailyInfo previousPrice = getDailyInfoByKey(date, key);
+    snapshot previousPrice = snapshotByKey(date, key_);
     returnValue.insert(date, currentNav, previousPrice.totalValue);
 
     for(++i; i != nav.constEnd(); ++i)
     {
         date = i.key();
-        if (date > endDate)
+        if (date > endDate_)
             break;
 
-        dailyInfo currentPrice = getDailyInfoByKey(date, key);
-        currentNav = change(currentPrice.totalValue, previousPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis,
-            dividends ? currentPrice.dividendAmount : 0, currentNav);
+        snapshot currentPrice = snapshotByKey(date, key_);
+        currentNav = change(previousPrice.totalValue, currentPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis,
+            dividends_ ? currentPrice.dividendAmount : 0, currentNav);
         returnValue.insert(date, currentNav, currentPrice.totalValue);
         previousPrice = currentPrice;
     }
@@ -180,7 +182,7 @@ navInfoStatistic calculations::changeOverTime(const QString &symbol, const int &
         if (currentPrice.close == 0)
             break;
 
-        nav = change(currentPrice.close * currentPrice.split, previousPrice.close, 0, dividends ? currentPrice.dividend : 0, nav);
+        nav = change(previousPrice.close, currentPrice.close * currentPrice.split, 0, dividends ? currentPrice.dividend : 0, nav);
         returnValue.insert(date, nav, currentPrice.close / splitRatio.ratio(date));
         previousPrice = currentPrice;
     }
@@ -202,7 +204,7 @@ navInfoStatistic calculations::changeOverTime(const int &startDate, const int &e
         ++i;
     }
 
-    dailyInfoPortfolio p = portfolioValues(endDate);
+    snapshotPortfolio p = portfolioSnapshot(endDate);
     returnValue.costBasis = p.costBasis;
     returnValue.expenseRatio = p.expenseRatio();
     returnValue.taxLiability = p.taxLiability;

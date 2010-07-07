@@ -17,21 +17,33 @@ public:
     bool cashAccount;
     bool includeInCalc;
     bool hide;
+    QString note;
     QMap<int, double> aa;
     QMap<int, trade> trades;
 
-    security(): objectKey(objectType_Security, QString()), account(-1), expense(-1),
-        divReinvest(false), cashAccount(false), includeInCalc(true), hide(false) {}
+    security(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = QString()):
+        objectKey(objectType_Security, description_, id_, parent_),
+        account(-1),
+        expense(0),
+        divReinvest(false),
+        cashAccount(false),
+        includeInCalc(true),
+        hide(false)
+    {}
 
     bool operator==(const security &other) const;
     bool operator!=(const security &other) const { return !(*this == other); }
 
     int firstTradeDate() const;
-    void save(const int &portfolioID);
-    void saveAATargets() const;
-    void remove() const;
-    void removeAATarget(const int &aaID);
-    void removeAccount(const int &accountID, const int &portfolioID);
+    void save(const queries &dataSource) { saveSecurity(dataSource); saveAATargets(dataSource); }
+
+    void remove(const queries &dataSource) const;
+    void removeAATarget(const queries &dataSource, const int &aaID);
+    void removeAccount(const queries &dataSource, const int &accountID);
+
+private:
+    void saveSecurity(const queries &dataSource);
+    void saveAATargets(const queries &dataSource) const;
 };
 
 #endif // SECURITY_H

@@ -8,22 +8,25 @@ bool account::operator==(const account &other) const
             && this->costBasis == other.costBasis;
 }
 
-void account::save(const int &portfolioID)
+void account::save(const queries &dataSource)
 {
+    if (!this->hasParent())
+        return;
+
     QMap<QString, QVariant> values;
-    values.insert(queries::acctColumns.at(queries::acctColumns_PortfolioID), portfolioID);
+    values.insert(queries::acctColumns.at(queries::acctColumns_PortfolioID), this->parent);
     values.insert(queries::acctColumns.at(queries::acctColumns_Description), this->description);
     values.insert(queries::acctColumns.at(queries::acctColumns_TaxRate), functions::doubleToNull(this->taxRate));
     values.insert(queries::acctColumns.at(queries::acctColumns_TaxDeferred), (int)this->taxDeferred);
     values.insert(queries::acctColumns.at(queries::acctColumns_CostBasis), (int)this->costBasis);
 
-    this->id = queries::insert(queries::table_Acct, values, this->id);
+    this->id = dataSource.insert(queries::table_Acct, values, this->id);
 }
 
-void account::remove() const
+void account::remove(const queries &dataSource) const
 {
-    if (this->id == -1)
+    if (!this->hasIdentity())
         return;
 
-    queries::deleteItem(queries::table_Acct, this->id);
+    dataSource.deleteItem(queries::table_Acct, this->id);
 }

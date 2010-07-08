@@ -4,7 +4,6 @@
 #include <QAbstractTableModel>
 #include <QTableView>
 #include <QList>
-#include "prices.h"
 #include "executedTrade.h"
 #include "functions.h"
 

@@ -11,7 +11,7 @@ class assetAllocation: public objectKey
 public:
     double target;
 
-    assetAllocation(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = "(Blank)"):
+    assetAllocation(int &id_ = -1, int &parent_ = -1, const QString &description_ = "(Blank)"):
         objectKey(objectType_AA, description_, id_, parent_),
         target(-1)
     {}

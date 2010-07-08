@@ -2,7 +2,7 @@ INCLUDEPATH += $$PWD
 SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/queries.cpp \
     $$PWD/nav.cpp \
-    $$PWD/prices.cpp \
+    $$PWD/priceFactory.cpp \
     $$PWD/calculations.cpp \
     $$PWD/functions.cpp \
     $$PWD/navInfo.cpp \
@@ -15,7 +15,7 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/chartInfo.cpp \
     $$PWD/snapshot.cpp \
     $$PWD/executedTrade.cpp \
-    $$PWD/securityPrice.cpp \
+    $$PWD/historicalPrices.cpp \
     $$PWD/trade.cpp \
     $$PWD/updateInfo.cpp \
     $$PWD/statisticInfo.cpp \
@@ -31,7 +31,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/functions.h \
     $$PWD/nav.h \
     $$PWD/calculations.h \
-    $$PWD/prices.h \
+    $$PWD/priceFactory.h \
     $$PWD/navInfo.h \
     $$PWD/assetAllocation.h \
     $$PWD/account.h \
@@ -42,7 +42,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/chartInfo.h \
     $$PWD/snapshot.h \
     $$PWD/executedTrade.h \
-    $$PWD/securityPrice.h \
+    $$PWD/historicalPrices.h \
     $$PWD/trade.h \
     $$PWD/updateInfo.h \
     $$PWD/statisticInfo.h \

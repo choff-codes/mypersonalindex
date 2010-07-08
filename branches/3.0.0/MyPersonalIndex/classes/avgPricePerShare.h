@@ -11,7 +11,7 @@
 class avgPricePerShare
 {
 public:
-    static double calculate(const int &date_, const QList<executedTrade> &trades_, const costBasis &costBasis_, const splits &splits_);
+    static double calculate(int &date_, const QList<executedTrade> &trades_, costBasis costBasis_, splits splits_);
 
 private:
     struct sharePricePair

@@ -2,7 +2,6 @@
 #define MAINHOLDINGSMODEL_H
 
 #include "mpiViewModelBase.h"
-#include "prices.h"
 #include "calculations.h"
 
 class holdingsRow: public baseRow

@@ -14,7 +14,7 @@ public:
     bool taxDeferred;
     costBasis costBasis;
 
-    account(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = "(Blank)"):
+    account(int id_ = -1, int parent_ = -1, const QString &description_ = "(Blank)"):
         objectKey(objectType_Account, description_, id_, parent_),
         taxRate(-1),
         taxDeferred(false),

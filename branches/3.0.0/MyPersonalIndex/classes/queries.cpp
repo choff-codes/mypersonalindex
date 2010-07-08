@@ -226,11 +226,3 @@ void queries::deleteSecurityItems(const QString &table, const int &securityID) c
 {
     executeNonQuery(QString("DELETE FROM %1 WHERE SecurityID = %2").arg(table, QString::number(securityID)));
 }
-
-void queries::deleteSymbolItems(const QString &symbol) const
-{
-    QString sql = "DELETE FROM %1 WHERE Symbol = '%2'";
-    executeNonQuery(sql.arg(table_ClosingPrices, symbol));
-    executeNonQuery(sql.arg(table_Dividends, symbol));
-    executeNonQuery(sql.arg(table_Splits, symbol));
-}

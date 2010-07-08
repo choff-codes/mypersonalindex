@@ -4,6 +4,7 @@
 #include <qmath.h>
 #include <qnumeric.h>
 #include <QHash>
+#include <QMap>
 #include "snapshot.h"
 #include "portfolio.h"
 #include "splits.h"
@@ -19,30 +20,27 @@ class calculations
 {
 public:
     calculations(const portfolio &portfolio_):
-            m_portfolio(portfolio_)
+        m_portfolio(portfolio_)
     {}
 
-    void clearCache() { m_cache.clear(); }
+    snapshotPortfolio portfolioSnapshot(int date_, bool calcAveragePrices_ = false);
+    snapshotSecurity securitySnapshot(int date_, int id_);
+    snapshot assetAllocationSnapshot(int date_, int id_);
+    snapshot accountSnapshot(int date_, int id_);
 
-    snapshotPortfolio portfolioSnapshot(const int &date_, const bool &calcAveragePrices_ = false);
-    snapshotSecurity securitySnapshot(const int &date_, const int &id_);
-    snapshot assetAllocationSnapshot(const int &date_, const int &id_);
-    snapshot accountSnapshot(const int &date_, const int &id_);
-
-    navInfoStatistic changeOverTime(const objectKey &key_, const int &beginDate_, const int &endDate_, const bool &dividends_);
-    navInfoStatistic changeOverTime(const int &beginDate_, const int &endDate_); // overload that uses portfolio's NAV values, much faster than recalc'ing
+    navInfoStatistic changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_);
+    navInfoStatistic changeOverTime(int beginDate_, int endDate_); // overload that uses portfolio's NAV values, much faster than recalc'ing
 
     static double correlation(const navInfoStatistic &first_, const navInfoStatistic &second_);
-    static double change(const double &beginValue, const double &endValue_, const double &activity_,
-                         const double &dividends_, const double &beginNav_ = 1);
+    static double change(double beginValue, double endValue_, double activity_, double dividends_, double beginNav_ = 1);
 
 private:
-    const m_portfolio;
+    const portfolio m_portfolio;
     QHash<int, snapshotPortfolio> m_cache;
 
-    navInfoStatistic changeOverTime(const QString &symbol_, const int &beginDate_, const int &endDate_, const bool &dividends_);
-    snapshot snapshotByKey(const int &date_, const objectKey &key_);
-    QMap<int, double> avgPricePerShare(const int &date_);
+    snapshot snapshotByKey(int date_, const objectKey &key_);
+    navInfoStatistic changeOverTime(const QString &symbol_, int beginDate_, int endDate_, bool dividends_);
+    QMap<int, double> avgPricePerShare(int date_);
 };
 
 

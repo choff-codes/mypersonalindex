@@ -7,8 +7,6 @@
 #include <QtNetwork>
 #include "updateInfo.h"
 #include "queries.h"
-#include "portfolio.h"
-#include "settings.h"
 
 struct updatePricesReturnValue
 {
@@ -19,17 +17,17 @@ struct updatePricesReturnValue
 class updatePrices
 {
 public:
-    updatePrices(const settings &settings):
-            m_downloadSplits(settings.splits),
-            m_dataStartDate(settings.dataStartDate - 6 /* need a couple days before */)
+    updatePrices(int beginDate_, bool splits_):
+            m_splits(splits_),
+            m_beginDate(beginDate_)
     {}
 
     static bool isInternetConnection();
     updatePricesReturnValue run();
 
 private:
-    bool m_downloadSplits;
-    int m_dataStartDate;
+    bool m_splits;
+    int m_beginDate;
     QVariantList m_pricesDate, m_pricesSymbol, m_pricesPrice;
     QVariantList m_divDate, m_divSymbol, m_divAmount;
     QVariantList m_splitDate, m_splitSymbol, m_splitRatio;

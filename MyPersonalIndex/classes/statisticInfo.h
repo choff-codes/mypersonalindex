@@ -4,7 +4,6 @@
 #include <qmath.h>
 #include <qnumeric.h>
 #include "navInfo.h"
-#include "prices.h"
 
 class statisticInfo
 {

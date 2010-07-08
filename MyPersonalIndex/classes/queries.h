@@ -81,11 +81,10 @@ public:
 
     static QString getDefaultDatabaseLocation();
 
-    void executeNonQuery(const QString&) const;
     void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
     int insert(const QString &tableName, QMap<QString, QVariant> values, const int &id) const;
     void update(const QString &tableName, QMap<QString, QVariant> values, const int &id = -1) const;
-    QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString(), bool joinToSecurity = false) const;
+    QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString()) const;
 
     int getIdentity() const;
     int getDatabaseVersion() const;
@@ -99,6 +98,8 @@ public:
 
 private:
     QSqlDatabase m_database;
+
+    void executeNonQuery(const QString&) const;
 };
 
 #endif // QUERIES_H

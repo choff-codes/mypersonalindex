@@ -9,9 +9,22 @@ class tradeDateCalendar
 public:
     enum direction { direction_descending = -1, direction_ascending = 1 };
 
-    tradeDateCalendar(const int &date) { m_date = checkTradeDate(date); }
+    tradeDateCalendar(int date, const direction &direction_ = direction_ascending) { m_date = checkTradeDate(date, direction_); }
+    int date() { return m_date; }
+    tradeDateCalendar& operator++()
+    {
+        m_date = checkTradeDate(++m_date, direction_ascending);
+        return *this;
+    }
+    tradeDateCalendar operator++(int)
+    {
+        tradeDateCalendar copy(m_date);
+        ++(*this);
+        return copy;
+    }
 
-    static int checkTradeDate(const int &date_, const direction &direction_ = direction_ascending)
+
+    static int checkTradeDate(int date_, direction direction_ )
     {
         int date = date_;
 
@@ -47,7 +60,7 @@ public:
 
         const_iterator& operator++()
         {
-            currentDate = checkTradeDate(++currentDate);
+            currentDate = checkTradeDate(++currentDate, direction_ascending);
 
             if (currentDate > endDate)
                 currentDate = endDate;

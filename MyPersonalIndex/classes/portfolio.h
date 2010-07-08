@@ -4,7 +4,6 @@
 #include <QMap>
 #include "portfolioData.h"
 #include "queries.h"
-#include "prices.h"
 
 #ifdef CLOCKTIME
 #include <QTime>

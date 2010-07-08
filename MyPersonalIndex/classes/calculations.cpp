@@ -1,6 +1,6 @@
 #include "calculations.h"
 
-snapshotPortfolio calculations::portfolioSnapshot(const int &date_, const bool &calcAveragePrices_)
+snapshotPortfolio calculations::portfolioSnapshot(int date_, bool calcAveragePrices_)
 {
     snapshotPortfolio info = m_cache.value(date_);
     if (!info.isNull())
@@ -31,7 +31,7 @@ snapshotPortfolio calculations::portfolioSnapshot(const int &date_, const bool &
     return info;
 }
 
-snapshotSecurity calculations::securitySnapshot(const int &date_, const int &id_)
+snapshotSecurity calculations::securitySnapshot(int date_, int id_)
 {
     security s = m_portfolio.securities.value(id_);
 
@@ -63,7 +63,7 @@ snapshotSecurity calculations::securitySnapshot(const int &date_, const int &id_
     return value;
 }
 
-snapshot calculations::assetAllocationSnapshot(const int &date_, const int &id_)
+snapshot calculations::assetAllocationSnapshot(int date_, int id_)
 {
     snapshot value(date_);
     snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
@@ -75,7 +75,7 @@ snapshot calculations::assetAllocationSnapshot(const int &date_, const int &id_)
     return value;
 }
 
-snapshot calculations::accountSnapshot(const int &date_, const int &id_)
+snapshot calculations::accountSnapshot(int date_, int id_)
 {
     snapshot value(date_);
     snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
@@ -87,7 +87,7 @@ snapshot calculations::accountSnapshot(const int &date_, const int &id_)
     return value;
 }
 
-snapshot calculations::snapshotByKey(const int &date_, const objectKey &key_)
+snapshot calculations::snapshotByKey(int date_, const objectKey &key_)
 {
     switch(key_.type)
     {
@@ -107,47 +107,46 @@ snapshot calculations::snapshotByKey(const int &date_, const objectKey &key_)
     }
 }
 
-navInfoStatistic calculations::changeOverTime(const objectKey &key_, const int &beginDate_, const int &endDate_, const bool &dividends_)
+navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
 {
     if (key_.type == objectType_Symbol) // calculated differently
         return changeOverTime(key_.description, beginDate_, endDate_, dividends_);
 
-    navInfoStatistic returnValue;
-    const QMap<int, navPair> nav = m_portfolio.nav.navHistory();
+    navInfoStatistic navHistory;
+    if (m_portfolio.nav.isEmpty())
+        return navHistory;
 
-    if (nav.count() < 2)
-        return returnValue;
+    tradeDateCalendar calendar(qMax(m_portfolio.nav.constBegin().key(), beginDate_));
+    endDate_ = qMin((m_portfolio.nav.constEnd() - 1).key(), endDate_);
 
-    QMap<int, navPair>::const_iterator i = nav.lowerBound(qMax((nav.constBegin() + 1).key(), beginDate_));
-    if (i != nav.constBegin())
-        --i;
+    if (calendar.date() > endDate_)
+        return navHistory;
 
-    int date = i.key();
     double currentNav = 1;
-    snapshot previousPrice = snapshotByKey(date, key_);
-    returnValue.insert(date, currentNav, previousPrice.totalValue);
+    snapshot previousSnapshot = snapshotByKey(calendar.date(), key_);
+    navHistory.insert(calendar.date(), currentNav, previousSnapshot.totalValue);
+    ++calendar;
 
-    for(++i; i != nav.constEnd(); ++i)
+    foreach(const int &date, tradeDateCalendar)
     {
-        date = i.key();
         if (date > endDate_)
             break;
 
         snapshot currentPrice = snapshotByKey(date, key_);
-        currentNav = change(previousPrice.totalValue, currentPrice.totalValue, currentPrice.costBasis - previousPrice.costBasis,
+        currentNav = change(previousSnapshot.totalValue, currentPrice.totalValue, currentPrice.costBasis - previousSnapshot.costBasis,
             dividends_ ? currentPrice.dividendAmount : 0, currentNav);
-        returnValue.insert(date, currentNav, currentPrice.totalValue);
-        previousPrice = currentPrice;
+        navHistory.insert(date, currentNav, currentPrice.totalValue);
+        previousSnapshot = currentPrice;
     }
 
-    returnValue.costBasis = previousPrice.costBasis;
-    returnValue.expenseRatio = previousPrice.expenseRatio();
-    returnValue.taxLiability = previousPrice.taxLiability;
+    navHistory.costBasis = previousSnapshot.costBasis;
+    navHistory.expenseRatio = previousSnapshot.expenseRatio;
+    navHistory.taxLiability = previousSnapshot.taxLiability;
 
-    return returnValue;
+    return navHistory;
 }
 
-navInfoStatistic calculations::changeOverTime(const QString &symbol, const int &startDate, const int &endDate, const bool &dividends)
+navInfoStatistic calculations::changeOverTime(const QString &symbol, int startDate, int endDate, bool dividends)
 {
     navInfoStatistic returnValue;
     const securityPrices historicalInfo = priceManager.history(symbol);

@@ -64,19 +64,19 @@ QString trade::tradeTypeToString(const tradeType &type)
     }
 }
 
-QString trade::frequencyToString(const tradeFreq &freq)
+QString trade::frequencyToString(const tradeDateCalendar::frequency &freq)
 {
     switch (freq)
     {
-        case tradeFreq_Once:
+        case tradeDateCalendar::frequency_Once:
             return "Once";
-        case tradeFreq_Daily:
+        case tradeDateCalendar::frequency_Daily:
             return "Daily";
-        case tradeFreq_Weekly:
+        case tradeDateCalendar::frequency_Weekly:
             return "Weekly";
-        case tradeFreq_Monthly:
+        case tradeDateCalendar::frequency_Monthly:
             return "Monthly";
-        case tradeFreq_Yearly:
+        case tradeDateCalendar::frequency_Yearly:
             return "Yearly";
         default:
             return "";
@@ -108,19 +108,19 @@ QString trade::valueToString(const tradeType &type, const double &value)
     }
 }
 
-QString trade::dateToString(const tradeFreq &freq, const int &date)
+QString trade::dateToString(const tradeDateCalendar::frequency &freq, const int &date)
 {
     switch (freq)
     {
-        case tradeFreq_Once:
+        case tradeDateCalendar::frequency_Once:
             return date != 0 ? QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate) : "";
-        case tradeFreq_Daily:
+        case tradeDateCalendar::frequency_Daily:
             return "Market Days";
-        case tradeFreq_Weekly:
+        case tradeDateCalendar::frequency_Weekly:
             return date != 0 ? QDate::fromJulianDay(date).toString("dddd") : "";
-        case tradeFreq_Monthly:
+        case tradeDateCalendar::frequency_Monthly:
             return date != 0 ? QDate::fromJulianDay(date).toString("dd") : "";
-        case tradeFreq_Yearly:
+        case tradeDateCalendar::frequency_Yearly:
             return date != 0 ? QDate::fromJulianDay(date).toString("dd MMM") : "";
         default:
             return "";

@@ -13,7 +13,7 @@ public:
     double price;
     double commission;
 
-    executedTrade(const int &date_, const double &shares_, const double &price_, const double &commission_):
+    executedTrade(int date_, double shares_, double price_, double commission_):
         date(date_),
         shares(shares_),
         price(price_),
@@ -24,16 +24,19 @@ public:
 class executedTradeList: public objectBase
 {
 public:
-    executedTradeList(const int &parent_):
-            objectBase(parent_)
+    executedTradeList(int parent_):
+        objectBase(parent_)
     {}
 
-    const QList<executedTrade> executedTrades(const int &securityID) { return m_trades.value(securityID); }
+    const QList<executedTrade> executedTrades(int id_) const { return m_trades.value(id_); }
 
-    void insert(const int &securityID, const executedTrade &executedTrade_) { m_trades[securityID].append(executedTrade_); }
+    QMap<int, QList<executedTrade> >::const_iterator constBegin() const { return m_trades.constBegin(); }
+    QMap<int, QList<executedTrade> >::const_iterator constEnd() const { return m_trades.constEnd(); }
 
-    void remove(const queries &dataSource, const int &startDate);
-    void remove(const queries &dataSource);
+    void insert(int id_, const executedTrade &executedTrade_) { m_trades[id_].append(executedTrade_); }
+
+    void remove(const queries &dataSource_, int beginDate_);
+    void remove(const queries &dataSource_);
 
 private:
    QMap<int, QList<executedTrade> > m_trades;

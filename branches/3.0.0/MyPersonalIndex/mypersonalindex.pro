@@ -1,4 +1,3 @@
-include(shared/qtsingleapplication/qtsingleapplication.pri)
 include(forms/forms.pri)
 include(classes/classes.pri)
 include(models/models.pri)
@@ -6,6 +5,7 @@ include(ui/ui.pri)
 include(usercontrols/usercontrols.pri)
 
 INCLUDEPATH += shared/qwt
+INCLUDEPATH += shared/qtsingleapplication
 
 win32{
     CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd6.a

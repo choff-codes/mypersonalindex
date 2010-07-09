@@ -3,19 +3,34 @@
 
 #include <QSet>
 #include <QDate>
+#include <QList>
 
 class tradeDateCalendar
 {
 public:
-    enum direction { direction_descending = -1, direction_ascending = 1 };
+    enum direction {
+        direction_descending = -1,
+        direction_ascending = 1
+    };
 
-    tradeDateCalendar(int date, const direction &direction_ = direction_ascending) { m_date = checkTradeDate(date, direction_); }
-    int date() { return m_date; }
+    enum frequency {
+        frequency_Once,
+        frequency_Daily,
+        frequency_Weekly,
+        frequency_Monthly,
+        frequency_Yearly
+    };
+
+    tradeDateCalendar(int date_, direction direction_ = direction_ascending):
+        m_date(checkTradeDate(date_, direction_))
+    { }
+
     tradeDateCalendar& operator++()
     {
         m_date = checkTradeDate(++m_date, direction_ascending);
         return *this;
     }
+
     tradeDateCalendar operator++(int)
     {
         tradeDateCalendar copy(m_date);
@@ -23,15 +38,19 @@ public:
         return copy;
     }
 
+    int date() { return m_date; }
+    static QList<int> computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_);
 
     static int checkTradeDate(int date_, direction direction_ )
     {
-        int date = date_;
+        while(holidays.contains(date) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
+            date_ += direction_;
+        return date_;
+    }
 
-        while(holidays.contains(date) || date % 7 > 4) // 5 = Saturday, 6 = Sunday
-            date += direction_;
-
-        return date;
+    static int previousTradeDate(int date_)
+    {
+        return checkTradeDate(date_ - 1, direction_descending);
     }
 
     // Iterator that supports the "foreach". It needs to be
@@ -80,6 +99,11 @@ private:
     static const QSet<int> holidays;
     int m_date;
 
+    static QList<int> tradeDateCalendar::computeFrequencyTradeOnce(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_);
+    static QList<int> tradeDateCalendar::computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> tradeDateCalendar::computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> tradeDateCalendar::computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_);
 };
 
 #endif // TRADEDATECALENDAR_H

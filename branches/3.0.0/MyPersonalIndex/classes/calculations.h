@@ -27,19 +27,20 @@ public:
     snapshotSecurity securitySnapshot(int date_, int id_);
     snapshot assetAllocationSnapshot(int date_, int id_);
     snapshot accountSnapshot(int date_, int id_);
+    snapshot symbolSnapshot(int date_, int id_);
 
     navInfoStatistic changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_);
     navInfoStatistic changeOverTime(int beginDate_, int endDate_); // overload that uses portfolio's NAV values, much faster than recalc'ing
 
     static double correlation(const navInfoStatistic &first_, const navInfoStatistic &second_);
-    static double change(double beginValue, double endValue_, double activity_, double dividends_, double beginNav_ = 1);
+    static double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
 
 private:
     const portfolio m_portfolio;
     QHash<int, snapshotPortfolio> m_cache;
 
     snapshot snapshotByKey(int date_, const objectKey &key_);
-    navInfoStatistic changeOverTime(const QString &symbol_, int beginDate_, int endDate_, bool dividends_);
+    int beginDateByKey(const objectKey &key_);
     QMap<int, double> avgPricePerShare(int date_);
 };
 

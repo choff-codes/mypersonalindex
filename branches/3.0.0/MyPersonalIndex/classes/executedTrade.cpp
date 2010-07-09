@@ -1,24 +1,25 @@
 #include "executedTrade.h"
 
-void executedTradeList::remove(const queries &dataSource, const int &startDate)
+void executedTradeList::remove(const queries &dataSource_, int beginDate_)
 {
-    for(iterator i = begin(); i != end(); ++i)
+    for(QMap<int, QList<executedTrade> >::iterator i = m_trades.begin(); i != m_trades.end(); ++i)
     {
         QList<executedTrade>::iterator trade = i->begin();
         while (trade != i->end())
-            if (trade->date >= startDate)
+            if (trade->date >= beginDate_)
                 trade = i->erase(trade);
             else
                 ++trade;
     }
 
     if (this->hasParent())
-        dataSource.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, startDate, true);
+        dataSource_.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, beginDate_, true);
 }
 
-void executedTradeList::remove(const queries &dataSource)
+void executedTradeList::remove(const queries &dataSource_)
 {
     clear();
+
     if (this->hasParent())
-        dataSource.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, true);
+        dataSource_.deletePortfolioItems(queries::table_ExecutedTrades, this->parent, true);
 }

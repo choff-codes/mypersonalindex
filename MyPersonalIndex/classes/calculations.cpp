@@ -41,7 +41,7 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_)
     snapshotSecurity value(date_);
     splits splitRatio(s.splits, date_);
 
-    foreach(const executedTrade &t, m_portfolio.executedTrades.value(s.id))
+    foreach(const executedTrade &t, m_portfolio.executedTrades.executedTrade(s.id))
     {
         if (t.date > date)
             break;
@@ -67,6 +67,7 @@ snapshot calculations::assetAllocationSnapshot(int date_, int id_)
 {
     snapshot value(date_);
     snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
+    splits splitRatio(s.splits, date_);
 
     foreach(const security &s, m_portfolio.securities)
         if (s.aa.contains(id_) || (id_ == -1 && s.aa.isEmpty()))
@@ -87,6 +88,17 @@ snapshot calculations::accountSnapshot(int date_, int id_)
     return value;
 }
 
+snapshot calculations::symbolSnapshot(int date_, int id_)
+{
+    snapshot value(date_);
+    security s = m_portfolio.securities.value(id_);
+
+    value.costBasis = s.prices(tradeDateCalendar::previousTradeDate(date_));
+    value.count = 1;
+    value.dividendAmount = s.dividends(date_);
+    value.totalValue = s.prices(date_) / s.splits(date_);
+}
+
 snapshot calculations::snapshotByKey(int date_, const objectKey &key_)
 {
     switch(key_.type)
@@ -102,32 +114,50 @@ snapshot calculations::snapshotByKey(int date_, const objectKey &key_)
                 return portfolioSnapshot(date_).securitiesInfo.value(key_.id);
             else
                 return securitySnapshot(date_, key_.id);
+        case objectType_Symbol:
+            return symbolSnapshot(date_, key_.id);
         default:
             return snapshot(0);
     }
 }
 
+int calculations::beginDateByKey(const objectKey &key_)
+{
+    switch(key_.type)
+    {
+        case objectType_AA:
+        case objectType_Account:
+        case objectType_Portfolio:
+        case objectType_Security:
+            return m_portfolio.nav.isEmpty() ? 0 :  m_portfolio.nav.constBegin().key();
+    case objectType_Symbol:
+            return m_portfolio.security.value(key_.id).firstPrice();
+        default:
+            return 0;
+    }
+}
+
 navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
 {
-    if (key_.type == objectType_Symbol) // calculated differently
-        return changeOverTime(key_.description, beginDate_, endDate_, dividends_);
-
     navInfoStatistic navHistory;
-    if (m_portfolio.nav.isEmpty())
+    int objectEarliestDate = beginDateByKey(key_);
+
+    if (objectEarliestDate == 0)
         return navHistory;
 
-    tradeDateCalendar calendar(qMax(m_portfolio.nav.constBegin().key(), beginDate_));
+    beginDate_ = qMax(objectEarliestDate, beginDate_);
     endDate_ = qMin((m_portfolio.nav.constEnd() - 1).key(), endDate_);
 
+    tradeDateCalendar calendar(beginDate_);
     if (calendar.date() > endDate_)
         return navHistory;
 
     double currentNav = 1;
     snapshot previousSnapshot = snapshotByKey(calendar.date(), key_);
     navHistory.insert(calendar.date(), currentNav, previousSnapshot.totalValue);
-    ++calendar;
 
-    foreach(const int &date, tradeDateCalendar)
+    ++calendar;
+    foreach(const int &date, calendar)
     {
         if (date > endDate_)
             break;
@@ -139,6 +169,7 @@ navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDa
         previousSnapshot = currentPrice;
     }
 
+    // take last day's values
     navHistory.costBasis = previousSnapshot.costBasis;
     navHistory.expenseRatio = previousSnapshot.expenseRatio;
     navHistory.taxLiability = previousSnapshot.taxLiability;
@@ -146,100 +177,59 @@ navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDa
     return navHistory;
 }
 
-navInfoStatistic calculations::changeOverTime(const QString &symbol, int startDate, int endDate, bool dividends)
+
+//TODO: possibly remove if changeOverTime above can be efficient
+navInfoStatistic calculations::changeOverTime(int beginDate_, int endDate_)
 {
-    navInfoStatistic returnValue;
-    const securityPrices historicalInfo = priceManager.history(symbol);
-    const QMap<int, double> historicalPrices = historicalInfo.prices;
-    splits splitRatio(symbol, endDate);
+    navInfoStatistic navHistory;
+    if (m_portfolio.nav.isEmpty())
+        return navHistory;
 
-    if (historicalPrices.count() < 2)
-        return returnValue;
-
-    QMap<int, double>::const_iterator i = historicalPrices.lowerBound(qMax(historicalInfo.prices.constBegin().key() + 1, startDate));
-    if (i != historicalPrices.constBegin())
-        --i;
-
-    int date = i.key();
-    securityPrice previousPrice = historicalInfo.dailyPriceInfo(date);
-    if (previousPrice.close == 0)
-        return returnValue;
-
-    double nav = 1;
-    double totalValue = previousPrice.close / splitRatio.ratio(date);
-    returnValue.costBasis = totalValue;
-    returnValue.insert(date, nav, totalValue);
-
-    for(++i; i != historicalPrices.constEnd(); ++i)
+    int date = 0;
+    for(QMap<int, navPair>::const_iterator i = m_portfolio.nav.constBegin(); i != m_portfolio.nav.constEnd(); ++i)
     {
         date = i.key();
-        if (date > endDate)
-            break;
-
-        securityPrice currentPrice = historicalInfo.dailyPriceInfo(date);
-
-        if (currentPrice.close == 0)
-            break;
-
-        nav = change(previousPrice.close, currentPrice.close * currentPrice.split, 0, dividends ? currentPrice.dividend : 0, nav);
-        returnValue.insert(date, nav, currentPrice.close / splitRatio.ratio(date));
-        previousPrice = currentPrice;
+        if (date >= beginDate_ && date <= endDate_)
+            navHistory.insert(date, i.value().nav, i.value().totalValue);
     }
 
-    return returnValue;
-}
-
-navInfoStatistic calculations::changeOverTime(const int &startDate, const int &endDate)
-{
-    navInfoStatistic returnValue;
-    const QMap<int, navPair> info = portfolio::instance().nav(m_portfolioID).navHistory();
-    QMap<int, navPair>::const_iterator i = info.lowerBound(startDate);
-    if (i != info.constBegin())
-        --i;
-
-    while (i != info.constEnd() && i.key() <= endDate)
-    {
-        returnValue.insert(i.key(), i.value().nav, i.value().totalValue);
-        ++i;
-    }
-
-    snapshotPortfolio p = portfolioSnapshot(endDate);
+    snapshotPortfolio p = portfolioSnapshot(date);
     returnValue.costBasis = p.costBasis;
-    returnValue.expenseRatio = p.expenseRatio();
+    returnValue.expenseRatio = p.expenseRatio;
     returnValue.taxLiability = p.taxLiability;
 
-    return returnValue;
+    return navHistory;
 }
 
 
-double calculations::correlation(const navInfoStatistic &info1, const navInfoStatistic &info2)
+double calculations::correlation(const navInfoStatistic &first_, const navInfoStatistic &second_)
 {
-    if (info1.isEmpty() || info2.isEmpty())
+    if (first_.isEmpty() || second_.isEmpty())
         return 0;
 
-    int endDate = qMin(info1.lastDate(), info2.lastDate());
-    int startDate = qMax(info1.firstDate(), info2.firstDate());
+    int beginDate = qMax(first_.firstDate(), second_.firstDate());
+    int endDate = qMin(first_.lastDate(), second_.lastDate());
 
-    QList<int>::const_iterator i = priceManager.iteratorCurrentDateOrNext(startDate);
-    QList<int>::const_iterator end = priceManager.iteratorEnd();
+    tradeDateCalendar calendar(beginDate);
 
-    if (i == end)
-        return 0;
+    double previousNav1 = first_.nav(calendar.date());
+    double previousNav2 = second_.nav(calendar.date());
 
-    int date = *i;
+    // correlation totals
     int count = 0;
-    double security1Sum = 0, security2Sum = 0, security1Square = 0, security2Square = 0, productSquare = 0;
-    double previousNav1 = info1.nav(date);
-    double previousNav2 = info2.nav(date);
+    double security1Sum = 0;
+    double security2Sum = 0;
+    double security1Square = 0;
+    double security2Square = 0;
+    double productSquare = 0;
 
-    for(++i; i != end; ++i)
+    foreach(const int &date, tradeDateCalendar)
     {
-        date = *i;
         if (date > endDate)
             break;
 
-        double nav1 = info1.nav(date);
-        double nav2 = info2.nav(date);
+        double nav1 = first_.nav(date);
+        double nav2 = second_.nav(date);
         double change1 = nav1 / previousNav1 - 1;
         double change2 = nav2 / previousNav2 - 1;
 
@@ -264,48 +254,50 @@ double calculations::correlation(const navInfoStatistic &info1, const navInfoSta
     return (isnan(coefficient) || isinf(coefficient)) ? 0 : coefficient;
 }
 
-double calculations::change(double totalValue, double previousTotalValue, double dailyActivity, double dividends, double previousNAV)
+double calculations::change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1)
 {
     double nav;
-    dailyActivity -= dividends;
-    if (dailyActivity < 0)
-        nav = (totalValue - dailyActivity) / (previousTotalValue / previousNAV);
+    activity_ -= dividends_;
+    if (activity_ < 0)
+        nav = (endValue_ - activity_) / (beginValue_ / beginNAV_);
     else
-        nav = totalValue / ((previousTotalValue + dailyActivity) / previousNAV);
+        nav = endValue_ / ((beginValue_ + activity_) / beginNAV_);
 
-    return (isnan(nav) || isinf(nav)) ? previousNAV : nav;
+    return (isnan(nav) || isinf(nav)) ? beginNAV_ : nav;
 }
 
-QMap<int, double> calculations::avgPricePerShare(const int &calculationDate)
+QMap<int, double> calculations::avgPricePerShare(const int &date_)
 {
 #ifdef CLOCKTIME
     QTime t;
     t.start();
 #endif
 
-    QMap<int, double> returnValues;
-    const executedTradeList trades = portfolio::instance().executedTrades(m_portfolioID);
-    account::costBasisType portfolioCostCalc = portfolio::instance().info(m_portfolioID).costBasis;
+    QMap<int, double> avgPrices;
+    costBasis defaultCostBasis = m_portfolio.info.costBasis;
+    QMap<int, QList<executedTrade> >::const_iterator tradeList;
 
-    for(executedTradeList::const_iterator tradeList = trades.constBegin(); tradeList != trades.constEnd(); ++tradeList)
+    for(tradeList = m_portfolio.executedTrades.constBegin(); tradeList != m_portfolio.executedTrades.constEnd(); ++tradeList)
     {
-        security s = portfolio::instance().securities(m_portfolioID, tradeList.key());
-        account::costBasisType type = portfolio::instance().acct(m_portfolioID, s.account).costBasis;
+        security s = m_portfolio.securities.value(tradeList.key());
+        costBasis overrideCostBasis = m_portfolio.acct.value(s.account).costBasis;
 
-        if (type == account::costBasisType_None)
-            type = portfolioCostCalc;
+        if (overrideCostBasis == account::costBasisType_None)
+            overrideCostBasis = defaultCostBasis;
 
-        if (s.cashAccount)
-            type = account::costBasisType_AVG;
+        if (s.cashAccount) // cash should always be computed as average
+            overrideCostBasis = account::costBasisType_AVG;
 
-        double price = avgPricePerShare::calculate(s.description, *tradeList, type, calculationDate);
-        if (price > 0)
-            returnValues.insert(s.id, price);
+        splits splitRatio(s.splits, date_);
+        double avg = avgPricePerShare::calculate(date_, tradeList.value(), overrideCostBasis, splitRatio);
+
+        if (avg > 0)
+            avgPrices.insert(s.id, avg);
     }
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (avg price): %d ms", t.elapsed());
 #endif
 
-    return returnValues;
+    return avgPrices;
 }

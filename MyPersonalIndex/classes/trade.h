@@ -7,6 +7,7 @@
 #include "queries.h"
 #include "functions.h"
 #include "assetAllocation.h"
+#include "tradeDateCalendar.h"
 
 class trade: public objectKey
 {
@@ -25,21 +26,12 @@ public:
         tradeType_Count
     };
 
-    enum tradeFreq {
-        tradeFreq_Once,
-        tradeFreq_Daily,
-        tradeFreq_Weekly,
-        tradeFreq_Monthly,
-        tradeFreq_Yearly,
-        tradeFreq_Count
-    };
-
     tradeType type;
     double value;
     double price;
     double commission;
     int cashAccount;
-    tradeFreq frequency;
+    tradeDateCalendar::frequency frequency;
     int date;
     int startDate;
     int endDate;
@@ -71,9 +63,9 @@ public:
     QList<int> tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const;
 
     static QString tradeTypeToString(const tradeType &type);
-    static QString frequencyToString(const tradeFreq &freq);
+    static QString frequencyToString(const tradeDateCalendar::frequency &freq);
     static QString valueToString(const tradeType &type, const double &value);
-    static QString dateToString(const tradeFreq &freq, const int &date);
+    static QString dateToString(const tradeDateCalendar::frequency &freq, const int &date);
 };
 
 #endif // TRADE_H

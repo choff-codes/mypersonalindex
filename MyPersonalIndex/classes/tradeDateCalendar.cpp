@@ -1,5 +1,133 @@
 #include "tradeDateCalendar.h"
 
+QList<int> tradeDateCalendar::computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_)
+{
+    switch (frequency_)
+    {
+        case frequency_Once:
+            return computeFrequencyTradeOnce(date_, minimumDate_, maximumDate_);
+        case frequency_Daily:
+            return computeFrequencyTradeDaily(date_, minimumDate_, maximumDate_);
+        case frequency_Weekly:
+            return computeFrequencyTradeWeekly(date_, minimumDate_, maximumDate_);
+        case frequency_Monthly:
+            return computeFrequencyTradeMonthly(date_, minimumDate_, maximumDate_);
+        case frequency_Yearly:
+            return computeFrequencyTradeYearly(date_, minimumDate_, maximumDate_);
+        default:
+            return QList<int>();
+    }
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeOnce(int date_, int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    date_ = checkTradeDate(date_);
+    if (date_ >= minimumDate_ && date_ <= maximumDate_)
+        tradeDates.append(date_);
+
+    return tradeDates;
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    tradeDateCalendar calendar(minimumDate_);
+    foreach(const int &date, calendar)
+    {
+        if (date > maximumDate_)
+            break;
+
+        tradeDates.append(date);
+    }
+
+    return tradeDates;
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    int weekDayCounter = minimumDate_;
+    while (weekDayCounter % 7 != date_ % 7)
+        ++weekDayCounter;
+
+    forever
+    {
+        date_ = checkTradeDate(weekDayCounter);
+        if (date_ > maximumDate_)
+            break;
+
+        tradeDates.append(date_);
+        weekDayCounter += 7;
+    }
+
+    return tradeDates;
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    QDate monthDayCounter = QDate::fromJulianDay(minimumDate_);
+    int dayOfMonth = QDate::fromJulianDay(date_).day();
+
+    forever
+    {
+        QDate monthDayComputation = monthDayCounter;
+        if (monthDayComputation.day() > dayOfMonth)
+            monthDayComputation = monthDayComputation.addMonths(1);
+
+        if (dayOfMonth > monthDayComputation.daysInMonth())
+        {
+            monthDayComputation = monthDayComputation.addMonths(1);
+            monthDayComputation = QDate(monthDayComputation.year(), monthDayComputation.month(), 1);
+        }
+        else
+            monthDayComputation = QDate(monthDayComputation.year(), monthDayComputation.month(), dayOfMonth);
+
+        date_ = checkTradeDate(monthDayComputation.toJulianDay());
+        if (date_ > maximumDate_)
+            break;
+
+        tradeDates.append(date_);
+        monthDayCounter = monthDayCounter.addMonths(1);
+    }
+
+    return tradeDates;
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    QDate yearDayCounter = QDate::fromJulianDay(minimumDate_);
+    int dayOfYear = QDate::fromJulianDay(date_).dayOfYear();
+
+    forever
+    {
+        QDate yearDayComputation = yearDayCounter;
+        int leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearDayComputation.year()) ? 1 : 0);
+
+        if (yearDayComputation.dayOfYear() > leapDayofYear)
+        {
+            yearDayComputation = yearDayComputation.addYears(1);
+            leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearDayComputation.year()) ? 1 : 0);
+        }
+
+        date_ = checkTradeDate(yearDayComputation.toJulianDay());
+        if (date_ > maximumDate_)
+            break;
+
+        tradeDates.append(date_);
+        yearDayCounter = yearDayCounter.addYears(1);
+    }
+
+    return tradeDates;
+}
+
 const QSet<int> tradeDateCalendar::holidays = QSet<int>()
                                               << 2437666 // 01-Jan-1962
                                               << 2437718 // 22-Feb-1962

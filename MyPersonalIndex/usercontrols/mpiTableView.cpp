@@ -34,7 +34,7 @@ void mpiTableView::exportTable(bool copy)
         line.append("");
 
     for(int i = 0; i < model()->columnCount(); ++i)
-        line.append(functions::replaceDelimiter(model()->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimiter));
+        line.append(functions::formatForExport(model()->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimiter));
 
     lines.append(line.join(delimiter));
 
@@ -42,12 +42,12 @@ void mpiTableView::exportTable(bool copy)
     {
         line.clear();
         if (m_hasRowLabels)
-            line.append(functions::replaceDelimiter(model()->headerData(rows.at(x), Qt::Vertical, Qt::DisplayRole), delimiter));
+            line.append(functions::formatForExport(model()->headerData(rows.at(x), Qt::Vertical, Qt::DisplayRole), delimiter));
         for (int i = 0; i < model()->columnCount(); ++i)
         {
             QVariant v = model()->data(model()->index(rows.at(x), i), Qt::CheckStateRole);
             if (v.isNull())
-                line.append(functions::replaceDelimiter(model()->data(model()->index(rows.at(x), i), Qt::DisplayRole), delimiter));
+                line.append(functions::formatForExport(model()->data(model()->index(rows.at(x), i), Qt::DisplayRole), delimiter));
             else
                 line.append(v.toInt() == Qt::Checked ? "Yes" : "No");
         }

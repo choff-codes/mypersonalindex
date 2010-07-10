@@ -23,7 +23,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeOnce(int date_, int minimumDa
 {
     QList<int> tradeDates;
 
-    date_ = checkTradeDate(date_);
+    date_ = checkTradeDate(date_, direction_ascending);
     if (date_ >= minimumDate_ && date_ <= maximumDate_)
         tradeDates.append(date_);
 
@@ -56,7 +56,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeWeekly(int date_, int minimum
 
     forever
     {
-        date_ = checkTradeDate(weekDayCounter);
+        date_ = checkTradeDate(weekDayCounter, direction_ascending);
         if (date_ > maximumDate_)
             break;
 
@@ -88,7 +88,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeMonthly(int date_, int minimu
         else
             monthDayComputation = QDate(monthDayComputation.year(), monthDayComputation.month(), dayOfMonth);
 
-        date_ = checkTradeDate(monthDayComputation.toJulianDay());
+        date_ = checkTradeDate(monthDayComputation.toJulianDay(), direction_ascending);
         if (date_ > maximumDate_)
             break;
 
@@ -117,7 +117,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeYearly(int date_, int minimum
             leapDayofYear = dayOfYear + (dayOfYear > 59 /* Feb 28th */ && QDate::isLeapYear(yearDayComputation.year()) ? 1 : 0);
         }
 
-        date_ = checkTradeDate(yearDayComputation.toJulianDay());
+        date_ = checkTradeDate(yearDayComputation.toJulianDay(), direction_ascending);
         if (date_ > maximumDate_)
             break;
 

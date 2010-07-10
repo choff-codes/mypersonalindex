@@ -91,31 +91,28 @@ void queries::executeNonQuery(const QString &query) const
     QSqlQuery(query, m_database);
 }
 
-void queries::executeTableUpdate(const QString &tableName, const QMap<QString /* column name */, QVariantList /* values to be inserted */> &values)
+void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_)
 {
-    if (tableName.isEmpty() || values.isEmpty())
+    if (tableName_.isEmpty() || columns_.isEmpty() || !object_)
         return;
 
     m_database.transaction();
 
     QSqlQuery query(m_database);
-    QStringList parameters, columns;
-    const QList<QVariantList> binds = values.values();
+    QStringList parameters;
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
-    foreach(const QString &column, values.keys())
-    {
+    foreach(const QString &columns_, columns_)
         parameters.append("?");
-        columns.append(column);
-    }
 
-    query.prepare(sql.arg(tableName, columns.join(","), parameters.join(",")));
+    query.prepare(sql.arg(tableName_, columns_.join(","), parameters.join(",")));
 
-    int count = binds.at(0).count();
-    for (int i = 0; i < count; ++i)
+    int rowCount = object_->rowsToBeInserted();
+    int columnCount = columns_.count();
+    for (int i = 0; i < rowCount; ++i)
     {
-        for (int x = 0; x < binds.count(); ++x)
-            query.addBindValue(binds.at(x).at(i));
+        for (int x = 0; x < columnCount; ++x)
+            query.addBindValue(object_->value(i, x));
         query.exec();
     }
 

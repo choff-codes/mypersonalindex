@@ -2,94 +2,89 @@
 #define PORTFOLIO_H
 
 #include <QMap>
+#include <QSharedData>
 #include "portfolioData.h"
 #include "queries.h"
+#include "executedTrade.h"
+#include "navInfo.h"
+#include "security.h"
+#include "assetAllocation.h"
+#include "account.h"
+#include "portfolioInfo.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
+class portfolioData;
 class portfolio
 {
 public:
-    static portfolio& instance()
-    {
-        static portfolio m_instance; // Guaranteed to be destroyed and instantiated on first use.
-        return m_instance;
-    }
+    portfolio(int id_);
+    portfolio(const portfolio &other);
+    ~portfolio();
 
-    bool isEmpty() const { return m_portfolios.isEmpty(); }
-    int count() const { return m_portfolios.count(); }
-    QList<int> ids() const { return m_portfolios.keys(); }
+    portfolio& operator=(const portfolio &other);
+
     QStringList symbols() const;
-    bool datesOutsidePriceData() const;
+//    bool datesOutsidePriceData() const;
 
-    bool exists(const int &portfolioID) const { return m_portfolios.contains(portfolioID); }
-    void save() { foreach(const int &i, ids())  m_portfolios[i].info.save(); }
+    void save(const queries &dataSource_) {d->info.save(dataSource_); }
 
-    void insert(const portfolioInfo &info) { m_portfolios[info.id].info = info; }
-    void insert(const int &portfolioID, const assetAllocation &aa) { m_portfolios[portfolioID].aa[aa.id] = aa; }
-    void insert(const int &portfolioID, const account &acct) { m_portfolios[portfolioID].acct[acct.id] = acct; }
-    void insert(const int &portfolioID, const security &sec) { m_portfolios[portfolioID].securities[sec.id] = sec; }
-    void insertTrade(const int &portfolioID, const int &securityID, const trade &t) { m_portfolios[portfolioID].securities[securityID].trades[t.id] = t; }
-    void insertAAPercentage(const int &portfolioID, const int &securityID, const int &aaID, const double &value) { m_portfolios[portfolioID].securities[securityID].aa[aaID] = value; }
-    void insertNAV(const int &portfolioID, const int &date, const double &nav, const double &totalValue) { m_portfolios[portfolioID].nav.insert(date, nav, totalValue); }
-    void insertExecutedTrade(const int &portfolioID, const int &securityID, const executedTrade &t) { m_portfolios[portfolioID].executedTrades[securityID].append(t); }
+    void insert(const portfolioInfo &info_) { d->info = info_; }
+    void insert(const assetAllocation &aa_) { d->aa[aa.id] = aa; }
+    void insert(const account &acct_) { d->acct[acct.id] = acct; }
+    void insert(const security &security_) { d->securities[security_.id] = security_; }
+    void insertNAV(const queries &dataSource_, int date_, double nav_, double totalValue_) { d->nav.insert(dataSource_, date_, nav_, totalValue_); }
+    void insertExecutedTrade(const queries &dataSource_, int id_, const executedTrade &trade_) {d->executedTrades.insert(dateSource_, id_, trade_); }
 
-    void remove(const int &portfolioID);
-    void remove(const int &portfolioID, const assetAllocation &aa);
-    void remove(const int &portfolioID, const account &acct);
-    void remove(const int &portfolioID, const security &sec);
-    void removeNAV(const int &portfolioID) { m_portfolios[portfolioID].nav.remove(portfolioID); }
-    void removeNAV(const int &portfolioID, const int &startDate) { m_portfolios[portfolioID].nav.remove(portfolioID, startDate); }
-    void removeExecutedTrades(const int &portfolioID) { m_portfolios[portfolioID].executedTrades.remove(portfolioID); }
-    void removeExecutedTrades(const int &portfolioID, const int &startDate) { m_portfolios[portfolioID].executedTrades.remove(portfolioID, startDate); }
+    void beginNAVBatch() { d->nav.beginBatch(); }
+    void insertNAVBatch(const queries &dataSource_) { d->nav.insertBatch(dataSource_); }
+    void beginExecutedTradesBatch() { d->executedTrades.beginBatch(); }
+    void insertExecutedTradesBatch(const queries &dataSource_) { d->executedTrades.insertBatch(dataSource_); }
 
-    const QMap<int, security> securities(const int &portfolioID) const { return m_portfolios.value(portfolioID).securities; }
-    const security securities(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).securities.value(id); }
-    const security securityFromID(const int &id) const;
-    const QList<int> securityReinvestments(const int &portfolioID);
+    void remove(const queries &dataSource_);
+    void remove(const queries &dataSource_, const assetAllocation &aa_);
+    void remove(const queries &dataSource_, const account &acct_);
+    void remove(const queries &dataSource_, const security &security_);
+    void removeNAV(const queries &dataSource_, ) { d->nav.remove(dataSource_); }
+    void removeNAV(const queries &dataSource_, int beginDate_) { d->nav.remove(dataSource_, beginDate_); }
+    void removeExecutedTrades(const queries &dataSource_, ) { d->executedTrades.remove(dataSource_); }
+    void removeExecutedTrades(const queries &dataSource_, int beginDate_) { d->executedTrades.remove(dataSource_, beginDate_); }
 
-    const QMap<int, assetAllocation> aa(const int &portfolioID) const { return m_portfolios.value(portfolioID).aa; }
-    const assetAllocation aa(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).aa.value(id); }
-    const assetAllocation assetAllocationFromID(const int &id) const;
+    const QMap<int, security> securities() const { return d->securities; }
+    const security securities(int id_) const { return d->securities.value(id_); }
+    const QList<int> securityReinvestments();
 
-    const QMap<int, account> acct(const int &portfolioID) const { return m_portfolios.value(portfolioID).acct; }
-    const account acct(const int &portfolioID, const int &id) const { return m_portfolios.value(portfolioID).acct.value(id); }
-    const account accountFromID(const int &id) const;
+    const QMap<int, assetAllocation> aa() const { return d->aa; }
+    const assetAllocation aa(int id_) const { return d->aa.value(id_); }
 
-    const executedTradeList executedTrades(const int &portfolioID) const { return m_portfolios.value(portfolioID).executedTrades; }
-    const QList<executedTrade> executedTrades(const int &portfolioID, const int &securityID) const { return m_portfolios.value(portfolioID).executedTrades.value(securityID); }
-    const navInfoPortfolio nav(const int &id) const { return m_portfolios.value(id).nav; }
+    const QMap<int, account> acct() const { return d->acct; }
+    const account acct(int id_) const { return d->acct.value(id_); }
 
-    portfolioInfo info(const int &id) const { return m_portfolios.value(id).info; }
-    QList<portfolioInfo> info() const { QList<portfolioInfo> list; foreach(const portfolioData &d, m_portfolios) list.append(d.info); return list; }
-    objectKey key(const int &id) const { return m_portfolios.value(id).info.key(); }
+    const executedTradeList executedTrades() const { return d->executedTrades; }
+    const navInfoPortfolio nav() const { return d->nav; }
 
-    int startDate(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startDate; }
-    double startValue(const int &portfolioID) const { return m_portfolios.value(portfolioID).info.startValue; }
+    portfolioInfo info() const { return d->info; }
+    objectKey key() const { return d->info.key(); }
 
-    int minimumDate(const int &currentMinimumDate, const int &date) const;
-    int minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const;
+    int startDate() const { return d->info.startDate; }
+    double startValue() const { return d->info.startValue; }
+
+    //int minimumDate(const int &currentMinimumDate, const int &date) const;
+    //int minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const;
 
 private:
-    QMap<int, portfolioData> m_portfolios;
+    QExplicitlySharedDataPointer<portfolioData> d;
 
-    portfolio();
-    // Dont forget to declare these two. You want to make sure they
-    // are unaccessable otherwise you may accidently get copies of
-    // your singelton appearing.
-    portfolio(portfolio const&);  // Don't Implement
-    void operator=(portfolio const&); // Don't implement
-
-    void loadPortfoliosInfo();
-    void loadPortfoliosSecurity();
-    void loadPortfoliosSecurityAA();
-    void loadPortfoliosSecurityTrades();
-    void loadPortfoliosExecutedTrades();
-    void loadPortfoliosAA();
-    void loadPortfoliosAcct();
-    void loadPortfoliosNAV();
+//    void loadPortfoliosInfo();
+//    void loadPortfoliosSecurity();
+//    void loadPortfoliosSecurityAA();
+//    void loadPortfoliosSecurityTrades();
+//    void loadPortfoliosExecutedTrades();
+//    void loadPortfoliosAA();
+//    void loadPortfoliosAcct();
+//    void loadPortfoliosNAV();
 };
 
 #endif // PORTFOLIO_H

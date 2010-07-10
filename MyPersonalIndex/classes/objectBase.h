@@ -6,7 +6,10 @@ class objectBase
 public:
     int parent;
 
-    objectBase(const int &parent_ = -1): parent(parent_) {}
+    objectBase(const int &parent_ = -1):
+        parent(parent_)
+    {}
+
     bool hasParent() { return parent == -1; }
 };
 

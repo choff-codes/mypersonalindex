@@ -38,7 +38,10 @@ double historicalPrices::dividend(const int &date) const
     return d->dividends.value(date, 0);
 }
 
-double historicalPrices::split(const int &date) const { return d->splits.value(date, 1); }
+double historicalPrices::split(const int &date) const
+{
+    return d->splits.value(date, 1);
+}
 
 void historicalPrices::setPrices(const QMap<int, double> &prices_)
 {

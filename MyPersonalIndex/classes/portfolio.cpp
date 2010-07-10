@@ -1,26 +1,100 @@
 #include "portfolio.h"
 
-portfolio::portfolio()
+class portfolioData: public QSharedData
 {
+public:
+    QMap<int, security> securities;
+    QMap<int, assetAllocation> aa;
+    QMap<int, account> acct;
+    executedTradeList executedTrades;
+    navInfoPortfolio nav;
+    portfolioInfo info;
 
-#ifdef CLOCKTIME
-    QTime t;
-    t.start();
-#endif
+    portfolioData(const int &id_):
+            executedTrades(executedTradeList(id_)),
+            info(portfolioInfo(id_)),
+            nav(navInfoPortfolio(id_))
+    {}
+};
 
-    loadPortfoliosInfo();
-    loadPortfoliosAA();
-    loadPortfoliosAcct();
-    loadPortfoliosSecurity();
-    loadPortfoliosSecurityAA();
-    loadPortfoliosSecurityTrades();
-    loadPortfoliosExecutedTrades();
-    loadPortfoliosNAV();
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
-#endif
+portfolio::portfolio(int id_):
+    d(new portfolioData(id_))
+{
 }
+
+portfolio::portfolio(const portfolio &other):
+    d(other.d)
+{
+}
+
+portfolio::~portfolio()
+{
+}
+
+portfolio& portfolio::operator=(const portfolio &other)
+{
+    d = other.d;
+    return *this;
+}
+
+//portfolio::portfolio()
+//{
+//
+//#ifdef CLOCKTIME
+//    QTime t;
+//    t.start();
+//#endif
+//
+//    loadPortfoliosInfo();
+//    loadPortfoliosAA();
+//    loadPortfoliosAcct();
+//    loadPortfoliosSecurity();
+//    loadPortfoliosSecurityAA();
+//    loadPortfoliosSecurityTrades();
+//    loadPortfoliosExecutedTrades();
+//    loadPortfoliosNAV();
+//
+//#ifdef CLOCKTIME
+//    qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
+//#endif
+//}
+//
+//int portfolio::minimumDate(const int &currentMinimumDate, const int &date) const
+//{
+//    int returnDate = currentMinimumDate;
+//    if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
+//        returnDate = date;
+//
+//    return returnDate;
+//}
+//
+//int portfolio::minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
+//{
+//    int returnDate = currentMinimumDate;
+//    foreach(const security &s, securities(portfolioID))
+//        if(s.aa.contains(aa.id))
+//            foreach(const trade &t, s.trades)
+//                if (t.type == trade::tradeType_AA)
+//                {
+//                    returnDate = minimumDate(currentMinimumDate, s.firstTradeDate());
+//                    break;
+//                }
+//
+//    return returnDate;
+//}
+//
+//bool portfolio::datesOutsidePriceData() const
+//{
+//    int firstDate = prices::instance().firstDate();
+//    if (firstDate == 0)
+//        return true;
+//
+//    foreach(const portfolioData &d, m_portfolios)
+//        if (!d.nav.isEmpty() && d.nav.firstDate() < firstDate)
+//            return true;
+//
+//    return false;
+//}
 
 void portfolio::loadPortfoliosInfo()
 {
@@ -170,111 +244,47 @@ void portfolio::loadPortfoliosNAV()
 QStringList portfolio::symbols() const
 {
     QStringList list;
-    foreach(const portfolioData &d, m_portfolios)
-        foreach(const security &s, d.securities)
+    foreach(const security &s, d->securities)
+        if (!s.cashAccount)
             list.append(s.description);
+
     list.removeDuplicates();
     return list;
 }
 
-bool portfolio::datesOutsidePriceData() const
+const QList<int> portfolio::securityReinvestments()
 {
-    int firstDate = prices::instance().firstDate();
-    if (firstDate == 0)
-        return true;
-
-    foreach(const portfolioData &d, m_portfolios)
-        if (!d.nav.isEmpty() && d.nav.firstDate() < firstDate)
-            return true;
-
-    return false;
-}
-
-const security portfolio::securityFromID(const int &id) const
-{
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.securities.contains(id))
-            return d.securities.value(id);
-
-    return security();
-}
-
-const QList<int> portfolio::securityReinvestments(const int &portfolioID)
-{
-    QList<int> securityIDs;
-    foreach(const security &s, securities(portfolioID))
+    QList<int> reinvestments;
+    foreach(const security &s, d->securities)
         if (s.includeInCalc && s.divReinvest && !s.cashAccount)
-            securityIDs.append(s.id);
+            reinvestments.append(s.id);
 
-    return securityIDs;
+    return reinvestments;
 }
 
-const assetAllocation portfolio::assetAllocationFromID(const int &id) const
+void portfolio::remove(const queries &dataSource_)
 {
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.aa.contains(id))
-            return d.aa.value(id);
-
-    return assetAllocation();
+    dataSource_.deleteItem(queries::table_Portfolios, d->info.id);
 }
 
-const account portfolio::accountFromID(const int &id) const
+void portfolio::remove(const queries &dataSource_, const assetAllocation &aa_)
 {
-    foreach(const portfolioData &d, m_portfolios)
-        if (d.acct.contains(id))
-            return d.acct.value(id);
-
-    return account();
-}
-
-void portfolio::remove(const int &portfolioID)
-{
-    queries::deleteItem(queries::table_Portfolios, portfolioID);
-    m_portfolios.remove(portfolioID);
-}
-
-void portfolio::remove(const int &portfolioID, const assetAllocation &aa)
-{
-    aa.remove();
-    m_portfolios[portfolioID].aa.remove(aa.id);
-    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.end(); ++i)
+    aa.remove(dataSource_);
+    d->aa.remove(aa.id);
+    for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
         i->removeAATarget(aa.id);
 }
 
-void portfolio::remove(const int &portfolioID, const account &acct)
+void portfolio::remove(const queries &dataSource_, const account &acct_)
 {
-    acct.remove();
-    m_portfolios[portfolioID].acct.remove(acct.id);
-    for(QMap<int, security>::iterator i = m_portfolios[portfolioID].securities.begin(); i != m_portfolios[portfolioID].securities.end(); ++i)
+    acct.remove(dataSource_);
+    d->acct.remove(acct.id);
+    for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
         i->removeAccount(acct.id, portfolioID);
 }
 
-void portfolio::remove(const int &portfolioID, const security &sec)
+void portfolio::remove(const queries &dataSource_, const security &security_)
 {
-    sec.remove();
-    m_portfolios[portfolioID].securities.remove(sec.id);
-}
-
-int portfolio::minimumDate(const int &currentMinimumDate, const int &date) const
-{
-    int returnDate = currentMinimumDate;
-    if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
-        returnDate = date;
-
-    return returnDate;
-}
-
-int portfolio::minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
-{
-    int returnDate = currentMinimumDate;
-    foreach(const security &s, securities(portfolioID))
-        if(s.aa.contains(aa.id))
-            foreach(const trade &t, s.trades)
-                if (t.type == trade::tradeType_AA)
-                {
-                    returnDate = minimumDate(currentMinimumDate, s.firstTradeDate());
-                    break;
-                }
-
-    return returnDate;
+    sec.remove(dataSource_);
+    d->securities.remove(sec.id);
 }

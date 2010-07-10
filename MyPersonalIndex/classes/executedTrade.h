@@ -2,6 +2,7 @@
 #define EXECUTEDTRADE_H
 
 #include <QMap>
+#include <QPair>
 #include "queries.h"
 #include "objectBase.h"
 
@@ -21,11 +22,12 @@ public:
     {}
 };
 
-class executedTradeList: public objectBase
+class executedTradeList: public objectBase, public queriesBatch
 {
 public:
     executedTradeList(int parent_):
-        objectBase(parent_)
+        objectBase(parent_),
+        m_beginBatch(false)
     {}
 
     const QList<executedTrade> executedTrades(int id_) const { return m_trades.value(id_); }
@@ -34,12 +36,19 @@ public:
     QMap<int, QList<executedTrade> >::const_iterator constEnd() const { return m_trades.constEnd(); }
 
     void insert(int id_, const executedTrade &executedTrade_) { m_trades[id_].append(executedTrade_); }
+    void insert(const queries &dataSource_, int id_, const executedTrade &executedTrade_);
 
     void remove(const queries &dataSource_, int beginDate_);
     void remove(const queries &dataSource_);
 
+    void insertBatch(const queries &dataSource_);
+
+    int rowsToBeInserted() { return m_valuesToBeInserted.count(); }
+    QVariant value(int row_, int column_);
+
 private:
-   QMap<int, QList<executedTrade> > m_trades;
+   QHash<int, QList<executedTrade> > m_trades;
+   QList<QPair<int, int > > m_valuesToBeInserted;
 };
 
 #endif // EXECUTEDTRADE_H

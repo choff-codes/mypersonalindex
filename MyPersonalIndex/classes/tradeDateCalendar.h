@@ -43,7 +43,7 @@ public:
 
     static int checkTradeDate(int date_, direction direction_ )
     {
-        while(holidays.contains(date) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
+        while(holidays.contains(date_) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
             date_ += direction_;
         return date_;
     }
@@ -92,18 +92,18 @@ public:
         int endDate;
     };
 
-    const_iterator begin() const { return const_iterator(this, const_iterator::START); };
-    const_iterator end() const { return const_iterator(this, const_iterator::END); };
+    const_iterator begin() const { return const_iterator(this, const_iterator::START); }
+    const_iterator end() const { return const_iterator(this, const_iterator::END); }
 
 private:
     static const QSet<int> holidays;
     int m_date;
 
-    static QList<int> tradeDateCalendar::computeFrequencyTradeOnce(int date_, int minimumDate_, int maximumDate_);
-    static QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_);
-    static QList<int> tradeDateCalendar::computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_);
-    static QList<int> tradeDateCalendar::computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_);
-    static QList<int> tradeDateCalendar::computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeOnce(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_);
 };
 
 #endif // TRADEDATECALENDAR_H

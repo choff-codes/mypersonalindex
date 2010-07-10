@@ -11,6 +11,7 @@ public:
     historicalPrices();
     historicalPrices(const historicalPrices &other);
     ~historicalPrices();
+
     historicalPrices& operator=(const historicalPrices &other);
 
     double price(const int &date) const;

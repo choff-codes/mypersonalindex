@@ -9,6 +9,7 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QCoreApplication>
+#include "queriesBatch.h"
 
 class queries
 {
@@ -81,7 +82,7 @@ public:
 
     static QString getDefaultDatabaseLocation();
 
-    void executeTableUpdate(const QString &tableName, const QMap<QString, QVariantList> &values);
+    void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
     int insert(const QString &tableName, QMap<QString, QVariant> values, const int &id) const;
     void update(const QString &tableName, QMap<QString, QVariant> values, const int &id = -1) const;
     QSqlQuery select(const QString &tableName, QStringList columns, QString sortBy = QString()) const;

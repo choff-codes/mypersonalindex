@@ -1,12 +1,12 @@
 #include "assetAllocation.h"
 
-bool assetAllocation::operator==(const assetAllocation &other) const
+bool assetAllocation::operator==(const assetAllocation &other_) const
 {
-    return this->key() == other.key()
-            && this->target == other.target;
+    return this->key() == other_.key()
+            && this->target == other_.target;
 }
 
-void assetAllocation::save(const queries &dataSource)
+void assetAllocation::save(const queries &dataSource_)
 {
     if (!this->hasParent())
         return;
@@ -16,13 +16,13 @@ void assetAllocation::save(const queries &dataSource)
     values.insert(queries::aaColumns.at(queries::aaColumns_Description), this->description);
     values.insert(queries::aaColumns.at(queries::aaColumns_Target), functions::doubleToNull(this->target));
 
-    this->id = dataSource.insert(queries::table_AA, values, this->id);
+    this->id = dataSource_.insert(queries::table_AA, values, this->id);
 }
 
-void assetAllocation::remove(const queries &dataSource) const
+void assetAllocation::remove(const queries &dataSource_) const
 {
     if (!this->hasIdentity())
         return;
 
-    dataSource.deleteItem(queries::table_AA, this->id);
+    dataSource_.deleteItem(queries::table_AA, this->id);
 }

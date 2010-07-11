@@ -9,14 +9,16 @@ class historicalPrices
 {
 public:
     historicalPrices();
-    historicalPrices(const historicalPrices &other);
+    historicalPrices(const historicalPrices &other_);
     ~historicalPrices();
 
-    historicalPrices& operator=(const historicalPrices &other);
+    historicalPrices& operator=(const historicalPrices &other_);
 
-    double price(const int &date) const;
-    double dividend(const int &date) const;
-    double split(const int &date) const;
+    double price(int date_) const;
+    double dividend(int date_) const;
+    double split(int date_) const;
+
+    int endDate() const;
 
     void setPrices(const QMap<int, double> &prices_);
     void setDividends(const QMap<int, double> &dividends_);

@@ -209,6 +209,11 @@ void queries::deleteItem(const QString &table, const int &id) const
     executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table, QString::number(id)));
 }
 
+void queries::deleteItem(const QString &table, const int &id, const int &startingDate) const
+{
+    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table, QString::number(id), QString::number(startingDate)));
+}
+
 void queries::deletePortfolioItems(const QString &table, const int &portfolioID) const
 {
     executeNonQuery(QString("DELETE FROM %1 WHERE PortfolioID = %2").arg(table, QString::number(portfolioID)));

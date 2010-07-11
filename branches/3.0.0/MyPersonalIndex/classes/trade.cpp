@@ -173,36 +173,3 @@ double trade::purchasePrice(const double &currentSecurityPrice) const
         price >= 0 ? price :
         currentSecurityPrice;
 }
-
-QList<int> trade::tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const
-{
-    if(dates.isEmpty())
-        return QList<int>();
-
-    int startDate = qMax(this->startDate, calculationDate);;
-    int endDate = this->endDate == 0 ? dates.last() : qMin(this->endDate, dates.last());
-
-    switch(frequency)
-    {
-        case trade::tradeFreq_Once:
-            // these are not calculated on the fly and trades before the start date need to be inserted
-            if (date < startDate && calculatingFromStartDate)
-                return QList<int>() << this->date;
-
-            return functions::singleTrade(dates, this->date, startDate, endDate);
-        case trade::tradeFreq_Daily:
-            // -1 applies to every trading day
-            if (startDate == calculationDate && endDate == dates.last())
-                return QList<int>() << -1;
-            else
-                return functions::dailyTrades(dates, startDate, endDate);
-        case trade::tradeFreq_Weekly:
-            return functions::weeklyTrades(dates, this->date, startDate, endDate);
-        case trade::tradeFreq_Monthly:
-            return functions::monthlyTrades(dates, this->date, startDate, endDate);
-        case trade::tradeFreq_Yearly:
-            return functions::yearlyTrades(dates, this->date, startDate, endDate);
-        default:
-            return QList<int>();
-    }
-}

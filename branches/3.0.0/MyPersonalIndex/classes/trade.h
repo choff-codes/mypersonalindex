@@ -43,7 +43,7 @@ public:
         price(-1),
         commission(0),
         cashAccount(-1),
-        frequency(tradeFreq_Once),
+        frequency(tradeDateCalendar::frequency_Once),
         date(0),
         startDate(0),
         endDate(0)

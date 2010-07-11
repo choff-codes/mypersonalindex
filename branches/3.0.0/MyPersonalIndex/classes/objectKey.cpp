@@ -1,21 +1,21 @@
 #include "objectKey.h"
 
-bool objectKey::operator==(const objectKey &other) const
+bool objectKey::operator==(const objectKey &other_) const
 {
-    return this->description == other.description &&
-           this->id == other.id &&
-           this->type == other.type;
+    return this->description == other_.description &&
+           this->id == other_.id &&
+           this->type == other_.type;
 }
 
-bool objectKey::operator<(const objectKey &other) const
+bool objectKey::operator<(const objectKey &other_) const
 {
-    if (this->type < other.type)
+    if (this->type < other_.type)
         return true;
 
-    if (this->type == other.type && this->description < other.description)
+    if (this->type == other_.type && this->description < other_.description)
         return true;
 
-    if (this->type == other.type && this->description == other.description && this->id < other.id)
+    if (this->type == other_.type && this->description == other_.description && this->id < other_.id)
         return true;
 
     return false;

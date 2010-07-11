@@ -7,6 +7,8 @@
 #include "queries.h"
 #include "functions.h"
 #include "objectKey.h"
+#include "executedTrade.h"
+#include "historicalPrices.h"
 
 class security: public objectKey
 {
@@ -20,6 +22,7 @@ public:
     QString note;
     QMap<int, double> aa;
     QMap<int, trade> trades;
+    executedTradeList executedTrades;
 
     security(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = QString()):
         objectKey(objectType_Security, description_, id_, parent_),
@@ -28,22 +31,28 @@ public:
         divReinvest(false),
         cashAccount(false),
         includeInCalc(true),
-        hide(false)
+        hide(false),
+        executedTrades(id_)
     {}
 
-    bool operator==(const security &other) const;
-    bool operator!=(const security &other) const { return !(*this == other); }
+    bool operator==(const security &other_) const;
+    bool operator!=(const security &other_) const { return !(*this == other_); }
 
     int firstTradeDate() const;
-    void save(const queries &dataSource) { saveSecurity(dataSource); saveAATargets(dataSource); }
 
-    void remove(const queries &dataSource) const;
-    void removeAATarget(const queries &dataSource, const int &aaID);
-    void removeAccount(const queries &dataSource, const int &accountID);
+    void setHistoricalPrices(const historicalPrices &prices_) { m_prices = prices_; }
+    double price(int date_) const { return cashAccount ? 1 : m_prices.price(date_); }
+    double dividend(int date_) const { return cashAccount ? 0 : m_prices.dividend(date_); }
+    double split(int date_) const { return cashAccount ? 1 : m_prices.split(date_); }
+    int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(); }
+    
+    void save(const queries &dataSource_);
+    void remove(const queries &dataSource_) const;
 
 private:
-    void saveSecurity(const queries &dataSource);
-    void saveAATargets(const queries &dataSource) const;
+    historicalPrices m_prices;
+
+    void saveAATargets(const queries &dataSource_) const;
 };
 
 #endif // SECURITY_H

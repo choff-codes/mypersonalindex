@@ -17,7 +17,7 @@ public:
     virtual QVariant value(int row_, int column_) = 0;
 
 protected:
-    m_batchInProgress;
+    bool m_batchInProgress;
 };
 
 #endif // QUERIESBATCH_H

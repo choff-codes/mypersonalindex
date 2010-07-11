@@ -53,6 +53,11 @@ public:
         return checkTradeDate(date_ - 1, direction_descending);
     }
 
+    static int endDate()
+    {
+        return checkTradeDate(QDate::currentDate().toJulianDay(), direction_descending);
+    }
+
     // Iterator that supports the "foreach". It needs to be
     // named *exactly* const_iterator
     // http://sites.google.com/site/andreatagliasacchi/blog/customforeachiteratorsinqt

@@ -13,34 +13,29 @@
 class nav
 {
 public:
-    nav(const int &calculationDate, const int &portfolioID = -1): m_calculationDate(calculationDate), m_portfolioID(portfolioID) {}
-    void run();
+    nav(queries dataSource_):
+        m_dataSource(dataSource_)
+    {}
+
+    void run(int date_, const QList<portfolio> portfolios_);
 
 private:
-    int m_calculationDate;
-    int m_portfolioID;
-    QVariantList m_NAV_Portfolio, m_NAV_Dates, m_NAV_Totalvalue, m_NAV_Nav;
-    QVariantList m_ExecutedTrades_SecurityID, m_ExecutedTrades_Dates, m_ExecutedTrades_Shares, m_ExecutedTrades_Price, m_ExecutedTrades_Commission;
+    queries m_dataSource;
 
     typedef QMap<int, trade>::const_iterator navTradePointer;
     typedef QMap<int, QList<navTradePointer> > navTradeList;
 
-    navTradeList appendNavTradeLists(const navTradeList &first, const navTradeList &second);
-    void addToNAVList(const int &portfolioID, const int &date, const double &totalValue, const double &nav);
-    void addToExecutedTradeList(const int &portfolioID, const int &securityID, const int &date, const double &shares, const double &price, const double &commission);
+    void insertNAV(portfolio portfolio_, int date_, double endValue_, double nav_);
+    void insertExecutedTrade(portfolio portfolio_, int id_, int date_, double shares_, double price_, double commission_);
 
-    void clearNAVValues();
-    void insertNAVValues();
-    void deleteNAVValues(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
-    void calculateNAVValues(const int &portfolioID);
+    void removeHistoricalValues(portfolio portfolio_, int beginDate_, bool recalculateAll_);
+    void calculateNAVValues(portfolio portfolio_, int date_);
 
-    const QMap<int, navTradeList> calculateExecutedTrades(const int &portfolioID, const int &calculationDate, const bool &calculateFromStartDate);
-    void insertExecutedTrades(const int &portfolioID, const int &date, const snapshotPortfolio &previousInfo, const navTradeList &trades);
-    void insertExecutedTradesPreStartDate(const int &portfolioID, const int &startDate, const QMap<int, navTradeList> &allTrades);
-    void insertPortfolioReinvestments(const int &portfolioID, const int &date, const QList<int> &securityReinvestments, const snapshotPortfolio &previousInfo);
-    void insertPortfolioCashTrade(const int &portfolioID, const int &cashAccount, const snapshotPortfolio &previousInfo, const int &date, const double &reverseTradeValue);
-
-    int checkCalculationDate(const int &portfolioID, int calculationDate, bool *calcuateFromStartDate);
+    const QMap<int, navTradeList> calculateExecutedTrades(portfolio portfolio_, int date_, bool recalculateAll_);
+    void insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const navTradeList &trades_);
+    void insertExecutedTradesPreStartDate(portfolio portfolio_, int &beginDate_, const QMap<int, navTradeList> &trades_);
+    void insertPortfolioReinvestments(portfolio portfolio_, int date_, const QList<int> &securityReinvestments_, const snapshotPortfolio &priorDaySnapshot_);
+    void insertPortfolioCashTrade(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double &value_);
 };
 
 #endif // NAV_H

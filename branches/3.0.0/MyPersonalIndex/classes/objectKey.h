@@ -27,10 +27,10 @@ public:
     int id;
 
     objectKey(const objectType &type_ = objectType_None, const QString &description_ = QString(), const int &id_ = -1, const int &parent_ = -1):
+        objectBase(parent_),
         type(type_),
         description(description_),
-        id(id_),
-        objectBase(parent_)
+        id(id_)
     {}
 
     objectKey(const QString &p_symbol):
@@ -40,12 +40,13 @@ public:
     {}
 
     objectKey key() const { return *this; }
+
     void clearIdentity() { id = UNASSIGNED; }
     bool hasIdentity() { return this->id != UNASSIGNED; }
 
-    bool operator==(const objectKey &other) const;
-    bool operator!=(const objectKey &other) const { return !(*this == other); }
-    bool operator<(const objectKey &other) const;
+    bool operator==(const objectKey &other_) const;
+    bool operator!=(const objectKey &other_) const { return !(*this == other_); }
+    bool operator<(const objectKey &other_) const;
 };
 
 Q_DECLARE_METATYPE(objectKey);

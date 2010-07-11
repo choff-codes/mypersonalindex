@@ -13,8 +13,8 @@ historicalPrices::historicalPrices():
 {
 }
 
-historicalPrices::historicalPrices(const historicalPrices &other):
-    d(other.d)
+historicalPrices::historicalPrices(const historicalPrices &other_):
+    d(other_.d)
 {
 }
 
@@ -22,23 +22,23 @@ historicalPrices::~historicalPrices()
 {
 }
 
-historicalPrices& historicalPrices::operator=(const historicalPrices &other)
+historicalPrices& historicalPrices::operator=(const historicalPrices &other_)
 {
-    d = other.d;
+    d = other_.d;
     return *this;
 }
 
-double historicalPrices::price(const int &date) const
+double historicalPrices::price(int date) const
 {
     return d->prices.value(date, 0);
 }
 
-double historicalPrices::dividend(const int &date) const
+double historicalPrices::dividend(int date) const
 {
     return d->dividends.value(date, 0);
 }
 
-double historicalPrices::split(const int &date) const
+double historicalPrices::split(int date) const
 {
     return d->splits.value(date, 1);
 }
@@ -56,4 +56,9 @@ void historicalPrices::setDividends(const QMap<int, double> &dividends_)
 void historicalPrices::setSplits(const QMap<int, double> &splits_)
 {
     d->splits = splits_;
+}
+
+int historicalPrices::endDate() const
+{
+    return d->prices.isEmpty() ? 0 : (d->prices.constEnd() - 1).key();
 }

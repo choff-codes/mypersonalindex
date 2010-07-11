@@ -1,19 +1,19 @@
 #include "avgPricePerShare.h"
 
-double avgPricePerShare::calculate(int &date_, const QList<executedTrade> &trades_, costBasis costBasis_, splits splits_)
+double avgPricePerShare::calculate(int &date_, const QMap<int, executedTrade> &trades_, costBasis costBasis_, splits splits_)
 {
     QMap<double, sharePricePair> runningTrades;
     double shares = 0;
     double total = 0;
 
-    for(int i = 0; i < trades_.count(); ++i)
+    for(QMap<int, executedTrade>::const_iterator i = trades_.constBegin(); i != trades_.constEnd(); ++i)
     {
-        executedTrade t = trades_.at(i);
-        if (t.date > date_) // trade date outside of calculation date
+        if (i.key() > date_) // trade date outside of calculation date
             break;
 
-        t.price /= splits_.ratio(t.date);
-        t.shares *= splits_.ratio(t.date);
+        executedTrade t = i.value();
+        t.price /= splits_.ratio(i.key());
+        t.shares *= splits_.ratio(i.key());
 
         if (t.shares >= 0) // this is a buy, just add the trade
         {

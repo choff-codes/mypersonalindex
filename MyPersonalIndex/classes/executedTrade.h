@@ -9,13 +9,12 @@
 class executedTrade
 {
 public:
-    int date;
+
     double shares;
     double price;
     double commission;
 
-    executedTrade(int date_, double shares_, double price_, double commission_):
-        date(date_),
+    executedTrade(double shares_, double price_, double commission_):
         shares(shares_),
         price(price_),
         commission(commission_)
@@ -26,20 +25,17 @@ class executedTradeList: public objectBase, public queriesBatch
 {
 public:
     executedTradeList(int parent_):
-        objectBase(parent_),
-        m_beginBatch(false)
+        objectBase(parent_)
     {}
 
-    const QList<executedTrade> executedTrades(int id_) const { return m_trades.value(id_); }
+    QMap<int, executedTrade>::const_iterator constBegin() const { return m_trades.constBegin(); }
+    QMap<int, executedTrade>::const_iterator constEnd() const { return m_trades.constEnd(); }
 
-    QMap<int, QList<executedTrade> >::const_iterator constBegin() const { return m_trades.constBegin(); }
-    QMap<int, QList<executedTrade> >::const_iterator constEnd() const { return m_trades.constEnd(); }
+    void insert(int date_, const executedTrade &executedTrade_) { m_trades.insertMulti(date_, executedTrade_); }
+    void insert(const queries &dataSource_, int date_, const executedTrade &executedTrade_);
 
-    void insert(int id_, const executedTrade &executedTrade_) { m_trades[id_].append(executedTrade_); }
-    void insert(const queries &dataSource_, int id_, const executedTrade &executedTrade_);
-
-    void remove(const queries &dataSource_, int beginDate_);
     void remove(const queries &dataSource_);
+    void remove(const queries &dataSource_, int beginDate_);
 
     void insertBatch(const queries &dataSource_);
 
@@ -47,8 +43,8 @@ public:
     QVariant value(int row_, int column_);
 
 private:
-   QHash<int, QList<executedTrade> > m_trades;
-   QList<QPair<int, int > > m_valuesToBeInserted;
+   QMap<int, executedTrade> m_trades;
+   QList<QMap<int, executedTrade>::iterator> m_valuesToBeInserted;
 };
 
 #endif // EXECUTEDTRADE_H

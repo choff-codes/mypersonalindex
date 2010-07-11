@@ -11,9 +11,10 @@ historicalPrices priceFactory::getPrice(const QString &symbol_, const queries &d
     if (m_historicalPricesCache.contains(symbol_))
         return m_historicalPricesCache.value(symbol_);
 
-    securityPrices price;
+    historicalPrices price;
 
     m_historicalPricesCache.insert(symbol_, price);
+    updateHistoricalPrices(symbol_, price, dataSource_);
     return price;
 
 #ifdef CLOCKTIME
@@ -28,7 +29,7 @@ void priceFactory::updateHistoricalPrices(const QString &symbol_, const historic
     priceData_.setSplits(loadSplits(symbol_, dataSource_));
 }
 
-void priceFactory::refreshCache(const queries &dataSource_)
+void priceFactory::flagDirty(const queries &dataSource_)
 {
     for(QHash<QString, historicalPrices>::const_iterator i = m_historicalPricesCache.constBegin(); i != m_historicalPricesCache.constEnd(); ++i)
         updateHistoricalPrices(i.key(), i.value(), dataSource_);

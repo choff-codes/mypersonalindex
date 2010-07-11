@@ -1,14 +1,14 @@
 #include "account.h"
 
-bool account::operator==(const account &other) const
+bool account::operator==(const account &other_) const
 {
-    return this->key() == other.key()
-            && this->taxRate == other.taxRate
-            && this->taxDeferred == other.taxDeferred
-            && this->costBasis == other.costBasis;
+    return this->key() == other_.key()
+            && this->taxRate == other_.taxRate
+            && this->taxDeferred == other_.taxDeferred
+            && this->costBasis == other_.costBasis;
 }
 
-void account::save(const queries &dataSource)
+void account::save(const queries &dataSource_)
 {
     if (!this->hasParent())
         return;
@@ -20,13 +20,13 @@ void account::save(const queries &dataSource)
     values.insert(queries::acctColumns.at(queries::acctColumns_TaxDeferred), (int)this->taxDeferred);
     values.insert(queries::acctColumns.at(queries::acctColumns_CostBasis), (int)this->costBasis);
 
-    this->id = dataSource.insert(queries::table_Acct, values, this->id);
+    this->id = dataSource_.insert(queries::table_Acct, values, this->id);
 }
 
-void account::remove(const queries &dataSource) const
+void account::remove(const queries &dataSource_) const
 {
     if (!this->hasIdentity())
         return;
 
-    dataSource.deleteItem(queries::table_Acct, this->id);
+    dataSource_.deleteItem(queries::table_Acct, this->id);
 }

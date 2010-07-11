@@ -13,24 +13,11 @@ class priceFactory
 {
 public:
 
-    static priceFactory& getPriceFactory()
-    {
-        static priceFactory m_priceFactory; // Guaranteed to be destroyed and instantiated on first use.
-        return m_priceFactory;
-    }
-
     historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
-    void refreshCache(const queries &dataSource_);
+    static void flagDirty(const queries &dataSource_);
 
 private:
-    QHash<QString, historicalPrices> m_historicalPricesCache;
-
-    priceFactory();
-    // Dont forget to declare these two. You want to make sure they
-    // are unaccessable otherwise you may accidently get copies of
-    // your singelton appearing.
-    priceFactory(priceFactory const&);  // Don't Implement
-    void operator=(priceFactory const&); // Don't implement
+    static QHash<QString, historicalPrices> m_historicalPricesCache;
 
     void updateHistoricalPrices(const QString &symbol_, const historicalPrices &priceData_, const queries &dataSource_);
     QMap<int, double> loadPrices(const queries &dataSource_);

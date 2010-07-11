@@ -16,11 +16,11 @@ public:
         target(-1)
     {}
 
-    bool operator==(const assetAllocation &other) const;
-    bool operator!=(const assetAllocation &other) const { return !(*this == other); }
+    bool operator==(const assetAllocation &other_) const;
+    bool operator!=(const assetAllocation &other_) const { return !(*this == other_); }
 
-    void save(const queries &dataSource);
-    void remove(const queries &dataSource) const;
+    void save(const queries &dataSource_);
+    void remove(const queries &dataSource_) const;
 };
 
 #endif // ASSETALLOCATION_H

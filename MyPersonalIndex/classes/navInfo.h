@@ -36,6 +36,10 @@ public:
     QMap<int, navPair>::const_iterator constEnd() const { return m_nav.constEnd(); }
 
     int count() const { return m_nav.count(); }
+    int isEmpty() const { return m_nav.isEmpty(); }
+
+    double nav(int date_) const { return m_nav.value(date_).nav; }
+    double totalValue(int date_) const { return m_nav.value(date_).totalValue; }
 
     void remove(const queries &dataSource_);
     void remove(const queries &dataSource_, int beginDate_);

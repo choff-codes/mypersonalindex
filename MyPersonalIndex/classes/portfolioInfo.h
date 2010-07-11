@@ -13,7 +13,7 @@ public:
     enum thesholdMethod { threshold_Portfolio, theshold_AA };
 
     bool dividends;
-    account::costBasisType costBasis;
+    costBasis defaultCostBasis;
     int startValue;
     int aaThreshold;
     thesholdMethod aaThresholdMethod;

@@ -24,7 +24,8 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
     $$PWD/avgPricePerShare.cpp \
-    $$PWD/tradeDateCalendar.cpp
+    $$PWD/tradeDateCalendar.cpp \
+    $$PWD/portfolioFactory.cpp
 HEADERS += $$PWD/updatePrices.h \
     $$PWD/queries.h \
     $$PWD/functions.h \
@@ -54,4 +55,5 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/objectBase.h \
     $$PWD/tradeDateCalendar.h \
     $$PWD/costBasis.h \
-    queriesBatch.h
+    $$PWD/queriesBatch.h \
+    $$PWD/portfolioFactory.h

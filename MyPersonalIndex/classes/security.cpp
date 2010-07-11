@@ -1,16 +1,16 @@
 #include "security.h"
 
-bool security::operator==(const security &other) const
+bool security::operator==(const security &other_) const
 {
-    return this->key() == other.key()
-            && this->account == other.account
-            && this->expense == other.expense
-            && this->divReinvest == other.divReinvest
-            && this->cashAccount == other.cashAccount
-            && this->includeInCalc == other.includeInCalc
-            && this->hide == other.hide
-            && this->aa == other.aa
-            && this->trades == other.trades;
+    return this->key() == other_.key()
+            && this->account == other_.account
+            && this->expense == other_.expense
+            && this->divReinvest == other_.divReinvest
+            && this->cashAccount == other_.cashAccount
+            && this->includeInCalc == other_.includeInCalc
+            && this->hide == other_.hide
+            && this->aa == other_.aa
+            && this->trades == other_.trades;
 }
 
 int security::firstTradeDate() const
@@ -18,7 +18,7 @@ int security::firstTradeDate() const
     int minDate = -1;
     foreach(const trade &t, trades)
     {
-        if (t.frequency != trade::tradeFreq_Once && (t.startDate < minDate || minDate == -1))
+        if (t.frequency != tradeDateCalendar::frequency_Once && (t.startDate < minDate || minDate == -1))
             minDate = t.startDate;
         else if (t.startDate < t.date && (t.endDate > t.date || t.endDate == 0) && (t.date < minDate || minDate == -1))
             minDate = t.date;
@@ -27,7 +27,7 @@ int security::firstTradeDate() const
     return minDate;
 }
 
-void security::saveSecurity(const queries &dataSource)
+void security::save(const queries &dataSource_)
 {
     if (!this->hasParent())
         return;
@@ -42,12 +42,12 @@ void security::saveSecurity(const queries &dataSource)
     values.insert(queries::SecurityColumns.at(queries::securityColumns_IncludeInCalc), (int)this->includeInCalc);
     values.insert(queries::SecurityColumns.at(queries::securityColumns_Hide), (int)this->hide);
 
-    this->id = dataSource.insert(queries::table_Security, values, this->id);
+    this->id = dataSource_.insert(queries::table_Security, values, this->id);
 
     saveAATargets();
 }
 
-void security::saveAATargets(const queries &dataSource) const
+void security::saveAATargets(const queries &dataSource_) const
 {
     QVariantList securityID, aaID, percent;
 
@@ -63,30 +63,12 @@ void security::saveAATargets(const queries &dataSource) const
     tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_AAID), aaID);
     tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_Percent), percent);
 
-    dataSource.deleteSecurityItems(queries::table_SecurityAA, this->id);
+    dataSource_.deleteSecurityItems(queries::table_SecurityAA, this->id);
     if (!securityID.isEmpty())
-        dataSource.executeTableUpdate(queries::table_SecurityAA, tableValues);
+        dataSource_.executeTableUpdate(queries::table_SecurityAA, tableValues);
 }
 
-void security::remove(const queries &dataSource) const
+void security::remove(const queries &dataSource_) const
 {
-    dataSource.deleteItem(queries::table_Security, this->id);
-}
-
-void security::removeAATarget(const queries &dataSource, const int &aaID)
-{
-    if (aaID == UNASSIGNED || !this->aa.contains(aaID))
-        return;
-
-    this->aa.remove(aaID);
-    saveAATargets(dataSource);
-}
-
-void security::removeAccount(const queries &dataSource, const int &accountID)
-{
-    if (accountID == UNASSIGNED || this->account != accountID)
-        return;
-
-    this->account = UNASSIGNED;
-    saveSecurity(dataSource);
+    dataSource_.deleteItem(queries::table_Security, this->id);
 }

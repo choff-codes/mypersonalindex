@@ -41,13 +41,13 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_)
     snapshotSecurity value(date_);
     splits splitRatio(s.splits, date_);
 
-    foreach(const executedTrade &t, m_portfolio.executedTrades.executedTrade(s.id))
+    for(QMap<int, executedTrade>::const_iterator i = s.executedTrades.constBegin(); i != s.executedTrades.constEnd(); ++i)
     {
-        if (t.date > date)
+        if (i.key() > date)
             break;
 
-        value.shares += t.shares * splitRatio.ratio(t.date);
-        value.costBasis += (t.shares * t.price) + t.commission;
+        value.shares += i->shares * splitRatio.ratio(i.key());
+        value.costBasis += (i->shares * i->price) + i->commission;
     }
 
     if (value.shares < EPSILON)
@@ -277,19 +277,18 @@ QMap<int, double> calculations::avgPricePerShare(const int &date_)
     costBasis defaultCostBasis = m_portfolio.info.costBasis;
     QMap<int, QList<executedTrade> >::const_iterator tradeList;
 
-    for(tradeList = m_portfolio.executedTrades.constBegin(); tradeList != m_portfolio.executedTrades.constEnd(); ++tradeList)
+    foreach(const security &s, m_portfolio.securities())
     {
-        security s = m_portfolio.securities.value(tradeList.key());
-        costBasis overrideCostBasis = m_portfolio.acct.value(s.account).costBasis;
+        costBasis overrideCostBasis = m_portfolio.accounts().value(s.account).overrideCostBasis;
 
-        if (overrideCostBasis == account::costBasisType_None)
+        if (overrideCostBasis == costBasis_None)
             overrideCostBasis = defaultCostBasis;
 
         if (s.cashAccount) // cash should always be computed as average
             overrideCostBasis = account::costBasisType_AVG;
 
         splits splitRatio(s.splits, date_);
-        double avg = avgPricePerShare::calculate(date_, tradeList.value(), overrideCostBasis, splitRatio);
+        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splitRatio);
 
         if (avg > 0)
             avgPrices.insert(s.id, avg);

@@ -92,9 +92,10 @@ public:
 
     void deleteTable(const QString &table) const;
     void deleteItem(const QString &table, const int &id) const;
+    void deleteItem(const QString &table, const int &id, const int &startingDate) const;
     void deleteSecurityItems(const QString &table, const int &securityID) const;
-    void deletePortfolioItems(const QString &table, const int &portfolioID, bool joinToSecurity = false) const;
-    void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate, bool joinToSecurity = false) const;
+    void deletePortfolioItems(const QString &table, const int &portfolioID) const;
+    void deletePortfolioItems(const QString &table, const int &portfolioID, const int &startingDate) const;
     void deleteSymbolItems(const QString &symbol) const;
 
 private:

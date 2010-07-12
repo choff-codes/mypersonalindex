@@ -33,12 +33,12 @@ private:
     settings *m_settings;
     QList<chartInfo*> m_curves;
 
-    QHash<objectKey, navInfoStatistic> selectedNavInfo();
+    QHash<objectKey, historicalNAV> selectedNavInfo();
     selectionMap selectedByPortfolio();
     void addTreeItem(QTreeWidgetItem *parent, const QString &description, const objectKey &key);
-    void correlatation(const QHash<objectKey, navInfoStatistic> &items);
-    void stat(const QHash<objectKey, navInfoStatistic> &items);
-    void chart(const QHash<objectKey, navInfoStatistic> &items);
+    void correlatation(const QHash<objectKey, historicalNAV> &items);
+    void stat(const QHash<objectKey, historicalNAV> &items);
+    void chart(const QHash<objectKey, historicalNAV> &items);
 
 private slots:
     void refresh();

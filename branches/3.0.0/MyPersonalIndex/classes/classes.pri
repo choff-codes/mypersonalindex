@@ -5,7 +5,7 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/priceFactory.cpp \
     $$PWD/calculations.cpp \
     $$PWD/functions.cpp \
-    $$PWD/navInfo.cpp \
+    $$PWD/historicalNAV.cpp \
     $$PWD/assetAllocation.cpp \
     $$PWD/account.cpp \
     $$PWD/security.cpp \
@@ -20,7 +20,7 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/updateInfo.cpp \
     $$PWD/statisticInfo.cpp \
     $$PWD/import.cpp \
-    $$PWD/portfolioInfo.cpp \
+    $$PWD/portfolioAttributes.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
     $$PWD/avgPricePerShare.cpp \
@@ -32,7 +32,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/nav.h \
     $$PWD/calculations.h \
     $$PWD/priceFactory.h \
-    $$PWD/navInfo.h \
+    $$PWD/historicalNAV.h \
     $$PWD/assetAllocation.h \
     $$PWD/account.h \
     $$PWD/security.h \
@@ -47,7 +47,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/updateInfo.h \
     $$PWD/statisticInfo.h \
     $$PWD/import.h \
-    $$PWD/portfolioInfo.h \
+    $$PWD/portfolioAttributes.h \
     $$PWD/splits.h \
     $$PWD/objectKey.h \
     $$PWD/avgPricePerShare.h \

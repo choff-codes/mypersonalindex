@@ -21,7 +21,7 @@ frmCompare::frmCompare(settings *parentSettings): m_settings(parentSettings)
 {
     ui.setupUI(this);
 
-    foreach(const portfolioInfo &i, portfolio::instance().info())
+    foreach(const portfolioAttributes &i, portfolio::instance().info())
     {
         addTreeItem(ui.treePortfolios, i.description, i.key());
 
@@ -111,7 +111,7 @@ void frmCompare::refresh()
     QTime t;
     t.start();
 #endif
-    QHash<objectKey, navInfoStatistic> items = selectedNavInfo();
+    QHash<objectKey, historicalNAV> items = selectedNavInfo();
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (selected)", t.elapsed());
     t.restart();
@@ -151,12 +151,12 @@ frmCompare::selectionMap frmCompare::selectedByPortfolio()
     return itemsByPortfolio;
 }
 
-QHash<objectKey, navInfoStatistic> frmCompare::selectedNavInfo()
+QHash<objectKey, historicalNAV> frmCompare::selectedNavInfo()
 {
     selectionMap itemsByPortfolio = selectedByPortfolio();
     int startDate = ui.mainStartDateDropDown->date().toJulianDay();
     int endDate = ui.mainEndDateDropDown->date().toJulianDay();
-    QHash<objectKey, navInfoStatistic> items;
+    QHash<objectKey, historicalNAV> items;
 
     for(QMap<int, QList<objectKey> >::const_iterator i = itemsByPortfolio.constBegin(); i != itemsByPortfolio.constEnd(); ++i)
     {
@@ -169,7 +169,7 @@ QHash<objectKey, navInfoStatistic> frmCompare::selectedNavInfo()
     return items;
 }
 
-void frmCompare::correlatation(const QHash<objectKey, navInfoStatistic> &items)
+void frmCompare::correlatation(const QHash<objectKey, historicalNAV> &items)
 {
     QAbstractItemModel *oldModel = ui.correlations->model();
 
@@ -181,12 +181,12 @@ void frmCompare::correlatation(const QHash<objectKey, navInfoStatistic> &items)
     for(int i = 0; i < count - 1; ++i)  // once we reach count - 1, all combinations will already be calculated
     {
         objectKey key = (correlations.constBegin() + i).key();
-        navInfoStatistic security1history = items.value(key);
+        historicalNAV security1history = items.value(key);
 
         for (int x = i + 1; x < count; ++x)
         {
             objectKey key2 = (correlations.constBegin() + x).key();
-            navInfoStatistic security2history = items.value(key2);
+            historicalNAV security2history = items.value(key2);
 
             correlations[key].insert(key2, calculations::correlation(security1history, security2history));
         }
@@ -199,12 +199,12 @@ void frmCompare::correlatation(const QHash<objectKey, navInfoStatistic> &items)
     delete oldModel;
 }
 
-void frmCompare::stat(const QHash<objectKey, navInfoStatistic> &items)
+void frmCompare::stat(const QHash<objectKey, historicalNAV> &items)
 {
     QAbstractItemModel *oldModel = ui.stats->model();
 
     QMap<objectKey, QStringList> statisticMap;
-    for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+    for(QHash<objectKey, historicalNAV>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
     {
         statisticInfo s(i.value());
         QStringList statisticValues;
@@ -220,13 +220,13 @@ void frmCompare::stat(const QHash<objectKey, navInfoStatistic> &items)
     delete oldModel;
 }
 
-void frmCompare::chart(const QHash<objectKey, navInfoStatistic> &items)
+void frmCompare::chart(const QHash<objectKey, historicalNAV> &items)
 {
     qDeleteAll(m_curves);
     m_curves.clear();
     int colorCount = 0;
 
-    for(QHash<objectKey, navInfoStatistic>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+    for(QHash<objectKey, historicalNAV>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
     {
         chartInfo *c = new chartInfo();
         QwtPlotCurve *newLine = new QwtPlotCurve();

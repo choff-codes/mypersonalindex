@@ -1,13 +1,13 @@
-#include "navInfo.h"
+#include "historicalNAV.h"
 
-void navInfoPortfolio::insertBatch(const queries &dataSource_)
+void historicalNAVPortfolio::insertBatch(const queries &dataSource_)
 {
     dataSource_.executeTableUpdate(queries::table_NAV, queries::navColumns, this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }
 
-QVariant navInfoPortfolio::value(int row_, int column_)
+QVariant historicalNAVPortfolio::value(int row_, int column_)
 {
     int date = m_valuesToBeInserted.at(row_);
     navPair pair = m_nav.value(date);
@@ -25,7 +25,7 @@ QVariant navInfoPortfolio::value(int row_, int column_)
     }
 }
 
-void navInfoPortfolio::insert(const queries &dataSource_, int date_, double nav_, double totalValue_)
+void historicalNAVPortfolio::insert(const queries &dataSource_, int date_, double nav_, double totalValue_)
 {
     m_valuesToBeInserted.append(date_);
     insert(date_, nav_, totalValue_);
@@ -33,7 +33,7 @@ void navInfoPortfolio::insert(const queries &dataSource_, int date_, double nav_
         insertBatch(dataSource_);
 }
 
-void navInfoPortfolio::remove(const queries &dataSource_, int beginDate_)
+void historicalNAVPortfolio::remove(const queries &dataSource_, int beginDate_)
 {
     QMap<int, navPair>::iterator i = m_nav.lowerBound(beginDate_);
     while (i != m_nav.end())
@@ -42,13 +42,13 @@ void navInfoPortfolio::remove(const queries &dataSource_, int beginDate_)
     dataSource_.deletePortfolioItems(queries::table_NAV, portfolioID, beginDate_);
 }
 
-void navInfoPortfolio::remove(const queries &dataSource_)
+void historicalNAVPortfolio::remove(const queries &dataSource_)
 {
     m_nav.clear();
     dataSource_.deletePortfolioItems(queries::table_NAV, portfolioID);
 }
 
-void navInfoStatistic::insert(int date_, double nav_, double totalValue_)
+void historicalNAV::insert(int date_, double nav_, double totalValue_)
 {
     m_nav.insert(date_, navPair(nav_, totalValue_));
     if (date_ < m_firstDate || m_firstDate == 0)

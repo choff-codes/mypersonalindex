@@ -1,7 +1,7 @@
 #define priceManager prices::instance()
 #include "statisticInfo.h"
 
-statisticInfo::statisticInfo(const navInfoStatistic &info, const double &startNav):
+statisticInfo::statisticInfo(const historicalNAV &info, const double &startNav):
     m_endInfo(info), m_startNAV(startNav), m_startTotalValue(0), m_endNAV(startNav), m_endTotalValue(0),
     m_count(0), m_stdDev(0), m_maxChangePositive(0), m_maxChangePositiveDay(0), m_maxChangeNegative(0), m_maxChangeNegativeDay(0),
     m_minNAVValue(0), m_minNAVValueDay(0), m_maxNAVValue(0), m_maxNAVValueDay(0), m_minTotalValue(0), m_minTotalValueDay(0),

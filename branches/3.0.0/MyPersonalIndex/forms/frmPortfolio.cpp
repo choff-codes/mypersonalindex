@@ -1,7 +1,7 @@
 #include <QtGui>
 #include "frmPortfolio.h"
 
-frmPortfolio::frmPortfolio(const portfolioInfo& p, const int &dataStartDate, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p)
+frmPortfolio::frmPortfolio(const portfolioAttributes& p, const int &dataStartDate, QWidget *parent): QDialog(parent), m_portfolio(p), m_portfolioOriginal(p)
 {
     ui.setupUI(this);    
     this->setWindowTitle(QString("%1 Properties").arg(m_portfolio.description.isEmpty() ? "New Portfolio" : m_portfolio.description));
@@ -70,7 +70,7 @@ void frmPortfolio::accept()
     m_portfolio.description = ui.txtDesc->text();
     m_portfolio.dividends = ui.chkIncludeDiv->isChecked();
     m_portfolio.aaThreshold = ui.sbAAThreshold->value();
-    m_portfolio.aaThresholdMethod = (portfolioInfo::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
+    m_portfolio.aaThresholdMethod = (portfolioAttributes::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
     m_portfolio.costBasis = (account::costBasisType)ui.cmbCostBasis->itemData(ui.cmbCostBasis->currentIndex(), Qt::UserRole).toInt(); // ignore none
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.startDate = ui.dateStartDate->date().toJulianDay();

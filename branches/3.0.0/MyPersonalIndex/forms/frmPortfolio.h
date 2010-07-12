@@ -11,15 +11,15 @@ class frmPortfolio : public QDialog
 
 public:
 
-    const portfolioInfo& getReturnValues() const { return m_portfolio; }
+    const portfolioAttributes& getReturnValues() const { return m_portfolio; }
 
-    frmPortfolio(const portfolioInfo& p, const int &dataStartDate, QWidget *parent = 0);
+    frmPortfolio(const portfolioAttributes& p, const int &dataStartDate, QWidget *parent = 0);
 
 private:
 
     frmPortfolio_UI ui;
-    portfolioInfo m_portfolio;
-    portfolioInfo m_portfolioOriginal;
+    portfolioAttributes m_portfolio;
+    portfolioAttributes m_portfolioOriginal;
 
     void loadPortfolioAttributes();
     bool hasValidationErrors();

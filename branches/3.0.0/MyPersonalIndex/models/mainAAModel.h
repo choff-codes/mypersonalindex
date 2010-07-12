@@ -12,7 +12,7 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioInfo::thesholdMethod method, const assetAllocation &aa, const QString &sort);
+    aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioAttributes::thesholdMethod method, const assetAllocation &aa, const QString &sort);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();

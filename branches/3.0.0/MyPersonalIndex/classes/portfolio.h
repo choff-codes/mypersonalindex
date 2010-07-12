@@ -4,11 +4,11 @@
 #include <QMap>
 #include <QSharedData>
 #include "queries.h"
-#include "navInfo.h"
+#include "historicalNAV.h"
 #include "security.h"
 #include "assetAllocation.h"
 #include "account.h"
-#include "portfolioInfo.h"
+#include "portfolioAttributes.h"
 
 class portfolioData;
 class portfolio
@@ -21,7 +21,7 @@ public:
     portfolio& operator=(const portfolio &other_);
 
     QStringList symbols() const;
-    const QList<int> securityReinvestments();
+    QList<int> securityReinvestments();
 
     void beginNAVBatch();
     void insertNAVBatch(const queries &dataSource_);
@@ -33,8 +33,8 @@ public:
     QMap<int, security>& securities();
     QMap<int, assetAllocation> &assetAllocations();
     QMap<int, account>& accounts();
-    navInfoPortfolio& navHistory();
-    portfolioInfo& attributes();
+    historicalNAVPortfolio& navHistory();
+    portfolioAttributes& attributes();
 
 private:
     QExplicitlySharedDataPointer<portfolioData> d;

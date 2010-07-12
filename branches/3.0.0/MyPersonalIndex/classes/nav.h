@@ -22,20 +22,22 @@ public:
 private:
     queries m_dataSource;
 
-    typedef QMap<int, trade>::const_iterator navTradePointer;
-    typedef QMap<int, QList<navTradePointer> > navTradeList;
+    typedef QMap<int, trade>::const_iterator tradePointer;
+    typedef QMap<int, QList<tradePointer> > tradePointerMap;
 
     void insertNAV(portfolio portfolio_, int date_, double endValue_, double nav_);
     void insertExecutedTrade(portfolio portfolio_, int id_, int date_, double shares_, double price_, double commission_);
 
-    void removeHistoricalValues(portfolio portfolio_, int beginDate_, bool recalculateAll_);
-    void calculateNAVValues(portfolio portfolio_, int date_);
+    void clearHistoricalValues(portfolio portfolio_, int beginDate_, bool recalculateAll_);
 
-    const QMap<int, navTradeList> calculateExecutedTrades(portfolio portfolio_, int date_, bool recalculateAll_);
-    void insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const navTradeList &trades_);
-    void insertExecutedTradesPreStartDate(portfolio portfolio_, int &beginDate_, const QMap<int, navTradeList> &trades_);
+    void calculate(portfolio portfolio_, int date_);
+    QMap<int, tradePointerMap> calculateExecutedTrades(portfolio portfolio_, int date_, bool recalculateAll_);
+    double calculateShares(trade::tradeType tradeType_, double value_, double purchasePrice_, int id_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_);
+
+    void insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const tradePointerMap &trades_);
+    void insertExecutedTradesPreStartDate(portfolio portfolio_, int &beginDate_, const QMap<int, tradePointerMap> &trades_);
     void insertPortfolioReinvestments(portfolio portfolio_, int date_, const QList<int> &securityReinvestments_, const snapshotPortfolio &priorDaySnapshot_);
-    void insertPortfolioCashTrade(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double &value_);
+    void insertPortfolioCashReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double &value_);
 };
 
 #endif // NAV_H

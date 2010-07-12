@@ -38,7 +38,7 @@ void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
         p.attributes().costBasis = (costBasis)q.value(queries::portfoliosColumns_CostBasis).toInt();
         p.attributes().startValue = q.value(queries::portfoliosColumns_StartValue).toInt();
         p.attributes().aaThreshold = q.value(queries::portfoliosColumns_AAThreshold).toInt();
-        p.attributes().aaThresholdMethod = (portfolioInfo::thesholdMethod)q.value(queries::portfoliosColumns_ThresholdMethod).toInt();
+        p.attributes().aaThresholdMethod = (portfolioAttributes::thesholdMethod)q.value(queries::portfoliosColumns_ThresholdMethod).toInt();
         p.attributes().holdingsShowHidden = q.value(queries::portfoliosColumns_HoldingsShowHidden).toBool();
         p.attributes().navSortDesc = q.value(queries::portfoliosColumns_NAVSortDesc).toBool();
         p.attributes().aaShowBlank = q.value(queries::portfoliosColumns_AAShowBlank).toBool();

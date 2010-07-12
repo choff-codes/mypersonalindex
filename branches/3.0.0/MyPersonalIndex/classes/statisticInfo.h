@@ -3,14 +3,14 @@
 
 #include <qmath.h>
 #include <qnumeric.h>
-#include "navInfo.h"
+#include "historicalNAV.h"
 
 class statisticInfo
 {
 public:
-    statisticInfo(const navInfoStatistic &info, const double &startNav = 1);
+    statisticInfo(const historicalNAV &info, const double &startNav = 1);
 
-    const navInfoStatistic endInfo() const { return m_endInfo; }
+    const historicalNAV endInfo() const { return m_endInfo; }
     int startDate() const { return m_endInfo.firstDate(); }
     int endDate() const { return m_endInfo.lastDate(); }
     double startNAV() const { return m_startNAV; }
@@ -34,7 +34,7 @@ public:
     double expenseRatio() const { return m_endInfo.expenseRatio; }
 
 private:
-    const navInfoStatistic m_endInfo;
+    const historicalNAV m_endInfo;
     double m_startNAV;
     double m_startTotalValue;
     double m_endNAV;

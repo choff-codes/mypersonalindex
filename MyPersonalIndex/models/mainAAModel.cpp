@@ -9,7 +9,7 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
 
 
-aaRow::aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioInfo::thesholdMethod method,
+aaRow::aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioAttributes::thesholdMethod method,
     const assetAllocation &aa, const QString &sort): baseRow(sort)
 {
     //row_Description
@@ -28,7 +28,7 @@ aaRow::aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioInf
     this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Variance
     this->values.append(info.totalValue == 0 || aa.target < EPSILON ? QVariant() :
-        method == portfolioInfo::theshold_AA ? ((aaInfo.totalValue / (info.totalValue * aa.target)) - 1) :
+        method == portfolioAttributes::theshold_AA ? ((aaInfo.totalValue / (info.totalValue * aa.target)) - 1) :
         (aaInfo.totalValue / info.totalValue) - aa.target);
     //row_Rebalance
     this->values.append(info.totalValue == 0 || aa.target < EPSILON ? QVariant() : -1 * info.totalValue * ((aaInfo.totalValue / info.totalValue) - aa.target));

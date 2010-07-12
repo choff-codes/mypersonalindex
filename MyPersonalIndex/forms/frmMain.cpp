@@ -180,7 +180,7 @@ void frmMain::resetPortfolioDropDown(const int &portfolioID = -1)
     ui.mainPortfolioCombo->blockSignals(true);
     ui.mainPortfolioCombo->clear();
 
-    foreach(const portfolioInfo &info, portfolios.info())
+    foreach(const portfolioAttributes &info, portfolios.info())
         ui.mainPortfolioCombo->addItem(info.description, info.id);
 
     int row = portfolioID == -1 ? 0 : ui.mainPortfolioCombo->findData(portfolioID);
@@ -397,7 +397,7 @@ void frmMain::resetPortfolioCorrelation()
 
     correlations.insert(portfolios.key(m_portfolioID), QHash<objectKey, double>());
     
-    QHash<objectKey, navInfoStatistic> cache;
+    QHash<objectKey, historicalNAV> cache;
     foreach(const objectKey &key, correlations.keys())
         if (key.type == objectType_Portfolio)
             cache.insert(key, m_calculations.changeOverTime(startDate, endDate));
@@ -408,12 +408,12 @@ void frmMain::resetPortfolioCorrelation()
     for(int i = 0; i < count - 1; ++i)  // once we reach count - 1, all combinations will already be calculated
     {
         objectKey key = (correlations.constBegin() + i).key();
-        navInfoStatistic security1history = cache.value(key);
+        historicalNAV security1history = cache.value(key);
 
         for (int x = i + 1; x < count; ++x)
         {
             objectKey key2 = (correlations.constBegin() + x).key();
-            navInfoStatistic security2history = cache.value(key2);
+            historicalNAV security2history = cache.value(key2);
 
             correlations[key].insert(key2, calculations::correlation(security1history, security2history));
         }
@@ -491,7 +491,7 @@ void frmMain::resetPortfolioStat()
 void frmMain::resetPortfolioSettings()
 {
     ui.stbStartDate->setText(QString(" %1%2 ").arg(ui.INDEX_START_TEXT, QDate::fromJulianDay(portfolios.startDate(m_portfolioID)).toString(Qt::SystemLocaleShortDate)));
-    portfolioInfo info = portfolios.info(m_portfolioID);
+    portfolioAttributes info = portfolios.info(m_portfolioID);
     ui.holdingsShowHidden->setChecked(info.holdingsShowHidden);
     ui.performanceSortDesc->setChecked(info.navSortDesc);
     ui.aaShowBlank->setChecked(info.aaShowBlank);
@@ -504,7 +504,7 @@ void frmMain::savePortfolio()
     if (!portfolios.exists(m_portfolioID))
         return;
 
-    portfolioInfo info = portfolios.info(m_portfolioID);
+    portfolioAttributes info = portfolios.info(m_portfolioID);
     info.holdingsShowHidden = ui.holdingsShowHidden->isChecked();
     info.navSortDesc = ui.performanceSortDesc->isChecked();
     info.aaShowBlank = ui.aaShowBlank->isChecked();
@@ -516,10 +516,10 @@ void frmMain::savePortfolio()
 
 void frmMain::addPortfolio()
 {
-    frmPortfolio f(portfolioInfo(), m_settings.dataStartDate, this);
+    frmPortfolio f(portfolioAttributes(), m_settings.dataStartDate, this);
     if (f.exec())
     {
-        portfolioInfo p = f.getReturnValues();
+        portfolioAttributes p = f.getReturnValues();
 
         portfolios.insert(p);
         resetPortfolioDropDown(p.id);
@@ -532,11 +532,11 @@ void frmMain::editPortfolio()
     if (!portfolios.exists(m_portfolioID))
         return;
 
-    portfolioInfo origInfo = portfolios.info(m_portfolioID);
+    portfolioAttributes origInfo = portfolios.info(m_portfolioID);
     frmPortfolio f(origInfo, m_settings.dataStartDate, this);
     if (f.exec())
     {
-        portfolioInfo info = f.getReturnValues();
+        portfolioAttributes info = f.getReturnValues();
         bool reCalcChange = info.startValue != origInfo.startValue
                             || info.startDate != origInfo.startDate
                             || info.dividends != origInfo.dividends;
@@ -702,7 +702,7 @@ void frmMain::options()
 
         m_settings = f.getReturnValues();
         priceManager.remove(priceManager.symbols());
-        foreach(portfolioInfo info, portfolios.info())
+        foreach(portfolioAttributes info, portfolios.info())
         {
             if (info.startDate < m_settings.dataStartDate)
             {
@@ -969,7 +969,7 @@ void frmMain::sortDropDownChange(int columnID, QString *sortString, const QMap<i
 
 void frmMain::holdingsSortChanged(int index)
 {
-    portfolioInfo info = portfolios.info(m_portfolioID);
+    portfolioAttributes info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.holdingsSortCombo->itemData(index).toInt(), &info.holdingsSort, holdingsRow::fieldNames());
     portfolios.insert(info);
     resetPortfolioHoldings();
@@ -977,7 +977,7 @@ void frmMain::holdingsSortChanged(int index)
 
 void frmMain::aaSortChanged(int index)
 {
-    portfolioInfo info = portfolios.info(m_portfolioID);
+    portfolioAttributes info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.aaSortCombo->itemData(index).toInt(), &info.aaSort, aaRow::fieldNames());
     portfolios.insert(info);
     resetPortfolioAA();
@@ -985,7 +985,7 @@ void frmMain::aaSortChanged(int index)
 
 void frmMain::acctSortChanged(int index)
 {
-    portfolioInfo info = portfolios.info(m_portfolioID);
+    portfolioAttributes info = portfolios.info(m_portfolioID);
     sortDropDownChange(ui.accountsSortCombo->itemData(index).toInt(), &info.acctSort, acctRow::fieldNames());
     portfolios.insert(info);
     resetPortfolioAcct();

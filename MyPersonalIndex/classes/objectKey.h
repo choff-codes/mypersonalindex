@@ -50,7 +50,7 @@ public:
 };
 
 Q_DECLARE_METATYPE(objectKey);
-inline uint qHash(const objectKey &key) { return key.type ^ key.id; }
+inline uint qHash(const objectKey &key_) { return key_.type ^ key_.id; }
 
 
 #endif // OBJECTKEY_H

@@ -6,7 +6,7 @@
 #include <QMap>
 #include <QDate>
 #include "functions.h"
-#include "navInfo.h"
+#include "historicalNAV.h"
 
 class mainPerformanceModel: public QAbstractTableModel
 {

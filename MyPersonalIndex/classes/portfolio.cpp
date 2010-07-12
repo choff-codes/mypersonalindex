@@ -6,12 +6,12 @@ public:
     QMap<int, security> securities;
     QMap<int, assetAllocation> assetAllocations;
     QMap<int, account> accounts;
-    navInfoPortfolio navHistory;
-    portfolioInfo attributes;
+    historicalNAVPortfolio navHistory;
+    portfolioAttributes attributes;
 
     portfolioData(int id_):
-            attributes(portfolioInfo(id_)),
-            navHistory(navInfoPortfolio(id_))
+            attributes(portfolioAttributes(id_)),
+            navHistory(historicalNAVPortfolio(id_))
     {}
 };
 
@@ -72,12 +72,12 @@ QMap<int, account>& portfolio::accounts()
     return &d->accounts;
 }
 
-navInfoPortfolio& portfolio::navHistory()
+historicalNAVPortfolio& portfolio::navHistory()
 {
     return &d->navHistory;
 }
 
-portfolioInfo& portfolio::attributes()
+portfolioAttributes& portfolio::attributes()
 {
     return &d->attributes;
 }
@@ -93,7 +93,7 @@ QStringList portfolio::symbols() const
     return list;
 }
 
-const QList<int> portfolio::securityReinvestments()
+QList<int> portfolio::securityReinvestments()
 {
     QList<int> reinvestments;
     foreach(const security &s, d->securities)

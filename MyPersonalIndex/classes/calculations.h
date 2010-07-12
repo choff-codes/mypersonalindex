@@ -29,10 +29,10 @@ public:
     snapshot accountSnapshot(int date_, int id_);
     snapshot symbolSnapshot(int date_, int id_);
 
-    navInfoStatistic changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_);
-    navInfoStatistic changeOverTime(int beginDate_, int endDate_); // overload that uses portfolio's NAV values, much faster than recalc'ing
+    historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_);
+    historicalNAV changeOverTime(int beginDate_, int endDate_); // overload that uses portfolio's NAV values, much faster than recalc'ing
 
-    static double correlation(const navInfoStatistic &first_, const navInfoStatistic &second_);
+    static double correlation(const historicalNAV &first_, const historicalNAV &second_);
     static double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
 
 private:

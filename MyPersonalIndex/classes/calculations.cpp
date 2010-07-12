@@ -137,9 +137,9 @@ int calculations::beginDateByKey(const objectKey &key_)
     }
 }
 
-navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
+historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
 {
-    navInfoStatistic navHistory;
+    historicalNAV navHistory;
     int objectEarliestDate = beginDateByKey(key_);
 
     if (objectEarliestDate == 0)
@@ -179,9 +179,9 @@ navInfoStatistic calculations::changeOverTime(const objectKey &key_, int beginDa
 
 
 //TODO: possibly remove if changeOverTime above can be efficient
-navInfoStatistic calculations::changeOverTime(int beginDate_, int endDate_)
+historicalNAV calculations::changeOverTime(int beginDate_, int endDate_)
 {
-    navInfoStatistic navHistory;
+    historicalNAV navHistory;
     if (m_portfolio.nav.isEmpty())
         return navHistory;
 
@@ -202,7 +202,7 @@ navInfoStatistic calculations::changeOverTime(int beginDate_, int endDate_)
 }
 
 
-double calculations::correlation(const navInfoStatistic &first_, const navInfoStatistic &second_)
+double calculations::correlation(const historicalNAV &first_, const historicalNAV &second_)
 {
     if (first_.isEmpty() || second_.isEmpty())
         return 0;

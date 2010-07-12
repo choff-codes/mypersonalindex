@@ -3,7 +3,7 @@
 import::import()
 {
     int securityIdentity = 0, aaIdentity = 0, acctIdentity = 0;
-    foreach(const portfolioInfo &info, portfolio::instance().info())
+    foreach(const portfolioAttributes &info, portfolio::instance().info())
     {
          securityIdentity = getMappings<security>(portfolio::instance().securities(info.id), &securities, info.description, securityIdentity);
          aaIdentity = getMappings<assetAllocation>(portfolio::instance().aa(info.id), &assetAllocations, info.description, aaIdentity);

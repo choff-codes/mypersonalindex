@@ -2,11 +2,10 @@
 #define TRADE_H
 
 #include <QString>
-#include <QMap>
 #include <QDate>
 #include "queries.h"
 #include "functions.h"
-#include "assetAllocation.h"
+#include "objectKey.h"
 #include "tradeDateCalendar.h"
 
 class trade: public objectKey
@@ -54,13 +53,6 @@ public:
 
     void save(const queries &dataSource);
     void remove(const queries &dataSource) const;
-
-    double shares(const double &price, const double &securityValue, const double &portfolioValue,
-        const QMap<int, double> securityAA, const QMap<int, assetAllocation>  &portfolioAA) const;
-
-    double purchasePrice(const double &currentSecurityPrice) const;
-
-    QList<int> tradeDates(const QList<int> &dates, const int &calculationDate, const bool &calculatingFromStartDate) const;
 
     static QString tradeTypeToString(const tradeType &type);
     static QString frequencyToString(const tradeDateCalendar::frequency &freq);

@@ -14,7 +14,7 @@ public:
     double dividendAmount;
     double expenseRatio;
 
-    snapshot(const int &date_):
+    snapshot(int date_):
             date(date_),
             count(0),
             totalValue(0),
@@ -26,7 +26,7 @@ public:
 
     bool isNull() const { return date == 0; }
 
-    void add(const snapshot &other, const double &multiplier = 1);
+    void add(const snapshot &other_, double multiplier_ = 1.0);
 };
 
 class snapshotSecurity: public snapshot
@@ -41,14 +41,14 @@ public:
         count = 1;
     }
 
-    snapshotSecurity(const int &date_):
+    snapshotSecurity(int date_):
             snapshot(date_),
             shares(0)
     {
         count = 1;
     }
 
-    void setTaxLiability(const double &taxRate, const bool &taxDeferred);
+    void setTaxLiability(double taxRate_, bool taxDeferred_);
 };
 
 class snapshotPortfolio: public snapshot
@@ -61,7 +61,7 @@ public:
             snapshot(0)
     {}
 
-    snapshotPortfolio(const int &date_):
+    snapshotPortfolio(int date_):
             snapshot(date_)
     {}
 };

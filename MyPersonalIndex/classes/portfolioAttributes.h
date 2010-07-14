@@ -30,7 +30,7 @@ public:
     QString aaSort;
     QString acctSort;
 
-    portfolioAttributes(const int &id_ = -1);
+    portfolioAttributes(int id_);
     void save(const queries &dataSource_);
 
     bool operator==(const portfolioAttributes &other_) const;

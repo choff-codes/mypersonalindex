@@ -27,7 +27,7 @@ QMap<int, portfolio> portfolioFactory::getPortfolios(const queries &dataSource_)
 
 void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_select(queries::table_Portfolios, queries::portfoliosColumns);
+    QSqlQuery q = dataSource_.select(queries::table_Portfolios, queries::portfoliosColumns);
     while(q.next())
     {
         portfolio p(q.value(queries::portfoliosColumns_ID).toInt());
@@ -35,7 +35,7 @@ void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
         p.attributes().description = q.value(queries::portfoliosColumns_Description).toString();
         p.attributes().startDate = q.value(queries::portfoliosColumns_StartDate).toInt();
         p.attributes().dividends = q.value(queries::portfoliosColumns_Dividends).toBool();
-        p.attributes().costBasis = (costBasis)q.value(queries::portfoliosColumns_CostBasis).toInt();
+        p.attributes().defaultCostBasis = (costBasis)q.value(queries::portfoliosColumns_CostBasis).toInt();
         p.attributes().startValue = q.value(queries::portfoliosColumns_StartValue).toInt();
         p.attributes().aaThreshold = q.value(queries::portfoliosColumns_AAThreshold).toInt();
         p.attributes().aaThresholdMethod = (portfolioAttributes::thesholdMethod)q.value(queries::portfoliosColumns_ThresholdMethod).toInt();
@@ -54,7 +54,7 @@ void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
 
 void portfolioFactory::loadPortfoliosAA(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_select(queries::table_AA, queries::aaColumns);
+    QSqlQuery q = dataSource_.select(queries::table_AA, queries::aaColumns);
     while(q.next())
     {
         assetAllocation aa(
@@ -84,7 +84,7 @@ void portfolioFactory::loadPortfoliosAcct(const queries &dataSource_)
         if (!q.value(queries::acctColumns_TaxRate).isNull())
             acct.taxRate = q.value(queries::acctColumns_TaxRate).toDouble();
         acct.taxDeferred = q.value(queries::acctColumns_TaxDeferred).toBool();
-        acct.costBasis = (costBasis)q.value(queries::acctColumns_CostBasis).toInt();
+        acct.overrideCostBasis = (costBasis)q.value(queries::acctColumns_CostBasis).toInt();
 
         m_portfolios[acct.parent].accounts().insert(acct.id, acct);
     }
@@ -92,7 +92,7 @@ void portfolioFactory::loadPortfoliosAcct(const queries &dataSource_)
 
 void portfolioFactory::loadPortfoliosSecurity(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_.select(queries::table_Security, queries::SecurityColumns);
+    QSqlQuery q = dataSource_.select(queries::table_Security, queries::securityColumns);
     while(q.next())
     {
         security sec(
@@ -119,57 +119,57 @@ void portfolioFactory::loadPortfoliosSecurity(const queries &dataSource_)
 
 void portfolioFactory::loadPortfoliosSecurityAA(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_.select(queries::table_SecurityAA, queries::SecurityAAColumns, QString());
+    QSqlQuery q = dataSource_.select(queries::view_SecurityAA, queries::securityAAViewColumns);
     while(q.next())
-        m_portfolios[q.value(queries::securityAAColumns_Count).toInt()].securities()[q.value(queries::securityAAColumns_SecurityID).toInt()].aa.insert(
-            q.value(queries::securityAAColumns_AAID).toInt(),
-            q.value(queries::securityAAColumns_Percent).toDouble()
+        m_portfolios[q.value(queries::securityAAViewColumns_PortfolioID).toInt()].securities()[q.value(queries::securityAAViewColumns_SecurityID).toInt()].aa.insert(
+            q.value(queries::securityAAViewColumns_AAID).toInt(),
+            q.value(queries::securityAAViewColumns_Percent).toDouble()
         );
 }
 
 void portfolioFactory::loadPortfoliosSecurityTrades(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_.select(queries::table_SecurityTrades, queries::SecurityTradeColumns, QString());
+    QSqlQuery q = dataSource_.select(queries::view_SecurityTrades, queries::securityTradesViewColumns);
     while(q.next())
     {
         trade t(
-               q.value(queries::securityTradeColumns_ID).toInt(),
-               q.value(queries::securityTradeColumns_SecurityID).toInt()
+               q.value(queries::securityTradesViewColumns_ID).toInt(),
+               q.value(queries::securityTradesViewColumns_SecurityID).toInt()
         );
 
-        t.type = (trade::tradeType)q.value(queries::securityTradeColumns_Type).toInt();
-        t.value = q.value(queries::securityTradeColumns_Value).toDouble();
-        if (!q.value(queries::securityTradeColumns_Price).isNull())
-            t.price = q.value(queries::securityTradeColumns_Price).toDouble();
-        t.commission = q.value(queries::securityTradeColumns_Commission).toDouble();
-        if (!q.value(queries::securityTradeColumns_CashAccountID).isNull())
-            t.cashAccount = q.value(queries::securityTradeColumns_CashAccountID).toInt();
-        t.frequency = (tradeDateCalendar::frequency)q.value(queries::securityTradeColumns_Frequency).toInt();
-        if (!q.value(queries::securityTradeColumns_Date).isNull())
-            t.date = q.value(queries::securityTradeColumns_Date).toInt();
-        if (!q.value(queries::securityTradeColumns_StartDate).isNull())
-            t.startDate = q.value(queries::securityTradeColumns_StartDate).toInt();
-        if (!q.value(queries::securityTradeColumns_EndDate).isNull())
-            t.endDate = q.value(queries::securityTradeColumns_EndDate).toInt();
+        t.type = (trade::tradeType)q.value(queries::securityTradesViewColumns_Type).toInt();
+        t.value = q.value(queries::securityTradesViewColumns_Value).toDouble();
+        if (!q.value(queries::securityTradesViewColumns_Price).isNull())
+            t.price = q.value(queries::securityTradesViewColumns_Price).toDouble();
+        t.commission = q.value(queries::securityTradesViewColumns_Commission).toDouble();
+        if (!q.value(queries::securityTradesViewColumns_CashAccountID).isNull())
+            t.cashAccount = q.value(queries::securityTradesViewColumns_CashAccountID).toInt();
+        t.frequency = (tradeDateCalendar::frequency)q.value(queries::securityTradesViewColumns_Frequency).toInt();
+        if (!q.value(queries::securityTradesViewColumns_Date).isNull())
+            t.date = q.value(queries::securityTradesViewColumns_Date).toInt();
+        if (!q.value(queries::securityTradesViewColumns_StartDate).isNull())
+            t.startDate = q.value(queries::securityTradesViewColumns_StartDate).toInt();
+        if (!q.value(queries::securityTradesViewColumns_EndDate).isNull())
+            t.endDate = q.value(queries::securityTradesViewColumns_EndDate).toInt();
 
-        m_portfolios[q.value(queries::securityTradeColumns_Count).toInt()].securities()[t.parent].trades.insert(t.id, t);
+        m_portfolios[q.value(queries::securityTradesViewColumns_PortfolioID).toInt()].securities()[t.parent].trades.insert(t.id, t);
     }
 }
 
 void portfolioFactory::loadPortfoliosExecutedTrades(const queries &dataSource_)
 {
-    QSqlQuery q = dataSource_.select(queries::table_ExecutedTrades, queries::executedTradesColumns);
+    QSqlQuery q = dataSource_.select(queries::view_ExecutedTrades, queries::executedTradesViewColumns);
 
     while(q.next())
-        m_portfolios[q.value(queries::executedTradesColumns_Count).toInt()]
-            .securities()[q.value(queries::executedTradesColumns_SecurityID).toInt()]
+        m_portfolios[q.value(queries::executedTradesViewColumns_PortfolioID).toInt()]
+            .securities()[q.value(queries::executedTradesViewColumns_SecurityID).toInt()]
             .executedTrades.insert
             (
-                q.value(queries::executedTradesColumns_Date).toInt(),
+                q.value(queries::executedTradesViewColumns_Date).toInt(),
                 executedTrade(
-                    q.value(queries::executedTradesColumns_Shares).toDouble(),
-                    q.value(queries::executedTradesColumns_Price).toDouble(),
-                    q.value(queries::executedTradesColumns_Commission).toDouble()
+                    q.value(queries::executedTradesViewColumns_Shares).toDouble(),
+                    q.value(queries::executedTradesViewColumns_Price).toDouble(),
+                    q.value(queries::executedTradesViewColumns_Commission).toDouble()
                 )
             );
 }

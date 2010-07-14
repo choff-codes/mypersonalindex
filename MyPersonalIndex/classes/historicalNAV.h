@@ -77,7 +77,7 @@ public:
     void remove(const queries &dataSource_);
     void remove(const queries &dataSource_, int beginDate_);
 
-    void insertBatch(const queries &dataSource_);
+    void insertBatch(queries dataSource_);
 
     int rowsToBeInserted() { return m_valuesToBeInserted.count(); }
     QVariant value(int row_, int column_);

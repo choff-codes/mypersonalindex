@@ -1,28 +1,43 @@
 #define priceManager prices::instance()
 #include "statisticInfo.h"
 
-statisticInfo::statisticInfo(const historicalNAV &info, const double &startNav):
-    m_endInfo(info), m_startNAV(startNav), m_startTotalValue(0), m_endNAV(startNav), m_endTotalValue(0),
-    m_count(0), m_stdDev(0), m_maxChangePositive(0), m_maxChangePositiveDay(0), m_maxChangeNegative(0), m_maxChangeNegativeDay(0),
-    m_minNAVValue(0), m_minNAVValueDay(0), m_maxNAVValue(0), m_maxNAVValueDay(0), m_minTotalValue(0), m_minTotalValueDay(0),
-    m_maxTotalValue(0), m_maxTotalValueDay(0)
+statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNAV_):
+    m_endInfo(historicalNAV_),
+    m_startNAV(beginNAV_),
+    m_startTotalValue(0),
+    m_endNAV(beginNAV_),
+    m_endTotalValue(0),
+    m_count(0),
+    m_stdDev(0),
+    m_maxChangePositive(0),
+    m_maxChangePositiveDay(0),
+    m_maxChangeNegative(0),
+    m_maxChangeNegativeDay(0),
+    m_minNAVValue(0),
+    m_minNAVValueDay(0),
+    m_maxNAVValue(0),
+    m_maxNAVValueDay(0),
+    m_minTotalValue(0),
+    m_minTotalValueDay(0),
+    m_maxTotalValue(0),
+    m_maxTotalValueDay(0)
 {    
-    m_count = info.count() - 1; // first is baseline nav, so discard
+    m_count = historicalNAV_.count() - 1; // first is baseline nav, so discard
     if (m_count <= 0)
         return;
 
-    m_startNAV = info.nav(info.firstDate());
-    m_startTotalValue = info.totalValue(info.firstDate());
-    m_endNAV = info.nav(info.lastDate());
-    m_endTotalValue = info.totalValue(info.lastDate());
+    m_startNAV = historicalNAV_.nav(historicalNAV_.firstDate());
+    m_startTotalValue = historicalNAV_.totalValue(historicalNAV_.firstDate());
+    m_endNAV = historicalNAV_.nav(historicalNAV_.lastDate());
+    m_endTotalValue = historicalNAV_.totalValue(historicalNAV_.lastDate());
     m_minNAVValue = m_startNAV;
-    m_minNAVValueDay = info.firstDate();
+    m_minNAVValueDay = historicalNAV_.firstDate();
     m_maxNAVValue = m_startNAV;
-    m_maxNAVValueDay = info.firstDate();
+    m_maxNAVValueDay = historicalNAV_.firstDate();
     m_minTotalValue = m_startTotalValue;
-    m_minTotalValueDay = info.firstDate();
+    m_minTotalValueDay = historicalNAV_.firstDate();
     m_maxTotalValue = m_startTotalValue;
-    m_maxTotalValueDay = info.firstDate();
+    m_maxTotalValueDay = historicalNAV_.firstDate();
 
     double previousNAV = m_startNAV;
 
@@ -33,15 +48,15 @@ statisticInfo::statisticInfo(const historicalNAV &info, const double &startNav):
     double newS = 0;
     int count = 1;
 
-    for(QList<int>::const_iterator i = priceManager.iteratorCurrentDateOrNext(info.firstDate() + 1); i != priceManager.iteratorEnd(); ++i)
+    tradeDateCalendar calendar(historicalNAV_.firstDate() + 1);
+    foreach(const int &date, calendar)
     {
-        int date = *i;
-        if (date > info.lastDate())
+        if (date > historicalNAV_.lastDate())
             break;
 
-        double newNav = info.nav(date);
+        double newNav = historicalNAV_.nav(date);
         double change = newNav / previousNAV - 1;
-        double totalValue = info.totalValue(date);
+        double totalValue = historicalNAV_.totalValue(date);
 
         if (totalValue > m_maxTotalValue)
         {

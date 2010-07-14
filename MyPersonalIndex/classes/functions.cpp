@@ -1,6 +1,6 @@
 #include "functions.h"
 
-QString functions::doubleToCurrency(const double &value_)
+QString functions::doubleToCurrency(double value_)
 {
     if (value_ < 0)
         return QString("($%L1)").arg(-value_, 0, 'f', 2);

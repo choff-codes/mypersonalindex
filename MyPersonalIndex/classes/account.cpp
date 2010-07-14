@@ -5,7 +5,7 @@ bool account::operator==(const account &other_) const
     return this->key() == other_.key()
             && this->taxRate == other_.taxRate
             && this->taxDeferred == other_.taxDeferred
-            && this->costBasis == other_.costBasis;
+            && this->overrideCostBasis == other_.overrideCostBasis;
 }
 
 void account::save(const queries &dataSource_)
@@ -18,7 +18,7 @@ void account::save(const queries &dataSource_)
     values.insert(queries::acctColumns.at(queries::acctColumns_Description), this->description);
     values.insert(queries::acctColumns.at(queries::acctColumns_TaxRate), functions::doubleToNull(this->taxRate));
     values.insert(queries::acctColumns.at(queries::acctColumns_TaxDeferred), (int)this->taxDeferred);
-    values.insert(queries::acctColumns.at(queries::acctColumns_CostBasis), (int)this->costBasis);
+    values.insert(queries::acctColumns.at(queries::acctColumns_CostBasis), (int)this->overrideCostBasis);
 
     this->id = dataSource_.insert(queries::table_Acct, values, this->id);
 }

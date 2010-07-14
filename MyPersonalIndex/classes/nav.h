@@ -35,9 +35,9 @@ private:
     double calculateShares(trade::tradeType tradeType_, double value_, double purchasePrice_, int id_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_);
 
     void insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const tradePointerMap &trades_);
-    void insertExecutedTradesPreStartDate(portfolio portfolio_, int &beginDate_, const QMap<int, tradePointerMap> &trades_);
+    void insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_, const QMap<int, tradePointerMap> &trades_);
     void insertPortfolioReinvestments(portfolio portfolio_, int date_, const QList<int> &securityReinvestments_, const snapshotPortfolio &priorDaySnapshot_);
-    void insertPortfolioCashReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double &value_);
+    void insertPortfolioCashReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double value_);
 };
 
 #endif // NAV_H

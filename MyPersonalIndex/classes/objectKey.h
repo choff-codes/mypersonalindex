@@ -42,7 +42,7 @@ public:
     objectKey key() const { return *this; }
 
     void clearIdentity() { id = UNASSIGNED; }
-    bool hasIdentity() { return this->id != UNASSIGNED; }
+    bool hasIdentity() const { return this->id != UNASSIGNED; }
 
     bool operator==(const objectKey &other_) const;
     bool operator!=(const objectKey &other_) const { return !(*this == other_); }

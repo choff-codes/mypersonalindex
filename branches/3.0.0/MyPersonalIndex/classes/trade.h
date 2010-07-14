@@ -21,8 +21,7 @@ public:
         tradeType_InterestPercent,
         tradeType_Value,
         tradeType_TotalValue,
-        tradeType_AA,
-        tradeType_Count
+        tradeType_AA
     };
 
     tradeType type;
@@ -48,16 +47,16 @@ public:
         endDate(0)
     {}
 
-    bool operator==(const trade &other) const;
-    bool operator!=(const trade &other) const { return !(*this == other); }
+    bool operator==(const trade &other_) const;
+    bool operator!=(const trade &other_) const { return !(*this == other_); }
 
-    void save(const queries &dataSource);
-    void remove(const queries &dataSource) const;
+    void save(const queries &dataSource_);
+    void remove(const queries &dataSource_) const;
 
-    static QString tradeTypeToString(const tradeType &type);
-    static QString frequencyToString(const tradeDateCalendar::frequency &freq);
-    static QString valueToString(const tradeType &type, const double &value);
-    static QString dateToString(const tradeDateCalendar::frequency &freq, const int &date);
+    static QString tradeTypeToString(tradeType type_);
+    static QString frequencyToString(tradeDateCalendar::frequency freq_);
+    static QString valueToString(tradeType type_, double value_);
+    static QString dateToString(tradeDateCalendar::frequency freq_, int date_);
 };
 
 #endif // TRADE_H

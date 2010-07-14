@@ -6,8 +6,8 @@
 class splits
 {
 public:
-    splits(const QMap<int, double> &splits_, const int &date_);
-    double ratio (const int &date_); // must be called in date ascending order only!
+    splits(const QMap<int, double> &splits_, int date_);
+    double ratio (int date_); // must be called in date ascending order only!
 
 private:
     const QMap<int, double> m_splits;

@@ -1,8 +1,8 @@
 #include "historicalNAV.h"
 
-void historicalNAVPortfolio::insertBatch(const queries &dataSource_)
+void historicalNAVPortfolio::insertBatch(queries dataSource_)
 {
-    dataSource_.executeTableUpdate(queries::table_NAV, queries::navColumns, this);
+    dataSource_.bulkInsert(queries::table_NAV, queries::navColumns, this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }
@@ -23,6 +23,8 @@ QVariant historicalNAVPortfolio::value(int row_, int column_)
         case queries::navColumns_TotalValue:
             return pair.totalValue;
     }
+
+    return QVariant();
 }
 
 void historicalNAVPortfolio::insert(const queries &dataSource_, int date_, double nav_, double totalValue_)
@@ -39,20 +41,20 @@ void historicalNAVPortfolio::remove(const queries &dataSource_, int beginDate_)
     while (i != m_nav.end())
         i = m_nav.erase(i);
     
-    dataSource_.deletePortfolioItems(queries::table_NAV, portfolioID, beginDate_);
+    dataSource_.deletePortfolioItems(queries::table_NAV, this->parent, beginDate_);
 }
 
 void historicalNAVPortfolio::remove(const queries &dataSource_)
 {
     m_nav.clear();
-    dataSource_.deletePortfolioItems(queries::table_NAV, portfolioID);
+    dataSource_.deletePortfolioItems(queries::table_NAV, this->parent);
 }
 
 void historicalNAV::insert(int date_, double nav_, double totalValue_)
 {
     m_nav.insert(date_, navPair(nav_, totalValue_));
     if (date_ < m_firstDate || m_firstDate == 0)
-        m_firstDate = date;
+        m_firstDate = date_;
     if (date_ > m_lastDate)
         m_lastDate = date_;
 }

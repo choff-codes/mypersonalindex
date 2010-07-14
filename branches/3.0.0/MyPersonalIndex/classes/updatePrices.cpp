@@ -1,4 +1,3 @@
-#define priceManager prices::instance()
 #include "updatePrices.h"
 
 updatePricesReturnValue updatePrices::run()
@@ -12,7 +11,7 @@ updatePricesReturnValue updatePrices::run()
         if (getPrices(info.symbol, info.lastPrice, &returnValue.earliestUpdate))  // check if symbol exists
         {
             getDividends(info.symbol, info.lastDividend, &returnValue.earliestUpdate);
-            if (m_downloadSplits)
+            if (m_splits)
                 getSplits(info.symbol, info.lastSplit, &returnValue.earliestUpdate);
         }
         else

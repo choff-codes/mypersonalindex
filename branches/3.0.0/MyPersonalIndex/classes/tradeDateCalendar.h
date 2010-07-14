@@ -23,7 +23,7 @@ public:
 
     tradeDateCalendar(int date_, direction direction_ = direction_ascending):
         m_date(checkTradeDate(date_, direction_))
-    { }
+    {}
 
     tradeDateCalendar& operator++()
     {
@@ -50,7 +50,7 @@ public:
 
     static int previousTradeDate(int date_)
     {
-        return checkTradeDate(date_ - 1, direction_descending);
+        return checkTradeDate(--date_, direction_descending);
     }
 
     static int endDate()
@@ -69,18 +69,18 @@ public:
             END
         };
 
-        const_iterator(const tradeDateCalendar* v_, etype t)
+        const_iterator(const tradeDateCalendar* v_, etype t_)
         {
             endDate = QDate::currentDate().toJulianDay() + 1;
 
-            if (t == START)
+            if (t_ == START)
                 currentDate = v_->m_date;
-            if (t == END)
+            if (t_ == END)
                 currentDate = endDate;
         }
 
         const int operator*() { return currentDate; }
-        bool operator!=(const const_iterator& it) { return currentDate != it.currentDate; }
+        bool operator!=(const const_iterator& it_) { return currentDate != it_.currentDate; }
 
         const_iterator& operator++()
         {

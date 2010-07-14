@@ -44,7 +44,9 @@ public:
     double price(int date_) const { return cashAccount ? 1 : m_prices.price(date_); }
     double dividend(int date_) const { return cashAccount ? 0 : m_prices.dividend(date_); }
     double split(int date_) const { return cashAccount ? 1 : m_prices.split(date_); }
+    QMap<int, double> splits() const { return cashAccount ? QMap<int, double>() : m_prices.splits(); }
     int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(); }
+    int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(); }
     
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

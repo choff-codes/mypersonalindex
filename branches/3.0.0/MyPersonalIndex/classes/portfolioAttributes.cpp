@@ -1,9 +1,9 @@
 #include "portfolioAttributes.h"
 
-portfolioAttributes::portfolioAttributes(const int &id_ = -1):
+portfolioAttributes::portfolioAttributes(int id_):
     objectKey(objectType_Portfolio, QString(), id_),
     dividends(true),
-    costBasis(costBasis_FIFO),
+    defaultCostBasis(costBasis_FIFO),
     startValue(100),
     aaThreshold(5),
     aaThresholdMethod(threshold_Portfolio),
@@ -19,7 +19,7 @@ bool portfolioAttributes::operator==(const portfolioAttributes &other_) const
 {
     return this->key() == other_.key()
             && this->dividends == other_.dividends
-            && this->costBasis == other_.costBasis
+            && this->defaultCostBasis == other_.defaultCostBasis
             && this->startValue == other_.startValue
             && this->aaThreshold == other_.aaThreshold
             && this->aaThresholdMethod == other_.aaThresholdMethod
@@ -41,7 +41,7 @@ void portfolioAttributes::save(const queries &dataSource_)
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartValue), this->startValue);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AAThreshold), this->aaThreshold);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)this->aaThresholdMethod);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostBasis), (int)this->costBasis);
+    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostBasis), (int)this->defaultCostBasis);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartDate), this->startDate);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Dividends), (int)this->dividends);
     values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)this->holdingsShowHidden);

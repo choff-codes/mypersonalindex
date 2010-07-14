@@ -36,7 +36,7 @@ public:
     static double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
 
 private:
-    const portfolio m_portfolio;
+    portfolio m_portfolio;
     QHash<int, snapshotPortfolio> m_cache;
 
     snapshot snapshotByKey(int date_, const objectKey &key_);

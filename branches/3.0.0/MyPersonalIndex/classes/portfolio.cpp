@@ -10,8 +10,8 @@ public:
     portfolioAttributes attributes;
 
     portfolioData(int id_):
-            attributes(portfolioAttributes(id_)),
-            navHistory(historicalNAVPortfolio(id_))
+            navHistory(historicalNAVPortfolio(id_)),
+            attributes(portfolioAttributes(id_))
     {}
 };
 
@@ -59,27 +59,27 @@ void portfolio::insertNAVBatch(const queries &dataSource_)
 
 QMap<int, security>& portfolio::securities()
 {
-    return &d->securities;
+    return d->securities;
 }
 
 QMap<int, assetAllocation>& portfolio::assetAllocations()
 {
-    return &d->assetAllocations;
+    return d->assetAllocations;
 }
 
 QMap<int, account>& portfolio::accounts()
 {
-    return &d->accounts;
+    return d->accounts;
 }
 
 historicalNAVPortfolio& portfolio::navHistory()
 {
-    return &d->navHistory;
+    return d->navHistory;
 }
 
 portfolioAttributes& portfolio::attributes()
 {
-    return &d->attributes;
+    return d->attributes;
 }
 
 QStringList portfolio::symbols() const

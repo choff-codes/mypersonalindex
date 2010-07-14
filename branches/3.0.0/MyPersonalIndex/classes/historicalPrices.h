@@ -17,8 +17,10 @@ public:
     double price(int date_) const;
     double dividend(int date_) const;
     double split(int date_) const;
+    QMap<int, double> splits() const;
 
     int endDate() const;
+    int beginDate() const;
 
     void setPrices(const QMap<int, double> &prices_);
     void setDividends(const QMap<int, double> &dividends_);

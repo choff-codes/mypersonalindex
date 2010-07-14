@@ -43,6 +43,11 @@ double historicalPrices::split(int date) const
     return d->splits.value(date, 1);
 }
 
+QMap<int, double> historicalPrices::splits() const
+{
+    return d->splits;
+}
+
 void historicalPrices::setPrices(const QMap<int, double> &prices_)
 {
     d->prices = prices_;
@@ -61,4 +66,9 @@ void historicalPrices::setSplits(const QMap<int, double> &splits_)
 int historicalPrices::endDate() const
 {
     return d->prices.isEmpty() ? 0 : (d->prices.constEnd() - 1).key();
+}
+
+int historicalPrices::beginDate() const
+{
+    return d->prices.isEmpty() ? 0 : (d->prices.constBegin()).key();
 }

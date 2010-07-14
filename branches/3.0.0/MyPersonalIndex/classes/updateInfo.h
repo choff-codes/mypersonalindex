@@ -14,11 +14,11 @@ public:
     updateInfo()
     {}
 
-    updateInfo(const QString &p_symbol, const int &minDate):
-            symbol(p_symbol),
-            lastPrice(minDate),
-            lastDividend(minDate),
-            lastSplit(minDate)
+    updateInfo(const QString &symbol_, int beginDate_):
+            symbol(symbol_),
+            lastPrice(beginDate_),
+            lastDividend(beginDate_),
+            lastSplit(beginDate_)
     {}
 };
 

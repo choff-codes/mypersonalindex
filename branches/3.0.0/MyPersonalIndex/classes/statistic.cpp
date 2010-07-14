@@ -25,92 +25,92 @@ QMap<int, QString> statistic::statisticList()
     return stats;
 }
 
-QString statistic::calculate(stat statistic, const statisticInfo &statInfo)
+QString statistic::calculate(stat statistic_, const statisticInfo &statisticInfo_)
 {
-    switch(statistic)
+    switch(statistic_)
     {
         case stat_BeginningIndexValue:
-            return functions::doubleToLocalFormat(statInfo.startNAV());
+            return functions::doubleToLocalFormat(statisticInfo_.startNAV());
         case stat_BeginningValue:
-            return functions::doubleToCurrency(statInfo.startTotalValue());
+            return functions::doubleToCurrency(statisticInfo_.startTotalValue());
         case stat_CurrentIndexValue:
-            return functions::doubleToLocalFormat(statInfo.endNAV());
+            return functions::doubleToLocalFormat(statisticInfo_.endNAV());
         case stat_CurrentValue:
-            return functions::doubleToCurrency(statInfo.endTotalValue());
+            return functions::doubleToCurrency(statisticInfo_.endTotalValue());
         case stat_CostBasis:
-            return functions::doubleToCurrency(statInfo.endInfo().costBasis);
+            return functions::doubleToCurrency(statisticInfo_.endInfo().costBasis);
         case stat_DailyStandardDeviation:
-            return functions::doubleToPercentage(statInfo.standardDeviation());
+            return functions::doubleToPercentage(statisticInfo_.standardDeviation());
         case stat_MonthlyStandardDeviation:
-            return functions::doubleToPercentage(sqrt(21) * statInfo.standardDeviation());
+            return functions::doubleToPercentage(sqrt(21) * statisticInfo_.standardDeviation());
         case stat_YearlyStandardDeviation:
-            return functions::doubleToPercentage(sqrt(252) * statInfo.standardDeviation());
+            return functions::doubleToPercentage(sqrt(252) * statisticInfo_.standardDeviation());
         case stat_DaysInvested:
-            return functions::doubleToLocalFormat(statInfo.days(), 0);
+            return functions::doubleToLocalFormat(statisticInfo_.days(), 0);
         case stat_Date:
-            return QDate::fromJulianDay(statInfo.endDate()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.endDate()).toString(Qt::SystemLocaleShortDate);
         case stat_GainLoss:
-            return functions::doubleToCurrency(statInfo.endInfo().totalValue(statInfo.endDate()) - statInfo.endInfo().costBasis);
+            return functions::doubleToCurrency(statisticInfo_.endInfo().totalValue(statisticInfo_.endDate()) - statisticInfo_.endInfo().costBasis);
         case stat_DailyReturn:
-            return functions::doubleToPercentage(returnPercent(statInfo, 1));
+            return functions::doubleToPercentage(returnPercent(statisticInfo_, 1));
         case stat_HourlyReturn:
-            return functions::doubleToPercentage(returnPercent(statInfo, 1.0 / 6.5));
+            return functions::doubleToPercentage(returnPercent(statisticInfo_, 1.0 / 6.5));
         case stat_MonthlyReturn:
-            return functions::doubleToPercentage(returnPercent(statInfo, 21));
+            return functions::doubleToPercentage(returnPercent(statisticInfo_, 21));
         case stat_YearlyReturn:
-            return functions::doubleToPercentage(returnPercent(statInfo, 252));
+            return functions::doubleToPercentage(returnPercent(statisticInfo_, 252));
         case stat_NetChange:
-            return functions::doubleToCurrency(statInfo.endTotalValue() - statInfo.startTotalValue());
+            return functions::doubleToCurrency(statisticInfo_.endTotalValue() - statisticInfo_.startTotalValue());
         case stat_OverallReturn:
-            return functions::doubleToPercentage((statInfo.endNAV() / statInfo.startNAV()) - 1);
+            return functions::doubleToPercentage((statisticInfo_.endNAV() / statisticInfo_.startNAV()) - 1);
         case stat_TaxLiability:
-            return functions::doubleToCurrency(statInfo.endInfo().taxLiability);
+            return functions::doubleToCurrency(statisticInfo_.endInfo().taxLiability);
         case stat_MaxPercentDown:
-            return functions::doubleToPercentage(statInfo.maxChangeNegative());
+            return functions::doubleToPercentage(statisticInfo_.maxChangeNegative());
         case stat_MaxPercentDownDay:
-            return QDate::fromJulianDay(statInfo.maxChangeNegativeDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.maxChangeNegativeDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaxPercentUp:
-            return functions::doubleToPercentage(statInfo.maxChangePositive());
+            return functions::doubleToPercentage(statisticInfo_.maxChangePositive());
         case stat_MaxPercentUpDay:
-            return QDate::fromJulianDay(statInfo.maxChangePositiveDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.maxChangePositiveDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaximumIndexValue:
-            return functions::doubleToLocalFormat(statInfo.maxNAVValue());
+            return functions::doubleToLocalFormat(statisticInfo_.maxNAVValue());
         case stat_MaximumIndexValueDay:
-            return QDate::fromJulianDay(statInfo.maxNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.maxNAVValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MinimumIndexValue:
-            return functions::doubleToLocalFormat(statInfo.minNAVValue());
+            return functions::doubleToLocalFormat(statisticInfo_.minNAVValue());
         case stat_MinimumIndexValueDay:
-            return QDate::fromJulianDay(statInfo.minNAVValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.minNAVValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MinimumPortfolioValue:
-            return functions::doubleToCurrency(statInfo.minTotalValue());
+            return functions::doubleToCurrency(statisticInfo_.minTotalValue());
         case stat_MinimumPortfolioValueDay:
-            return QDate::fromJulianDay(statInfo.minTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.minTotalValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_MaximumPortfolioValue:
-            return functions::doubleToCurrency(statInfo.maxTotalValue());
+            return functions::doubleToCurrency(statisticInfo_.maxTotalValue());
         case stat_MaximumPortfolioValueDay:
-            return QDate::fromJulianDay(statInfo.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
+            return QDate::fromJulianDay(statisticInfo_.maxTotalValueDay()).toString(Qt::SystemLocaleShortDate);
         case stat_ProbabilityOfYearlyGain:
-            return functions::doubleToPercentage(cumulativeNormalDistribution(statInfo));
+            return functions::doubleToPercentage(cumulativeNormalDistribution(statisticInfo_));
         case stat_ProbabilityOfYearlyLoss:
-            return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statInfo));
+            return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statisticInfo_));
         case stat_WeightedExpenseRatio:
-            return functions::doubleToPercentage(statInfo.expenseRatio());
+            return functions::doubleToPercentage(statisticInfo_.expenseRatio());
         default:
             return QString();
     }
 }
 
-double statistic::returnPercent(const statisticInfo &statInfo, const double &divisor)
+double statistic::returnPercent(const statisticInfo &statisticInfo_, double divisor_)
 {
-    if (statInfo.days() == 0 || statInfo.startNAV() == 0)
+    if (statisticInfo_.days() == 0 || statisticInfo_.startNAV() == 0)
         return 0;
 
-    return pow(statInfo.endNAV() / statInfo.startNAV(), 1.0 / (statInfo.days() / divisor)) - 1;
+    return pow(statisticInfo_.endNAV() / statisticInfo_.startNAV(), 1.0 / (statisticInfo_.days() / divisor_)) - 1;
 }
 
-double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
+double statistic::cumulativeNormalDistribution(const statisticInfo &statisticInfo_)
 {
-    if (statInfo.days() < 2)
+    if (statisticInfo_.days() < 2)
         return 0;
 
     //http://www.sitmo.com/doc/Calculating_the_Cumulative_Normal_Distribution
@@ -121,7 +121,7 @@ double statistic::cumulativeNormalDistribution(const statisticInfo &statInfo)
     const double b5 =  1.330274429;
     const double p  =  0.2316419;
     const double c  =  0.39894228;
-    const double x = returnPercent(statInfo, 252) / (sqrt(252) * statInfo.standardDeviation());
+    const double x = returnPercent(statisticInfo_, 252) / (sqrt(252) * statisticInfo_.standardDeviation());
     double t;
 
     if (x >= 0)

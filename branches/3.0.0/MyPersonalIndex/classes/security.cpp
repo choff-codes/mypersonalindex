@@ -33,39 +33,39 @@ void security::save(const queries &dataSource_)
         return;
 
     QMap<QString, QVariant> values;
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_PortfolioID), this->parent);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_Symbol), this->description);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_Account), functions::intToNull(this->account));
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_Expense), functions::doubleToNull(this->expense));
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_DivReinvest), (int)this->divReinvest);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_CashAccount), (int)this->cashAccount);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_IncludeInCalc), (int)this->includeInCalc);
-    values.insert(queries::SecurityColumns.at(queries::securityColumns_Hide), (int)this->hide);
+    values.insert(queries::securityColumns.at(queries::securityColumns_PortfolioID), this->parent);
+    values.insert(queries::securityColumns.at(queries::securityColumns_Symbol), this->description);
+    values.insert(queries::securityColumns.at(queries::securityColumns_Account), functions::intToNull(this->account));
+    values.insert(queries::securityColumns.at(queries::securityColumns_Expense), functions::doubleToNull(this->expense));
+    values.insert(queries::securityColumns.at(queries::securityColumns_DivReinvest), (int)this->divReinvest);
+    values.insert(queries::securityColumns.at(queries::securityColumns_CashAccount), (int)this->cashAccount);
+    values.insert(queries::securityColumns.at(queries::securityColumns_IncludeInCalc), (int)this->includeInCalc);
+    values.insert(queries::securityColumns.at(queries::securityColumns_Hide), (int)this->hide);
 
     this->id = dataSource_.insert(queries::table_Security, values, this->id);
 
-    saveAATargets();
+    saveAATargets(dataSource_);
 }
 
 void security::saveAATargets(const queries &dataSource_) const
 {
-    QVariantList securityID, aaID, percent;
-
-    for(QMap<int, double>::const_iterator i = this->aa.constBegin(); i != this->aa.constEnd(); ++i)
-    {
-        securityID.append(this->id);
-        aaID.append(i.key());
-        percent.append(i.value());
-    }
-
-    QMap<QString, QVariantList> tableValues;
-    tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_SecurityID), securityID);
-    tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_AAID), aaID);
-    tableValues.insert(queries::SecurityAAColumns.at(queries::securityAAColumns_Percent), percent);
-
-    dataSource_.deleteSecurityItems(queries::table_SecurityAA, this->id);
-    if (!securityID.isEmpty())
-        dataSource_.executeTableUpdate(queries::table_SecurityAA, tableValues);
+//    QVariantList securityID, aaID, percent;
+//
+//    for(QMap<int, double>::const_iterator i = this->aa.constBegin(); i != this->aa.constEnd(); ++i)
+//    {
+//        securityID.append(this->id);
+//        aaID.append(i.key());
+//        percent.append(i.value());
+//    }
+//
+//    QMap<QString, QVariantList> tableValues;
+//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_SecurityID), securityID);
+//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_AAID), aaID);
+//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_Percent), percent);
+//
+//    dataSource_.deleteSecurityItems(queries::table_SecurityAA, this->id);
+//    if (!securityID.isEmpty())
+//        dataSource_.executeTableUpdate(queries::table_SecurityAA, tableValues);
 }
 
 void security::remove(const queries &dataSource_) const

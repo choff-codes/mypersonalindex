@@ -1,6 +1,6 @@
 #include "avgPricePerShare.h"
 
-double avgPricePerShare::calculate(int &date_, const QMap<int, executedTrade> &trades_, costBasis costBasis_, splits splits_)
+double avgPricePerShare::calculate(int date_, const executedTradeList &trades_, costBasis costBasis_, splits splits_)
 {
     QMap<double, sharePricePair> runningTrades;
     double shares = 0;
@@ -20,7 +20,7 @@ double avgPricePerShare::calculate(int &date_, const QMap<int, executedTrade> &t
             if (costBasis_ == costBasis_HIFO)
                 runningTrades.insertMulti(t.price, sharePricePair(t.shares, t.price)); // insert so that the highest price is the last item in the map
             else
-                runningTrades.insert(i, sharePricePair(t.shares, t.price)); // insert in order
+                runningTrades.insert(runningTrades.count(), sharePricePair(t.shares, t.price)); // insert in order
 
             shares += t.shares;
             total += t.shares * t.price;

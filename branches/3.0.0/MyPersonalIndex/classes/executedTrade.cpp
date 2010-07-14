@@ -10,7 +10,7 @@ void executedTradeList::insert(const queries &dataSource_, int date_, const exec
 void executedTradeList::remove(const queries &dataSource_, int beginDate_)
 {
     QMap<int, executedTrade>::iterator i = m_trades.lowerBound(beginDate_);
-    while (i != m_trades->end())
+    while (i != m_trades.end())
             i = m_trades.erase(i);
 
     if (this->hasParent())
@@ -19,7 +19,7 @@ void executedTradeList::remove(const queries &dataSource_, int beginDate_)
 
 void executedTradeList::remove(const queries &dataSource_)
 {
-    clear();
+    m_trades.clear();
 
     if (this->hasParent())
         dataSource_.deleteItem(queries::table_ExecutedTrades, this->parent);
@@ -41,11 +41,13 @@ QVariant executedTradeList::value(int row_, int column_)
         case queries::executedTradesColumns_Commission:
             return i.value().commission;
     }
+
+    return QVariant();
 }
 
-void executedTradeList::insertBatch(const queries &dataSource_)
+void executedTradeList::insertBatch(queries dataSource_)
 {
-    dataSource_.executeTableUpdate(queries::table_ExecutedTrades, queries::executedTradesColumns, this);
+    dataSource_.bulkInsert(queries::table_ExecutedTrades, queries::executedTradesColumns, this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }

@@ -27,7 +27,7 @@ void frmPortfolio::loadPortfolioAttributes()
     ui.txtStartValue->setText(QString::number(m_portfolio.startValue));
     ui.sbAAThreshold->setValue(m_portfolio.aaThreshold);
     ui.cmbAAThresholdValue->setCurrentIndex((int)m_portfolio.aaThresholdMethod);
-    ui.cmbCostBasis->setCurrentIndex(ui.cmbCostBasis->findData(m_portfolio.costBasis));
+    ui.cmbCostBasis->setCurrentIndex(ui.cmbCostBasis->findData(m_portfolio.defaultCostBasis));
     ui.dateStartDate->setDate(QDate::fromJulianDay(m_portfolio.startDate));
 }
 
@@ -71,7 +71,7 @@ void frmPortfolio::accept()
     m_portfolio.dividends = ui.chkIncludeDiv->isChecked();
     m_portfolio.aaThreshold = ui.sbAAThreshold->value();
     m_portfolio.aaThresholdMethod = (portfolioAttributes::thesholdMethod)ui.cmbAAThresholdValue->currentIndex();
-    m_portfolio.costBasis = (account::costBasisType)ui.cmbCostBasis->itemData(ui.cmbCostBasis->currentIndex(), Qt::UserRole).toInt(); // ignore none
+    m_portfolio.defaultCostBasis = (costBasis)ui.cmbCostBasis->itemData(ui.cmbCostBasis->currentIndex(), Qt::UserRole).toInt(); // ignore none
     m_portfolio.startValue = ui.txtStartValue->text().toInt();
     m_portfolio.startDate = ui.dateStartDate->date().toJulianDay();
 

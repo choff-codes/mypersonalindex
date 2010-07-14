@@ -1,43 +1,43 @@
 #include "trade.h"
 
-bool trade::operator==(const trade &other) const
+bool trade::operator==(const trade &other_) const
 {
-    return this->type == other.type
-            && this->value == other.value
-            && this->price == other.price
-            && this->commission == other.commission
-            && this->cashAccount == other.cashAccount
-            && this->frequency == other.frequency
-            && this->date == other.date
-            && this->startDate == other.startDate
-            && this->endDate == other.endDate;
+    return this->type == other_.type
+            && this->value == other_.value
+            && this->price == other_.price
+            && this->commission == other_.commission
+            && this->cashAccount == other_.cashAccount
+            && this->frequency == other_.frequency
+            && this->date == other_.date
+            && this->startDate == other_.startDate
+            && this->endDate == other_.endDate;
 }
 
-void trade::save(const queries &dataSource)
+void trade::save(const queries &dataSource_)
 {
     QMap<QString, QVariant> values;
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_SecurityID), this->parent);
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Type), (int)this->type);
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Value), this->value);
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Price), functions::doubleToNull(this->price));
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Commission), this->commission);
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount));
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Frequency), (int)this->frequency);
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_Date), functions::dateToNull(this->date));
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_StartDate), functions::dateToNull(this->startDate));
-    values.insert(queries::SecurityTradeColumns.at(queries::securityTradeColumns_EndDate), functions::dateToNull(this->endDate));
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_SecurityID), this->parent);
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Type), (int)this->type);
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Value), this->value);
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Price), functions::doubleToNull(this->price));
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Commission), this->commission);
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount));
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Frequency), (int)this->frequency);
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Date), functions::dateToNull(this->date));
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_StartDate), functions::dateToNull(this->startDate));
+    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_EndDate), functions::dateToNull(this->endDate));
 
-    this->id = dataSource.insert(queries::table_SecurityTrades, values, this->id);
+    this->id = dataSource_.insert(queries::table_SecurityTrades, values, this->id);
 }
 
-void trade::remove(const queries &dataSource) const
+void trade::remove(const queries &dataSource_) const
 {
-    dataSource.deleteItem(queries::table_SecurityTrades, this->id);
+    dataSource_.deleteItem(queries::table_SecurityTrades, this->id);
 }
 
-QString trade::tradeTypeToString(const tradeType &type)
+QString trade::tradeTypeToString(tradeType type_)
 {
-    switch (type)
+    switch (type_)
     {
         case tradeType_Purchase:
             return "Purchase";
@@ -64,9 +64,9 @@ QString trade::tradeTypeToString(const tradeType &type)
     }
 }
 
-QString trade::frequencyToString(const tradeDateCalendar::frequency &freq)
+QString trade::frequencyToString(tradeDateCalendar::frequency freq_)
 {
-    switch (freq)
+    switch (freq_)
     {
         case tradeDateCalendar::frequency_Once:
             return "Once";
@@ -83,45 +83,45 @@ QString trade::frequencyToString(const tradeDateCalendar::frequency &freq)
     }
 }
 
-QString trade::valueToString(const tradeType &type, const double &value)
+QString trade::valueToString(tradeType type_, double value_)
 {
-    if (value < 0)
+    if (value_ < 0)
         return "";
 
-    switch (type)
+    switch (type_)
     {
         case tradeType_Purchase:
         case tradeType_Sale:
         case tradeType_DivReinvest:
-            return functions::doubleToLocalFormat(value);
+            return functions::doubleToLocalFormat(value_);
         case tradeType_Interest:
         case tradeType_FixedPurchase:
         case tradeType_FixedSale:
-            return functions::doubleToCurrency(value);
+            return functions::doubleToCurrency(value_);
         case tradeType_TotalValue:
         case tradeType_AA:
         case tradeType_Value:
         case tradeType_InterestPercent:
-            return functions::doubleToPercentage(value / 100);
+            return functions::doubleToPercentage(value_ / 100);
         default:
             return "";
     }
 }
 
-QString trade::dateToString(const tradeDateCalendar::frequency &freq, const int &date)
+QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
 {
-    switch (freq)
+    switch (freq_)
     {
         case tradeDateCalendar::frequency_Once:
-            return date != 0 ? QDate::fromJulianDay(date).toString(Qt::SystemLocaleShortDate) : "";
+            return date_ != 0 ? QDate::fromJulianDay(date_).toString(Qt::SystemLocaleShortDate) : "";
         case tradeDateCalendar::frequency_Daily:
             return "Market Days";
         case tradeDateCalendar::frequency_Weekly:
-            return date != 0 ? QDate::fromJulianDay(date).toString("dddd") : "";
+            return date_ != 0 ? QDate::fromJulianDay(date_).toString("dddd") : "";
         case tradeDateCalendar::frequency_Monthly:
-            return date != 0 ? QDate::fromJulianDay(date).toString("dd") : "";
+            return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd") : "";
         case tradeDateCalendar::frequency_Yearly:
-            return date != 0 ? QDate::fromJulianDay(date).toString("dd MMM") : "";
+            return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd MMM") : "";
         default:
             return "";
     }

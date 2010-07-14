@@ -4,11 +4,12 @@
 #include <qmath.h>
 #include <qnumeric.h>
 #include "historicalNAV.h"
+#include "tradeDateCalendar.h"
 
 class statisticInfo
 {
 public:
-    statisticInfo(const historicalNAV &info, const double &startNav = 1);
+    statisticInfo(const historicalNAV &historicalNAV_, double beginNAV_ = 1);
 
     const historicalNAV endInfo() const { return m_endInfo; }
     int startDate() const { return m_endInfo.firstDate(); }

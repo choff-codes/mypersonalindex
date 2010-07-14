@@ -47,12 +47,12 @@ public:
 
     static const QStringList statisticDisplayNames;
 
-    static QString calculate(stat statistic, const statisticInfo &statInfo);
+    static QString calculate(stat statistic_, const statisticInfo &statisticInfo_);
     static QMap<int, QString> statisticList();
 
 private:
-    static double returnPercent(const statisticInfo &statInfo, const double &divisor);
-    static double cumulativeNormalDistribution(const statisticInfo &statInfo); 
+    static double returnPercent(const statisticInfo &statisticInfo_, double divisor);
+    static double cumulativeNormalDistribution(const statisticInfo &statisticInfo_);
 };
 
 #endif // STATISTIC_H

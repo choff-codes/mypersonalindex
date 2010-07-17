@@ -1,5 +1,7 @@
 #include "priceFactory.h"
 
+QHash<queries, QHash<QString, historicalPrices> > priceFactory::m_historicalPricesCache;
+
 historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &dataSource_)
 {
 
@@ -8,12 +10,12 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
     t.start();
 #endif
 
-    if (m_historicalPricesCache.contains(symbol_))
-        return m_historicalPricesCache.value(symbol_);
+    if (m_historicalPricesCache.value(dataSource_).contains(symbol_))
+        return m_historicalPricesCache.value(dataSource_).value(symbol_);
 
     historicalPrices price;
 
-    m_historicalPricesCache.insert(symbol_, price);
+    m_historicalPricesCache[dataSource_].insert(symbol_, price);
     updateHistoricalPrices(symbol_, price, dataSource_);
 
 #ifdef CLOCKTIME
@@ -30,16 +32,23 @@ void priceFactory::updateHistoricalPrices(const QString &symbol_, historicalPric
     priceData_.setSplits(loadSplits(symbol_, dataSource_));
 }
 
-//void priceFactory::flagDirty(const queries &dataSource_)
-//{
-//    for(QHash<QString, historicalPrices>::const_iterator i = m_historicalPricesCache.constBegin(); i != m_historicalPricesCache.constEnd(); ++i)
-//        updateHistoricalPrices(i.key(), i.value(), dataSource_);
-//}
+void priceFactory::flagDirty(const queries &dataSource_)
+{
+    QHash<QString, historicalPrices> symbols = m_historicalPricesCache.value(dataSource_);
+    for(QHash<QString, historicalPrices>::const_iterator i = symbols.constBegin(); i != symbols.constEnd(); ++i)
+        updateHistoricalPrices(i.key(), i.value(), dataSource_);
+}
 
 QMap<int, double> priceFactory::loadPrices(const QString &symbol_, const queries &dataSource_)
 {
     QMap<int, double> prices;
-    QSqlQuery q = dataSource_.select(queries::table_ClosingPrices, queries::closingPricesColumns);
+
+    QSqlQuery q = dataSource_.select(
+        queries::table_ClosingPrices,
+        queries::closingPricesColumns,
+        queries::closingPricesColumns.at(queries::closingPricesColumns_Symbol),
+        symbol_
+    );
 
     while(q.next())
         prices.insert(
@@ -53,7 +62,13 @@ QMap<int, double> priceFactory::loadPrices(const QString &symbol_, const queries
 QMap<int, double> priceFactory::loadDividends(const QString &symbol_, const queries &dataSource_)
 {
     QMap<int, double> dividends;
-    QSqlQuery q = dataSource_.select(queries::table_Dividends, queries::dividendsColumns);
+
+    QSqlQuery q = dataSource_.select(
+        queries::table_Dividends,
+        queries::dividendsColumns,
+        queries::dividendsColumns.at(queries::dividendsColumns_Symbol),
+        symbol_
+    );
 
     while(q.next())
         dividends.insert(
@@ -67,7 +82,13 @@ QMap<int, double> priceFactory::loadDividends(const QString &symbol_, const quer
 QMap<int, double> priceFactory::loadSplits(const QString &symbol_, const queries &dataSource_)
 {
     QMap<int, double> splits;
-    QSqlQuery q = dataSource_.select(queries::table_Splits, queries::splitsColumns);
+
+    QSqlQuery q = dataSource_.select(
+        queries::table_Splits,
+        queries::splitsColumns,
+        queries::splitsColumns.at(queries::splitsColumns_Symbol),
+        symbol_
+    );
 
     while(q.next())
         splits.insert(

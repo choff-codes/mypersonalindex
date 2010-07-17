@@ -42,7 +42,7 @@ holdingsRow::holdingsRow(const security &s, const snapshotPortfolio &info, const
     this->values.append(s.account == -1 ? QVariant() : accounts.value(s.account).description);
     //row_AA
     QStringList aaList;
-    for(QMap<int, double>::const_iterator i = s.aa.constBegin(); i != s.aa.constEnd(); ++i)
+    for(QMap<int, double>::const_iterator i = s.targets.constBegin(); i != s.targets.constEnd(); ++i)
         aaList.append(QString("%1 - %2").arg(aa.value(i.key()).description, functions::doubleToPercentage(i.value())));
     this->values.append(aaList.join(", "));
     //row_TaxLiability

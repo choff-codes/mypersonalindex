@@ -39,8 +39,8 @@ public:
 
     void insertBatch(queries dataSource_);
 
-    int rowsToBeInserted() { return m_valuesToBeInserted.count(); }
-    QVariant value(int row_, int column_);
+    int rowsToBeInserted() const { return m_valuesToBeInserted.count(); }
+    QVariant data(int row_, int column_) const;
 
 private:
    QMap<int, executedTrade> m_trades;

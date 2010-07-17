@@ -25,7 +25,7 @@ void executedTradeList::remove(const queries &dataSource_)
         dataSource_.deleteItem(queries::table_ExecutedTrades, this->parent);
 }
 
-QVariant executedTradeList::value(int row_, int column_)
+QVariant executedTradeList::data(int row_, int column_) const
 {
     QMap<int, executedTrade>::iterator i = m_valuesToBeInserted.at(row_);
     switch(column_)

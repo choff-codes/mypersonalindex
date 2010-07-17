@@ -13,16 +13,17 @@ class priceFactory
 {
 public:
 
-    historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
-    //static void flagDirty(const queries &dataSource_);
+    static historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
+    static void flagDirty(const queries &dataSource_);
+    static void close(const queries &dataSource_) { m_historicalPricesCache.remove(dataSource_); }
 
 private:
-    static QHash<QString, historicalPrices> m_historicalPricesCache;
+    static QHash<queries, QHash<QString, historicalPrices> > m_historicalPricesCache;
 
-    void updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_);
-    QMap<int, double> loadPrices(const QString &symbol_, const queries &dataSource_);
-    QMap<int, double> loadDividends(const QString &symbol_, const queries &dataSource_);
-    QMap<int, double> loadSplits(const QString &symbol_, const queries &dataSource_);
+    static void updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_);
+    static QMap<int, double> loadPrices(const QString &symbol_, const queries &dataSource_);
+    static QMap<int, double> loadDividends(const QString &symbol_, const queries &dataSource_);
+    static QMap<int, double> loadSplits(const QString &symbol_, const queries &dataSource_);
 };
 
 #endif // PRICEFACTORY_H

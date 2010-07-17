@@ -7,7 +7,7 @@ void historicalNAVPortfolio::insertBatch(queries dataSource_)
     queriesBatch::insertBatch();
 }
 
-QVariant historicalNAVPortfolio::value(int row_, int column_)
+QVariant historicalNAVPortfolio::data(int row_, int column_) const
 {
     int date = m_valuesToBeInserted.at(row_);
     navPair pair = m_nav.value(date);

@@ -202,15 +202,18 @@ public:
     };
 
     queries(const QString &databaseLocation_);
+    bool operator==(const queries &other_) const { return this->getDatabaseLocation() == other_.getDatabaseLocation();}
 
     static QString getDefaultDatabaseLocation();
 
     void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
+    QSqlQuery select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const;
 
     int getIdentity() const;
     int getDatabaseVersion() const;
+    QString getDatabaseLocation() const { return m_database.databaseName(); }
 
     void deleteTable(const QString &table_) const;
     void deleteItem(const QString &table_, int id_) const;
@@ -223,7 +226,9 @@ private:
     QSqlDatabase m_database;
 
     void executeNonQuery(const QString &query_) const;
-    void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_ = -1) const;
+    void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
 };
+
+inline uint qHash(const queries &dataSource_) { return qHash(dataSource_.getDatabaseLocation()); }
 
 #endif // QUERIES_H

@@ -1,6 +1,5 @@
 INCLUDEPATH += $$PWD
-SOURCES += $$PWD/updatePrices.cpp \
-    $$PWD/queries.cpp \
+SOURCES += $$PWD/queries.cpp \
     $$PWD/nav.cpp \
     $$PWD/priceFactory.cpp \
     $$PWD/calculations.cpp \
@@ -19,15 +18,18 @@ SOURCES += $$PWD/updatePrices.cpp \
     $$PWD/trade.cpp \
     $$PWD/updateInfo.cpp \
     $$PWD/statisticInfo.cpp \
-    $$PWD/import.cpp \
+    #$$PWD/import.cpp \
+    $$PWD/updatePrices.cpp \
     $$PWD/portfolioAttributes.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
     $$PWD/avgPricePerShare.cpp \
     $$PWD/tradeDateCalendar.cpp \
-    $$PWD/portfolioFactory.cpp
-HEADERS += $$PWD/updatePrices.h \
-    $$PWD/queries.h \
+    $$PWD/portfolioFactory.cpp \
+    $$PWD/columns.cpp \
+    $$PWD/settingsFactory.cpp \
+    $$PWD/assetAllocationTarget.cpp
+HEADERS += $$PWD/queries.h \
     $$PWD/functions.h \
     $$PWD/nav.h \
     $$PWD/calculations.h \
@@ -46,7 +48,8 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/trade.h \
     $$PWD/updateInfo.h \
     $$PWD/statisticInfo.h \
-    $$PWD/import.h \
+    #$$PWD/import.h \
+    $$PWD/updatePrices.h \
     $$PWD/portfolioAttributes.h \
     $$PWD/splits.h \
     $$PWD/objectKey.h \
@@ -56,4 +59,7 @@ HEADERS += $$PWD/updatePrices.h \
     $$PWD/tradeDateCalendar.h \
     $$PWD/costBasis.h \
     $$PWD/queriesBatch.h \
-    $$PWD/portfolioFactory.h
+    $$PWD/portfolioFactory.h \
+    $$PWD/columns.h \
+    $$PWD/settingsFactory.h \
+    $$PWD/assetAllocationTarget.h

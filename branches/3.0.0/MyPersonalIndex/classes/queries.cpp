@@ -239,13 +239,13 @@ const QStringList queries::executedTradesColumns = QStringList()
 //    executedTradesViewColumns_PortfolioID
 //};
 
-static const QStringList executedTradesViewColumns = QStringList()
-                                                     << "SecurityID"
-                                                     << "Date"
-                                                     << "Shares"
-                                                     << "Price"
-                                                     << "Commission"
-                                                     << "PortfolioID";
+const QStringList queries::executedTradesViewColumns = QStringList()
+                                              << "SecurityID"
+                                              << "Date"
+                                              << "Shares"
+                                              << "Price"
+                                              << "Commission"
+                                              << "PortfolioID";
 
 //enum {
 //    securityAAViewColumns_SecurityID,
@@ -254,11 +254,11 @@ static const QStringList executedTradesViewColumns = QStringList()
 //    securityAAViewColumns_PortfolioID
 //};
 
-static const QStringList securityAAViewColumns = QStringList()
-                                                 << "SecurityID"
-                                                 << "AAID"
-                                                 << "Percent"
-                                                 << "PortfolioID";
+const QStringList queries::securityAAViewColumns = QStringList()
+                                          << "SecurityID"
+                                          << "AAID"
+                                          << "Percent"
+                                          << "PortfolioID";
 
 
 //enum {
@@ -277,20 +277,20 @@ static const QStringList securityAAViewColumns = QStringList()
 //    securityTradesViewColumns_PortfolioID
 //};
 
-static const QStringList securityTradesViewColumns = QStringList()
-                                                     << "ID"
-                                                     << "SecurityID"
-                                                     << "Type"
-                                                     << "Value"
-                                                     << "Price"
-                                                     << "Commission"
-                                                     << "CashAccountID"
-                                                     << "Frequency"
-                                                     << "Date"
-                                                     << "StartDate"
-                                                     << "EndDate"
-                                                     << "Description"
-                                                     << "PortfolioID";
+const QStringList queries::securityTradesViewColumns = QStringList()
+                                              << "ID"
+                                              << "SecurityID"
+                                              << "Type"
+                                              << "Value"
+                                              << "Price"
+                                              << "Commission"
+                                              << "CashAccountID"
+                                              << "Frequency"
+                                              << "Date"
+                                              << "StartDate"
+                                              << "EndDate"
+                                              << "Description"
+                                              << "PortfolioID";
 
 const QString queries::table_AA = "AA";
 const QString queries::table_Acct = "Acct";
@@ -305,9 +305,9 @@ const QString queries::table_Security = "Security";
 const QString queries::table_SecurityAA = "SecurityAA";
 const QString queries::table_SecurityTrades = "SecurityTrades";
 const QString queries::table_ExecutedTrades = "ExecutedTrades";
-const QString view_ExecutedTrades = "ExecutedTradesView";
-const QString view_SecurityAA = "SecurityAAView";
-const QString view_SecurityTrades = "SecurityTradesView";
+const QString queries::view_ExecutedTrades = "ExecutedTradesView";
+const QString queries::view_SecurityAA = "SecurityAAView";
+const QString queries::view_SecurityTrades = "SecurityTradesView";
 
 queries::queries(const QString &databaseLocation_)
 {
@@ -355,7 +355,7 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
     for (int i = 0; i < rowCount; ++i)
     {
         for (int x = 0; x < columnCount; ++x)
-            query.addBindValue(object_->value(i, x));
+            query.addBindValue(object_->data(i, x));
         query.exec();
     }
 
@@ -418,6 +418,19 @@ QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_
 
     resultSet.setForwardOnly(true);
     resultSet.exec(sql.arg(columns_.join(","), tableName_));
+
+    return resultSet;
+}
+
+QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const
+{
+    QSqlQuery resultSet(m_database);
+    QString sql("SELECT %1 FROM %2 WHERE %3 = ?");
+
+    resultSet.setForwardOnly(true);
+    resultSet.prepare(sql.arg(columns_.join(","), tableName_, whereColumn_));
+    resultSet.addBindValue(whereValue_);
+    resultSet.exec();
 
     return resultSet;
 }

@@ -9,6 +9,7 @@
 #include "objectKey.h"
 #include "executedTrade.h"
 #include "historicalPrices.h"
+#include "assetAllocationTarget.h"
 
 class security: public objectKey
 {
@@ -20,7 +21,7 @@ public:
     bool includeInCalc;
     bool hide;
     QString note;
-    QMap<int, double> aa;
+    assetAllocationTarget targets;
     QMap<int, trade> trades;
     executedTradeList executedTrades;
 
@@ -53,8 +54,6 @@ public:
 
 private:
     historicalPrices m_prices;
-
-    void saveAATargets(const queries &dataSource_) const;
 };
 
 #endif // SECURITY_H

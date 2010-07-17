@@ -1,8 +1,8 @@
-include(forms/forms.pri)
+#include(forms/forms.pri)
 include(classes/classes.pri)
-include(models/models.pri)
-include(ui/ui.pri)
-include(usercontrols/usercontrols.pri)
+#include(models/models.pri)
+#include(ui/ui.pri)
+#include(usercontrols/usercontrols.pri)
 
 INCLUDEPATH += shared/qwt
 INCLUDEPATH += shared/qtsingleapplication

@@ -13,8 +13,8 @@ public:
     void beginBatch() { m_batchInProgress = true; }
     virtual void insertBatch() { m_batchInProgress = false; }
 
-    virtual int rowsToBeInserted() = 0;
-    virtual QVariant value(int row_, int column_) = 0;
+    virtual int rowsToBeInserted() const = 0;
+    virtual QVariant data(int row_, int column_) const = 0;
 
 protected:
     bool m_batchInProgress;

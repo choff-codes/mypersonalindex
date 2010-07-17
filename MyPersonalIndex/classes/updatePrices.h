@@ -5,10 +5,12 @@
 #include <QString>
 #include <QDate>
 #include <QtNetwork>
+#include <QPair>
 #include "updateInfo.h"
 #include "queries.h"
+#include "priceFactory.h"
 
-struct updatePricesReturnValue
+struct updatePricesResult
 {
     QStringList updateFailures;
     int earliestUpdate;
@@ -17,33 +19,28 @@ struct updatePricesReturnValue
 class updatePrices
 {
 public:
-    updatePrices(int beginDate_, bool splits_):
-            m_splits(splits_),
-            m_beginDate(beginDate_)
+    updatePrices(queries dataSource_):
+        m_dataSource(dataSource_),
+        NO_DATA(QDate::currentDate().toJulianDay())
     {}
 
     static bool isInternetConnection();
-    updatePricesReturnValue run();
+    updatePricesResult run(const QStringList &symbols_, int beginDate_, bool splits_);
 
 private:
-    bool m_splits;
-    int m_beginDate;
-    QVariantList m_pricesDate, m_pricesSymbol, m_pricesPrice;
-    QVariantList m_divDate, m_divSymbol, m_divAmount;
-    QVariantList m_splitDate, m_splitSymbol, m_splitRatio;
+    queries m_dataSource;
+
+    const int NO_DATA;
 
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';
 
-    QMap<QString, updateInfo> getUpdateInfo() const;
-    bool getPrices(const QString &symbol, const int &minDate, int *earliestUpdate);
-    void getDividends(const QString &symbol, const int &minDate, int *earliestUpdate);
-    void getSplits(const QString &symbol, const int &minDate, int *earliestUpdate);
-    void updateMissingPrices();
-    void insertUpdates();
+    QPair<bool, int> getPrices(const QString &symbol_, int beginDate_);
+    int getDividends(const QString &symbol_, int beginDate_);
+    int getSplits(const QString &symbol_, int beginDate_);
 
-    QList<QByteArray> downloadFile(const QUrl &url, const bool &splitOnLineBreak = true);
-    static QString getCSVAddress(const QString &symbol, const QDate &begin, const QDate &end, const QString &type);
+    QList<QByteArray> downloadFile(const QUrl &url_, bool splitResultByLineBreak = true);
+    static QString getCSVAddress(const QString &symbol_, const QDate &beginDate_, const QDate &endDate_, const QString &type_);
     static QString getSplitAddress(const QString &symbol);
 };
 

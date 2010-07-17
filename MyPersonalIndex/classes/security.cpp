@@ -9,7 +9,7 @@ bool security::operator==(const security &other_) const
             && this->cashAccount == other_.cashAccount
             && this->includeInCalc == other_.includeInCalc
             && this->hide == other_.hide
-            && this->aa == other_.aa
+            && this->targets == other_.targets
             && this->trades == other_.trades;
 }
 
@@ -43,29 +43,6 @@ void security::save(const queries &dataSource_)
     values.insert(queries::securityColumns.at(queries::securityColumns_Hide), (int)this->hide);
 
     this->id = dataSource_.insert(queries::table_Security, values, this->id);
-
-    saveAATargets(dataSource_);
-}
-
-void security::saveAATargets(const queries &dataSource_) const
-{
-//    QVariantList securityID, aaID, percent;
-//
-//    for(QMap<int, double>::const_iterator i = this->aa.constBegin(); i != this->aa.constEnd(); ++i)
-//    {
-//        securityID.append(this->id);
-//        aaID.append(i.key());
-//        percent.append(i.value());
-//    }
-//
-//    QMap<QString, QVariantList> tableValues;
-//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_SecurityID), securityID);
-//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_AAID), aaID);
-//    tableValues.insert(queries::securityAAColumns.at(queries::securityAAColumns_Percent), percent);
-//
-//    dataSource_.deleteSecurityItems(queries::table_SecurityAA, this->id);
-//    if (!securityID.isEmpty())
-//        dataSource_.executeTableUpdate(queries::table_SecurityAA, tableValues);
 }
 
 void security::remove(const queries &dataSource_) const

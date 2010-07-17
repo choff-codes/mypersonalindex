@@ -60,11 +60,11 @@ void import::save(const int &portfolioID)
         sec.account = newAcctIDs.contains(sec.account) ? newAcctIDs.value(sec.account) : -1;
         sec.save(portfolioID);
 
-        QMap<int, double> oldAA = sec.aa;
-        sec.aa.clear();
+        QMap<int, double> oldAA = sec.targets;
+        sec.targets.clear();
         foreach(const int &x, oldAA.keys())
             if (newAAIDs.contains(x))
-                sec.aa.insert(newAAIDs.value(x), oldAA.value(x));
+                sec.targets.insert(newAAIDs.value(x), oldAA.value(x));
 
         sec.saveAATargets();
 

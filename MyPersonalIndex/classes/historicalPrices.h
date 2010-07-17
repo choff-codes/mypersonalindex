@@ -21,6 +21,8 @@ public:
 
     int endDate() const;
     int beginDate() const;
+    int endDividendDate() const;
+    int endSplitDate() const;
 
     void setPrices(const QMap<int, double> &prices_);
     void setDividends(const QMap<int, double> &dividends_);

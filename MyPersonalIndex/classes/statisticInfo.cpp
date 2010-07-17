@@ -1,4 +1,3 @@
-#define priceManager prices::instance()
 #include "statisticInfo.h"
 
 statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNAV_):

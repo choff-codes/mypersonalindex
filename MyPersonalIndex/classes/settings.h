@@ -9,6 +9,7 @@
 #include <QPoint>
 #include <QMap>
 #include "queries.h"
+#include "columns.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -17,14 +18,6 @@
 class settings
 {
 public:
-    typedef QHash<int, QList<int> > columns;
-    enum {
-        columns_Holdings,
-        columns_AA,
-        columns_Acct,
-        columns_Stat
-    };
-
     int dataStartDate;
     bool splits;
     int version;
@@ -33,7 +26,7 @@ public:
     QSize windowSize;
     QPoint windowLocation;
     Qt::WindowState state;
-    columns viewableColumns;
+    QHash<int, columns> viewableColumns;
 
     settings():
             dataStartDate(0),
@@ -43,22 +36,15 @@ public:
             state(Qt::WindowActive)
     {}
 
-    void save();
+    void save(const queries &dataSource_);
 
-    static void saveColumns(const int &columnsID, const QList<int> &columns);
-    static settings loadSettings();
-
-    bool operator==(const settings &other) const
+    bool operator==(const settings &other_) const
     {
         // these are the only static properties, the other properties cannot be edited by the user
-        return this->dataStartDate == other.dataStartDate && this->splits == other.splits;
+        return this->dataStartDate == other_.dataStartDate && this->splits == other_.splits;
     }
 
-    bool operator!=(const settings &other) const { return !(*this == other); }
-
-private:
-    static void loadSettingsInfo(settings &s);
-    static void loadSettingsColumns(settings &s);
+    bool operator!=(const settings &other_) const { return !(*this == other_); }
 };
 
 #endif // SETTINGS_H

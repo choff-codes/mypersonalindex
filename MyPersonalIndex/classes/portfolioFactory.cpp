@@ -1,7 +1,5 @@
 #include "portfolioFactory.h"
 
-
-
 QMap<int, portfolio> portfolioFactory::getPortfolios(const queries &dataSource_)
 {
 #ifdef CLOCKTIME
@@ -111,7 +109,7 @@ void portfolioFactory::loadPortfoliosSecurity(const queries &dataSource_)
         sec.hide = q.value(queries::securityColumns_Hide).toBool();
 
         if(!sec.cashAccount)
-            sec.setHistoricalPrices(priceFactory().getPrices(sec.description, dataSource_));
+            sec.setHistoricalPrices(priceFactory::getPrices(sec.description, dataSource_));
 
         m_portfolios[sec.parent].securities().insert(sec.id, sec);
     }
@@ -121,7 +119,7 @@ void portfolioFactory::loadPortfoliosSecurityAA(const queries &dataSource_)
 {
     QSqlQuery q = dataSource_.select(queries::view_SecurityAA, queries::securityAAViewColumns);
     while(q.next())
-        m_portfolios[q.value(queries::securityAAViewColumns_PortfolioID).toInt()].securities()[q.value(queries::securityAAViewColumns_SecurityID).toInt()].aa.insert(
+        m_portfolios[q.value(queries::securityAAViewColumns_PortfolioID).toInt()].securities()[q.value(queries::securityAAViewColumns_SecurityID).toInt()].targets.insert(
             q.value(queries::securityAAViewColumns_AAID).toInt(),
             q.value(queries::securityAAViewColumns_Percent).toDouble()
         );

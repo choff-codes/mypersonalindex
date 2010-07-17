@@ -164,7 +164,7 @@ double nav::calculateShares(trade::tradeType tradeType_, double value_, double p
         case trade::tradeType_AA:
         {
             double shares = 0;
-            for(QMap<int, double>::const_iterator i = portfolio_.securities()[id_].aa.constBegin(); i != portfolio_.securities()[id_].aa.constEnd(); ++i)
+            for(QMap<int, double>::const_iterator i = portfolio_.securities()[id_].targets.constBegin(); i != portfolio_.securities()[id_].targets.constEnd(); ++i)
             {
                 double target = portfolio_.assetAllocations().value(i.key()).target;
                 if (target <= 0)

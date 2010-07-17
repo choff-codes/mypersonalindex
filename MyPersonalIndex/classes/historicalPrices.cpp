@@ -72,3 +72,13 @@ int historicalPrices::beginDate() const
 {
     return d->prices.isEmpty() ? 0 : (d->prices.constBegin()).key();
 }
+
+int historicalPrices::endDividendDate() const
+{
+    return d->dividends.isEmpty() ? 0 : (d->dividends.constEnd() - 1).key();
+}
+
+int historicalPrices::endSplitDate() const
+{
+    return d->splits.isEmpty() ? 0 : (d->splits.constBegin()).key();
+}

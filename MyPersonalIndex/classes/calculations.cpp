@@ -69,8 +69,8 @@ snapshot calculations::assetAllocationSnapshot(int date_, int id_)
     snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
     foreach(const security &s, m_portfolio.securities())
-        if (s.aa.contains(id_) || (id_ == -1 && s.aa.isEmpty()))
-            value.add(portfolioValue.securitiesInfo.value(s.id), s.aa.value(id_, 1));
+        if (s.targets.contains(id_) || (id_ == -1 && s.targets.isEmpty()))
+            value.add(portfolioValue.securitiesInfo.value(s.id), s.targets.value(id_));
 
     return value;
 }
@@ -202,7 +202,6 @@ historicalNAV calculations::changeOverTime(int beginDate_, int endDate_)
     return navHistory;
 }
 
-
 double calculations::correlation(const historicalNAV &first_, const historicalNAV &second_)
 {
     if (first_.isEmpty() || second_.isEmpty())
@@ -224,6 +223,7 @@ double calculations::correlation(const historicalNAV &first_, const historicalNA
     double security2Square = 0;
     double productSquare = 0;
 
+    ++calendar;
     foreach(const int &date, calendar)
     {
         if (date > endDate)

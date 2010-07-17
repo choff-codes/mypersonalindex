@@ -77,7 +77,7 @@ void frmSecurity::loadSecurity()
     ui.chkInclude->setChecked(m_security.includeInCalc);
     ui.btnHistorical->setDisabled(m_security.id == -1);
 
-    m_modelAA = new securityAAModel(m_security.aa, portfolio::instance().aa(m_portfolioID), ui.aa);
+    m_modelAA = new securityAAModel(m_security.targets, portfolio::instance().aa(m_portfolioID), ui.aa);
     installAAModel();
 
     m_modelTrade = new securityTradeModel(m_security.trades.values(), portfolio::instance().securities(m_portfolioID),  ui.trades, this);
@@ -139,7 +139,7 @@ void frmSecurity::accept()
 
     if (m_security.id != -1) // can't save trades until there is a valid ID
         m_security.trades = m_modelTrade->saveList(m_securityOriginal.trades, m_security.id);
-    m_security.aa = m_modelAA->getList();
+    m_security.targets = m_modelAA->getList();
 
     if (m_security == m_securityOriginal)
     {
@@ -165,7 +165,7 @@ void frmSecurity::accept()
     else
         m_minDate = -1;
 
-    if (m_security.aa != m_securityOriginal.aa)
+    if (m_security.targets != m_securityOriginal.targets)
         m_security.saveAATargets();
 
     if (m_security.divReinvest != m_securityOriginal.divReinvest || m_security.includeInCalc != m_securityOriginal.includeInCalc || m_security.cashAccount != m_securityOriginal.cashAccount)

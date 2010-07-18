@@ -1,44 +1,44 @@
 #include "statisticInfo.h"
 
 statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNAV_):
-    m_endInfo(historicalNAV_),
-    m_startNAV(beginNAV_),
-    m_startTotalValue(0),
-    m_endNAV(beginNAV_),
-    m_endTotalValue(0),
-    m_count(0),
-    m_stdDev(0),
-    m_maxChangePositive(0),
-    m_maxChangePositiveDay(0),
-    m_maxChangeNegative(0),
-    m_maxChangeNegativeDay(0),
-    m_minNAVValue(0),
-    m_minNAVValueDay(0),
-    m_maxNAVValue(0),
-    m_maxNAVValueDay(0),
-    m_minTotalValue(0),
-    m_minTotalValueDay(0),
-    m_maxTotalValue(0),
-    m_maxTotalValueDay(0)
+    navHistory(historicalNAV_),
+    beginNAV(beginNAV_),
+    endNAV(beginNAV_),
+    beginTotalValue(0),
+    endTotalValue(0),
+    days(0),
+    standardDeviation(0),
+    maxChangePositive(0),
+    maxChangePositiveDay(0),
+    maxChangeNegative(0),
+    maxChangeNegativeDay(0),
+    minNAVValue(0),
+    minNAVValueDay(0),
+    maxNAVValue(0),
+    maxNAVValueDay(0),
+    minTotalValue(0),
+    minTotalValueDay(0),
+    maxTotalValue(0),
+    maxTotalValueDay(0)
 {    
-    m_count = historicalNAV_.count() - 1; // first is baseline nav, so discard
-    if (m_count <= 0)
+    days = historicalNAV_.count() - 1; // first is baseline nav, so discard
+    if (days <= 0)
         return;
 
-    m_startNAV = historicalNAV_.nav(historicalNAV_.firstDate());
-    m_startTotalValue = historicalNAV_.totalValue(historicalNAV_.firstDate());
-    m_endNAV = historicalNAV_.nav(historicalNAV_.lastDate());
-    m_endTotalValue = historicalNAV_.totalValue(historicalNAV_.lastDate());
-    m_minNAVValue = m_startNAV;
-    m_minNAVValueDay = historicalNAV_.firstDate();
-    m_maxNAVValue = m_startNAV;
-    m_maxNAVValueDay = historicalNAV_.firstDate();
-    m_minTotalValue = m_startTotalValue;
-    m_minTotalValueDay = historicalNAV_.firstDate();
-    m_maxTotalValue = m_startTotalValue;
-    m_maxTotalValueDay = historicalNAV_.firstDate();
+    beginNAV = historicalNAV_.nav(historicalNAV_.firstDate());
+    beginTotalValue = historicalNAV_.totalValue(historicalNAV_.firstDate());
+    endNAV = historicalNAV_.nav(historicalNAV_.lastDate());
+    endTotalValue = historicalNAV_.totalValue(historicalNAV_.lastDate());
+    minNAVValue = beginNAV;
+    minNAVValueDay = historicalNAV_.firstDate();
+    maxNAVValue = beginNAV;
+    maxNAVValueDay = historicalNAV_.firstDate();
+    minTotalValue = beginTotalValue;
+    minTotalValueDay = historicalNAV_.firstDate();
+    maxTotalValue = beginTotalValue;
+    maxTotalValueDay = historicalNAV_.firstDate();
 
-    double previousNAV = m_startNAV;
+    double previousNAV = beginNAV;
 
     //http://www.johndcook.com/standard_deviation.html
     double oldM = 0;
@@ -57,37 +57,37 @@ statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNA
         double change = newNav / previousNAV - 1;
         double totalValue = historicalNAV_.totalValue(date);
 
-        if (totalValue > m_maxTotalValue)
+        if (totalValue > maxTotalValue)
         {
-           m_maxTotalValue = totalValue;
-           m_maxTotalValueDay = date;
+           maxTotalValue = totalValue;
+           maxTotalValueDay = date;
         }
 
-        if (totalValue < m_minTotalValue)
+        if (totalValue < minTotalValue)
         {
-           m_minTotalValue = totalValue;
-           m_minTotalValueDay = date;
+           minTotalValue = totalValue;
+           minTotalValueDay = date;
         }
 
-        if (change > m_maxChangePositive || count == 1)
+        if (change > maxChangePositive || count == 1)
         {
-            m_maxChangePositive = change;
-            m_maxChangePositiveDay = date;
+            maxChangePositive = change;
+            maxChangePositiveDay = date;
         }
-        if (change < m_maxChangeNegative || count == 1)
+        if (change < maxChangeNegative || count == 1)
         {
-            m_maxChangeNegative = change;
-            m_maxChangeNegativeDay = date;
+            maxChangeNegative = change;
+            maxChangeNegativeDay = date;
         }
-        if (newNav > m_maxNAVValue)
+        if (newNav > maxNAVValue)
         {
-            m_maxNAVValue = newNav;
-            m_maxNAVValueDay = date;
+            maxNAVValue = newNav;
+            maxNAVValueDay = date;
         }
-        if (newNav < m_minNAVValue)
+        if (newNav < minNAVValue)
         {
-            m_minNAVValue = newNav;
-            m_minNAVValueDay = date;
+            minNAVValue = newNav;
+            minNAVValueDay = date;
         }
 
         newM = oldM + (change - oldM) / count;
@@ -103,5 +103,5 @@ statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNA
 
     // standard deviation
     if (--count != 1)
-        m_stdDev = sqrt(newS / (count - 1));
+        standardDeviation = sqrt(newS / (count - 1));
 }

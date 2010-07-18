@@ -42,12 +42,12 @@ public:
     int firstTradeDate() const;
 
     void setHistoricalPrices(const historicalPrices &prices_) { m_prices = prices_; }
-    double price(int date_) const { return cashAccount ? 1 : m_prices.price(date_); }
-    double dividend(int date_) const { return cashAccount ? 0 : m_prices.dividend(date_); }
-    double split(int date_) const { return cashAccount ? 1 : m_prices.split(date_); }
-    QMap<int, double> splits() const { return cashAccount ? QMap<int, double>() : m_prices.splits(); }
-    int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(); }
-    int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(); }
+    double price(int date_) const { return cashAccount ? 1 : m_prices.value(date_, historicalPrices::type_price); }
+    double dividend(int date_) const { return cashAccount ? 0 : m_prices.value(date_, historicalPrices::type_dividend); }
+    double split(int date_) const { return cashAccount ? 1 : m_prices.value(date_, historicalPrices::type_split); }
+    QMap<int, double> splits() const { return cashAccount ? QMap<int, double>() : m_prices.values(historicalPrices::type_split); }
+    int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(historicalPrices::type_price); }
+    int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(historicalPrices::type_price); }
     
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

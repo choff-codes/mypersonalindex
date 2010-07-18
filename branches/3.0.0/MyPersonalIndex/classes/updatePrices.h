@@ -6,8 +6,7 @@
 #include <QDate>
 #include <QtNetwork>
 #include <QPair>
-#include "updateInfo.h"
-#include "queries.h"
+#include "updatePricesBatch.h"
 #include "priceFactory.h"
 
 struct updatePricesResult
@@ -24,22 +23,35 @@ public:
         NO_DATA(QDate::currentDate().toJulianDay())
     {}
 
-    static bool isInternetConnection();
     updatePricesResult run(const QStringList &symbols_, int beginDate_, bool splits_);
+
+    static bool isInternetConnection();
 
 private:
     queries m_dataSource;
+    updatePricesBatch m_newPrices;
 
     const int NO_DATA;
+
+    struct downloadResult
+    {
+        bool success;
+        int earliestDate;
+
+        downloadResult(bool success_, int earliestDate_):
+            success(success_),
+            earliestDate(earliestDate_)
+        {}
+    };
 
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';
 
-    QPair<bool, int> getPrices(const QString &symbol_, int beginDate_);
-    int getDividends(const QString &symbol_, int beginDate_);
-    int getSplits(const QString &symbol_, int beginDate_);
+    downloadResult getPrices(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
+    int getDividends(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
+    int getSplits(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
 
-    QList<QByteArray> downloadFile(const QUrl &url_, bool splitResultByLineBreak = true);
+    static QList<QByteArray> downloadFile(const QUrl &url_, bool splitResultByLineBreak = true);
     static QString getCSVAddress(const QString &symbol_, const QDate &beginDate_, const QDate &endDate_, const QString &type_);
     static QString getSplitAddress(const QString &symbol);
 };

@@ -27,9 +27,9 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
 
 void priceFactory::updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_)
 {
-    priceData_.setPrices(loadPrices(symbol_, dataSource_));
-    priceData_.setDividends(loadDividends(symbol_, dataSource_));
-    priceData_.setSplits(loadSplits(symbol_, dataSource_));
+    priceData_.setValues(loadPrices(symbol_, dataSource_), historicalPrices::type_price);
+    priceData_.setValues(loadDividends(symbol_, dataSource_), historicalPrices::type_dividend);
+    priceData_.setValues(loadSplits(symbol_, dataSource_), historicalPrices::type_split);
 }
 
 void priceFactory::flagDirty(const queries &dataSource_)

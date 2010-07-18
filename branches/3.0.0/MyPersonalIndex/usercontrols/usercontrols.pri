@@ -6,10 +6,12 @@ HEADERS += $$PWD/mpiValidator.h \
     $$PWD/mpiPercentScale.h \
     $$PWD/mpiDateEdit.h \
     $$PWD/mpiTableView.h \
-    $$PWD/mpiChart.h
+    $$PWD/mpiChart.h \
+    $$PWD/mpiChartCurve.h
 SOURCES += $$PWD/mpiValidator.cpp \
     $$PWD/mpiViewDelegates.cpp \
     $$PWD/mpiViewModelBase.cpp \
     $$PWD/mpiDateEdit.cpp \
     $$PWD/mpiTableView.cpp \
-    $$PWD/mpiChart.cpp
+    $$PWD/mpiChart.cpp \
+    $$PWD/mpiChartCurve.cpp

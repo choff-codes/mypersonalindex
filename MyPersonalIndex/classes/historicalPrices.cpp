@@ -28,57 +28,85 @@ historicalPrices& historicalPrices::operator=(const historicalPrices &other_)
     return *this;
 }
 
-double historicalPrices::price(int date) const
+double historicalPrices::value(int date_, type type_) const
 {
-    return d->prices.value(date, 0);
+    switch(type_)
+    {
+        case type_price:
+            return d->prices.value(date_, 0);
+        case type_dividend:
+            return d->dividends.value(date_, 0);
+        case type_split:
+            return d->splits.value(date_, 1);
+    }
+    return 0;
 }
 
-double historicalPrices::dividend(int date) const
+QMap<int, double> historicalPrices::values(type type_) const
 {
-    return d->dividends.value(date, 0);
+    switch(type_)
+    {
+        case type_price:
+            return d->prices;
+        case type_dividend:
+            return d->dividends;
+        case type_split:
+            return d->splits;
+    }
+    return QMap<int, double>();
 }
 
-double historicalPrices::split(int date) const
+bool historicalPrices::contains(int date_, type type_) const
 {
-    return d->splits.value(date, 1);
+    switch(type_)
+    {
+        case type_price:
+            return d->prices.contains(date_);
+        case type_dividend:
+            return d->dividends.contains(date_);
+        case type_split:
+            return d->splits.contains(date_);
+    }
+    return false;
 }
 
-QMap<int, double> historicalPrices::splits() const
+void historicalPrices::setValues(const QMap<int, double> &values_, type type_)
 {
-    return d->splits;
+    switch(type_)
+    {
+        case type_price:
+            d->prices = values_;
+        case type_dividend:
+            d->dividends = values_;
+        case type_split:
+            d->splits = values_;
+    }
 }
 
-void historicalPrices::setPrices(const QMap<int, double> &prices_)
+int historicalPrices::endDate(type type_) const
 {
-    d->prices = prices_;
+    switch(type_)
+    {
+        case type_price:
+            return d->prices.isEmpty() ? 0 : (d->prices.constEnd() - 1).key();
+        case type_dividend:
+            return d->dividends.isEmpty() ? 0 : (d->dividends.constEnd() - 1).key();
+        case type_split:
+            return d->splits.isEmpty() ? 0 : (d->splits.constEnd() - 1).key();
+    }
+    return 0;
 }
 
-void historicalPrices::setDividends(const QMap<int, double> &dividends_)
+int historicalPrices::beginDate(type type_) const
 {
-    d->dividends = dividends_;
-}
-
-void historicalPrices::setSplits(const QMap<int, double> &splits_)
-{
-    d->splits = splits_;
-}
-
-int historicalPrices::endDate() const
-{
-    return d->prices.isEmpty() ? 0 : (d->prices.constEnd() - 1).key();
-}
-
-int historicalPrices::beginDate() const
-{
-    return d->prices.isEmpty() ? 0 : (d->prices.constBegin()).key();
-}
-
-int historicalPrices::endDividendDate() const
-{
-    return d->dividends.isEmpty() ? 0 : (d->dividends.constEnd() - 1).key();
-}
-
-int historicalPrices::endSplitDate() const
-{
-    return d->splits.isEmpty() ? 0 : (d->splits.constBegin()).key();
+    switch(type_)
+    {
+        case type_price:
+            return d->prices.isEmpty() ? 0 : (d->prices.constBegin()).key();
+        case type_dividend:
+            return d->dividends.isEmpty() ? 0 : (d->dividends.constBegin()).key();
+        case type_split:
+            return d->splits.isEmpty() ? 0 : (d->splits.constBegin()).key();
+    }
+    return 0;
 }

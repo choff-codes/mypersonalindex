@@ -1,15 +1,15 @@
-#ifndef CHARTINFO_H
-#define CHARTINFO_H
+#ifndef MPICHARTCURVE_H
+#define MPICHARTCURVE_H
 
 #include <QVector>
 #include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
-class chartInfo
+class mpiChartCurve
 {
 public:
-    chartInfo(): m_curve(0) {}
-    ~chartInfo() { setCurve(0); }
+    mpiChartCurve(): m_curve(0) {}
+    ~mpiChartCurve() { setCurve(0); }
 
     void setCurve(QwtPlotCurve *curve_);
     void attach(QwtPlot *chart_);
@@ -26,4 +26,4 @@ private:
     QVector<double> m_yData;
 };
 
-#endif // CHARTINFO_H
+#endif // MPICHARTCURVE_H

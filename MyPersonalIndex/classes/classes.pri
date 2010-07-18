@@ -11,12 +11,11 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/settings.cpp \
     $$PWD/statistic.cpp \
     $$PWD/portfolio.cpp \
-    $$PWD/chartInfo.cpp \
     $$PWD/snapshot.cpp \
     $$PWD/executedTrade.cpp \
     $$PWD/historicalPrices.cpp \
     $$PWD/trade.cpp \
-    $$PWD/updateInfo.cpp \
+    $$PWD/updatePricesBatch.cpp \
     $$PWD/statisticInfo.cpp \
     #$$PWD/import.cpp \
     $$PWD/updatePrices.cpp \
@@ -41,12 +40,11 @@ HEADERS += $$PWD/queries.h \
     $$PWD/settings.h \
     $$PWD/statistic.h \
     $$PWD/portfolio.h \
-    $$PWD/chartInfo.h \
     $$PWD/snapshot.h \
     $$PWD/executedTrade.h \
     $$PWD/historicalPrices.h \
     $$PWD/trade.h \
-    $$PWD/updateInfo.h \
+    $$PWD/updatePricesBatch.h \
     $$PWD/statisticInfo.h \
     #$$PWD/import.h \
     $$PWD/updatePrices.h \

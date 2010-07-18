@@ -14,19 +14,21 @@ public:
 
     historicalPrices& operator=(const historicalPrices &other_);
 
-    double price(int date_) const;
-    double dividend(int date_) const;
-    double split(int date_) const;
-    QMap<int, double> splits() const;
+    enum type {
+        type_price,
+        type_dividend,
+        type_split
+    };
 
-    int endDate() const;
-    int beginDate() const;
-    int endDividendDate() const;
-    int endSplitDate() const;
+    double value(int date_, type type_) const;
+    QMap<int, double> values(type type_) const;
 
-    void setPrices(const QMap<int, double> &prices_);
-    void setDividends(const QMap<int, double> &dividends_);
-    void setSplits(const QMap<int, double> &splits_);
+    bool contains(int date_, type type_) const;
+
+    int endDate(type type_) const;
+    int beginDate(type type_) const;
+
+    void setValues(const QMap<int, double> &values_, type type_);
 
 private:
     QExplicitlySharedDataPointer<historicalPricesData> d;

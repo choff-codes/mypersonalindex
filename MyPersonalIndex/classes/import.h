@@ -19,7 +19,7 @@ public:
     importData accounts;
     importData assetAllocations;
 
-    import();
+    import(const QMap<int, portfolio> &portfolios_);
     void updateBasedOnSelectedSecurities();
     void save(const int &portfolioID);
 

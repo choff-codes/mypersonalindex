@@ -2,6 +2,9 @@
 
 void historicalNAVPortfolio::insertBatch(queries dataSource_)
 {
+    if (!this->hasParent())
+        return;
+
     dataSource_.bulkInsert(queries::table_NAV, queries::navColumns, this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
@@ -10,29 +13,27 @@ void historicalNAVPortfolio::insertBatch(queries dataSource_)
 QVariant historicalNAVPortfolio::data(int row_, int column_) const
 {
     int date = m_valuesToBeInserted.at(row_);
-    navPair pair = m_nav.value(date);
 
     switch(column_)
     {
         case queries::navColumns_Date:
             return date;
         case queries::navColumns_NAV:
-            return pair.nav;
+            return m_nav.value(date).nav;
         case queries::navColumns_PortfolioID:
             return this->parent;
         case queries::navColumns_TotalValue:
-            return pair.totalValue;
+            return m_nav.value(date).totalValue;
     }
 
     return QVariant();
 }
 
-void historicalNAVPortfolio::insert(const queries &dataSource_, int date_, double nav_, double totalValue_)
+void historicalNAVPortfolio::insert(int date_, double nav_, double totalValue_)
 {
-    m_valuesToBeInserted.append(date_);
     insert(date_, nav_, totalValue_);
-    if (!m_batchInProgress)
-        insertBatch(dataSource_);
+    if (m_batchInProgress)
+        m_valuesToBeInserted.append(date_);
 }
 
 void historicalNAVPortfolio::remove(const queries &dataSource_, int beginDate_)
@@ -41,13 +42,16 @@ void historicalNAVPortfolio::remove(const queries &dataSource_, int beginDate_)
     while (i != m_nav.end())
         i = m_nav.erase(i);
     
-    dataSource_.deletePortfolioItems(queries::table_NAV, this->parent, beginDate_);
+    if(this->hasParent())
+        dataSource_.deletePortfolioItems(queries::table_NAV, this->parent, beginDate_);
 }
 
 void historicalNAVPortfolio::remove(const queries &dataSource_)
 {
     m_nav.clear();
-    dataSource_.deletePortfolioItems(queries::table_NAV, this->parent);
+
+    if(this->hasParent())
+        dataSource_.deletePortfolioItems(queries::table_NAV, this->parent);
 }
 
 void historicalNAV::insert(int date_, double nav_, double totalValue_)

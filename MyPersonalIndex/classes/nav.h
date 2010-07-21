@@ -30,9 +30,9 @@ private:
 
     void clearHistoricalValues(portfolio portfolio_, int beginDate_, bool recalculateAll_);
 
-    void calculate(portfolio portfolio_, int date_);
-    QMap<int, tradePointerMap> calculateExecutedTrades(portfolio portfolio_, int date_, bool recalculateAll_);
-    double calculateShares(trade::tradeType tradeType_, double value_, double purchasePrice_, int id_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_);
+    void calculateNAV(portfolio portfolio_, int date_);
+    QMap<int, tradePointerMap> calculateExecutedTrades(portfolio portfolio_, int date_, bool recalculateAll_) const;
+    double calculateShares(trade::tradeType tradeType_, double value_, double purchasePrice_, int id_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_) const;
 
     void insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const tradePointerMap &trades_);
     void insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_, const QMap<int, tradePointerMap> &trades_);

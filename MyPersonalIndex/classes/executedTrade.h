@@ -31,8 +31,7 @@ public:
     QMap<int, executedTrade>::const_iterator constBegin() const { return m_trades.constBegin(); }
     QMap<int, executedTrade>::const_iterator constEnd() const { return m_trades.constEnd(); }
 
-    void insert(int date_, const executedTrade &executedTrade_) { m_trades.insertMulti(date_, executedTrade_); }
-    void insert(const queries &dataSource_, int date_, const executedTrade &executedTrade_);
+    void insert(int date_, const executedTrade &executedTrade_);
 
     void remove(const queries &dataSource_);
     void remove(const queries &dataSource_, int beginDate_);

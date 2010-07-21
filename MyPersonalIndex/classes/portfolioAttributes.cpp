@@ -55,3 +55,11 @@ void portfolioAttributes::save(const queries &dataSource_)
 
     this->id = dataSource_.insert(queries::table_Portfolios, values, this->id);
 }
+
+void portfolioAttributes::remove(const queries &dataSource_) const
+{
+    if (!this->hasIdentity())
+        return;
+
+    dataSource_.deleteItem(queries::table_Portfolios, this->id);
+}

@@ -7,7 +7,6 @@
 #include <QMap>
 #include "snapshot.h"
 #include "portfolio.h"
-#include "splits.h"
 #include "epsilon.h"
 #include "avgPricePerShare.h"
 #include "tradeDateCalendar.h"
@@ -41,6 +40,7 @@ private:
 
     snapshot snapshotByKey(int date_, const objectKey &key_);
     int beginDateByKey(const objectKey &key_);
+    int endDateByKey(const objectKey &key_);
     QMap<int, double> avgPricePerShare(int date_);
 };
 

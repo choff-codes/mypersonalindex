@@ -17,10 +17,14 @@ double avgPricePerShare::calculate(int date_, const executedTradeList &trades_, 
 
         if (t.shares >= 0) // this is a buy, just add the trade
         {
-            if (costBasis_ == costBasis_HIFO)
-                runningTrades.insertMulti(t.price, sharePricePair(t.shares, t.price)); // insert so that the highest price is the last item in the map
-            else
-                runningTrades.insert(runningTrades.count(), sharePricePair(t.shares, t.price)); // insert in order
+            runningTrades.insertMulti( // insert depending on cost basis
+                (
+                    costBasis_ == costBasis_HIFO ? t.price :
+                    costBasis_ == costBasis_LIFO ? -1 * runningTrades.count():
+                    runningTrades.count() // FIFO
+                ),
+                sharePricePair(t.shares, t.price)
+            );
 
             shares += t.shares;
             total += t.shares * t.price;
@@ -32,24 +36,20 @@ double avgPricePerShare::calculate(int date_, const executedTradeList &trades_, 
 
         while (t.shares > EPSILON && !runningTrades.isEmpty()) // still shares to sell
         {
-            QMap<double, sharePricePair>::iterator pos =
-                costBasis_ == costBasis_FIFO ?
-                    runningTrades.begin() : // FIFO
-                    runningTrades.end() - 1; // LIFO or HIFO
+            QMap<double, sharePricePair>::iterator firstOut = runningTrades.begin();
 
-            // z->first is shares, z->second is
-            if (pos->shares <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
+            if (firstOut->shares <= -1 * t.shares) // the sold shares is greater than the first/last purchase, remove the entire trade
             {
-                t.shares += pos->shares;
-                shares -= pos->shares;
-                total -= pos->shares * pos->price;
-                runningTrades.erase(pos);
+                t.shares += firstOut->shares;
+                shares -= firstOut->shares;
+                total -= firstOut->shares * firstOut->price;
+                runningTrades.erase(firstOut);
             }
             else // the solds shares is less than the first/last purchase, just subtract the sold shares from the first/last purchase
             {
-                pos->shares += t.shares;
+                firstOut->shares += t.shares;
                 shares += t.shares;
-                total += t.shares * pos->price;
+                total += t.shares * firstOut->price;
                 break;
             }
         }

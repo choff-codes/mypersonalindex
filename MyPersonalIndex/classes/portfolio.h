@@ -21,7 +21,7 @@ public:
     portfolio& operator=(const portfolio &other_);
 
     QStringList symbols() const;
-    QList<int> securityReinvestments();
+    QList<int> securityReinvestments() const;
 
     void beginNAVBatch();
     void insertNAVBatch(const queries &dataSource_);
@@ -31,7 +31,7 @@ public:
     int endDate() const;
 
     QMap<int, security>& securities();
-    QMap<int, assetAllocation> &assetAllocations();
+    QMap<int, assetAllocation>& assetAllocations();
     QMap<int, account>& accounts();
     historicalNAVPortfolio& navHistory();
     portfolioAttributes& attributes();

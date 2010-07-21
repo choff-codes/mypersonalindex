@@ -5,10 +5,6 @@
 #include <QMetaType>
 #include "objectBase.h"
 
-#ifndef UNASSIGNED
-#define UNASSIGNED -1
-#endif
-
 enum objectType {
     objectType_Portfolio,
     objectType_Account,
@@ -26,16 +22,16 @@ public:
     QString description;
     int id;
 
-    objectKey(const objectType &type_ = objectType_None, const QString &description_ = QString(), const int &id_ = -1, const int &parent_ = -1):
+    objectKey(objectType type_ = objectType_None, const QString &description_ = QString(), int id_ = -1, int parent_ = -1):
         objectBase(parent_),
         type(type_),
         description(description_),
         id(id_)
     {}
 
-    objectKey(const QString &p_symbol):
+    objectKey(const QString &symbol_):
         type(objectType_Symbol),
-        description(p_symbol),
+        description(symbol_),
         id(-1)
     {}
 

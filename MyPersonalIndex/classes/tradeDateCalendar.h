@@ -71,30 +71,26 @@ public:
 
         const_iterator(const tradeDateCalendar* v_, etype t_)
         {
-            endDate = QDate::currentDate().toJulianDay() + 1;
+            m_endDate = QDate::currentDate().toJulianDay() + 1;
 
             if (t_ == START)
-                currentDate = v_->m_date;
+                m_currentDate = qMin(v_->m_date, m_endDate);
             if (t_ == END)
-                currentDate = endDate;
+                m_currentDate = m_endDate;
         }
 
-        const int operator*() { return currentDate; }
-        bool operator!=(const const_iterator& it_) { return currentDate != it_.currentDate; }
+        const int operator*() { return m_currentDate; }
+        bool operator!=(const const_iterator& it_) { return m_currentDate != it_.m_currentDate; }
 
         const_iterator& operator++()
         {
-            currentDate = checkTradeDate(++currentDate, direction_ascending);
-
-            if (currentDate > endDate)
-                currentDate = endDate;
-
+            m_currentDate = qMin(checkTradeDate(++m_currentDate, direction_ascending), m_endDate);
             return *this;
         }
 
     private:
-        int currentDate; // Current iteration position
-        int endDate;
+        int m_currentDate; // Current iteration position
+        int m_endDate;
     };
 
     const_iterator begin() const { return const_iterator(this, const_iterator::START); }

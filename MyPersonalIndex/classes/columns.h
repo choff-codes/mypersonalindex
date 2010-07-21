@@ -19,18 +19,20 @@ public:
         objectBase(parent_)
     {}
 
-    void insert(int sequence_, int id_) { m_columns.insert(sequence_, id_); }
+    void insert(int sequence_, int id_);
     int at(int index) const { return (m_columns.constBegin() + index).value(); }
-
     int count() const { return m_columns.count(); }
+
+    void remove(const queries &dataSource_);
 
     void insertBatch(queries dataSource_);
 
-    int rowsToBeInserted() const { return m_columns.count(); }
+    int rowsToBeInserted() const { return m_valuesToBeInserted.count(); }
     QVariant data(int row_, int column_) const;
 
 private:
     QMap<int, int> m_columns;
+    QList<int> m_valuesToBeInserted;
 };
 
 #endif // COLUMNS_H

@@ -1,10 +1,10 @@
 #include "executedTrade.h"
 
-void executedTradeList::insert(const queries &dataSource_, int date_, const executedTrade &executedTrade_)
+void executedTradeList::insert(int date_, const executedTrade &executedTrade_)
 {
-    m_valuesToBeInserted.append(m_trades.insertMulti(date_, executedTrade_));
-    if (!m_batchInProgress)
-        insertBatch(dataSource_);
+    QMap<int, executedTrade>::iterator i = m_trades.insertMulti(date_, executedTrade_);
+    if (m_batchInProgress)
+        m_valuesToBeInserted.append(i);
 }
 
 void executedTradeList::remove(const queries &dataSource_, int beginDate_)
@@ -47,6 +47,9 @@ QVariant executedTradeList::data(int row_, int column_) const
 
 void executedTradeList::insertBatch(queries dataSource_)
 {
+    if (!this->hasParent())
+        return;
+
     dataSource_.bulkInsert(queries::table_ExecutedTrades, queries::executedTradesColumns, this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();

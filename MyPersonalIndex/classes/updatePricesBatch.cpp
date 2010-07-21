@@ -1,5 +1,11 @@
 #include "updatePricesBatch.h"
 
+void priceBatch::insert(const QString &symbol_, int date_, double value_)
+{
+    if (m_batchInProgress)
+        values.append(priceInformation(symbol_, date_, value_));
+}
+
 void priceBatch::insertBatch(queries dataSource_)
 {
     switch(m_table)
@@ -56,4 +62,11 @@ QVariant priceBatch::data(int row_, int column_) const
         }
 
     return QVariant();
+}
+
+void updatePricesBatch::insertBatch(queries dataSource_)
+{
+    prices.insertBatch(dataSource_);
+    dividends.insertBatch(dataSource_);
+    splits.insertBatch(dataSource_);
 }

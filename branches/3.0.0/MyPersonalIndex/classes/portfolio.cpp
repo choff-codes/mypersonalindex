@@ -93,7 +93,7 @@ QStringList portfolio::symbols() const
     return list;
 }
 
-QList<int> portfolio::securityReinvestments()
+QList<int> portfolio::securityReinvestments() const
 {
     QList<int> reinvestments;
     foreach(const security &s, d->securities)

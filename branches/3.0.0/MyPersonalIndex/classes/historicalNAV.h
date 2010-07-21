@@ -62,8 +62,7 @@ public:
         objectBase(parent_)
     {}
 
-    void insert(int date_, double nav_, double totalValue_) { m_nav.insert(date_, navPair(nav_, totalValue_)); }
-    void insert(const queries &dataSource_, int date_, double nav_, double totalValue_);
+    void insert(int date_, double nav_, double totalValue_);
 
     QMap<int, navPair>::const_iterator constBegin() const { return m_nav.constBegin(); }
     QMap<int, navPair>::const_iterator constEnd() const { return m_nav.constEnd(); }

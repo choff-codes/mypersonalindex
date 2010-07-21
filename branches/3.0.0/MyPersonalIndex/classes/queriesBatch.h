@@ -6,8 +6,8 @@
 class queriesBatch
 {
 public:
-    queriesBatch():
-        m_batchInProgress(false)
+    queriesBatch(bool startBatch_ = false):
+        m_batchInProgress(startBatch_)
     {}
 
     void beginBatch() { m_batchInProgress = true; }

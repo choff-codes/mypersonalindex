@@ -1,25 +1,24 @@
 #include "import.h"
 
-import::import()
+import::import(const QMap<int, portfolio> &portfolios_)
 {
     int securityIdentity = 0, aaIdentity = 0, acctIdentity = 0;
-    foreach(const portfolioAttributes &info, portfolio::instance().info())
-    {
-         securityIdentity = getMappings<security>(portfolio::instance().securities(info.id), &securities, info.description, securityIdentity);
-         aaIdentity = getMappings<assetAllocation>(portfolio::instance().aa(info.id), &assetAllocations, info.description, aaIdentity);
-         acctIdentity = getMappings<account>(portfolio::instance().acct(info.id), &accounts, info.description, acctIdentity);
+    foreach(const portfolio p, portfolios_)
+         securityIdentity = getMappings<security>(p.securities(), &securities, p.attributes().description, securityIdentity);
+         aaIdentity = getMappings<assetAllocation>(p.assetAllocations(), &assetAllocations, p.attributes().description, aaIdentity);
+         acctIdentity = getMappings<account>(p.accounts(), &accounts, p.attributes().description, acctIdentity);
     }
 }
 
 template <class T>
-int import::getMappings(const QMap<int, T> &values, importData *data, const QString &portfolioDescription, const int &startID)
+int import::getMappings(const QMap<int, T> &values_, importData *data_, const QString &portfolioDescription_, int beginID)
 {
-    int i = startID;
-    foreach(const T &value, values)
+    int i = beginID;
+    foreach(const T &value, values_)
     {
-        data->mapping.insert(i, value.id);
-        data->reverseMapping.insert(value.id, i);
-        data->values.insert(i, QString("%1: %2").arg(portfolioDescription, value.description));
+        data_->mapping.insert(i, value.id);
+        data_->reverseMapping.insert(value.id, i);
+        data_->values.insert(i, QString("%1: %2").arg(portfolioDescription_, value.description));
         ++i;
     }
     return i;

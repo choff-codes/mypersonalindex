@@ -15,10 +15,11 @@ public:
     };
 
     priceBatch(table table_):
+        queriesBatch(true),
         m_table(table_)
     {}
 
-    void insert(const QString &symbol_, int date_, double value_) { values.append(priceInformation(symbol_, date_, value_)); }
+    void insert(const QString &symbol_, int date_, double value_);
     void insertBatch(queries dataSource_);
 
     int rowsToBeInserted() const { return values.count(); }
@@ -55,7 +56,7 @@ public:
         splits(priceBatch(priceBatch::table_Splits))
     {}
 
-    void insertBatch(queries dataSource_) { prices.insertBatch(dataSource_); dividends.insertBatch(dataSource_); splits.insertBatch(dataSource_); }
+    void insertBatch(queries dataSource_);
 };
 
 #endif // UPDATEIPRICESBATCH_H

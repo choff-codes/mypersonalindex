@@ -138,16 +138,32 @@ int calculations::beginDateByKey(const objectKey &key_)
     }
 }
 
+int calculations::endDateByKey(const objectKey &key_)
+{
+    switch(key_.type)
+    {
+        case objectType_AA:
+        case objectType_Account:
+        case objectType_Portfolio:
+        case objectType_Security:
+            return m_portfolio.navHistory().isEmpty() ? 0 :  m_portfolio.navHistory().constEnd().key();
+    case objectType_Symbol:
+            return m_portfolio.securities().value(key_.id).endDate();
+        default:
+            return 0;
+    }
+}
+
 historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
 {
     historicalNAV navHistory;
-    int objectEarliestDate = beginDateByKey(key_);
 
+    int objectEarliestDate = beginDateByKey(key_);
     if (objectEarliestDate == 0)
         return navHistory;
 
     beginDate_ = qMax(objectEarliestDate, beginDate_);
-    endDate_ = qMin((m_portfolio.navHistory().constEnd() - 1).key(), endDate_);
+    endDate_ = qMin(endDateByKey(key_), endDate_);
 
     tradeDateCalendar calendar(beginDate_);
     if (calendar.date() > endDate_)
@@ -157,15 +173,22 @@ historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_
     snapshot previousSnapshot = snapshotByKey(calendar.date(), key_);
     navHistory.insert(calendar.date(), currentNav, previousSnapshot.totalValue);
 
-    ++calendar;
-    foreach(const int &date, calendar)
+    foreach(const int &date, ++calendar)
     {
         if (date > endDate_)
             break;
 
         snapshot currentPrice = snapshotByKey(date, key_);
-        currentNav = change(previousSnapshot.totalValue, currentPrice.totalValue, currentPrice.costBasis - previousSnapshot.costBasis,
-            dividends_ ? currentPrice.dividendAmount : 0, currentNav);
+
+        currentNav =
+                    change(
+                        previousSnapshot.totalValue,
+                        currentPrice.totalValue,
+                        currentPrice.costBasis - previousSnapshot.costBasis,
+                        dividends_ ? currentPrice.dividendAmount : 0,
+                        currentNav
+                    );
+
         navHistory.insert(date, currentNav, currentPrice.totalValue);
         previousSnapshot = currentPrice;
     }
@@ -249,8 +272,16 @@ double calculations::correlation(const historicalNAV &first_, const historicalNA
         return 0;
 
     // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]
-    double coefficient = (productSquare - (security1Sum * security2Sum / count)) /
-                         sqrt((security1Square - (security1Sum * security1Sum / count)) * (security2Square - (security2Sum * security2Sum / count)));
+    double coefficient =
+            (
+                    (productSquare - (security1Sum * security2Sum / count))
+                /
+                    sqrt(
+                            (security1Square - (security1Sum * security1Sum / count))
+                        *
+                            (security2Square - (security2Sum * security2Sum / count))
+                    )
+            );
 
     return (isnan(coefficient) || isinf(coefficient)) ? 0 : coefficient;
 }
@@ -276,7 +307,6 @@ QMap<int, double> calculations::avgPricePerShare(int date_)
 
     QMap<int, double> avgPrices;
     costBasis defaultCostBasis = m_portfolio.attributes().defaultCostBasis;
-    QMap<int, QList<executedTrade> >::const_iterator tradeList;
 
     foreach(const security &s, m_portfolio.securities())
     {
@@ -288,10 +318,9 @@ QMap<int, double> calculations::avgPricePerShare(int date_)
         if (s.cashAccount) // cash should always be computed as average
             overrideCostBasis = costBasis_AVG;
 
-        splits splitRatio(s.splits(), date_);
-        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splitRatio);
+        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splits(s.splits(), date_));
 
-        if (avg > 0)
+        if (avg > EPSILON)
             avgPrices.insert(s.id, avg);
     }
 

@@ -23,17 +23,15 @@ public:
     QString note;
     assetAllocationTarget targets;
     QMap<int, trade> trades;
-    executedTradeList executedTrades;
 
-    security(const int &id_ = -1, const int &parent_ = -1, const QString &description_ = QString()):
+    security(int id_ = -1, int parent_ = -1, const QString &description_ = QString()):
         objectKey(objectType_Security, description_, id_, parent_),
         account(-1),
         expense(0),
         divReinvest(false),
         cashAccount(false),
         includeInCalc(true),
-        hide(false),
-        executedTrades(id_)
+        hide(false)
     {}
 
     bool operator==(const security &other_) const;
@@ -46,8 +44,13 @@ public:
     double dividend(int date_) const { return cashAccount ? 0 : m_prices.value(date_, historicalPrices::type_dividend); }
     double split(int date_) const { return cashAccount ? 1 : m_prices.value(date_, historicalPrices::type_split); }
     QMap<int, double> splits() const { return cashAccount ? QMap<int, double>() : m_prices.values(historicalPrices::type_split); }
+    QMap<int, double> dividends() const { return cashAccount ? QMap<int, double>() : m_prices.values(historicalPrices::type_dividend); }
     int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(historicalPrices::type_price); }
     int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(historicalPrices::type_price); }
+
+    double splitAdjustedPriorDayPrice(int date_, int priorDate_) { return price(priorDate_) / split(date_); }
+
+    trade& reversalTrade();
     
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

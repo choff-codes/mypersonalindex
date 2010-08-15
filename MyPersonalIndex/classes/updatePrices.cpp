@@ -4,6 +4,7 @@ updatePricesResult updatePrices::run(const QStringList &symbols_, int beginDate_
 {
     updatePricesResult result;
     result.earliestUpdate = NO_DATA; // track earliest date saved to database for recalc
+    m_newPrices.beginBatch();
 
     foreach(const QString &symbol, symbols_)
     {
@@ -115,7 +116,7 @@ updatePrices::downloadResult updatePrices::getPrices(const QString &symbol_, con
 
         double price = line.at(4).toDouble();
 
-        m_newPrices.prices.insert(symbol_, date, price);
+        m_newPrices.insert(symbol_, date, price, historicalPrices::type_price);
     }
 
     return downloadResult(true, earliestUpdate);
@@ -155,7 +156,7 @@ int updatePrices::getDividends(const QString &symbol_, const historicalPrices &p
 
         double price = line.at(1).toDouble();
 
-        m_newPrices.dividends.insert(symbol_, date, price);
+        m_newPrices.insert(symbol_, date, price, historicalPrices::type_dividend);
     }
 
     return earliestUpdate;
@@ -215,7 +216,7 @@ int updatePrices::getSplits(const QString &symbol_, const historicalPrices &pric
 
         double ratio = divisor.at(0).toDouble() / divisor.at(1).toDouble();
 
-        m_newPrices.splits.insert(symbol_, date, ratio);
+        m_newPrices.insert(symbol_, date, ratio, historicalPrices::type_split);
     }
 
     return earliestUpdate;

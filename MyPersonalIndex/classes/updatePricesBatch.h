@@ -3,23 +3,13 @@
 
 #include <QString>
 #include <QList>
+#include "historicalPrices.h"
 #include "queries.h"
 
-class priceBatch: public queriesBatch
+class updatePricesBatch: public queriesBatch
 {
 public:
-    enum table {
-        table_ClosingPrices,
-        table_Dividends,
-        table_Splits
-    };
-
-    priceBatch(table table_):
-        queriesBatch(true),
-        m_table(table_)
-    {}
-
-    void insert(const QString &symbol_, int date_, double value_);
+    void insert(const QString &symbol_, int date_, double value_, historicalPrices::type type_);
     void insertBatch(queries dataSource_);
 
     int rowsToBeInserted() const { return values.count(); }
@@ -31,32 +21,17 @@ private:
         QString symbol;
         int date;
         double value;
+        historicalPrices::type type;
 
-        priceInformation(const QString &symbol_, int date_, double value_):
+        priceInformation(const QString &symbol_, int date_, double value_, historicalPrices::type type_):
             symbol(symbol_),
             date(date_),
-            value(value_)
+            value(value_),
+            type(type_)
         {}
     };
 
-    table m_table;
     QList<priceInformation> values;
-};
-
-class updatePricesBatch
-{
-public:
-    priceBatch prices;
-    priceBatch dividends;
-    priceBatch splits;
-
-    updatePricesBatch():
-        prices(priceBatch(priceBatch::table_ClosingPrices)),
-        dividends(priceBatch(priceBatch::table_Dividends)),
-        splits(priceBatch(priceBatch::table_Splits))
-    {}
-
-    void insertBatch(queries dataSource_);
 };
 
 #endif // UPDATEIPRICESBATCH_H

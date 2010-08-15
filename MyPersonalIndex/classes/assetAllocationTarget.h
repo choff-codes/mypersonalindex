@@ -17,7 +17,7 @@ public:
     bool isEmpty() const { return m_targets.isEmpty(); }
     int count() const { return m_targets.count(); }
     bool contains(int id_) const { return m_targets.contains(id_); }
-    double value(int id_) const { return m_targets.value(id_, 1); }
+    double value(int id_) const { return m_targets.value(id_); }
 
     QMap<int, double>::const_iterator constBegin() const { return m_targets.constBegin(); }
     QMap<int, double>::const_iterator constEnd() const { return m_targets.constEnd(); }

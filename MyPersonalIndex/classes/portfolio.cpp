@@ -38,13 +38,15 @@ portfolio& portfolio::operator=(const portfolio &other_)
 void portfolio::beginExecutedTradesBatch()
 {
     for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
-        i.value().executedTrades.beginBatch();
+        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
+            x.value().executedTrades.beginBatch();
 }
 
 void portfolio::insertExecutedTradesBatch(const queries &dataSource_)
 {
     for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
-        i.value().executedTrades.insertBatch(dataSource_);
+        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
+            x.value().executedTrades.insertBatch(dataSource_);
 }
 
 void portfolio::beginNAVBatch()
@@ -91,16 +93,6 @@ QStringList portfolio::symbols() const
 
     list.removeDuplicates();
     return list;
-}
-
-QList<int> portfolio::securityReinvestments() const
-{
-    QList<int> reinvestments;
-    foreach(const security &s, d->securities)
-        if (s.includeInCalc && s.divReinvest && !s.cashAccount)
-            reinvestments.append(s.id);
-
-    return reinvestments;
 }
 
 int portfolio::endDate() const

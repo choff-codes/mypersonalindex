@@ -31,6 +31,6 @@ int main(int argc, char *argv[])
 
     QApplication app(argc, argv);
 
-    QMap<int, portfolio> portfolios = portfolioFactory().getPortfolios(queries(queries::getDefaultDatabaseLocation()));
+    QMap<int, portfolio> portfolios = portfolioFactory(queries(queries::getDefaultDatabaseLocation())).getPortfolios();
     return app.exec();
 }

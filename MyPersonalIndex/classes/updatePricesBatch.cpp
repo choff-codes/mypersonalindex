@@ -1,72 +1,33 @@
 #include "updatePricesBatch.h"
 
-void priceBatch::insert(const QString &symbol_, int date_, double value_)
+void updatePricesBatch::insert(const QString &symbol_, int date_, double value_, historicalPrices::type type_)
 {
     if (m_batchInProgress)
-        values.append(priceInformation(symbol_, date_, value_));
+        values.append(priceInformation(symbol_, date_, value_, type_));
 }
 
-void priceBatch::insertBatch(queries dataSource_)
+void updatePricesBatch::insertBatch(queries dataSource_)
 {
-    switch(m_table)
-    {
-        case table_ClosingPrices:
-            dataSource_.bulkInsert(queries::table_ClosingPrices, queries::closingPricesColumns, this);
-            break;
-        case table_Dividends:
-            dataSource_.bulkInsert(queries::table_Dividends, queries::dividendsColumns, this);
-            break;
-        case table_Splits:
-            dataSource_.bulkInsert(queries::table_Splits, queries::splitsColumns, this);
-            break;
-    }
+    dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, *this);
 
     values.clear();
     queriesBatch::insertBatch();
 }
 
-QVariant priceBatch::data(int row_, int column_) const
+QVariant updatePricesBatch::data(int row_, int column_) const
 {
     priceInformation price = values.at(row_);
-    if (m_table == table_ClosingPrices)
-        switch(column_)
-        {
-            case queries::closingPricesColumns_Date:
-                return price.date;
-            case queries::closingPricesColumns_Price:
-                return price.value;
-            case queries::closingPricesColumns_Symbol:
-                return price.symbol;
-        }
-
-    if (m_table == table_Dividends)
-        switch(column_)
-        {
-            case queries::dividendsColumns_Amount:
-                return price.value;
-            case queries::dividendsColumns_Date:
-                return price.date;
-            case queries::dividendsColumns_Symbol:
-                return price.symbol;
-        }
-
-    if (m_table == table_Splits)
-        switch(column_)
-        {
-            case queries::splitsColumns_Date:
-                return price.date;
-            case queries::splitsColumns_Ratio:
-                return price.value;
-            case queries::splitsColumns_Symbol:
-                return price.symbol;
-        }
+    switch(column_)
+    {
+        case queries::historicalPriceColumns_Date:
+            return price.date;
+        case queries::historicalPriceColumns_Value:
+            return price.value;
+        case queries::historicalPriceColumns_Symbol:
+            return price.symbol;
+        case queries::historicalPriceColumns_Type:
+            return (int)price.type;
+    }
 
     return QVariant();
-}
-
-void updatePricesBatch::insertBatch(queries dataSource_)
-{
-    prices.insertBatch(dataSource_);
-    dividends.insertBatch(dataSource_);
-    splits.insertBatch(dataSource_);
 }

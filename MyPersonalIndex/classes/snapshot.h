@@ -58,11 +58,11 @@ public:
     QMap<int, snapshotSecurity> securitiesInfo;
 
     snapshotPortfolio():
-            snapshot(0)
+        snapshot(0)
     {}
 
     snapshotPortfolio(int date_):
-            snapshot(date_)
+        snapshot(date_)
     {}
 };
 

@@ -35,20 +35,21 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_)
 {
     security s = m_portfolio.securities().value(id_);
 
-    if(!s.includeInCalc)
+    if (!s.includeInCalc)
         return snapshotSecurity();
 
     snapshotSecurity value(date_);
     splits splitRatio(s.splits(), date_);
 
-    for(QMap<int, executedTrade>::const_iterator i = s.executedTrades.constBegin(); i != s.executedTrades.constEnd(); ++i)
-    {
-        if (i.key() > date_)
-            break;
+    foreach(const trade &t, s.trades)
+        for(QMap<int, executedTrade>::const_iterator i = t.executedTrades.constBegin(); i != t.executedTrades.constEnd(); ++i)
+        {
+            if (i.key() > date_)
+                break;
 
-        value.shares += i->shares * splitRatio.ratio(i.key());
-        value.costBasis += (i->shares * i->price) + i->commission;
-    }
+            value.shares += i->shares * splitRatio.ratio(i.key());
+            value.costBasis += (i->shares * i->price) + i->commission;
+        }
 
     if (value.shares < EPSILON)
         value.shares = 0;
@@ -69,8 +70,10 @@ snapshot calculations::assetAllocationSnapshot(int date_, int id_)
     snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
     foreach(const security &s, m_portfolio.securities())
-        if (s.targets.contains(id_) || (id_ == -1 && s.targets.isEmpty()))
+        if (s.targets.contains(id_))
             value.add(portfolioValue.securitiesInfo.value(s.id), s.targets.value(id_));
+        else if (id_ == -1 && s.targets.isEmpty())
+            value.add(portfolioValue.securitiesInfo.value(s.id), 1);
 
     return value;
 }
@@ -318,7 +321,7 @@ QMap<int, double> calculations::avgPricePerShare(int date_)
         if (s.cashAccount) // cash should always be computed as average
             overrideCostBasis = costBasis_AVG;
 
-        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splits(s.splits(), date_));
+        double avg = avgPricePerShare::calculate(date_, s.trades, overrideCostBasis, splits(s.splits(), date_));
 
         if (avg > EPSILON)
             avgPrices.insert(s.id, avg);

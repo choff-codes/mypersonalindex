@@ -25,13 +25,6 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
     return price;
 }
 
-void priceFactory::updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_)
-{
-    priceData_.setValues(loadPrices(symbol_, dataSource_), historicalPrices::type_price);
-    priceData_.setValues(loadDividends(symbol_, dataSource_), historicalPrices::type_dividend);
-    priceData_.setValues(loadSplits(symbol_, dataSource_), historicalPrices::type_split);
-}
-
 void priceFactory::flagDirty(const queries &dataSource_)
 {
     QHash<QString, historicalPrices> symbols = m_historicalPricesCache.value(dataSource_);
@@ -39,62 +32,39 @@ void priceFactory::flagDirty(const queries &dataSource_)
         updateHistoricalPrices(i.key(), i.value(), dataSource_);
 }
 
-QMap<int, double> priceFactory::loadPrices(const QString &symbol_, const queries &dataSource_)
+void priceFactory::updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_)
 {
     QMap<int, double> prices;
-
-    QSqlQuery q = dataSource_.select(
-        queries::table_ClosingPrices,
-        queries::closingPricesColumns,
-        queries::closingPricesColumns.at(queries::closingPricesColumns_Symbol),
-        symbol_
-    );
-
-    while(q.next())
-        prices.insert(
-            q.value(queries::closingPricesColumns_Date).toInt(),
-            q.value(queries::closingPricesColumns_Price).toDouble()
-        );
-
-    return prices;
-}
-
-QMap<int, double> priceFactory::loadDividends(const QString &symbol_, const queries &dataSource_)
-{
     QMap<int, double> dividends;
-
-    QSqlQuery q = dataSource_.select(
-        queries::table_Dividends,
-        queries::dividendsColumns,
-        queries::dividendsColumns.at(queries::dividendsColumns_Symbol),
-        symbol_
-    );
-
-    while(q.next())
-        dividends.insert(
-            q.value(queries::dividendsColumns_Date).toInt(),
-            q.value(queries::dividendsColumns_Amount).toDouble()
-        );
-
-    return dividends;
-}
-
-QMap<int, double> priceFactory::loadSplits(const QString &symbol_, const queries &dataSource_)
-{
     QMap<int, double> splits;
 
     QSqlQuery q = dataSource_.select(
-        queries::table_Splits,
-        queries::splitsColumns,
-        queries::splitsColumns.at(queries::splitsColumns_Symbol),
+        queries::table_HistoricalPrice,
+        queries::historicalPriceColumns,
+        queries::historicalPriceColumns.at(queries::historicalPriceColumns_Symbol),
         symbol_
     );
 
     while(q.next())
-        splits.insert(
-            q.value(queries::splitsColumns_Date).toInt(),
-            q.value(queries::splitsColumns_Ratio).toDouble()
-        );
+    {
+        int date = q.value(queries::historicalPriceColumns_Date).toInt();
+        double value = q.value(queries::historicalPriceColumns_Value).toInt();
 
-    return splits;
+        switch((historicalPrices::type)q.value(queries::historicalPriceColumns_Type).toInt())
+        {
+            case historicalPrices::type_price:
+                prices.insert(date, value);
+                break;
+            case historicalPrices::type_dividend:
+                dividends.insert(date, value);
+                break;
+            case historicalPrices::type_split:
+                splits.insert(date, value);
+                break;
+        }
+    }
+
+    priceData_.setValues(prices, historicalPrices::type_price);
+    priceData_.setValues(dividends, historicalPrices::type_dividend);
+    priceData_.setValues(splits, historicalPrices::type_split);
 }

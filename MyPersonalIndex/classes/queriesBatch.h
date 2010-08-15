@@ -6,10 +6,6 @@
 class queriesBatch
 {
 public:
-    queriesBatch(bool startBatch_ = false):
-        m_batchInProgress(startBatch_)
-    {}
-
     void beginBatch() { m_batchInProgress = true; }
     virtual void insertBatch() { m_batchInProgress = false; }
 

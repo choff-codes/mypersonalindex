@@ -39,6 +39,7 @@ public:
     }
 
     int date() { return m_date; }
+
     static QList<int> computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_);
 
     static int checkTradeDate(int date_, direction direction_ )

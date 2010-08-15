@@ -37,23 +37,23 @@ bool portfolioAttributes::operator==(const portfolioAttributes &other_) const
 void portfolioAttributes::save(const queries &dataSource_)
 {
     QMap<QString, QVariant> values;
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Description), this->description);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartValue), this->startValue);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AAThreshold), this->aaThreshold);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)this->aaThresholdMethod);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CostBasis), (int)this->defaultCostBasis);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_StartDate), this->startDate);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_Dividends), (int)this->dividends);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)this->holdingsShowHidden);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_HoldingsSort), this->holdingsSort);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AAShowBlank), (int)this->aaShowBlank);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AASort), this->aaSort);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_CorrelationShowHidden), (int)this->correlationShowHidden);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AcctShowBlank), (int)this->acctShowBlank);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_AcctSort), this->acctSort);
-    values.insert(queries::portfoliosColumns.at(queries::portfoliosColumns_NAVSortDesc), (int)this->navSortDesc);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Description), this->description);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartValue), this->startValue);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAThreshold), this->aaThreshold);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)this->aaThresholdMethod);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)this->defaultCostBasis);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), this->startDate);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)this->dividends);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)this->holdingsShowHidden);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsSort), this->holdingsSort);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAShowBlank), (int)this->aaShowBlank);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AASort), this->aaSort);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CorrelationShowHidden), (int)this->correlationShowHidden);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctShowBlank), (int)this->acctShowBlank);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctSort), this->acctSort);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_NAVSortDesc), (int)this->navSortDesc);
 
-    this->id = dataSource_.insert(queries::table_Portfolios, values, this->id);
+    this->id = dataSource_.insert(queries::table_Portfolio, values, this->id);
 }
 
 void portfolioAttributes::remove(const queries &dataSource_) const
@@ -61,5 +61,5 @@ void portfolioAttributes::remove(const queries &dataSource_) const
     if (!this->hasIdentity())
         return;
 
-    dataSource_.deleteItem(queries::table_Portfolios, this->id);
+    dataSource_.deleteItem(queries::table_Portfolio, this->id);
 }

@@ -1,20 +1,20 @@
 #include "portfolioFactory.h"
 
-QMap<int, portfolio> portfolioFactory::getPortfolios(const queries &dataSource_)
+QMap<int, portfolio> portfolioFactory::getPortfolios()
 {
 #ifdef CLOCKTIME
     QTime t;
     t.start();
 #endif
 
-    loadPortfoliosInfo(dataSource_);
-    loadPortfoliosAA(dataSource_);
-    loadPortfoliosAcct(dataSource_);
-    loadPortfoliosSecurity(dataSource_);
-    loadPortfoliosSecurityAA(dataSource_);
-    loadPortfoliosSecurityTrades(dataSource_);
-    loadPortfoliosExecutedTrades(dataSource_);
-    loadPortfoliosNAV(dataSource_);
+    loadPortfoliosInfo();
+    loadPortfoliosAA();
+    loadPortfoliosAcct();
+    loadPortfoliosSecurity();
+    loadPortfoliosSecurityAA();
+    loadPortfoliosSecurityTrades();
+    loadPortfoliosExecutedTrades();
+    loadPortfoliosNAV();
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
@@ -23,9 +23,9 @@ QMap<int, portfolio> portfolioFactory::getPortfolios(const queries &dataSource_)
     return m_portfolios;
 }
 
-void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosInfo()
 {
-    QSqlQuery q = dataSource_.select(queries::table_Portfolios, queries::portfoliosColumns);
+    QSqlQuery q = m_dataSource.select(queries::table_Portfolio, queries::portfolioColumns);
     while(q.next())
     {
         portfolio p(q.value(queries::portfoliosColumns_ID).toInt());
@@ -50,135 +50,139 @@ void portfolioFactory::loadPortfoliosInfo(const queries &dataSource_)
     }
 }
 
-void portfolioFactory::loadPortfoliosAA(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosAA()
 {
-    QSqlQuery q = dataSource_.select(queries::table_AA, queries::aaColumns);
+    QSqlQuery q = m_dataSource.select(queries::table_PortfolioAA, queries::portfolioAAColumns);
     while(q.next())
     {
         assetAllocation aa(
-            q.value(queries::aaColumns_ID).toInt(),
-            q.value(queries::aaColumns_PortfolioID).toInt(),
-            q.value(queries::aaColumns_Description).toString()
+            q.value(queries::portfolioAAColumns_ID).toInt(),
+            q.value(queries::portfolioAAColumns_PortfolioID).toInt(),
+            q.value(queries::portfolioAAColumns_Description).toString()
         );
 
-        if (!q.value(queries::aaColumns_Target).isNull())
-            aa.target = q.value(queries::aaColumns_Target).toDouble();
+        if (!q.value(queries::portfolioAAColumns_Target).isNull())
+            aa.target = q.value(queries::portfolioAAColumns_Target).toDouble();
 
         m_portfolios[aa.parent].assetAllocations().insert(aa.id, aa);
     }
 }
 
-void portfolioFactory::loadPortfoliosAcct(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosAcct()
 {
-    QSqlQuery q = dataSource_.select(queries::table_Acct, queries::acctColumns);
+    QSqlQuery q = m_dataSource.select(queries::table_PortfolioAccount, queries::portfolioAccountColumns);
     while(q.next())
     {
         account acct(
-            q.value(queries::acctColumns_ID).toInt(),
-            q.value(queries::acctColumns_PortfolioID).toInt(),
-            q.value(queries::acctColumns_Description).toString()
+            q.value(queries::portfolioAccountColumns_ID).toInt(),
+            q.value(queries::portfolioAccountColumns_PortfolioID).toInt(),
+            q.value(queries::portfolioAccountColumns_Description).toString()
         );
 
-        if (!q.value(queries::acctColumns_TaxRate).isNull())
-            acct.taxRate = q.value(queries::acctColumns_TaxRate).toDouble();
-        acct.taxDeferred = q.value(queries::acctColumns_TaxDeferred).toBool();
-        acct.overrideCostBasis = (costBasis)q.value(queries::acctColumns_CostBasis).toInt();
+        if (!q.value(queries::portfolioAccountColumns_TaxRate).isNull())
+            acct.taxRate = q.value(queries::portfolioAccountColumns_TaxRate).toDouble();
+        acct.taxDeferred = q.value(queries::portfolioAccountColumns_TaxDeferred).toBool();
+        acct.overrideCostBasis = (costBasis)q.value(queries::portfolioAccountColumns_CostBasis).toInt();
 
         m_portfolios[acct.parent].accounts().insert(acct.id, acct);
     }
 }
 
-void portfolioFactory::loadPortfoliosSecurity(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosSecurity()
 {
-    QSqlQuery q = dataSource_.select(queries::table_Security, queries::securityColumns);
+    QSqlQuery q = m_dataSource.select(queries::table_PortfolioSecurity, queries::portfolioSecurityColumns);
     while(q.next())
     {
         security sec(
-            q.value(queries::securityColumns_ID).toInt(),
-            q.value(queries::securityColumns_PortfolioID).toInt(),
-            q.value(queries::securityColumns_Symbol).toString()
+            q.value(queries::portfolioSecurityColumns_ID).toInt(),
+            q.value(queries::portfolioSecurityColumns_PortfolioID).toInt(),
+            q.value(queries::portfolioSecurityColumns_Symbol).toString()
         );
 
-        if (!q.value(queries::securityColumns_Account).isNull())
-            sec.account = q.value(queries::securityColumns_Account).toInt();
-        if (!q.value(queries::securityColumns_Expense).isNull())
-            sec.expense = q.value(queries::securityColumns_Expense).toDouble();
-        sec.divReinvest = q.value(queries::securityColumns_DivReinvest).toBool();
-        sec.cashAccount = q.value(queries::securityColumns_CashAccount).toBool();
-        sec.includeInCalc = q.value(queries::securityColumns_IncludeInCalc).toBool();
-        sec.hide = q.value(queries::securityColumns_Hide).toBool();
+        if (!q.value(queries::portfolioSecurityColumns_Account).isNull())
+            sec.account = q.value(queries::portfolioSecurityColumns_Account).toInt();
+        if (!q.value(queries::portfolioSecurityColumns_Expense).isNull())
+            sec.expense = q.value(queries::portfolioSecurityColumns_Expense).toDouble();
+        sec.divReinvest = q.value(queries::portfolioSecurityColumns_DivReinvest).toBool();
+        sec.cashAccount = q.value(queries::portfolioSecurityColumns_CashAccount).toBool();
+        sec.includeInCalc = q.value(queries::portfolioSecurityColumns_IncludeInCalc).toBool();
+        sec.hide = q.value(queries::portfolioSecurityColumns_Hide).toBool();
+        sec.note = q.value(queries::portfolioSecurityColumns_Note).toString();
 
         if(!sec.cashAccount)
-            sec.setHistoricalPrices(priceFactory::getPrices(sec.description, dataSource_));
+            sec.setHistoricalPrices(priceFactory::getPrices(sec.description, m_dataSource));
 
         m_portfolios[sec.parent].securities().insert(sec.id, sec);
     }
 }
 
-void portfolioFactory::loadPortfoliosSecurityAA(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosSecurityAA()
 {
-    QSqlQuery q = dataSource_.select(queries::view_SecurityAA, queries::securityAAViewColumns);
+    QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityAA, queries::portfolioSecurityAAViewColumns);
     while(q.next())
-        m_portfolios[q.value(queries::securityAAViewColumns_PortfolioID).toInt()].securities()[q.value(queries::securityAAViewColumns_SecurityID).toInt()].targets.insert(
-            q.value(queries::securityAAViewColumns_AAID).toInt(),
-            q.value(queries::securityAAViewColumns_Percent).toDouble()
-        );
+        m_portfolios[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
+            [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets.insert(
+                q.value(queries::portfolioSecurityAAViewColumns_AAID).toInt(),
+                q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble()
+            );
 }
 
-void portfolioFactory::loadPortfoliosSecurityTrades(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosSecurityTrades()
 {
-    QSqlQuery q = dataSource_.select(queries::view_SecurityTrades, queries::securityTradesViewColumns);
+    QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityTrade, queries::portfolioSecurityTradeViewColumns);
     while(q.next())
     {
         trade t(
-               q.value(queries::securityTradesViewColumns_ID).toInt(),
-               q.value(queries::securityTradesViewColumns_SecurityID).toInt()
+               q.value(queries::portfolioSecurityTradeViewColumns_ID).toInt(),
+               q.value(queries::portfolioSecurityTradeViewColumns_SecurityID).toInt()
         );
 
-        t.type = (trade::tradeType)q.value(queries::securityTradesViewColumns_Type).toInt();
-        t.value = q.value(queries::securityTradesViewColumns_Value).toDouble();
-        if (!q.value(queries::securityTradesViewColumns_Price).isNull())
-            t.price = q.value(queries::securityTradesViewColumns_Price).toDouble();
-        t.commission = q.value(queries::securityTradesViewColumns_Commission).toDouble();
-        if (!q.value(queries::securityTradesViewColumns_CashAccountID).isNull())
-            t.cashAccount = q.value(queries::securityTradesViewColumns_CashAccountID).toInt();
-        t.frequency = (tradeDateCalendar::frequency)q.value(queries::securityTradesViewColumns_Frequency).toInt();
-        if (!q.value(queries::securityTradesViewColumns_Date).isNull())
-            t.date = q.value(queries::securityTradesViewColumns_Date).toInt();
-        if (!q.value(queries::securityTradesViewColumns_StartDate).isNull())
-            t.startDate = q.value(queries::securityTradesViewColumns_StartDate).toInt();
-        if (!q.value(queries::securityTradesViewColumns_EndDate).isNull())
-            t.endDate = q.value(queries::securityTradesViewColumns_EndDate).toInt();
+        t.type = (trade::tradeType)q.value(queries::portfolioSecurityTradeViewColumns_Type).toInt();
+        t.value = q.value(queries::portfolioSecurityTradeViewColumns_Value).toDouble();
+        t.description = q.value(queries::portfolioSecurityTradeViewColumns_Description).toString();
+        if (!q.value(queries::portfolioSecurityTradeViewColumns_Price).isNull())
+            t.price = q.value(queries::portfolioSecurityTradeViewColumns_Price).toDouble();
+        t.commission = q.value(queries::portfolioSecurityTradeViewColumns_Commission).toDouble();
+        if (!q.value(queries::portfolioSecurityTradeViewColumns_CashAccountID).isNull())
+            t.cashAccount = q.value(queries::portfolioSecurityTradeViewColumns_CashAccountID).toInt();
+        t.frequency = (tradeDateCalendar::frequency)q.value(queries::portfolioSecurityTradeViewColumns_Frequency).toInt();
+        if (!q.value(queries::portfolioSecurityTradeViewColumns_Date).isNull())
+            t.date = q.value(queries::portfolioSecurityTradeViewColumns_Date).toInt();
+        if (!q.value(queries::portfolioSecurityTradeViewColumns_StartDate).isNull())
+            t.startDate = q.value(queries::portfolioSecurityTradeViewColumns_StartDate).toInt();
+        if (!q.value(queries::portfolioSecurityTradeViewColumns_EndDate).isNull())
+            t.endDate = q.value(queries::portfolioSecurityTradeViewColumns_EndDate).toInt();
 
-        m_portfolios[q.value(queries::securityTradesViewColumns_PortfolioID).toInt()].securities()[t.parent].trades.insert(t.id, t);
+        m_portfolios[q.value(queries::portfolioSecurityTradeViewColumns_PortfolioID).toInt()].securities()[t.parent].trades.insert(t.id, t);
     }
 }
 
-void portfolioFactory::loadPortfoliosExecutedTrades(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosExecutedTrades()
 {
-    QSqlQuery q = dataSource_.select(queries::view_ExecutedTrades, queries::executedTradesViewColumns);
+    QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionViewColumns);
 
     while(q.next())
-        m_portfolios[q.value(queries::executedTradesViewColumns_PortfolioID).toInt()]
-            .securities()[q.value(queries::executedTradesViewColumns_SecurityID).toInt()]
+        m_portfolios[q.value(queries::portfolioSecurityTradeExecutionViewColumns_PortfolioID).toInt()]
+            .securities()[q.value(queries::portfolioSecurityTradeExecutionViewColumns_SecurityID).toInt()]
+            .trades[q.value(queries::portfolioSecurityTradeExecutionViewColumns_TradeID).toInt()]
             .executedTrades.insert
             (
-                q.value(queries::executedTradesViewColumns_Date).toInt(),
+                q.value(queries::portfolioSecurityTradeExecutionViewColumns_Date).toInt(),
                 executedTrade(
-                    q.value(queries::executedTradesViewColumns_Shares).toDouble(),
-                    q.value(queries::executedTradesViewColumns_Price).toDouble(),
-                    q.value(queries::executedTradesViewColumns_Commission).toDouble()
+                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_Shares).toDouble(),
+                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_Price).toDouble(),
+                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_Commission).toDouble()
                 )
             );
 }
 
-void portfolioFactory::loadPortfoliosNAV(const queries &dataSource_)
+void portfolioFactory::loadPortfoliosNAV()
 {
-    QSqlQuery q = dataSource_.select(queries::table_NAV, queries::navColumns);
+    QSqlQuery q = m_dataSource.select(queries::table_PortfolioNAV, queries::portfolioNAVColumns);
     while(q.next())
-        m_portfolios[q.value(queries::navColumns_PortfolioID).toInt()].navHistory().insert(
-            q.value(queries::navColumns_Date).toInt(),
-            q.value(queries::navColumns_NAV).toDouble(),
-            q.value(queries::navColumns_TotalValue).toDouble()
+        m_portfolios[q.value(queries::portfolioNAVColumns_PortfolioID).toInt()].navHistory().insert(
+            q.value(queries::portfolioNAVColumns_Date).toInt(),
+            q.value(queries::portfolioNAVColumns_NAV).toDouble(),
+            q.value(queries::portfolioNAVColumns_TotalValue).toDouble()
         );
 }

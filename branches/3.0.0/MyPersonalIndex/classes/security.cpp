@@ -33,19 +33,28 @@ void security::save(const queries &dataSource_)
         return;
 
     QMap<QString, QVariant> values;
-    values.insert(queries::securityColumns.at(queries::securityColumns_PortfolioID), this->parent);
-    values.insert(queries::securityColumns.at(queries::securityColumns_Symbol), this->description);
-    values.insert(queries::securityColumns.at(queries::securityColumns_Account), functions::intToNull(this->account));
-    values.insert(queries::securityColumns.at(queries::securityColumns_Expense), functions::doubleToNull(this->expense));
-    values.insert(queries::securityColumns.at(queries::securityColumns_DivReinvest), (int)this->divReinvest);
-    values.insert(queries::securityColumns.at(queries::securityColumns_CashAccount), (int)this->cashAccount);
-    values.insert(queries::securityColumns.at(queries::securityColumns_IncludeInCalc), (int)this->includeInCalc);
-    values.insert(queries::securityColumns.at(queries::securityColumns_Hide), (int)this->hide);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_PortfolioID), this->parent);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Symbol), this->description);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Account), functions::intToNull(this->account));
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Expense), functions::doubleToNull(this->expense));
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_DivReinvest), (int)this->divReinvest);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_CashAccount), (int)this->cashAccount);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_IncludeInCalc), (int)this->includeInCalc);
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Hide), (int)this->hide);
 
-    this->id = dataSource_.insert(queries::table_Security, values, this->id);
+    this->id = dataSource_.insert(queries::table_PortfolioSecurity, values, this->id);
 }
 
 void security::remove(const queries &dataSource_) const
 {
-    dataSource_.deleteItem(queries::table_Security, this->id);
+    dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id);
+}
+
+trade& security::reversalTrade()
+{
+    for(QMap<int, trade>::iterator i = trades.begin(); i != trades.end(); ++i)
+        if (i.value().type == trade::tradeType_Reversal)
+            return i.value();
+
+    return trades.end().value();
 }

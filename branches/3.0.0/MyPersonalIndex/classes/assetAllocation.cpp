@@ -12,11 +12,11 @@ void assetAllocation::save(const queries &dataSource_)
         return;
 
     QMap<QString, QVariant> values;
-    values.insert(queries::aaColumns.at(queries::aaColumns_PortfolioID), this->parent);
-    values.insert(queries::aaColumns.at(queries::aaColumns_Description), this->description);
-    values.insert(queries::aaColumns.at(queries::aaColumns_Target), functions::doubleToNull(this->target));
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_PortfolioID), this->parent);
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Description), this->description);
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), functions::doubleToNull(this->target));
 
-    this->id = dataSource_.insert(queries::table_AA, values, this->id);
+    this->id = dataSource_.insert(queries::table_PortfolioAA, values, this->id);
 }
 
 void assetAllocation::remove(const queries &dataSource_) const
@@ -24,5 +24,5 @@ void assetAllocation::remove(const queries &dataSource_) const
     if (!this->hasIdentity())
         return;
 
-    dataSource_.deleteItem(queries::table_AA, this->id);
+    dataSource_.deleteItem(queries::table_PortfolioAA, this->id);
 }

@@ -14,7 +14,7 @@ void executedTradeList::remove(const queries &dataSource_, int beginDate_)
             i = m_trades.erase(i);
 
     if (this->hasParent())
-        dataSource_.deleteItem(queries::table_ExecutedTrades, this->parent, beginDate_);
+        dataSource_.deleteTradeItems(queries::table_PortfolioSecurityTradeExecution, this->parent, beginDate_);
 }
 
 void executedTradeList::remove(const queries &dataSource_)
@@ -22,7 +22,7 @@ void executedTradeList::remove(const queries &dataSource_)
     m_trades.clear();
 
     if (this->hasParent())
-        dataSource_.deleteItem(queries::table_ExecutedTrades, this->parent);
+        dataSource_.deleteTradeItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
 }
 
 QVariant executedTradeList::data(int row_, int column_) const
@@ -30,15 +30,15 @@ QVariant executedTradeList::data(int row_, int column_) const
     QMap<int, executedTrade>::iterator i = m_valuesToBeInserted.at(row_);
     switch(column_)
     {
-        case queries::executedTradesColumns_Date:
+        case queries::portfolioSecurityTradeExecutionColumns_Date:
             return i.key();
-        case queries::executedTradesColumns_SecurityID:
+        case queries::portfolioSecurityTradeExecutionColumns_TradeID:
             return this->parent;
-        case queries::executedTradesColumns_Shares:
+        case queries::portfolioSecurityTradeExecutionColumns_Shares:
             return i.value().shares;
-        case queries::executedTradesColumns_Price:
+        case queries::portfolioSecurityTradeExecutionColumns_Price:
             return i.value().price;
-        case queries::executedTradesColumns_Commission:
+        case queries::portfolioSecurityTradeExecutionColumns_Commission:
             return i.value().commission;
     }
 
@@ -50,7 +50,7 @@ void executedTradeList::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
-    dataSource_.bulkInsert(queries::table_ExecutedTrades, queries::executedTradesColumns, this);
+    dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, *this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }

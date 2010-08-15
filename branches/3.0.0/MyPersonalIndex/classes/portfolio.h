@@ -21,7 +21,6 @@ public:
     portfolio& operator=(const portfolio &other_);
 
     QStringList symbols() const;
-    QList<int> securityReinvestments() const;
 
     void beginNAVBatch();
     void insertNAVBatch(const queries &dataSource_);

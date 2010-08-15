@@ -3,6 +3,7 @@
 
 #include <QVariant>
 #include <QString>
+#include "epsilon.h"
 
 class functions
 {
@@ -16,6 +17,7 @@ public:
     static QString formatForExport(QVariant v_, const QString &delimiter_) { return v_.toString().remove(delimiter_).replace("\n", " "); }
     static bool lessThan(const QVariant &left_, const QVariant &right_, const QVariant &type_);
     static bool equal(const QVariant &left_, const QVariant &right_, const QVariant &type_);
+    static bool isZero(const double &value_) { return value_ < EPSILON && value_ > EPSILONNEGATIVE; }
 };
 
 #endif // FUNCTIONS_H

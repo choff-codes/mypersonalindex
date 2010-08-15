@@ -13,74 +13,67 @@
 class queries
 {
 public:
-    static const QString table_AA;
-    static const QString table_Acct;
-    static const QString table_ClosingPrices;
-    static const QString table_Dividends;
-    static const QString table_NAV;
-    static const QString table_Portfolios;
+    static const QString table_HistoricalPrice;
+    static const QString table_Portfolio;
+    static const QString table_PortfolioAA;
+    static const QString table_PortfolioAccount;
+    static const QString table_PortfolioNAV;
+    static const QString table_PortfolioSecurity;
+    static const QString table_PortfolioSecurityAA;
+    static const QString table_PortfolioSecurityTrade;
+    static const QString table_PortfolioSecurityTradeExecution;
     static const QString table_Settings;
     static const QString table_SettingsColumns;
-    static const QString table_Splits;
-    static const QString table_Security;
-    static const QString table_SecurityAA;
-    static const QString table_SecurityTrades;
-    static const QString table_ExecutedTrades;
-    static const QString view_ExecutedTrades;
-    static const QString view_SecurityAA;
-    static const QString view_SecurityTrades;
 
-    static const QStringList aaColumns;
-    static const QStringList acctColumns;
-    static const QStringList closingPricesColumns;
-    static const QStringList dividendsColumns;
-    static const QStringList navColumns;
-    static const QStringList portfoliosColumns;
+    static const QString view_PortfolioSecurityAA;
+    static const QString view_PortfolioSecurityTrade;
+    static const QString view_PortfolioSecurityTradeExecution;
+
+    static const QStringList historicalPriceColumns;
+    static const QStringList portfolioColumns;
+    static const QStringList portfolioAAColumns;
+    static const QStringList portfolioAccountColumns;
+    static const QStringList portfolioNAVColumns;
+    static const QStringList portfolioSecurityColumns;
+    static const QStringList portfolioSecurityAAColumns;
+    static const QStringList portfolioSecurityTradeColumns;
+    static const QStringList portfolioSecurityTradeExecutionColumns;
     static const QStringList settingsColumns;
     static const QStringList settingsColumnsColumns;
-    static const QStringList splitsColumns;
-    static const QStringList securityColumns;
-    static const QStringList securityAAColumns;
-    static const QStringList securityTradeColumns;
-    static const QStringList executedTradesColumns;
-    static const QStringList executedTradesViewColumns;
-    static const QStringList securityAAViewColumns;
-    static const QStringList securityTradesViewColumns;
+
+    static const QStringList portfolioSecurityAAViewColumns;
+    static const QStringList portfolioSecurityTradeViewColumns;
+    static const QStringList portfolioSecurityTradeExecutionViewColumns;
 
     // NOTE: when changing these enums, modify the corresponding table's QStringList in the cpp
     enum {
-        aaColumns_ID,
-        aaColumns_PortfolioID,
-        aaColumns_Description,
-        aaColumns_Target
+        portfolioAAColumns_ID,
+        portfolioAAColumns_PortfolioID,
+        portfolioAAColumns_Description,
+        portfolioAAColumns_Target
     };
 
     enum {
-        acctColumns_ID,
-        acctColumns_PortfolioID,
-        acctColumns_Description,
-        acctColumns_TaxRate,
-        acctColumns_TaxDeferred,
-        acctColumns_CostBasis
+        portfolioAccountColumns_ID,
+        portfolioAccountColumns_PortfolioID,
+        portfolioAccountColumns_Description,
+        portfolioAccountColumns_TaxRate,
+        portfolioAccountColumns_TaxDeferred,
+        portfolioAccountColumns_CostBasis
     };
 
     enum {
-        closingPricesColumns_Date,
-        closingPricesColumns_Symbol,
-        closingPricesColumns_Price
+        historicalPriceColumns_Date,
+        historicalPriceColumns_Symbol,
+        historicalPriceColumns_Type,
+        historicalPriceColumns_Value
     };
 
     enum {
-        dividendsColumns_Date,
-        dividendsColumns_Symbol,
-        dividendsColumns_Amount
-    };
-
-    enum {
-        navColumns_PortfolioID,
-        navColumns_Date,
-        navColumns_TotalValue,
-        navColumns_NAV
+        portfolioNAVColumns_PortfolioID,
+        portfolioNAVColumns_Date,
+        portfolioNAVColumns_TotalValue,
+        portfolioNAVColumns_NAV
     };
 
     enum {
@@ -122,83 +115,78 @@ public:
     };
 
     enum {
-        splitsColumns_Date,
-        splitsColumns_Symbol,
-        splitsColumns_Ratio
+        portfolioSecurityColumns_ID,
+        portfolioSecurityColumns_PortfolioID,
+        portfolioSecurityColumns_Symbol,
+        portfolioSecurityColumns_Account,
+        portfolioSecurityColumns_Expense,
+        portfolioSecurityColumns_DivReinvest,
+        portfolioSecurityColumns_CashAccount,
+        portfolioSecurityColumns_IncludeInCalc,
+        portfolioSecurityColumns_Hide,
+        portfolioSecurityColumns_Note
     };
 
     enum {
-        securityColumns_ID,
-        securityColumns_PortfolioID,
-        securityColumns_Symbol,
-        securityColumns_Account,
-        securityColumns_Expense,
-        securityColumns_DivReinvest,
-        securityColumns_CashAccount,
-        securityColumns_IncludeInCalc,
-        securityColumns_Hide,
-        securityColumns_Note
+        portfolioSecurityAAColumns_SecurityID,
+        portfolioSecurityAAColumns_AAID,
+        portfolioSecurityAAColumns_Percent
     };
 
     enum {
-        securityAAColumns_SecurityID,
-        securityAAColumns_AAID,
-        securityAAColumns_Percent
+        portfolioSecurityTradeColumns_ID,
+        portfolioSecurityTradeColumns_SecurityID,
+        portfolioSecurityTradeColumns_Type,
+        portfolioSecurityTradeColumns_Value,
+        portfolioSecurityTradeColumns_Price,
+        portfolioSecurityTradeColumns_Commission,
+        portfolioSecurityTradeColumns_CashAccountID,
+        portfolioSecurityTradeColumns_Frequency,
+        portfolioSecurityTradeColumns_Date,
+        portfolioSecurityTradeColumns_StartDate,
+        portfolioSecurityTradeColumns_EndDate,
+        portfolioSecurityTradeColumns_Description
     };
 
     enum {
-        securityTradeColumns_ID,
-        securityTradeColumns_SecurityID,
-        securityTradeColumns_Type,
-        securityTradeColumns_Value,
-        securityTradeColumns_Price,
-        securityTradeColumns_Commission,
-        securityTradeColumns_CashAccountID,
-        securityTradeColumns_Frequency,
-        securityTradeColumns_Date,
-        securityTradeColumns_StartDate,
-        securityTradeColumns_EndDate,
-        securityTradeColumns_Description
+        portfolioSecurityTradeExecutionColumns_TradeID,
+        portfolioSecurityTradeExecutionColumns_Date,
+        portfolioSecurityTradeExecutionColumns_Shares,
+        portfolioSecurityTradeExecutionColumns_Price,
+        portfolioSecurityTradeExecutionColumns_Commission
     };
 
     enum {
-        executedTradesColumns_SecurityID,
-        executedTradesColumns_Date,
-        executedTradesColumns_Shares,
-        executedTradesColumns_Price,
-        executedTradesColumns_Commission
+        portfolioSecurityTradeExecutionViewColumns_TradeID,
+        portfolioSecurityTradeExecutionViewColumns_Date,
+        portfolioSecurityTradeExecutionViewColumns_Shares,
+        portfolioSecurityTradeExecutionViewColumns_Price,
+        portfolioSecurityTradeExecutionViewColumns_Commission,
+        portfolioSecurityTradeExecutionViewColumns_SecurityID,
+        portfolioSecurityTradeExecutionViewColumns_PortfolioID
     };
 
     enum {
-        executedTradesViewColumns_SecurityID,
-        executedTradesViewColumns_Date,
-        executedTradesViewColumns_Shares,
-        executedTradesViewColumns_Price,
-        executedTradesViewColumns_Commission,
-        executedTradesViewColumns_PortfolioID
+        portfolioSecurityAAViewColumns_SecurityID,
+        portfolioSecurityAAViewColumns_AAID,
+        portfolioSecurityAAViewColumns_Percent,
+        portfolioSecurityAAViewColumns_PortfolioID
     };
 
     enum {
-        securityAAViewColumns_SecurityID,
-        securityAAViewColumns_AAID,
-        securityAAViewColumns_Percent,
-        securityAAViewColumns_PortfolioID
-    };
-
-    enum {
-        securityTradesViewColumns_ID,
-        securityTradesViewColumns_SecurityID,
-        securityTradesViewColumns_Type,
-        securityTradesViewColumns_Value,
-        securityTradesViewColumns_Price,
-        securityTradesViewColumns_Commission,
-        securityTradesViewColumns_CashAccountID,
-        securityTradesViewColumns_Frequency,
-        securityTradesViewColumns_Date,
-        securityTradesViewColumns_StartDate,
-        securityTradesViewColumns_EndDate,
-        securityTradesViewColumns_Description,
-        securityTradesViewColumns_PortfolioID
+        portfolioSecurityTradeViewColumns_ID,
+        portfolioSecurityTradeViewColumns_SecurityID,
+        portfolioSecurityTradeViewColumns_Type,
+        portfolioSecurityTradeViewColumns_Value,
+        portfolioSecurityTradeViewColumns_Price,
+        portfolioSecurityTradeViewColumns_Commission,
+        portfolioSecurityTradeViewColumns_CashAccountID,
+        portfolioSecurityTradeViewColumns_Frequency,
+        portfolioSecurityTradeViewColumns_Date,
+        portfolioSecurityTradeViewColumns_StartDate,
+        portfolioSecurityTradeViewColumns_EndDate,
+        portfolioSecurityTradeViewColumns_Description,
+        portfolioSecurityTradeViewColumns_PortfolioID
     };
 
     queries(const QString &databaseLocation_);
@@ -206,7 +194,7 @@ public:
 
     static QString getDefaultDatabaseLocation();
 
-    void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
+    void bulkInsert(const QString &tableName_, const QStringList &columns_, const queriesBatch &object_);
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const;
@@ -219,14 +207,19 @@ public:
     void deleteItem(const QString &table_, int id_) const;
     void deleteItem(const QString &table_, int id_, int beginDate_) const;
     void deleteSecurityItems(const QString &table_, int securityID_) const;
+    void deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const;
     void deletePortfolioItems(const QString &table_, int portfolioID_) const;
     void deletePortfolioItems(const QString &table_, int portfolioID_, int beginDate_) const;
+    void deleteTradeItems(const QString &table_, int tradeID_) const;
+    void deleteTradeItems(const QString &table_, int tradeID_, int beginDate_) const;
 
 private:
     QSqlDatabase m_database;
 
     void executeNonQuery(const QString &query_) const;
     void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
+    void deleteItem(const QString &table_, const QString &identifier_, int id_) const;
+    void deleteItem(const QString &table_, const QString &identifier_, int id_, int beginDate_) const;
 };
 
 inline uint qHash(const queries &dataSource_) { return qHash(dataSource_.getDatabaseLocation()); }

@@ -12,19 +12,24 @@
 class portfolioFactory
 {
 public:
-    QMap<int, portfolio> getPortfolios(const queries &dataSource_);
+    portfolioFactory(const queries &dataSource_):
+        m_dataSource(dataSource_)
+    { }
+
+    QMap<int, portfolio> getPortfolios();
 
 private:
     QMap<int, portfolio> m_portfolios;
+    queries m_dataSource;
 
-    void loadPortfoliosInfo(const queries &dataSource_);
-    void loadPortfoliosSecurity(const queries &dataSource_);
-    void loadPortfoliosSecurityAA(const queries &dataSource_);
-    void loadPortfoliosSecurityTrades(const queries &dataSource_);
-    void loadPortfoliosExecutedTrades(const queries &dataSource_);
-    void loadPortfoliosAA(const queries &dataSource_);
-    void loadPortfoliosAcct(const queries &dataSource_);
-    void loadPortfoliosNAV(const queries &dataSource_);
+    void loadPortfoliosInfo();
+    void loadPortfoliosSecurity();
+    void loadPortfoliosSecurityAA();
+    void loadPortfoliosSecurityTrades();
+    void loadPortfoliosExecutedTrades();
+    void loadPortfoliosAA();
+    void loadPortfoliosAcct();
+    void loadPortfoliosNAV();
 };
 
 #endif // PORTFOLIOFACTORY_H

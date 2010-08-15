@@ -1,69 +1,60 @@
 #include "queries.h"
 
 //enum {
-//    aaColumns_ID,
-//    aaColumns_PortfolioID,
-//    aaColumns_Description,
-//    aaColumns_Target
+//    portfolioAAColumns_ID,
+//    portfolioAAColumnsPortfolio_ID,
+//    portfolioAAColumns_Description,
+//    portfolioAAColumns_Target
 //};
 
-const QStringList queries::aaColumns = QStringList()
-                                       << "ID"
-                                       << "PortfolioID"
-                                       << "Description"
-                                       << "Target";
+const QStringList queries::portfolioAAColumns = QStringList()
+                                                << "ID"
+                                                << "PortfolioID"
+                                                << "Description"
+                                                << "Target";
 
 //enum {
-//    acctColumns_ID,
-//    acctColumns_PortfolioID,
-//    acctColumns_Description,
-//    acctColumns_TaxRate,
-//    acctColumns_TaxDeferred,
-//    acctColumns_CostBasis
+//    portfolioAccountColumns_ID,
+//    portfolioAccountColumns_PortfolioID,
+//    portfolioAccountColumns_Description,
+//    portfolioAccountColumns_TaxRate,
+//    portfolioAccountColumns_TaxDeferred,
+//    portfolioAccountColumns_CostBasis
 //};
 
-const QStringList queries::acctColumns = QStringList()
-                                         << "ID"
-                                         << "PortfolioID"
-                                         << "Description"
-                                         << "TaxRate"
-                                         << "TaxDeferred"
-                                         << "CostBasis";
+const QStringList queries::portfolioAccountColumns = QStringList()
+                                                     << "ID"
+                                                     << "PortfolioID"
+                                                     << "Description"
+                                                     << "TaxRate"
+                                                     << "TaxDeferred"
+                                                     << "CostBasis";
 
 //enum {
-//    closingPricesColumns_Date,
-//    closingPricesColumns_Symbol,
-//    closingPricesColumns_Price
+//    historicalPriceColumns_Date,
+//    historicalPriceColumns_Symbol,
+//    historicalPriceColumns_Type,
+//    historicalPriceColumns_Value
 //};
 
-const QStringList queries::closingPricesColumns = QStringList()
-                                                  << "Date"
-                                                  << "Symbol"
-                                                  << "Price";
+const QStringList queries::historicalPriceColumns = QStringList()
+                                                    << "Date"
+                                                    << "Symbol"
+                                                    << "Type"
+                                                    << "Value";
 
 //enum {
-//    dividendsColumns_Date,
-//    dividendsColumns_Symbol,
-//    dividendsColumns_Amount
+//    portfolioNAVColumns_PortfolioID,
+//    portfolioNAVColumns_Date,
+//    portfolioNAVColumns_TotalValue,
+//    portfolioNAVColumns_NAV
 //};
 
-const QStringList queries::dividendsColumns = QStringList()
-                                              << "Date"
-                                              << "Symbol"
-                                              << "Amount";
-
-//enum {
-//    navColumns_PortfolioID,
-//    navColumns_Date,
-//    navColumns_TotalValue,
-//    navColumns_NAV
-//};
-
-const QStringList queries::navColumns = QStringList()
-                                        << "PortfolioID"
-                                        << "Date"
-                                        << "TotalValue"
-                                        << "NAV";
+const QStringList queries::portfolioNAVColumns = QStringList()
+                                                 << "PortfolioID"
+                                                 << "Date"
+                                                 << "TotalValue"
+                                                 << "NAV";
 
 //enum {
 //    portfoliosColumns_ID,
@@ -84,23 +75,23 @@ const QStringList queries::navColumns = QStringList()
 //    portfoliosColumns_NAVSortDesc
 //};
 
-const QStringList queries::portfoliosColumns = QStringList()
-                                               << "ID"
-                                               << "Description"
-                                               << "StartValue"
-                                               << "AAThreshold"
-                                               << "ThresholdMethod"
-                                               << "CostBasis"
-                                               << "StartDate"
-                                               << "Dividends"
-                                               << "HoldingsShowHidden"
-                                               << "HoldingsSort"
-                                               << "AAShowBlank"
-                                               << "AASort"
-                                               << "CorrelationShowHidden"
-                                               << "AcctShowBlank"
-                                               << "AcctSort"
-                                               << "NAVSortDesc";
+const QStringList queries::portfolioColumns = QStringList()
+                                              << "ID"
+                                              << "Description"
+                                              << "StartValue"
+                                              << "AAThreshold"
+                                              << "ThresholdMethod"
+                                              << "CostBasis"
+                                              << "StartDate"
+                                              << "Dividends"
+                                              << "HoldingsShowHidden"
+                                              << "HoldingsSort"
+                                              << "AAShowBlank"
+                                              << "AASort"
+                                              << "CorrelationShowHidden"
+                                              << "AcctShowBlank"
+                                              << "AcctSort"
+                                              << "NAVSortDesc";
 
 //enum {
 //    settingsColumns_DataStartDate,
@@ -139,175 +130,165 @@ const QStringList queries::settingsColumnsColumns = QStringList()
                                                     << "Sequence";
 
 //enum {
-//    splitsColumns_Date,
-//    splitsColumns_Symbol,
-//    splitsColumns_Ratio
+//    portfolioSecurityColumns_ID,
+//    portfolioSecurityColumns_PortfolioID,
+//    portfolioSecurityColumns_Symbol,
+//    portfolioSecurityColumns_Account,
+//    portfolioSecurityColumns_Expense,
+//    portfolioSecurityColumns_DivReinvest,
+//    portfolioSecurityColumns_CashAccount,
+//    portfolioSecurityColumns_IncludeInCalc,
+//    portfolioSecurityColumns_Hide,
+//    portfolioSecurityColumns_Note
 //};
 
-const QStringList queries::splitsColumns = QStringList()
-                                           << "Date"
-                                           << "Symbol"
-                                           << "Ratio";
-
-//enum {
-//    securityColumns_ID,
-//    securityColumns_PortfolioID,
-//    securityColumns_Symbol,
-//    securityColumns_Account,
-//    securityColumns_Expense,
-//    securityColumns_DivReinvest,
-//    securityColumns_CashAccount,
-//    securityColumns_IncludeInCalc,
-//    securityColumns_Hide,
-//    securityColumns_Note
-//};
-
-const QStringList queries::securityColumns = QStringList()
-                                             << "ID"
-                                             << "PortfolioID"
-                                             << "Symbol"
-                                             << "Account"
-                                             << "Expense"
-                                             << "DivReinvest"
-                                             << "CashAccount"
-                                             << "IncludeInCalc"
-                                             << "Hide"
-                                             << "Note";
+const QStringList queries::portfolioSecurityColumns = QStringList()
+                                                      << "ID"
+                                                      << "PortfolioID"
+                                                      << "Symbol"
+                                                      << "Account"
+                                                      << "Expense"
+                                                      << "DivReinvest"
+                                                      << "CashAccount"
+                                                      << "IncludeInCalc"
+                                                      << "Hide"
+                                                      << "Note";
 
 
 //enum {
-//    securityAAColumns_SecurityID,
-//    securityAAColumns_AAID,
-//    securityAAColumns_Percent
+//    portfolioSecurityAAColumns_SecurityID,
+//    portfolioSecurityAAColumns_AAID,
+//    portfolioSecurityAAColumns_Percent
 //};
 
-const QStringList queries::securityAAColumns = QStringList()
-                                               << "SecurityID"
-                                               << "AAID"
-                                               << "Percent";
+const QStringList queries::portfolioSecurityAAColumns = QStringList()
+                                                        << "SecurityID"
+                                                        << "AAID"
+                                                        << "Percent";
 
 //enum {
-//    securityTradeColumns_ID,
-//    securityTradeColumns_SecurityID,
-//    securityTradeColumns_Type,
-//    securityTradeColumns_Value,
-//    securityTradeColumns_Price,
-//    securityTradeColumns_Commission,
-//    securityTradeColumns_CashAccountID,
-//    securityTradeColumns_Frequency,
-//    securityTradeColumns_Date,
-//    securityTradeColumns_StartDate,
-//    securityTradeColumns_EndDate
-//    securityTradeColumns_Description
+//    portfolioSecurityTradeColumns_ID,
+//    portfolioSecurityTradeColumns_SecurityID,
+//    portfolioSecurityTradeColumns_Type,
+//    portfolioSecurityTradeColumns_Value,
+//    portfolioSecurityTradeColumns_Price,
+//    portfolioSecurityTradeColumns_Commission,
+//    portfolioSecurityTradeColumns_CashAccountID,
+//    portfolioSecurityTradeColumns_Frequency,
+//    portfolioSecurityTradeColumns_Date,
+//    portfolioSecurityTradeColumns_StartDate,
+//    portfolioSecurityTradeColumns_EndDate
+//    portfolioSecurityTradeColumns_Description
 //};
 
-const QStringList queries::securityTradeColumns = QStringList()
-                                                  << "ID"
-                                                  << "SecurityID"
-                                                  << "Type"
-                                                  << "Value"
-                                                  << "Price"
-                                                  << "Commission"
-                                                  << "CashAccountID"
-                                                  << "Frequency"
-                                                  << "Date"
-                                                  << "StartDate"
-                                                  << "EndDate"
-                                                  << "Description";
+const QStringList queries::portfolioSecurityTradeColumns = QStringList()
+                                                           << "ID"
+                                                           << "SecurityID"
+                                                           << "Type"
+                                                           << "Value"
+                                                           << "Price"
+                                                           << "Commission"
+                                                           << "CashAccountID"
+                                                           << "Frequency"
+                                                           << "Date"
+                                                           << "StartDate"
+                                                           << "EndDate"
+                                                           << "Description";
 
 //enum {
-//    executedTradesColumns_SecurityID,
-//    executedTradesColumns_Date,
-//    executedTradesColumns_Shares,
-//    executedTradesColumns_Price,
-//    executedTradesColumns_Commission
+//    portfolioSecurityTradeExecutionColumns_TradeID,
+//    portfolioSecurityTradeExecutionColumns_Date,
+//    portfolioSecurityTradeExecutionColumns_Shares,
+//    portfolioSecurityTradeExecutionColumns_Price,
+//    portfolioSecurityTradeExecutionColumns_Commission
 //};
 
-const QStringList queries::executedTradesColumns = QStringList()
-                                                   << "SecurityID"
-                                                   << "Date"
-                                                   << "Shares"
-                                                   << "Price"
-                                                   << "Commission";
+const QStringList queries::portfolioSecurityTradeExecutionColumns = QStringList()
+                                                                    << "TradeID"
+                                                                    << "Date"
+                                                                    << "Shares"
+                                                                    << "Price"
+                                                                    << "Commission";
 
 //enum {
-//    executedTradesViewColumns_SecurityID,
-//    executedTradesViewColumns_Date,
-//    executedTradesViewColumns_Shares,
-//    executedTradesViewColumns_Price,
-//    executedTradesViewColumns_Commission,
-//    executedTradesViewColumns_PortfolioID
+//    portfolioSecurityTradeExecutionViewColumns_TradeID,
+//    portfolioSecurityTradeExecutionViewColumns_Date,
+//    portfolioSecurityTradeExecutionViewColumns_Shares,
+//    portfolioSecurityTradeExecutionViewColumns_Price,
+//    portfolioSecurityTradeExecutionViewColumns_Commission,
+//    portfolioSecurityTradeExecutionViewColumns_SecurityID,
+//    portfolioSecurityTradeExecutionViewColumns_PortfolioID
 //};
 
-const QStringList queries::executedTradesViewColumns = QStringList()
-                                              << "SecurityID"
-                                              << "Date"
-                                              << "Shares"
-                                              << "Price"
-                                              << "Commission"
-                                              << "PortfolioID";
+const QStringList queries::portfolioSecurityTradeExecutionViewColumns = QStringList()
+                                                                        << "TradeID"
+                                                                        << "Date"
+                                                                        << "Shares"
+                                                                        << "Price"
+                                                                        << "Commission"
+                                                                        << "SecurityID"
+                                                                        << "PortfolioID";
 
 //enum {
-//    securityAAViewColumns_SecurityID,
-//    securityAAViewColumns_AAID,
-//    securityAAViewColumns_Percent,
-//    securityAAViewColumns_PortfolioID
+//    portfolioSecurityAAViewColumns_SecurityID,
+//    portfolioSecurityAAViewColumns_AAID,
+//    portfolioSecurityAAViewColumns_Percent,
+//    portfolioSecurityAAViewColumns_PortfolioID
 //};
 
-const QStringList queries::securityAAViewColumns = QStringList()
-                                          << "SecurityID"
-                                          << "AAID"
-                                          << "Percent"
-                                          << "PortfolioID";
+const QStringList queries::portfolioSecurityAAViewColumns = QStringList()
+                                                            << "SecurityID"
+                                                            << "AAID"
+                                                            << "Percent"
+                                                            << "PortfolioID";
 
 
 //enum {
-//    securityTradesViewColumns_ID,
-//    securityTradesViewColumns_SecurityID,
-//    securityTradesViewColumns_Type,
-//    securityTradesViewColumns_Value,
-//    securityTradesViewColumns_Price,
-//    securityTradesViewColumns_Commission,
-//    securityTradesViewColumns_CashAccountID,
-//    securityTradesViewColumns_Frequency,
-//    securityTradesViewColumns_Date,
-//    securityTradesViewColumns_StartDate,
-//    securityTradesViewColumns_EndDate,
-//    securityTradesViewColumns_Description,
-//    securityTradesViewColumns_PortfolioID
+//    portfolioSecurityTradeViewColumns_ID,
+//    portfolioSecurityTradeViewColumns_SecurityID,
+//    portfolioSecurityTradeViewColumns_Type,
+//    portfolioSecurityTradeViewColumns_Value,
+//    portfolioSecurityTradeViewColumns_Price,
+//    portfolioSecurityTradeViewColumns_Commission,
+//    portfolioSecurityTradeViewColumns_CashAccountID,
+//    portfolioSecurityTradeViewColumns_Frequency,
+//    portfolioSecurityTradeViewColumns_Date,
+//    portfolioSecurityTradeViewColumns_StartDate,
+//    portfolioSecurityTradeViewColumns_EndDate,
+//    portfolioSecurityTradeViewColumns_Description,
+//    portfolioSecurityTradeViewColumns_PortfolioID
 //};
 
-const QStringList queries::securityTradesViewColumns = QStringList()
-                                              << "ID"
-                                              << "SecurityID"
-                                              << "Type"
-                                              << "Value"
-                                              << "Price"
-                                              << "Commission"
-                                              << "CashAccountID"
-                                              << "Frequency"
-                                              << "Date"
-                                              << "StartDate"
-                                              << "EndDate"
-                                              << "Description"
-                                              << "PortfolioID";
+const QStringList queries::portfolioSecurityTradeViewColumns = QStringList()
+                                                               << "ID"
+                                                               << "SecurityID"
+                                                               << "Type"
+                                                               << "Value"
+                                                               << "Price"
+                                                               << "Commission"
+                                                               << "CashAccountID"
+                                                               << "Frequency"
+                                                               << "Date"
+                                                               << "StartDate"
+                                                               << "EndDate"
+                                                               << "Description"
+                                                               << "PortfolioID";
 
-const QString queries::table_AA = "AA";
-const QString queries::table_Acct = "Acct";
-const QString queries::table_ClosingPrices = "ClosingPrices";
-const QString queries::table_Dividends = "Dividends";
-const QString queries::table_NAV = "NAV";
-const QString queries::table_Portfolios = "Portfolios";
+const QString queries::table_Portfolio = "Portfolio";
+const QString queries::table_PortfolioAA = "PortfolioAA";
+const QString queries::table_PortfolioAccount = "PortfolioAccount";
+const QString queries::table_HistoricalPrice = "HistoricalPrice";
+const QString queries::table_PortfolioNAV = "PortfolioNAV";
+const QString queries::table_PortfolioSecurity = "PortfolioSecurity";
+const QString queries::table_PortfolioSecurityAA = "PortfolioSecurityAA";
+const QString queries::table_PortfolioSecurityTrade = "PortfolioSecurityTrade";
+const QString queries::table_PortfolioSecurityTradeExecution = "PortfolioSecurityTradeExecution";
 const QString queries::table_Settings = "Settings";
 const QString queries::table_SettingsColumns = "SettingsColumns";
-const QString queries::table_Splits = "Splits";
-const QString queries::table_Security = "Security";
-const QString queries::table_SecurityAA = "SecurityAA";
-const QString queries::table_SecurityTrades = "SecurityTrades";
-const QString queries::table_ExecutedTrades = "ExecutedTrades";
-const QString queries::view_ExecutedTrades = "ExecutedTradesView";
-const QString queries::view_SecurityAA = "SecurityAAView";
-const QString queries::view_SecurityTrades = "SecurityTradesView";
+
+const QString queries::view_PortfolioSecurityAA = "PortfolioSecurityAAView";
+const QString queries::view_PortfolioSecurityTrade = "PortfolioSecurityTradeView";
+const QString queries::view_PortfolioSecurityTradeExecution = "PortfolioSecurityTradeExecutionView";
 
 queries::queries(const QString &databaseLocation_)
 {
@@ -334,9 +315,9 @@ void queries::executeNonQuery(const QString &query_) const
     QSqlQuery(query_, m_database);
 }
 
-void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_)
+void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, const queriesBatch &object_)
 {
-    if (tableName_.isEmpty() || columns_.isEmpty() || !object_)
+    if (tableName_.isEmpty() || columns_.isEmpty())
         return;
 
     m_database.transaction();
@@ -350,12 +331,12 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
 
     query.prepare(sql.arg(tableName_, columns_.join(","), parameters.join(",")));
 
-    int rowCount = object_->rowsToBeInserted();
+    int rowCount = object_.rowsToBeInserted();
     int columnCount = columns_.count();
     for (int i = 0; i < rowCount; ++i)
     {
         for (int x = 0; x < columnCount; ++x)
-            query.addBindValue(object_->data(i, x));
+            query.addBindValue(object_.data(i, x));
         query.exec();
     }
 
@@ -462,25 +443,50 @@ void queries::deleteTable(const QString &table_) const
 
 void queries::deleteItem(const QString &table_, int id_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table_, QString::number(id_)));
+    deleteItem(table_, "ID", id_);
 }
 
 void queries::deleteItem(const QString &table_, int id_, int beginDate_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table_, QString::number(id_), QString::number(beginDate_)));
+    deleteItem(table_, "ID", id_, beginDate_);
 }
 
 void queries::deletePortfolioItems(const QString &table_, int portfolioID_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE PortfolioID = %2").arg(table_, QString::number(portfolioID_)));
+    deleteItem(table_, "PortfolioID", portfolioID_);
 }
 
 void queries::deletePortfolioItems(const QString &table_, int portfolioID_, int beginDate_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE PortfolioID = %2 AND Date >= %3").arg(table_, QString::number(portfolioID_), QString::number(beginDate_)));
+    deleteItem(table_, "PortfolioID", portfolioID_, beginDate_);
 }
 
 void queries::deleteSecurityItems(const QString &table_, int securityID_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE SecurityID = %2").arg(table_, QString::number(securityID_)));
+    deleteItem(table_, "SecurityID", securityID_);
+}
+
+void queries::deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const
+{
+    deleteItem(table_, "SecurityID", securityID_, beginDate_);
+}
+
+void queries::deleteTradeItems(const QString &table_, int tradeID_) const
+{
+    deleteItem(table_, "TradeID", tradeID_);
+}
+
+void queries::deleteTradeItems(const QString &table_, int tradeID_, int beginDate_) const
+{
+    deleteItem(table_, "TradeID", tradeID_, beginDate_);
+}
+
+void queries::deleteItem(const QString &table_, const QString &identifier_, int id_) const
+{
+    executeNonQuery(QString("DELETE FROM %1 WHERE %2 = %3").arg(table_,identifier_, QString::number(id_)));
+}
+
+void queries::deleteItem(const QString &table_, const QString &identifier_, int id_, int beginDate_) const
+{
+    executeNonQuery(QString("DELETE FROM %1 WHERE %2 = %3 AND Date >= %4").arg(table_, identifier_, QString::number(id_), QString::number(beginDate_)));
 }

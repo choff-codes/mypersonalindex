@@ -5,7 +5,7 @@ void historicalNAVPortfolio::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
-    dataSource_.bulkInsert(queries::table_NAV, queries::navColumns, this);
+    dataSource_.bulkInsert(queries::table_PortfolioNAV, queries::portfolioNAVColumns, *this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }
@@ -16,13 +16,13 @@ QVariant historicalNAVPortfolio::data(int row_, int column_) const
 
     switch(column_)
     {
-        case queries::navColumns_Date:
+        case queries::portfolioNAVColumns_Date:
             return date;
-        case queries::navColumns_NAV:
+        case queries::portfolioNAVColumns_NAV:
             return m_nav.value(date).nav;
-        case queries::navColumns_PortfolioID:
+        case queries::portfolioNAVColumns_PortfolioID:
             return this->parent;
-        case queries::navColumns_TotalValue:
+        case queries::portfolioNAVColumns_TotalValue:
             return m_nav.value(date).totalValue;
     }
 
@@ -43,7 +43,7 @@ void historicalNAVPortfolio::remove(const queries &dataSource_, int beginDate_)
         i = m_nav.erase(i);
     
     if(this->hasParent())
-        dataSource_.deletePortfolioItems(queries::table_NAV, this->parent, beginDate_);
+        dataSource_.deletePortfolioItems(queries::table_PortfolioNAV, this->parent, beginDate_);
 }
 
 void historicalNAVPortfolio::remove(const queries &dataSource_)
@@ -51,7 +51,7 @@ void historicalNAVPortfolio::remove(const queries &dataSource_)
     m_nav.clear();
 
     if(this->hasParent())
-        dataSource_.deletePortfolioItems(queries::table_NAV, this->parent);
+        dataSource_.deletePortfolioItems(queries::table_PortfolioNAV, this->parent);
 }
 
 void historicalNAV::insert(int date_, double nav_, double totalValue_)

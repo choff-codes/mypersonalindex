@@ -12,7 +12,7 @@ void columns::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
-    dataSource_.bulkInsert(queries::table_SettingsColumns, queries::settingsColumnsColumns, this);
+    dataSource_.bulkInsert(queries::table_SettingsColumns, queries::settingsColumnsColumns, *this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }

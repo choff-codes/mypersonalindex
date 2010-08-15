@@ -12,7 +12,7 @@ void assetAllocationTarget::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
-    dataSource_.bulkInsert(queries::table_SecurityAA, queries::securityAAColumns, this);
+    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, *this);
     m_valuesToBeInserted.clear();
     queriesBatch::insertBatch();
 }
@@ -21,20 +21,20 @@ void assetAllocationTarget::remove(const queries &dataSource_)
 {
     m_targets.clear();
     if (this->hasParent())
-        dataSource_.deleteSecurityItems(queries::table_SecurityAA, this->parent);
+        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityAA, this->parent);
 }
 
 QVariant assetAllocationTarget::data(int row_, int column_) const
 {
     switch(column_)
     {
-        case queries::securityAAColumns_AAID:
+        case queries::portfolioSecurityAAColumns_AAID:
             return m_valuesToBeInserted.at(row_);
             break;
-        case queries::securityAAColumns_Percent:
+        case queries::portfolioSecurityAAColumns_Percent:
             return m_targets.value(m_valuesToBeInserted.at(row_));
             break;
-        case queries::securityAAColumns_SecurityID:
+        case queries::portfolioSecurityAAColumns_SecurityID:
             return this->parent;
             break;
     }

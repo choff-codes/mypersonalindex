@@ -2,6 +2,7 @@
 
 bool trade::operator==(const trade &other_) const
 {
+    // ignore executedTrades since these are not user set
     return this->type == other_.type
             && this->value == other_.value
             && this->price == other_.price
@@ -16,23 +17,24 @@ bool trade::operator==(const trade &other_) const
 void trade::save(const queries &dataSource_)
 {
     QMap<QString, QVariant> values;
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_SecurityID), this->parent);
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Type), (int)this->type);
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Value), this->value);
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Price), functions::doubleToNull(this->price));
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Commission), this->commission);
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount));
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Frequency), (int)this->frequency);
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_Date), functions::dateToNull(this->date));
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_StartDate), functions::dateToNull(this->startDate));
-    values.insert(queries::securityTradeColumns.at(queries::securityTradeColumns_EndDate), functions::dateToNull(this->endDate));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_SecurityID), this->parent);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Type), (int)this->type);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Value), this->value);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Price), functions::doubleToNull(this->price));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Commission), this->commission);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Frequency), (int)this->frequency);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Date), functions::dateToNull(this->date));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_StartDate), functions::dateToNull(this->startDate));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_EndDate), functions::dateToNull(this->endDate));
 
-    this->id = dataSource_.insert(queries::table_SecurityTrades, values, this->id);
+    this->id = dataSource_.insert(queries::table_PortfolioSecurityTrade, values, this->id);
+    this->executedTrades.parent = this->id;
 }
 
 void trade::remove(const queries &dataSource_) const
 {
-    dataSource_.deleteItem(queries::table_SecurityTrades, this->id);
+    dataSource_.deleteItem(queries::table_PortfolioSecurityTrade, this->id);
 }
 
 QString trade::tradeTypeToString(tradeType type_)
@@ -59,6 +61,10 @@ QString trade::tradeTypeToString(tradeType type_)
             return "% of Portfolio";
         case tradeType_AA:
             return "% of AA Target";
+        case tradeType_DivReinvestAuto:
+            return "Auto Reinvestment";
+        case tradeType_Reversal:
+            return "Reversal";
         default:
             return "";
     }

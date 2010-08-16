@@ -44,19 +44,6 @@ const QStringList queries::historicalPriceColumns = QStringList()
                                                     << "Value";
 
 //enum {
-//    portfolioNAVColumns_PortfolioID,
-//    portfolioNAVColumns_Date,
-//    portfolioNAVColumns_TotalValue,
-//    portfolioNAVColumns_NAV
-//};
-
-const QStringList queries::portfolioNAVColumns = QStringList()
-                                                 << "PortfolioID"
-                                                 << "Date"
-                                                 << "TotalValue"
-                                                 << "NAV";
-
-//enum {
 //    portfoliosColumns_ID,
 //    portfoliosColumns_Description,
 //    portfoliosColumns_StartValue,
@@ -278,7 +265,6 @@ const QString queries::table_Portfolio = "Portfolio";
 const QString queries::table_PortfolioAA = "PortfolioAA";
 const QString queries::table_PortfolioAccount = "PortfolioAccount";
 const QString queries::table_HistoricalPrice = "HistoricalPrice";
-const QString queries::table_PortfolioNAV = "PortfolioNAV";
 const QString queries::table_PortfolioSecurity = "PortfolioSecurity";
 const QString queries::table_PortfolioSecurityAA = "PortfolioSecurityAA";
 const QString queries::table_PortfolioSecurityTrade = "PortfolioSecurityTrade";

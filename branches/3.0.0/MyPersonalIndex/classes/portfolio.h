@@ -22,17 +22,11 @@ public:
 
     QStringList symbols() const;
 
-    void beginNAVBatch();
-    void insertNAVBatch(const queries &dataSource_);
-    void beginExecutedTradesBatch();
-    void insertExecutedTradesBatch(const queries &dataSource_);
-
     int endDate() const;
 
     QMap<int, security>& securities();
     QMap<int, assetAllocation>& assetAllocations();
     QMap<int, account>& accounts();
-    historicalNAVPortfolio& navHistory();
     portfolioAttributes& attributes();
 
 private:

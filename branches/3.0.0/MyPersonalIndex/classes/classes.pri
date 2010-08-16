@@ -1,6 +1,6 @@
 INCLUDEPATH += $$PWD
 SOURCES += $$PWD/queries.cpp \
-    $$PWD/nav.cpp \
+    $$PWD/tradeCalculations.cpp \
     $$PWD/priceFactory.cpp \
     $$PWD/calculations.cpp \
     $$PWD/functions.cpp \
@@ -29,7 +29,7 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/assetAllocationTarget.cpp
 HEADERS += $$PWD/queries.h \
     $$PWD/functions.h \
-    $$PWD/nav.h \
+    $$PWD/tradeCalculations.h \
     $$PWD/calculations.h \
     $$PWD/priceFactory.h \
     $$PWD/historicalNAV.h \

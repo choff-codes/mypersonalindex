@@ -1,6 +1,6 @@
-#include "nav.h"
+#include "tradeCalculations.h"
 
-void nav::run(int date_, const QList<portfolio> &portfolios_)
+void tradeCalculations::run(int beginDate_, const QList<portfolio> &portfolios_)
 {
 #ifdef CLOCKTIME
     QTime t;
@@ -9,76 +9,44 @@ void nav::run(int date_, const QList<portfolio> &portfolios_)
 
     foreach(portfolio p, portfolios_)
     {
-        p.beginExecutedTradesBatch();
-        p.beginNAVBatch();
-
-        calculateNAV(p, date_);
-
-        p.insertExecutedTradesBatch(m_dataSource);
-        p.insertNAVBatch(m_dataSource);
+        beginExecutedTradeBatchInsert(p);
+        calculate(p, beginDate_);
+        endExecutedTradeBatchInsert(p);
     }
 
 #ifdef CLOCKTIME
-    qDebug("Time elapsed (nav): %d ms", t.elapsed());
+    qDebug("Time elapsed (trades): %d ms", t.elapsed());
 #endif
 }
 
-void nav::calculateNAV(portfolio portfolio_, int date_)
+void tradeCalculations::calculate(portfolio portfolio_, int beginDate_)
 {
-    if (!portfolio_.navHistory().isEmpty())
-        date_ = qMax( // keep the date greater than or equal to the portfolio start date
-                    qMin( // move the date back if the portfolio hasn't been calculated up to the passed in date
-                        date_,
-                        (portfolio_.navHistory().constEnd() - 1).key()
-                    ),
-                    portfolio_.attributes().startDate
-                );
+    // keep the date greater than or equal to the portfolio start date
+    beginDate_ = qMax( beginDate_, portfolio_.attributes().startDate);
+    bool recalculateAll = beginDate_ == portfolio_.attributes().startDate;
 
-    bool recalculateAll = date_ <= portfolio_.attributes().startDate;
+    clearExecutedTrades(portfolio_, beginDate_, recalculateAll);
 
-    clearHistoricalValues(portfolio_, date_, recalculateAll);
-
-    tradeDateCalendar calendar(date_);
+    tradeDateCalendar calendar(beginDate_);
     if (calendar.date() > calendar.endDate())
         return;
 
     calculations calc(portfolio_);
-    QList<tradePointerWithDates> trades = calculateTradesWithDates(portfolio_, calendar.date(), recalculateAll);
+    QList<tradeWithDates> trades = calculateTradeDates(portfolio_, calendar.date(), recalculateAll);
 
     if (recalculateAll)
-        insertExecutedTradesPreStartDate(portfolio_, date_, trades);
+        insertExecutedTradesPreStartDate(portfolio_, beginDate_, trades);
 
     snapshotPortfolio previousSnapshot = calc.portfolioSnapshot(calendar.date());
-    double navValue =
-            recalculateAll ?
-                portfolio_.attributes().startValue :
-                portfolio_.navHistory().nav(calendar.date());
-
-    if (recalculateAll) // cannot do this above since pre-start date trades must be inserted first
-        portfolio_.navHistory().insert(calendar.date(), navValue, previousSnapshot.totalValue);
 
     foreach(const int &date, ++calendar)
     {
         insertExecutedTrades(portfolio_, date, previousSnapshot, trades);
-
-        const snapshotPortfolio presentSnapshot = calc.portfolioSnapshot(date);
-
-        navValue = calc.change(
-            previousSnapshot.totalValue,
-            presentSnapshot.totalValue,
-            presentSnapshot.costBasis - previousSnapshot.costBasis,
-            portfolio_.attributes().dividends ?
-                presentSnapshot.dividendAmount :
-                0,
-            navValue
-        );
-
-        portfolio_.navHistory().insert(date, navValue, presentSnapshot.totalValue);
-        previousSnapshot = presentSnapshot;
+        previousSnapshot = calc.portfolioSnapshot(date);
     }
 }
 
-void nav::clearHistoricalValues(portfolio portfolio_, int beginDate_, bool recalculateAll_)
+void tradeCalculations::clearExecutedTrades(portfolio portfolio_, int beginDate_, bool recalculateAll_)
 {
     for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
         for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
@@ -86,16 +54,25 @@ void nav::clearHistoricalValues(portfolio portfolio_, int beginDate_, bool recal
                 x.value().executedTrades.remove(m_dataSource);
             else
                 x.value().executedTrades.remove(m_dataSource, beginDate_);
-
-    if (recalculateAll_)
-        portfolio_.navHistory().remove(m_dataSource);
-    else
-        portfolio_.navHistory().remove(m_dataSource, beginDate_);
 }
 
-QList<nav::tradePointerWithDates> nav::calculateTradesWithDates(portfolio portfolio_, int date_, bool recalculateAll_) const
+void tradeCalculations::beginExecutedTradeBatchInsert(portfolio portfolio_)
 {
-    QList<tradePointerWithDates> calculatedTrades;
+    for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
+        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
+            x.value().executedTrades.beginBatch();
+}
+
+void tradeCalculations::endExecutedTradeBatchInsert(portfolio portfolio_)
+{
+    for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
+        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
+            x.value().executedTrades.insertBatch(m_dataSource);
+}
+
+QList<tradeCalculations::tradeWithDates> tradeCalculations::calculateTradeDates(portfolio portfolio_, int date_, bool recalculateAll_) const
+{
+    QList<tradeWithDates> calculatedTrades;
 
     for(QMap<int, security>::iterator security = portfolio_.securities().begin(); security != portfolio_.securities().end(); ++security)
     {
@@ -116,7 +93,7 @@ QList<nav::tradePointerWithDates> nav::calculateTradesWithDates(portfolio portfo
                     dates.append(dividend.key());
 
                 if (!dates.isEmpty())
-                    calculatedTrades.append(tradePointerWithDates(security, trade, dates));
+                    calculatedTrades.append(tradeWithDates(security, trade, dates));
 
                 continue;
             }
@@ -124,7 +101,7 @@ QList<nav::tradePointerWithDates> nav::calculateTradesWithDates(portfolio portfo
             // these are not calculated on the fly and trades before the start date need to be inserted
             if (recalculateAll_ && trade->frequency == tradeDateCalendar::frequency_Once && trade->date < date_)
             {
-                calculatedTrades.append(tradePointerWithDates(security, trade, QList<int>() << trade->date));
+                calculatedTrades.append(tradeWithDates(security, trade, QList<int>() << trade->date));
                 continue;
             }
 
@@ -139,17 +116,17 @@ QList<nav::tradePointerWithDates> nav::calculateTradesWithDates(portfolio portfo
                 );
 
             if (!dates.isEmpty())
-                calculatedTrades.append(tradePointerWithDates(security, trade, dates));
+                calculatedTrades.append(tradeWithDates(security, trade, dates));
         }
     }
 
     return calculatedTrades;
 }
 
-void nav::insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_, const QList<tradePointerWithDates> &trades_)
+void tradeCalculations::insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_, const QList<tradeWithDates> &trades_)
 {
     QSet<int> priorStartDates;
-    foreach(const tradePointerWithDates &trade, trades_)
+    foreach(const tradeWithDates &trade, trades_)
         foreach(const int &date, trade.dates)
         {
             if (date >= beginDate_)
@@ -162,9 +139,9 @@ void nav::insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_,
         insertExecutedTrades(portfolio_, date, snapshotPortfolio(), trades_);
 }
 
-void nav::insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const QList<tradePointerWithDates> &trades_)
+void tradeCalculations::insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const QList<tradeWithDates> &trades_)
 {
-    foreach(const tradePointerWithDates &trade, trades_)
+    foreach(const tradeWithDates &trade, trades_)
     {
         if (qBinaryFind(trade.dates, date_) == trade.dates.constEnd()) // this date isn't found
             continue;
@@ -178,18 +155,18 @@ void nav::insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPo
                         0 :
                         trade.parent().splitAdjustedPriorDayPrice(date_, priorDaySnapshot_.date);
 
-        double shares = calculateShares(trade, purchasePrice, portfolio_, priorDaySnapshot_);
+        double shares = calculateTradeShares(trade, purchasePrice, portfolio_, priorDaySnapshot_);
         if (functions::isZero(shares))
             continue;
 
         trade.value().executedTrades.insert(date_, executedTrade(shares, purchasePrice, trade.value().commission));
 
         if (trade.value().cashAccount != -1)
-            insertPortfolioReversal(portfolio_, trade.value().cashAccount, date_, priorDaySnapshot_.date, shares * purchasePrice);
+            insertExecutedTradeReversal(portfolio_, trade.value().cashAccount, date_, priorDaySnapshot_.date, shares * purchasePrice);
     }
 }
 
-double nav::calculateShares(const tradePointerWithDates &trade_, double purchasePrice_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_) const
+double tradeCalculations::calculateTradeShares(const tradeWithDates &trade_, double purchasePrice_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_) const
 {
     if (purchasePrice_ == 0)
         if (    // these types are allowed a price of 0
@@ -250,7 +227,7 @@ double nav::calculateShares(const tradePointerWithDates &trade_, double purchase
     return 0;
 }
 
-void nav::insertPortfolioReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double value_)
+void tradeCalculations::insertExecutedTradeReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double value_)
 {
     if (!portfolio_.securities().contains(cashAccountID_))
         return;

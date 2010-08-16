@@ -133,7 +133,7 @@ int calculations::beginDateByKey(const objectKey &key_)
         case objectType_Account:
         case objectType_Portfolio:
         case objectType_Security:
-            return m_portfolio.navHistory().isEmpty() ? 0 :  m_portfolio.navHistory().constBegin().key();
+            return m_portfolio.attributes().startDate;
     case objectType_Symbol:
             return m_portfolio.securities().value(key_.id).beginDate();
         default:
@@ -149,7 +149,7 @@ int calculations::endDateByKey(const objectKey &key_)
         case objectType_Account:
         case objectType_Portfolio:
         case objectType_Security:
-            return m_portfolio.navHistory().isEmpty() ? 0 :  m_portfolio.navHistory().constEnd().key();
+            return tradeDateCalendar::endDate();
     case objectType_Symbol:
             return m_portfolio.securities().value(key_.id).endDate();
         default:
@@ -200,30 +200,6 @@ historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_
     navHistory.costBasis = previousSnapshot.costBasis;
     navHistory.expenseRatio = previousSnapshot.expenseRatio;
     navHistory.taxLiability = previousSnapshot.taxLiability;
-
-    return navHistory;
-}
-
-
-//TODO: possibly remove if changeOverTime above can be efficient
-historicalNAV calculations::changeOverTime(int beginDate_, int endDate_)
-{
-    historicalNAV navHistory;
-    if (m_portfolio.navHistory().isEmpty())
-        return navHistory;
-
-    int date = 0;
-    for(QMap<int, navPair>::const_iterator i = m_portfolio.navHistory().constBegin(); i != m_portfolio.navHistory().constEnd(); ++i)
-    {
-        date = i.key();
-        if (date >= beginDate_ && date <= endDate_)
-            navHistory.insert(date, i.value().nav, i.value().totalValue);
-    }
-
-    snapshotPortfolio p = portfolioSnapshot(date);
-    navHistory.costBasis = p.costBasis;
-    navHistory.expenseRatio = p.expenseRatio;
-    navHistory.taxLiability = p.taxLiability;
 
     return navHistory;
 }

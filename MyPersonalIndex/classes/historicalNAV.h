@@ -55,35 +55,4 @@ private:
     int m_lastDate;
 };
 
-class historicalNAVPortfolio: public objectBase, public queriesBatch
-{
-public:
-    historicalNAVPortfolio(const int &parent_):
-        objectBase(parent_)
-    {}
-
-    void insert(int date_, double nav_, double totalValue_);
-
-    QMap<int, navPair>::const_iterator constBegin() const { return m_nav.constBegin(); }
-    QMap<int, navPair>::const_iterator constEnd() const { return m_nav.constEnd(); }
-
-    int count() const { return m_nav.count(); }
-    int isEmpty() const { return m_nav.isEmpty(); }
-
-    double nav(int date_) const { return m_nav.value(date_).nav; }
-    double totalValue(int date_) const { return m_nav.value(date_).totalValue; }
-
-    void remove(const queries &dataSource_);
-    void remove(const queries &dataSource_, int beginDate_);
-
-    void insertBatch(queries dataSource_);
-
-    int rowsToBeInserted() const { return m_valuesToBeInserted.count(); }
-    QVariant data(int row_, int column_) const;
-
-private:
-    QMap<int, navPair> m_nav;
-    QList<int> m_valuesToBeInserted;
-};
-
 #endif // HISTORICALNAV_H

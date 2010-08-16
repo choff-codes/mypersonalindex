@@ -14,7 +14,6 @@ QMap<int, portfolio> portfolioFactory::getPortfolios()
     loadPortfoliosSecurityAA();
     loadPortfoliosSecurityTrades();
     loadPortfoliosExecutedTrades();
-    loadPortfoliosNAV();
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
@@ -174,15 +173,4 @@ void portfolioFactory::loadPortfoliosExecutedTrades()
                     q.value(queries::portfolioSecurityTradeExecutionViewColumns_Commission).toDouble()
                 )
             );
-}
-
-void portfolioFactory::loadPortfoliosNAV()
-{
-    QSqlQuery q = m_dataSource.select(queries::table_PortfolioNAV, queries::portfolioNAVColumns);
-    while(q.next())
-        m_portfolios[q.value(queries::portfolioNAVColumns_PortfolioID).toInt()].navHistory().insert(
-            q.value(queries::portfolioNAVColumns_Date).toInt(),
-            q.value(queries::portfolioNAVColumns_NAV).toDouble(),
-            q.value(queries::portfolioNAVColumns_TotalValue).toDouble()
-        );
 }

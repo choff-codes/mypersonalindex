@@ -6,11 +6,9 @@ public:
     QMap<int, security> securities;
     QMap<int, assetAllocation> assetAllocations;
     QMap<int, account> accounts;
-    historicalNAVPortfolio navHistory;
     portfolioAttributes attributes;
 
     portfolioData(int id_):
-            navHistory(historicalNAVPortfolio(id_)),
             attributes(portfolioAttributes(id_))
     {}
 };
@@ -35,30 +33,6 @@ portfolio& portfolio::operator=(const portfolio &other_)
     return *this;
 }
 
-void portfolio::beginExecutedTradesBatch()
-{
-    for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
-        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
-            x.value().executedTrades.beginBatch();
-}
-
-void portfolio::insertExecutedTradesBatch(const queries &dataSource_)
-{
-    for(QMap<int, security>::iterator i = d->securities.begin(); i != d->securities.end(); ++i)
-        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
-            x.value().executedTrades.insertBatch(dataSource_);
-}
-
-void portfolio::beginNAVBatch()
-{
-    d->navHistory.beginBatch();
-}
-
-void portfolio::insertNAVBatch(const queries &dataSource_)
-{
-    d->navHistory.insertBatch(dataSource_);
-}
-
 QMap<int, security>& portfolio::securities()
 {
     return d->securities;
@@ -72,11 +46,6 @@ QMap<int, assetAllocation>& portfolio::assetAllocations()
 QMap<int, account>& portfolio::accounts()
 {
     return d->accounts;
-}
-
-historicalNAVPortfolio& portfolio::navHistory()
-{
-    return d->navHistory;
 }
 
 portfolioAttributes& portfolio::attributes()

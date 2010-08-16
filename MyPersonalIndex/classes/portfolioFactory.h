@@ -29,7 +29,6 @@ private:
     void loadPortfoliosExecutedTrades();
     void loadPortfoliosAA();
     void loadPortfoliosAcct();
-    void loadPortfoliosNAV();
 };
 
 #endif // PORTFOLIOFACTORY_H

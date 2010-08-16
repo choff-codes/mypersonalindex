@@ -17,7 +17,6 @@ public:
     static const QString table_Portfolio;
     static const QString table_PortfolioAA;
     static const QString table_PortfolioAccount;
-    static const QString table_PortfolioNAV;
     static const QString table_PortfolioSecurity;
     static const QString table_PortfolioSecurityAA;
     static const QString table_PortfolioSecurityTrade;
@@ -33,7 +32,6 @@ public:
     static const QStringList portfolioColumns;
     static const QStringList portfolioAAColumns;
     static const QStringList portfolioAccountColumns;
-    static const QStringList portfolioNAVColumns;
     static const QStringList portfolioSecurityColumns;
     static const QStringList portfolioSecurityAAColumns;
     static const QStringList portfolioSecurityTradeColumns;
@@ -67,13 +65,6 @@ public:
         historicalPriceColumns_Symbol,
         historicalPriceColumns_Type,
         historicalPriceColumns_Value
-    };
-
-    enum {
-        portfolioNAVColumns_PortfolioID,
-        portfolioNAVColumns_Date,
-        portfolioNAVColumns_TotalValue,
-        portfolioNAVColumns_NAV
     };
 
     enum {

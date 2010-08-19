@@ -4,7 +4,6 @@ updatePricesResult updatePrices::run(const QStringList &symbols_, int beginDate_
 {
     updatePricesResult result;
     result.earliestUpdate = NO_DATA; // track earliest date saved to database for recalc
-    m_newPrices.beginBatch();
 
     foreach(const QString &symbol, symbols_)
     {

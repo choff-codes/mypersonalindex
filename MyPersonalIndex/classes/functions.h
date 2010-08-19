@@ -18,6 +18,7 @@ public:
     static bool lessThan(const QVariant &left_, const QVariant &right_, const QVariant &type_);
     static bool equal(const QVariant &left_, const QVariant &right_, const QVariant &type_);
     static bool isZero(const double &value_) { return value_ < EPSILON && value_ > EPSILONNEGATIVE; }
+    static double massage(const double &value_) { return isZero(value_) ? 0 : value_; }
 };
 
 #endif // FUNCTIONS_H

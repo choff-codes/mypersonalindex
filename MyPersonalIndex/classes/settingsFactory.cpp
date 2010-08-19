@@ -45,12 +45,12 @@ void settingsFactory::loadSettingsColumns(const queries &dataSource_)
 {
     QSqlQuery q = dataSource_.select(queries::table_SettingsColumns, queries::settingsColumnsColumns);
 
-    columns newColumns;
     while(q.next())
-        newColumns.insert(
+    {
+        m_settings.viewableColumns[q.value(queries::settingsColumnsColumns_ID).toInt()].insert(
             q.value(queries::settingsColumnsColumns_Sequence).toInt(),
-            q.value(queries::settingsColumnsColumns_ColumnID).toInt()
+            q.value(queries::settingsColumnsColumns_ColumnID).toInt(),
+            false
         );
-
-    m_settings.viewableColumns.insert(q.value(queries::settingsColumnsColumns_ID).toInt(), newColumns);
+    }
 }

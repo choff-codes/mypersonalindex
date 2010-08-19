@@ -29,7 +29,6 @@ void trade::save(const queries &dataSource_)
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_EndDate), functions::dateToNull(this->endDate));
 
     this->id = dataSource_.insert(queries::table_PortfolioSecurityTrade, values, this->id);
-    this->executedTrades.parent = this->id;
 }
 
 void trade::remove(const queries &dataSource_) const

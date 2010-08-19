@@ -7,7 +7,6 @@
 #include "functions.h"
 #include "objectKey.h"
 #include "tradeDateCalendar.h"
-#include "executedTrade.h"
 
 class trade: public objectKey
 {
@@ -36,7 +35,6 @@ public:
     int date;
     int startDate;
     int endDate;
-    executedTradeList executedTrades;
 
     trade(int id_ = -1, int parent_ = -1):
         objectKey(objectType_Trade, QString(), id_, parent_),
@@ -48,8 +46,7 @@ public:
         frequency(tradeDateCalendar::frequency_Once),
         date(0),
         startDate(0),
-        endDate(0),
-        executedTrades(id_)
+        endDate(0)
     {}
 
     bool operator==(const trade &other_) const;

@@ -1,10 +1,10 @@
 #include "assetAllocationTarget.h"
 
-void assetAllocationTarget::insert(int id_, double target_)
+void assetAllocationTarget::insert(int id_, double target_, bool toDatabase_)
 {
     m_targets.insert(id_, target_);
-    if (m_batchInProgress)
-        m_valuesToBeInserted.append(id_);
+    if (toDatabase_)
+        m_toDatabase.append(id_);
 }
 
 void assetAllocationTarget::insertBatch(queries dataSource_)
@@ -12,9 +12,8 @@ void assetAllocationTarget::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
-    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, *this);
-    m_valuesToBeInserted.clear();
-    queriesBatch::insertBatch();
+    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, this);
+    m_toDatabase.clear();
 }
 
 void assetAllocationTarget::remove(const queries &dataSource_)
@@ -29,10 +28,10 @@ QVariant assetAllocationTarget::data(int row_, int column_) const
     switch(column_)
     {
         case queries::portfolioSecurityAAColumns_AAID:
-            return m_valuesToBeInserted.at(row_);
+            return m_toDatabase.at(row_);
             break;
         case queries::portfolioSecurityAAColumns_Percent:
-            return m_targets.value(m_valuesToBeInserted.at(row_));
+            return m_targets.value(m_toDatabase.at(row_));
             break;
         case queries::portfolioSecurityAAColumns_SecurityID:
             return this->parent;

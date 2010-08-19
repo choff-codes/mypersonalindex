@@ -9,9 +9,12 @@ void tradeCalculations::run(int beginDate_, const QList<portfolio> &portfolios_)
 
     foreach(portfolio p, portfolios_)
     {
-        beginExecutedTradeBatchInsert(p);
+        insertDividendReinvestmentPlaceholders(p);
+
         calculate(p, beginDate_);
-        endExecutedTradeBatchInsert(p);
+
+        removeDividendReinvestmentPlaceholders(p);
+        batchSaveExecutedTrades(p);
     }
 
 #ifdef CLOCKTIME
@@ -19,192 +22,218 @@ void tradeCalculations::run(int beginDate_, const QList<portfolio> &portfolios_)
 #endif
 }
 
-void tradeCalculations::calculate(portfolio portfolio_, int beginDate_)
+void tradeCalculations::insertDividendReinvestmentPlaceholders(portfolio portfolio_)
 {
-    // keep the date greater than or equal to the portfolio start date
-    beginDate_ = qMax( beginDate_, portfolio_.attributes().startDate);
-    bool recalculateAll = beginDate_ == portfolio_.attributes().startDate;
+    for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
+        if (sec.value().divReinvest)
+            // use DIVIDEND_REINVESTMENT_TRADE_ID placeholder
+            sec.value().trades.insert(DIVIDEND_REINVESTMENT_TRADE_ID, trade(DIVIDEND_REINVESTMENT_TRADE_ID, sec.value().id));
+}
 
-    clearExecutedTrades(portfolio_, beginDate_, recalculateAll);
-
-    tradeDateCalendar calendar(beginDate_);
-    if (calendar.date() > calendar.endDate())
-        return;
-
-    calculations calc(portfolio_);
-    QList<tradeWithDates> trades = calculateTradeDates(portfolio_, calendar.date(), recalculateAll);
-
-    if (recalculateAll)
-        insertExecutedTradesPreStartDate(portfolio_, beginDate_, trades);
-
-    snapshotPortfolio previousSnapshot = calc.portfolioSnapshot(calendar.date());
-
-    foreach(const int &date, ++calendar)
-    {
-        insertExecutedTrades(portfolio_, date, previousSnapshot, trades);
-        previousSnapshot = calc.portfolioSnapshot(date);
-    }
+void tradeCalculations::removeDividendReinvestmentPlaceholders(portfolio portfolio_)
+{
+    for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
+        sec.value().trades.remove(DIVIDEND_REINVESTMENT_TRADE_ID);
 }
 
 void tradeCalculations::clearExecutedTrades(portfolio portfolio_, int beginDate_, bool recalculateAll_)
 {
-    for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
-        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
-            if (recalculateAll_)
-                x.value().executedTrades.remove(m_dataSource);
-            else
-                x.value().executedTrades.remove(m_dataSource, beginDate_);
+    for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
+        if (recalculateAll_)
+            sec.value().executedTrades.remove(m_dataSource);
+        else
+            sec.value().executedTrades.remove(m_dataSource, beginDate_);
 }
 
-void tradeCalculations::beginExecutedTradeBatchInsert(portfolio portfolio_)
+void tradeCalculations::batchSaveExecutedTrades(portfolio portfolio_)
 {
-    for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
-        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
-            x.value().executedTrades.beginBatch();
+    for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
+        sec.value().executedTrades.insertBatch(m_dataSource);
 }
 
-void tradeCalculations::endExecutedTradeBatchInsert(portfolio portfolio_)
+void tradeCalculations::calculate(portfolio portfolio_, int beginDate_)
 {
-    for(QMap<int, security>::iterator i = portfolio_.securities().begin(); i != portfolio_.securities().end(); ++i)
-        for(QMap<int, trade>::iterator x = i->trades.begin(); x != i->trades.end(); ++x)
-            x.value().executedTrades.insertBatch(m_dataSource);
-}
+    // keep the date greater than or equal to the portfolio start date
+    beginDate_ = qMax(beginDate_, portfolio_.attributes().startDate);
+    bool recalculateAll = beginDate_ == portfolio_.attributes().startDate;
 
-QList<tradeCalculations::tradeWithDates> tradeCalculations::calculateTradeDates(portfolio portfolio_, int date_, bool recalculateAll_) const
-{
-    QList<tradeWithDates> calculatedTrades;
+    clearExecutedTrades(portfolio_, beginDate_, recalculateAll);
 
-    for(QMap<int, security>::iterator security = portfolio_.securities().begin(); security != portfolio_.securities().end(); ++security)
+    QMap<int, tradeDay> trades = calculateTradeDates(portfolio_, beginDate_, recalculateAll);
+    calculations calc(portfolio_); // keep a cache going, pass by reference/pointer (cache can get large)
+
+    // loop through each day
+    for(QMap<int, tradeDay>::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
     {
-        if (!security->includeInCalc)
+        int date = i.key();
+
+        // loop through each security that has a trade that day
+        for(tradeDay::const_iterator trades = i.value().constBegin(); trades != i.value().constEnd(); ++trades)
+        {
+            security s = portfolio_.securities().value(trades.key());
+
+            // loop through each trade and calculate
+            foreach(const tradeIterator &trade, trades.value())
+            {
+                // insert executed trade
+                executedTrade e = calculateExecutedTrade(
+                        date,
+                        calc,
+                        portfolio_.assetAllocations(),
+                        s,
+                        trade.value()
+                    );
+
+                insertExecutedTrade(portfolio_, s.id, date, e);
+
+                if (trade.value().cashAccount == -1)
+                    continue;
+
+                // reverse trade
+                executedTrade reversal = calculateExecutedTradeReversal(
+                        portfolio_.securities().value(trade.value().cashAccount),
+                        date,
+                        e.shares,
+                        e.price,
+                        trade.key()
+                    );
+
+                insertExecutedTrade(portfolio_, trade.value().cashAccount, date, reversal);
+            }
+        }
+    }
+}
+
+// note this must have the portfolio object passed in so that the iterator pointers do not invalidate
+QMap<int, tradeCalculations::tradeDay> tradeCalculations::calculateTradeDates(portfolio portfolio_, int date_, bool recalculateAll_) const
+{
+    QMap<int, tradeCalculations::tradeDay> calculatedTrades;
+
+    for(QMap<int, security>::const_iterator sec = portfolio_.securities().constBegin(); sec != portfolio_.securities().constEnd(); ++sec)
+    {
+        const security &security = sec.value();
+
+        if (!security.includeInCalc)
             continue;
 
-        for(QMap<int, trade>::iterator trade = security->trades.begin(); trade != security->trades.end(); ++trade)
+        for(QMap<int, trade>::const_iterator x = sec->trades.constBegin(); x != sec->trades.constEnd(); ++x)
         {
-            if (trade->type == trade::tradeType_Reversal)
-                continue;
+            const trade &trade = x.value();
 
-            if (trade->type == trade::tradeType_DivReinvestAuto) // get each dividend date
+            if (trade.type == trade::tradeType_DivReinvestAuto) // get each dividend date greater than or equal to current date
             {
-                QMap<int, double> dividends = security->dividends();
+                QMap<int, double> dividends = security.dividends();
                 QList<int> dates;
 
                 for(QMap<int, double>::iterator dividend = dividends.lowerBound(date_); dividend != dividends.constEnd(); ++dividend)
                     dates.append(dividend.key());
 
-                if (!dates.isEmpty())
-                    calculatedTrades.append(tradeWithDates(security, trade, dates));
+                foreach(const int &date, dates)
+                    calculatedTrades[date][security.id].append(x);
 
                 continue;
             }
 
             // these are not calculated on the fly and trades before the start date need to be inserted
-            if (recalculateAll_ && trade->frequency == tradeDateCalendar::frequency_Once && trade->date < date_)
+            if (recalculateAll_ && trade.frequency == tradeDateCalendar::frequency_Once && trade.date < date_)
             {
-                calculatedTrades.append(tradeWithDates(security, trade, QList<int>() << trade->date));
+                calculatedTrades[trade.date][security.id].append(x);
                 continue;
             }
 
+            // compute dates
             QList<int> dates =
                 tradeDateCalendar::computeFrequencyTradeDates(
-                    trade->date,
-                    qMax(trade->startDate, date_),
-                    trade->endDate == 0 ?
-                        security->endDate():
-                        qMin(trade->endDate, security->endDate()),
-                    trade->frequency
+                    trade.date,
+                    qMax(trade.startDate, date_),
+                    trade.endDate == 0 ?
+                        security.endDate():
+                        qMin(trade.endDate, security.endDate()),
+                    trade.frequency
                 );
 
-            if (!dates.isEmpty())
-                calculatedTrades.append(tradeWithDates(security, trade, dates));
+            foreach(const int &date, dates)
+                calculatedTrades[date][security.id].append(x);
         }
     }
 
     return calculatedTrades;
 }
 
-void tradeCalculations::insertExecutedTradesPreStartDate(portfolio portfolio_, int beginDate_, const QList<tradeWithDates> &trades_)
+executedTrade tradeCalculations::calculateExecutedTrade(int date_, calculations &calc_, const QMap<int, assetAllocation> &aa,
+    const security &parent_, const trade &trade_) const
 {
-    QSet<int> priorStartDates;
-    foreach(const tradeWithDates &trade, trades_)
-        foreach(const int &date, trade.dates)
-        {
-            if (date >= beginDate_)
-                break;
+    double purchasePrice = calculateTradePrice(
+            trade_.type,
+            trade_.price,
+            parent_.splitAdjustedPriorDayPrice(date_)
+        );
 
-            priorStartDates.insert(date);
-        }
+    double shares = calculateTradeShares(
+            date_,
+            purchasePrice,
+            calc_,
+            aa,
+            parent_,
+            trade_
+        );
 
-    foreach(const int &date, priorStartDates)
-        insertExecutedTrades(portfolio_, date, snapshotPortfolio(), trades_);
+    return executedTrade(shares, purchasePrice, trade_.commission, trade_.id);
 }
 
-void tradeCalculations::insertExecutedTrades(portfolio portfolio_, int date_, const snapshotPortfolio &priorDaySnapshot_, const QList<tradeWithDates> &trades_)
+double tradeCalculations::calculateTradePrice(trade::tradeType type_, double price_, double priorDayPrice_) const
 {
-    foreach(const tradeWithDates &trade, trades_)
-    {
-        if (qBinaryFind(trade.dates, date_) == trade.dates.constEnd()) // this date isn't found
-            continue;
+    if (type_ == trade::tradeType_Interest || type_ == trade::tradeType_InterestPercent)
+        return 0;
 
-        double purchasePrice =
-                trade.value().type == trade::tradeType_Interest || trade.value().type == trade::tradeType_InterestPercent ?
-                0 :
-                trade.value().price >= 0 ?
-                    trade.value().price :
-                    priorDaySnapshot_.isNull() ?
-                        0 :
-                        trade.parent().splitAdjustedPriorDayPrice(date_, priorDaySnapshot_.date);
+    if (price_ >= 0)
+        return price_;
 
-        double shares = calculateTradeShares(trade, purchasePrice, portfolio_, priorDaySnapshot_);
-        if (functions::isZero(shares))
-            continue;
-
-        trade.value().executedTrades.insert(date_, executedTrade(shares, purchasePrice, trade.value().commission));
-
-        if (trade.value().cashAccount != -1)
-            insertExecutedTradeReversal(portfolio_, trade.value().cashAccount, date_, priorDaySnapshot_.date, shares * purchasePrice);
-    }
+    return priorDayPrice_;
 }
 
-double tradeCalculations::calculateTradeShares(const tradeWithDates &trade_, double purchasePrice_, portfolio portfolio_, const snapshotPortfolio &priorDaySnapshot_) const
+double tradeCalculations::calculateTradeShares(int date_, double price_, calculations &calc_, const QMap<int, assetAllocation> &aa,
+    const security &parent_, const trade &trade_) const
 {
-    if (purchasePrice_ == 0)
+    if (price_ == 0)
         if (    // these types are allowed a price of 0
-                trade_.value().type != trade::tradeType_Purchase &&
-                trade_.value().type != trade::tradeType_DivReinvest &&
-                trade_.value().type != trade::tradeType_Interest &&
-                trade_.value().type != trade::tradeType_Sale
+                trade_.type != trade::tradeType_Purchase &&
+                trade_.type != trade::tradeType_DivReinvest &&
+                trade_.type != trade::tradeType_Interest &&
+                trade_.type != trade::tradeType_Sale
             )
             return 0;
 
-    switch(trade_.value().type)
+    date_ = tradeDateCalendar::previousTradeDate(date_);
+
+    switch(trade_.type)
     {
         case trade::tradeType_Purchase:
         case trade::tradeType_DivReinvest:
         case trade::tradeType_Interest:
-            return trade_.value().value;
+            return trade_.value;
         case trade::tradeType_Sale:
-            return trade_.value().value * -1;
+            return trade_.value * -1;
         case trade::tradeType_FixedPurchase:
-            return trade_.value().value / purchasePrice_;
+            return trade_.value / price_;
         case trade::tradeType_FixedSale:
-            return trade_.value().value / purchasePrice_ * -1;
+            return trade_.value / price_ * -1;
         case trade::tradeType_Value:
         case trade::tradeType_InterestPercent:
-            return (priorDaySnapshot_.securitiesInfo.value(trade_.value().parent).totalValue * (trade_.value().value / 100)) / purchasePrice_;
+            return (calc_.securitySnapshot(date_, trade_.parent).totalValue * (trade_.value / 100)) / price_;
         case trade::tradeType_TotalValue:
-            return (priorDaySnapshot_.totalValue * (trade_.value().value / 100)) / purchasePrice_;
+            return (calc_.portfolioSnapshot(date_).totalValue * (trade_.value / 100)) / price_;
         case trade::tradeType_DivReinvestAuto:
-            return (priorDaySnapshot_.securitiesInfo.value(trade_.value().parent).shares * trade_.parent().dividend(priorDaySnapshot_.date)) / purchasePrice_;
+            return (calc_.securitySnapshot(date_, trade_.parent).shares * parent_.dividend(date_)) / price_;
         case trade::tradeType_Reversal:
                 return 0; // should not occur
         case trade::tradeType_AA:
         {
             double shares = 0;
-            assetAllocationTarget targets = trade_.parent().targets;
+            assetAllocationTarget targets = parent_.targets;
             for(QMap<int, double>::const_iterator i = targets.constBegin(); i != targets.constEnd(); ++i)
             {
-                double target = portfolio_.assetAllocations().value(i.key()).target;
+                double target = aa.value(i.key()).target;
                 if (target <= 0)
                     continue;
 
@@ -213,12 +242,12 @@ double tradeCalculations::calculateTradeShares(const tradeWithDates &trade_, dou
                     // less current security value = amount to purchase / sell.
                     // Divide by price to get shares.
                         (
-                                (priorDaySnapshot_.totalValue * (target * i.value() * trade_.value().value / 100))
+                                (calc_.portfolioSnapshot(date_).totalValue * (target * i.value() * trade_.value / 100))
                             -
-                                (priorDaySnapshot_.securitiesInfo.value(trade_.value().parent).totalValue)
+                                (calc_.securitySnapshot(date_, trade_.parent).totalValue)
                         )
                     /
-                        purchasePrice_;
+                        price_;
             }
             return shares;
         }
@@ -227,15 +256,17 @@ double tradeCalculations::calculateTradeShares(const tradeWithDates &trade_, dou
     return 0;
 }
 
-void tradeCalculations::insertExecutedTradeReversal(portfolio portfolio_, int cashAccountID_, int date_, int priorDate_, double value_)
+void tradeCalculations::insertExecutedTrade(portfolio portfolio_, int id_, int date_, const executedTrade &trade_)
 {
-    if (!portfolio_.securities().contains(cashAccountID_))
+    if (functions::isZero(trade_.shares))
         return;
 
-    double price = portfolio_.securities()[cashAccountID_].splitAdjustedPriorDayPrice(date_, priorDate_);
-    if (functions::isZero(price))
-        return;
+    portfolio_.securities()[id_].executedTrades.insert(date_, trade_);
+}
 
-    portfolio_.securities()[cashAccountID_].reversalTrade().
-            executedTrades.insert(date_, executedTrade(-1 * value_ / price, price, 0));
+executedTrade tradeCalculations::calculateExecutedTradeReversal(const security &security_, int date_, double shares_, double price_, int spawningID_) const
+{
+    double price = security_.splitAdjustedPriorDayPrice(date_);
+
+    return executedTrade(-1 * (shares_ * price_) / price, price, 0, spawningID_);
 }

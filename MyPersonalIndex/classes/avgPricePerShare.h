@@ -3,7 +3,7 @@
 
 #include <QList>
 #include <QMap>
-#include "trade.h"
+#include "executedTrade.h"
 #include "costBasis.h"
 #include "splits.h"
 #include "epsilon.h"
@@ -11,7 +11,7 @@
 class avgPricePerShare
 {
 public:
-    static double calculate(int date_, const QMap<int, trade> &trades_, costBasis costBasis_, splits splits_);
+    static double calculate(int date_, const executedTradeMap &executedTrades_, costBasis costBasis_, splits splits_);
 
 private:
     struct sharePricePair

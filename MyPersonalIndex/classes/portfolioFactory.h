@@ -16,19 +16,19 @@ public:
         m_dataSource(dataSource_)
     { }
 
-    QMap<int, portfolio> getPortfolios();
+    QMap<int, portfolio> getPortfolios(bool includePricing_);
 
 private:
     QMap<int, portfolio> m_portfolios;
     queries m_dataSource;
 
     void loadPortfoliosInfo();
-    void loadPortfoliosSecurity();
+    void loadPortfoliosSecurity(bool includePricing_);
     void loadPortfoliosSecurityAA();
     void loadPortfoliosSecurityTrades();
-    void loadPortfoliosExecutedTrades();
+    void loadPortfoliosSecurityTradesExecution();
     void loadPortfoliosAA();
-    void loadPortfoliosAcct();
+    void loadPortfoliosAccount();
 };
 
 #endif // PORTFOLIOFACTORY_H

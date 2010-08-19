@@ -10,9 +10,10 @@ class updatePricesBatch: public queriesBatch
 {
 public:
     void insert(const QString &symbol_, int date_, double value_, historicalPrices::type type_);
+
     void insertBatch(queries dataSource_);
 
-    int rowsToBeInserted() const { return values.count(); }
+    int rowsToBeInserted() const { return m_toDatabase.count(); }
     QVariant data(int row_, int column_) const;
 
 private:
@@ -31,7 +32,7 @@ private:
         {}
     };
 
-    QList<priceInformation> values;
+    QList<priceInformation> m_toDatabase;
 };
 
 #endif // UPDATEIPRICESBATCH_H

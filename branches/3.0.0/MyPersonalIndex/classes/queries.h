@@ -140,20 +140,21 @@ public:
     };
 
     enum {
-        portfolioSecurityTradeExecutionColumns_TradeID,
+        portfolioSecurityTradeExecutionColumns_SecurityID,
         portfolioSecurityTradeExecutionColumns_Date,
         portfolioSecurityTradeExecutionColumns_Shares,
         portfolioSecurityTradeExecutionColumns_Price,
-        portfolioSecurityTradeExecutionColumns_Commission
+        portfolioSecurityTradeExecutionColumns_Commission,
+        portfolioSecurityTradeExecutionColumns_AssociatedTradeID
     };
 
     enum {
-        portfolioSecurityTradeExecutionViewColumns_TradeID,
+        portfolioSecurityTradeExecutionViewColumns_SecurityID,
         portfolioSecurityTradeExecutionViewColumns_Date,
         portfolioSecurityTradeExecutionViewColumns_Shares,
         portfolioSecurityTradeExecutionViewColumns_Price,
         portfolioSecurityTradeExecutionViewColumns_Commission,
-        portfolioSecurityTradeExecutionViewColumns_SecurityID,
+        portfolioSecurityTradeExecutionViewColumns_AssociatedTradeID,
         portfolioSecurityTradeExecutionViewColumns_PortfolioID
     };
 
@@ -185,7 +186,7 @@ public:
 
     static QString getDefaultDatabaseLocation();
 
-    void bulkInsert(const QString &tableName_, const QStringList &columns_, const queriesBatch &object_);
+    void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const;

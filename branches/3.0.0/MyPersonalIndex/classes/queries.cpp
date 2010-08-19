@@ -183,37 +183,39 @@ const QStringList queries::portfolioSecurityTradeColumns = QStringList()
                                                            << "Description";
 
 //enum {
-//    portfolioSecurityTradeExecutionColumns_TradeID,
+//    portfolioSecurityTradeExecutionColumns_SecurityID,
 //    portfolioSecurityTradeExecutionColumns_Date,
 //    portfolioSecurityTradeExecutionColumns_Shares,
 //    portfolioSecurityTradeExecutionColumns_Price,
 //    portfolioSecurityTradeExecutionColumns_Commission
+//    portfolioSecurityTradeExecutionColumns_AssociatedTradeID
 //};
 
 const QStringList queries::portfolioSecurityTradeExecutionColumns = QStringList()
-                                                                    << "TradeID"
+                                                                    << "SecurityID"
                                                                     << "Date"
                                                                     << "Shares"
                                                                     << "Price"
-                                                                    << "Commission";
+                                                                    << "Commission"
+                                                                    << "AssociatedTradeID";
 
 //enum {
-//    portfolioSecurityTradeExecutionViewColumns_TradeID,
+//    portfolioSecurityTradeExecutionViewColumns_SecurityID,
 //    portfolioSecurityTradeExecutionViewColumns_Date,
 //    portfolioSecurityTradeExecutionViewColumns_Shares,
 //    portfolioSecurityTradeExecutionViewColumns_Price,
 //    portfolioSecurityTradeExecutionViewColumns_Commission,
-//    portfolioSecurityTradeExecutionViewColumns_SecurityID,
+//    portfolioSecurityTradeExecutionViewColumns_AssociatedTradeID,
 //    portfolioSecurityTradeExecutionViewColumns_PortfolioID
 //};
 
 const QStringList queries::portfolioSecurityTradeExecutionViewColumns = QStringList()
-                                                                        << "TradeID"
+                                                                        << "SecurityID"
                                                                         << "Date"
                                                                         << "Shares"
                                                                         << "Price"
                                                                         << "Commission"
-                                                                        << "SecurityID"
+                                                                        << "AssociatedTradeID"
                                                                         << "PortfolioID";
 
 //enum {
@@ -301,7 +303,7 @@ void queries::executeNonQuery(const QString &query_) const
     QSqlQuery(query_, m_database);
 }
 
-void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, const queriesBatch &object_)
+void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_)
 {
     if (tableName_.isEmpty() || columns_.isEmpty())
         return;
@@ -317,12 +319,12 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
 
     query.prepare(sql.arg(tableName_, columns_.join(","), parameters.join(",")));
 
-    int rowCount = object_.rowsToBeInserted();
+    int rowCount = object_->rowsToBeInserted();
     int columnCount = columns_.count();
     for (int i = 0; i < rowCount; ++i)
     {
         for (int x = 0; x < columnCount; ++x)
-            query.addBindValue(object_.data(i, x));
+            query.addBindValue(object_->data(i, x));
         query.exec();
     }
 

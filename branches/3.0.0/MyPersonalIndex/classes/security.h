@@ -11,9 +11,14 @@
 #include "historicalPrices.h"
 #include "assetAllocationTarget.h"
 
+#ifndef DIVIDEND_REINVESTMENT_TRADE_ID
+#define DIVIDEND_REINVESTMENT_TRADE_ID -2
+#endif
+
 class security: public objectKey
 {
 public:
+
     int account;
     double expense;
     bool divReinvest;
@@ -23,6 +28,7 @@ public:
     QString note;
     assetAllocationTarget targets;
     QMap<int, trade> trades;
+    executedTradeMap executedTrades;
 
     security(int id_ = -1, int parent_ = -1, const QString &description_ = QString()):
         objectKey(objectType_Security, description_, id_, parent_),
@@ -31,7 +37,8 @@ public:
         divReinvest(false),
         cashAccount(false),
         includeInCalc(true),
-        hide(false)
+        hide(false),
+        executedTrades(id_)
     {}
 
     bool operator==(const security &other_) const;
@@ -48,7 +55,7 @@ public:
     int endDate() const { return cashAccount ? tradeDateCalendar::endDate() : m_prices.endDate(historicalPrices::type_price); }
     int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(historicalPrices::type_price); }
 
-    double splitAdjustedPriorDayPrice(int date_, int priorDate_) { return price(priorDate_) / split(date_); }
+    double splitAdjustedPriorDayPrice(int date_) const { return price(tradeDateCalendar::previousTradeDate(date_)) / split(date_); }
 
     trade& reversalTrade();
     

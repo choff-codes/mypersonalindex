@@ -1,59 +1,50 @@
 #include "calculations.h"
 
-snapshotPortfolio calculations::portfolioSnapshot(int date_, bool calcAveragePrices_)
+snapshotPortfolio calculations::portfolioSnapshot(int date_, int priorDate_, bool calcAveragePrices_)
 {
-    snapshotPortfolio info = m_cache.value(date_);
-    if (!info.isNull())
-    {
-        if (calcAveragePrices_ && info.avgPrices.isEmpty())
-        {
-            info.avgPrices = avgPricePerShare(date_);
-            m_cache.insert(date_, info);
-        }
-        return info;
-    }
-
-    info = snapshotPortfolio(date_);
+    snapshotPortfolio info = snapshotPortfolio(date_);
     foreach(const security &s, m_portfolio.securities())
-    {
-        snapshotSecurity value = securitySnapshot(date_, s.id);
-        if (value.isNull())
-            continue;
-
-        info.securitiesInfo.insert(s.id, value);
-        info.add(value);
-    }
+        info.add(securitySnapshot(date_, s.id, priorDate_));
 
     if (calcAveragePrices_)
        info.avgPrices = avgPricePerShare(date_);
 
-    m_cache.insert(date_, info);
     return info;
 }
 
-snapshotSecurity calculations::securitySnapshot(int date_, int id_)
+snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDate_)
 {
+    // check today's cache
+    snapshotSecurity value = m_cache.value(date_).value(id_);
+    if (!value.isNull())
+        return value;
+
     security s = m_portfolio.securities().value(id_);
-
     if (!s.includeInCalc)
-        return snapshotSecurity();
+        return snapshotSecurity(date_);
 
-    snapshotSecurity value(date_);
+    // check if prior day is cached
+    value = m_cache.value(
+            priorDate_ == 0 ?
+                tradeDateCalendar::previousTradeDate(date_) :
+                priorDate_
+        ).value(id_);
+
     splits splitRatio(s.splits(), date_);
 
-    foreach(const trade &t, s.trades)
-        for(QMap<int, executedTrade>::const_iterator i = t.executedTrades.constBegin(); i != t.executedTrades.constEnd(); ++i)
-        {
-            if (i.key() > date_)
-                break;
+    // start loop depending on cached date
+    for(QMap<int, executedTrade>::const_iterator i = s.executedTrades.lowerBound(value.date); i != s.executedTrades.constEnd(); ++i)
+    {
+        if (i.key() > date_)
+            break;
 
-            value.shares += i->shares * splitRatio.ratio(i.key());
-            value.costBasis += (i->shares * i->price) + i->commission;
-        }
+        value.shares += i->shares * splitRatio.ratio(i.key());
+        value.costBasis += (i->shares * i->price) + i->commission;
+    }
 
-    if (value.shares < EPSILON)
-        value.shares = 0;
 
+    value.shares = functions::massage(value.shares); // zero out if needed
+    value.date = date_;
     value.dividendAmount = value.shares * s.dividend(date_);
     value.totalValue = value.shares * s.price(date_);
     value.expenseRatio = s.expense;
@@ -64,62 +55,56 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_)
     return value;
 }
 
-snapshot calculations::assetAllocationSnapshot(int date_, int id_)
+snapshot calculations::assetAllocationSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
-    snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
     foreach(const security &s, m_portfolio.securities())
         if (s.targets.contains(id_))
-            value.add(portfolioValue.securitiesInfo.value(s.id), s.targets.value(id_));
-        else if (id_ == -1 && s.targets.isEmpty())
-            value.add(portfolioValue.securitiesInfo.value(s.id), 1);
+            value.add(securitySnapshot(date_, s.id, priorDate_), s.targets.value(id_));
 
     return value;
 }
 
-snapshot calculations::accountSnapshot(int date_, int id_)
+snapshot calculations::accountSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
-    snapshotPortfolio portfolioValue = portfolioSnapshot(date_);
 
     foreach(const security &s, m_portfolio.securities())
         if (id_ == s.account)
-            value.add(portfolioValue.securitiesInfo.value(s.id));
+            value.add(securitySnapshot(date_, s.id, priorDate_));
 
     return value;
 }
 
-snapshot calculations::symbolSnapshot(int date_, int id_)
+snapshot calculations::symbolSnapshot(int date_, int id_, int beginDate_)
 {
     snapshot value(date_);
     security s = m_portfolio.securities().value(id_);
+    splits splitRatio(s.splits(), date_);
 
-    value.costBasis = s.price(tradeDateCalendar::previousTradeDate(date_));
     value.count = 1;
     value.dividendAmount = s.dividend(date_);
-    value.totalValue = s.price(date_) / s.split(date_);
+    value.costBasis = s.price(beginDate_) / splitRatio.ratio(beginDate_);
+    value.totalValue = s.price(date_) / splitRatio.ratio(date_);
 
     return value;
 }
 
-snapshot calculations::snapshotByKey(int date_, const objectKey &key_)
+snapshot calculations::snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_)
 {
     switch(key_.type)
     {
         case objectType_AA:
-            return assetAllocationSnapshot(date_, key_.id);
+            return assetAllocationSnapshot(date_, key_.id, priorDate_);
         case objectType_Account:
-            return accountSnapshot(date_, key_.id);
+            return accountSnapshot(date_, key_.id, priorDate_);
         case objectType_Portfolio:
-            return portfolioSnapshot(date_);
+            return portfolioSnapshot(date_, priorDate_);
         case objectType_Security:
-            if (m_cache.contains(date_)) // may be cached
-                return portfolioSnapshot(date_).securitiesInfo.value(key_.id);
-            else
-                return securitySnapshot(date_, key_.id);
+            return securitySnapshot(date_, key_.id, priorDate_);
         case objectType_Symbol:
-            return symbolSnapshot(date_, key_.id);
+            return symbolSnapshot(date_, key_.id, beginDate_);
         default:
             return snapshot(0);
     }
@@ -157,49 +142,45 @@ int calculations::endDateByKey(const objectKey &key_)
     }
 }
 
-historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_)
+historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_)
 {
     historicalNAV navHistory;
 
-    int objectEarliestDate = beginDateByKey(key_);
-    if (objectEarliestDate == 0)
-        return navHistory;
-
-    beginDate_ = qMax(objectEarliestDate, beginDate_);
+    beginDate_ = qMax(beginDateByKey(key_), beginDate_);
     endDate_ = qMin(endDateByKey(key_), endDate_);
 
     tradeDateCalendar calendar(beginDate_);
-    if (calendar.date() > endDate_)
+    if (beginDate_ == 0 || calendar.date() > endDate_)
         return navHistory;
 
-    double currentNav = 1;
-    snapshot previousSnapshot = snapshotByKey(calendar.date(), key_);
-    navHistory.insert(calendar.date(), currentNav, previousSnapshot.totalValue);
+    beginDate_ = calendar.date();
+    snapshot priorSnapshot = snapshotByKey(beginDate_, key_, beginDate_, 0);
+    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue);
 
     foreach(const int &date, ++calendar)
     {
         if (date > endDate_)
             break;
 
-        snapshot currentPrice = snapshotByKey(date, key_);
+        snapshot currentSnapshot = snapshotByKey(date, key_, beginDate_, priorSnapshot.date);
 
-        currentNav =
+        navValue_ =
                     change(
-                        previousSnapshot.totalValue,
-                        currentPrice.totalValue,
-                        currentPrice.costBasis - previousSnapshot.costBasis,
-                        dividends_ ? currentPrice.dividendAmount : 0,
-                        currentNav
+                        priorSnapshot.totalValue,
+                        currentSnapshot.totalValue,
+                        currentSnapshot.costBasis - priorSnapshot.costBasis,
+                        dividends_ ? currentSnapshot.dividendAmount : 0,
+                        navValue_
                     );
 
-        navHistory.insert(date, currentNav, currentPrice.totalValue);
-        previousSnapshot = currentPrice;
+        navHistory.insert(date, navValue_, currentSnapshot.totalValue);
+        priorSnapshot = currentSnapshot;
     }
 
     // take last day's values
-    navHistory.costBasis = previousSnapshot.costBasis;
-    navHistory.expenseRatio = previousSnapshot.expenseRatio;
-    navHistory.taxLiability = previousSnapshot.taxLiability;
+    navHistory.costBasis = priorSnapshot.costBasis;
+    navHistory.expenseRatio = priorSnapshot.expenseRatio;
+    navHistory.taxLiability = priorSnapshot.taxLiability;
 
     return navHistory;
 }
@@ -297,9 +278,9 @@ QMap<int, double> calculations::avgPricePerShare(int date_)
         if (s.cashAccount) // cash should always be computed as average
             overrideCostBasis = costBasis_AVG;
 
-        double avg = avgPricePerShare::calculate(date_, s.trades, overrideCostBasis, splits(s.splits(), date_));
+        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splits(s.splits(), date_));
 
-        if (avg > EPSILON)
+        if (!functions::isZero(avg))
             avgPrices.insert(s.id, avg);
     }
 

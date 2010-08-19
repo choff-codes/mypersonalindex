@@ -1,6 +1,6 @@
 #include "portfolioFactory.h"
 
-QMap<int, portfolio> portfolioFactory::getPortfolios()
+QMap<int, portfolio> portfolioFactory::getPortfolios(bool includePricing_)
 {
 #ifdef CLOCKTIME
     QTime t;
@@ -9,11 +9,11 @@ QMap<int, portfolio> portfolioFactory::getPortfolios()
 
     loadPortfoliosInfo();
     loadPortfoliosAA();
-    loadPortfoliosAcct();
-    loadPortfoliosSecurity();
+    loadPortfoliosAccount();
+    loadPortfoliosSecurity(includePricing_);
     loadPortfoliosSecurityAA();
     loadPortfoliosSecurityTrades();
-    loadPortfoliosExecutedTrades();
+    loadPortfoliosSecurityTradesExecution();
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
@@ -67,7 +67,7 @@ void portfolioFactory::loadPortfoliosAA()
     }
 }
 
-void portfolioFactory::loadPortfoliosAcct()
+void portfolioFactory::loadPortfoliosAccount()
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioAccount, queries::portfolioAccountColumns);
     while(q.next())
@@ -87,7 +87,7 @@ void portfolioFactory::loadPortfoliosAcct()
     }
 }
 
-void portfolioFactory::loadPortfoliosSecurity()
+void portfolioFactory::loadPortfoliosSecurity(bool includePricing_)
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioSecurity, queries::portfolioSecurityColumns);
     while(q.next())
@@ -108,7 +108,7 @@ void portfolioFactory::loadPortfoliosSecurity()
         sec.hide = q.value(queries::portfolioSecurityColumns_Hide).toBool();
         sec.note = q.value(queries::portfolioSecurityColumns_Note).toString();
 
-        if(!sec.cashAccount)
+        if(!sec.cashAccount && includePricing_)
             sec.setHistoricalPrices(priceFactory::getPrices(sec.description, m_dataSource));
 
         m_portfolios[sec.parent].securities().insert(sec.id, sec);
@@ -122,7 +122,8 @@ void portfolioFactory::loadPortfoliosSecurityAA()
         m_portfolios[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
             [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets.insert(
                 q.value(queries::portfolioSecurityAAViewColumns_AAID).toInt(),
-                q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble()
+                q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble(),
+                false
             );
 }
 
@@ -156,21 +157,22 @@ void portfolioFactory::loadPortfoliosSecurityTrades()
     }
 }
 
-void portfolioFactory::loadPortfoliosExecutedTrades()
+void portfolioFactory::loadPortfoliosSecurityTradesExecution()
 {
     QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionViewColumns);
 
     while(q.next())
         m_portfolios[q.value(queries::portfolioSecurityTradeExecutionViewColumns_PortfolioID).toInt()]
             .securities()[q.value(queries::portfolioSecurityTradeExecutionViewColumns_SecurityID).toInt()]
-            .trades[q.value(queries::portfolioSecurityTradeExecutionViewColumns_TradeID).toInt()]
             .executedTrades.insert
             (
                 q.value(queries::portfolioSecurityTradeExecutionViewColumns_Date).toInt(),
                 executedTrade(
                     q.value(queries::portfolioSecurityTradeExecutionViewColumns_Shares).toDouble(),
                     q.value(queries::portfolioSecurityTradeExecutionViewColumns_Price).toDouble(),
-                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_Commission).toDouble()
-                )
+                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_Commission).toDouble(),
+                    q.value(queries::portfolioSecurityTradeExecutionViewColumns_AssociatedTradeID).toInt()
+                ),
+                false
             );
 }

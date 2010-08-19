@@ -2,21 +2,18 @@
 
 void updatePricesBatch::insert(const QString &symbol_, int date_, double value_, historicalPrices::type type_)
 {
-    if (m_batchInProgress)
-        values.append(priceInformation(symbol_, date_, value_, type_));
+    m_toDatabase.append(priceInformation(symbol_, date_, value_, type_));
 }
 
 void updatePricesBatch::insertBatch(queries dataSource_)
 {
-    dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, *this);
-
-    values.clear();
-    queriesBatch::insertBatch();
+    dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, this);
+    m_toDatabase.clear();
 }
 
 QVariant updatePricesBatch::data(int row_, int column_) const
 {
-    priceInformation price = values.at(row_);
+    priceInformation price = m_toDatabase.at(row_);
     switch(column_)
     {
         case queries::historicalPriceColumns_Date:

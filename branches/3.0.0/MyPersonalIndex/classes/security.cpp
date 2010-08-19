@@ -49,12 +49,3 @@ void security::remove(const queries &dataSource_) const
 {
     dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id);
 }
-
-trade& security::reversalTrade()
-{
-    for(QMap<int, trade>::iterator i = trades.begin(); i != trades.end(); ++i)
-        if (i.value().type == trade::tradeType_Reversal)
-            return i.value();
-
-    return trades.end().value();
-}

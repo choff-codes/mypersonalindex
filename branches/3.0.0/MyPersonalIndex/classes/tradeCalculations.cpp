@@ -60,7 +60,7 @@ void tradeCalculations::calculate(portfolio portfolio_, int beginDate_)
     clearExecutedTrades(portfolio_, beginDate_, recalculateAll);
 
     QMap<int, tradeDay> trades = calculateTradeDates(portfolio_, beginDate_, recalculateAll);
-    calculations calc(portfolio_); // keep a cache going, pass by reference/pointer (cache can get large)
+    calculations calc(portfolio_); // keep a cache going, pass by reference/pointer ONLY (cache can get large)
 
     // loop through each day
     for(QMap<int, tradeDay>::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
@@ -122,13 +122,7 @@ QMap<int, tradeCalculations::tradeDay> tradeCalculations::calculateTradeDates(po
 
             if (trade.type == trade::tradeType_DivReinvestAuto) // get each dividend date greater than or equal to current date
             {
-                QMap<int, double> dividends = security.dividends();
-                QList<int> dates;
-
-                for(QMap<int, double>::iterator dividend = dividends.lowerBound(date_); dividend != dividends.constEnd(); ++dividend)
-                    dates.append(dividend.key());
-
-                foreach(const int &date, dates)
+                foreach(const int &date, calculateDividendReinvestmentDates(date_, security.dividends()))
                     calculatedTrades[date][security.id].append(x);
 
                 continue;
@@ -158,6 +152,22 @@ QMap<int, tradeCalculations::tradeDay> tradeCalculations::calculateTradeDates(po
     }
 
     return calculatedTrades;
+}
+
+QList<int> tradeCalculations::calculateDividendReinvestmentDates(int date_, const QMap<int, double> dividends_) const
+{
+    QList<int> dates;
+    int endDate = tradeDateCalendar::endDate();
+
+    // add a day to the dividend date since it wouldn't be received until EOD, closing price that day
+    for(QMap<int, double>::const_iterator dividend = dividends_.lowerBound(date_); dividend != dividends_.constEnd(); ++dividend)
+    {
+        int date = tradeDateCalendar::nextTradeDate(dividend.key());
+        if (date <= endDate)
+            dates.append(tradeDateCalendar::nextTradeDate(dividend.key()));
+    }
+
+    return dates;
 }
 
 executedTrade tradeCalculations::calculateExecutedTrade(int date_, calculations &calc_, const QMap<int, assetAllocation> &aa,
@@ -195,7 +205,7 @@ double tradeCalculations::calculateTradePrice(trade::tradeType type_, double pri
 double tradeCalculations::calculateTradeShares(int date_, double price_, calculations &calc_, const QMap<int, assetAllocation> &aa,
     const security &parent_, const trade &trade_) const
 {
-    if (price_ == 0)
+    if (functions::isZero(price_))
         if (    // these types are allowed a price of 0
                 trade_.type != trade::tradeType_Purchase &&
                 trade_.type != trade::tradeType_DivReinvest &&

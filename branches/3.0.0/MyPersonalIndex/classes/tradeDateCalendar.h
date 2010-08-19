@@ -54,6 +54,11 @@ public:
         return checkTradeDate(--date_, direction_descending);
     }
 
+    static int nextTradeDate(int date_)
+    {
+        return checkTradeDate(++date_, direction_ascending);
+    }
+
     static int endDate()
     {
         return checkTradeDate(QDate::currentDate().toJulianDay(), direction_descending);

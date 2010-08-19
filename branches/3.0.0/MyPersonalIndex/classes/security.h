@@ -56,8 +56,6 @@ public:
     int beginDate() const { return cashAccount ? 0 : m_prices.beginDate(historicalPrices::type_price); }
 
     double splitAdjustedPriorDayPrice(int date_) const { return price(tradeDateCalendar::previousTradeDate(date_)) / split(date_); }
-
-    trade& reversalTrade();
     
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

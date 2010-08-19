@@ -35,6 +35,8 @@ private:
 
     QMap<int, tradeDay> calculateTradeDates(portfolio portfolio_, int date_, bool recalculateAll_) const;
 
+    QList<int> calculateDividendReinvestmentDates(int date_, const QMap<int, double> dividends_) const;
+
     executedTrade calculateExecutedTrade(int date_, calculations &calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;
 

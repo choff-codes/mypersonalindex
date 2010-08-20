@@ -7,6 +7,7 @@
 #include "costBasis.h"
 #include "splits.h"
 #include "epsilon.h"
+#include "functions.h"
 
 class avgPricePerShare
 {

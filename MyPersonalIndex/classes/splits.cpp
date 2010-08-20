@@ -1,11 +1,12 @@
 #include "splits.h"
 
-splits::splits(const QMap<int, double> &splits_, int date_):
-    m_splits(splits_),
-    m_ratio(1)
+void splits::initialize(const QMap<int, double> &splits_, int date_, int beginDate_)
 {
-    m_position = m_splits.constBegin();
-    for(QMap<int, double>::const_iterator i = m_splits.constBegin(); i != m_splits.constEnd() && i.key() <= date_; ++i)
+    m_splits = splits_;
+    m_ratio = 1;
+    m_position = m_splits.lowerBound(beginDate_);
+
+    for(QMap<int, double>::const_iterator i = m_position; i != m_splits.constEnd() && i.key() > date_; ++i)
         m_ratio *= i.value();
 }
 

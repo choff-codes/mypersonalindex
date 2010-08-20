@@ -2,9 +2,10 @@
 
 bool objectKey::operator==(const objectKey &other_) const
 {
-    return this->description == other_.description &&
-           this->id == other_.id &&
-           this->type == other_.type;
+    return objectBase::operator ==(other_)
+            && this->description == other_.description
+            && this->id == other_.id
+            && this->type == other_.type;
 }
 
 bool objectKey::operator<(const objectKey &other_) const

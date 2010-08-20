@@ -3,7 +3,8 @@
 bool trade::operator==(const trade &other_) const
 {
     // ignore executedTrades since these are not user set
-    return this->type == other_.type
+    return objectKey::operator ==(other_)
+            && this->type == other_.type
             && this->value == other_.value
             && this->price == other_.price
             && this->commission == other_.commission

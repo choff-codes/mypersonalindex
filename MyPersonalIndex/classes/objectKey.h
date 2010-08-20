@@ -29,12 +29,6 @@ public:
         id(id_)
     {}
 
-    objectKey(const QString &symbol_):
-        type(objectType_Symbol),
-        description(symbol_),
-        id(-1)
-    {}
-
     objectKey key() const { return *this; }
 
     void clearIdentity() { id = UNASSIGNED; }

@@ -2,14 +2,14 @@
 
 snapshotPortfolio calculations::portfolioSnapshot(int date_, int priorDate_, bool calcAveragePrices_)
 {
-    snapshotPortfolio info = snapshotPortfolio(date_);
+    snapshotPortfolio value = snapshotPortfolio(date_);
     foreach(const security &s, m_portfolio.securities())
-        info.add(securitySnapshot(date_, s.id, priorDate_));
+        value.add(securitySnapshot(date_, s.id, priorDate_));
 
     if (calcAveragePrices_)
-       info.avgPrices = avgPricePerShare(date_);
+       value.avgPrices = avgPricePerShare(date_);
 
-    return info;
+    return value;
 }
 
 snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDate_)
@@ -19,6 +19,7 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDat
     if (!value.isNull())
         return value;
 
+    // check if it needs to be calculated
     security s = m_portfolio.securities().value(id_);
     if (!s.includeInCalc)
         return snapshotSecurity(date_);
@@ -30,7 +31,7 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDat
                 priorDate_
         ).value(id_);
 
-    splits splitRatio(s.splits(), date_);
+    splits splitRatio(s.splits(), date_, value.date);
 
     // start loop depending on cached date
     for(QMap<int, executedTrade>::const_iterator i = s.executedTrades.lowerBound(value.date); i != s.executedTrades.constEnd(); ++i)
@@ -81,12 +82,12 @@ snapshot calculations::symbolSnapshot(int date_, int id_, int beginDate_)
 {
     snapshot value(date_);
     security s = m_portfolio.securities().value(id_);
-    splits splitRatio(s.splits(), date_);
+    splits splitRatio(s.splits(), date_, beginDate_);
 
     value.count = 1;
-    value.dividendAmount = s.dividend(date_);
-    value.costBasis = s.price(beginDate_) / splitRatio.ratio(beginDate_);
-    value.totalValue = s.price(date_) / splitRatio.ratio(date_);
+    value.costBasis = s.price(beginDate_);
+    value.dividendAmount = s.dividend(date_) * splitRatio.ratio(beginDate_);
+    value.totalValue = s.price(date_) * splitRatio.ratio(beginDate_);
 
     return value;
 }
@@ -150,7 +151,7 @@ historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_
     endDate_ = qMin(endDateByKey(key_), endDate_);
 
     tradeDateCalendar calendar(beginDate_);
-    if (beginDate_ == 0 || calendar.date() > endDate_)
+    if (beginDate_ > endDate_ || calendar.date() > endDate_)
         return navHistory;
 
     beginDate_ = calendar.date();
@@ -278,10 +279,15 @@ QMap<int, double> calculations::avgPricePerShare(int date_)
         if (s.cashAccount) // cash should always be computed as average
             overrideCostBasis = costBasis_AVG;
 
-        double avg = avgPricePerShare::calculate(date_, s.executedTrades, overrideCostBasis, splits(s.splits(), date_));
-
-        if (!functions::isZero(avg))
-            avgPrices.insert(s.id, avg);
+        avgPrices.insert(
+            s.id,
+            avgPricePerShare::calculate(
+                date_,
+                s.executedTrades,
+                overrideCostBasis,
+                splits(s.splits(), date_)
+            )
+        );
     }
 
 #ifdef CLOCKTIME

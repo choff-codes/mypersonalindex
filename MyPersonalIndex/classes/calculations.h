@@ -40,6 +40,7 @@ private:
     snapshot snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_);
     int beginDateByKey(const objectKey &key_);
     int endDateByKey(const objectKey &key_);
+
     QMap<int, double> avgPricePerShare(int date_);
 };
 

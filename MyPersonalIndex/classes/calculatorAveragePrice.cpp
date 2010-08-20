@@ -1,6 +1,45 @@
-#include "avgPricePerShare.h"
+#include "calculatorAveragePrice.h"
 
-double avgPricePerShare::calculate(int date_, const executedTradeMap &executedTrades_, costBasis costBasis_, splits splits_)
+QMap<int, double> calculatorAveragePrice::calculate(portfolio portfolio_, int date_)
+{
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+
+    QMap<int, double> avgPrices;
+    costBasis defaultCostBasis = portfolio_.attributes().defaultCostBasis;
+
+    foreach(const security &s, portfolio_.securities())
+    {
+        costBasis overrideCostBasis = portfolio_.accounts().value(s.account).overrideCostBasis;
+
+        if (overrideCostBasis == costBasis_None)
+            overrideCostBasis = defaultCostBasis;
+
+        if (s.cashAccount) // cash should always be computed as average
+            overrideCostBasis = costBasis_AVG;
+
+        avgPrices.insert(
+            s.id,
+            calculate(
+                date_,
+                s.executedTrades,
+                overrideCostBasis,
+                splits(s.splits(), date_)
+            )
+        );
+    }
+
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (avg price): %d ms", t.elapsed());
+#endif
+
+    return avgPrices;
+}
+
+
+double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, costBasis costBasis_, splits splits_)
 {
     QMap<double, sharePricePair> runningTrades;
     double shares = 0;

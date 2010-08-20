@@ -1,18 +1,6 @@
-#include "calculations.h"
+#include "calculatorNAV.h"
 
-snapshotPortfolio calculations::portfolioSnapshot(int date_, int priorDate_, bool calcAveragePrices_)
-{
-    snapshotPortfolio value = snapshotPortfolio(date_);
-    foreach(const security &s, m_portfolio.securities())
-        value.add(securitySnapshot(date_, s.id, priorDate_));
-
-    if (calcAveragePrices_)
-       value.avgPrices = avgPricePerShare(date_);
-
-    return value;
-}
-
-snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDate_)
+snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDate_)
 {
     // check today's cache
     snapshotSecurity value = m_cache.value(date_).value(id_);
@@ -56,7 +44,17 @@ snapshotSecurity calculations::securitySnapshot(int date_, int id_, int priorDat
     return value;
 }
 
-snapshot calculations::assetAllocationSnapshot(int date_, int id_, int priorDate_)
+snapshot calculatorNAV::portfolioSnapshot(int date_, int priorDate_)
+{
+    snapshot value(date_);
+
+    foreach(const security &s, m_portfolio.securities())
+        value.add(securitySnapshot(date_, s.id, priorDate_));
+
+    return value;
+}
+
+snapshot calculatorNAV::assetAllocationSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
@@ -67,7 +65,7 @@ snapshot calculations::assetAllocationSnapshot(int date_, int id_, int priorDate
     return value;
 }
 
-snapshot calculations::accountSnapshot(int date_, int id_, int priorDate_)
+snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
@@ -78,7 +76,7 @@ snapshot calculations::accountSnapshot(int date_, int id_, int priorDate_)
     return value;
 }
 
-snapshot calculations::symbolSnapshot(int date_, int id_, int beginDate_)
+snapshot calculatorNAV::symbolSnapshot(int date_, int id_, int beginDate_)
 {
     snapshot value(date_);
     security s = m_portfolio.securities().value(id_);
@@ -92,7 +90,7 @@ snapshot calculations::symbolSnapshot(int date_, int id_, int beginDate_)
     return value;
 }
 
-snapshot calculations::snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_)
+snapshot calculatorNAV::snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_)
 {
     switch(key_.type)
     {
@@ -111,7 +109,7 @@ snapshot calculations::snapshotByKey(int date_, const objectKey &key_, int begin
     }
 }
 
-int calculations::beginDateByKey(const objectKey &key_)
+int calculatorNAV::beginDateByKey(const objectKey &key_)
 {
     switch(key_.type)
     {
@@ -127,7 +125,7 @@ int calculations::beginDateByKey(const objectKey &key_)
     }
 }
 
-int calculations::endDateByKey(const objectKey &key_)
+int calculatorNAV::endDateByKey(const objectKey &key_)
 {
     switch(key_.type)
     {
@@ -143,7 +141,7 @@ int calculations::endDateByKey(const objectKey &key_)
     }
 }
 
-historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_)
+historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_)
 {
     historicalNAV navHistory;
 
@@ -186,68 +184,7 @@ historicalNAV calculations::changeOverTime(const objectKey &key_, int beginDate_
     return navHistory;
 }
 
-double calculations::correlation(const historicalNAV &first_, const historicalNAV &second_)
-{
-    if (first_.isEmpty() || second_.isEmpty())
-        return 0;
-
-    int beginDate = qMax(first_.firstDate(), second_.firstDate());
-    int endDate = qMin(first_.lastDate(), second_.lastDate());
-
-    tradeDateCalendar calendar(beginDate);
-
-    double previousNav1 = first_.nav(calendar.date());
-    double previousNav2 = second_.nav(calendar.date());
-
-    // correlation totals
-    int count = 0;
-    double security1Sum = 0;
-    double security2Sum = 0;
-    double security1Square = 0;
-    double security2Square = 0;
-    double productSquare = 0;
-
-    ++calendar;
-    foreach(const int &date, calendar)
-    {
-        if (date > endDate)
-            break;
-
-        double nav1 = first_.nav(date);
-        double nav2 = second_.nav(date);
-        double change1 = nav1 / previousNav1 - 1;
-        double change2 = nav2 / previousNav2 - 1;
-
-        security1Sum += change1;
-        security2Sum += change2;
-        security1Square += change1 * change1;
-        security2Square += change2 * change2;
-        productSquare += change1 * change2;
-        ++count;
-
-        previousNav1 = nav1;
-        previousNav2 = nav2;
-    }
-
-    if (count <= 1)
-        return 0;
-
-    // [ SUM(X*Y) - ( SUM(X) * SUM(Y) / N ) ] / [SQRT { ( SUM(X^2) - ( SUM(X) ^ 2 / N ) ) * ( SUM(Y^2) - (SUM(Y) ^ 2 / N) ) } ]
-    double coefficient =
-            (
-                    (productSquare - (security1Sum * security2Sum / count))
-                /
-                    sqrt(
-                            (security1Square - (security1Sum * security1Sum / count))
-                        *
-                            (security2Square - (security2Sum * security2Sum / count))
-                    )
-            );
-
-    return (isnan(coefficient) || isinf(coefficient)) ? 0 : coefficient;
-}
-
-double calculations::change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_)
+double calculatorNAV::change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_)
 {
     double nav;
     activity_ -= dividends_;
@@ -257,42 +194,4 @@ double calculations::change(double beginValue_, double endValue_, double activit
         nav = endValue_ / ((beginValue_ + activity_) / beginNAV_);
 
     return (isnan(nav) || isinf(nav)) ? beginNAV_ : nav;
-}
-
-QMap<int, double> calculations::avgPricePerShare(int date_)
-{
-#ifdef CLOCKTIME
-    QTime t;
-    t.start();
-#endif
-
-    QMap<int, double> avgPrices;
-    costBasis defaultCostBasis = m_portfolio.attributes().defaultCostBasis;
-
-    foreach(const security &s, m_portfolio.securities())
-    {
-        costBasis overrideCostBasis = m_portfolio.accounts().value(s.account).overrideCostBasis;
-
-        if (overrideCostBasis == costBasis_None)
-            overrideCostBasis = defaultCostBasis;
-
-        if (s.cashAccount) // cash should always be computed as average
-            overrideCostBasis = costBasis_AVG;
-
-        avgPrices.insert(
-            s.id,
-            avgPricePerShare::calculate(
-                date_,
-                s.executedTrades,
-                overrideCostBasis,
-                splits(s.splits(), date_)
-            )
-        );
-    }
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (avg price): %d ms", t.elapsed());
-#endif
-
-    return avgPrices;
 }

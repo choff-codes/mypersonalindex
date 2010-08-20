@@ -17,7 +17,7 @@ portfolioAttributes::portfolioAttributes(int id_):
 
 bool portfolioAttributes::operator==(const portfolioAttributes &other_) const
 {
-    return this->key() == other_.key()
+    return objectKey::operator ==(other_)
             && this->dividends == other_.dividends
             && this->defaultCostBasis == other_.defaultCostBasis
             && this->startValue == other_.startValue

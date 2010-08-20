@@ -2,7 +2,7 @@
 
 bool security::operator==(const security &other_) const
 {
-    return this->key() == other_.key()
+    return objectKey::operator ==(other_)
             && this->account == other_.account
             && this->expense == other_.expense
             && this->divReinvest == other_.divReinvest

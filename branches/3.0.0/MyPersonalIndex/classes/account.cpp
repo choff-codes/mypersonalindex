@@ -2,7 +2,7 @@
 
 bool account::operator==(const account &other_) const
 {
-    return this->key() == other_.key()
+    return objectKey::operator ==(other_)
             && this->taxRate == other_.taxRate
             && this->taxDeferred == other_.taxDeferred
             && this->overrideCostBasis == other_.overrideCostBasis;

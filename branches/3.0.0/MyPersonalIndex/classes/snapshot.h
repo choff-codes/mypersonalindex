@@ -51,19 +51,4 @@ public:
     void setTaxLiability(double taxRate_, bool taxDeferred_);
 };
 
-class snapshotPortfolio: public snapshot
-{
-public:
-    QMap<int, double> avgPrices;
-    QMap<int, snapshotSecurity> securitiesInfo;
-
-    snapshotPortfolio():
-        snapshot(0)
-    {}
-
-    snapshotPortfolio(int date_):
-        snapshot(date_)
-    {}
-};
-
 #endif // SNAPSHOT_H

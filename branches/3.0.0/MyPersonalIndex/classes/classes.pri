@@ -1,8 +1,8 @@
 INCLUDEPATH += $$PWD
 SOURCES += $$PWD/queries.cpp \
-    $$PWD/tradeCalculations.cpp \
+    $$PWD/calculatorTrade.cpp \
     $$PWD/priceFactory.cpp \
-    $$PWD/calculations.cpp \
+    $$PWD/calculatorNAV.cpp \
     $$PWD/functions.cpp \
     $$PWD/historicalNAV.cpp \
     $$PWD/assetAllocation.cpp \
@@ -21,16 +21,17 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/portfolioAttributes.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
-    $$PWD/avgPricePerShare.cpp \
     $$PWD/tradeDateCalendar.cpp \
     $$PWD/portfolioFactory.cpp \
     $$PWD/columns.cpp \
     $$PWD/settingsFactory.cpp \
-    $$PWD/assetAllocationTarget.cpp
+    $$PWD/assetAllocationTarget.cpp \
+    $$PWD/calculatorCorrelation.cpp \
+    $$PWD/calculatorAveragePrice.cpp
 HEADERS += $$PWD/queries.h \
     $$PWD/functions.h \
-    $$PWD/tradeCalculations.h \
-    $$PWD/calculations.h \
+    $$PWD/calculatorTrade.h \
+    $$PWD/calculatorNAV.h \
     $$PWD/priceFactory.h \
     $$PWD/historicalNAV.h \
     $$PWD/assetAllocation.h \
@@ -49,7 +50,6 @@ HEADERS += $$PWD/queries.h \
     $$PWD/portfolioAttributes.h \
     $$PWD/splits.h \
     $$PWD/objectKey.h \
-    $$PWD/avgPricePerShare.h \
     $$PWD/epsilon.h \
     $$PWD/objectBase.h \
     $$PWD/tradeDateCalendar.h \
@@ -58,4 +58,6 @@ HEADERS += $$PWD/queries.h \
     $$PWD/portfolioFactory.h \
     $$PWD/columns.h \
     $$PWD/settingsFactory.h \
-    $$PWD/assetAllocationTarget.h
+    $$PWD/assetAllocationTarget.h \
+    $$PWD/calculatorCorrelation.h \
+    $$PWD/calculatorAveragePrice.h

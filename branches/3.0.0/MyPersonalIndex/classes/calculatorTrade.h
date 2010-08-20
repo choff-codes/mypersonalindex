@@ -3,17 +3,17 @@
 
 #include <QMap>
 #include "queries.h"
-#include "calculations.h"
+#include "calculatorNAV.h"
 #include "portfolio.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
-class tradeCalculations
+class calculatorTrade
 {
 public:
-    tradeCalculations(queries dataSource_):
+    calculatorTrade(queries dataSource_):
         m_dataSource(dataSource_)
     {}
 
@@ -37,12 +37,12 @@ private:
 
     QList<int> calculateDividendReinvestmentDates(int date_, const QMap<int, double> dividends_) const;
 
-    executedTrade calculateExecutedTrade(int date_, calculations &calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
+    executedTrade calculateExecutedTrade(int date_, calculatorNAV &calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;
 
     double calculateTradePrice(trade::tradeType type_, double price_, double priorDayPrice_) const;
 
-    double calculateTradeShares(int date_, double price_, calculations &calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
+    double calculateTradeShares(int date_, double price_, calculatorNAV &calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;
 
     void insertExecutedTrade(portfolio portfolio_, int id_, int date_, const executedTrade &trade_);

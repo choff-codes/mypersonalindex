@@ -2,17 +2,18 @@
 
 updatePricesResult updatePrices::run(const QStringList &symbols_, int beginDate_, bool splits_)
 {
-    updatePricesResult result;
-    result.earliestUpdate = NO_DATA; // track earliest date saved to database for recalc
+    updatePricesResult result(NO_DATA); // track earliest date saved to database for recalc
 
     foreach(const QString &symbol, symbols_)
     {
         historicalPrices prices = priceFactory::getPrices(symbol, m_dataSource);
 
-        downloadResult d = getPrices(symbol, prices,
+        downloadResult d = getPrices(
+                                symbol,
+                                prices,
                                 prices.beginDate(historicalPrices::type_price) > beginDate_ ?
                                     beginDate_ :
-                                    qMax(prices.endDate(historicalPrices::type_price), beginDate_)
+                                    prices.endDate(historicalPrices::type_price)
                            );
 
         if (d.success) // symbol exists

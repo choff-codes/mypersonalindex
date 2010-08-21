@@ -7,7 +7,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeDates(int date_, int minimumD
         case frequency_Once:
             return computeFrequencyTradeOnce(date_, minimumDate_, maximumDate_);
         case frequency_Daily:
-            return computeFrequencyTradeDaily(date_, minimumDate_, maximumDate_);
+            return computeFrequencyTradeDaily(minimumDate_, maximumDate_);
         case frequency_Weekly:
             return computeFrequencyTradeWeekly(date_, minimumDate_, maximumDate_);
         case frequency_Monthly:
@@ -30,7 +30,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeOnce(int date_, int minimumDa
     return tradeDates;
 }
 
-QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_)
+QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int minimumDate_, int maximumDate_)
 {
     QList<int> tradeDates;
 
@@ -591,5 +591,77 @@ const QSet<int> tradeDateCalendar::holidays = QSet<int>()
                                               << 2456174 // 03-Sep-2012
                                               << 2456254 // 22-Nov-2012
                                               << 2456287 // 25-Dec-2012
+                                              << 2456294 // 01-Jan-2013
+                                              << 2456314 // 21-Jan-2013
+                                              << 2456342 // 18-Feb-2013
+                                              << 2456381 // 29-Mar-2013
+                                              << 2456440 // 27-May-2013
+                                              << 2456478 // 04-Jul-2013
+                                              << 2456538 // 02-Sep-2013
+                                              << 2456625 // 28-Nov-2013
+                                              << 2456652 // 25-Dec-2013
+                                              << 2456659 // 01-Jan-2014
+                                              << 2456678 // 20-Jan-2014
+                                              << 2456706 // 17-Feb-2014
+                                              << 2456766 // 18-Apr-2014
+                                              << 2456804 // 26-May-2014
+                                              << 2456843 // 04-Jul-2014
+                                              << 2456902 // 01-Sep-2014
+                                              << 2456989 // 27-Nov-2014
+                                              << 2457017 // 25-Dec-2014
+                                              << 2457024 // 01-Jan-2015
+                                              << 2457042 // 19-Jan-2015
+                                              << 2457070 // 16-Feb-2015
+                                              << 2457116 // 03-Apr-2015
+                                              << 2457168 // 25-May-2015
+                                              << 2457207 // 03-Jul-2015
+                                              << 2457273 // 07-Sep-2015
+                                              << 2457353 // 26-Nov-2015
+                                              << 2457382 // 25-Dec-2015
+                                              << 2457389 // 01-Jan-2016
+                                              << 2457406 // 18-Jan-2016
+                                              << 2457434 // 15-Feb-2016
+                                              << 2457473 // 25-Mar-2016
+                                              << 2457539 // 30-May-2016
+                                              << 2457574 // 04-Jul-2016
+                                              << 2457637 // 05-Sep-2016
+                                              << 2457717 // 24-Nov-2016
+                                              << 2457749 // 26-Dec-2016
+                                              << 2457756 // 02-Jan-2017
+                                              << 2457770 // 16-Jan-2017
+                                              << 2457805 // 20-Feb-2017
+                                              << 2457858 // 14-Apr-2017
+                                              << 2457903 // 29-May-2017
+                                              << 2457939 // 04-Jul-2017
+                                              << 2458001 // 04-Sep-2017
+                                              << 2458081 // 23-Nov-2017
+                                              << 2458113 // 25-Dec-2017
+                                              << 2458120 // 01-Jan-2018
+                                              << 2458134 // 15-Jan-2018
+                                              << 2458169 // 19-Feb-2018
+                                              << 2458208 // 30-Mar-2018
+                                              << 2458267 // 28-May-2018
+                                              << 2458304 // 04-Jul-2018
+                                              << 2458365 // 03-Sep-2018
+                                              << 2458445 // 22-Nov-2018
+                                              << 2458478 // 25-Dec-2018
+                                              << 2458485 // 01-Jan-2019
+                                              << 2458505 // 21-Jan-2019
+                                              << 2458533 // 18-Feb-2019
+                                              << 2458593 // 19-Apr-2019
+                                              << 2458631 // 27-May-2019
+                                              << 2458669 // 04-Jul-2019
+                                              << 2458729 // 02-Sep-2019
+                                              << 2458816 // 28-Nov-2019
+                                              << 2458843 // 25-Dec-2019
+                                              << 2458850 // 01-Jan-2020
+                                              << 2458869 // 20-Jan-2020
+                                              << 2458897 // 17-Feb-2020
+                                              << 2458950 // 10-Apr-2020
+                                              << 2458995 // 25-May-2020
+                                              << 2459034 // 03-Jul-2020
+                                              << 2459100 // 07-Sep-2020
+                                              << 2459180 // 26-Nov-2020
+                                              << 2459209 // 25-Dec-2020
                                               
     ;

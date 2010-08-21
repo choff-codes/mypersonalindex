@@ -202,8 +202,6 @@ public:
     void deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const;
     void deletePortfolioItems(const QString &table_, int portfolioID_) const;
     void deletePortfolioItems(const QString &table_, int portfolioID_, int beginDate_) const;
-    void deleteTradeItems(const QString &table_, int tradeID_) const;
-    void deleteTradeItems(const QString &table_, int tradeID_, int beginDate_) const;
 
 private:
     QSqlDatabase m_database;

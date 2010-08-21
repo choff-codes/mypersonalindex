@@ -13,6 +13,10 @@ struct updatePricesResult
 {
     QStringList updateFailures;
     int earliestUpdate;
+
+    updatePricesResult(int earliestUpdate_):
+        earliestUpdate(earliestUpdate_)
+    {}
 };
 
 class updatePrices
@@ -20,7 +24,7 @@ class updatePrices
 public:
     updatePrices(queries dataSource_):
         m_dataSource(dataSource_),
-        NO_DATA(QDate::currentDate().toJulianDay())
+        NO_DATA(QDate::currentDate().toJulianDay() + 1)
     {}
 
     updatePricesResult run(const QStringList &symbols_, int beginDate_, bool splits_);

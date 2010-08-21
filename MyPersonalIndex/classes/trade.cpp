@@ -34,6 +34,9 @@ void trade::save(const queries &dataSource_)
 
 void trade::remove(const queries &dataSource_) const
 {
+    if (!this->hasIdentity())
+        return;
+
     dataSource_.deleteItem(queries::table_PortfolioSecurityTrade, this->id);
 }
 

@@ -11,14 +11,9 @@
 #include "queries.h"
 #include "columns.h"
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class settings
 {
 public:
-    int dataStartDate;
     bool splits;
     int version;
     bool compareIncludeDividends;
@@ -29,22 +24,19 @@ public:
     QHash<int, columns> viewableColumns;
 
     settings():
-            dataStartDate(0),
             splits(true),
             version(0),
             compareIncludeDividends(true),
             state(Qt::WindowActive)
-    {}
-
-    void save(const queries &dataSource_);
-
-    bool operator==(const settings &other_) const
     {
-        // these are the only static properties, the other properties cannot be edited by the user
-        return this->dataStartDate == other_.dataStartDate && this->splits == other_.splits;
+        // initalize the expected column objects
+        viewableColumns.insert(columns::columns_Holdings, columns(columns::columns_Holdings));
+        viewableColumns.insert(columns::columns_AA, columns(columns::columns_AA));
+        viewableColumns.insert(columns::columns_Acct, columns(columns::columns_Acct));
+        viewableColumns.insert(columns::columns_Stat, columns(columns::columns_Stat));
     }
 
-    bool operator!=(const settings &other_) const { return !(*this == other_); }
+    void save(const queries &dataSource_);
 };
 
 #endif // SETTINGS_H

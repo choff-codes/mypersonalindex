@@ -44,8 +44,6 @@ public:
     bool operator==(const security &other_) const;
     bool operator!=(const security &other_) const { return !(*this == other_); }
 
-    int firstTradeDate() const;
-
     void setHistoricalPrices(const historicalPrices &prices_) { m_prices = prices_; }
     double price(int date_) const { return cashAccount ? 1 : m_prices.value(date_, historicalPrices::type_price); }
     double dividend(int date_) const { return cashAccount ? 0 : m_prices.value(date_, historicalPrices::type_dividend); }

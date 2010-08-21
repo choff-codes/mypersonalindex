@@ -13,20 +13,6 @@ bool security::operator==(const security &other_) const
             && this->trades == other_.trades;
 }
 
-int security::firstTradeDate() const
-{
-    int minDate = -1;
-    foreach(const trade &t, trades)
-    {
-        if (t.frequency != tradeDateCalendar::frequency_Once && (t.startDate < minDate || minDate == -1))
-            minDate = t.startDate;
-        else if (t.startDate < t.date && (t.endDate > t.date || t.endDate == 0) && (t.date < minDate || minDate == -1))
-            minDate = t.date;
-    }
-
-    return minDate;
-}
-
 void security::save(const queries &dataSource_)
 {
     if (!this->hasParent())
@@ -43,9 +29,18 @@ void security::save(const queries &dataSource_)
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Hide), (int)this->hide);
 
     this->id = dataSource_.insert(queries::table_PortfolioSecurity, values, this->id);
+
+    for(QMap<int, trade>::iterator i = trades.begin(); i != trades.end(); ++i)
+        i.value().parent = this->id;
+
+    targets.parent = this->id;
+    executedTrades.parent = this->id;
 }
 
 void security::remove(const queries &dataSource_) const
 {
+    if (!this->hasIdentity())
+        return;
+
     dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id);
 }

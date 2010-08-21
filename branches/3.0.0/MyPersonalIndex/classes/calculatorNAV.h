@@ -9,6 +9,7 @@
 #include "portfolio.h"
 #include "tradeDateCalendar.h"
 #include "splits.h"
+#include "historicalNAV.h"
 
 #ifdef CLOCKTIME
 #include <QTime>

@@ -42,27 +42,11 @@ public:
 
     static QList<int> computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_);
 
-    static int checkTradeDate(int date_, direction direction_ )
-    {
-        while(holidays.contains(date_) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
-            date_ += direction_;
-        return date_;
-    }
+    static int previousTradeDate(int date_) { return checkTradeDate(--date_, direction_descending); }
 
-    static int previousTradeDate(int date_)
-    {
-        return checkTradeDate(--date_, direction_descending);
-    }
+    static int nextTradeDate(int date_) {  return checkTradeDate(++date_, direction_ascending); }
 
-    static int nextTradeDate(int date_)
-    {
-        return checkTradeDate(++date_, direction_ascending);
-    }
-
-    static int endDate()
-    {
-        return checkTradeDate(QDate::currentDate().toJulianDay(), direction_descending);
-    }
+    static int endDate() { return checkTradeDate(QDate::currentDate().toJulianDay(), direction_descending); }
 
     // Iterator that supports the "foreach". It needs to be
     // named *exactly* const_iterator
@@ -103,11 +87,19 @@ public:
     const_iterator end() const { return const_iterator(this, const_iterator::END); }
 
 private:
-    static const QSet<int> holidays;
     int m_date;
 
+    static const QSet<int> holidays; // contains stock market holidays from 1962 - 2020
+
+    static int checkTradeDate(int date_, direction direction_ )
+    {
+        while(holidays.contains(date_) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
+            date_ += direction_;
+        return date_;
+    }
+
     static QList<int> computeFrequencyTradeOnce(int date_, int minimumDate_, int maximumDate_);
-    static QList<int> computeFrequencyTradeDaily(int /* date_ */, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeDaily(int minimumDate_, int maximumDate_);
     static QList<int> computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_);
     static QList<int> computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_);
     static QList<int> computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_);

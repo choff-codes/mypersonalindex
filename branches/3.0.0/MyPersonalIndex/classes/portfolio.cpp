@@ -9,8 +9,50 @@ public:
     portfolioAttributes attributes;
 
     portfolioData(int id_):
-            attributes(portfolioAttributes(id_))
+        attributes(portfolioAttributes(id_))
     {}
+
+
+    void save(const queries &dataSource_)
+    {
+        QMap<QString, QVariant> values;
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Description), attributes.description);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartValue), attributes.startValue);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAThreshold), attributes.aaThreshold);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)attributes.aaThresholdMethod);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)attributes.defaultCostBasis);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), attributes.startDate);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)attributes.dividends);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)attributes.holdingsShowHidden);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsSort), attributes.holdingsSort);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAShowBlank), (int)attributes.aaShowBlank);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AASort), attributes.aaSort);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CorrelationShowHidden), (int)attributes.correlationShowHidden);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctShowBlank), (int)attributes.acctShowBlank);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctSort), attributes.acctSort);
+        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_NAVSortDesc), (int)attributes.navSortDesc);
+
+        attributes.id = dataSource_.insert(queries::table_Portfolio, values, attributes.id);
+
+        for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
+            i.value().parent = attributes.id;
+
+        for(QMap<int, assetAllocation>::iterator i = assetAllocations.begin(); i != assetAllocations.end(); ++i)
+            i.value().parent = attributes.id;
+
+        for(QMap<int, account>::iterator i = accounts.begin(); i != accounts.end(); ++i)
+            i.value().parent = attributes.id;
+
+    }
+
+    void remove(const queries &dataSource_) const
+    {
+        if (!attributes.hasIdentity())
+            return;
+
+        dataSource_.deleteItem(queries::table_Portfolio, attributes.id);
+    }
+
 };
 
 portfolio::portfolio(int id_):
@@ -33,24 +75,34 @@ portfolio& portfolio::operator=(const portfolio &other_)
     return *this;
 }
 
-QMap<int, security>& portfolio::securities()
+QMap<int, security>& portfolio::securities() const
 {
     return d->securities;
 }
 
-QMap<int, assetAllocation>& portfolio::assetAllocations()
+QMap<int, assetAllocation>& portfolio::assetAllocations() const
 {
     return d->assetAllocations;
 }
 
-QMap<int, account>& portfolio::accounts()
+QMap<int, account>& portfolio::accounts() const
 {
     return d->accounts;
 }
 
-portfolioAttributes& portfolio::attributes()
+portfolioAttributes& portfolio::attributes() const
 {
     return d->attributes;
+}
+
+void portfolio::save(const queries &dataSource_)
+{
+    d->save(dataSource_);
+}
+
+void portfolio::remove(const queries &dataSource_) const
+{
+    d->remove(dataSource_);
 }
 
 QStringList portfolio::symbols() const
@@ -64,16 +116,19 @@ QStringList portfolio::symbols() const
     return list;
 }
 
+
 int portfolio::endDate() const
 {
+    //TODO
     int date = 0;
     bool nonCashAccount = false;
     foreach(const security &s, d->securities)
     {
         if (s.cashAccount)
-            nonCashAccount = true;
-        else
-            date = qMax(date, s.endDate());
+            continue;
+
+        nonCashAccount = true;
+        date = qMax(date, s.endDate());
     }
 
     if (!nonCashAccount)
@@ -81,40 +136,3 @@ int portfolio::endDate() const
 
     return date;
 }
-
-//bool portfolio::datesOutsidePriceData() const
-//{
-//    int firstDate = prices::instance().firstDate();
-//    if (firstDate == 0)
-//        return true;
-//
-//    foreach(const portfolioData &d, m_portfolios)
-//        if (!d.nav.isEmpty() && d.nav.firstDate() < firstDate)
-//            return true;
-//
-//    return false;
-//}
-
-//int portfolio::minimumDate(const int &currentMinimumDate, const int &date) const
-//{
-//    int returnDate = currentMinimumDate;
-//    if (date != -1 && (date < currentMinimumDate || currentMinimumDate == -1))
-//        returnDate = date;
-//
-//    return returnDate;
-//}
-//
-//int portfolio::minimumDate(const int &currentMinimumDate, const int &portfolioID, const assetAllocation &aa) const
-//{
-//    int returnDate = currentMinimumDate;
-//    foreach(const security &s, securities(portfolioID))
-//        if(s.aa.contains(aa.id))
-//            foreach(const trade &t, s.trades)
-//                if (t.type == trade::tradeType_AA)
-//                {
-//                    returnDate = minimumDate(currentMinimumDate, s.firstTradeDate());
-//                    break;
-//                }
-//
-//    return returnDate;
-//}

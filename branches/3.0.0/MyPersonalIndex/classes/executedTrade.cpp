@@ -14,7 +14,7 @@ void executedTradeMap::remove(const queries &dataSource_, int beginDate_)
             i = m_trades.erase(i);
 
     if (this->hasParent())
-        dataSource_.deleteTradeItems(queries::table_PortfolioSecurityTradeExecution, this->parent, beginDate_);
+        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent, beginDate_);
 }
 
 void executedTradeMap::remove(const queries &dataSource_)
@@ -22,7 +22,7 @@ void executedTradeMap::remove(const queries &dataSource_)
     m_trades.clear();
 
     if (this->hasParent())
-        dataSource_.deleteTradeItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
+        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
 }
 
 QVariant executedTradeMap::data(int row_, int column_) const

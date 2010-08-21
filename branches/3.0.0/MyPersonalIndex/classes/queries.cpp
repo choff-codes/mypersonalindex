@@ -325,6 +325,7 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
     {
         for (int x = 0; x < columnCount; ++x)
             query.addBindValue(object_->data(i, x));
+
         query.exec();
     }
 
@@ -365,14 +366,12 @@ void queries::update(const QString &tableName_, const QMap<QString, QVariant> &v
 {
     QSqlQuery query(m_database);
     QStringList columns;
-    QString sql("UPDATE %1 SET %2");
-    if (id_ != -1)
-        sql.append(QString(" WHERE ID = %1").arg(QString::number(id_)));
+    QString sql("UPDATE %1 SET %2 WHERE ID = %3");
 
     foreach(const QString &column, values_.keys())
         columns.append(QString("%1 = ?").arg(column));
 
-    query.prepare(sql.arg(tableName_, columns.join(",")));
+    query.prepare(sql.arg(tableName_, columns.join(","), QString::number(id_)));
 
     foreach(const QVariant &value, values_)
         query.addBindValue(value);
@@ -457,16 +456,6 @@ void queries::deleteSecurityItems(const QString &table_, int securityID_) const
 void queries::deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const
 {
     deleteItem(table_, "SecurityID", securityID_, beginDate_);
-}
-
-void queries::deleteTradeItems(const QString &table_, int tradeID_) const
-{
-    deleteItem(table_, "TradeID", tradeID_);
-}
-
-void queries::deleteTradeItems(const QString &table_, int tradeID_, int beginDate_) const
-{
-    deleteItem(table_, "TradeID", tradeID_, beginDate_);
 }
 
 void queries::deleteItem(const QString &table_, const QString &identifier_, int id_) const

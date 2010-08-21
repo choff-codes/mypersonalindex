@@ -24,7 +24,6 @@ void settingsFactory::loadSettings(const queries &dataSource_)
     if (!q.first())
         return;
 
-    m_settings.dataStartDate = q.value(queries::settingsColumns_DataStartDate).toInt();
     m_settings.splits = q.value(queries::settingsColumns_Splits).toBool();
     m_settings.compareIncludeDividends = q.value(queries::settingsColumns_CompareIncludeDividends).toBool();
     m_settings.version = q.value(queries::settingsColumns_Version).toInt();

@@ -21,9 +21,6 @@ private:
     static QHash<queries, QHash<QString, historicalPrices> > m_historicalPricesCache;
 
     static void updateHistoricalPrices(const QString &symbol_, historicalPrices priceData_, const queries &dataSource_);
-    static QMap<int, double> loadPrices(const QString &symbol_, const queries &dataSource_);
-    static QMap<int, double> loadDividends(const QString &symbol_, const queries &dataSource_);
-    static QMap<int, double> loadSplits(const QString &symbol_, const queries &dataSource_);
 };
 
 #endif // PRICEFACTORY_H

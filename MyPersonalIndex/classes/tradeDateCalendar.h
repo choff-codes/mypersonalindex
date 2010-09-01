@@ -69,7 +69,7 @@ public:
                 m_currentDate = m_endDate;
         }
 
-        const int operator*() { return m_currentDate; }
+        int operator*() { return m_currentDate; }
         bool operator!=(const const_iterator& it_) { return m_currentDate != it_.m_currentDate; }
 
         const_iterator& operator++()

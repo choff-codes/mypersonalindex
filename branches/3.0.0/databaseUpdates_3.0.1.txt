@@ -1,0 +1,37 @@
+CREATE TABLE "PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Date" INTEGER,"Shares" NUMERIC,"Price" NUMERIC,"Commission" NUMERIC, "AssociatedTradeID" INTEGER)
+CREATE TABLE "HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC)
+
+INSERT INTO HistoricalPrice SELECT Date, Symbol, 0, Price FROM ClosingPrices
+INSERT INTO HistoricalPrice SELECT Date, Symbol, 1, Amount FROM Dividends
+INSERT INTO HistoricalPrice SELECT Date, Symbol, 2, Ratio FROM Splits
+
+DROP TABLE "main"."ClosingPrices"
+DROP TABLE "main"."Dividends"
+DROP TABLE "main"."Splits"
+DROP TABLE "main"."ExecutedTrades"
+DROP TABLE "main"."NAV"
+
+ALTER TABLE "main"."Portfolios" RENAME TO "Portfolio"
+ALTER TABLE "main"."AA" RENAME TO "PortfolioAA"
+ALTER TABLE "main"."Acct" RENAME TO "PortfolioAccount"
+ALTER TABLE "main"."Security" RENAME TO "PortfolioSecurity"
+ALTER TABLE "main"."SecurityAA" RENAME TO "PortfolioSecurityAA"
+ALTER TABLE "main"."SecurityTrades" RENAME TO "PortfolioSecurityTrade"
+
+CREATE VIEW "PortfolioSecurityTradeExecutionView" AS SELECT e.*, s.PortfolioID FROM PortfolioSecurityTradeExecution e INNER JOIN PortfolioSecurity s ON e.SecurityID = s.ID
+CREATE VIEW "PortfolioSecurityAAView" AS SELECT aa.*, s.PortfolioID FROM PortfolioSecurityAA aa INNER JOIN PortfolioSecurity s ON aa.SecurityID = s.ID
+CREATE VIEW "PortfolioSecurityTradeView" AS SELECT trades.*, s.PortfolioID FROM PortfolioSecurityTrade trades INNER JOIN PortfolioSecurity s ON trades.SecurityID = s.ID
+
+CREATE TRIGGER "PortfolioTrigger" BEFORE DELETE ON Portfolio FOR EACH ROW  BEGIN DELETE FROM PortfolioSecurity WHERE PortfolioSecurity.PortfolioID = old.ID;
+DELETE FROM PortfolioAA WHERE PortfolioAA.PortfolioID = old.ID;
+DELETE FROM PortfolioAcctount WHERE PortfolioAccount.PortfolioID = old.ID;
+DELETE FROM PortfolioNAV WHERE PortfolioNAV.PortfolioID = old.ID; END
+
+CREATE TRIGGER "PortfolioSecurityTrigger" BEFORE DELETE ON PortfolioSecurity FOR EACH ROW  BEGIN DELETE FROM PortfolioSecurityAA WHERE PortfolioSecurityAA.SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTrade WHERE PortfolioSecurityTrade.SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTradeExecution WHERE PortfolioSecurityTrade.SecurityID = old.ID; END
+
+ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Note" VARCHAR
+ALTER TABLE "main"."PortfolioSecurityTrade" ADD COLUMN "Description" VARCHAR
+
+CREATE INDEX "HistoricalPriceIndex" ON "HistoricalPrice" ("Symbol" ASC)

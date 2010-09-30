@@ -39,11 +39,11 @@ void frmAcctEdit_UI::setupUI(QDialog *dialog)
     formLayout->setWidget(2, QFormLayout::LabelRole, costBasis);
 
     cmbCostBasis = new QComboBox(dialog);
-    cmbCostBasis->addItem("Portfolio Default", account::costBasisType_None);
-    cmbCostBasis->addItem("FIFO", account::costBasisType_FIFO);
-    cmbCostBasis->addItem("LIFO", account::costBasisType_LIFO);
-    cmbCostBasis->addItem("HIFO", account::costBasisType_HIFO);
-    cmbCostBasis->addItem("Average", account::costBasisType_AVG);
+    cmbCostBasis->addItem("Portfolio Default", costBasis_None);
+    cmbCostBasis->addItem("FIFO", costBasis_FIFO);
+    cmbCostBasis->addItem("LIFO", costBasis_LIFO);
+    cmbCostBasis->addItem("HIFO", costBasis_HIFO);
+    cmbCostBasis->addItem("Average", costBasis_AVG);
     formLayout->setWidget(2, QFormLayout::FieldRole, cmbCostBasis);
 
     formLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(dialog));

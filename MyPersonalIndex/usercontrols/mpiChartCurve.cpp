@@ -1,4 +1,4 @@
-#include "chartInfo.h"
+#include "mpiChartCurve.h"
 
 void mpiChartCurve::setCurve(QwtPlotCurve *curve_)
 {
@@ -17,6 +17,6 @@ void mpiChartCurve::attach(QwtPlot *chart_)
     if (!m_curve)
         return;
 
-    m_curve->setRawSamples(&m_xData[0], &m_yData[0], count());
+    m_curve->setRawData(&m_xData[0], &m_yData[0], count());
     m_curve->attach(chart_);
 }

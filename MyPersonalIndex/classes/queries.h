@@ -9,6 +9,7 @@
 #include <QFileInfo>
 #include <QCoreApplication>
 #include "queriesBatch.h"
+#include "objectBase.h" // to get UNASSIGNED definition
 
 class queries
 {

@@ -1,19 +1,50 @@
 #include "calculatorNAV.h"
 
+class calculatorNAVData: public QSharedData
+{
+public:
+    portfolio currentPortfolio;
+    QHash<int, QHash<int, snapshotSecurity> > securitiesCache;
+
+    calculatorNAVData(const portfolio &portfolio_):
+        currentPortfolio(portfolio_)
+    {}
+};
+
+calculatorNAV::calculatorNAV(const portfolio &portfolio_):
+    d(new calculatorNAVData(portfolio_))
+{
+}
+
+calculatorNAV::calculatorNAV(const calculatorNAV &other_):
+    d(other_.d)
+{
+}
+
+calculatorNAV::~calculatorNAV()
+{
+}
+
+calculatorNAV& calculatorNAV::operator=(const calculatorNAV &other_)
+{
+    d = other_.d;
+    return *this;
+}
+
 snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDate_)
 {
     // check today's cache
-    snapshotSecurity value = m_cache.value(date_).value(id_);
+    snapshotSecurity value = d->securitiesCache.value(date_).value(id_);
     if (!value.isNull())
         return value;
 
     // check if it needs to be calculated
-    security s = m_portfolio.securities().value(id_);
+    security s = d->currentPortfolio.securities().value(id_);
     if (!s.includeInCalc)
         return snapshotSecurity(date_);
 
     // check if prior day is cached
-    value = m_cache.value(
+    value = d->securitiesCache.value(
             priorDate_ == 0 ?
                 tradeDateCalendar::previousTradeDate(date_) :
                 priorDate_
@@ -38,7 +69,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     value.totalValue = value.shares * s.price(date_);
     value.expenseRatio = s.expense;
 
-    account acct = m_portfolio.accounts().value(s.account);
+    account acct = d->currentPortfolio.accounts().value(s.account);
     value.setTaxLiability(acct.taxRate, acct.taxDeferred);
 
     return value;
@@ -48,7 +79,7 @@ snapshot calculatorNAV::portfolioSnapshot(int date_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, m_portfolio.securities())
+    foreach(const security &s, d->currentPortfolio.securities())
         value.add(securitySnapshot(date_, s.id, priorDate_));
 
     return value;
@@ -58,7 +89,7 @@ snapshot calculatorNAV::assetAllocationSnapshot(int date_, int id_, int priorDat
 {
     snapshot value(date_);
 
-    foreach(const security &s, m_portfolio.securities())
+    foreach(const security &s, d->currentPortfolio.securities())
         if (s.targets.contains(id_))
             value.add(securitySnapshot(date_, s.id, priorDate_), s.targets.value(id_));
 
@@ -69,7 +100,7 @@ snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, m_portfolio.securities())
+    foreach(const security &s, d->currentPortfolio.securities())
         if (id_ == s.account)
             value.add(securitySnapshot(date_, s.id, priorDate_));
 
@@ -79,7 +110,7 @@ snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
 snapshot calculatorNAV::symbolSnapshot(int date_, int id_, int beginDate_)
 {
     snapshot value(date_);
-    security s = m_portfolio.securities().value(id_);
+    security s = d->currentPortfolio.securities().value(id_);
     splits splitRatio(s.splits(), date_, beginDate_);
 
     value.count = 1;
@@ -117,9 +148,9 @@ int calculatorNAV::beginDateByKey(const objectKey &key_)
         case objectType_Account:
         case objectType_Portfolio:
         case objectType_Security:
-            return m_portfolio.attributes().startDate;
+            return d->currentPortfolio.attributes().startDate;
     case objectType_Symbol:
-            return m_portfolio.securities().value(key_.id).beginDate();
+            return d->currentPortfolio.securities().value(key_.id).beginDate();
         default:
             return 0;
     }
@@ -135,7 +166,7 @@ int calculatorNAV::endDateByKey(const objectKey &key_)
         case objectType_Security:
             return tradeDateCalendar::endDate();
     case objectType_Symbol:
-            return m_portfolio.securities().value(key_.id).endDate();
+            return d->currentPortfolio.securities().value(key_.id).endDate();
         default:
             return 0;
     }

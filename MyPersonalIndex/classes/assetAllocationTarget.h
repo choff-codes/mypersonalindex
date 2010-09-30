@@ -8,7 +8,7 @@
 class assetAllocationTarget: public objectBase, public queriesBatch
 {
 public:
-    assetAllocationTarget(int parent_ = -1):
+    assetAllocationTarget(int parent_ = UNASSIGNED):
         objectBase(parent_)
     {}
 
@@ -16,8 +16,9 @@ public:
 
     bool isEmpty() const { return m_targets.isEmpty(); }
     int count() const { return m_targets.count(); }
-    bool contains(int id_) const { return id_ == -1 ? m_targets.isEmpty() : m_targets.contains(id_); }
-    double value(int id_) const { return id_ == -1 ? 1 : m_targets.value(id_); }
+    // if this is unassigned and there are no asset allocation targets, then assign this target, i.e. (Blank)
+    bool contains(int id_) const { return id_ == UNASSIGNED ? m_targets.isEmpty() : m_targets.contains(id_); }
+    double value(int id_) const { return id_ == UNASSIGNED ? 1 : m_targets.value(id_); }
 
     QMap<int, double>::const_iterator constBegin() const { return m_targets.constBegin(); }
     QMap<int, double>::const_iterator constEnd() const { return m_targets.constEnd(); }

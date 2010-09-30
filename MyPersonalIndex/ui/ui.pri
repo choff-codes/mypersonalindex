@@ -8,7 +8,8 @@ SOURCES += $$PWD/frmSecurity_UI.cpp \
     $$PWD/frmAcctEdit_UI.cpp \
     $$PWD/frmColumns_UI.cpp \
     $$PWD/frmSort_UI.cpp \
-    $$PWD/frmCompare_UI.cpp
+    $$PWD/frmCompare_UI.cpp \
+    $$PWD/frmMain.cpp
 HEADERS += $$PWD/frmPortfolio_UI.h \
     $$PWD/frmMain_UI.h \
     $$PWD/frmSecurity_UI.h \
@@ -18,4 +19,6 @@ HEADERS += $$PWD/frmPortfolio_UI.h \
     $$PWD/frmAcctEdit_UI.h \
     $$PWD/frmColumns_UI.h \
     $$PWD/frmSort_UI.h \
-    $$PWD/frmCompare_UI.h
+    $$PWD/frmCompare_UI.h \
+    $$PWD/frmMain.h
+FORMS += $$PWD/frmMain.ui

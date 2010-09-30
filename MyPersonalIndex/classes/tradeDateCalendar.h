@@ -13,6 +13,8 @@ public:
         direction_ascending = 1
     };
 
+    static const int frequency_Count = 4;
+
     enum frequency {
         frequency_Once,
         frequency_Daily,
@@ -59,10 +61,10 @@ public:
             END
         };
 
-        const_iterator(const tradeDateCalendar* v_, etype t_)
+        const_iterator(const tradeDateCalendar* v_, etype t_):
+            m_currentDate(0),
+            m_endDate(QDate::currentDate().toJulianDay() + 1)
         {
-            m_endDate = QDate::currentDate().toJulianDay() + 1;
-
             if (t_ == START)
                 m_currentDate = qMin(v_->m_date, m_endDate);
             if (t_ == END)
@@ -74,7 +76,7 @@ public:
 
         const_iterator& operator++()
         {
-            m_currentDate = qMin(checkTradeDate(++m_currentDate, direction_ascending), m_endDate);
+            m_currentDate = qMin(checkTradeDate(m_currentDate + 1, direction_ascending), m_endDate);
             return *this;
         }
 

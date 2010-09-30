@@ -175,6 +175,8 @@ double statistic::cumulativeNormalDistribution(const statisticInfo &statisticInf
     const double b5 =  1.330274429;
     const double p  =  0.2316419;
     const double c  =  0.39894228;
+
+    // x = Yearly Return / Yearly Standard Deviation
     const double x = returnPercent(statisticInfo_, 252) / (sqrt(252) * statisticInfo_.standardDeviation);
     double t;
 

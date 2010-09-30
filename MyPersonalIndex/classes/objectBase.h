@@ -10,7 +10,7 @@ class objectBase
 public:
     int parent;
 
-    objectBase(int parent_ = -1):
+    objectBase(int parent_ = UNASSIGNED):
         parent(parent_)
     {}
 

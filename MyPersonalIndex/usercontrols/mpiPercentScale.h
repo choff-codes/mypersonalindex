@@ -8,9 +8,9 @@ class mpiPercentScale: public QwtScaleDraw
 {
 public:
 
-    QwtText label(double v) const
+    QwtText label(double v_) const
     {
-        return functions::doubleToPercentage(v);
+        return functions::doubleToPercentage(v_);
     }
 };
 

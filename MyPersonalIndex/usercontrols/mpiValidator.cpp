@@ -1,23 +1,23 @@
 #include "mpiValidator.h"
 
-QValidator::State mpiDoubleValidator::validate(QString &input, int &pos) const
+QValidator::State mpiDoubleValidator::validate(QString &input_, int &pos_) const
 {
-    if (input.isEmpty())
+    if (input_.isEmpty())
         return QValidator::Intermediate;
 
-    if ( QDoubleValidator::validate(input, pos) != QValidator::Acceptable
-         || input == "," || input == "." )  // has to be greater than 1
+    if ( QDoubleValidator::validate(input_, pos_) != QValidator::Acceptable
+         || input_ == "," || input_ == "." )  // has to be greater than 1
         return QValidator::Invalid;
 
     return QValidator::Acceptable;
 }
 
-QValidator::State mpiIntValidator::validate(QString &input, int &pos) const
+QValidator::State mpiIntValidator::validate(QString &input_, int &pos_) const
 {
-    if (input.isEmpty())
+    if (input_.isEmpty())
         return QValidator::Intermediate;
 
-    if ( QIntValidator::validate(input, pos) != QValidator::Acceptable)
+    if ( QIntValidator::validate(input_, pos_) != QValidator::Acceptable)
         return QValidator::Invalid;
 
     return QValidator::Acceptable;

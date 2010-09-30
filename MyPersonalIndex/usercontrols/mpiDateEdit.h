@@ -6,7 +6,7 @@
 class mpiDateEdit : public QDateEdit
 {
 public:
-    mpiDateEdit(QWidget *parent = 0);
+    mpiDateEdit(QWidget *parent_ = 0);
 };
 
 #endif // MPIDATEEDIT_H

@@ -86,7 +86,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
 
                 insertExecutedTrade(portfolio_, s.id, date, e);
 
-                if (trade.value().cashAccount == -1)
+                if (trade.value().cashAccount == UNASSIGNED)
                     continue;
 
                 // reverse trade
@@ -170,7 +170,7 @@ QList<int> calculatorTrade::calculateDividendReinvestmentDates(int date_, const 
     return dates;
 }
 
-executedTrade calculatorTrade::calculateExecutedTrade(int date_, calculatorNAV &calc_, const QMap<int, assetAllocation> &aa,
+executedTrade calculatorTrade::calculateExecutedTrade(int date_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa,
     const security &parent_, const trade &trade_) const
 {
     double purchasePrice = calculateTradePrice(
@@ -202,7 +202,7 @@ double calculatorTrade::calculateTradePrice(trade::tradeType type_, double price
     return priorDayPrice_;
 }
 
-double calculatorTrade::calculateTradeShares(int date_, double price_, calculatorNAV &calc_, const QMap<int, assetAllocation> &aa,
+double calculatorTrade::calculateTradeShares(int date_, double price_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa,
     const security &parent_, const trade &trade_) const
 {
     if (functions::isZero(price_))

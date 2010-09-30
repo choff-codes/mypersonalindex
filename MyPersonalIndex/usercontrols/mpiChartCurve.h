@@ -8,7 +8,10 @@
 class mpiChartCurve
 {
 public:
-    mpiChartCurve(): m_curve(0) {}
+    mpiChartCurve():
+        m_curve(0)
+    { }
+
     ~mpiChartCurve() { setCurve(0); }
 
     void setCurve(QwtPlotCurve *curve_);

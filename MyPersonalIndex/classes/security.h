@@ -30,9 +30,9 @@ public:
     QMap<int, trade> trades;
     executedTradeMap executedTrades;
 
-    security(int id_ = -1, int parent_ = -1, const QString &description_ = QString()):
+    security(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(objectType_Security, description_, id_, parent_),
-        account(-1),
+        account(UNASSIGNED),
         expense(0),
         divReinvest(false),
         cashAccount(false),

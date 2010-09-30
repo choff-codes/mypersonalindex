@@ -1,23 +1,25 @@
 #include(forms/forms.pri)
 include(classes/classes.pri)
 #include(models/models.pri)
-#include(ui/ui.pri)
-#include(usercontrols/usercontrols.pri)
-
-INCLUDEPATH += shared/qwt
-INCLUDEPATH += shared/qtsingleapplication
+include(ui/ui.pri)
+include(usercontrols/usercontrols.pri)
+#include(shared/qtsingleapplication/qtsingleapplication.pri)
 
 win32{
+    INCLUDEPATH += shared/qwt
+
     CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd6.a
         else: LIBS += shared/qwt/lib/libqwt6.a
 }
 
 unix:!macx{
-    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd.so
-        else: LIBS += shared/qwt/lib/libqwt.so
+    INCLUDEPATH += /usr/include/qwt/
+    LIBS += /usr/lib/libqwt.so
 }
 
 macx{
+    INCLUDEPATH += shared/qwt
+
     CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwt.dylib
         else: LIBS += shared/qwt/lib/libqwt.dylib
 }

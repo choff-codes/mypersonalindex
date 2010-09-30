@@ -1,2 +1,0 @@
-C:\Qt\2009.03\mingw\bin>gcc.exe -dynamiclib C:\QT\extension-functions.c -o libsqlitefunctions.so
-gcc -fPIC -lm -shared extension-functions.c -o libsqlitefunctions.so

@@ -2,40 +2,42 @@
 
 //enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Offset, row_Holdings };
 const QStringList aaRow::columns = QStringList() << "Asset Class" << "Cost Basis" << "Total Value" << "% of Portfolio"
-    << "Gain/Loss" << "% Gain Loss" << "Target" << "Variance" << "Rebalance\nAmount" << "# Holdings" << "ID";
+    << "Gain/Loss" << "% Gain Loss" << "Target" << "Variance" << "Rebalance\nAmount" << "# Holdings" << "ID" << "NAV";
 
 const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::String) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
     << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-    << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int);
+    << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int) << QVariant(QVariant::Double);
 
 
-aaRow::aaRow(const snapshotPortfolio &info, const snapshot &aaInfo, portfolioAttributes::thesholdMethod method,
-    const assetAllocation &aa, const QString &sort): baseRow(sort)
-{
+aaRow::aaRow(const snapshot &aaInfo_, const historicalNAV nav_, portfolioAttributes::thesholdMethod method_, const assetAllocation &aa_, const QString &sort_):
+    baseRow(sort_)
+{    
     //row_Description
     this->values.append(aa.description);
     //row_CostBasis
-    this->values.append(aaInfo.costBasis);
+    this->values.append(aaInfo_.costBasis);
     //row_Value
-    this->values.append(aaInfo.totalValue);
+    this->values.append(aaInfo_.totalValue);
     //row_ValueP
-    this->values.append(info.totalValue == 0 ? QVariant() : aaInfo.totalValue / info.totalValue);
+    this->values.append(info.totalValue == 0 ? QVariant() : aaInfo_.totalValue / info.totalValue);
     //row_Gain
-    this->values.append(aaInfo.totalValue - aaInfo.costBasis);
+    this->values.append(aaInfo_.totalValue - aaInfo_.costBasis);
     //row_GainP
-    this->values.append(aaInfo.costBasis == 0 || (aaInfo.totalValue < EPSILON && aaInfo.totalValue > EPSILONNEGATIVE) ? QVariant() : (aaInfo.totalValue / aaInfo.costBasis) - 1);
+    this->values.append(aaInfo_.costBasis == 0 || (aaInfo_.totalValue < EPSILON && aaInfo_.totalValue > EPSILONNEGATIVE) ? QVariant() : (aaInfo_.totalValue / aaInfo_.costBasis) - 1);
     //row_Target
     this->values.append(aa.target < 0 ? QVariant() : aa.target);
     //row_Variance
     this->values.append(info.totalValue == 0 || aa.target < EPSILON ? QVariant() :
-        method == portfolioAttributes::theshold_AA ? ((aaInfo.totalValue / (info.totalValue * aa.target)) - 1) :
-        (aaInfo.totalValue / info.totalValue) - aa.target);
+        method == portfolioAttributes::theshold_AA ? ((aaInfo_.totalValue / (info.totalValue * aa.target)) - 1) :
+        (aaInfo_.totalValue / info.totalValue) - aa.target);
     //row_Rebalance
-    this->values.append(info.totalValue == 0 || aa.target < EPSILON ? QVariant() : -1 * info.totalValue * ((aaInfo.totalValue / info.totalValue) - aa.target));
+    this->values.append(info.totalValue == 0 || aa.target < EPSILON ? QVariant() : -1 * info.totalValue * ((aaInfo_.totalValue / info.totalValue) - aa.target));
     //row_Holdings
-    this->values.append(aaInfo.count);
+    this->values.append(aaInfo_.count);
     //row_ID
     this->values.append(aa.id);
+    //row_IRR
+    this->values.append(nav_.nav());
 }
 
 QMap<int, QString> aaRow::fieldNames()

@@ -1,6 +1,7 @@
 #include "mpiDateEdit.h"
 
-mpiDateEdit::mpiDateEdit(QWidget *parent): QDateEdit(parent)
+mpiDateEdit::mpiDateEdit(QWidget *parent_):
+    QDateEdit(parent_)
 {
     setDate(QDate::currentDate());
     setCalendarPopup(true);

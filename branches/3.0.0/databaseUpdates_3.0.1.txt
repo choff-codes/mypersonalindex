@@ -1,3 +1,5 @@
+UPDATE Settings SET Splits = 1
+
 CREATE TABLE "PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Date" INTEGER,"Shares" NUMERIC,"Price" NUMERIC,"Commission" NUMERIC, "AssociatedTradeID" INTEGER)
 CREATE TABLE "HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC)
 

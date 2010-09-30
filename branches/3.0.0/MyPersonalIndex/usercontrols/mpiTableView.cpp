@@ -1,12 +1,12 @@
 #include "mpiTableView.h"
 
-void mpiTableView::exportTable(bool copy)
+void mpiTableView::exportTable(bool toClipboard_)
 {
     QList<int> rows;
     QString fileType, filePath;
     QString delimiter = "\t";
 
-    if (!copy) // export
+    if (!toClipboard_) // export
     {
         for(int i = 0; i < model()->rowCount(); ++i)
             rows.append(i);
@@ -54,7 +54,7 @@ void mpiTableView::exportTable(bool copy)
         lines.append(line.join(delimiter));
     }
 
-    if (!copy) // export
+    if (!toClipboard_) // export
     {
         QFile data(filePath);
         if (!data.open(QFile::WriteOnly | QFile::Truncate | QIODevice::Text))

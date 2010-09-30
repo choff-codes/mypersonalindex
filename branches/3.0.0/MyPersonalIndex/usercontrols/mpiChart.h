@@ -13,7 +13,9 @@ class mpiChart : public QwtPlot
     Q_OBJECT
 
 public:
-    mpiChart(QWidget *parent = 0): QwtPlot(parent) {}
+    mpiChart(QWidget *parent_ = 0):
+        QwtPlot(parent_)
+    {}
 
 public slots:
     void exportChart();

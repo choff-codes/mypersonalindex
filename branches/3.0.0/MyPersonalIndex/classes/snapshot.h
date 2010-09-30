@@ -1,8 +1,6 @@
 #ifndef SNAPSHOT_H
 #define SNAPSHOT_H
 
-#include <QMap>
-
 class snapshot
 {
 public:

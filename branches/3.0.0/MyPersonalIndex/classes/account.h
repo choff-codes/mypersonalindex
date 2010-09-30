@@ -14,9 +14,9 @@ public:
     bool taxDeferred;
     costBasis overrideCostBasis;
 
-    account(int id_ = -1, int parent_ = -1, const QString &description_ = "(Blank)"):
+    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
         objectKey(objectType_Account, description_, id_, parent_),
-        taxRate(-1),
+        taxRate(UNASSIGNED),
         taxDeferred(false),
         overrideCostBasis(costBasis_None)
     {}

@@ -168,8 +168,8 @@ int updatePrices::getSplits(const QString &symbol_, const historicalPrices &pric
         return NO_DATA;
 
     int earliestUpdate = NO_DATA;
-    const QString htmlSplitTrue = "<br><center>Splits:<nobr>";  // but signifying splits
-    const QString htmlSplitNone = "<br><center>Splits:none</center>"; // same line, but signifying no splits
+    const QString htmlSplitTrue = "Splits:<nobr>";  // but signifying splits
+    const QString htmlSplitNone = "Splits:none</center>"; // same line, but signifying no splits
     QList<QByteArray> lines = downloadFile(QUrl(getSplitAddress(symbol_)), false);
 
     if (lines.isEmpty())
@@ -181,7 +181,7 @@ int updatePrices::getSplits(const QString &symbol_, const historicalPrices &pric
     if (line.contains(htmlSplitNone, Qt::CaseInsensitive))
         return earliestUpdate;
 
-    int i = line.indexOf(htmlSplitTrue, 0, Qt::CaseInsensitive);
+    int i = line.indexOf(htmlSplitTrue, 0, Qt::CaseSensitive);
     if (i == -1)
         return earliestUpdate;
     else

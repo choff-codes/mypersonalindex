@@ -22,7 +22,7 @@ public:
     QString description;
     int id;
 
-    objectKey(objectType type_ = objectType_None, const QString &description_ = QString(), int id_ = -1, int parent_ = -1):
+    objectKey(objectType type_ = objectType_None, const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectBase(parent_),
         type(type_),
         description(description_),

@@ -1,8 +1,8 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#define VERSION 300 // UPDATE EACH RELEASE
-#define VERSIONTEXT "3.0.0" // UPDATE EACH RELEASE
+#define VERSION 310 // UPDATE EACH RELEASE
+#define VERSIONTEXT "3.1.0" // UPDATE EACH RELEASE
 
 #include <QVariant>
 #include <QSize>

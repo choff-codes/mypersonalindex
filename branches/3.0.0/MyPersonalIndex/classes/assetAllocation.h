@@ -11,9 +11,9 @@ class assetAllocation: public objectKey
 public:
     double target;
 
-    assetAllocation(int id_ = -1, int parent_ = -1, const QString &description_ = "(Blank)"):
+    assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
         objectKey(objectType_AA, description_, id_, parent_),
-        target(-1)
+        target(UNASSIGNED)
     {}
 
     bool operator==(const assetAllocation &other_) const;

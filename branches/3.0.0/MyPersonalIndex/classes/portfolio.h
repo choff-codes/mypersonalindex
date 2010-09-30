@@ -13,7 +13,7 @@ class portfolioData;
 class portfolio
 {
 public:
-    portfolio(int id_ = -1);
+    portfolio(int id_ = UNASSIGNED);
     portfolio(const portfolio &other_);
     ~portfolio();
 

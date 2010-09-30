@@ -11,6 +11,9 @@
 class trade: public objectKey
 {
 public:
+
+    static const int tradeType_Count = 11;
+
     enum tradeType {
         tradeType_Purchase,
         tradeType_Sale,
@@ -36,13 +39,13 @@ public:
     int startDate;
     int endDate;
 
-    trade(int id_ = -1, int parent_ = -1):
+    trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectKey(objectType_Trade, QString(), id_, parent_),
         type(tradeType_Purchase),
-        value(-1),
-        price(-1),
+        value(UNASSIGNED),
+        price(UNASSIGNED),
         commission(0),
-        cashAccount(-1),
+        cashAccount(UNASSIGNED),
         frequency(tradeDateCalendar::frequency_Once),
         date(0),
         startDate(0),

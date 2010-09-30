@@ -18,10 +18,13 @@ class mpiTableView : public QTableView
     Q_OBJECT
 
 public:
-    mpiTableView(const bool &hasRowLabels, QWidget *parent = 0): QTableView(parent), m_hasRowLabels(hasRowLabels) {}
+    mpiTableView(bool hasRowLabels_, QWidget *parent_ = 0):
+        QTableView(parent_),
+        m_hasRowLabels(hasRowLabels_)
+    {}
 
 public slots:
-    void exportTable(bool copy = false);
+    void exportTable(bool toClipboard_ = false);
     void copyTable() { exportTable(true); }
 
 private:

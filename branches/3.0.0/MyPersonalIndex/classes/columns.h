@@ -15,7 +15,7 @@ public:
         columns_Stat
     };
 
-    columns(int parent_ = -1):
+    columns(int parent_ = UNASSIGNED):
         objectBase(parent_)
     {}
 

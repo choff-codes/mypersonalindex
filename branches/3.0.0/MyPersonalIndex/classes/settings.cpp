@@ -18,5 +18,5 @@ void settings::save(const queries &dataSource_)
     }
 
     dataSource_.deleteTable(queries::table_Settings);
-    dataSource_.insert(queries::table_Settings, values, -1);
+    dataSource_.insert(queries::table_Settings, values, UNASSIGNED);
 }

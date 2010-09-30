@@ -4,7 +4,7 @@
 #include <qmath.h>
 #include <qnumeric.h>
 #include <QHash>
-#include <QMap>
+#include <QSharedData>
 #include "snapshot.h"
 #include "portfolio.h"
 #include "tradeDateCalendar.h"
@@ -15,12 +15,15 @@
 #include <QTime>
 #endif
 
+class calculatorNAVData;
 class calculatorNAV
 {
 public:
-    calculatorNAV(const portfolio &portfolio_):
-        m_portfolio(portfolio_)
-    {}
+    calculatorNAV(const portfolio &portfolio_);
+    calculatorNAV(const calculatorNAV &other_);
+    ~calculatorNAV();
+
+    calculatorNAV& operator=(const calculatorNAV &other_);
 
     snapshotSecurity securitySnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot portfolioSnapshot(int date_, int priorDate_ = 0);
@@ -31,8 +34,7 @@ public:
     historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_ = 1);
 
 private:
-    portfolio m_portfolio;
-    QHash<int, QHash<int, snapshotSecurity> > m_cache;
+    QExplicitlySharedDataPointer<calculatorNAVData> d;
 
     snapshot snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_);
     int beginDateByKey(const objectKey &key_);

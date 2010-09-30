@@ -46,8 +46,8 @@ void frmTrade_UI::setupUI(QDialog *dialog)
     freq = new QLabel("&Frequency:", gpDate);
     cmbFreq = new QComboBox(gpDate);
 
-    for(int i = 0; i < trade::tradeFreq_Count; ++i)
-        cmbFreq->addItem(trade::frequencyToString((trade::tradeFreq)i));
+    for(int i = 0; i < tradeDateCalendar::frequency_Count; ++i)
+        cmbFreq->addItem(trade::frequencyToString((tradeDateCalendar::frequency)i));
 
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, cmbFreq);

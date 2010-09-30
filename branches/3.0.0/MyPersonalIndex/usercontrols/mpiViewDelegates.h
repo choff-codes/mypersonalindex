@@ -7,15 +7,20 @@
 class spinBoxDelegate : public QItemDelegate
 {
 public:
-    spinBoxDelegate(const double &min, const double &max, QObject *parent): QItemDelegate(parent), m_min(min), m_max(max) {}
+    spinBoxDelegate(double min_, double max_, QObject *parent_):
+        QItemDelegate(parent_),
+        m_min(min_),
+        m_max(max_)
+    {}
 
-    QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem&, const QModelIndex&) const;
-    void setEditorData(QWidget *editor, const QModelIndex &index) const;
-    void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
-    void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex&) const;
+    QWidget* createEditor(QWidget *parent_, const QStyleOptionViewItem&, const QModelIndex&) const;
+    void setEditorData(QWidget *editor_, const QModelIndex &index_) const;
+    void setModelData(QWidget *editor_, QAbstractItemModel *model_, const QModelIndex &index_) const;
+    void updateEditorGeometry(QWidget *editor_, const QStyleOptionViewItem &option_, const QModelIndex&) const;
 
 private:
-    double m_min, m_max;
+    double m_min;
+    double m_max;
 };
 
 //class checkBoxDelegate : public QItemDelegate

@@ -12,18 +12,18 @@
 class frmColumns_UI
 {
 public:
-    QVBoxLayout *mainLayout;
-    QGroupBox *gpMain;
-    QHBoxLayout *groupLayout;
-    QListWidget *removedItems;
-    QListWidget *addedItems;
+    QVBoxLayout *layout;
+    QGroupBox *groupBox;
+    QHBoxLayout *groupBoxLayout;
+    QListWidget *removedItemsList;
+    QListWidget *addedItemsList;
     QVBoxLayout *moveLayout;
-    QToolButton *btnAdd;
-    QToolButton *btnRemove;
+    QToolButton *moveBtnAdd;
+    QToolButton *moveBtnRemove;
     QVBoxLayout *reorderLayout;
-    QToolButton *btnMoveUp;
-    QToolButton *btnMoveDown;
-    QDialogButtonBox *btnOkCancel;
+    QToolButton *reorderBtnMoveUp;
+    QToolButton *reorderBtnMoveDown;
+    QDialogButtonBox *okCancelBtn;
 
     void setupUI(QDialog* dialog);
 };

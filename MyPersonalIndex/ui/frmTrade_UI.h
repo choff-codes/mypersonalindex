@@ -1,15 +1,13 @@
 #ifndef FRMTRADE_UI_H
 #define FRMTRADE_UI_H
 
-#include <QGridLayout>
+#include <QHBoxLayout>
 #include <QGroupBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
-#include <QDialogButtonBox>
-#include <QDialog>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 #include "trade.h"
@@ -17,33 +15,32 @@
 class frmTrade_UI
 {
 public:
-    QGridLayout *mainLayout;
-    QGroupBox *gpTrade;
+    QHBoxLayout *layout;
+    QGroupBox *groupBoxTrade;
     QFormLayout *tradeLayout;
     QLabel *type;
-    QComboBox *cmbType;
-    mpiDoubleValidator *validator;
+    QComboBox *typeCmb;
+    mpiDoubleValidator *sharePriceValidator;
     QLabel *shares;
-    QLineEdit *txtShares;
-    QCheckBox *chkPrice;
-    QLineEdit *txtPrice;
+    QLineEdit *sharesTxt;
+    QCheckBox *priceChk;
+    QLineEdit *priceTxt;
     QLabel *commission;
-    QLineEdit *txtCommission;
+    QLineEdit *commissionTxt;
     QLabel *cash;
-    QComboBox *cmbCash;
-    QGroupBox *gpDate;
+    QComboBox *cashCmb;
+    QGroupBox *groupBoxDate;
     QFormLayout *dateLayout;
     QLabel *freq;
-    QComboBox *cmbFreq;
+    QComboBox *freqCmb;
     QLabel *date;
-    mpiDateEdit *deDate;
-    QCheckBox *chkStarting;
-    mpiDateEdit *deStarting;
-    QCheckBox *chkEnding;
-    mpiDateEdit *deEnding;
-    QDialogButtonBox *btnOkCancel;
+    mpiDateEdit *dateDateEdit;
+    QCheckBox *startingChk;
+    mpiDateEdit *startingDateEdit;
+    QCheckBox *endingChk;
+    mpiDateEdit *endingDateEdit;
 
-    void setupUI(QDialog* dialog);
+    void setupUI(QWidget* parent = 0);
 };
 
 #endif // FRMTRADE_UI_H

@@ -1,78 +1,66 @@
 #include "frmPortfolio_UI.h"
 
-void frmPortfolio_UI::setupUI(QDialog *dialog)
+void frmPortfolio_UI::setupUI(QWidget *parent)
 {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
-
-    btnOkCancel = new QDialogButtonBox(dialog);
-    btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
-
-    mainLayout = new QVBoxLayout(dialog);
-    mainLayout->setSpacing(15);
-
-    layout = new QFormLayout();
+    layout = new QFormLayout(parent);
     layout->setVerticalSpacing(8);
 
-    desc = new QLabel("&Description:", dialog);
+    desc = new QLabel("&Description:", parent);
     layout->setWidget(0, QFormLayout::LabelRole, desc);
 
-    txtDesc = new QLineEdit(dialog);
-    layout->setWidget(0, QFormLayout::FieldRole, txtDesc);
+    descTxt = new QLineEdit(parent);
+    layout->setWidget(0, QFormLayout::FieldRole, descTxt);
 
-    startValue = new QLabel("&Index Start Value:", dialog);
+    startValue = new QLabel("&Index Start Value:", parent);
     layout->setWidget(1, QFormLayout::LabelRole, startValue);
 
-    txtStartValue = new QLineEdit(dialog);
-    ivalidator = new mpiIntValidator(1, 1000000, dialog);
-    txtStartValue->setValidator(ivalidator);
-    layout->setWidget(1, QFormLayout::FieldRole, txtStartValue);
+    startValueTxt = new QLineEdit(parent);
+    startValueValidator = new mpiIntValidator(1, 1000000, parent);
+    startValueTxt->setValidator(startValueValidator);
+    layout->setWidget(1, QFormLayout::FieldRole, startValueTxt);
 
-    aaThreshold = new QLabel("&AA Threshold:", dialog);
+    aaThreshold = new QLabel("&AA Threshold:", parent);
     layout->setWidget(2, QFormLayout::LabelRole, aaThreshold);
 
-    sbAAThreshold = new QSpinBox(dialog);
-    sbAAThreshold->setMaximum(100);
-    sbAAThreshold->setSuffix("%");
-    layout->setWidget(2, QFormLayout::FieldRole, sbAAThreshold);
+    aaThresholdSpinBox = new QSpinBox(parent);
+    aaThresholdSpinBox->setMaximum(100);
+    aaThresholdSpinBox->setSuffix("%");
+    layout->setWidget(2, QFormLayout::FieldRole, aaThresholdSpinBox);
 
-    aaThresholdValue = new QLabel("&Threshold Method:", dialog);
+    aaThresholdValue = new QLabel("&Threshold Method:", parent);
     layout->setWidget(3, QFormLayout::LabelRole, aaThresholdValue);
 
-    cmbAAThresholdValue = new QComboBox(dialog);
-    cmbAAThresholdValue->addItem("Portfolio Value");
-    cmbAAThresholdValue->addItem("AA Value");
-    layout->setWidget(3, QFormLayout::FieldRole, cmbAAThresholdValue);
+    aaThresholdValueCmb = new QComboBox(parent);
+    aaThresholdValueCmb->addItem("Portfolio Value");
+    aaThresholdValueCmb->addItem("AA Value");
+    layout->setWidget(3, QFormLayout::FieldRole, aaThresholdValueCmb);
 
-    costBasis = new QLabel("&Cost Basis Method:", dialog);
+    costBasis = new QLabel("&Cost Basis Method:", parent);
     layout->setWidget(4, QFormLayout::LabelRole, costBasis);
 
-    cmbCostBasis = new QComboBox(dialog);
-    cmbCostBasis->addItem("FIFO", costBasis_FIFO);
-    cmbCostBasis->addItem("LIFO", costBasis_LIFO);
-    cmbCostBasis->addItem("HIFO", costBasis_HIFO);
-    cmbCostBasis->addItem("Average", costBasis_AVG);
-    layout->setWidget(4, QFormLayout::FieldRole, cmbCostBasis);
+    costBasisCmb = new QComboBox(parent);
+    costBasisCmb->addItem("FIFO", costBasis_FIFO);
+    costBasisCmb->addItem("LIFO", costBasis_LIFO);
+    costBasisCmb->addItem("HIFO", costBasis_HIFO);
+    costBasisCmb->addItem("Average", costBasis_AVG);
+    layout->setWidget(4, QFormLayout::FieldRole, costBasisCmb);
 
-    startDate = new QLabel("&Start Date:", dialog);
+    startDate = new QLabel("&Start Date:", parent);
     layout->setWidget(5, QFormLayout::LabelRole, startDate);
 
-    dateStartDate = new mpiDateEdit(dialog);
-    layout->setWidget(5, QFormLayout::FieldRole, dateStartDate);
+    startDateDateEdit = new mpiDateEdit(parent);
+    layout->setWidget(5, QFormLayout::FieldRole, startDateDateEdit);
 
-    QLabel *tmp = new QLabel(dialog);  // hack needed for correct resizing
-    layout->setWidget(6, QFormLayout::LabelRole, tmp);
+    // no text label
+    layout->setWidget(6, QFormLayout::LabelRole, new QLabel(parent));
 
-    chkIncludeDiv = new QCheckBox("I&nclude Dividends", dialog);
-    layout->setWidget(6, QFormLayout::FieldRole, chkIncludeDiv);
+    includeDivChk = new QCheckBox("I&nclude Dividends", parent);
+    layout->setWidget(6, QFormLayout::FieldRole, includeDivChk);
 
-    mainLayout->addLayout(layout);
-    mainLayout->addWidget(btnOkCancel);
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
-
-    desc->setBuddy(txtDesc);
-    startValue->setBuddy(txtStartValue);
-    aaThreshold->setBuddy(sbAAThreshold);
-    aaThresholdValue->setBuddy(cmbAAThresholdValue);
-    costBasis->setBuddy(cmbCostBasis);
-    startDate->setBuddy(dateStartDate);
+    desc->setBuddy(descTxt);
+    startValue->setBuddy(startValueTxt);
+    aaThreshold->setBuddy(aaThresholdSpinBox);
+    aaThresholdValue->setBuddy(aaThresholdValueCmb);
+    costBasis->setBuddy(costBasisCmb);
+    startDate->setBuddy(startDateDateEdit);
 }

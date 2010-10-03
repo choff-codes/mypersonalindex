@@ -1,8 +1,7 @@
 #ifndef FRMSECURITY_UI_H
 #define FRMSECURITY_UI_H
 
-#include <QGridLayout>
-#include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QGroupBox>
 #include <QFormLayout>
 #include <QLabel>
@@ -12,64 +11,36 @@
 #include <QDoubleSpinBox>
 #include <QCheckBox>
 #include <QDialogButtonBox>
-#include <QToolBar>
-#include <QShortcut>
 #include <QPushButton>
-#include <QDialog>
-#include <QMenu>
 #include "mpiTableView.h"
 
 class frmSecurity_UI
 {
 public:
-    QGridLayout *mainLayout;
-    QHBoxLayout *topSectionLayout;
-    QGroupBox *gpSecurity;
+    QVBoxLayout *layout;
+    QGroupBox *securityGroupBox;
     QFormLayout *securityLayout;
     QLabel *symbol;
-    QHBoxLayout *symbolLayout;
-    QLineEdit *txtSymbol;
-    QToolButton *btnHistorical;
+    QLineEdit *symbolTxt;
     QLabel *acct;
-    QComboBox *cmbAcct;
+    QComboBox *acctCmb;
     QLabel *expense;
     QHBoxLayout *expenseLayout;
-    QDoubleSpinBox *sbExpense;
-    QToolButton *btnExpenseClear;
-    QCheckBox *chkReinvest;
-    QCheckBox *chkCash;
-    QCheckBox *chkInclude;
-    QCheckBox *chkHide;
-    QGroupBox *gpAA;
+    QDoubleSpinBox *expenseSpinBox;
+    QToolButton *expenseBtnClear;
+    QCheckBox *reinvestChk;
+    QCheckBox *cashChk;
+    QCheckBox *includeChk;
+    QCheckBox *hideChk;
+    QGroupBox *aaGroupBox;
     QVBoxLayout *aaLayout;
     mpiTableView *aa;
     QGridLayout *aaLayoutBottom;
-    QComboBox *cmbAA;
-    QPushButton *btnAAAdd;
-    QPushButton *btnAADelete;
-    QGroupBox *gpTrades;
-    QVBoxLayout *tradesLayout;
-    mpiTableView *trades;
-    QHBoxLayout *tradesLayoutButtons;
-    QPushButton *btnTradesAdd;
-    QPushButton *btnTradesEdit;
-    QPushButton *btnTradesDelete;
-    QMenu *tradesPopup;
-    QAction *tradesCopy;
-    QShortcut *tradesCopyShortcut;
-    QAction *tradesPaste;
-    QShortcut *tradesPasteShortcut;
-    QDialogButtonBox *btnOkCancel;
-    QPushButton *btnAddAnother;
-    QGroupBox *gpHistorical;
-    QVBoxLayout *historicalLayout;
-    QToolBar *tbHistorical;
-    QComboBox *cmbHistorical;
-    QAction *sortHistorical;
-    mpiTableView *history;
-    QShortcut *historyCopyShortcut;
+    QComboBox *aaCmb;
+    QPushButton *aaBtnAdd;
+    QPushButton *aaBtnDelete;
 
-    void setupUI(QDialog* dialog);
+    void setupUI(QWidget* parent = 0);
 };
 
 #endif // FRMSECURITY_UI_H

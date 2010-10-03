@@ -1,62 +1,53 @@
 #include "frmAcctEdit_UI.h"
 
-void frmAcctEdit_UI::setupUI(QDialog *dialog)
+void frmAcctEdit_UI::setupUI(QWidget *parent)
 {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    layout = new QFormLayout(parent);
 
-    btnOkCancel = new QDialogButtonBox(dialog);
-    btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    desc = new QLabel("&Description:", parent);
+    layout->setWidget(0, QFormLayout::LabelRole, desc);
 
-    mainLayout = new QVBoxLayout(dialog);
-    formLayout = new QFormLayout();
+    descTxt = new QLineEdit(parent);
+    layout->setWidget(0, QFormLayout::FieldRole, descTxt);
 
-    desc = new QLabel("&Description:", dialog);
-    formLayout->setWidget(0, QFormLayout::LabelRole, desc);
-
-    txtDesc = new QLineEdit(dialog);
-    formLayout->setWidget(0, QFormLayout::FieldRole, txtDesc);
-
-    taxrate = new QLabel("&Tax Rate:", dialog);
-    formLayout->setWidget(1, QFormLayout::LabelRole, taxrate);
+    taxRate = new QLabel("&Tax Rate:", parent);
+    layout->setWidget(1, QFormLayout::LabelRole, taxRate);
 
     taxRateLayout = new QHBoxLayout();
-    sbTaxRate = new QDoubleSpinBox(dialog);
-    sbTaxRate->setDecimals(2);
-    sbTaxRate->setMinimum(-1);
-    sbTaxRate->setMaximum(100);
-    sbTaxRate->setSingleStep(1);
-    sbTaxRate->setSuffix("%");
-    sbTaxRate->setSpecialValueText("None");
-    sbTaxRate->setValue(-1);
-    btnClearTaxRate = new QToolButton(dialog);
-    btnClearTaxRate->setText("C&lear");
+    taxRateSpinBox = new QDoubleSpinBox(parent);
+    taxRateSpinBox->setDecimals(2);
+    taxRateSpinBox->setMinimum(-1);
+    taxRateSpinBox->setMaximum(100);
+    taxRateSpinBox->setSingleStep(1);
+    taxRateSpinBox->setSuffix("%");
+    taxRateSpinBox->setSpecialValueText("None");
+    taxRateSpinBox->setValue(-1);
+    taxRateBtnClear = new QToolButton(parent);
+    taxRateBtnClear->setText("C&lear");
 
-    taxRateLayout->addWidget(sbTaxRate, 1);
-    taxRateLayout->addWidget(btnClearTaxRate);
-    formLayout->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
+    taxRateLayout->addWidget(taxRateSpinBox, 1);
+    taxRateLayout->addWidget(taxRateBtnClear);
+    layout->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
 
-    costBasis = new QLabel("&Cost Basis Method:", dialog);
-    formLayout->setWidget(2, QFormLayout::LabelRole, costBasis);
+    costBasis = new QLabel("&Cost Basis Method:", parent);
+    layout->setWidget(2, QFormLayout::LabelRole, costBasis);
 
-    cmbCostBasis = new QComboBox(dialog);
-    cmbCostBasis->addItem("Portfolio Default", costBasis_None);
-    cmbCostBasis->addItem("FIFO", costBasis_FIFO);
-    cmbCostBasis->addItem("LIFO", costBasis_LIFO);
-    cmbCostBasis->addItem("HIFO", costBasis_HIFO);
-    cmbCostBasis->addItem("Average", costBasis_AVG);
-    formLayout->setWidget(2, QFormLayout::FieldRole, cmbCostBasis);
+    costBasisCmb = new QComboBox(parent);
+    costBasisCmb->addItem("Portfolio Default", costBasis_None);
+    costBasisCmb->addItem("FIFO", costBasis_FIFO);
+    costBasisCmb->addItem("LIFO", costBasis_LIFO);
+    costBasisCmb->addItem("HIFO", costBasis_HIFO);
+    costBasisCmb->addItem("Average", costBasis_AVG);
+    layout->setWidget(2, QFormLayout::FieldRole, costBasisCmb);
 
-    formLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(dialog));
+    // no label
+    layout->setWidget(3, QFormLayout::LabelRole, new QLabel(parent));
 
-    chkTaxDeferred = new QCheckBox("T&ax Deferred", dialog);
-    formLayout->setWidget(3, QFormLayout::FieldRole, chkTaxDeferred);
+    taxDeferredChk = new QCheckBox("T&ax Deferred", parent);
+    layout->setWidget(3, QFormLayout::FieldRole, taxDeferredChk);
 
-    mainLayout->addLayout(formLayout);
-    mainLayout->addWidget(btnOkCancel);
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
-
-    desc->setBuddy(txtDesc);
-    taxrate->setBuddy(sbTaxRate);
-    costBasis->setBuddy(cmbCostBasis);
+    desc->setBuddy(descTxt);
+    taxRate->setBuddy(taxRateSpinBox);
+    costBasis->setBuddy(costBasisCmb);
 }
 

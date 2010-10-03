@@ -14,25 +14,25 @@
 class frmSort_UI
 {
 public:
-    QVBoxLayout *mainLayout;
-    QGroupBox *gpMain;
+    QVBoxLayout *layout;
+    QGroupBox *groupBox;
     QVBoxLayout *groupLayout;
-    QComboBox *sort1;
+    QComboBox *sort1Cmb;
     QGridLayout *sort1Layout;
     QButtonGroup *group1;
-    QRadioButton *rSortAsc1;
-    QRadioButton *rSortDesc1;
+    QRadioButton *group1SortAscRadio;
+    QRadioButton *group1SortDescRadio;
     QGridLayout *sort2Layout;
-    QComboBox *sort2;
+    QComboBox *sort2Cmb;
     QButtonGroup *group2;
-    QRadioButton *rSortAsc2;
-    QRadioButton *rSortDesc2;
+    QRadioButton *group2SortAscRadio;
+    QRadioButton *group2SortDescRadio;
     QGridLayout *sort3Layout;
-    QComboBox *sort3;
+    QComboBox *sort3Cmb;
     QButtonGroup *group3;
-    QRadioButton *rSortAsc3;
-    QRadioButton *rSortDesc3;
-    QDialogButtonBox *btnOkCancel;
+    QRadioButton *group3SortAscRadio;
+    QRadioButton *group3SortDescRadio;
+    QDialogButtonBox *okCancelBtn;
 
     void setupUI(QDialog* dialog);
 };

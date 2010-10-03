@@ -4,44 +4,44 @@ void frmColumns_UI::setupUI(QDialog *dialog)
 {
     dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
 
-    btnOkCancel = new QDialogButtonBox(dialog);
-    btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    okCancelBtn = new QDialogButtonBox(dialog);
+    okCancelBtn->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-    mainLayout = new QVBoxLayout(dialog);
-    gpMain = new QGroupBox("Add/Remove", dialog);
-    groupLayout = new QHBoxLayout(gpMain);
+    layout = new QVBoxLayout(dialog);
+    groupBox = new QGroupBox("Add/Remove", dialog);
+    groupBoxLayout = new QHBoxLayout(groupBox);
 
-    removedItems = new QListWidget(gpMain);
-    removedItems->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    groupLayout->addWidget(removedItems);
+    removedItemsList = new QListWidget(groupBox);
+    removedItemsList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    groupBoxLayout->addWidget(removedItemsList);
 
     moveLayout = new QVBoxLayout();
-    btnAdd = new QToolButton(gpMain);
-    btnAdd->setArrowType(Qt::RightArrow);
-    btnRemove = new QToolButton(gpMain);
-    btnRemove->setArrowType(Qt::LeftArrow);
+    moveBtnAdd = new QToolButton(groupBox);
+    moveBtnAdd->setArrowType(Qt::RightArrow);
+    moveBtnRemove = new QToolButton(groupBox);
+    moveBtnRemove->setArrowType(Qt::LeftArrow);
     moveLayout->addStretch();
-    moveLayout->addWidget(btnAdd);
-    moveLayout->addWidget(btnRemove);
+    moveLayout->addWidget(moveBtnAdd);
+    moveLayout->addWidget(moveBtnRemove);
     moveLayout->addStretch();
-    groupLayout->addLayout(moveLayout);
+    groupBoxLayout->addLayout(moveLayout);
 
-    addedItems = new QListWidget(gpMain);
-    addedItems->setSelectionMode(QAbstractItemView::ExtendedSelection);
-    groupLayout->addWidget(addedItems);
+    addedItemsList = new QListWidget(groupBox);
+    addedItemsList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+    groupBoxLayout->addWidget(addedItemsList);
 
     reorderLayout = new QVBoxLayout();
-    btnMoveUp = new QToolButton(gpMain);
-    btnMoveUp->setArrowType(Qt::UpArrow);
-    btnMoveDown = new QToolButton(gpMain);
-    btnMoveDown->setArrowType(Qt::DownArrow);
+    reorderBtnMoveUp = new QToolButton(groupBox);
+    reorderBtnMoveUp->setArrowType(Qt::UpArrow);
+    reorderBtnMoveDown = new QToolButton(groupBox);
+    reorderBtnMoveDown->setArrowType(Qt::DownArrow);
     reorderLayout->addStretch();
-    reorderLayout->addWidget(btnMoveUp);
-    reorderLayout->addWidget(btnMoveDown);
+    reorderLayout->addWidget(reorderBtnMoveUp);
+    reorderLayout->addWidget(reorderBtnMoveDown);
     reorderLayout->addStretch();
-    groupLayout->addLayout(reorderLayout);
+    groupBoxLayout->addLayout(reorderLayout);
 
-    mainLayout->addWidget(gpMain);
-    mainLayout->addWidget(btnOkCancel);
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
+    layout->addWidget(groupBox);
+    layout->addWidget(okCancelBtn);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 }

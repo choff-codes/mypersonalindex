@@ -1,45 +1,35 @@
 #include "frmAAEdit_UI.h"
 
-void frmAAEdit_UI::setupUI(QDialog *dialog)
+void frmAAEdit_UI::setupUI(QWidget *parent)
 {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    layout = new QFormLayout(parent);
 
-    btnOkCancel = new QDialogButtonBox(dialog);
-    btnOkCancel->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    desc = new QLabel("&Description:", parent);
+    layout->setWidget(0, QFormLayout::LabelRole, desc);
 
-    mainLayout = new QVBoxLayout(dialog);
-    formLayout = new QFormLayout();
+    descTxt = new QLineEdit(parent);
+    layout->setWidget(0, QFormLayout::FieldRole, descTxt);
 
-    desc = new QLabel("&Description:", dialog);
-    formLayout->setWidget(0, QFormLayout::LabelRole, desc);
-
-    txtDesc = new QLineEdit(dialog);
-    formLayout->setWidget(0, QFormLayout::FieldRole, txtDesc);
-
-    target = new QLabel("&Target:", dialog);
-    formLayout->setWidget(1, QFormLayout::LabelRole, target);
+    target = new QLabel("&Target:", parent);
+    layout->setWidget(1, QFormLayout::LabelRole, target);
 
     targetLayout = new QHBoxLayout();
-    sbTarget = new QDoubleSpinBox(dialog);
-    sbTarget->setDecimals(2);
-    sbTarget->setMinimum(-1);
-    sbTarget->setMaximum(100);
-    sbTarget->setSingleStep(1);
-    sbTarget->setSuffix("%");
-    sbTarget->setSpecialValueText("None");
-    sbTarget->setValue(-1);
-    btnClearTarget = new QToolButton(dialog);
-    btnClearTarget->setText("&Clear");
+    targetSpinBox = new QDoubleSpinBox(parent);
+    targetSpinBox->setDecimals(2);
+    targetSpinBox->setMinimum(-1);
+    targetSpinBox->setMaximum(100);
+    targetSpinBox->setSingleStep(1);
+    targetSpinBox->setSuffix("%");
+    targetSpinBox->setSpecialValueText("None");
+    targetSpinBox->setValue(-1);
+    targetBtnClear = new QToolButton(parent);
+    targetBtnClear->setText("&Clear");
 
-    targetLayout->addWidget(sbTarget, 1);
-    targetLayout->addWidget(btnClearTarget);
+    targetLayout->addWidget(targetSpinBox, 1);
+    targetLayout->addWidget(targetBtnClear);
 
-    formLayout->setLayout(1, QFormLayout::FieldRole, targetLayout);
+    layout->setLayout(1, QFormLayout::FieldRole, targetLayout);
 
-    mainLayout->addLayout(formLayout);
-    mainLayout->addWidget(btnOkCancel);
-    mainLayout->setSizeConstraint(QLayout::SetFixedSize);
-
-    desc->setBuddy(txtDesc);
-    target->setBuddy(sbTarget);
+    desc->setBuddy(descTxt);
+    target->setBuddy(targetSpinBox);
 }

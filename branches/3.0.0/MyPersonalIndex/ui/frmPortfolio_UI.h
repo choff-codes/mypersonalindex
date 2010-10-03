@@ -1,15 +1,12 @@
 #ifndef FRMPORTFOLIO_UI_H
 #define FRMPORTFOLIO_UI_H
 
-#include <QVBoxLayout>
-#include <QDialogButtonBox>
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
 #include <QComboBox>
 #include <QCheckBox>
-#include <QDialog>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 #include "costBasis.h"
@@ -17,25 +14,23 @@
 class frmPortfolio_UI
 {
 public:
-    QVBoxLayout *mainLayout;
-    QDialogButtonBox *btnOkCancel;
     QFormLayout *layout;
     QLabel *desc;
-    QLineEdit *txtDesc;
+    QLineEdit *descTxt;
     QLabel *startValue;
-    QLineEdit *txtStartValue;
-    mpiIntValidator *ivalidator;
+    QLineEdit *startValueTxt;
+    mpiIntValidator *startValueValidator;
     QLabel *aaThreshold;
-    QSpinBox *sbAAThreshold;
+    QSpinBox *aaThresholdSpinBox;
     QLabel *aaThresholdValue;
-    QComboBox *cmbAAThresholdValue;
+    QComboBox *aaThresholdValueCmb;
     QLabel *costBasis;
-    QComboBox *cmbCostBasis;
+    QComboBox *costBasisCmb;
     QLabel *startDate;
-    mpiDateEdit *dateStartDate;
-    QCheckBox *chkIncludeDiv;
+    mpiDateEdit *startDateDateEdit;
+    QCheckBox *includeDivChk;
 
-    void setupUI(QDialog* dialog);
+    void setupUI(QWidget* parent = 0);
 };
 
 #endif // FRMPORTFOLIO_UI_H

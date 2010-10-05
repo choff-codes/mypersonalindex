@@ -1,17 +1,21 @@
-#include "frmAAEdit_UI.h"
+#include "frmEditAA_UI.h"
 
-void frmAAEdit_UI::setupUI(QWidget *parent)
+void frmEditAA_UI::setupUI(QWidget *parent)
 {
-    layout = new QFormLayout(parent);
+    layout = new QHBoxLayout(parent);
+    groupBox = new QGroupBox("Asset Class", parent);
+    layout->addWidget(groupBox);
+
+    layoutAA = new QFormLayout(groupBox);
 
     desc = new QLabel("&Description:", parent);
-    layout->setWidget(0, QFormLayout::LabelRole, desc);
+    layoutAA->setWidget(0, QFormLayout::LabelRole, desc);
 
     descTxt = new QLineEdit(parent);
-    layout->setWidget(0, QFormLayout::FieldRole, descTxt);
+    layoutAA->setWidget(0, QFormLayout::FieldRole, descTxt);
 
     target = new QLabel("&Target:", parent);
-    layout->setWidget(1, QFormLayout::LabelRole, target);
+    layoutAA->setWidget(1, QFormLayout::LabelRole, target);
 
     targetLayout = new QHBoxLayout();
     targetSpinBox = new QDoubleSpinBox(parent);
@@ -28,7 +32,7 @@ void frmAAEdit_UI::setupUI(QWidget *parent)
     targetLayout->addWidget(targetSpinBox, 1);
     targetLayout->addWidget(targetBtnClear);
 
-    layout->setLayout(1, QFormLayout::FieldRole, targetLayout);
+    layoutAA->setLayout(1, QFormLayout::FieldRole, targetLayout);
 
     desc->setBuddy(descTxt);
     target->setBuddy(targetSpinBox);

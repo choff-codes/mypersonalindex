@@ -1,17 +1,20 @@
-#ifndef FRMAAEDIT_UI_H
-#define FRMAAEDIT_UI_H
+#ifndef FRMEDITAA_UI_H
+#define FRMEDITAA_UI_H
 
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QHBoxLayout>
 #include <QDoubleSpinBox>
 #include <QToolButton>
 
-class frmAAEdit_UI
+class frmEditAA_UI
 {
 public:
-    QFormLayout *layout;
+    QHBoxLayout *layout;
+    QGroupBox *groupBox;
+    QFormLayout *layoutAA;
     QLabel *desc;
     QLineEdit *descTxt;
     QLabel *target;
@@ -22,4 +25,4 @@ public:
     void setupUI(QWidget* parent = 0);
 };
 
-#endif // FRMAAEDIT_UI_H
+#endif // FRMEDITAA_UI_H

@@ -1,6 +1,6 @@
-#include "frmTrade_UI.h"
+#include "frmEditTrade_UI.h"
 
-void frmTrade_UI::setupUI(QWidget *parent)
+void frmEditTrade_UI::setupUI(QWidget *parent)
 {
     layout = new QHBoxLayout(parent);
 
@@ -64,8 +64,8 @@ void frmTrade_UI::setupUI(QWidget *parent)
     dateLayout->setWidget(3, QFormLayout::LabelRole, endingChk);
     dateLayout->setWidget(3, QFormLayout::FieldRole, endingDateEdit);
 
-    layout->addWidget(groupBoxTrade);
-    layout->addWidget(groupBoxDate);
+    layout->addWidget(groupBoxTrade, 1);
+    layout->addWidget(groupBoxDate, 1);
 
     type->setBuddy(typeCmb);
     shares->setBuddy(sharesTxt);

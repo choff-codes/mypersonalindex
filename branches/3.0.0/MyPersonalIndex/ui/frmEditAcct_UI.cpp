@@ -1,17 +1,21 @@
-#include "frmAcctEdit_UI.h"
+#include "frmEditAcct_UI.h"
 
-void frmAcctEdit_UI::setupUI(QWidget *parent)
+void frmEditAcct_UI::setupUI(QWidget *parent)
 {
-    layout = new QFormLayout(parent);
+    layout = new QHBoxLayout(parent);
+    groupBox = new QGroupBox("Account", parent);
+    layout->addWidget(groupBox);
+
+    layoutAcct = new QFormLayout(groupBox);
 
     desc = new QLabel("&Description:", parent);
-    layout->setWidget(0, QFormLayout::LabelRole, desc);
+    layoutAcct->setWidget(0, QFormLayout::LabelRole, desc);
 
     descTxt = new QLineEdit(parent);
-    layout->setWidget(0, QFormLayout::FieldRole, descTxt);
+    layoutAcct->setWidget(0, QFormLayout::FieldRole, descTxt);
 
     taxRate = new QLabel("&Tax Rate:", parent);
-    layout->setWidget(1, QFormLayout::LabelRole, taxRate);
+    layoutAcct->setWidget(1, QFormLayout::LabelRole, taxRate);
 
     taxRateLayout = new QHBoxLayout();
     taxRateSpinBox = new QDoubleSpinBox(parent);
@@ -27,10 +31,10 @@ void frmAcctEdit_UI::setupUI(QWidget *parent)
 
     taxRateLayout->addWidget(taxRateSpinBox, 1);
     taxRateLayout->addWidget(taxRateBtnClear);
-    layout->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
+    layoutAcct->setLayout(1, QFormLayout::FieldRole, taxRateLayout);
 
     costBasis = new QLabel("&Cost Basis Method:", parent);
-    layout->setWidget(2, QFormLayout::LabelRole, costBasis);
+    layoutAcct->setWidget(2, QFormLayout::LabelRole, costBasis);
 
     costBasisCmb = new QComboBox(parent);
     costBasisCmb->addItem("Portfolio Default", costBasis_None);
@@ -38,13 +42,13 @@ void frmAcctEdit_UI::setupUI(QWidget *parent)
     costBasisCmb->addItem("LIFO", costBasis_LIFO);
     costBasisCmb->addItem("HIFO", costBasis_HIFO);
     costBasisCmb->addItem("Average", costBasis_AVG);
-    layout->setWidget(2, QFormLayout::FieldRole, costBasisCmb);
+    layoutAcct->setWidget(2, QFormLayout::FieldRole, costBasisCmb);
 
     // no label
-    layout->setWidget(3, QFormLayout::LabelRole, new QLabel(parent));
+    layoutAcct->setWidget(3, QFormLayout::LabelRole, new QLabel(parent));
 
     taxDeferredChk = new QCheckBox("T&ax Deferred", parent);
-    layout->setWidget(3, QFormLayout::FieldRole, taxDeferredChk);
+    layoutAcct->setWidget(3, QFormLayout::FieldRole, taxDeferredChk);
 
     desc->setBuddy(descTxt);
     taxRate->setBuddy(taxRateSpinBox);

@@ -1,5 +1,5 @@
-#ifndef FRMTRADE_UI_H
-#define FRMTRADE_UI_H
+#ifndef FRMEDITTRADE_UI_H
+#define FRMEDITTRADE_UI_H
 
 #include <QHBoxLayout>
 #include <QGroupBox>
@@ -12,7 +12,7 @@
 #include "mpiDateEdit.h"
 #include "trade.h"
 
-class frmTrade_UI
+class frmEditTrade_UI
 {
 public:
     QHBoxLayout *layout;
@@ -43,4 +43,4 @@ public:
     void setupUI(QWidget* parent = 0);
 };
 
-#endif // FRMTRADE_UI_H
+#endif // FRMEDITTRADE_UI_H

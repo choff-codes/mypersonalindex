@@ -1,7 +1,9 @@
-#ifndef FRMPORTFOLIO_UI_H
-#define FRMPORTFOLIO_UI_H
+#ifndef FRMEDITPORTFOLIO_UI_H
+#define FRMEDITPORTFOLIO_UI_H
 
 #include <QFormLayout>
+#include <QHBoxLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QSpinBox>
@@ -11,10 +13,12 @@
 #include "mpiDateEdit.h"
 #include "costBasis.h"
 
-class frmPortfolio_UI
+class frmEditPortfolio_UI
 {
 public:
-    QFormLayout *layout;
+    QHBoxLayout *layout;
+    QGroupBox *groupBox;
+    QFormLayout *layoutTrade;
     QLabel *desc;
     QLineEdit *descTxt;
     QLabel *startValue;
@@ -33,4 +37,4 @@ public:
     void setupUI(QWidget* parent = 0);
 };
 
-#endif // FRMPORTFOLIO_UI_H
+#endif // FRMEDITPORTFOLIO_UI_H

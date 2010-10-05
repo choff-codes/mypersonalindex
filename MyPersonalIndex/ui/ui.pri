@@ -1,20 +1,22 @@
 INCLUDEPATH += $$PWD
-SOURCES += $$PWD/frmSecurity_UI.cpp \
-    $$PWD/frmPortfolio_UI.cpp \
+SOURCES += $$PWD/frmEditSecurity_UI.cpp \
+    $$PWD/frmEditPortfolio_UI.cpp \
     $$PWD/frmMain_UI.cpp \
-    $$PWD/frmTrade_UI.cpp \
-    $$PWD/frmAAEdit_UI.cpp \
-    $$PWD/frmAcctEdit_UI.cpp \
+    $$PWD/frmEditTrade_UI.cpp \
+    $$PWD/frmEditAA_UI.cpp \
+    $$PWD/frmEditAcct_UI.cpp \
     $$PWD/frmColumns_UI.cpp \
     $$PWD/frmSort_UI.cpp \
-    $$PWD/frmMain.cpp
-HEADERS += $$PWD/frmPortfolio_UI.h \
+    $$PWD/frmMain.cpp \
+    $$PWD/frmEdit_UI.cpp
+HEADERS += $$PWD/frmEditPortfolio_UI.h \
     $$PWD/frmMain_UI.h \
-    $$PWD/frmSecurity_UI.h \
-    $$PWD/frmTrade_UI.h \
-    $$PWD/frmAAEdit_UI.h \
-    $$PWD/frmAcctEdit_UI.h \
+    $$PWD/frmEditSecurity_UI.h \
+    $$PWD/frmEditTrade_UI.h \
+    $$PWD/frmEditAA_UI.h \
+    $$PWD/frmEditAcct_UI.h \
     $$PWD/frmColumns_UI.h \
     $$PWD/frmSort_UI.h \
-    $$PWD/frmMain.h
+    $$PWD/frmMain.h \
+    $$PWD/frmEdit_UI.h
 FORMS += $$PWD/frmMain.ui

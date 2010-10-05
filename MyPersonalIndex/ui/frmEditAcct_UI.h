@@ -1,7 +1,8 @@
-#ifndef FRMACCTEDIT_UI_H
-#define FRMACCTEDIT_UI_H
+#ifndef FRMEDITACCT_UI_H
+#define FRMEDITACCT_UI_H
 
 #include <QFormLayout>
+#include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
 #include <QHBoxLayout>
@@ -11,10 +12,12 @@
 #include <QCheckBox>
 #include "costBasis.h"
 
-class frmAcctEdit_UI
+class frmEditAcct_UI
 {
 public:
-    QFormLayout *layout;
+    QHBoxLayout *layout;
+    QGroupBox *groupBox;
+    QFormLayout *layoutAcct;
     QLabel *desc;
     QLineEdit *descTxt;
     QLabel *taxRate;
@@ -28,4 +31,4 @@ public:
     void setupUI(QWidget* parent = 0);
 };
 
-#endif // FRMACCTEDIT_UI_H
+#endif // FRMEDITACCT_UI_H

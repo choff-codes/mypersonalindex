@@ -1,5 +1,5 @@
-#ifndef FRMSECURITY_UI_H
-#define FRMSECURITY_UI_H
+#ifndef FRMEDITSECURITY_UI_H
+#define FRMEDITSECURITY_UI_H
 
 #include <QVBoxLayout>
 #include <QGroupBox>
@@ -14,7 +14,7 @@
 #include <QPushButton>
 #include "mpiTableView.h"
 
-class frmSecurity_UI
+class frmEditSecurity_UI
 {
 public:
     QVBoxLayout *layout;
@@ -43,4 +43,4 @@ public:
     void setupUI(QWidget* parent = 0);
 };
 
-#endif // FRMSECURITY_UI_H
+#endif // FRMEDITSECURITY_UI_H

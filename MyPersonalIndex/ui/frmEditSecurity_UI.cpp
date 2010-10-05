@@ -1,6 +1,6 @@
-#include "frmSecurity_UI.h"
+#include "frmEditSecurity_UI.h"
 
-void frmSecurity_UI::setupUI(QWidget *parent)
+void frmEditSecurity_UI::setupUI(QWidget *parent)
 {
     layout = new QVBoxLayout(parent);
 

@@ -8,9 +8,9 @@
 #include <QSettings>
 #include <QFileInfo>
 #include <QCoreApplication>
-#include "queriesBatch.h"
 #include "objectBase.h" // to get UNASSIGNED definition
 
+class queriesBatch;
 class queries
 {
 public:

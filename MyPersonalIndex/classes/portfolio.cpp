@@ -23,14 +23,6 @@ public:
         values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)attributes.defaultCostBasis);
         values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), attributes.startDate);
         values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)attributes.dividends);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsShowHidden), (int)attributes.holdingsShowHidden);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_HoldingsSort), attributes.holdingsSort);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAShowBlank), (int)attributes.aaShowBlank);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AASort), attributes.aaSort);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CorrelationShowHidden), (int)attributes.correlationShowHidden);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctShowBlank), (int)attributes.acctShowBlank);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AcctSort), attributes.acctSort);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_NAVSortDesc), (int)attributes.navSortDesc);
 
         attributes.id = dataSource_.insert(queries::table_Portfolio, values, attributes.id);
 

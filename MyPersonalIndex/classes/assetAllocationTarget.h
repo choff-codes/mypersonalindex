@@ -2,7 +2,7 @@
 #define ASSETALLOCATIONTARGET_H
 
 #include <QMap>
-#include "queries.h"
+#include "queriesBatch.h"
 #include "objectBase.h"
 
 class assetAllocationTarget: public objectBase, public queriesBatch

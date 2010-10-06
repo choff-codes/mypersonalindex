@@ -1,4 +1,5 @@
 #include "queries.h"
+#include "queriesBatch.h"
 
 //enum {
 //    portfolioAAColumns_ID,

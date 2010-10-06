@@ -2,7 +2,7 @@
 #define COLUMNS_H
 
 #include <QMap>
-#include "queries.h"
+#include "queriesBatch.h"
 #include "objectBase.h"
 
 class columns: public objectBase, public queriesBatch

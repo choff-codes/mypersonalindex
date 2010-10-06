@@ -4,7 +4,7 @@
 #include <QString>
 #include <QList>
 #include "historicalPrices.h"
-#include "queries.h"
+#include "queriesBatch.h"
 
 class updatePricesBatch: public queriesBatch
 {

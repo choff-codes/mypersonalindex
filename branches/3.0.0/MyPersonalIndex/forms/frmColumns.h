@@ -12,25 +12,31 @@ class frmColumns : public QDialog
     Q_OBJECT
 
 public:
-    const QList<int>& getReturnValues() const { return m_selected; }
+    QList<int> getReturnValues() const { return m_selectedItems; }
 
-    frmColumns(const QList<int> &selected, const QMap<int, QString> &values, const QString &title,
-        const QDialog::DialogCode &resultNoChange, QWidget *parent = 0);
+    frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, const QString &windowTitle_,
+        QDialog::DialogCode dialogCodeOnNoChange_, QWidget *parent_ = 0);
 
 private:
+    enum direction {
+        direction_up = -1,
+        direction_down = 1
+    };
+
     frmColumns_UI ui;
-    QList<int> m_selected;
-    QMap<int, QString> m_values;
-    QDialog::DialogCode m_resultNoChange;
+    QList<int> m_selectedItems;
+    QMap<int, QString> m_items;
+    QDialog::DialogCode m_dialogCodeOnNoChange;
 
     void switchSelected(QListWidget *from, QListWidget* to);
+    void move(direction direction_);
 
 private slots:
     void accept();
-    void moveDown();
-    void moveUp();
-    void remove() { switchSelected(ui.addedItems, ui.removedItems); }
-    void add() { switchSelected(ui.removedItems, ui.addedItems); }
+    void moveDown() { move(direction_down); }
+    void moveUp() { move(direction_up); }
+    void remove() { switchSelected(ui.addedItemsList, ui.removedItemsList); }
+    void add() { switchSelected(ui.removedItemsList, ui.addedItemsList); }
 };
 
 #endif // FRMCOLUMNS_H

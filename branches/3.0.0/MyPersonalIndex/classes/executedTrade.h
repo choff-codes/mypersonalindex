@@ -3,7 +3,7 @@
 
 #include <QMap>
 #include <QPair>
-#include "queries.h"
+#include "queriesBatch.h"
 #include "objectBase.h"
 
 class executedTrade

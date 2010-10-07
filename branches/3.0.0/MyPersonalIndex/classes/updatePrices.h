@@ -33,7 +33,6 @@ public:
 
 private:
     queries m_dataSource;
-    updatePricesBatch m_newPrices;
 
     const int NO_DATA;
 
@@ -51,9 +50,9 @@ private:
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';
 
-    downloadResult getPrices(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
-    int getDividends(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
-    int getSplits(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_);
+    downloadResult getPrices(const QString &symbol_, historicalPrices priceHistory_, int beginDate_);
+    int getDividends(const QString &symbol_, historicalPrices priceHistory_, int beginDate_);
+    int getSplits(const QString &symbol_, historicalPrices priceHistory_, int beginDate_);
 
     static QList<QByteArray> downloadFile(const QUrl &url_, bool splitResultByLineBreak = true);
     static QString getCSVAddress(const QString &symbol_, const QDate &beginDate_, const QDate &endDate_, const QString &type_);

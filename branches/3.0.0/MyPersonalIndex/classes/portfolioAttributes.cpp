@@ -25,3 +25,17 @@ bool portfolioAttributes::operator==(const portfolioAttributes &other_) const
             && this->aaThresholdMethod == other_.aaThresholdMethod
             && this->startDate == other_.startDate;
 }
+
+void portfolioAttributes::save(const queries &dataSource_)
+{
+    QMap<QString, QVariant> values;
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Description), description);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartValue), startValue);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAThreshold), aaThreshold);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)aaThresholdMethod);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)defaultCostBasis);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), startDate);
+    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)dividends);
+
+    this->id = dataSource_.insert(queries::table_Portfolio, values, this->id);
+}

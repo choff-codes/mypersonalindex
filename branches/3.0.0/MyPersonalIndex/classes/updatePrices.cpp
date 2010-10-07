@@ -37,11 +37,6 @@ updatePricesResult updatePrices::run(const QStringList &symbols_, int beginDate_
             result.updateFailures.append(symbol);
     }
 
-    m_newPrices.insertBatch(m_dataSource);
-
-    if (result.earliestUpdate != NO_DATA)
-        priceFactory::flagDirty(m_dataSource);
-
     return result;
 }
 
@@ -82,7 +77,7 @@ QList<QByteArray> updatePrices::downloadFile(const QUrl &url_, bool splitResultB
     return lines;
 }
 
-updatePrices::downloadResult updatePrices::getPrices(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_)
+updatePrices::downloadResult updatePrices::getPrices(const QString &symbol_, historicalPrices priceHistory_, int beginDate_)
 {
     if (beginDate_ == QDate::currentDate().toJulianDay())
         return downloadResult(true, NO_DATA);
@@ -116,13 +111,13 @@ updatePrices::downloadResult updatePrices::getPrices(const QString &symbol_, con
 
         double price = line.at(4).toDouble();
 
-        m_newPrices.insert(symbol_, date, price, historicalPrices::type_price);
+        priceHistory_.insert(date, price, historicalPrices::type_price);
     }
 
     return downloadResult(true, earliestUpdate);
 }
 
-int updatePrices::getDividends(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_)
+int updatePrices::getDividends(const QString &symbol_, historicalPrices priceHistory_, int beginDate_)
 {
     if (beginDate_ == QDate::currentDate().toJulianDay())
         return NO_DATA;
@@ -156,13 +151,13 @@ int updatePrices::getDividends(const QString &symbol_, const historicalPrices &p
 
         double price = line.at(1).toDouble();
 
-        m_newPrices.insert(symbol_, date, price, historicalPrices::type_dividend);
+        priceHistory_.insert(date, price, historicalPrices::type_dividend);
     }
 
     return earliestUpdate;
 }
 
-int updatePrices::getSplits(const QString &symbol_, const historicalPrices &priceHistory_, int beginDate_)
+int updatePrices::getSplits(const QString &symbol_, historicalPrices priceHistory_, int beginDate_)
 {
     if (beginDate_ == QDate::currentDate().toJulianDay())
         return NO_DATA;
@@ -216,7 +211,7 @@ int updatePrices::getSplits(const QString &symbol_, const historicalPrices &pric
 
         double ratio = divisor.at(0).toDouble() / divisor.at(1).toDouble();
 
-        m_newPrices.insert(symbol_, date, ratio, historicalPrices::type_split);
+        priceHistory_.insert(date, ratio, historicalPrices::type_split);
     }
 
     return earliestUpdate;

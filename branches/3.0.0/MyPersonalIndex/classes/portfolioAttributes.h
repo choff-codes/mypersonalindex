@@ -32,6 +32,8 @@ public:
 
     portfolioAttributes(int id_);
 
+    void save(const queries &dataSource_);
+
     bool operator==(const portfolioAttributes &other_) const;
     bool operator!=(const portfolioAttributes &other_) const { return !(*this == other_); }
 };

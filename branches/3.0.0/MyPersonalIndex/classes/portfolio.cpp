@@ -15,26 +15,76 @@ public:
 
     void save(const queries &dataSource_)
     {
-        QMap<QString, QVariant> values;
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Description), attributes.description);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartValue), attributes.startValue);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAThreshold), attributes.aaThreshold);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)attributes.aaThresholdMethod);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)attributes.defaultCostBasis);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), attributes.startDate);
-        values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)attributes.dividends);
+        // Note: order of saving matters!
 
-        attributes.id = dataSource_.insert(queries::table_Portfolio, values, attributes.id);
+        // save portfolio
+        attributes.save(dataSource_);
 
-        for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
-            i.value().parent = attributes.id;
-
+        // save asset allocation
         for(QMap<int, assetAllocation>::iterator i = assetAllocations.begin(); i != assetAllocations.end(); ++i)
-            i.value().parent = attributes.id;
+        {
+            int origID = i.value().id;
 
+            i.value().parent = attributes.id;
+            i.value().save(dataSource_);
+
+            if (origID > UNASSIGNED)
+                continue;
+
+            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++i)
+                x.value().targets.updateAssetAllocationID(origID, i.value().id);
+        }
+
+        // save accounts
         for(QMap<int, account>::iterator i = accounts.begin(); i != accounts.end(); ++i)
-            i.value().parent = attributes.id;
+        {
+            int origID = i.value().id;
 
+            i.value().parent = attributes.id;
+            i.value().save(dataSource_);
+
+            if (origID > UNASSIGNED)
+                continue;
+
+            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++i)
+                if (x.value().account == origID)
+                    x.value().account = i.value().id;
+        }
+
+        QHash<int, int> tradeIDMapping;
+
+        // save securities
+        for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
+        {
+            i.value().parent = attributes.id;
+            i.value().save(dataSource_);
+
+            // save AA targets
+            i.value().targets.parent = i.value().id;
+            i.value().targets.insertBatch(dataSource_);
+
+            // save trades (keep map of old id -> new id for executed trades associated trade id)
+            for(QMap<int, trade>::iterator x = i.value().trades.begin(); x != i.value().trades.end(); ++x)
+            {
+                int origID = x.value().id;
+
+                x.value().parent = i.value().id;
+                x.value().save(dataSource_);
+
+                if (origID < UNASSIGNED)
+                    tradeIDMapping.insert(origID, x.value().id);
+            }
+
+            // set executed trades parent (save after all trades are saved)
+            i.value().executedTrades.parent = i.value().id;
+        }
+
+        // save executed trades (need all securities and trades to be saved first to properly set associatedTradeID)
+        for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
+        {
+            i.value().executedTrades.updateAssociatedTradeID(tradeIDMapping);
+            i.value().executedTrades.insertBatch(dataSource_);
+        }
     }
 
     void remove(const queries &dataSource_) const
@@ -95,6 +145,11 @@ void portfolio::save(const queries &dataSource_)
 void portfolio::remove(const queries &dataSource_) const
 {
     d->remove(dataSource_);
+}
+
+void portfolio::detach()
+{
+    d.detach();
 }
 
 QStringList portfolio::symbols() const

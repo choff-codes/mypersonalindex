@@ -11,10 +11,15 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
     symbolTxt = new QLineEdit(securityGroupBox);
     securityLayout->setWidget(0, QFormLayout::LabelRole, symbol);
     securityLayout->setWidget(0, QFormLayout::FieldRole, symbolTxt);
+    notes = new QLabel("&Notes:", securityGroupBox);
+    notesTxt = new QTextEdit(securityGroupBox);
+    notesTxt->setAcceptRichText(false);
+    securityLayout->setWidget(1, QFormLayout::LabelRole, notes);
+    securityLayout->setWidget(1, QFormLayout::FieldRole, notesTxt);
     acct = new QLabel("&Account:", securityGroupBox);
     acctCmb = new QComboBox(securityGroupBox);
-    securityLayout->setWidget(1, QFormLayout::LabelRole, acct);
-    securityLayout->setWidget(1, QFormLayout::FieldRole, acctCmb);
+    securityLayout->setWidget(2, QFormLayout::LabelRole, acct);
+    securityLayout->setWidget(2, QFormLayout::FieldRole, acctCmb);
     expense = new QLabel("&Expense:", securityGroupBox);
     expenseLayout = new QHBoxLayout();
     expenseSpinBox = new QDoubleSpinBox(securityGroupBox);
@@ -28,20 +33,20 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
     expenseBtnClear->setText("&Clear");
     expenseLayout->addWidget(expenseSpinBox, 1);
     expenseLayout->addWidget(expenseBtnClear);
-    securityLayout->setWidget(2, QFormLayout::LabelRole, expense);
-    securityLayout->setLayout(2, QFormLayout::FieldRole, expenseLayout);
+    securityLayout->setWidget(3, QFormLayout::LabelRole, expense);
+    securityLayout->setLayout(3, QFormLayout::FieldRole, expenseLayout);
     reinvestChk = new QCheckBox("&Reinvest Dividends", securityGroupBox);
-    securityLayout->setWidget(3, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(3, QFormLayout::FieldRole, reinvestChk);
-    cashChk = new QCheckBox("Cash Acc&ount", securityGroupBox);
     securityLayout->setWidget(4, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(4, QFormLayout::FieldRole, cashChk);
-    includeChk = new QCheckBox("Incl&ude in Calculations", securityGroupBox);
+    securityLayout->setWidget(4, QFormLayout::FieldRole, reinvestChk);
+    cashChk = new QCheckBox("Cash Acc&ount", securityGroupBox);
     securityLayout->setWidget(5, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(5, QFormLayout::FieldRole, includeChk);
-    hideChk = new QCheckBox("Hide in Port&folio", securityGroupBox);
+    securityLayout->setWidget(5, QFormLayout::FieldRole, cashChk);
+    includeChk = new QCheckBox("Incl&ude in Calculations", securityGroupBox);
     securityLayout->setWidget(6, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(6, QFormLayout::FieldRole, hideChk);
+    securityLayout->setWidget(6, QFormLayout::FieldRole, includeChk);
+    hideChk = new QCheckBox("Hide in Port&folio", securityGroupBox);
+    securityLayout->setWidget(7, QFormLayout::LabelRole, new QLabel(securityGroupBox));
+    securityLayout->setWidget(7, QFormLayout::FieldRole, hideChk);
 
     aaGroupBox = new QGroupBox("Asset Allocation", parent);
     aaLayout = new QVBoxLayout(aaGroupBox);
@@ -66,6 +71,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
     layout->addWidget(aaGroupBox);
 
     symbol->setBuddy(symbolTxt);
+    notes->setBuddy(notesTxt);
     acct->setBuddy(acctCmb);
     expense->setBuddy(expenseSpinBox);
 }

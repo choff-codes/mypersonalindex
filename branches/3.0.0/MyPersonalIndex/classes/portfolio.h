@@ -29,8 +29,9 @@ public:
     portfolioAttributes& attributes() const;
 
     void save(const queries &dataSource_);
-
     void remove(const queries &dataSource_) const;
+
+    void detach();
 
 private:
     QExplicitlySharedDataPointer<portfolioData> d;

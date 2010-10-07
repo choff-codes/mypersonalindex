@@ -29,13 +29,10 @@ QVariant columns::data(int row_, int column_) const
     {
         case queries::settingsColumnsColumns_ColumnID:
             return this->parent;
-            break;
         case queries::settingsColumnsColumns_ID:
             return m_columns.value(m_toDatabase.at(row_));
-            break;
         case queries::settingsColumnsColumns_Sequence:
             return m_toDatabase.at(row_);
-            break;
     }
     return QVariant();
 }

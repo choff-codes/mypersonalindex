@@ -4,7 +4,8 @@
 #include <QApplication>
 //#include <QtSingleApplication>
 //#include "frmMain.h"
-#include "portfolioFactory.h"
+//#include "portfolioFactory.h"
+#include "frmEdit.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,11 +28,11 @@ int main(int argc, char *argv[])
 //            return 0;
 //        }
 //
-//    frmMain mainForm;
-//    app.setActivationWindow(&mainForm);
-//    mainForm.show();
+    frmEdit(portfolio()).exec();
+    //app.setActivationWindow(&mainForm);
+    //form.show();
 
 
-    QMap<int, portfolio> portfolios = portfolioFactory(queries(queries::getDefaultDatabaseLocation())).getPortfolios(true);
+    //QMap<int, portfolio> portfolios = portfolioFactory(queries(queries::getDefaultDatabaseLocation())).getPortfolios(true);
     return app.exec();
 }

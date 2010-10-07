@@ -1,15 +1,87 @@
 #include "historicalPrices.h"
 
-class historicalPricesData: public QSharedData
+class historicalPricesData: public QSharedData, public queriesBatch
 {
 public:
     QMap<int, double> splits;
     QMap<int, double> dividends;
     QMap<int, double> prices;
+    QString symbol;
+
+    historicalPricesData()
+    {}
+
+    historicalPricesData(const QString &symbol_):
+        symbol(symbol_)
+    {}
+
+    void insert(int date_, double value_, historicalPrices::type type_, bool toDatabase_)
+    {
+        QMap<int, double>::iterator it;
+        switch(type_)
+        {
+            case historicalPrices::type_price:
+                it = prices.insert(date_, value_);
+            case historicalPrices::type_dividend:
+                it = dividends.insert(date_, value_);
+            case historicalPrices::type_split:
+                it = splits.insert(date_, value_);
+        }
+        if (toDatabase_)
+            m_toDatabase.append(priceKey(type_, it));
+    }
+
+    void insertBatch(queries dataSource_)
+    {
+        if (symbol.isEmpty())
+            return;
+
+        dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, this);
+        m_toDatabase.clear();
+    }
+
+    int rowsToBeInserted() const { return m_toDatabase.count(); }
+
+    QVariant data(int row_, int column_) const
+    {
+        switch(column_)
+        {
+            case queries::historicalPriceColumns_Date:
+                return m_toDatabase.at(row_).keyIterator.key();
+            case queries::historicalPriceColumns_Symbol:
+                return symbol;
+            case queries::historicalPriceColumns_Type:
+                return m_toDatabase.at(row_).keyType;
+            case queries::historicalPriceColumns_Value:
+                return m_toDatabase.at(row_).keyIterator.value();
+        }
+        return QVariant();
+    }
+
+private:
+    struct priceKey
+    {
+        historicalPrices::type keyType;
+        QMap<int, double>::iterator keyIterator;
+
+        priceKey(historicalPrices::type type_, QMap<int, double>::iterator iterator_):
+            keyType(type_),
+            keyIterator(iterator_)
+        {}
+
+        bool operator==(const priceKey &other_) const { return this->keyType == other_.keyType && this->keyIterator == other_.keyIterator;}
+    };
+
+    QList<priceKey> m_toDatabase;
 };
 
 historicalPrices::historicalPrices():
-    d(new historicalPricesData)
+    d(new historicalPricesData())
+{
+}
+
+historicalPrices::historicalPrices(const QString &symbol_):
+    d(new historicalPricesData(symbol_))
 {
 }
 
@@ -70,17 +142,14 @@ bool historicalPrices::contains(int date_, type type_) const
     return false;
 }
 
-void historicalPrices::setValues(const QMap<int, double> &values_, type type_)
+void historicalPrices::insert(int date_, double value_, type type_, bool toDatabase_)
 {
-    switch(type_)
-    {
-        case type_price:
-            d->prices = values_;
-        case type_dividend:
-            d->dividends = values_;
-        case type_split:
-            d->splits = values_;
-    }
+    d->insert(date_, value_, type_, toDatabase_);
+}
+
+void historicalPrices::insertBatch(queries dataSource_)
+{
+    d->insertBatch(dataSource_);
 }
 
 int historicalPrices::endDate(type type_) const
@@ -109,4 +178,9 @@ int historicalPrices::beginDate(type type_) const
             return d->splits.isEmpty() ? 0 : (d->splits.constBegin()).key();
     }
     return 0;
+}
+
+QString historicalPrices::symbol() const
+{
+    return d->symbol;
 }

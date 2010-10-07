@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QPair>
+#include <QHash>
 #include "queriesBatch.h"
 #include "objectBase.h"
 
@@ -42,6 +43,8 @@ public:
     QMap<int, executedTrade>::const_iterator constEnd() const { return m_trades.constEnd(); }
 
     void insert(int date_, const executedTrade &executedTrade_, bool toDatabase_ = true);
+
+    void updateAssociatedTradeID(QHash<int, int> tradeIDMapping_);
 
     void remove(const queries &dataSource_);
     void remove(const queries &dataSource_, int beginDate_);

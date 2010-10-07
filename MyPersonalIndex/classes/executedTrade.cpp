@@ -7,6 +7,13 @@ void executedTradeMap::insert(int date_, const executedTrade &executedTrade_, bo
         m_toDatabase.append(i);
 }
 
+void executedTradeMap::updateAssociatedTradeID(QHash<int, int> tradeIDMapping_)
+{
+    for(QMap<int, executedTrade>::iterator i = m_trades.begin(); i != m_trades.end(); ++i)
+        if (tradeIDMapping_.contains(i.value().associatedTradeID))
+            i.value().associatedTradeID = tradeIDMapping_.value(i.value().associatedTradeID);
+}
+
 void executedTradeMap::remove(const queries &dataSource_, int beginDate_)
 {
     QMap<int, executedTrade>::iterator i = m_trades.lowerBound(beginDate_);
@@ -41,7 +48,7 @@ QVariant executedTradeMap::data(int row_, int column_) const
         case queries::portfolioSecurityTradeExecutionColumns_Commission:
             return i.value().commission;
         case queries::portfolioSecurityTradeExecutionColumns_AssociatedTradeID:
-                return i.value().associatedTradeID;
+            return i.value().associatedTradeID;
     }
 
     return QVariant();

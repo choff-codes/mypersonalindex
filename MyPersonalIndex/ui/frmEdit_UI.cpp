@@ -1,7 +1,7 @@
 #include "frmEdit_UI.h"
 
 void frmEdit_UI::setupUI(QDialog* dialog) {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    dialog->setWindowFlags((dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint)) | Qt::WindowMinMaxButtonsHint);
     dialog->setWindowTitle("Edit Portfolio");
 
     layout = new QVBoxLayout(dialog);

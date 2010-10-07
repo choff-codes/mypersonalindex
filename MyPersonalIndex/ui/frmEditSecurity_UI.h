@@ -9,6 +9,7 @@
 #include <QToolButton>
 #include <QComboBox>
 #include <QDoubleSpinBox>
+#include <QTextEdit>
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
@@ -22,6 +23,8 @@ public:
     QFormLayout *securityLayout;
     QLabel *symbol;
     QLineEdit *symbolTxt;
+    QLabel *notes;
+    QTextEdit *notesTxt;
     QLabel *acct;
     QComboBox *acctCmb;
     QLabel *expense;

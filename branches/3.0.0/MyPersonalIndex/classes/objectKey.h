@@ -11,8 +11,7 @@ enum objectType {
     objectType_AA,
     objectType_Security,
     objectType_Symbol,
-    objectType_Trade,
-    objectType_None
+    objectType_Trade
 };
 
 class objectKey: public objectBase
@@ -22,25 +21,26 @@ public:
     QString description;
     int id;
 
-    objectKey(objectType type_ = objectType_None, const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
+    objectKey(objectType type_, const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectBase(parent_),
         type(type_),
         description(description_),
         id(id_)
     {}
 
-    objectKey key() const { return *this; }
-
     void clearIdentity() { id = UNASSIGNED; }
     bool hasIdentity() const { return this->id != UNASSIGNED; }
+
+    // return an empty string if there are no validation errors, otherwise return the error message
+    virtual QString validate() = 0;
 
     bool operator==(const objectKey &other_) const;
     bool operator!=(const objectKey &other_) const { return !(*this == other_); }
     bool operator<(const objectKey &other_) const;
 };
 
-Q_DECLARE_METATYPE(objectKey);
-inline uint qHash(const objectKey &key_) { return key_.type ^ key_.id; }
+//Q_DECLARE_METATYPE(objectKey);
+//inline uint qHash(const objectKey &key_) { return key_.type ^ key_.id; }
 
 
 #endif // OBJECTKEY_H

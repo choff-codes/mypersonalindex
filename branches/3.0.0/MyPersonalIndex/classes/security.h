@@ -55,6 +55,8 @@ public:
 
     double splitAdjustedPriorDayPrice(int date_) const { return price(tradeDateCalendar::previousTradeDate(date_)) / split(date_); }
     
+    QString validate();
+
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
 

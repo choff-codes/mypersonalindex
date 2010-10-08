@@ -15,7 +15,7 @@ void frmEditPortfolio_UI::setupUI(QWidget *parent)
     descTxt = new QLineEdit(parent);
     layoutTrade->setWidget(0, QFormLayout::FieldRole, descTxt);
 
-    startValue = new QLabel("&Index Start Value:", parent);
+    startValue = new QLabel("Starting &NAV:", parent);
     layoutTrade->setWidget(1, QFormLayout::LabelRole, startValue);
 
     startValueTxt = new QLineEdit(parent);

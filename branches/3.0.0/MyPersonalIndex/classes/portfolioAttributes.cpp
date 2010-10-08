@@ -39,3 +39,14 @@ void portfolioAttributes::save(const queries &dataSource_)
 
     this->id = dataSource_.insert(queries::table_Portfolio, values, this->id);
 }
+
+QString portfolioAttributes::validate()
+{
+    if (this->description.isEmpty())
+        return "Please enter a description!";
+
+    if (this->startValue < 1 || this->startValue > 1000000)
+        return "Beginning NAV must be between 1 and 1000000!";
+
+    return QString();
+}

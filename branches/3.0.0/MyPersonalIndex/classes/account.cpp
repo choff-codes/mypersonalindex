@@ -30,3 +30,11 @@ void account::remove(const queries &dataSource_) const
 
     dataSource_.deleteItem(queries::table_PortfolioAccount, this->id);
 }
+
+QString account::validate()
+{
+    if (this->description.isEmpty())
+        return "Please enter a description!";
+
+    return QString();
+}

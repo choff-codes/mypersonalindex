@@ -58,4 +58,5 @@ HEADERS += $$PWD/queries.h \
     $$PWD/settingsFactory.h \
     $$PWD/assetAllocationTarget.h \
     $$PWD/calculatorCorrelation.h \
-    $$PWD/calculatorAveragePrice.h
+    $$PWD/calculatorAveragePrice.h \
+    $$PWD/symbol.h

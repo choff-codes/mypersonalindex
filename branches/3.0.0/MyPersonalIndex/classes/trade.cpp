@@ -135,3 +135,37 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
             return "";
     }
 }
+
+QString trade::validate()
+{
+    if (functions::massage(this->value) < 0)
+        switch (this->type)
+        {
+            case tradeType_Purchase:
+            case tradeType_Sale:
+            case tradeType_DivReinvest:
+                return "The shares cannot be negative!";
+            case tradeType_Interest:
+            case tradeType_FixedPurchase:
+            case tradeType_FixedSale:
+                return "The dollar amount cannot be negative!";
+            case tradeType_TotalValue:
+            case tradeType_AA:
+            case tradeType_Value:
+            case tradeType_InterestPercent:
+                return "The percentage cannot be negative!";
+            default:
+                return "Value cannot be negative";
+        }
+
+    if (functions::massage(this->price) < 0)
+        return "The price cannot be negative!";
+
+    if (this->frequency == tradeDateCalendar::frequency_Once && this->startDate > this->date)
+        return "The start date cannot be after the trade date!";
+
+    if(this->frequency == tradeDateCalendar::frequency_Once && this->endDate < this->date && this->endDate != 0)
+        return "The end date cannot be before the trade date!";
+
+    return QString();
+}

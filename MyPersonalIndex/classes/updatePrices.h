@@ -6,7 +6,6 @@
 #include <QDate>
 #include <QtNetwork>
 #include <QPair>
-#include "updatePricesBatch.h"
 #include "priceFactory.h"
 
 struct updatePricesResult

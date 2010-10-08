@@ -58,6 +58,8 @@ public:
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
 
+    QString validate();
+
     static QString tradeTypeToString(tradeType type_);
     static QString frequencyToString(tradeDateCalendar::frequency freq_);
     static QString valueToString(tradeType type_, double value_);

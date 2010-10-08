@@ -24,6 +24,8 @@ public:
     bool operator==(const account &other_) const;
     bool operator!=(const account &other_) const { return !(*this == other_); }
 
+    QString validate();
+
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
 };

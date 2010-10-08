@@ -34,6 +34,8 @@ public:
 
     void save(const queries &dataSource_);
 
+    QString validate();
+
     bool operator==(const portfolioAttributes &other_) const;
     bool operator!=(const portfolioAttributes &other_) const { return !(*this == other_); }
 };

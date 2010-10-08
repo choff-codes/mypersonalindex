@@ -19,6 +19,8 @@ public:
     bool operator==(const assetAllocation &other_) const;
     bool operator!=(const assetAllocation &other_) const { return !(*this == other_); }
 
+    QString validate();
+
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
 };

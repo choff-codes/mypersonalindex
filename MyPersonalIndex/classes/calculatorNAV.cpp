@@ -135,9 +135,11 @@ snapshot calculatorNAV::snapshotByKey(int date_, const objectKey &key_, int begi
             return securitySnapshot(date_, key_.id, priorDate_);
         case objectType_Symbol:
             return symbolSnapshot(date_, key_.id, beginDate_);
-        default:
+        case objectType_Trade:
+            // not implemented yet, a little too granular...
             return snapshot(0);
     }
+    return snapshot(0);
 }
 
 int calculatorNAV::beginDateByKey(const objectKey &key_)
@@ -149,11 +151,13 @@ int calculatorNAV::beginDateByKey(const objectKey &key_)
         case objectType_Portfolio:
         case objectType_Security:
             return d->currentPortfolio.attributes().startDate;
-    case objectType_Symbol:
+        case objectType_Symbol:
             return d->currentPortfolio.securities().value(key_.id).beginDate();
-        default:
+        case objectType_Trade:
+            // not implemented yet, a little too granular...
             return 0;
     }
+    return 0;
 }
 
 int calculatorNAV::endDateByKey(const objectKey &key_)
@@ -165,11 +169,13 @@ int calculatorNAV::endDateByKey(const objectKey &key_)
         case objectType_Portfolio:
         case objectType_Security:
             return tradeDateCalendar::endDate();
-    case objectType_Symbol:
+        case objectType_Symbol:
             return d->currentPortfolio.securities().value(key_.id).endDate();
-        default:
+        case objectType_Trade:
+            // not implemented yet, a little too granular...
             return 0;
     }
+    return 0;
 }
 
 historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_)

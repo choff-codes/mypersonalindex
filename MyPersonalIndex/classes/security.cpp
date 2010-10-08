@@ -44,3 +44,12 @@ void security::remove(const queries &dataSource_) const
 
     dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id);
 }
+
+QString security::validate()
+{
+    if (this->description.isEmpty())
+        return "Please enter a description!";
+
+    return QString();
+}
+

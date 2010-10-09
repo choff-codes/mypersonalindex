@@ -51,7 +51,6 @@ HEADERS += $$PWD/queries.h \
     $$PWD/epsilon.h \
     $$PWD/objectBase.h \
     $$PWD/tradeDateCalendar.h \
-    $$PWD/costBasis.h \
     $$PWD/queriesBatch.h \
     $$PWD/portfolioFactory.h \
     $$PWD/columns.h \

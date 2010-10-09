@@ -10,6 +10,7 @@
 #include "executedTrade.h"
 #include "historicalPrices.h"
 #include "assetAllocationTarget.h"
+#include "priceFactory.h"
 
 #ifndef DIVIDEND_REINVESTMENT_TRADE_ID
 #define DIVIDEND_REINVESTMENT_TRADE_ID -2
@@ -20,8 +21,9 @@ class security: public objectKey
 public:
 
     int account;
-    double expense;
-    bool divReinvest;
+    double expenseRatio;
+    bool dividendReinvestment;
+    bool dividendNAVAdjustment;
     bool cashAccount;
     bool includeInCalc;
     bool hide;
@@ -31,10 +33,11 @@ public:
     executedTradeMap executedTrades;
 
     security(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
-        objectKey(objectType_Security, description_, id_, parent_),
+        objectKey(description_, id_, parent_),
         account(UNASSIGNED),
-        expense(0),
-        divReinvest(false),
+        expenseRatio(0),
+        dividendReinvestment(false),
+        dividendNAVAdjustment(true),
         cashAccount(false),
         includeInCalc(true),
         hide(false),
@@ -55,10 +58,12 @@ public:
 
     double splitAdjustedPriorDayPrice(int date_) const { return price(tradeDateCalendar::previousTradeDate(date_)) / split(date_); }
     
-    QString validate();
+    objectType type() const { return objectType_Security; }
+    QString validate() const;
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
+    static security load(QSqlQuery q_);
 
 private:
     historicalPrices m_prices;

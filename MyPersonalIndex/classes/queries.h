@@ -49,7 +49,9 @@ public:
         portfolioAAColumns_ID,
         portfolioAAColumns_PortfolioID,
         portfolioAAColumns_Description,
-        portfolioAAColumns_Target
+        portfolioAAColumns_Target,
+        portfolioAAColumns_RebalanceBand,
+        portfolioAAColumns_Threshold
     };
 
     enum {
@@ -69,22 +71,10 @@ public:
     };
 
     enum {
-        portfoliosColumns_ID,
-        portfoliosColumns_Description,
-        portfoliosColumns_StartValue,
-        portfoliosColumns_AAThreshold,
-        portfoliosColumns_ThresholdMethod,
-        portfoliosColumns_CostBasis,
-        portfoliosColumns_StartDate,
-        portfoliosColumns_Dividends,
-        portfoliosColumns_HoldingsShowHidden,
-        portfoliosColumns_HoldingsSort,
-        portfoliosColumns_AAShowBlank,
-        portfoliosColumns_AASort,
-        portfoliosColumns_CorrelationShowHidden,
-        portfoliosColumns_AcctShowBlank,
-        portfoliosColumns_AcctSort,
-        portfoliosColumns_NAVSortDesc
+        portfolioColumns_ID,
+        portfolioColumns_Description,
+        portfolioColumns_StartValue,
+        portfolioColumns_StartDate
     };
 
     enum {
@@ -116,7 +106,8 @@ public:
         portfolioSecurityColumns_CashAccount,
         portfolioSecurityColumns_IncludeInCalc,
         portfolioSecurityColumns_Hide,
-        portfolioSecurityColumns_Note
+        portfolioSecurityColumns_Note,
+        portfolioSecurityColumns_Dividends
     };
 
     enum {

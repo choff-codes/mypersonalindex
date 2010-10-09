@@ -8,6 +8,7 @@
 #include <QComboBox>
 #include <QLineEdit>
 #include <QCheckBox>
+#include <QTextEdit>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 #include "trade.h"
@@ -29,6 +30,8 @@ public:
     QLineEdit *commissionTxt;
     QLabel *cash;
     QComboBox *cashCmb;
+    QLabel *note;
+    QTextEdit *noteTxt;
     QGroupBox *groupBoxDate;
     QFormLayout *dateLayout;
     QLabel *freq;

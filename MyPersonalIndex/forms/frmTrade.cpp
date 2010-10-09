@@ -30,7 +30,7 @@ void frmTrade::connectSlots()
 
 void frmTrade::loadTrade()
 {
-    ui.cmbType->setCurrentIndex((int)m_trade.type);
+    ui.cmbType->setCurrentIndex((int)m_trade.action);
     if (m_trade.value >= 0)
         ui.txtShares->setText(QString::number(m_trade.value, 'f', 4));
     if (m_trade.price >= 0)
@@ -78,7 +78,7 @@ void frmTrade::accept()
     if (hasValidationErrors())
         return;
 
-    m_trade.type = (trade::tradeType)ui.cmbType->currentIndex();
+    m_trade.action = (trade::tradeAction)ui.cmbType->currentIndex();
     m_trade.value = ui.txtShares->text().toDouble();
     m_trade.price = ui.chkPrice->isChecked() && !ui.txtPrice->text().isEmpty() ? ui.txtPrice->text().toDouble() : -1;
     m_trade.commission = ui.txtCommission->text().isEmpty() ? 0 : ui.txtCommission->text().toDouble();
@@ -169,37 +169,37 @@ void frmTrade::freqChange(int index)
 
 void frmTrade::typeChange(int index)
 {
-    switch ((trade::tradeType)index)
+    switch ((trade::tradeAction)index)
     {
-        case trade::tradeType_Purchase:
+        case trade::tradeAction_Purchase:
             ui.shares->setText("Shares:");
             break;
-        case trade::tradeType_Sale:
+        case trade::tradeAction_Sale:
             ui.shares->setText("Shares:");
             break;
-        case trade::tradeType_DivReinvest:
+        case trade::tradeAction_DivReinvest:
             ui.shares->setText("Shares:");
             break;
-        case trade::tradeType_Interest:
+        case trade::tradeAction_Interest:
             ui.shares->setText("Amount ($):");
             break;
-        case trade::tradeType_FixedPurchase:
-        case trade::tradeType_FixedSale:
+        case trade::tradeAction_FixedPurchase:
+        case trade::tradeAction_FixedSale:
             ui.shares->setText("Amount ($):");
             break;
-        case trade::tradeType_Value:
+        case trade::tradeAction_Value:
             ui.shares->setText("% of Value:");
             break;
-        case trade::tradeType_InterestPercent:
+        case trade::tradeAction_InterestPercent:
             ui.shares->setText("Rate (%):");
             break;
-        case trade::tradeType_TotalValue:
+        case trade::tradeAction_TotalValue:
             ui.shares->setText("% of Total");
             break;
-        case trade::tradeType_AA:
+        case trade::tradeAction_AA:
             ui.shares->setText("% of Target:");
             break;
-        case trade::tradeType_Count:
+        case trade::tradeAction_Count:
             break;
     }
 }

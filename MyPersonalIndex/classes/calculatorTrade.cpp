@@ -25,7 +25,7 @@ void calculatorTrade::run(int beginDate_, const QList<portfolio> &portfolios_)
 void calculatorTrade::insertDividendReinvestmentPlaceholders(portfolio portfolio_)
 {
     for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
-        if (sec.value().divReinvest)
+        if (sec.value().dividendReinvestment)
             // use DIVIDEND_REINVESTMENT_TRADE_ID placeholder
             sec.value().trades.insert(DIVIDEND_REINVESTMENT_TRADE_ID, trade(DIVIDEND_REINVESTMENT_TRADE_ID, sec.value().id));
 }
@@ -120,7 +120,7 @@ QMap<int, calculatorTrade::tradeDay> calculatorTrade::calculateTradeDates(portfo
         {
             const trade &trade = x.value();
 
-            if (trade.type == trade::tradeType_DivReinvestAuto) // get each dividend date greater than or equal to current date
+            if (trade.action == trade::tradeAction_DivReinvestAuto) // get each dividend date greater than or equal to current date
             {
                 foreach(const int &date, calculateDividendReinvestmentDates(date_, security.dividends()))
                     calculatedTrades[date][security.id].append(x);
@@ -174,7 +174,7 @@ executedTrade calculatorTrade::calculateExecutedTrade(int date_, calculatorNAV c
     const security &parent_, const trade &trade_) const
 {
     double purchasePrice = calculateTradePrice(
-            trade_.type,
+            trade_.action,
             trade_.price,
             parent_.splitAdjustedPriorDayPrice(date_)
         );
@@ -191,9 +191,9 @@ executedTrade calculatorTrade::calculateExecutedTrade(int date_, calculatorNAV c
     return executedTrade(shares, purchasePrice, trade_.commission, trade_.id);
 }
 
-double calculatorTrade::calculateTradePrice(trade::tradeType type_, double price_, double priorDayPrice_) const
+double calculatorTrade::calculateTradePrice(trade::tradeAction type_, double price_, double priorDayPrice_) const
 {
-    if (type_ == trade::tradeType_Interest || type_ == trade::tradeType_InterestPercent)
+    if (type_ == trade::tradeAction_Interest || type_ == trade::tradeAction_InterestPercent)
         return 0;
 
     if (price_ >= 0)
@@ -207,37 +207,37 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
 {
     if (functions::isZero(price_))
         if (    // these types are allowed a price of 0
-                trade_.type != trade::tradeType_Purchase &&
-                trade_.type != trade::tradeType_DivReinvest &&
-                trade_.type != trade::tradeType_Interest &&
-                trade_.type != trade::tradeType_Sale
+                trade_.action != trade::tradeAction_Purchase &&
+                trade_.action != trade::tradeAction_DivReinvest &&
+                trade_.action != trade::tradeAction_Interest &&
+                trade_.action != trade::tradeAction_Sale
             )
             return 0;
 
     date_ = tradeDateCalendar::previousTradeDate(date_);
 
-    switch(trade_.type)
+    switch(trade_.action)
     {
-        case trade::tradeType_Purchase:
-        case trade::tradeType_DivReinvest:
-        case trade::tradeType_Interest:
+        case trade::tradeAction_Purchase:
+        case trade::tradeAction_DivReinvest:
+        case trade::tradeAction_Interest:
             return trade_.value;
-        case trade::tradeType_Sale:
+        case trade::tradeAction_Sale:
             return trade_.value * -1;
-        case trade::tradeType_FixedPurchase:
+        case trade::tradeAction_FixedPurchase:
             return trade_.value / price_;
-        case trade::tradeType_FixedSale:
+        case trade::tradeAction_FixedSale:
             return trade_.value / price_ * -1;
-        case trade::tradeType_Value:
-        case trade::tradeType_InterestPercent:
+        case trade::tradeAction_Value:
+        case trade::tradeAction_InterestPercent:
             return (calc_.securitySnapshot(date_, trade_.parent).totalValue * (trade_.value / 100)) / price_;
-        case trade::tradeType_TotalValue:
+        case trade::tradeAction_TotalValue:
             return (calc_.portfolioSnapshot(date_).totalValue * (trade_.value / 100)) / price_;
-        case trade::tradeType_DivReinvestAuto:
+        case trade::tradeAction_DivReinvestAuto:
             return (calc_.securitySnapshot(date_, trade_.parent).shares * parent_.dividend(date_)) / price_;
-        case trade::tradeType_Reversal:
+        case trade::tradeAction_Reversal:
                 return 0; // should not occur
-        case trade::tradeType_AA:
+        case trade::tradeAction_AA:
         {
             double shares = 0;
             assetAllocationTarget targets = parent_.targets;

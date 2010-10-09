@@ -2,8 +2,10 @@
 
 bool assetAllocation::operator==(const assetAllocation &other_) const
 {
-    return objectKey::operator ==(other_)
-            && this->target == other_.target;
+    return objectKey::operator==(other_)
+            && this->target == other_.target
+            && this->rebalanceBand == other_.rebalanceBand
+            && this->threshold == other_.threshold;
 }
 
 void assetAllocation::save(const queries &dataSource_)
@@ -15,6 +17,8 @@ void assetAllocation::save(const queries &dataSource_)
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_PortfolioID), this->parent);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Description), this->description);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), functions::doubleToNull(this->target));
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_RebalanceBand), this->rebalanceBand);
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Threshold), (int)this->threshold);
 
     this->id = dataSource_.insert(queries::table_PortfolioAA, values, this->id);
 }
@@ -27,7 +31,24 @@ void assetAllocation::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioAA, this->id);
 }
 
-QString assetAllocation::validate()
+assetAllocation assetAllocation::load(QSqlQuery q_)
+{
+    assetAllocation aa(
+        q_.value(queries::portfolioAAColumns_ID).toInt(),
+        q_.value(queries::portfolioAAColumns_PortfolioID).toInt(),
+        q_.value(queries::portfolioAAColumns_Description).toString()
+    );
+
+    if (!q_.value(queries::portfolioAAColumns_Target).isNull())
+        aa.target = q_.value(queries::portfolioAAColumns_Target).toDouble();
+
+    aa.rebalanceBand = q_.value(queries::portfolioAAColumns_RebalanceBand).toDouble();
+    aa.threshold = (thresholdMethod)q_.value(queries::portfolioAAColumns_Threshold).toInt();
+
+    return aa;
+}
+
+QString assetAllocation::validate() const
 {
     if (this->description.isEmpty())
         return "Please enter a description!";

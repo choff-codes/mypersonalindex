@@ -8,28 +8,18 @@ QMap<int, double> calculatorAveragePrice::calculate(portfolio portfolio_, int da
 #endif
 
     QMap<int, double> avgPrices;
-    costBasis defaultCostBasis = portfolio_.attributes().defaultCostBasis;
 
     foreach(const security &s, portfolio_.securities())
-    {
-        costBasis overrideCostBasis = portfolio_.accounts().value(s.account).overrideCostBasis;
-
-        if (overrideCostBasis == costBasis_None)
-            overrideCostBasis = defaultCostBasis;
-
-        if (s.cashAccount) // cash should always be computed as average
-            overrideCostBasis = costBasis_AVG;
-
         avgPrices.insert(
             s.id,
             calculate(
                 date_,
                 s.executedTrades,
-                overrideCostBasis,
+                // cash should always be computed as average
+                s.cashAccount ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account).costBasis,
                 splits(s.splits(), date_)
             )
         );
-    }
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (avg price): %d ms", t.elapsed());
@@ -39,7 +29,7 @@ QMap<int, double> calculatorAveragePrice::calculate(portfolio portfolio_, int da
 }
 
 
-double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, costBasis costBasis_, splits splits_)
+double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_)
 {
     QMap<double, sharePricePair> runningTrades;
     double shares = 0;
@@ -58,8 +48,8 @@ double calculatorAveragePrice::calculate(int date_, const executedTradeMap &exec
         {
             runningTrades.insertMulti( // insert depending on cost basis (should be inserted in the order to remove)
                 (
-                    costBasis_ == costBasis_HIFO ? t.price :
-                    costBasis_ == costBasis_LIFO ? -1 * runningTrades.count():
+                    costBasis_ == account::costBasisMethod_HIFO ? t.price :
+                    costBasis_ == account::costBasisMethod_LIFO ? -1 * runningTrades.count():
                     runningTrades.count() // FIFO
                 ),
                 sharePricePair(t.shares, t.price)
@@ -70,7 +60,7 @@ double calculatorAveragePrice::calculate(int date_, const executedTradeMap &exec
             continue;
         }
 
-        if (costBasis_ == costBasis_AVG) // only positive trades factor into average
+        if (costBasis_ == account::costBasisMethod_AVG) // only positive trades factor into average
             continue;
 
         while (!functions::isZero(t.shares) && !runningTrades.isEmpty()) // continue while shares to sell

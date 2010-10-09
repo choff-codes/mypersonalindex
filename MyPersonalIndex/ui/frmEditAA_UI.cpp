@@ -34,6 +34,24 @@ void frmEditAA_UI::setupUI(QWidget *parent)
 
     layoutAA->setLayout(1, QFormLayout::FieldRole, targetLayout);
 
+    rebalanceBand = new QLabel("&Rebalance Band:", parent);
+    layoutAA->setWidget(2, QFormLayout::LabelRole, rebalanceBand);
+
+    rebalanceBandSpinBox = new QSpinBox(parent);
+    rebalanceBandSpinBox->setMaximum(100);
+    rebalanceBandSpinBox->setSuffix("%");
+    layoutAA->setWidget(2, QFormLayout::FieldRole, rebalanceBandSpinBox);
+
+    threshold = new QLabel("Rebalance &Denominator:", parent);
+    layoutAA->setWidget(3, QFormLayout::LabelRole, threshold);
+
+    thresholdCmb = new QComboBox(parent);
+    thresholdCmb->addItem("Portfolio Value", assetAllocation::threshold_Portfolio);
+    thresholdCmb->addItem("Asset Class Value", assetAllocation::threshold_AA);
+    layoutAA->setWidget(3, QFormLayout::FieldRole, thresholdCmb);
+
     desc->setBuddy(descTxt);
     target->setBuddy(targetSpinBox);
+    rebalanceBand->setBuddy(rebalanceBandSpinBox);
+    threshold->setBuddy(thresholdCmb);
 }

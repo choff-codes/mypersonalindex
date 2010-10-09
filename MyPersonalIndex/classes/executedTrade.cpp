@@ -1,5 +1,23 @@
 #include "executedTrade.h"
 
+bool executedTrade::operator==(const executedTrade &other_) const
+{
+    return this->shares == other_.shares
+            && this->price == other_.price
+            && this->commission == other_.commission
+            && this->associatedTradeID == other_.associatedTradeID;
+}
+
+executedTrade executedTrade::load(QSqlQuery q_)
+{
+    return executedTrade (
+            q_.value(queries::portfolioSecurityTradeExecutionViewColumns_Shares).toDouble(),
+            q_.value(queries::portfolioSecurityTradeExecutionViewColumns_Price).toDouble(),
+            q_.value(queries::portfolioSecurityTradeExecutionViewColumns_Commission).toDouble(),
+            q_.value(queries::portfolioSecurityTradeExecutionViewColumns_AssociatedTradeID).toInt()
+        );
+}
+
 void executedTradeMap::insert(int date_, const executedTrade &executedTrade_, bool toDatabase_)
 {
     QMap<int, executedTrade>::iterator i = m_trades.insertMulti(date_, executedTrade_);

@@ -5,7 +5,7 @@ bool account::operator==(const account &other_) const
     return objectKey::operator ==(other_)
             && this->taxRate == other_.taxRate
             && this->taxDeferred == other_.taxDeferred
-            && this->overrideCostBasis == other_.overrideCostBasis;
+            && this->costBasis == other_.costBasis;
 }
 
 void account::save(const queries &dataSource_)
@@ -18,7 +18,7 @@ void account::save(const queries &dataSource_)
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_Description), this->description);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxRate), functions::doubleToNull(this->taxRate));
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxDeferred), (int)this->taxDeferred);
-    values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_CostBasis), (int)this->overrideCostBasis);
+    values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_CostBasis), (int)this->costBasis);
 
     this->id = dataSource_.insert(queries::table_PortfolioAccount, values, this->id);
 }
@@ -31,7 +31,23 @@ void account::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioAccount, this->id);
 }
 
-QString account::validate()
+account account::load(QSqlQuery q_)
+{
+    account acct(
+        q_.value(queries::portfolioAccountColumns_ID).toInt(),
+        q_.value(queries::portfolioAccountColumns_PortfolioID).toInt(),
+        q_.value(queries::portfolioAccountColumns_Description).toString()
+    );
+
+    if (!q_.value(queries::portfolioAccountColumns_TaxRate).isNull())
+        acct.taxRate = q_.value(queries::portfolioAccountColumns_TaxRate).toDouble();
+    acct.taxDeferred = q_.value(queries::portfolioAccountColumns_TaxDeferred).toBool();
+    acct.costBasis = (costBasisMethod)q_.value(queries::portfolioAccountColumns_CostBasis).toInt();
+
+    return acct;
+}
+
+QString account::validate() const
 {
     if (this->description.isEmpty())
         return "Please enter a description!";

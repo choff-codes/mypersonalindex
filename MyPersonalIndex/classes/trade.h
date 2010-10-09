@@ -12,24 +12,24 @@ class trade: public objectKey
 {
 public:
 
-    static const int tradeType_Count = 11;
+    static const int tradeAction_Count = 11;
 
-    enum tradeType {
-        tradeType_Purchase,
-        tradeType_Sale,
-        tradeType_FixedPurchase,
-        tradeType_FixedSale,
-        tradeType_DivReinvest,
-        tradeType_Interest,
-        tradeType_InterestPercent,
-        tradeType_Value,
-        tradeType_TotalValue,
-        tradeType_AA,
-        tradeType_DivReinvestAuto,
-        tradeType_Reversal
+    enum tradeAction {
+        tradeAction_Purchase,
+        tradeAction_Sale,
+        tradeAction_FixedPurchase,
+        tradeAction_FixedSale,
+        tradeAction_DivReinvest,
+        tradeAction_Interest,
+        tradeAction_InterestPercent,
+        tradeAction_Value,
+        tradeAction_TotalValue,
+        tradeAction_AA,
+        tradeAction_DivReinvestAuto,
+        tradeAction_Reversal
     };
 
-    tradeType type;
+    tradeAction action;
     double value;
     double price;
     double commission;
@@ -40,8 +40,8 @@ public:
     int endDate;
 
     trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
-        objectKey(objectType_Trade, QString(), id_, parent_),
-        type(tradeType_Purchase),
+        objectKey(QString(), id_, parent_),
+        action(tradeAction_Purchase),
         value(UNASSIGNED),
         price(UNASSIGNED),
         commission(0),
@@ -57,12 +57,14 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
+    static trade load(QSqlQuery q_);
 
-    QString validate();
+    objectType type() const { return objectType_Trade; }
+    QString validate() const;
 
-    static QString tradeTypeToString(tradeType type_);
+    static QString tradeTypeToString(tradeAction type_);
     static QString frequencyToString(tradeDateCalendar::frequency freq_);
-    static QString valueToString(tradeType type_, double value_);
+    static QString valueToString(tradeAction type_, double value_);
     static QString dateToString(tradeDateCalendar::frequency freq_, int date_);
 };
 

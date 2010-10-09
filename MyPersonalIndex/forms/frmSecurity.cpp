@@ -70,8 +70,8 @@ void frmSecurity::loadSecurity()
 {
     ui.txtSymbol->setText(m_security.description);
     ui.cmbAcct->setCurrentIndex(ui.cmbAcct->findData(m_security.account));
-    ui.sbExpense->setValue(m_security.expense * 100);
-    ui.chkReinvest->setChecked(m_security.divReinvest);
+    ui.sbExpense->setValue(m_security.expenseRatio * 100);
+    ui.chkReinvest->setChecked(m_security.dividendReinvestment);
     ui.chkHide->setChecked(m_security.hide);
     ui.chkCash->setChecked(m_security.cashAccount);
     ui.chkInclude->setChecked(m_security.includeInCalc);
@@ -91,8 +91,8 @@ void frmSecurity::saveSecurity()
 {
     m_security.description = ui.txtSymbol->text();
     m_security.account = ui.cmbAcct->itemData(ui.cmbAcct->currentIndex()).toInt();
-    m_security.expense = ui.sbExpense->value() / 100;
-    m_security.divReinvest = ui.chkReinvest->isChecked();
+    m_security.expenseRatio = ui.sbExpense->value() / 100;
+    m_security.dividendReinvestment = ui.chkReinvest->isChecked();
     m_security.cashAccount = ui.chkCash->isChecked();
     m_security.includeInCalc = ui.chkInclude->isChecked();
     m_security.hide = ui.chkHide->isChecked();
@@ -168,7 +168,7 @@ void frmSecurity::accept()
     if (m_security.targets != m_securityOriginal.targets)
         m_security.saveAATargets();
 
-    if (m_security.divReinvest != m_securityOriginal.divReinvest || m_security.includeInCalc != m_securityOriginal.includeInCalc || m_security.cashAccount != m_securityOriginal.cashAccount)
+    if (m_security.dividendReinvestment != m_securityOriginal.dividendReinvestment || m_security.includeInCalc != m_securityOriginal.includeInCalc || m_security.cashAccount != m_securityOriginal.cashAccount)
         m_minDate = 0;
 
     QDialog::done(result);

@@ -8,6 +8,8 @@
 #include <QHBoxLayout>
 #include <QDoubleSpinBox>
 #include <QToolButton>
+#include <QComboBox>
+#include "assetAllocation.h"
 
 class frmEditAA_UI
 {
@@ -21,6 +23,10 @@ public:
     QHBoxLayout *targetLayout;
     QDoubleSpinBox *targetSpinBox;
     QToolButton *targetBtnClear;
+    QLabel *rebalanceBand;
+    QSpinBox *rebalanceBandSpinBox;
+    QLabel *threshold;
+    QComboBox *thresholdCmb;
 
     void setupUI(QWidget* parent = 0);
 };

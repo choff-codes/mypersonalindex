@@ -29,6 +29,11 @@ public:
         commission(commission_),
         associatedTradeID(associatedTradeID_)
     {}
+
+    static executedTrade load(QSqlQuery q_);
+
+    bool operator==(const executedTrade &other_) const;
+    bool operator!=(const executedTrade &other_) const { return !(*this == other_); }
 };
 
 class executedTradeMap: public objectBase, public queriesBatch
@@ -48,6 +53,9 @@ public:
 
     void remove(const queries &dataSource_);
     void remove(const queries &dataSource_, int beginDate_);
+
+    bool operator==(const executedTradeMap &other_) const { return m_trades == other_.m_trades; }
+    bool operator!=(const executedTradeMap &other_) const { return !(*this == other_); }
 
     void insertBatch(queries dataSource_);
 

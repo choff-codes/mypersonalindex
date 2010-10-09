@@ -12,7 +12,7 @@ public:
 
     static QMap<int, double> calculate(portfolio portfolio_, int date_);
 
-    static double calculate(int date_, const executedTradeMap &executedTrades_, costBasis costBasis_, splits splits_);
+    static double calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_);
 
 private:
     struct sharePricePair

@@ -1,46 +1,50 @@
 #include "portfolioAttributes.h"
 
-portfolioAttributes::portfolioAttributes(int id_):
-    objectKey(objectType_Portfolio, QString(), id_),
-    dividends(true),
-    defaultCostBasis(costBasis_FIFO),
+portfolioAttributes::portfolioAttributes(int id_, const QString description_):
+    objectKey(description_, id_),
     startValue(100),
-    aaThreshold(5),
-    aaThresholdMethod(threshold_Portfolio),
-    startDate(QDate::currentDate().toJulianDay()),
-    holdingsShowHidden(true),
-    navSortDesc(true),
-    aaShowBlank(true),
-    correlationShowHidden(true),
-    acctShowBlank(true)
+    startDate(QDate::currentDate().toJulianDay())
 {}
 
 bool portfolioAttributes::operator==(const portfolioAttributes &other_) const
 {
     return objectKey::operator ==(other_)
-            && this->dividends == other_.dividends
-            && this->defaultCostBasis == other_.defaultCostBasis
             && this->startValue == other_.startValue
-            && this->aaThreshold == other_.aaThreshold
-            && this->aaThresholdMethod == other_.aaThresholdMethod
             && this->startDate == other_.startDate;
 }
 
 void portfolioAttributes::save(const queries &dataSource_)
 {
     QMap<QString, QVariant> values;
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Description), description);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartValue), startValue);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_AAThreshold), aaThreshold);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_ThresholdMethod), (int)aaThresholdMethod);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_CostBasis), (int)defaultCostBasis);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_StartDate), startDate);
-    values.insert(queries::portfolioColumns.at(queries::portfoliosColumns_Dividends), (int)dividends);
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_Description), description);
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartValue), startValue);
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartDate), startDate);
 
     this->id = dataSource_.insert(queries::table_Portfolio, values, this->id);
 }
 
-QString portfolioAttributes::validate()
+void portfolioAttributes::remove(const queries &dataSource_) const
+{
+    if (!hasIdentity())
+        return;
+
+    dataSource_.deleteItem(queries::table_Portfolio, this->id);
+}
+
+portfolioAttributes portfolioAttributes::load(QSqlQuery q_)
+{
+    portfolioAttributes p(
+        q_.value(queries::portfolioColumns_ID).toInt(),
+        q_.value(queries::portfolioColumns_Description).toString()
+    );
+
+    p.startDate = q_.value(queries::portfolioColumns_StartDate).toInt();
+    p.startValue = q_.value(queries::portfolioColumns_StartValue).toInt();
+
+    return p;
+}
+
+QString portfolioAttributes::validate() const
 {
     if (this->description.isEmpty())
         return "Please enter a description!";

@@ -8,8 +8,8 @@ public:
     QMap<int, account> accounts;
     portfolioAttributes attributes;
 
-    portfolioData(int id_):
-        attributes(portfolioAttributes(id_))
+    portfolioData(int id_, const QString &description_):
+        attributes(portfolioAttributes(id_, description_))
     {}
 
 
@@ -86,19 +86,10 @@ public:
             i.value().executedTrades.insertBatch(dataSource_);
         }
     }
-
-    void remove(const queries &dataSource_) const
-    {
-        if (!attributes.hasIdentity())
-            return;
-
-        dataSource_.deleteItem(queries::table_Portfolio, attributes.id);
-    }
-
 };
 
-portfolio::portfolio(int id_):
-    d(new portfolioData(id_))
+portfolio::portfolio(int id_, const QString &description_):
+    d(new portfolioData(id_, description_))
 {
 }
 
@@ -144,7 +135,7 @@ void portfolio::save(const queries &dataSource_)
 
 void portfolio::remove(const queries &dataSource_) const
 {
-    d->remove(dataSource_);
+    d->attributes.remove(dataSource_);
 }
 
 void portfolio::detach()
@@ -162,7 +153,6 @@ QStringList portfolio::symbols() const
     list.removeDuplicates();
     return list;
 }
-
 
 int portfolio::endDate() const
 {

@@ -37,11 +37,10 @@ void frmEditAcct_UI::setupUI(QWidget *parent)
     layoutAcct->setWidget(2, QFormLayout::LabelRole, costBasis);
 
     costBasisCmb = new QComboBox(parent);
-    costBasisCmb->addItem("Portfolio Default", costBasis_None);
-    costBasisCmb->addItem("FIFO", costBasis_FIFO);
-    costBasisCmb->addItem("LIFO", costBasis_LIFO);
-    costBasisCmb->addItem("HIFO", costBasis_HIFO);
-    costBasisCmb->addItem("Average", costBasis_AVG);
+    costBasisCmb->addItem("FIFO", account::costBasisMethod_FIFO);
+    costBasisCmb->addItem("LIFO", account::costBasisMethod_LIFO);
+    costBasisCmb->addItem("HIFO", account::costBasisMethod_HIFO);
+    costBasisCmb->addItem("Average", account::costBasisMethod_AVG);
     layoutAcct->setWidget(2, QFormLayout::FieldRole, costBasisCmb);
 
     // no label

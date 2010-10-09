@@ -22,13 +22,13 @@ private:
     QMap<int, portfolio> m_portfolios;
     queries m_dataSource;
 
-    void loadPortfoliosInfo();
-    void loadPortfoliosSecurity(bool includePricing_);
-    void loadPortfoliosSecurityAA();
-    void loadPortfoliosSecurityTrades();
-    void loadPortfoliosSecurityTradesExecution();
-    void loadPortfoliosAA();
-    void loadPortfoliosAccount();
+    void loadPortfolio();
+    void loadPortfolioSecurity(bool includePricing_);
+    void loadPortfolioSecurityAA();
+    void loadPortfolioSecurityTrades();
+    void loadPortfolioSecurityTradesExecution();
+    void loadPortfolioAA();
+    void loadPortfolioAccount();
 };
 
 #endif // PORTFOLIOFACTORY_H

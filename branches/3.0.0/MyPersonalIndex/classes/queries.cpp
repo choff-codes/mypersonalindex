@@ -3,16 +3,20 @@
 
 //enum {
 //    portfolioAAColumns_ID,
-//    portfolioAAColumnsPortfolio_ID,
+//    portfolioAAColumns_PortfolioID,
 //    portfolioAAColumns_Description,
-//    portfolioAAColumns_Target
+//    portfolioAAColumns_Target,
+//    portfolioAAColumns_RebalanceBand,
+//    portfolioAAColumns_Threshold
 //};
 
 const QStringList queries::portfolioAAColumns = QStringList()
                                                 << "ID"
                                                 << "PortfolioID"
                                                 << "Description"
-                                                << "Target";
+                                                << "Target"
+                                                << "RebalanceBand"
+                                                << "Threshold";
 
 //enum {
 //    portfolioAccountColumns_ID,
@@ -45,41 +49,17 @@ const QStringList queries::historicalPriceColumns = QStringList()
                                                     << "Value";
 
 //enum {
-//    portfoliosColumns_ID,
-//    portfoliosColumns_Description,
-//    portfoliosColumns_StartValue,
-//    portfoliosColumns_AAThreshold,
-//    portfoliosColumns_ThresholdMethod,
-//    portfoliosColumns_CostBasis,
-//    portfoliosColumns_StartDate,
-//    portfoliosColumns_Dividends,
-//    portfoliosColumns_HoldingsShowHidden,
-//    portfoliosColumns_HoldingsSort,
-//    portfoliosColumns_AAShowBlank,
-//    portfoliosColumns_AASort,
-//    portfoliosColumns_CorrelationShowHidden,
-//    portfoliosColumns_AcctShowBlank,
-//    portfoliosColumns_AcctSort,
-//    portfoliosColumns_NAVSortDesc
+//    portfolioColumns_ID,
+//    portfolioColumns_Description,
+//    portfolioColumns_StartValue,
+//    portfolioColumns_StartDate
 //};
 
 const QStringList queries::portfolioColumns = QStringList()
                                               << "ID"
                                               << "Description"
                                               << "StartValue"
-                                              << "AAThreshold"
-                                              << "ThresholdMethod"
-                                              << "CostBasis"
-                                              << "StartDate"
-                                              << "Dividends"
-                                              << "HoldingsShowHidden"
-                                              << "HoldingsSort"
-                                              << "AAShowBlank"
-                                              << "AASort"
-                                              << "CorrelationShowHidden"
-                                              << "AcctShowBlank"
-                                              << "AcctSort"
-                                              << "NAVSortDesc";
+                                              << "StartDate";
 
 //enum {
 //    settingsColumns_DataStartDate,
@@ -127,7 +107,8 @@ const QStringList queries::settingsColumnsColumns = QStringList()
 //    portfolioSecurityColumns_CashAccount,
 //    portfolioSecurityColumns_IncludeInCalc,
 //    portfolioSecurityColumns_Hide,
-//    portfolioSecurityColumns_Note
+//    portfolioSecurityColumns_Note,
+//    portfolioSecurityColumns_Dividends
 //};
 
 const QStringList queries::portfolioSecurityColumns = QStringList()
@@ -140,7 +121,8 @@ const QStringList queries::portfolioSecurityColumns = QStringList()
                                                       << "CashAccount"
                                                       << "IncludeInCalc"
                                                       << "Hide"
-                                                      << "Note";
+                                                      << "Note"
+                                                      << "Dividends";
 
 
 //enum {

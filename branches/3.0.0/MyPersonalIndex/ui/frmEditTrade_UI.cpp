@@ -12,8 +12,8 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     type = new QLabel("&Type:", groupBoxTrade);
     typeCmb = new QComboBox(groupBoxTrade);
 
-    for(int i = 0; i < trade::tradeType_Count; ++i)
-        typeCmb->addItem(trade::tradeTypeToString((trade::tradeType)i));
+    for(int i = 0; i < trade::tradeAction_Count; ++i)
+        typeCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i));
 
     tradeLayout->setWidget(0, QFormLayout::LabelRole, type);
     tradeLayout->setWidget(0, QFormLayout::FieldRole, typeCmb);
@@ -37,6 +37,11 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     cashCmb = new QComboBox(groupBoxTrade);
     tradeLayout->setWidget(4, QFormLayout::LabelRole, cash);
     tradeLayout->setWidget(4, QFormLayout::FieldRole, cashCmb);
+    note = new QLabel("&Notes:", groupBoxTrade);
+    noteTxt = new QTextEdit(groupBoxTrade);
+    noteTxt->setAcceptRichText(false);
+    tradeLayout->setWidget(5, QFormLayout::LabelRole, note);
+    tradeLayout->setWidget(5, QFormLayout::FieldRole, noteTxt);
 
     groupBoxDate = new QGroupBox("Date", parent);
     dateLayout = new QFormLayout(groupBoxDate);
@@ -73,4 +78,5 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     cash->setBuddy(cashCmb);
     freq->setBuddy(freqCmb);
     date->setBuddy(dateDateEdit);
+    note->setBuddy(noteTxt);
 }

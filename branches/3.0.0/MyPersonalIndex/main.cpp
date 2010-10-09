@@ -28,6 +28,7 @@ int main(int argc, char *argv[])
 //            return 0;
 //        }
 //
+
     frmEdit(portfolio()).exec();
     //app.setActivationWindow(&mainForm);
     //form.show();

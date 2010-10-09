@@ -4,7 +4,7 @@ bool trade::operator==(const trade &other_) const
 {
     // ignore executedTrades since these are not user set
     return objectKey::operator ==(other_)
-            && this->type == other_.type
+            && this->action == other_.action
             && this->value == other_.value
             && this->price == other_.price
             && this->commission == other_.commission
@@ -19,7 +19,8 @@ void trade::save(const queries &dataSource_)
 {
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_SecurityID), this->parent);
-    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Type), (int)this->type);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Description), this->description);
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Type), (int)this->action);
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Value), this->value);
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Price), functions::doubleToNull(this->price));
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Commission), this->commission);
@@ -40,33 +41,60 @@ void trade::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioSecurityTrade, this->id);
 }
 
-QString trade::tradeTypeToString(tradeType type_)
+trade trade::load(QSqlQuery q_)
+{
+    trade t(
+           q_.value(queries::portfolioSecurityTradeViewColumns_ID).toInt(),
+           q_.value(queries::portfolioSecurityTradeViewColumns_SecurityID).toInt()
+    );
+
+    t.action = (trade::tradeAction)q_.value(queries::portfolioSecurityTradeViewColumns_Type).toInt();
+    t.value = q_.value(queries::portfolioSecurityTradeViewColumns_Value).toDouble();
+    t.description = q_.value(queries::portfolioSecurityTradeViewColumns_Description).toString();
+    if (!q_.value(queries::portfolioSecurityTradeViewColumns_Price).isNull())
+        t.price = q_.value(queries::portfolioSecurityTradeViewColumns_Price).toDouble();
+    t.commission = q_.value(queries::portfolioSecurityTradeViewColumns_Commission).toDouble();
+    if (!q_.value(queries::portfolioSecurityTradeViewColumns_CashAccountID).isNull())
+        t.cashAccount = q_.value(queries::portfolioSecurityTradeViewColumns_CashAccountID).toInt();
+    t.frequency = (tradeDateCalendar::frequency)q_.value(queries::portfolioSecurityTradeViewColumns_Frequency).toInt();
+    if (!q_.value(queries::portfolioSecurityTradeViewColumns_Date).isNull())
+        t.date = q_.value(queries::portfolioSecurityTradeViewColumns_Date).toInt();
+    if (!q_.value(queries::portfolioSecurityTradeViewColumns_StartDate).isNull())
+        t.startDate = q_.value(queries::portfolioSecurityTradeViewColumns_StartDate).toInt();
+    if (!q_.value(queries::portfolioSecurityTradeViewColumns_EndDate).isNull())
+        t.endDate = q_.value(queries::portfolioSecurityTradeViewColumns_EndDate).toInt();
+
+    return t;
+}
+
+
+QString trade::tradeTypeToString(tradeAction type_)
 {
     switch (type_)
     {
-        case tradeType_Purchase:
+        case tradeAction_Purchase:
             return "Purchase";
-        case tradeType_Sale:
+        case tradeAction_Sale:
             return "Sale";
-        case tradeType_DivReinvest:
+        case tradeAction_DivReinvest:
             return "Reinvestment";
-        case tradeType_Interest:
+        case tradeAction_Interest:
             return "Interest";
-        case tradeType_InterestPercent:
+        case tradeAction_InterestPercent:
             return "% Interest";
-        case tradeType_FixedPurchase:
+        case tradeAction_FixedPurchase:
             return "Fixed Purchase";
-        case tradeType_FixedSale:
+        case tradeAction_FixedSale:
             return "Fixed Sale";
-        case tradeType_Value:
+        case tradeAction_Value:
             return "% of Value";
-        case tradeType_TotalValue:
+        case tradeAction_TotalValue:
             return "% of Portfolio";
-        case tradeType_AA:
+        case tradeAction_AA:
             return "% of AA Target";
-        case tradeType_DivReinvestAuto:
+        case tradeAction_DivReinvestAuto:
             return "Auto Reinvestment";
-        case tradeType_Reversal:
+        case tradeAction_Reversal:
             return "Reversal";
         default:
             return "";
@@ -92,25 +120,25 @@ QString trade::frequencyToString(tradeDateCalendar::frequency freq_)
     }
 }
 
-QString trade::valueToString(tradeType type_, double value_)
+QString trade::valueToString(tradeAction type_, double value_)
 {
     if (value_ < 0)
         return "";
 
     switch (type_)
     {
-        case tradeType_Purchase:
-        case tradeType_Sale:
-        case tradeType_DivReinvest:
+        case tradeAction_Purchase:
+        case tradeAction_Sale:
+        case tradeAction_DivReinvest:
             return functions::doubleToLocalFormat(value_);
-        case tradeType_Interest:
-        case tradeType_FixedPurchase:
-        case tradeType_FixedSale:
+        case tradeAction_Interest:
+        case tradeAction_FixedPurchase:
+        case tradeAction_FixedSale:
             return functions::doubleToCurrency(value_);
-        case tradeType_TotalValue:
-        case tradeType_AA:
-        case tradeType_Value:
-        case tradeType_InterestPercent:
+        case tradeAction_TotalValue:
+        case tradeAction_AA:
+        case tradeAction_Value:
+        case tradeAction_InterestPercent:
             return functions::doubleToPercentage(value_ / 100);
         default:
             return "";
@@ -136,23 +164,23 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
     }
 }
 
-QString trade::validate()
+QString trade::validate() const
 {
     if (functions::massage(this->value) < 0)
-        switch (this->type)
+        switch (this->action)
         {
-            case tradeType_Purchase:
-            case tradeType_Sale:
-            case tradeType_DivReinvest:
+            case tradeAction_Purchase:
+            case tradeAction_Sale:
+            case tradeAction_DivReinvest:
                 return "The shares cannot be negative!";
-            case tradeType_Interest:
-            case tradeType_FixedPurchase:
-            case tradeType_FixedSale:
+            case tradeAction_Interest:
+            case tradeAction_FixedPurchase:
+            case tradeAction_FixedSale:
                 return "The dollar amount cannot be negative!";
-            case tradeType_TotalValue:
-            case tradeType_AA:
-            case tradeType_Value:
-            case tradeType_InterestPercent:
+            case tradeAction_TotalValue:
+            case tradeAction_AA:
+            case tradeAction_Value:
+            case tradeAction_InterestPercent:
                 return "The percentage cannot be negative!";
             default:
                 return "Value cannot be negative";

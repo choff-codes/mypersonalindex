@@ -17,22 +17,21 @@ enum objectType {
 class objectKey: public objectBase
 {
 public:
-    objectType type;
     QString description;
     int id;
 
-    objectKey(objectType type_, const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
+    objectKey(const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectBase(parent_),
-        type(type_),
         description(description_),
         id(id_)
     {}
 
+    virtual objectType type() const = 0;
     void clearIdentity() { id = UNASSIGNED; }
     bool hasIdentity() const { return this->id != UNASSIGNED; }
 
     // return an empty string if there are no validation errors, otherwise return the error message
-    virtual QString validate() = 0;
+    virtual QString validate() const = 0;
 
     bool operator==(const objectKey &other_) const;
     bool operator!=(const objectKey &other_) const { return !(*this == other_); }

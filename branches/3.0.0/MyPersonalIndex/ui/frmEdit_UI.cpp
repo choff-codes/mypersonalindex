@@ -82,7 +82,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     tradeLayoutTop = new QGridLayout();
 
     tradeList = new QListWidget(tradeTab);
-    tradeFilter = new QLabel("Security Filter:", tradeTab);
+    tradeFilter = new QLabel("Choose Security:", tradeTab);
     tradeFilterCmb = new QComboBox(tradeTab);
     tradeAdd = new QPushButton("Add", tradeTab);
     tradeDelete = new QPushButton("Delete", tradeTab);
@@ -96,8 +96,8 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
 
     tradeFormWidget = new QWidget(tradeTab);
 
-    tradeLayout->addLayout(tradeLayoutTop);
-    tradeLayout->addWidget(tradeFormWidget);
+    tradeLayout->addLayout(tradeLayoutTop, 2);
+    tradeLayout->addWidget(tradeFormWidget, 1);
     tradeForm.setupUI(tradeFormWidget);
 
     tabs->addTab(tradeTab, "Trades");

@@ -4,30 +4,38 @@
 #include <QString>
 #include "queries.h"
 #include "functions.h"
-#include "costBasis.h"
 #include "objectKey.h"
 
 class account: public objectKey
 {
 public:
+    enum costBasisMethod {
+        costBasisMethod_FIFO,
+        costBasisMethod_LIFO,
+        costBasisMethod_AVG,
+        costBasisMethod_HIFO
+    };
+
     double taxRate;
     bool taxDeferred;
-    costBasis overrideCostBasis;
+    costBasisMethod costBasis;
 
     account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
-        objectKey(objectType_Account, description_, id_, parent_),
+        objectKey(description_, id_, parent_),
         taxRate(UNASSIGNED),
         taxDeferred(false),
-        overrideCostBasis(costBasis_None)
+        costBasis(costBasisMethod_FIFO)
     {}
 
     bool operator==(const account &other_) const;
     bool operator!=(const account &other_) const { return !(*this == other_); }
 
-    QString validate();
+    objectType type() const { return objectType_Account; }
+    QString validate() const;
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
+    static account load(QSqlQuery q_);
 };
 
 #endif // ACCOUNT_H

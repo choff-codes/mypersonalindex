@@ -31,8 +31,9 @@ public:
     QHBoxLayout *expenseLayout;
     QDoubleSpinBox *expenseSpinBox;
     QToolButton *expenseBtnClear;
-    QCheckBox *reinvestChk;
     QCheckBox *cashChk;
+    QCheckBox *reinvestChk;
+    QCheckBox *dividends;
     QCheckBox *includeChk;
     QCheckBox *hideChk;
     QGroupBox *aaGroupBox;

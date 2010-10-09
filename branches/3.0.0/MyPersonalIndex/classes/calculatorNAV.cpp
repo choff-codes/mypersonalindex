@@ -67,7 +67,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     value.date = date_;
     value.dividendAmount = value.shares * s.dividend(date_);
     value.totalValue = value.shares * s.price(date_);
-    value.expenseRatio = s.expense;
+    value.expenseRatio = s.expenseRatio;
 
     account acct = d->currentPortfolio.accounts().value(s.account);
     value.setTaxLiability(acct.taxRate, acct.taxDeferred);
@@ -123,7 +123,7 @@ snapshot calculatorNAV::symbolSnapshot(int date_, int id_, int beginDate_)
 
 snapshot calculatorNAV::snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_)
 {
-    switch(key_.type)
+    switch(key_.type())
     {
         case objectType_AA:
             return assetAllocationSnapshot(date_, key_.id, priorDate_);
@@ -144,7 +144,7 @@ snapshot calculatorNAV::snapshotByKey(int date_, const objectKey &key_, int begi
 
 int calculatorNAV::beginDateByKey(const objectKey &key_)
 {
-    switch(key_.type)
+    switch(key_.type())
     {
         case objectType_AA:
         case objectType_Account:
@@ -162,7 +162,7 @@ int calculatorNAV::beginDateByKey(const objectKey &key_)
 
 int calculatorNAV::endDateByKey(const objectKey &key_)
 {
-    switch(key_.type)
+    switch(key_.type())
     {
         case objectType_AA:
         case objectType_Account:

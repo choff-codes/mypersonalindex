@@ -40,7 +40,7 @@ private:
     executedTrade calculateExecutedTrade(int date_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;
 
-    double calculateTradePrice(trade::tradeType type_, double price_, double priorDayPrice_) const;
+    double calculateTradePrice(trade::tradeAction type_, double price_, double priorDayPrice_) const;
 
     double calculateTradeShares(int date_, double price_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;

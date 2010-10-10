@@ -72,8 +72,7 @@ void portfolioFactory::loadPortfolioSecurityAA()
         m_portfolios[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
             [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets.insert(
                 q.value(queries::portfolioSecurityAAViewColumns_AAID).toInt(),
-                q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble(),
-                false
+                q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble()
             );
 }
 

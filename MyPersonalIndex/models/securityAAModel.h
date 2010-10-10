@@ -14,21 +14,25 @@ class securityAAModel: public QAbstractTableModel
 
 public:
 
-    QMap<int, double> getList() const { return m_list; }
+    assetAllocationTarget getTargets() const { return m_target; }
 
-    securityAAModel(const QMap<int, double> &values, const QMap<int, assetAllocation> &aaValues, QTableView *parent = 0):
-            QAbstractTableModel(parent), m_aaValues(aaValues), m_parent(parent), m_list(values), m_keys(values.keys())
+    securityAAModel(assetAllocationTarget target_, const QMap<int, assetAllocation> &descriptions_, QObject *parent_ = 0):
+        QAbstractTableModel(parent_),
+        m_target(target_),
+        m_keys(target_.keys()),
+        m_descriptions(descriptions_)
     {
-        insertRows(0, m_list.count());
+        insertRows(0, m_keys.count());
     }
 
-    double totalPercentage() const;
+    double totalAssignedPercentage() const { return m_target.totalAssignedPercentage(); }
+    void addNew(int id_);
+    void deleteSelected(QItemSelectionModel selection_);
 
 private:
-    const QMap<int, assetAllocation> m_aaValues;
-    QTableView *m_parent;
-    QMap<int, double> m_list;
+    assetAllocationTarget m_target;
     QList<int> m_keys;
+    QMap<int, assetAllocation> m_descriptions;
 
     Qt::ItemFlags flags(const QModelIndex &index) const;
     int rowCount(const QModelIndex&) const { return m_keys.count(); }
@@ -37,10 +41,6 @@ private:
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int, Qt::Orientation, int) const { return QVariant(); }
     bool setData(const QModelIndex &index, const QVariant &value, int role);
-
-public slots:
-    void addNew(const int &id);
-    void deleteSelected();
 
 signals:
     void updateHeader();

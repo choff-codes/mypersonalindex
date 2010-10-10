@@ -32,6 +32,7 @@ public:
 
     // return an empty string if there are no validation errors, otherwise return the error message
     virtual QString validate() const = 0;
+    virtual QString displayText() const { return description.isEmpty() ? "(New)" : description; }
 
     bool operator==(const objectKey &other_) const;
     bool operator!=(const objectKey &other_) const { return !(*this == other_); }

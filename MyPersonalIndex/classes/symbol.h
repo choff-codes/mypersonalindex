@@ -14,6 +14,7 @@ public:
 
     objectType type() const { return objectType_Symbol; }
     QString validate() const { return QString(); }
+    QString displayText() const { return description; }
 };
 
 #endif // SYMBOL_H

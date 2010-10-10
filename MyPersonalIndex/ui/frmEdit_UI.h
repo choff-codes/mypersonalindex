@@ -8,7 +8,7 @@
 #include <QGridLayout>
 #include <QHBoxLayout>
 #include <QLabel>
-#include <QListWidget>
+#include <QListView>
 #include <QPushButton>
 #include <QTabWidget>
 #include <QVBoxLayout>
@@ -29,28 +29,28 @@ public:
     QWidget *acctTab;
     QHBoxLayout *acctLayout;
     QGridLayout *acctLayoutLeft;
-    QListWidget *acctList;
+    QListView *acctList;
     QPushButton *acctAdd;
     QPushButton *acctDelete;
     QWidget *acctFormWidget;
     QWidget *aaTab;
     QHBoxLayout *aaLayout;
     QGridLayout *aaLayoutLeft;
-    QListWidget *aaList;
+    QListView *aaList;
     QPushButton *aaAdd;
     QPushButton *aaDelete;
     QWidget *aaFormWidget;
     QWidget *securityTab;
     QHBoxLayout *securityLayout;
     QGridLayout *securityLayoutLeft;
-    QListWidget *securityList;
+    QListView *securityList;
     QPushButton *securityAdd;
     QPushButton *securityDelete;
     QWidget *securityFormWidget;
     QWidget *tradeTab;
     QVBoxLayout *tradeLayout;
     QGridLayout *tradeLayoutTop;
-    QListWidget *tradeList;
+    QListView *tradeList;
     QLabel *tradeFilter;
     QComboBox *tradeFilterCmb;
     QPushButton *tradeAdd;

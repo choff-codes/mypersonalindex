@@ -88,6 +88,8 @@ public:
     }
 };
 
+int portfolio::IDENTITY_COUNTER = -10;
+
 portfolio::portfolio(int id_, const QString &description_):
     d(new portfolioData(id_, description_))
 {

@@ -46,8 +46,8 @@ void frmEditAA_UI::setupUI(QWidget *parent)
     layoutAA->setWidget(3, QFormLayout::LabelRole, threshold);
 
     thresholdCmb = new QComboBox(parent);
-    thresholdCmb->addItem("Portfolio Value", assetAllocation::threshold_Portfolio);
-    thresholdCmb->addItem("Asset Class Value", assetAllocation::threshold_AA);
+    thresholdCmb->addItem("Portfolio Value", assetAllocation::thresholdMethod_Portfolio);
+    thresholdCmb->addItem("Asset Class Value", assetAllocation::thresholdMethod_AA);
     layoutAA->setWidget(3, QFormLayout::FieldRole, thresholdCmb);
 
     desc->setBuddy(descTxt);

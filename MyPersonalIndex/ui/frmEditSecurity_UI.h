@@ -13,7 +13,8 @@
 #include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QPushButton>
-#include "mpiTableView.h"
+#include <QTableView>
+#include <QHeaderView>
 
 class frmEditSecurity_UI
 {
@@ -32,13 +33,13 @@ public:
     QDoubleSpinBox *expenseSpinBox;
     QToolButton *expenseBtnClear;
     QCheckBox *cashChk;
-    QCheckBox *reinvestChk;
-    QCheckBox *dividends;
+    QCheckBox *dividendReinvestmentChk;
+    QCheckBox *dividendNAVAdjustmentChk;
     QCheckBox *includeChk;
     QCheckBox *hideChk;
     QGroupBox *aaGroupBox;
     QVBoxLayout *aaLayout;
-    mpiTableView *aa;
+    QTableView *aa;
     QGridLayout *aaLayoutBottom;
     QComboBox *aaCmb;
     QPushButton *aaBtnAdd;

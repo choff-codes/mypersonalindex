@@ -8,7 +8,7 @@
 class objectKeyEditModel : public QAbstractListModel
 {
 public:
-    objectKeyEditModel(QList<const objectKey*> items_, QObject *parent = 0):
+    objectKeyEditModel(QList<objectKey*> items_, QObject *parent = 0):
         QAbstractListModel(parent),
         m_items(items_)
     {
@@ -17,13 +17,15 @@ public:
 
     int rowCount(const QModelIndex&) const { return m_items.count(); }
     QVariant data(const QModelIndex &index, int role) const;
-    void insert(const objectKey* key_);
-    virtual bool removeRows(int row_, int count_, const QModelIndex &parent_);
+    void insert(objectKey* key_);
+    void remove(objectKey* key_);
+    void refresh(const QModelIndex &index_) { emit dataChanged(index_, index_); }
 
-    QModelIndex find(const objectKey* key_) { return index(m_items.indexOf(key_)); }
+    objectKey* get(int row_) { return row_ < m_items.count() && row_ >= 0 ? m_items.at(row_) : 0; }
+    QModelIndex find(objectKey* key_) { return index(m_items.indexOf(key_)); }
 
 private:
-    QList<const objectKey*> m_items;
+    QList<objectKey*> m_items;
 };
 
 #endif // OBJECTKEYEDITMODEL_H

@@ -19,8 +19,8 @@ public:
     QHBoxLayout *layout;
     QGroupBox *groupBoxTrade;
     QFormLayout *tradeLayout;
-    QLabel *type;
-    QComboBox *typeCmb;
+    QLabel *action;
+    QComboBox *actionCmb;
     mpiDoubleValidator *sharePriceValidator;
     QLabel *shares;
     QLineEdit *sharesTxt;

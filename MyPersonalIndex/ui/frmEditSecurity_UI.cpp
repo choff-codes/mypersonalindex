@@ -38,12 +38,12 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
     cashChk = new QCheckBox("Cash Acc&ount", securityGroupBox);
     securityLayout->setWidget(4, QFormLayout::LabelRole, new QLabel(securityGroupBox));
     securityLayout->setWidget(4, QFormLayout::FieldRole, cashChk);
-    reinvestChk = new QCheckBox("&Reinvest Dividends", securityGroupBox);
+    dividendReinvestmentChk = new QCheckBox("&Reinvest Dividends", securityGroupBox);
     securityLayout->setWidget(5, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(5, QFormLayout::FieldRole, reinvestChk);
-    dividends = new QCheckBox("&Adjust NAV for Dividends", securityGroupBox);
+    securityLayout->setWidget(5, QFormLayout::FieldRole, dividendReinvestmentChk);
+    dividendNAVAdjustmentChk = new QCheckBox("&Adjust NAV for Dividends", securityGroupBox);
     securityLayout->setWidget(6, QFormLayout::LabelRole, new QLabel(securityGroupBox));
-    securityLayout->setWidget(6, QFormLayout::FieldRole, dividends);
+    securityLayout->setWidget(6, QFormLayout::FieldRole, dividendNAVAdjustmentChk);
     includeChk = new QCheckBox("Incl&ude in Calculations", securityGroupBox);
     securityLayout->setWidget(7, QFormLayout::LabelRole, new QLabel(securityGroupBox));
     securityLayout->setWidget(7, QFormLayout::FieldRole, includeChk);
@@ -53,7 +53,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
 
     aaGroupBox = new QGroupBox("Asset Allocation", parent);
     aaLayout = new QVBoxLayout(aaGroupBox);
-    aa = new mpiTableView(false, aaGroupBox);
+    aa = new QTableView(aaGroupBox);
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
     aa->setSelectionBehavior(QAbstractItemView::SelectRows);
     aa->setAlternatingRowColors(true);

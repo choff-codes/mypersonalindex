@@ -9,14 +9,14 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
 
     sharePriceValidator = new mpiDoubleValidator(-100000000, 100000000, 4, parent);
 
-    type = new QLabel("&Type:", groupBoxTrade);
-    typeCmb = new QComboBox(groupBoxTrade);
+    action = new QLabel("&Type:", groupBoxTrade);
+    actionCmb = new QComboBox(groupBoxTrade);
 
     for(int i = 0; i < trade::tradeAction_Count; ++i)
-        typeCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i));
+        actionCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i));
 
-    tradeLayout->setWidget(0, QFormLayout::LabelRole, type);
-    tradeLayout->setWidget(0, QFormLayout::FieldRole, typeCmb);
+    tradeLayout->setWidget(0, QFormLayout::LabelRole, action);
+    tradeLayout->setWidget(0, QFormLayout::FieldRole, actionCmb);
     shares = new QLabel("&Shares:", groupBoxTrade);
     sharesTxt = new QLineEdit(groupBoxTrade);
     sharesTxt->setValidator(sharePriceValidator);
@@ -72,7 +72,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     layout->addWidget(groupBoxTrade, 1);
     layout->addWidget(groupBoxDate, 1);
 
-    type->setBuddy(typeCmb);
+    action->setBuddy(actionCmb);
     shares->setBuddy(sharesTxt);
     commission->setBuddy(commissionTxt);
     cash->setBuddy(cashCmb);

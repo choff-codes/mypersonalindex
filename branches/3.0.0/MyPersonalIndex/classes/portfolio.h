@@ -20,8 +20,9 @@ public:
     portfolio& operator=(const portfolio &other_);
 
     QStringList symbols() const;
-
     int endDate() const;
+
+    static int getOpenIdentity() { return --IDENTITY_COUNTER; }
 
     QMap<int, security>& securities() const;
     QMap<int, assetAllocation>& assetAllocations() const;
@@ -35,6 +36,7 @@ public:
 
 private:
     QExplicitlySharedDataPointer<portfolioData> d;
+    static int IDENTITY_COUNTER;
 };
 
 #endif // PORTFOLIO_H

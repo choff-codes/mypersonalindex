@@ -26,10 +26,11 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     acctTab = new QWidget(dialog);
     acctLayout = new QHBoxLayout(acctTab);
     acctLayoutLeft = new QGridLayout();
-    acctList = new QListWidget(acctTab);
+    acctList = new QListView(acctTab);
     acctAdd = new QPushButton("Add", acctTab);
     acctDelete = new QPushButton("Delete", acctTab);
     acctFormWidget = new QWidget(acctTab);
+    acctFormWidget->setEnabled(false);
 
     acctLayoutLeft->addWidget(acctList, 0, 0, 1, 2);
     acctLayoutLeft->addWidget(acctAdd, 1, 0, 1, 1);
@@ -44,10 +45,11 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     aaTab = new QWidget(dialog);
     aaLayout = new QHBoxLayout(aaTab);
     aaLayoutLeft = new QGridLayout();
-    aaList = new QListWidget(aaTab);
+    aaList = new QListView(aaTab);
     aaAdd = new QPushButton("Add", aaTab);
     aaDelete = new QPushButton("Delete", aaTab);
     aaFormWidget = new QWidget(aaTab);
+    aaFormWidget->setEnabled(false);
 
     aaLayoutLeft->addWidget(aaList, 0, 0, 1, 2);
     aaLayoutLeft->addWidget(aaAdd, 1, 0, 1, 1);
@@ -62,10 +64,11 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     securityTab = new QWidget(dialog);
     securityLayout = new QHBoxLayout(securityTab);
     securityLayoutLeft = new QGridLayout();
-    securityList = new QListWidget(securityTab);
+    securityList = new QListView(securityTab);
     securityAdd = new QPushButton("Add", securityTab);
     securityDelete = new QPushButton("Delete", securityTab);
     securityFormWidget = new QWidget(securityTab);
+    securityFormWidget->setEnabled(false);
 
     securityLayoutLeft->addWidget(securityList, 0, 0, 1, 2);
     securityLayoutLeft->addWidget(securityAdd, 1, 0, 1, 1);
@@ -81,7 +84,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     tradeLayout = new QVBoxLayout(tradeTab);
     tradeLayoutTop = new QGridLayout();
 
-    tradeList = new QListWidget(tradeTab);
+    tradeList = new QListView(tradeTab);
     tradeFilter = new QLabel("Choose Security:", tradeTab);
     tradeFilterCmb = new QComboBox(tradeTab);
     tradeAdd = new QPushButton("Add", tradeTab);
@@ -95,6 +98,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
 
 
     tradeFormWidget = new QWidget(tradeTab);
+    tradeFormWidget->setEnabled(false);
 
     tradeLayout->addLayout(tradeLayoutTop, 2);
     tradeLayout->addWidget(tradeFormWidget, 1);

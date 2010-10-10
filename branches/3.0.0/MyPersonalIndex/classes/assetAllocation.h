@@ -10,8 +10,8 @@ class assetAllocation: public objectKey
 {
 public:
     enum thresholdMethod {
-        threshold_Portfolio,
-        threshold_AA
+        thresholdMethod_Portfolio,
+        thresholdMethod_AA
     };
 
     double target;
@@ -21,7 +21,7 @@ public:
     assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
         objectKey(description_, id_, parent_),
         target(UNASSIGNED),
-        threshold(threshold_Portfolio),
+        threshold(thresholdMethod_Portfolio),
         rebalanceBand(5)
     {}
 

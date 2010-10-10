@@ -71,6 +71,9 @@ QString security::validate() const
     if (this->description.isEmpty())
         return "Please enter a description!";
 
+    if (this->targets.totalAssignedPercentage() > 100)
+        return "Asset allocation should not sum to more than 100!";
+
     return QString();
 }
 

@@ -148,7 +148,7 @@ QString statistic::calculate(stat statistic_, const statisticInfo &statisticInfo
         case stat_ProbabilityOfYearlyLoss:
             return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statisticInfo_));
         case stat_WeightedExpenseRatio:
-            return functions::doubleToPercentage(statisticInfo_.expenseRatio);
+            return functions::doubleToPercentage(statisticInfo_.navHistory.expenseRatio);
         default:
             return QString();
     }

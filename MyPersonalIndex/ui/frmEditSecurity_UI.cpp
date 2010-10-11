@@ -26,7 +26,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent)
     expenseSpinBox->setMinimum(0);
     expenseSpinBox->setSingleStep(0.01);
     expenseSpinBox->setValue(0);
-    expenseSpinBox->setSpecialValueText("N/A");
+    expenseSpinBox->setSpecialValueText("None");
     expenseSpinBox->setSuffix("%");
 
     expenseBtnClear = new QToolButton(securityGroupBox);

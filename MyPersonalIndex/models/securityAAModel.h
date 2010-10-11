@@ -10,10 +10,7 @@
 
 class securityAAModel: public QAbstractTableModel
 {
-    Q_OBJECT
-
 public:
-
     assetAllocationTarget getTargets() const { return m_target; }
 
     securityAAModel(assetAllocationTarget target_, const QMap<int, assetAllocation> &descriptions_, QObject *parent_ = 0):
@@ -25,25 +22,24 @@ public:
         insertRows(0, m_keys.count());
     }
 
-    double totalAssignedPercentage() const { return m_target.totalAssignedPercentage(); }
     void addNew(int id_);
-    void deleteSelected(QItemSelectionModel selection_);
+    void deleteSelected(QItemSelectionModel *selection_);
 
 private:
     assetAllocationTarget m_target;
     QList<int> m_keys;
     QMap<int, assetAllocation> m_descriptions;
 
-    Qt::ItemFlags flags(const QModelIndex &index) const;
+    Qt::ItemFlags flags(const QModelIndex &index_) const;
     int rowCount(const QModelIndex&) const { return m_keys.count(); }
     int columnCount (const QModelIndex&) const { return 2; }
 
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int, Qt::Orientation, int) const { return QVariant(); }
-    bool setData(const QModelIndex &index, const QVariant &value, int role);
+    void insertUnassigned();
+    void removeUnassigned();
 
-signals:
-    void updateHeader();
+    QVariant data(const QModelIndex &index_, int role_) const;
+    QVariant headerData(int, Qt::Orientation, int) const { return QVariant(); }
+    bool setData(const QModelIndex &index_, const QVariant &value_, int role_);
 };
 
 #endif // SECURITYAAMODEL_H

@@ -4,7 +4,7 @@ void assetAllocationTarget::insert(int id_, double target_)
 {
     m_targets.insert(id_, target_);
     double total = totalAssignedPercentage();
-    if (total == 1) // if we hit 100%, remove the unassigned portion
+    if (functions::massage(1 - total) <= 0) // if we hit 100%, remove the unassigned portion
         m_targets.remove(UNASSIGNED);
     else
         m_targets[UNASSIGNED] = 1 - total;
@@ -14,7 +14,7 @@ void assetAllocationTarget::remove(int id_)
 {
     m_targets.remove(id_);
     double total = totalAssignedPercentage();
-    if (total == 1) // if we hit 100%, remove the unassigned portion
+    if (functions::massage(1 - total) <= 0) // if we hit 100%, remove the unassigned portion
         m_targets.remove(UNASSIGNED);
     else
         m_targets[UNASSIGNED] = 1 - total;
@@ -25,7 +25,7 @@ double assetAllocationTarget::totalAssignedPercentage() const
     double total = 0;
     foreach(const double &d, m_targets)
         total += d;
-    return functions::massage(total);
+    return functions::massage(total - m_targets.value(UNASSIGNED));
 }
 
 void assetAllocationTarget::updateAssetAllocationID(int fromID_, int toID_)

@@ -28,7 +28,7 @@ public:
     QLabel *threshold;
     QComboBox *thresholdCmb;
 
-    void setupUI(QWidget* parent = 0);
+    void setupUI(QWidget* parent = 0);    
 };
 
 #endif // FRMEDITAA_UI_H

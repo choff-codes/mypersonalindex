@@ -20,12 +20,12 @@ void frmEditAcct_UI::setupUI(QWidget *parent)
     taxRateLayout = new QHBoxLayout();
     taxRateSpinBox = new QDoubleSpinBox(parent);
     taxRateSpinBox->setDecimals(2);
-    taxRateSpinBox->setMinimum(-1);
+    taxRateSpinBox->setMinimum(0);
     taxRateSpinBox->setMaximum(100);
     taxRateSpinBox->setSingleStep(1);
     taxRateSpinBox->setSuffix("%");
     taxRateSpinBox->setSpecialValueText("None");
-    taxRateSpinBox->setValue(-1);
+    taxRateSpinBox->setValue(0);
     taxRateBtnClear = new QToolButton(parent);
     taxRateBtnClear->setText("C&lear");
 

@@ -14,6 +14,7 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
     ui.securityList->setModel(new objectKeyEditModel(mapToList(m_portfolio.securities()), ui.securityList));
 
     connectSlots();
+    loadPortfolio();
 }
 
 void frmEdit::connectSlots()
@@ -37,6 +38,13 @@ void frmEdit::connectSlots()
     connect(ui.securityList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
     connect(ui.securityAdd, SIGNAL(clicked()), this, SLOT(add()));
     connect(ui.securityDelete, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(ui.securityForm.aaBtnAdd, SIGNAL(clicked()), this, SLOT(securityAddAA()));
+    connect(ui.securityForm.aaBtnDelete, SIGNAL(clicked()), this, SLOT(securityDeleteAA()));
+
+    connect(ui.aaForm.targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
+    connect(ui.acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
+    connect(ui.securityForm.expenseBtnClear, SIGNAL(clicked()), this, SLOT(resetExpenseRatio()));
+
 }
 
 void frmEdit::accept()
@@ -64,7 +72,7 @@ void frmEdit::tabChange(int currentIndex_)
             ui.securityForm.aaCmb->setCurrentIndex(0);
 
         ui.securityForm.acctCmb->clear();
-        ui.securityForm.acctCmb->addItem("", -1);
+        ui.securityForm.acctCmb->addItem("", UNASSIGNED);
         foreach(const account &acct, m_portfolio.accounts())
             ui.securityForm.acctCmb->addItem(acct.description, acct.id);
         ui.securityForm.acctCmb->model()->sort(0);
@@ -427,4 +435,17 @@ bool frmEdit::validateTrades()
             return false;
         }
     return true;
+}
+
+void frmEdit::securityAddAA()
+{
+    if (ui.securityForm.aaCmb->currentIndex() == -1)
+        return;
+
+    static_cast<securityAAModel*>(ui.securityForm.aa->model())->addNew(ui.securityForm.aaCmb->itemData(ui.securityForm.aaCmb->currentIndex()).toInt());
+}
+
+void frmEdit::securityDeleteAA()
+{
+    static_cast<securityAAModel*>(ui.securityForm.aa->model())->deleteSelected(ui.securityForm.aa->selectionModel());
 }

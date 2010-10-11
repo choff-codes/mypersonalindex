@@ -1,40 +1,63 @@
 #include "securityAAModel.h"
 
-Qt::ItemFlags securityAAModel::flags(const QModelIndex &index) const
+Qt::ItemFlags securityAAModel::flags(const QModelIndex &index_) const
 {
-    return index.column() == 1 ? QAbstractTableModel::flags(index) : QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    if (!index_.isValid())
+        return QAbstractTableModel::flags(index_);
+
+    if (index_.row() >= m_keys.count())
+        return QAbstractTableModel::flags(index_);
+
+    if (m_keys.at(index_.row()) == UNASSIGNED)
+        return QAbstractTableModel::flags(index_);
+
+    return index_.column() == 1 ? QAbstractTableModel::flags(index_) | Qt::ItemIsEditable : QAbstractTableModel::flags(index_);
 }
 
-QVariant securityAAModel::data(const QModelIndex &index, int role) const
+QVariant securityAAModel::data(const QModelIndex &index_, int role_) const
 {
-    if (!index.isValid())
+    if (!index_.isValid())
         return QVariant();
 
-    if (index.row() >= m_keys.count())
+    if (index_.row() >= m_keys.count())
         return QVariant();
 
-    if (role == Qt::DisplayRole)
+    if (role_ == Qt::DisplayRole)
     {
-        if (index.column() == 0)
-            return m_descriptions.value(m_keys.at(index.row())).description;
+        if (index_.column() == 0)
+            return m_keys.at(index_.row()) == UNASSIGNED ? "(Unassigned)" : m_descriptions.value(m_keys.at(index_.row())).description;
 
-        if (index.column() == 1)
-            return functions::doubleToPercentage(m_target.value(m_keys.at(index.row())));
+        if (index_.column() == 1)
+            return functions::doubleToPercentage(m_target.value(m_keys.at(index_.row())));
     }
 
-    if (role == Qt::EditRole && index.column() == 1)
-        return m_target.value(m_keys.at(index.row())) * 100;
+    if (role_ == Qt::EditRole && index_.column() == 1)
+        return m_target.value(m_keys.at(index_.row())) * 100;
 
     return QVariant();
 }
 
-bool securityAAModel::setData(const QModelIndex &index, const QVariant &value, int role)
+bool securityAAModel::setData(const QModelIndex &index_, const QVariant &value_, int role_)
 {
-    if (index.isValid() && index.column() == 1 && role == Qt::EditRole)
+    if (index_.isValid() && index_.column() == 1 && role_ == Qt::EditRole)
     {
-        m_target.insert(m_keys.at(index.row()), value.toDouble() / 100);
-        emit updateHeader();
+        m_target.insert(m_keys.at(index_.row()), value_.toDouble() / 100);
+        if (m_target.contains(UNASSIGNED) && m_keys.at(0) != UNASSIGNED)
+        {
+            insertUnassigned();
+            return true;
+        }
+        if (!m_target.contains(UNASSIGNED) && m_keys.at(0) == UNASSIGNED)
+        {
+            removeUnassigned();
+            return true;
+        }
+        if (m_keys.at(0) == UNASSIGNED)
+        {
+            emit dataChanged(index(0,0), index(0, 0));
+        }
         return true;
+
     }
 
     return false;
@@ -45,18 +68,20 @@ void securityAAModel::addNew(int id_)
     if (m_target.contains(id_))
         return;
 
+    if (m_keys.at(0) == UNASSIGNED)
+        removeUnassigned();
+
+    double total = m_target.totalAssignedPercentage();
     beginInsertRows(QModelIndex(), m_keys.count(), m_keys.count());
-    double total = totalAssignedPercentage();
     m_target.insert(id_, total >= 1 ? 0 : 1 - total);
     m_keys.append(id_);
     endInsertRows();
-    emit updateHeader();
 }
 
-void securityAAModel::deleteSelected(QItemSelectionModel selection_)
+void securityAAModel::deleteSelected(QItemSelectionModel *selection_)
 {
     QList<int> indexes;
-    foreach(const QModelIndex &q, selection_.selectedRows())
+    foreach(const QModelIndex &q, selection_->selectedRows())
         indexes.append(q.row());
     qSort(indexes);
 
@@ -65,10 +90,29 @@ void securityAAModel::deleteSelected(QItemSelectionModel selection_)
 
     for(int i = indexes.count() - 1; i >= 0; --i)
     {
+        if (m_keys.at(indexes.at(i)) == UNASSIGNED)
+            continue;
+
         beginRemoveRows(QModelIndex(), i, i);
         m_target.remove(m_keys.at(indexes.at(i)));
         m_keys.removeAt(indexes.at(i));
         endRemoveRows();
     }
-    emit updateHeader();
+
+    if (m_target.contains(UNASSIGNED) && m_keys.at(0) != UNASSIGNED)
+        insertUnassigned();
+}
+
+void securityAAModel::insertUnassigned()
+{
+    beginInsertRows(QModelIndex(), 0, 0);
+    m_keys.prepend(UNASSIGNED);
+    endInsertRows();
+}
+
+void securityAAModel::removeUnassigned()
+{
+    beginRemoveRows(QModelIndex(), 0, 0);
+    m_keys.removeAt(0);
+    endRemoveRows();
 }

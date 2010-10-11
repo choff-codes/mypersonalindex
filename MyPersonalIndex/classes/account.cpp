@@ -16,7 +16,7 @@ void account::save(const queries &dataSource_)
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_PortfolioID), this->parent);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_Description), this->description);
-    values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxRate), functions::doubleToNull(this->taxRate));
+    values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxRate), this->taxRate);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxDeferred), (int)this->taxDeferred);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_CostBasis), (int)this->costBasis);
 
@@ -39,8 +39,7 @@ account account::load(QSqlQuery q_)
         q_.value(queries::portfolioAccountColumns_Description).toString()
     );
 
-    if (!q_.value(queries::portfolioAccountColumns_TaxRate).isNull())
-        acct.taxRate = q_.value(queries::portfolioAccountColumns_TaxRate).toDouble();
+    acct.taxRate = q_.value(queries::portfolioAccountColumns_TaxRate).toDouble();
     acct.taxDeferred = q_.value(queries::portfolioAccountColumns_TaxDeferred).toBool();
     acct.costBasis = (costBasisMethod)q_.value(queries::portfolioAccountColumns_CostBasis).toInt();
 

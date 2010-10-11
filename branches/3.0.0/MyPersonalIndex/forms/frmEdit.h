@@ -23,6 +23,11 @@ private slots:
     void remove();
     void tabChange(int currentIndex_);
     void listChange(const QModelIndex &current_, const QModelIndex &previous_);
+    void resetTaxRate() { ui.acctForm.taxRateSpinBox->setValue(0); }
+    void resetTarget() { ui.aaForm.targetSpinBox->setValue(0); }
+    void resetExpenseRatio() { ui.securityForm.expenseSpinBox->setValue(0); }
+    void securityAddAA();
+    void securityDeleteAA();
 
 private:
     enum tab {

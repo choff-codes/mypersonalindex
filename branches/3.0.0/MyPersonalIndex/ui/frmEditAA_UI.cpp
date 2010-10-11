@@ -20,12 +20,12 @@ void frmEditAA_UI::setupUI(QWidget *parent)
     targetLayout = new QHBoxLayout();
     targetSpinBox = new QDoubleSpinBox(parent);
     targetSpinBox->setDecimals(2);
-    targetSpinBox->setMinimum(-1);
+    targetSpinBox->setMinimum(0);
     targetSpinBox->setMaximum(100);
     targetSpinBox->setSingleStep(1);
     targetSpinBox->setSuffix("%");
     targetSpinBox->setSpecialValueText("None");
-    targetSpinBox->setValue(-1);
+    targetSpinBox->setValue(0);
     targetBtnClear = new QToolButton(parent);
     targetBtnClear->setText("&Clear");
 

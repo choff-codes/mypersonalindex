@@ -16,7 +16,7 @@ void assetAllocation::save(const queries &dataSource_)
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_PortfolioID), this->parent);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Description), this->description);
-    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), functions::doubleToNull(this->target));
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), this->target);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_RebalanceBand), this->rebalanceBand);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Threshold), (int)this->threshold);
 
@@ -39,9 +39,7 @@ assetAllocation assetAllocation::load(QSqlQuery q_)
         q_.value(queries::portfolioAAColumns_Description).toString()
     );
 
-    if (!q_.value(queries::portfolioAAColumns_Target).isNull())
-        aa.target = q_.value(queries::portfolioAAColumns_Target).toDouble();
-
+    aa.target = q_.value(queries::portfolioAAColumns_Target).toDouble();
     aa.rebalanceBand = q_.value(queries::portfolioAAColumns_RebalanceBand).toDouble();
     aa.threshold = (thresholdMethod)q_.value(queries::portfolioAAColumns_Threshold).toInt();
 

@@ -244,7 +244,7 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
             for(QMap<int, double>::const_iterator i = targets.constBegin(); i != targets.constEnd(); ++i)
             {
                 double target = aa.value(i.key()).target;
-                if (target <= 0)
+                if (functions::massage(target) == 0)
                     continue;
 
                 shares +=

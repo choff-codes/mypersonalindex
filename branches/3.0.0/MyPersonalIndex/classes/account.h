@@ -22,7 +22,7 @@ public:
 
     account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
         objectKey(description_, id_, parent_),
-        taxRate(UNASSIGNED),
+        taxRate(0),
         taxDeferred(false),
         costBasis(costBasisMethod_FIFO)
     {}

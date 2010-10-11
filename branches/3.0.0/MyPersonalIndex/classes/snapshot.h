@@ -1,6 +1,8 @@
 #ifndef SNAPSHOT_H
 #define SNAPSHOT_H
 
+#include "functions.h"
+
 class snapshot
 {
 public:

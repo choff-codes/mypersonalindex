@@ -3,7 +3,6 @@
 
 #include <QString>
 #include "queries.h"
-#include "functions.h"
 #include "objectKey.h"
 
 class assetAllocation: public objectKey
@@ -20,7 +19,7 @@ public:
 
     assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
         objectKey(description_, id_, parent_),
-        target(UNASSIGNED),
+        target(0),
         threshold(thresholdMethod_Portfolio),
         rebalanceBand(5)
     {}

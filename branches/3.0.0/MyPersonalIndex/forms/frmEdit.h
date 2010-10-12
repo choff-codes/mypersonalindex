@@ -28,6 +28,10 @@ private slots:
     void resetExpenseRatio() { ui.securityForm.expenseSpinBox->setValue(0); }
     void securityAddAA();
     void securityDeleteAA();
+    void tradeSecurityFilterChange();
+    void tradeActionChange(int index_);
+    void tradeFrequencyChange(int index_);
+    void tradePriceChange(bool checked_);
 
 private:
     enum tab {
@@ -48,7 +52,7 @@ private:
 
     objectKeyEditModel* currentModel();
     QListView* currentListView();
-    int currentTradeSecurityID() { return ui.tradeFilterCmb->itemData(ui.tradeFilterCmb->currentIndex()).toInt(); }
+    int currentTradeSecurityID() { return ui.tradeFilterCmb->currentIndex()== -1 ? -1 :ui.tradeFilterCmb->itemData(ui.tradeFilterCmb->currentIndex()).toInt(); }
 
     void savePortfolio();
     void saveAccount();
@@ -60,6 +64,8 @@ private:
     void loadAssetAllocation();
     void loadSecurity();
     void loadTrade();
+    void populateSecurityTab();
+    void populateTradeTab();
 
 
     template <class T>

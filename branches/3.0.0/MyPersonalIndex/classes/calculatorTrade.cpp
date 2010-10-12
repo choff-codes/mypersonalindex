@@ -235,8 +235,6 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
             return (calc_.portfolioSnapshot(date_).totalValue * (trade_.value / 100)) / price_;
         case trade::tradeAction_DivReinvestAuto:
             return (calc_.securitySnapshot(date_, trade_.parent).shares * parent_.dividend(date_)) / price_;
-        case trade::tradeAction_Reversal:
-                return 0; // should not occur
         case trade::tradeAction_AA:
         {
             double shares = 0;

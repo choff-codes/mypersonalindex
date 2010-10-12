@@ -12,7 +12,7 @@ class trade: public objectKey
 {
 public:
 
-    static const int tradeAction_Count = 11;
+    static const int tradeAction_Count = 10; // exclude tradeAction_DivReinvestAuto at the end
 
     enum tradeAction {
         tradeAction_Purchase,
@@ -25,8 +25,7 @@ public:
         tradeAction_Value,
         tradeAction_TotalValue,
         tradeAction_AA,
-        tradeAction_DivReinvestAuto,
-        tradeAction_Reversal
+        tradeAction_DivReinvestAuto
     };
 
     tradeAction action;
@@ -42,7 +41,7 @@ public:
     trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectKey(QString(), id_, parent_),
         action(tradeAction_Purchase),
-        value(UNASSIGNED),
+        value(0),
         price(UNASSIGNED),
         commission(0),
         cashAccount(UNASSIGNED),

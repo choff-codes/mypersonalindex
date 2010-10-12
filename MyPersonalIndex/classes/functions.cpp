@@ -44,3 +44,19 @@ bool functions::equal(const QVariant &left_, const QVariant &right_, const QVari
             return left_.toString().compare(right_.toString(), Qt::CaseInsensitive) == 0;
     };
 }
+
+QString functions::formatForComboBox(const QString &value1_, const QString &value2_)
+{
+    QString returnValue = value1_;
+
+    if (!value2_.isEmpty())
+        returnValue.append(" | ");
+    else
+        return returnValue;
+
+    QString value2Modified = QString(value2_).replace("\n", " ");
+    if (value2Modified.length() > 20)
+        value2Modified = value2Modified.left(20);
+
+    return returnValue.append(value2Modified);
+}

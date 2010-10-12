@@ -19,8 +19,6 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
 
 void frmEdit::connectSlots()
 {
-    connect(ui.tradeAdd, SIGNAL(clicked()), this, SLOT(add()));
-
     //order matters
     connect(ui.okCancelBtn, SIGNAL(accepted()), this, SLOT(save()));
     connect(ui.okCancelBtn, SIGNAL(accepted()), this, SLOT(accept()));
@@ -40,6 +38,14 @@ void frmEdit::connectSlots()
     connect(ui.securityDelete, SIGNAL(clicked()), this, SLOT(remove()));
     connect(ui.securityForm.aaBtnAdd, SIGNAL(clicked()), this, SLOT(securityAddAA()));
     connect(ui.securityForm.aaBtnDelete, SIGNAL(clicked()), this, SLOT(securityDeleteAA()));
+    connect(ui.tradeAdd, SIGNAL(clicked()), this, SLOT(add()));
+    connect(ui.tradeDelete, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(ui.tradeFilterCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeSecurityFilterChange()));
+    connect(ui.tradeForm.startingChk, SIGNAL(toggled(bool)), ui.tradeForm.startingDateEdit, SLOT(setEnabled(bool)));
+    connect(ui.tradeForm.endingChk, SIGNAL(toggled(bool)), ui.tradeForm.endingDateEdit, SLOT(setEnabled(bool)));
+    connect(ui.tradeForm.freqCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeFrequencyChange(int)));
+    connect(ui.tradeForm.actionCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeActionChange(int)));
+    connect(ui.tradeForm.priceChk, SIGNAL(toggled(bool)), this, SLOT(tradePriceChange(bool)));
 
     connect(ui.aaForm.targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
     connect(ui.acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
@@ -57,25 +63,19 @@ void frmEdit::tabChange(int currentIndex_)
 {
     m_currentTab = (tab)currentIndex_;
 
-    if (m_currentTab == tab_portfolio)
+    switch(m_currentTab)
     {
-        m_currentItem = &m_portfolio.attributes();
-        return;
-    }
-    if (m_currentTab == tab_security)
-    {
-        ui.securityForm.aaCmb->clear();
-        foreach(const assetAllocation &aa, m_portfolio.assetAllocations())
-            ui.securityForm.aaCmb->addItem(aa.description, aa.id);
-        ui.securityForm.aaCmb->model()->sort(0);
-        if (ui.securityForm.aaCmb->count() != 0)
-            ui.securityForm.aaCmb->setCurrentIndex(0);
-
-        ui.securityForm.acctCmb->clear();
-        ui.securityForm.acctCmb->addItem("", UNASSIGNED);
-        foreach(const account &acct, m_portfolio.accounts())
-            ui.securityForm.acctCmb->addItem(acct.description, acct.id);
-        ui.securityForm.acctCmb->model()->sort(0);
+        case tab_portfolio:
+            m_currentItem = &m_portfolio.attributes();
+            return;
+        case tab_security:
+            populateSecurityTab();
+            break;
+        case tab_trade:
+            populateTradeTab();
+            break;
+        default:
+            break;
     }
 
     objectKeyEditModel* model = currentModel();
@@ -211,7 +211,7 @@ void frmEdit::saveTrade()
     t->description = ui.tradeForm.noteTxt->toPlainText();
     t->frequency = (tradeDateCalendar::frequency)ui.tradeForm.freqCmb->itemData(ui.tradeForm.freqCmb->currentIndex()).toInt();
     t->price = ui.tradeForm.priceChk->isChecked() && !ui.tradeForm.priceTxt->text().isEmpty() ? ui.tradeForm.priceTxt->text().toDouble() : -1;
-    t->value = ui.tradeForm.sharesTxt->text().toDouble();
+    t->value = ui.tradeForm.shares->text().toDouble();
 }
 
 void frmEdit::loadTrade()
@@ -229,8 +229,13 @@ void frmEdit::loadTrade()
     ui.tradeForm.endingDateEdit->setDate(t->endDate != 0 ? QDate::fromJulianDay(t->endDate) : QDate::currentDate());
     ui.tradeForm.noteTxt->setPlainText(t->description);
     ui.tradeForm.freqCmb->setCurrentIndex(ui.tradeForm.freqCmb->findData(t->frequency));
-    ui.tradeForm.priceChk->setChecked(functions::massage(t->price) < 0);
-    ui.tradeForm.priceTxt->setText(QString::number(t->price, 'f', 4));
+    if (functions::massage(t->price) >= 0)
+    {
+        ui.tradeForm.priceTxt->setText(QString::number(t->price, 'f', 4));
+        ui.tradeForm.priceChk->setChecked(true);
+    }
+    else
+        ui.tradeForm.priceChk->setChecked(false);
     ui.tradeForm.sharesTxt->setText(QString::number(t->value, 'f', 4));
 }
 
@@ -431,7 +436,7 @@ bool frmEdit::validateTrades()
             if (!model || !listView)
                 return false;
 
-            listView->setCurrentIndex(model->find(&i.value()));
+            listView->setCurrentIndex(model->find(&x.value()));
             return false;
         }
     return true;
@@ -449,3 +454,161 @@ void frmEdit::securityDeleteAA()
 {
     static_cast<securityAAModel*>(ui.securityForm.aa->model())->deleteSelected(ui.securityForm.aa->selectionModel());
 }
+
+void frmEdit::populateSecurityTab()
+{
+    ui.securityForm.aaCmb->clear();
+    // don't use foreach, weird stuff happens with the existing references
+    for(QMap<int, assetAllocation>::const_iterator i = m_portfolio.assetAllocations().begin(); i != m_portfolio.assetAllocations().end(); ++i)
+        ui.securityForm.aaCmb->addItem(i.value().displayText(), i.value().id);
+    ui.securityForm.aaCmb->model()->sort(0);
+    if (ui.securityForm.aaCmb->count() != 0)
+        ui.securityForm.aaCmb->setCurrentIndex(0);
+
+    ui.securityForm.acctCmb->clear();
+    ui.securityForm.acctCmb->addItem("", UNASSIGNED);
+    // don't use foreach, weird stuff happens with the existing references
+    for(QMap<int, account>::const_iterator i = m_portfolio.accounts().begin(); i != m_portfolio.accounts().end(); ++i)
+        ui.securityForm.acctCmb->addItem(i.value().displayText(), i.value().id);
+    ui.securityForm.acctCmb->model()->sort(0);
+}
+
+void frmEdit::populateTradeTab()
+{
+    int currentSecurityFilter = currentTradeSecurityID();
+    ui.tradeFilterCmb->blockSignals(true);
+
+    ui.tradeFilterCmb->clear();
+    ui.tradeForm.cashCmb->clear();
+
+    ui.tradeForm.cashCmb->addItem("", UNASSIGNED);
+
+    // don't use foreach, weird stuff happens with the existing references
+    for(QMap<int, security>::const_iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
+    {
+        QString item = functions::formatForComboBox(i.value().displayText(), i.value().note);
+        ui.tradeFilterCmb->addItem(item, i.value().id);
+        ui.tradeForm.cashCmb->addItem(item, i.value().id);
+    }
+    ui.tradeFilterCmb->model()->sort(0);
+    ui.tradeForm.cashCmb->model()->sort(0);
+
+    int selectRow = ui.tradeFilterCmb->findData(currentSecurityFilter);
+    if (selectRow != -1)
+        ui.tradeFilterCmb->setCurrentIndex(selectRow == -1 ? 0 : selectRow);
+    else
+    {
+        if (ui.tradeFilterCmb->count() != 0)
+            ui.tradeFilterCmb->setCurrentIndex(0);
+        tradeSecurityFilterChange();
+    }
+    ui.tradeFilterCmb->blockSignals(false);
+}
+
+void frmEdit::tradeSecurityFilterChange()
+{
+    int securityID = currentTradeSecurityID();
+    if (securityID == -1)
+    {
+        QAbstractItemModel *model = currentModel();
+        ui.tradeList->setModel(0);
+        delete model;
+        ui.tradeFormWidget->setEnabled(false);
+        return;
+    }
+
+    QAbstractItemModel *model = currentModel();
+    ui.tradeList->setModel(new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades), ui.tradeList));
+    connect(ui.tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
+    connect(ui.tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
+    delete model;
+
+    if (currentModel()->rowCount(QModelIndex()) > 0)
+        ui.tradeList->setCurrentIndex(currentModel()->index(0, 0));
+}
+
+void frmEdit::tradeFrequencyChange(int index_)
+{
+    ui.tradeForm.dateDateEdit->setEnabled(true);
+    switch ((tradeDateCalendar::frequency)index_)
+    {
+        case tradeDateCalendar::frequency_Daily:
+            ui.tradeForm.dateDateEdit->setDisabled(true);
+            break;
+        case tradeDateCalendar::frequency_Monthly:
+            ui.tradeForm.dateDateEdit->setDisplayFormat("dd");
+            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
+            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 1, 31));
+            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
+            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 1));
+            break;
+        case tradeDateCalendar::frequency_Once:
+            ui.tradeForm.dateDateEdit->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
+            ui.tradeForm.dateDateEdit->clearMinimumDate();
+            ui.tradeForm.dateDateEdit->clearMaximumDate();
+            ui.tradeForm.dateDateEdit->setCalendarPopup(true);
+            ui.tradeForm.dateDateEdit->setDate(QDate::currentDate());
+            break;
+        case tradeDateCalendar::frequency_Weekly:
+            ui.tradeForm.dateDateEdit->setDisplayFormat("dddd");
+            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 5));
+            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 1, 9));
+            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
+            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 5));
+            break;
+        case tradeDateCalendar::frequency_Yearly:
+            ui.tradeForm.dateDateEdit->setDisplayFormat("dd MMM");
+            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
+            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 12, 31));
+            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
+            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 1));
+            break;
+    }
+}
+
+void frmEdit::tradeActionChange(int index_)
+{
+    switch ((trade::tradeAction)index_)
+    {
+        case trade::tradeAction_Purchase:
+            ui.tradeForm.shares->setText("Shares:");
+            break;
+        case trade::tradeAction_Sale:
+            ui.tradeForm.shares->setText("Shares:");
+            break;
+        case trade::tradeAction_DivReinvest:
+            ui.tradeForm.shares->setText("Shares:");
+            break;
+        case trade::tradeAction_Interest:
+            ui.tradeForm.shares->setText("Amount ($):");
+            break;
+        case trade::tradeAction_FixedPurchase:
+        case trade::tradeAction_FixedSale:
+            ui.tradeForm.shares->setText("Amount ($):");
+            break;
+        case trade::tradeAction_Value:
+            ui.tradeForm.shares->setText("% of Value:");
+            break;
+        case trade::tradeAction_InterestPercent:
+            ui.tradeForm.shares->setText("Rate (%):");
+            break;
+        case trade::tradeAction_TotalValue:
+            ui.tradeForm.shares->setText("% of Total");
+            break;
+        case trade::tradeAction_AA:
+            ui.tradeForm.shares->setText("% of Target:");
+            break;
+        case trade::tradeAction_DivReinvestAuto:
+            break;
+    }
+}
+
+void frmEdit::tradePriceChange(bool checked_)
+{
+    ui.tradeForm.priceTxt->setEnabled(checked_);
+    if (!checked_)
+        ui.tradeForm.priceTxt->setText("Previous Close");
+    else
+        ui.tradeForm.priceTxt->setText("0.0000");
+}
+

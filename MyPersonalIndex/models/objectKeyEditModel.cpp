@@ -1,15 +1,15 @@
 #include "objectKeyEditModel.h"
 
-QVariant objectKeyEditModel::data(const QModelIndex &index, int role) const
+QVariant objectKeyEditModel::data(const QModelIndex &index_, int role_) const
 {
-    if (!index.isValid())
+    if (!index_.isValid())
         return QVariant();
 
-    if (index.row() >= m_items.count())
+    if (index_.row() >= m_items.count())
         return QVariant();
 
-    if (role == Qt::DisplayRole)
-        return m_items.at(index.row())->displayText();
+    if (role_ == Qt::DisplayRole)
+        return m_items.at(index_.row())->displayText();
 
     return QVariant();
 }

@@ -9,11 +9,11 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
 
     sharePriceValidator = new mpiDoubleValidator(-100000000, 100000000, 4, parent);
 
-    action = new QLabel("&Type:", groupBoxTrade);
+    action = new QLabel("&Action:", groupBoxTrade);
     actionCmb = new QComboBox(groupBoxTrade);
 
     for(int i = 0; i < trade::tradeAction_Count; ++i)
-        actionCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i));
+        actionCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i), i);
 
     tradeLayout->setWidget(0, QFormLayout::LabelRole, action);
     tradeLayout->setWidget(0, QFormLayout::FieldRole, actionCmb);
@@ -50,7 +50,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     freqCmb = new QComboBox(groupBoxDate);
 
     for(int i = 0; i < tradeDateCalendar::frequency_Count; ++i)
-        freqCmb->addItem(trade::frequencyToString((tradeDateCalendar::frequency)i));
+        freqCmb->addItem(trade::frequencyToString((tradeDateCalendar::frequency)i), i);
 
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, freqCmb);

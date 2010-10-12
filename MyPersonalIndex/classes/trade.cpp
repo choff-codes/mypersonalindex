@@ -94,8 +94,6 @@ QString trade::tradeTypeToString(tradeAction type_)
             return "% of AA Target";
         case tradeAction_DivReinvestAuto:
             return "Auto Reinvestment";
-        case tradeAction_Reversal:
-            return "Reversal";
         default:
             return "";
     }

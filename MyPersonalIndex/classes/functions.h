@@ -14,7 +14,8 @@ public:
     static QString doubleToCurrency(double value_);
     static QString doubleToPercentage(double value_) { return QString("%L1%").arg(value_ * 100, 0, 'f', 2); }
     static QString doubleToLocalFormat(double value_, int precision_ = 2) { return QString("%L1").arg(value_, 0, 'f', precision_); }
-    static QString formatForExport(QVariant v_, const QString &delimiter_) { return v_.toString().remove(delimiter_).replace("\n", " "); }
+    static QString formatForComboBox(const QString &value1_, const QString &value2_);
+    static QString formatForExport(const QVariant &v_, const QString &delimiter_) { return v_.toString().remove(delimiter_).replace("\n", " "); }
     static bool lessThan(const QVariant &left_, const QVariant &right_, const QVariant &type_);
     static bool equal(const QVariant &left_, const QVariant &right_, const QVariant &type_);
     static bool isZero(const double &value_) { return value_ < EPSILON && value_ > EPSILONNEGATIVE; }

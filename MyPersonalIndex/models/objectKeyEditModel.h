@@ -16,7 +16,7 @@ public:
     }
 
     int rowCount(const QModelIndex&) const { return m_items.count(); }
-    QVariant data(const QModelIndex &index, int role) const;
+    QVariant data(const QModelIndex &index_, int role_) const;
     void insert(objectKey* key_);
     void remove(objectKey* key_);
     void refresh(const QModelIndex &index_) { emit dataChanged(index_, index_); }

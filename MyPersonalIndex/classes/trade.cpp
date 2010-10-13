@@ -41,7 +41,7 @@ void trade::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioSecurityTrade, this->id);
 }
 
-trade trade::load(QSqlQuery q_)
+trade trade::load(const QSqlQuery &q_)
 {
     trade t(
            q_.value(queries::portfolioSecurityTradeViewColumns_ID).toInt(),
@@ -67,36 +67,34 @@ trade trade::load(QSqlQuery q_)
     return t;
 }
 
-
 QString trade::tradeTypeToString(tradeAction type_)
 {
     switch (type_)
     {
         case tradeAction_Purchase:
             return "Purchase";
-        case tradeAction_Sale:
-            return "Sale";
-        case tradeAction_DivReinvest:
-            return "Reinvestment";
-        case tradeAction_Interest:
-            return "Interest";
-        case tradeAction_InterestPercent:
-            return "% Interest";
-        case tradeAction_FixedPurchase:
-            return "Fixed Purchase";
-        case tradeAction_FixedSale:
-            return "Fixed Sale";
-        case tradeAction_Value:
-            return "% of Value";
-        case tradeAction_TotalValue:
-            return "% of Portfolio";
-        case tradeAction_AA:
-            return "% of AA Target";
-        case tradeAction_DivReinvestAuto:
-            return "Auto Reinvestment";
-        default:
-            return "";
+        case tradeAction_Sell:
+            return "Sell";
+        case tradeAction_ReinvestDividends:
+            return "Reinvest dividends";
+        case tradeAction_ReceiveInterest:
+            return "Receive interest";
+        case tradeAction_ReceiveInterestPercent:
+            return "Receive interest %";
+        case tradeAction_PurchaseFixedAmount:
+            return "Purchase fixed amount";
+        case tradeAction_SellFixedAmount:
+            return "Sell fixed amount";
+        case tradeAction_PurchasePercentOfSecurityValue:
+            return "Purchase % of security value";
+        case tradeAction_PurchasePercentOfPortfolioValue:
+            return "Purchase % of portfolio value";
+        case tradeAction_PurchasePercentOfAATarget:
+            return "Purchase % of asset allocation target";
+        case tradeAction_ReinvestDividendsAuto:
+            break;
     }
+    return "";
 }
 
 QString trade::frequencyToString(tradeDateCalendar::frequency freq_)
@@ -113,34 +111,32 @@ QString trade::frequencyToString(tradeDateCalendar::frequency freq_)
             return "Monthly";
         case tradeDateCalendar::frequency_Yearly:
             return "Yearly";
-        default:
-            return "";
     }
+    return "";
 }
 
 QString trade::valueToString(tradeAction type_, double value_)
 {
-    if (value_ < 0)
-        return "";
-
     switch (type_)
     {
         case tradeAction_Purchase:
-        case tradeAction_Sale:
-        case tradeAction_DivReinvest:
-            return functions::doubleToLocalFormat(value_);
-        case tradeAction_Interest:
-        case tradeAction_FixedPurchase:
-        case tradeAction_FixedSale:
-            return functions::doubleToCurrency(value_);
-        case tradeAction_TotalValue:
-        case tradeAction_AA:
-        case tradeAction_Value:
-        case tradeAction_InterestPercent:
-            return functions::doubleToPercentage(value_ / 100);
-        default:
-            return "";
+        case tradeAction_Sell:
+            return QString("%1 shares").arg(functions::doubleToLocalFormat(value_));
+        case tradeAction_ReinvestDividends:
+            return QString("totaling %1 shares").arg(functions::doubleToLocalFormat(value_));
+        case tradeAction_ReceiveInterest:
+        case tradeAction_PurchaseFixedAmount:
+        case tradeAction_SellFixedAmount:
+            return QString("of %1" ).arg(functions::doubleToCurrency(value_));
+        case tradeAction_PurchasePercentOfPortfolioValue:
+        case tradeAction_PurchasePercentOfAATarget:
+        case tradeAction_PurchasePercentOfSecurityValue:
+        case tradeAction_ReceiveInterestPercent:
+            return QString("totaling %1").arg(functions::doubleToPercentage(value_ / 100));
+        case tradeAction_ReinvestDividendsAuto:
+            break;
     }
+    return "";
 }
 
 QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
@@ -157,9 +153,8 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd") : "";
         case tradeDateCalendar::frequency_Yearly:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd MMM") : "";
-        default:
-            return "";
     }
+    return "";
 }
 
 QString trade::validate() const
@@ -168,20 +163,20 @@ QString trade::validate() const
         switch (this->action)
         {
             case tradeAction_Purchase:
-            case tradeAction_Sale:
-            case tradeAction_DivReinvest:
+            case tradeAction_Sell:
+            case tradeAction_ReinvestDividends:
                 return "The shares cannot be negative!";
-            case tradeAction_Interest:
-            case tradeAction_FixedPurchase:
-            case tradeAction_FixedSale:
+            case tradeAction_ReceiveInterest:
+            case tradeAction_PurchaseFixedAmount:
+            case tradeAction_SellFixedAmount:
                 return "The dollar amount cannot be negative!";
-            case tradeAction_TotalValue:
-            case tradeAction_AA:
-            case tradeAction_Value:
-            case tradeAction_InterestPercent:
+            case tradeAction_PurchasePercentOfPortfolioValue:
+            case tradeAction_PurchasePercentOfAATarget:
+            case tradeAction_PurchasePercentOfSecurityValue:
+            case tradeAction_ReceiveInterestPercent:
                 return "The percentage cannot be negative!";
             default:
-                return "Value cannot be negative";
+                return "Value cannot be negative!";
         }
 
     if (functions::massage(this->price) < 0)
@@ -194,4 +189,17 @@ QString trade::validate() const
         return "The end date cannot be before the trade date!";
 
     return QString();
+}
+
+QString trade::displayText() const
+{
+    return QString("%1 %2, %3 on %4%5%6").arg
+        (
+            tradeTypeToString(this->action),
+            valueToString(this->action, this->value),
+            frequencyToString(this->frequency).toLower(),
+            dateToString(this->frequency, this->date),
+            this->startDate == 0 ? QString() : QString(", starting on %1").arg(QDate::fromJulianDay(this->startDate).toString(Qt::SystemLocaleShortDate)),
+            this->endDate == 0 ? QString() : QString(", ending on %1").arg(QDate::fromJulianDay(this->endDate).toString(Qt::SystemLocaleShortDate))
+        );
 }

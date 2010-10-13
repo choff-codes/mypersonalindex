@@ -63,7 +63,7 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
-    static security load(QSqlQuery q_);
+    static security load(const QSqlQuery &q_);
 
 private:
     historicalPrices m_prices;

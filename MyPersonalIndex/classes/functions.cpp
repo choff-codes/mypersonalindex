@@ -56,7 +56,7 @@ QString functions::formatForComboBox(const QString &value1_, const QString &valu
 
     QString value2Modified = QString(value2_).replace("\n", " ");
     if (value2Modified.length() > 20)
-        value2Modified = value2Modified.left(20);
+        value2Modified = value2Modified.left(17).append("...");
 
     return returnValue.append(value2Modified);
 }

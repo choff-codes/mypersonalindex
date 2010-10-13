@@ -145,6 +145,14 @@ void portfolio::detach()
     d.detach();
 }
 
+bool portfolio::operator==(const portfolio &other_) const
+{
+    return d->securities == other_.d->securities
+        && d->assetAllocations == other_.d->assetAllocations
+        && d->accounts == other_.d->accounts
+        && d->attributes == other_.d->attributes;
+}
+
 QStringList portfolio::symbols() const
 {
     QStringList list;

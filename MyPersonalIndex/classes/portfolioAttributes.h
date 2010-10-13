@@ -16,7 +16,7 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
-    static portfolioAttributes load(QSqlQuery q_);
+    static portfolioAttributes load(const QSqlQuery &q_);
 
     objectType type() const { return objectType_Portfolio; }
     QString validate() const;

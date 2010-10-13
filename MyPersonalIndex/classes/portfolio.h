@@ -24,6 +24,9 @@ public:
 
     static int getOpenIdentity() { return --IDENTITY_COUNTER; }
 
+    bool operator==(const portfolio &other_) const;
+    bool operator!=(const portfolio &other_) const { return !(*this == other_); }
+
     QMap<int, security>& securities() const;
     QMap<int, assetAllocation>& assetAllocations() const;
     QMap<int, account>& accounts() const;

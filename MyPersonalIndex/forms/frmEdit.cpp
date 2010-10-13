@@ -2,7 +2,7 @@
 
 frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
     QDialog(parent),
-    m_originalPortfolio(portfolio_),
+    m_portfolioToReturn(portfolio_),
     m_portfolio(portfolio_),
     m_currentTab(tab_portfolio)
 {
@@ -19,9 +19,11 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
 
 void frmEdit::connectSlots()
 {
-    //order matters
+    //order matters!!
     connect(ui.okCancelBtn, SIGNAL(accepted()), this, SLOT(save()));
     connect(ui.okCancelBtn, SIGNAL(accepted()), this, SLOT(accept()));
+    connect(ui.okCancelBtn->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(save()));
+    connect(ui.okCancelBtn->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
     connect(ui.tabs, SIGNAL(currentChanged(int)), this, SLOT(save()));
     connect(ui.tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
     connect(ui.aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
@@ -55,8 +57,19 @@ void frmEdit::connectSlots()
 
 void frmEdit::accept()
 {
-    if (validate())
-        QDialog::accept();
+    if (!apply())
+        return;
+
+    QDialog::accept();
+}
+
+bool frmEdit::apply()
+{
+    if (!validate())
+        return false;
+
+    m_portfolioToReturn = m_portfolio;
+    return true;
 }
 
 void frmEdit::tabChange(int currentIndex_)
@@ -211,7 +224,7 @@ void frmEdit::saveTrade()
     t->description = ui.tradeForm.noteTxt->toPlainText();
     t->frequency = (tradeDateCalendar::frequency)ui.tradeForm.freqCmb->itemData(ui.tradeForm.freqCmb->currentIndex()).toInt();
     t->price = ui.tradeForm.priceChk->isChecked() && !ui.tradeForm.priceTxt->text().isEmpty() ? ui.tradeForm.priceTxt->text().toDouble() : -1;
-    t->value = ui.tradeForm.shares->text().toDouble();
+    t->value = ui.tradeForm.sharesTxt->text().toDouble();
 }
 
 void frmEdit::loadTrade()
@@ -530,7 +543,7 @@ void frmEdit::tradeSecurityFilterChange()
 void frmEdit::tradeFrequencyChange(int index_)
 {
     ui.tradeForm.dateDateEdit->setEnabled(true);
-    switch ((tradeDateCalendar::frequency)index_)
+    switch ((tradeDateCalendar::frequency)ui.tradeForm.freqCmb->itemData(index_).toInt())
     {
         case tradeDateCalendar::frequency_Daily:
             ui.tradeForm.dateDateEdit->setDisabled(true);
@@ -568,37 +581,37 @@ void frmEdit::tradeFrequencyChange(int index_)
 
 void frmEdit::tradeActionChange(int index_)
 {
-    switch ((trade::tradeAction)index_)
+    switch ((trade::tradeAction)ui.tradeForm.actionCmb->itemData(index_).toInt())
     {
         case trade::tradeAction_Purchase:
             ui.tradeForm.shares->setText("Shares:");
             break;
-        case trade::tradeAction_Sale:
+        case trade::tradeAction_Sell:
             ui.tradeForm.shares->setText("Shares:");
             break;
-        case trade::tradeAction_DivReinvest:
+        case trade::tradeAction_ReinvestDividends:
             ui.tradeForm.shares->setText("Shares:");
             break;
-        case trade::tradeAction_Interest:
+        case trade::tradeAction_ReceiveInterest:
             ui.tradeForm.shares->setText("Amount ($):");
             break;
-        case trade::tradeAction_FixedPurchase:
-        case trade::tradeAction_FixedSale:
+        case trade::tradeAction_PurchaseFixedAmount:
+        case trade::tradeAction_SellFixedAmount:
             ui.tradeForm.shares->setText("Amount ($):");
             break;
-        case trade::tradeAction_Value:
+        case trade::tradeAction_PurchasePercentOfSecurityValue:
             ui.tradeForm.shares->setText("% of Value:");
             break;
-        case trade::tradeAction_InterestPercent:
+        case trade::tradeAction_ReceiveInterestPercent:
             ui.tradeForm.shares->setText("Rate (%):");
             break;
-        case trade::tradeAction_TotalValue:
+        case trade::tradeAction_PurchasePercentOfPortfolioValue:
             ui.tradeForm.shares->setText("% of Total");
             break;
-        case trade::tradeAction_AA:
+        case trade::tradeAction_PurchasePercentOfAATarget:
             ui.tradeForm.shares->setText("% of Target:");
             break;
-        case trade::tradeAction_DivReinvestAuto:
+        case trade::tradeAction_ReinvestDividendsAuto:
             break;
     }
 }

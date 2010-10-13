@@ -12,8 +12,16 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     action = new QLabel("&Action:", groupBoxTrade);
     actionCmb = new QComboBox(groupBoxTrade);
 
-    for(int i = 0; i < trade::tradeAction_Count; ++i)
-        actionCmb->addItem(trade::tradeTypeToString((trade::tradeAction)i), i);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_Purchase), trade::tradeAction_Purchase);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchaseFixedAmount), trade::tradeAction_PurchaseFixedAmount);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_Sell), trade::tradeAction_Sell);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_SellFixedAmount), trade::tradeAction_SellFixedAmount);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReinvestDividends), trade::tradeAction_ReinvestDividends);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReceiveInterest), trade::tradeAction_ReceiveInterest);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReceiveInterestPercent), trade::tradeAction_ReceiveInterestPercent);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfSecurityValue), trade::tradeAction_PurchasePercentOfSecurityValue);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfPortfolioValue), trade::tradeAction_PurchasePercentOfPortfolioValue);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfAATarget), trade::tradeAction_PurchasePercentOfAATarget);
 
     tradeLayout->setWidget(0, QFormLayout::LabelRole, action);
     tradeLayout->setWidget(0, QFormLayout::FieldRole, actionCmb);
@@ -48,9 +56,11 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
 
     freq = new QLabel("&Frequency:", groupBoxDate);
     freqCmb = new QComboBox(groupBoxDate);
-
-    for(int i = 0; i < tradeDateCalendar::frequency_Count; ++i)
-        freqCmb->addItem(trade::frequencyToString((tradeDateCalendar::frequency)i), i);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Once), tradeDateCalendar::frequency_Once);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Daily), tradeDateCalendar::frequency_Daily);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Weekly), tradeDateCalendar::frequency_Weekly);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Monthly), tradeDateCalendar::frequency_Monthly);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Yearly), tradeDateCalendar::frequency_Yearly);
 
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, freqCmb);

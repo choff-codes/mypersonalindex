@@ -17,7 +17,7 @@ public:
     thresholdMethod threshold;
     double rebalanceBand;
 
-    assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
+    assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         target(0),
         threshold(thresholdMethod_Portfolio),
@@ -32,7 +32,7 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
-    static assetAllocation load(QSqlQuery q_);
+    static assetAllocation load(const QSqlQuery &q_);
 };
 
 #endif // ASSETALLOCATION_H

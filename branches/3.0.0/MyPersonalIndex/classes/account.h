@@ -20,7 +20,7 @@ public:
     bool taxDeferred;
     costBasisMethod costBasis;
 
-    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = "(Blank)"):
+    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         taxRate(0),
         taxDeferred(false),
@@ -35,7 +35,7 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
-    static account load(QSqlQuery q_);
+    static account load(const QSqlQuery &q_);
 };
 
 #endif // ACCOUNT_H

@@ -44,7 +44,7 @@ void security::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id);
 }
 
-security security::load(QSqlQuery q_)
+security security::load(const QSqlQuery &q_)
 {
     security sec(
         q_.value(queries::portfolioSecurityColumns_ID).toInt(),

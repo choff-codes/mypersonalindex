@@ -31,7 +31,7 @@ void portfolioAttributes::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_Portfolio, this->id);
 }
 
-portfolioAttributes portfolioAttributes::load(QSqlQuery q_)
+portfolioAttributes portfolioAttributes::load(const QSqlQuery &q_)
 {
     portfolioAttributes p(
         q_.value(queries::portfolioColumns_ID).toInt(),

@@ -30,7 +30,7 @@ public:
         associatedTradeID(associatedTradeID_)
     {}
 
-    static executedTrade load(QSqlQuery q_);
+    static executedTrade load(const QSqlQuery &q_);
 
     bool operator==(const executedTrade &other_) const;
     bool operator!=(const executedTrade &other_) const { return !(*this == other_); }

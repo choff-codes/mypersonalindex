@@ -8,7 +8,7 @@ bool executedTrade::operator==(const executedTrade &other_) const
             && this->associatedTradeID == other_.associatedTradeID;
 }
 
-executedTrade executedTrade::load(QSqlQuery q_)
+executedTrade executedTrade::load(const QSqlQuery &q_)
 {
     return executedTrade (
             q_.value(queries::portfolioSecurityTradeExecutionViewColumns_Shares).toDouble(),

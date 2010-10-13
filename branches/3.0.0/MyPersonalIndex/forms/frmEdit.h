@@ -15,9 +15,12 @@ class frmEdit : public QDialog
 public:
     frmEdit(portfolio portfolio_, QWidget *parent = 0);
 
+    portfolio getPortfolio() { return m_portfolioToReturn; }
+
 private slots:
     void add();
     void accept();
+    bool apply();
     void save();
     void load();
     void remove();
@@ -42,7 +45,7 @@ private:
         tab_trade
     };
 
-    portfolio m_originalPortfolio;
+    portfolio m_portfolioToReturn;
     portfolio m_portfolio;
     frmEdit_UI ui;
     objectKey *m_currentItem;

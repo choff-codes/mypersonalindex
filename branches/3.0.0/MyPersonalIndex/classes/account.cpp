@@ -31,7 +31,7 @@ void account::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioAccount, this->id);
 }
 
-account account::load(QSqlQuery q_)
+account account::load(const QSqlQuery &q_)
 {
     account acct(
         q_.value(queries::portfolioAccountColumns_ID).toInt(),

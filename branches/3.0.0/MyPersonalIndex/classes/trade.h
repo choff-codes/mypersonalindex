@@ -12,20 +12,18 @@ class trade: public objectKey
 {
 public:
 
-    static const int tradeAction_Count = 10; // exclude tradeAction_DivReinvestAuto at the end
-
     enum tradeAction {
         tradeAction_Purchase,
-        tradeAction_Sale,
-        tradeAction_FixedPurchase,
-        tradeAction_FixedSale,
-        tradeAction_DivReinvest,
-        tradeAction_Interest,
-        tradeAction_InterestPercent,
-        tradeAction_Value,
-        tradeAction_TotalValue,
-        tradeAction_AA,
-        tradeAction_DivReinvestAuto
+        tradeAction_Sell,
+        tradeAction_PurchaseFixedAmount,
+        tradeAction_SellFixedAmount,
+        tradeAction_ReinvestDividends,
+        tradeAction_ReceiveInterest,
+        tradeAction_ReceiveInterestPercent,
+        tradeAction_PurchasePercentOfSecurityValue,
+        tradeAction_PurchasePercentOfPortfolioValue,
+        tradeAction_PurchasePercentOfAATarget,
+        tradeAction_ReinvestDividendsAuto
     };
 
     tradeAction action;
@@ -46,7 +44,7 @@ public:
         commission(0),
         cashAccount(UNASSIGNED),
         frequency(tradeDateCalendar::frequency_Once),
-        date(0),
+        date(QDate::currentDate().toJulianDay()),
         startDate(0),
         endDate(0)
     {}
@@ -56,10 +54,11 @@ public:
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
-    static trade load(QSqlQuery q_);
+    static trade load(const QSqlQuery &q_);
 
     objectType type() const { return objectType_Trade; }
     QString validate() const;
+    QString displayText() const;
 
     static QString tradeTypeToString(tradeAction type_);
     static QString frequencyToString(tradeDateCalendar::frequency freq_);

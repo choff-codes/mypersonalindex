@@ -13,8 +13,6 @@ public:
         direction_ascending = 1
     };
 
-    static const int frequency_Count = 4;
-
     enum frequency {
         frequency_Once,
         frequency_Daily,

@@ -31,7 +31,7 @@ void assetAllocation::remove(const queries &dataSource_) const
     dataSource_.deleteItem(queries::table_PortfolioAA, this->id);
 }
 
-assetAllocation assetAllocation::load(QSqlQuery q_)
+assetAllocation assetAllocation::load(const QSqlQuery &q_)
 {
     assetAllocation aa(
         q_.value(queries::portfolioAAColumns_ID).toInt(),

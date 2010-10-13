@@ -90,12 +90,11 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     tradeAdd = new QPushButton("Add", tradeTab);
     tradeDelete = new QPushButton("Delete", tradeTab);
 
-    tradeLayoutTop->addWidget(tradeList, 0, 0, 1, 4);
+    tradeLayoutTop->addWidget(tradeList, 0, 0, 1, 5);
     tradeLayoutTop->addWidget(tradeFilter, 1, 0, 1, 1);
-    tradeLayoutTop->addWidget(tradeFilterCmb, 1, 1, 1, 1);
-    tradeLayoutTop->addWidget(tradeAdd, 1, 2, 1, 1);
-    tradeLayoutTop->addWidget(tradeDelete, 1, 3, 1, 1);
-
+    tradeLayoutTop->addWidget(tradeFilterCmb, 1, 1, 1, 2);
+    tradeLayoutTop->addWidget(tradeAdd, 1, 3, 1, 1);
+    tradeLayoutTop->addWidget(tradeDelete, 1, 4, 1, 1);
 
     tradeFormWidget = new QWidget(tradeTab);
     tradeFormWidget->setEnabled(false);

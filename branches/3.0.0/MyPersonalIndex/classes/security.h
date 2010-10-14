@@ -69,4 +69,7 @@ private:
     historicalPrices m_prices;
 };
 
+QDataStream& operator<<(QDataStream &stream_, const security &sec_);
+QDataStream& operator>>(QDataStream &stream_, security &sec_);
+
 #endif // SECURITY_H

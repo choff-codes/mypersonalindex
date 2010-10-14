@@ -53,3 +53,23 @@ QString assetAllocation::validate() const
 
     return QString();
 }
+
+QDataStream& operator<<(QDataStream &stream_, const assetAllocation &aa_)
+{
+    stream_ << aa_.description;
+    stream_ << aa_.rebalanceBand;
+    stream_ << aa_.target;
+    stream_ << aa_.threshold;
+    return stream_;
+}
+
+QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_)
+{
+    stream_ >> aa_.description;
+    stream_ >> aa_.rebalanceBand;
+    stream_ >> aa_.target;
+    int tmp;
+    stream_ >> tmp;
+    aa_.threshold = (assetAllocation::thresholdMethod)tmp;
+    return stream_;
+}

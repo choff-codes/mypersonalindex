@@ -77,3 +77,32 @@ QString security::validate() const
     return QString();
 }
 
+QDataStream& operator<<(QDataStream &stream_, const security &sec_)
+{
+    stream_ << sec_.account;
+    stream_ << sec_.cashAccount;
+    stream_ << sec_.description;
+    stream_ << sec_.dividendNAVAdjustment;
+    stream_ << sec_.dividendReinvestment;
+    stream_ << sec_.expenseRatio;
+    stream_ << sec_.hide;
+    stream_ << sec_.includeInCalc;
+    stream_ << sec_.note;
+    stream_ << sec_.targets;
+    return stream_;
+}
+
+QDataStream& operator>>(QDataStream &stream_, security &sec_)
+{
+    stream_ >> sec_.account;
+    stream_ >> sec_.cashAccount;
+    stream_ >> sec_.description;
+    stream_ >> sec_.dividendNAVAdjustment;
+    stream_ >> sec_.dividendReinvestment;
+    stream_ >> sec_.expenseRatio;
+    stream_ >> sec_.hide;
+    stream_ >> sec_.includeInCalc;
+    stream_ >> sec_.note;
+    stream_ >> sec_.targets;
+    return stream_;
+}

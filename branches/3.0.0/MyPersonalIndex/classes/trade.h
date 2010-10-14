@@ -66,4 +66,7 @@ public:
     static QString dateToString(tradeDateCalendar::frequency freq_, int date_);
 };
 
+QDataStream& operator<<(QDataStream &stream_, const trade &trade_);
+QDataStream& operator>>(QDataStream &stream_, trade &trade_);
+
 #endif // TRADE_H

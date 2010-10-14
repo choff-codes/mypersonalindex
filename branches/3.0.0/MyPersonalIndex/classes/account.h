@@ -38,4 +38,7 @@ public:
     static account load(const QSqlQuery &q_);
 };
 
+QDataStream& operator<<(QDataStream &stream_, const account &acct_);
+QDataStream& operator>>(QDataStream &stream_, account &acct_);
+
 #endif // ACCOUNT_H

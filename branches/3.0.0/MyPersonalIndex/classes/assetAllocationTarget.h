@@ -33,6 +33,8 @@ public:
 
     bool operator==(const assetAllocationTarget &other_) const { return m_targets == other_.m_targets; }
     bool operator!=(const assetAllocationTarget &other_) const { return !(*this == other_); }
+    friend QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_);
+    friend QDataStream& operator>>(QDataStream &stream_, assetAllocationTarget &target_);
 
     void insertBatch(queries dataSource_);
 
@@ -42,5 +44,9 @@ public:
 private:
     QMap<int, double> m_targets;
 };
+
+QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_);
+QDataStream& operator>>(QDataStream &stream_, assetAllocationTarget &target_);
+
 
 #endif // ASSETALLOCATIONTARGET_H

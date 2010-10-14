@@ -62,3 +62,15 @@ QVariant assetAllocationTarget::data(int row_, int column_) const
     }
     return QVariant();
 }
+
+QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_)
+{
+    stream_ << target_.m_targets;
+    return stream_;
+}
+
+QDataStream& operator>>(QDataStream &stream_, assetAllocationTarget &target_)
+{
+    stream_ >> target_.m_targets;
+    return stream_;
+}

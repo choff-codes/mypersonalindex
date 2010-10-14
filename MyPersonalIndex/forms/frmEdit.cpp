@@ -57,19 +57,20 @@ void frmEdit::connectSlots()
 
 void frmEdit::accept()
 {
-    if (!apply())
+    if (!validate())
         return;
 
+    m_portfolioToReturn = m_portfolio;
     QDialog::accept();
 }
 
-bool frmEdit::apply()
+void frmEdit::apply()
 {
     if (!validate())
-        return false;
+        return;
 
     m_portfolioToReturn = m_portfolio;
-    return true;
+    m_portfolio.detach();
 }
 
 void frmEdit::tabChange(int currentIndex_)

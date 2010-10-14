@@ -20,7 +20,7 @@ public:
 private slots:
     void add();
     void accept();
-    bool apply();
+    void apply();
     void save();
     void load();
     void remove();

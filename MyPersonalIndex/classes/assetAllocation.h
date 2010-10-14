@@ -35,4 +35,7 @@ public:
     static assetAllocation load(const QSqlQuery &q_);
 };
 
+QDataStream& operator<<(QDataStream &stream_, const assetAllocation &aa_);
+QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_);
+
 #endif // ASSETALLOCATION_H

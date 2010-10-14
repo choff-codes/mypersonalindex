@@ -203,3 +203,36 @@ QString trade::displayText() const
             this->endDate == 0 ? QString() : QString(", ending on %1").arg(QDate::fromJulianDay(this->endDate).toString(Qt::SystemLocaleShortDate))
         );
 }
+
+QDataStream& operator<<(QDataStream &stream_, const trade &trade_)
+{
+    stream_ << trade_.description;
+    stream_ << (qint32)trade_.action;
+    stream_ << (qint32)trade_.cashAccount;
+    stream_ << trade_.commission;
+    stream_ << (qint32)trade_.date;
+    stream_ << (qint32)trade_.endDate;
+    stream_ << (qint32)trade_.frequency;
+    stream_ << trade_.price;
+    stream_ << (qint32)trade_.startDate;
+    stream_ << trade_.value;
+    return stream_;
+}
+
+QDataStream& operator>>(QDataStream &stream_, trade &trade_)
+{
+    int tmp;
+    stream_ >> trade_.description;
+    stream_ >> tmp;
+    trade_.action = (trade::tradeAction)tmp;
+    stream_ >> trade_.cashAccount;
+    stream_ >> trade_.commission;
+    stream_ >> trade_.date;
+    stream_ >> trade_.endDate;
+    stream_ >> tmp;
+    trade_.frequency = (tradeDateCalendar::frequency)tmp;
+    stream_ >> trade_.price;
+    stream_ >> trade_.startDate;
+    stream_ >> trade_.value;
+    return stream_;
+}

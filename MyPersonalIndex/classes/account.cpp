@@ -53,3 +53,23 @@ QString account::validate() const
 
     return QString();
 }
+
+QDataStream& operator<<(QDataStream &stream_, const account &acct_)
+{
+    stream_ << acct_.costBasis;
+    stream_ << acct_.description;
+    stream_ << acct_.taxDeferred;
+    stream_ << acct_.taxRate;
+    return stream_;
+}
+
+QDataStream& operator>>(QDataStream &stream_, account &acct_)
+{
+    int tmp;
+    stream_ >> tmp;
+    acct_.costBasis = (account::costBasisMethod)tmp;
+    stream_ >> acct_.description;
+    stream_ >> acct_.taxDeferred;
+    stream_ >> acct_.taxRate;
+    return stream_;
+}

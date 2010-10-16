@@ -1,5 +1,7 @@
 #include "frmEdit.h"
 
+const int frmEdit::m_magicNumber = rand();
+
 frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
     QDialog(parent),
     m_portfolioToReturn(portfolio_),
@@ -53,6 +55,20 @@ void frmEdit::connectSlots()
     connect(ui.acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
     connect(ui.securityForm.expenseBtnClear, SIGNAL(clicked()), this, SLOT(resetExpenseRatio()));
 
+    connect(ui.copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+    connect(ui.pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+    connect(ui.acctList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+    connect(ui.aaList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+    connect(ui.securityList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+    connect(ui.tradeList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+    connect(ui.acctCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui.acctPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+    connect(ui.aaCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui.aaPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+    connect(ui.securityCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui.securityPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+    connect(ui.tradeCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui.tradePasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
 }
 
 void frmEdit::accept()
@@ -88,7 +104,8 @@ void frmEdit::tabChange(int currentIndex_)
         case tab_trade:
             populateTradeTab();
             break;
-        default:
+        case tab_account:
+        case tab_assetAllocation:
             break;
     }
 
@@ -317,24 +334,20 @@ void frmEdit::add()
     switch(m_currentTab)
     {
         case tab_account:
-            m_portfolio.accounts().insert(identity, account(identity, m_portfolio.attributes().id));
-            key = &m_portfolio.accounts()[identity];
+            key = &m_portfolio.accounts().insert(identity, account(identity, m_portfolio.attributes().id)).value();
             break;
         case tab_assetAllocation:
-            m_portfolio.assetAllocations().insert(identity, assetAllocation(identity, m_portfolio.attributes().id));
-            key = &m_portfolio.assetAllocations()[identity];
+            key = &m_portfolio.assetAllocations().insert(identity, assetAllocation(identity, m_portfolio.attributes().id)).value();
             break;
         case tab_security:
-            m_portfolio.securities().insert(identity, security(identity, m_portfolio.attributes().id));
-            key = &m_portfolio.securities()[identity];
+            key = &m_portfolio.securities().insert(identity, security(identity, m_portfolio.attributes().id)).value();
             break;
         case tab_trade:
             if (ui.tradeFilterCmb->currentIndex() == -1)
-                break;
-            m_portfolio.securities()[currentTradeSecurityID()].trades.insert(identity, trade(identity, currentTradeSecurityID()));
-            key = &m_portfolio.securities()[currentTradeSecurityID()].trades[identity];
+                return;
+            key = &m_portfolio.securities()[currentTradeSecurityID()].trades.insert(identity, trade(identity, currentTradeSecurityID())).value();
             break;
-        default:
+        case tab_portfolio:
             return;
     }
     model->insert(key);
@@ -350,26 +363,23 @@ void frmEdit::remove()
 
     objectKey *key = m_currentItem;
 
+    model->remove(key);
     switch(m_currentTab)
     {
         case tab_account:
-            model->remove(key);
             m_portfolio.accounts().remove(key->id);
             break;
         case tab_assetAllocation:
-            model->remove(key);
             m_portfolio.assetAllocations().remove(key->id);
             break;
         case tab_security:
-            model->remove(key);
             m_portfolio.securities().remove(key->id);
             break;
         case tab_trade:
-            model->remove(key);
             m_portfolio.securities()[key->parent].trades.remove(key->id);
             break;
-        default:
-            return;
+        case tab_portfolio:
+            break;
     }
 }
 
@@ -385,9 +395,10 @@ objectKeyEditModel* frmEdit::currentModel()
             return static_cast<objectKeyEditModel*>(ui.securityList->model());
         case tab_trade:
             return static_cast<objectKeyEditModel*>(ui.tradeList->model());
-        default:
+        case tab_portfolio:
             return 0;
     }
+    return 0;
 }
 
 QListView* frmEdit::currentListView()
@@ -402,9 +413,10 @@ QListView* frmEdit::currentListView()
             return ui.securityList;
         case tab_trade:
             return ui.tradeList;
-        default:
+        case tab_portfolio:
             return 0;
     }
+    return 0;
 }
 
 bool frmEdit::validate()
@@ -541,88 +553,98 @@ void frmEdit::tradeSecurityFilterChange()
         ui.tradeList->setCurrentIndex(currentModel()->index(0, 0));
 }
 
-void frmEdit::tradeFrequencyChange(int index_)
+void frmEdit::copy()
 {
-    ui.tradeForm.dateDateEdit->setEnabled(true);
-    switch ((tradeDateCalendar::frequency)ui.tradeForm.freqCmb->itemData(index_).toInt())
+    save();
+
+    if (!m_currentItem)
+        return;
+
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::WriteOnly);
+    QMimeData *mimeData = new QMimeData();
+
+    stream << m_magicNumber << m_portfolio.attributes().id;
+    switch(m_currentTab)
     {
-        case tradeDateCalendar::frequency_Daily:
-            ui.tradeForm.dateDateEdit->setDisabled(true);
+        case tab_account:
+            stream << *(static_cast<account*>(m_currentItem));
+            mimeData->setData("application/mypersonalindex-account", data);
             break;
-        case tradeDateCalendar::frequency_Monthly:
-            ui.tradeForm.dateDateEdit->setDisplayFormat("dd");
-            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
-            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 1, 31));
-            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
-            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 1));
+        case tab_assetAllocation:
+            stream << *(static_cast<assetAllocation*>(m_currentItem));
+            mimeData->setData("application/mypersonalindex-assetallocation", data);
             break;
-        case tradeDateCalendar::frequency_Once:
-            ui.tradeForm.dateDateEdit->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
-            ui.tradeForm.dateDateEdit->clearMinimumDate();
-            ui.tradeForm.dateDateEdit->clearMaximumDate();
-            ui.tradeForm.dateDateEdit->setCalendarPopup(true);
-            ui.tradeForm.dateDateEdit->setDate(QDate::currentDate());
+        case tab_security:
+            stream << *(static_cast<security*>(m_currentItem));
+            mimeData->setData("application/mypersonalindex-security", data);
             break;
-        case tradeDateCalendar::frequency_Weekly:
-            ui.tradeForm.dateDateEdit->setDisplayFormat("dddd");
-            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 5));
-            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 1, 9));
-            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
-            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 5));
+        case tab_trade:
+            stream << *(static_cast<trade*>(m_currentItem));
+            mimeData->setData("application/mypersonalindex-trade", data);
             break;
-        case tradeDateCalendar::frequency_Yearly:
-            ui.tradeForm.dateDateEdit->setDisplayFormat("dd MMM");
-            ui.tradeForm.dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
-            ui.tradeForm.dateDateEdit->setMaximumDate(QDate(2009, 12, 31));
-            ui.tradeForm.dateDateEdit->setCalendarPopup(false);
-            ui.tradeForm.dateDateEdit->setDate(QDate(2009, 1, 1));
+        case tab_portfolio:
+           return;
+    }
+    QApplication::clipboard()->setMimeData(mimeData);
+}
+
+void frmEdit::paste()
+{
+    const QMimeData *mimeData = QApplication::clipboard()->mimeData();
+    QByteArray data;
+    QDataStream stream(&data, QIODevice::ReadOnly);
+
+    switch(m_currentTab)
+    {
+        case tab_account:
+            data = mimeData->data("application/mypersonalindex-account");
+            break;
+        case tab_assetAllocation:
+            data = mimeData->data("application/mypersonalindex-assetallocation");
+            break;
+        case tab_security:
+            data = mimeData->data("application/mypersonalindex-security");
+            break;
+        case tab_trade:
+            data = mimeData->data("application/mypersonalindex-trade");
+            break;
+        case tab_portfolio:
             break;
     }
-}
 
-void frmEdit::tradeActionChange(int index_)
-{
-    switch ((trade::tradeAction)ui.tradeForm.actionCmb->itemData(index_).toInt())
+    if (data.isEmpty())
+        return;
+
+    int magicNumber, portfolioID;
+    stream >> magicNumber;
+    stream >> portfolioID;
+
+    if (magicNumber != m_magicNumber || portfolioID != m_portfolio.attributes().id)
+        return;
+
+    add();
+
+    if (!m_currentItem)
+        return;
+
+    switch(m_currentTab)
     {
-        case trade::tradeAction_Purchase:
-            ui.tradeForm.shares->setText("Shares:");
+        case tab_account:
+            stream >> *(static_cast<account*>(m_currentItem));
             break;
-        case trade::tradeAction_Sell:
-            ui.tradeForm.shares->setText("Shares:");
+        case tab_assetAllocation:
+            stream >> *(static_cast<assetAllocation*>(m_currentItem));
             break;
-        case trade::tradeAction_ReinvestDividends:
-            ui.tradeForm.shares->setText("Shares:");
+        case tab_security:
+            stream >> *(static_cast<security*>(m_currentItem));
             break;
-        case trade::tradeAction_ReceiveInterest:
-            ui.tradeForm.shares->setText("Amount ($):");
+        case tab_trade:
+            stream >> *(static_cast<trade*>(m_currentItem));
             break;
-        case trade::tradeAction_PurchaseFixedAmount:
-        case trade::tradeAction_SellFixedAmount:
-            ui.tradeForm.shares->setText("Amount ($):");
-            break;
-        case trade::tradeAction_PurchasePercentOfSecurityValue:
-            ui.tradeForm.shares->setText("% of Value:");
-            break;
-        case trade::tradeAction_ReceiveInterestPercent:
-            ui.tradeForm.shares->setText("Rate (%):");
-            break;
-        case trade::tradeAction_PurchasePercentOfPortfolioValue:
-            ui.tradeForm.shares->setText("% of Total");
-            break;
-        case trade::tradeAction_PurchasePercentOfAATarget:
-            ui.tradeForm.shares->setText("% of Target:");
-            break;
-        case trade::tradeAction_ReinvestDividendsAuto:
+        case tab_portfolio:
             break;
     }
-}
 
-void frmEdit::tradePriceChange(bool checked_)
-{
-    ui.tradeForm.priceTxt->setEnabled(checked_);
-    if (!checked_)
-        ui.tradeForm.priceTxt->setText("Previous Close");
-    else
-        ui.tradeForm.priceTxt->setText("0.0000");
+    load();
 }
-

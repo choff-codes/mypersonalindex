@@ -12,6 +12,8 @@
 #include <QPushButton>
 #include <QTabWidget>
 #include <QVBoxLayout>
+#include <QMenu>
+#include <QShortcut>
 #include "frmEditPortfolio_UI.h"
 #include "frmEditAA_UI.h"
 #include "frmEditAcct_UI.h"
@@ -63,6 +65,18 @@ public:
     frmEditAcct_UI acctForm;
     frmEditSecurity_UI securityForm;
     frmEditTrade_UI tradeForm;
+
+    QMenu *copyPastePopup;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QShortcut *acctCopyShortcut;
+    QShortcut *acctPasteShortcut;
+    QShortcut *aaCopyShortcut;
+    QShortcut *aaPasteShortcut;
+    QShortcut *securityCopyShortcut;
+    QShortcut *securityPasteShortcut;
+    QShortcut *tradeCopyShortcut;
+    QShortcut *tradePasteShortcut;
 
     void setupUI(QDialog* dialog);
 };

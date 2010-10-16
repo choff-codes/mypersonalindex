@@ -27,6 +27,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     acctLayout = new QHBoxLayout(acctTab);
     acctLayoutLeft = new QGridLayout();
     acctList = new QListView(acctTab);
+    acctList->setContextMenuPolicy(Qt::CustomContextMenu);
     acctAdd = new QPushButton("Add", acctTab);
     acctDelete = new QPushButton("Delete", acctTab);
     acctFormWidget = new QWidget(acctTab);
@@ -46,6 +47,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     aaLayout = new QHBoxLayout(aaTab);
     aaLayoutLeft = new QGridLayout();
     aaList = new QListView(aaTab);
+    aaList->setContextMenuPolicy(Qt::CustomContextMenu);
     aaAdd = new QPushButton("Add", aaTab);
     aaDelete = new QPushButton("Delete", aaTab);
     aaFormWidget = new QWidget(aaTab);
@@ -65,6 +67,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     securityLayout = new QHBoxLayout(securityTab);
     securityLayoutLeft = new QGridLayout();
     securityList = new QListView(securityTab);
+    securityList->setContextMenuPolicy(Qt::CustomContextMenu);
     securityAdd = new QPushButton("Add", securityTab);
     securityDelete = new QPushButton("Delete", securityTab);
     securityFormWidget = new QWidget(securityTab);
@@ -85,6 +88,7 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     tradeLayoutTop = new QGridLayout();
 
     tradeList = new QListView(tradeTab);
+    tradeList->setContextMenuPolicy(Qt::CustomContextMenu);
     tradeFilter = new QLabel("Choose Security:", tradeTab);
     tradeFilterCmb = new QComboBox(tradeTab);
     tradeAdd = new QPushButton("Add", tradeTab);
@@ -105,4 +109,21 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
 
     tabs->addTab(tradeTab, "Trades");
     tabs->setCurrentIndex(0);
+
+    copyPastePopup = new QMenu(dialog);
+    copyAction = new QAction("Copy", copyPastePopup);
+    copyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+    copyPastePopup->addAction(copyAction);
+    pasteAction = new QAction("Paste", copyPastePopup);
+    pasteAction->setShortcut(Qt::CTRL + Qt::Key_V);
+    copyPastePopup->addAction(pasteAction);
+
+    acctCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, acctList);
+    acctPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, acctList);
+    aaCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, aaList);
+    aaPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, aaList);
+    securityCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, securityList);
+    securityPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, securityList);
+    tradeCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, tradeList);
+    tradePasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, tradeList);
 }

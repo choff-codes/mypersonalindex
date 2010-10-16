@@ -44,6 +44,9 @@ public:
     mpiDateEdit *endingDateEdit;
 
     void setupUI(QWidget* parent = 0);
+    void tradeFrequencyChange(int index_);
+    void tradeActionChange(int index_);
+    void tradePriceChange(bool checked_);
 };
 
 #endif // FRMEDITTRADE_UI_H

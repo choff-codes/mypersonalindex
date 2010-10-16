@@ -90,3 +90,79 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     date->setBuddy(dateDateEdit);
     note->setBuddy(noteTxt);
 }
+
+void frmEditTrade_UI::tradeFrequencyChange(int index_)
+{
+    dateDateEdit->setEnabled(true);
+    switch ((tradeDateCalendar::frequency)freqCmb->itemData(index_).toInt())
+    {
+        case tradeDateCalendar::frequency_Daily:
+            dateDateEdit->setDisabled(true);
+            break;
+        case tradeDateCalendar::frequency_Monthly:
+            dateDateEdit->setDisplayFormat("dd");
+            dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
+            dateDateEdit->setMaximumDate(QDate(2009, 1, 31));
+            dateDateEdit->setCalendarPopup(false);
+            dateDateEdit->setDate(QDate(2009, 1, 1));
+            break;
+        case tradeDateCalendar::frequency_Once:
+            dateDateEdit->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
+            dateDateEdit->clearMinimumDate();
+            dateDateEdit->clearMaximumDate();
+            dateDateEdit->setCalendarPopup(true);
+            dateDateEdit->setDate(QDate::currentDate());
+            break;
+        case tradeDateCalendar::frequency_Weekly:
+            dateDateEdit->setDisplayFormat("dddd");
+            dateDateEdit->setMinimumDate(QDate(2009, 1, 5));
+            dateDateEdit->setMaximumDate(QDate(2009, 1, 9));
+            dateDateEdit->setCalendarPopup(false);
+            dateDateEdit->setDate(QDate(2009, 1, 5));
+            break;
+        case tradeDateCalendar::frequency_Yearly:
+            dateDateEdit->setDisplayFormat("dd MMM");
+            dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
+            dateDateEdit->setMaximumDate(QDate(2009, 12, 31));
+            dateDateEdit->setCalendarPopup(false);
+            dateDateEdit->setDate(QDate(2009, 1, 1));
+            break;
+    }
+}
+
+void frmEditTrade_UI::tradeActionChange(int index_)
+{
+    switch ((trade::tradeAction)actionCmb->itemData(index_).toInt())
+    {
+        case trade::tradeAction_Purchase:
+        case trade::tradeAction_Sell:
+        case trade::tradeAction_ReinvestDividends:
+            shares->setText("Shares:");
+            break;
+        case trade::tradeAction_ReceiveInterest:
+        case trade::tradeAction_PurchaseFixedAmount:
+        case trade::tradeAction_SellFixedAmount:
+            shares->setText("Amount ($):");
+            break;
+        case trade::tradeAction_PurchasePercentOfSecurityValue:
+            shares->setText("% of Value:");
+            break;
+        case trade::tradeAction_ReceiveInterestPercent:
+            shares->setText("Rate (%):");
+            break;
+        case trade::tradeAction_PurchasePercentOfPortfolioValue:
+            shares->setText("% of Total");
+            break;
+        case trade::tradeAction_PurchasePercentOfAATarget:
+            shares->setText("% of Target:");
+            break;
+        case trade::tradeAction_ReinvestDividendsAuto:
+            break;
+    }
+}
+
+void frmEditTrade_UI::tradePriceChange(bool checked_)
+{
+    priceTxt->setEnabled(checked_);
+    priceTxt->setText(checked_ ? "0.0000" : "Previous Close");
+}

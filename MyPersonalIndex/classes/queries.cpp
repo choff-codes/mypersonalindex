@@ -320,7 +320,7 @@ int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &va
     if (tableName_.isEmpty() || values_.isEmpty())
         return id_;
 
-    if (id_ != UNASSIGNED)
+    if (id_ > UNASSIGNED)
     {
         update(tableName_, values_, id_);
         return id_;

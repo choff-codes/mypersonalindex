@@ -3,6 +3,9 @@
 
 #include <QDialog>
 #include <QMessageBox>
+#include <QMimeData>
+#include <QApplication>
+#include <QClipboard>
 #include "frmEdit_UI.h"
 #include "portfolio.h"
 #include "objectKeyEditModel.h"
@@ -32,9 +35,12 @@ private slots:
     void securityAddAA();
     void securityDeleteAA();
     void tradeSecurityFilterChange();
-    void tradeActionChange(int index_);
-    void tradeFrequencyChange(int index_);
-    void tradePriceChange(bool checked_);
+    void tradeActionChange(int index_) { ui.tradeForm.tradeActionChange(index_); }
+    void tradeFrequencyChange(int index_) { ui.tradeForm.tradeFrequencyChange(index_); }
+    void tradePriceChange(bool checked_) { ui.tradeForm.tradePriceChange(checked_); }
+    void paste();
+    void copy();
+    void customContextMenuRequested(const QPoint&) { ui.copyPastePopup->popup(QCursor::pos()); }
 
 private:
     enum tab {
@@ -44,6 +50,8 @@ private:
         tab_security,
         tab_trade
     };
+
+    static const int m_magicNumber;
 
     portfolio m_portfolioToReturn;
     portfolio m_portfolio;
@@ -69,7 +77,6 @@ private:
     void loadTrade();
     void populateSecurityTab();
     void populateTradeTab();
-
 
     template <class T>
     QList<objectKey*> mapToList(QMap<int, T> &map_) {

@@ -88,7 +88,7 @@ public:
     }
 };
 
-int portfolio::IDENTITY_COUNTER = -10;
+int portfolio::IDENTITY_COUNTER = UNASSIGNED_RESERVED - 1;
 
 portfolio::portfolio(int id_, const QString &description_):
     d(new portfolioData(id_, description_))

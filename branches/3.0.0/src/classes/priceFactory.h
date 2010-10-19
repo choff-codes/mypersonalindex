@@ -15,10 +15,10 @@ public:
 
     static historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
     static void insertBatch(const queries &dataSource_);
-    static void close(const queries &dataSource_) { m_historicalPricesCache.remove(dataSource_); }
+    static void close(const queries &dataSource_) { m_historicalPricesCache.remove(dataSource_.getDatabaseLocation()); }
 
 private:
-    static QHash<queries, QHash<QString, historicalPrices> > m_historicalPricesCache;
+    static QHash<QString, QHash<QString, historicalPrices> > m_historicalPricesCache;
 
     static historicalPrices getHistoricalPrices(const QString &symbol_, const queries &dataSource_);
 };

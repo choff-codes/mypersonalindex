@@ -9,34 +9,38 @@
 #include <QPoint>
 #include <QMap>
 #include "queries.h"
-#include "columns.h"
 
 class settings
 {
 public:
+    enum {
+        columns_Holdings,
+        columns_AA,
+        columns_Acct,
+        columns_Stat
+    };
+
+    typedef QMap<int, int> columns;
+
     bool splits;
-    int version;
-    bool compareIncludeDividends;
-    QVariant lastPortfolio;
     QSize windowSize;
     QPoint windowLocation;
-    Qt::WindowState state;
+    Qt::WindowState windowState;
     QHash<int, columns> viewableColumns;
+    QStringList recentFiles;
 
     settings():
             splits(true),
-            version(0),
-            compareIncludeDividends(true),
-            state(Qt::WindowActive)
+            windowState(Qt::WindowActive)
     {
-        // initalize the expected column objects
-        viewableColumns.insert(columns::columns_Holdings, columns(columns::columns_Holdings));
-        viewableColumns.insert(columns::columns_AA, columns(columns::columns_AA));
-        viewableColumns.insert(columns::columns_Acct, columns(columns::columns_Acct));
-        viewableColumns.insert(columns::columns_Stat, columns(columns::columns_Stat));
+        qRegisterMetaType<columns>("columnMap");
+        qRegisterMetaTypeStreamOperators<columns>("columnMap");
     }
 
-    void save(const queries &dataSource_);
+    void save();
+    void load();
 };
+
+Q_DECLARE_METATYPE(settings::columns)
 
 #endif // SETTINGS_H

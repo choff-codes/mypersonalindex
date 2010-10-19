@@ -10,13 +10,10 @@
 class settingsFactory
 {
 public:
-    settings getSettings(const queries &dataSource_);
+    settings getSettings();
 
 private:
     settings m_settings;
-
-    void loadSettings(const queries &dataSource_);
-    void loadSettingsColumns(const queries &dataSource_);
 };
 
 #endif // SETTINGSFACTORY_H

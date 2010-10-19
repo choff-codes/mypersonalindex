@@ -1,6 +1,6 @@
 #include "priceFactory.h"
 
-QHash<queries, QHash<QString, historicalPrices> > priceFactory::m_historicalPricesCache;
+QHash<QString, QHash<QString, historicalPrices> > priceFactory::m_historicalPricesCache;
 
 historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &dataSource_)
 {
@@ -10,11 +10,13 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
     t.start();
 #endif
 
-    if (m_historicalPricesCache.value(dataSource_).contains(symbol_))
-        return m_historicalPricesCache.value(dataSource_).value(symbol_);
+    QString location = dataSource_.getDatabaseLocation();
+
+    if (m_historicalPricesCache.value(location).contains(symbol_))
+        return m_historicalPricesCache.value(location).value(symbol_);
 
     historicalPrices price = getHistoricalPrices(symbol_, dataSource_);
-    m_historicalPricesCache[dataSource_].insert(symbol_, price);
+    m_historicalPricesCache[location].insert(symbol_, price);
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (prices): %d ms", t.elapsed());
@@ -25,7 +27,7 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
 
 void priceFactory::insertBatch(const queries &dataSource_)
 {
-    foreach (historicalPrices prices, m_historicalPricesCache.value(dataSource_))
+    foreach (historicalPrices prices, m_historicalPricesCache.value(dataSource_.getDatabaseLocation()))
         prices.insertBatch(dataSource_);
 }
 

@@ -23,7 +23,6 @@ public:
     static const QString table_PortfolioSecurityTrade;
     static const QString table_PortfolioSecurityTradeExecution;
     static const QString table_Settings;
-    static const QString table_SettingsColumns;
 
     static const QString view_PortfolioSecurityAA;
     static const QString view_PortfolioSecurityTrade;
@@ -38,7 +37,6 @@ public:
     static const QStringList portfolioSecurityTradeColumns;
     static const QStringList portfolioSecurityTradeExecutionColumns;
     static const QStringList settingsColumns;
-    static const QStringList settingsColumnsColumns;
 
     static const QStringList portfolioSecurityAAViewColumns;
     static const QStringList portfolioSecurityTradeViewColumns;
@@ -78,22 +76,7 @@ public:
     };
 
     enum {
-        settingsColumns_DataStartDate,
-        settingsColumns_LastPortfolio,
-        settingsColumns_Version,
-        settingsColumns_WindowX,
-        settingsColumns_WindowY,
-        settingsColumns_WindowHeight,
-        settingsColumns_WindowWidth,
-        settingsColumns_WindowState,
-        settingsColumns_Splits,
-        settingsColumns_CompareIncludeDividends
-    };
-
-    enum {
-        settingsColumnsColumns_ID,
-        settingsColumnsColumns_ColumnID,
-        settingsColumnsColumns_Sequence
+        settingsColumns_Version
     };
 
     enum {
@@ -174,9 +157,6 @@ public:
     };
 
     queries(const QString &databaseLocation_);
-    bool operator==(const queries &other_) const { return this->getDatabaseLocation() == other_.getDatabaseLocation();}
-
-    static QString getDefaultDatabaseLocation();
 
     void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
@@ -203,7 +183,5 @@ private:
     void deleteItem(const QString &table_, const QString &identifier_, int id_) const;
     void deleteItem(const QString &table_, const QString &identifier_, int id_, int beginDate_) const;
 };
-
-inline uint qHash(const queries &dataSource_) { return qHash(dataSource_.getDatabaseLocation()); }
 
 #endif // QUERIES_H

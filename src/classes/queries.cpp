@@ -62,40 +62,11 @@ const QStringList queries::portfolioColumns = QStringList()
                                               << "StartDate";
 
 //enum {
-//    settingsColumns_DataStartDate,
-//    settingsColumns_LastPortfolio,
-//    settingsColumns_Version,
-//    settingsColumns_WindowX,
-//    settingsColumns_WindowY,
-//    settingsColumns_WindowHeight,
-//    settingsColumns_WindowWidth,
-//    settingsColumns_WindowState,
-//    settingsColumns_Splits,
-//    settingsColumns_CompareIncludeDividends
+//    settingsColumns_Version
 //};
 
 const QStringList queries::settingsColumns = QStringList()
-                                             << "DataStartDate"
-                                             << "LastPortfolio"
-                                             << "Version"
-                                             << "WindowX"
-                                             << "WindowY"
-                                             << "WindowHeight"
-                                             << "WindowWidth"
-                                             << "WindowState"
-                                             << "Splits"
-                                             << "CompareIncludeDividends";
-
-//enum {
-//    settingsColumnsColumns_ID,
-//    settingsColumnsColumns_ColumnID,
-//    settingsColumnsColumns_Sequence
-//};
-
-const QStringList queries::settingsColumnsColumns = QStringList()
-                                                    << "ID"
-                                                    << "ColumnID"
-                                                    << "Sequence";
+                                             << "Version";
 
 //enum {
 //    portfolioSecurityColumns_ID,
@@ -255,7 +226,6 @@ const QString queries::table_PortfolioSecurityAA = "PortfolioSecurityAA";
 const QString queries::table_PortfolioSecurityTrade = "PortfolioSecurityTrade";
 const QString queries::table_PortfolioSecurityTradeExecution = "PortfolioSecurityTradeExecution";
 const QString queries::table_Settings = "Settings";
-const QString queries::table_SettingsColumns = "SettingsColumns";
 
 const QString queries::view_PortfolioSecurityAA = "PortfolioSecurityAAView";
 const QString queries::view_PortfolioSecurityTrade = "PortfolioSecurityTradeView";
@@ -270,15 +240,6 @@ queries::queries(const QString &databaseLocation_)
     m_database = QSqlDatabase::addDatabase("QSQLITE", databaseLocation_);
     m_database.setDatabaseName(databaseLocation_);
     m_database.open();
-}
-
-QString queries::getDefaultDatabaseLocation()
-{
-#if defined(Q_OS_LINUX)
-    return QCoreApplication::applicationDirPath().append("/MPI.sqlite");
-#else
-    return QFileInfo(QSettings(QSettings::IniFormat, QSettings::UserScope, "MyPersonalIndex", "MPI").fileName()).absolutePath().append("/MPI.sqlite");
-#endif
 }
 
 void queries::executeNonQuery(const QString &query_) const

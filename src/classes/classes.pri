@@ -22,7 +22,6 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/objectKey.cpp \
     $$PWD/tradeDateCalendar.cpp \
     $$PWD/portfolioFactory.cpp \
-    $$PWD/columns.cpp \
     $$PWD/settingsFactory.cpp \
     $$PWD/assetAllocationTarget.cpp \
     $$PWD/calculatorCorrelation.cpp \
@@ -53,7 +52,6 @@ HEADERS += $$PWD/queries.h \
     $$PWD/tradeDateCalendar.h \
     $$PWD/queriesBatch.h \
     $$PWD/portfolioFactory.h \
-    $$PWD/columns.h \
     $$PWD/settingsFactory.h \
     $$PWD/assetAllocationTarget.h \
     $$PWD/calculatorCorrelation.h \

@@ -1,0 +1,45 @@
+DROP TABLE "main"."Settings"
+DROP TABLE "main"."SettingsColumns"
+DROP TABLE "main"."ClosingPrices"
+DROP TABLE "main"."Dividends"
+DROP TABLE "main"."Splits"
+DROP TABLE "main"."ExecutedTrades"
+DROP TABLE "main"."NAV"
+
+CREATE TABLE "main"."Settings" ("Version" INTEGER NOT NULL)
+CREATE TABLE "main"."PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Date" INTEGER,"Shares" NUMERIC,"Price" NUMERIC,"Commission" NUMERIC, "AssociatedTradeID" INTEGER)
+CREATE TABLE "main"."HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC)
+CREATE TABLE "main"."Portfolio" ("ID" INTEGER PRIMARY KEY  NOT NULL,"Description" VARCHAR,"StartValue" INTEGER,"StartDate" INTEGER)
+
+INSERT INTO "main"."Portfolio" SELECT "ID","Description","StartValue","StartDate" FROM "main"."Portfolios"
+DROP TABLE "main"."Portfolios"
+
+ALTER TABLE "main"."AA" RENAME TO "PortfolioAA"
+ALTER TABLE "main"."Acct" RENAME TO "PortfolioAccount"
+ALTER TABLE "main"."Security" RENAME TO "PortfolioSecurity"
+ALTER TABLE "main"."SecurityAA" RENAME TO "PortfolioSecurityAA"
+ALTER TABLE "main"."SecurityTrades" RENAME TO "PortfolioSecurityTrade"
+ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Note" VARCHAR
+ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Dividends" INTEGER
+ALTER TABLE "main"."PortfolioSecurityTrade" ADD COLUMN "Description" VARCHAR
+ALTER TABLE "main"."PortfolioAA" ADD COLUMN "Threshold" INTEGER
+ALTER TABLE "main"."PortfolioAA" ADD COLUMN "RebalanceBand" NUMERIC
+
+CREATE VIEW "PortfolioSecurityTradeExecutionView" AS SELECT e.*, s.PortfolioID FROM PortfolioSecurityTradeExecution e INNER JOIN PortfolioSecurity s ON e.SecurityID = s.ID
+CREATE VIEW "PortfolioSecurityAAView" AS SELECT aa.*, s.PortfolioID FROM PortfolioSecurityAA aa INNER JOIN PortfolioSecurity s ON aa.SecurityID = s.ID
+CREATE VIEW "PortfolioSecurityTradeView" AS SELECT trades.*, s.PortfolioID FROM PortfolioSecurityTrade trades INNER JOIN PortfolioSecurity s ON trades.SecurityID = s.ID
+
+CREATE TRIGGER "PortfolioTrigger" BEFORE DELETE ON Portfolio FOR EACH ROW BEGIN
+DELETE FROM PortfolioSecurity WHERE PortfolioSecurity.PortfolioID = old.ID;
+DELETE FROM PortfolioAA WHERE PortfolioAA.PortfolioID = old.ID;
+DELETE FROM PortfolioAcctount WHERE PortfolioAccount.PortfolioID = old.ID; END
+
+CREATE TRIGGER "PortfolioSecurityTrigger" BEFORE DELETE ON PortfolioSecurity FOR EACH ROW BEGIN
+DELETE FROM PortfolioSecurityAA WHERE PortfolioSecurityAA.SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTrade WHERE PortfolioSecurityTrade.SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTradeExecution WHERE PortfolioSecurityTrade.SecurityID = old.ID; END
+
+CREATE INDEX "HistoricalPriceIndex" ON "HistoricalPrice" ("Symbol" ASC)
+
+INSERT INTO "main"."Settings" ("Version") VALUES (310)
+UPDATE PortfolioAccount SET CostBasis = CostBasis - 1

@@ -6,24 +6,25 @@
 #include <QAbstractTableModel>
 #include <QTableView>
 #include "functions.h"
+#include "sort.h"
 
 class baseRow
 {
 public:
     QVariantList values;
 
-    baseRow(const QString &sort_):
-        m_sort(sort_)
+    baseRow(const QList<sort> &columnSort_):
+        m_columnSort(columnSort_)
     {}
 
     virtual ~baseRow() {}
 
     virtual QVariant columnType(int column_) const = 0;
-    QString sort() const { return m_sort; }
+    QList<sort> columnSort() const { return m_columnSort; }
     static bool baseRowSort(const baseRow *row1_, const baseRow *row2_);
 
 private:
-    QString m_sort;
+    QList<sort> m_columnSort;
 };
 
 class mpiViewModelBase: public QAbstractTableModel

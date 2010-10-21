@@ -1,6 +1,6 @@
 #include "frmSort.h"
 
-frmSort::frmSort(const QString &sort_, const QMap<int, QString> &columns_, QWidget *parent_):
+frmSort::frmSort(const QList<sort> &sort_, const QMap<int, QString> &columns_, QWidget *parent_):
     QDialog(parent_),
     m_sort(sort_),
     m_columns(columns_)
@@ -24,25 +24,22 @@ frmSort::frmSort(const QString &sort_, const QMap<int, QString> &columns_, QWidg
     if (m_sort.isEmpty())
         return;
 
-    QStringList list = m_sort.split('|');
-
-    for (int i = 0; i < list.count(); ++i)
+    for (int i = 0; i < m_sort.count(); ++i)
     {
-        bool desc = list.at(i).at(0) == 'D'; // "D2" = column 2, descending, "2" would be column 2 ascending
-        int sortColumn = desc ? list[i].remove(0, 1).toInt() : list.at(i).toInt();
+        sort s = m_sort.at(i);
         switch (i)
         {
             case 0:
-                ui.sort1Cmb->setCurrentIndex(ui.sort1Cmb->findData(sortColumn));
-                ui.group1SortDescRadio->setChecked(desc);
+                ui.sort1Cmb->setCurrentIndex(ui.sort1Cmb->findData(s.column));
+                ui.group1SortDescRadio->setChecked(s.orderColumn == sort::order_descending);
                 break;
             case 1:
-                ui.sort2Cmb->setCurrentIndex(ui.sort2Cmb->findData(sortColumn));
-                ui.group2SortDescRadio->setChecked(desc);
+                ui.sort2Cmb->setCurrentIndex(ui.sort2Cmb->findData(s.column));
+                ui.group2SortDescRadio->setChecked(s.orderColumn == sort::order_descending);
                 break;
             case 2:
-                ui.sort3Cmb->setCurrentIndex(ui.sort3Cmb->findData(sortColumn));
-                ui.group3SortDescRadio->setChecked(desc);
+                ui.sort3Cmb->setCurrentIndex(ui.sort3Cmb->findData(s.column));
+                ui.group3SortDescRadio->setChecked(s.orderColumn == sort::order_descending);
                 break;
         }
     }
@@ -50,34 +47,41 @@ frmSort::frmSort(const QString &sort_, const QMap<int, QString> &columns_, QWidg
 
 void frmSort::accept()
 {
-    QStringList sortList;
+    QList<sort> sortList;
 
     if (!ui.sort1Cmb->currentText().isEmpty())
         sortList.append(
-                (ui.group1SortDescRadio->isChecked() ? "D" : "") +
-                QString::number(ui.sort1Cmb->itemData(ui.sort1Cmb->currentIndex()).toInt())
+            sort
+            (
+                ui.sort1Cmb->itemData(ui.sort1Cmb->currentIndex()).toInt(),
+                ui.group1SortDescRadio->isChecked() ? sort::order_descending : sort::order_ascending
+            )
         );
 
     if (!ui.sort2Cmb->currentText().isEmpty() && !sortList.isEmpty()) // make sure sort1 is set
         sortList.append(
-                (ui.group2SortDescRadio->isChecked() ? "D" : "") +
-                QString::number(ui.sort2Cmb->itemData(ui.sort2Cmb->currentIndex()).toInt())
+            sort
+            (
+                ui.sort2Cmb->itemData(ui.sort2Cmb->currentIndex()).toInt(),
+                ui.group2SortDescRadio->isChecked() ? sort::order_descending : sort::order_ascending
+            )
         );
 
     if (!ui.sort3Cmb->currentText().isEmpty() && sortList.count() == 2) // make sure sort2 is set
         sortList.append(
-                (ui.group3SortDescRadio->isChecked() ? "D" : "") +
-                QString::number(ui.sort2Cmb->itemData(ui.sort3Cmb->currentIndex()).toInt())
+            sort
+            (
+                ui.sort3Cmb->itemData(ui.sort3Cmb->currentIndex()).toInt(),
+                ui.group3SortDescRadio->isChecked() ? sort::order_descending : sort::order_ascending
+            )
         );
 
-    QString sortString = sortList.join("|");
-
-    if (sortString == m_sort)
+    if (sortList == m_sort)
     {
         QDialog::reject();
         return;
     }
 
-    m_sort = sortString;
+    m_sort = sortList;
     QDialog::accept();
 }

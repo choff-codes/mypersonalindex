@@ -4,22 +4,19 @@
 // Note: if column sort is descending, returns false if less than
 bool baseRow::baseRowSort(const baseRow *row1_, const baseRow *row2_)
 {
-    if (row1_->sort().isEmpty())
+    if (row1_->columnSort().isEmpty())
         return false;
 
-    QStringList strings = row1_->sort().split('|'); // assume row1 and row2 have the same sort
-    foreach(const QString &s, strings)
+    // assume row1 and row2 have the same sort
+    foreach(const sort &s, row1_->columnSort())
     {
-        bool ascending = s.at(0) != 'D'; // "D2" = column 2, descending, "2" would be column 2 ascending
-        int column = ascending ? s.toInt() : QString(s).remove(0, 1).toInt();
-
-        if (functions::equal(row1_->values.at(column), row2_->values.at(column), row1_->columnType(column)))
+        if (functions::equal(row1_->values.at(s.column), row2_->values.at(s.column), row1_->columnType(s.column)))
             continue;
 
-        if (functions::lessThan(row1_->values.at(column), row2_->values.at(column), row1_->columnType(column)))
-            return ascending; // return false if descending
+        if (functions::lessThan(row1_->values.at(s.column), row2_->values.at(s.column), row1_->columnType(s.column)))
+            return s.orderColumn == sort::order_ascending; // return true if ascending (row1 should come first)
 
-        return !ascending; // greater than, return true if descending
+        return s.orderColumn == sort::order_descending; // greater than, return false if ascending (row1 should come second)
     }
     return false;
 }

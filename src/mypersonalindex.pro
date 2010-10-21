@@ -3,7 +3,12 @@ include(classes/classes.pri)
 include(models/models.pri)
 include(ui/ui.pri)
 include(usercontrols/usercontrols.pri)
-#include(shared/qtsingleapplication/qtsingleapplication.pri)
+
+VERSION = 310
+VERSIONTEXT = "3.1.0"
+DEFINES += APP_VERSION="$$VERSION" \
+        APP_VERSION_TEXT="$$VERSIONTEXT"
+
 
 win32{
     INCLUDEPATH += shared/qwt

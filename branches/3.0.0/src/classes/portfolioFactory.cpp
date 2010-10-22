@@ -1,4 +1,12 @@
 #include "portfolioFactory.h"
+#include <QSqlQuery>
+#include <QVariant>
+#include "security.h"
+#include "account.h"
+#include "assetAllocation.h"
+#include "security.h"
+#include "portfolioAttributes.h"
+#include "priceFactory.h"
 
 QMap<int, portfolio> portfolioFactory::getPortfolios(bool includePricing_)
 {
@@ -96,7 +104,6 @@ void portfolioFactory::loadPortfolioSecurityTradesExecution()
             .executedTrades.insert
             (
                 q.value(queries::portfolioSecurityTradeExecutionViewColumns_Date).toInt(),
-                executedTrade::load(q),
-                false
+                executedTrade::load(q)
             );
 }

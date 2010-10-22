@@ -2,10 +2,10 @@
 #define PORTFOLIOATTRIBUTES_H
 
 #include <QString>
-#include <QDate>
-#include "queries.h"
 #include "objectKey.h"
 
+class QSqlQuery;
+class queries;
 class portfolioAttributes: public objectKey
 {
 public:

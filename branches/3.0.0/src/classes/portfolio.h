@@ -1,14 +1,18 @@
 #ifndef PORTFOLIO_H
 #define PORTFOLIO_H
 
-#include <QMap>
 #include <QSharedData>
-#include "security.h"
-#include "assetAllocation.h"
-#include "account.h"
-#include "portfolioAttributes.h"
-#include "queries.h"
+#include <QString>
+#include "objectBase.h"
 
+template <class T, class V>
+class QMap;
+class QStringList;
+class queries;
+class security;
+class assetAllocation;
+class account;
+class portfolioAttributes;
 class portfolioData;
 class portfolio
 {

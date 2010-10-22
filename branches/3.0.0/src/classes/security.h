@@ -4,13 +4,10 @@
 #include <QString>
 #include <QMap>
 #include "trade.h"
-#include "queries.h"
-#include "functions.h"
 #include "objectKey.h"
 #include "executedTrade.h"
 #include "historicalPrices.h"
 #include "assetAllocationTarget.h"
-#include "priceFactory.h"
 
 #ifndef DIVIDEND_REINVESTMENT_TRADE_ID
 #define DIVIDEND_REINVESTMENT_TRADE_ID -2

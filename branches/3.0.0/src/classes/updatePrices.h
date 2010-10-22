@@ -1,12 +1,8 @@
 #ifndef UPDATEPRICES_H
 #define UPDATEPRICES_H
 
-#include <QMap>
-#include <QString>
 #include <QDate>
-#include <QtNetwork>
-#include <QPair>
-#include "priceFactory.h"
+#include "queries.h"
 
 struct updatePricesResult
 {
@@ -18,6 +14,8 @@ struct updatePricesResult
     {}
 };
 
+class QUrl;
+class historicalPrices;
 class updatePrices
 {
 public:

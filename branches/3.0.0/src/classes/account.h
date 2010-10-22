@@ -2,10 +2,10 @@
 #define ACCOUNT_H
 
 #include <QString>
-#include "queries.h"
-#include "functions.h"
 #include "objectKey.h"
 
+class queries;
+class QSqlQuery;
 class account: public objectKey
 {
 public:

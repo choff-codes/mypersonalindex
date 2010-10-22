@@ -1,4 +1,7 @@
 #include "security.h"
+#include <QSqlQuery>
+#include "queries.h"
+#include "functions.h"
 
 bool security::operator==(const security &other_) const
 {

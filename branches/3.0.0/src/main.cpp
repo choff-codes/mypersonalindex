@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QSettings>
 #include "frmMain.h"
 
 int main(int argc, char *argv[])

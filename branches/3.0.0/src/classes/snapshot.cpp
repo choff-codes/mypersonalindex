@@ -1,4 +1,5 @@
 #include "snapshot.h"
+#include "functions.h"
 
 void snapshot::add(const snapshot &other_, double multiplier_)
 {

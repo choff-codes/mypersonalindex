@@ -9,7 +9,6 @@
 #include <QDoubleSpinBox>
 #include <QToolButton>
 #include <QComboBox>
-#include "assetAllocation.h"
 
 class frmEditAA_UI
 {

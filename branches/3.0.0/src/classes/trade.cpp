@@ -1,4 +1,7 @@
 #include "trade.h"
+#include <QSqlQuery>
+#include "queries.h"
+#include "functions.h"
 
 bool trade::operator==(const trade &other_) const
 {

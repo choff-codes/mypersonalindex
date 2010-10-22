@@ -1,4 +1,5 @@
 #include "settings.h"
+#include <QSettings>
 
 void settings::save()
 {    

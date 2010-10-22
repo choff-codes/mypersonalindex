@@ -2,14 +2,11 @@
 #define QUERIES_H
 
 #include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QMap>
 #include <QStringList>
-#include <QSettings>
-#include <QFileInfo>
-#include <QCoreApplication>
-#include "objectBase.h" // to get UNASSIGNED definition
 
+template <class T, class V>
+class QMap;
+class QSqlQuery;
 class queriesBatch;
 class queries
 {

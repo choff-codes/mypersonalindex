@@ -1,20 +1,17 @@
 #ifndef CALCULATIONS_H
 #define CALCULATIONS_H
 
-#include <qmath.h>
-#include <qnumeric.h>
-#include <QHash>
 #include <QSharedData>
-#include "snapshot.h"
-#include "portfolio.h"
-#include "tradeDateCalendar.h"
-#include "splits.h"
-#include "historicalNAV.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
+class portfolio;
+class objectKey;
+class snapshot;
+class snapshotSecurity;
+class historicalNAV;
 class calculatorNAVData;
 class calculatorNAV
 {

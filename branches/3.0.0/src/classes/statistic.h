@@ -1,11 +1,9 @@
 #ifndef STATISTIC_H
 #define STATISTIC_H
 
-#include <QMap>
-#include <QString>
-#include "statisticInfo.h"
-#include "functions.h"
+#include <QStringList>
 
+class statisticInfo;
 class statistic
 {
 public:

@@ -1,4 +1,7 @@
 #include "queries.h"
+#include <QSqlQuery>
+#include <QVariant>
+#include "objectBase.h"
 #include "queriesBatch.h"
 
 //enum {

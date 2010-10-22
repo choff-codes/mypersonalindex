@@ -1,4 +1,9 @@
 #include "portfolio.h"
+#include "queries.h"
+#include "security.h"
+#include "account.h"
+#include "assetAllocation.h"
+#include "portfolioAttributes.h"
 
 class portfolioData: public QSharedData
 {

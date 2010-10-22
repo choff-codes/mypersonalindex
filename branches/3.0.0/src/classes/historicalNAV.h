@@ -1,10 +1,7 @@
 #ifndef HISTORICALNAV_H
 #define HISTORICALNAV_H
 
-#include <QMap>
 #include <QHash>
-#include "queries.h"
-#include "objectBase.h"
 
 struct navPair
 {

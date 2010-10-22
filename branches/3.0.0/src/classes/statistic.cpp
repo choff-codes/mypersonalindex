@@ -1,4 +1,9 @@
+#include <QDate>
+#include <qmath.h>
+#include <qnumeric.h>
 #include "statistic.h"
+#include "functions.h"
+#include "statisticInfo.h"
 
 //enum stat {
 //    stat_BeginningIndexValue,

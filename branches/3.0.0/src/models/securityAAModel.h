@@ -2,12 +2,11 @@
 #define SECURITYAAMODEL_H
 
 #include <QAbstractTableModel>
-#include <QTableView>
 #include <QMap>
-#include "functions.h"
-#include "security.h"
+#include "assetAllocationTarget.h"
 #include "assetAllocation.h"
 
+class QItemSelectionModel;
 class securityAAModel: public QAbstractTableModel
 {
 public:

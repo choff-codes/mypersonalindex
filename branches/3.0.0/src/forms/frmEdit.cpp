@@ -1,4 +1,12 @@
 #include "frmEdit.h"
+#include <QMimeData>
+#include <QApplication>
+#include <QClipboard>
+#include "portfolioAttributes.h"
+#include "securityAAModel.h"
+#include "security.h"
+#include "functions.h"
+#include "account.h"
 
 const int frmEdit::m_magicNumber = rand();
 

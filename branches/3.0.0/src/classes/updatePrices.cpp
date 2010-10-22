@@ -1,4 +1,7 @@
 #include "updatePrices.h"
+#include <QtNetwork>
+#include "historicalPrices.h"
+#include "priceFactory.h"
 
 updatePricesResult updatePrices::run(const QStringList &symbols_, int beginDate_, bool splits_)
 {

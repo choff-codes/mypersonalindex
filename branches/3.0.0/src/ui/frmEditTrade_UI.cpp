@@ -1,4 +1,5 @@
 #include "frmEditTrade_UI.h"
+#include "trade.h"
 
 void frmEditTrade_UI::setupUI(QWidget *parent)
 {

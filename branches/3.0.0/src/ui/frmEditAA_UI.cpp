@@ -1,4 +1,5 @@
 #include "frmEditAA_UI.h"
+#include "assetAllocation.h"
 
 void frmEditAA_UI::setupUI(QWidget *parent)
 {

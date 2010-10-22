@@ -3,11 +3,11 @@
 
 #include <QString>
 #include <QDate>
-#include "queries.h"
-#include "functions.h"
 #include "objectKey.h"
 #include "tradeDateCalendar.h"
 
+class QSqlQuery;
+class queries;
 class trade: public objectKey
 {
 public:

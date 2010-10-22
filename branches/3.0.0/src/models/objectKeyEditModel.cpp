@@ -1,4 +1,5 @@
 #include "objectKeyEditModel.h"
+#include "objectKey.h"
 
 QVariant objectKeyEditModel::data(const QModelIndex &index_, int role_) const
 {

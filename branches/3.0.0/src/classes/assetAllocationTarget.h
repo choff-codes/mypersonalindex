@@ -4,7 +4,6 @@
 #include <QMap>
 #include "queriesBatch.h"
 #include "objectBase.h"
-#include "functions.h"
 
 class assetAllocationTarget: public objectBase, public queriesBatch
 {

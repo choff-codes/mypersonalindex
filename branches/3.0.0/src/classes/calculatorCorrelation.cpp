@@ -1,4 +1,8 @@
 #include "calculatorCorrelation.h"
+#include <qmath.h>
+#include <qnumeric.h>
+#include "tradeDateCalendar.h"
+#include "historicalNAV.h"
 
 double calculatorCorrelation::correlation(const historicalNAV &first_, const historicalNAV &second_)
 {

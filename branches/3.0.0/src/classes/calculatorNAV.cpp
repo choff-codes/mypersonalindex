@@ -1,4 +1,14 @@
 #include "calculatorNAV.h"
+#include <qmath.h>
+#include <qnumeric.h>
+#include "portfolio.h"
+#include "security.h"
+#include "account.h"
+#include "portfolioAttributes.h"
+#include "splits.h"
+#include "snapshot.h"
+#include "historicalNAV.h"
+#include "functions.h"
 
 class calculatorNAVData: public QSharedData
 {

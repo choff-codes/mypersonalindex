@@ -11,7 +11,6 @@
 #include <QTextEdit>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
-#include "trade.h"
 
 class frmEditTrade_UI
 {

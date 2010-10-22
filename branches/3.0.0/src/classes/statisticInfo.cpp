@@ -1,4 +1,7 @@
 #include "statisticInfo.h"
+#include <qmath.h>
+#include <qnumeric.h>
+#include "tradeDateCalendar.h"
 
 statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNAV_):
     navHistory(historicalNAV_),

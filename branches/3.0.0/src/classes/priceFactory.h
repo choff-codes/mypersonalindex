@@ -3,19 +3,19 @@
 
 #include <QHash>
 #include "historicalPrices.h"
-#include "queries.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
+class queries;
 class priceFactory
 {
 public:
 
     static historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
     static void insertBatch(const queries &dataSource_);
-    static void close(const queries &dataSource_) { m_historicalPricesCache.remove(dataSource_.getDatabaseLocation()); }
+    static void close(const queries &dataSource_);
 
 private:
     static QHash<QString, QHash<QString, historicalPrices> > m_historicalPricesCache;

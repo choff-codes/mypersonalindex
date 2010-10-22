@@ -1,6 +1,12 @@
+#include <QTime>
 #include "calculatorAveragePrice.h"
+#include "portfolio.h"
+#include "splits.h"
+#include "security.h"
+#include "account.h"
+#include "functions.h"
 
-QMap<int, double> calculatorAveragePrice::calculate(portfolio portfolio_, int date_)
+QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_, int date_)
 {
 #ifdef CLOCKTIME
     QTime t;

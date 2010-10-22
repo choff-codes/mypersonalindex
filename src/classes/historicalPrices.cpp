@@ -1,4 +1,9 @@
 #include "historicalPrices.h"
+#include <QMap>
+#include <QString>
+#include <QVariant>
+#include "queries.h"
+#include "queriesBatch.h"
 
 class historicalPricesData: public QSharedData, public queriesBatch
 {

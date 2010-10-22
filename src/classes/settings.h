@@ -10,7 +10,6 @@
 #include <QHash>
 #include <QList>
 #include <QMetaType>
-#include <QSettings>
 #include <QStringList>
 #include "sort.h"
 

@@ -2,11 +2,11 @@
 #define FRMMAIN_H
 
 #include <QMainWindow>
-#include <QCloseEvent>
+#include "settings.h"
+#include "portfolio.h"
 #include "frmMain_UI.h"
-#include "frmEdit.h"
-#include "settingsFactory.h"
 
+class portfolio;
 class frmMain : public QMainWindow
 {
     Q_OBJECT
@@ -16,6 +16,7 @@ public:
 
 private slots:
     void showPortfolioEdit();
+    void about();
 
 private:
     frmMain_UI ui;

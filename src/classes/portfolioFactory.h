@@ -3,7 +3,7 @@
 
 #include <QMap>
 #include "portfolio.h"
-#include "priceFactory.h"
+#include "queries.h"
 
 #ifdef CLOCKTIME
 #include <QTime>

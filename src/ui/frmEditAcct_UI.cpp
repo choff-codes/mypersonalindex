@@ -1,4 +1,5 @@
 #include "frmEditAcct_UI.h"
+#include "account.h"
 
 void frmEditAcct_UI::setupUI(QWidget *parent)
 {

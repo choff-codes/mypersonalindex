@@ -2,9 +2,10 @@
 #define ASSETALLOCATION_H
 
 #include <QString>
-#include "queries.h"
 #include "objectKey.h"
 
+class queries;
+class QSqlQuery;
 class assetAllocation: public objectKey
 {
 public:

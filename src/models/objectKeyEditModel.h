@@ -3,8 +3,8 @@
 
 #include <QAbstractListModel>
 #include <QList>
-#include <objectKey.h>
 
+class objectKey;
 class objectKeyEditModel : public QAbstractListModel
 {
 public:

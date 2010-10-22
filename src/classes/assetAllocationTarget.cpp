@@ -1,4 +1,6 @@
 #include "assetAllocationTarget.h"
+#include "functions.h"
+#include "queries.h"
 
 void assetAllocationTarget::insert(int id_, double target_)
 {

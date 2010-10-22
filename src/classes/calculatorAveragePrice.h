@@ -1,16 +1,18 @@
 #ifndef AVGPRICEPERSHARE_H
 #define AVGPRICEPERSHARE_H
 
-#include <QList>
-#include <QMap>
-#include "portfolio.h"
-#include "splits.h"
+#include "account.h"
 
+template <class T, class V>
+class QMap;
+class portfolio;
+class executedTradeMap;
+class splits;
 class calculatorAveragePrice
 {
 public:
 
-    static QMap<int, double> calculate(portfolio portfolio_, int date_);
+    static QMap<int, double> calculate(const portfolio &portfolio_, int date_);
 
     static double calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_);
 

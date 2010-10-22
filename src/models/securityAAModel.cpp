@@ -1,4 +1,6 @@
 #include "securityAAModel.h"
+#include <QItemSelectionModel>
+#include "functions.h"
 
 Qt::ItemFlags securityAAModel::flags(const QModelIndex &index_) const
 {

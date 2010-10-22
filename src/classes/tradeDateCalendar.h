@@ -3,7 +3,6 @@
 
 #include <QSet>
 #include <QDate>
-#include <QList>
 
 class tradeDateCalendar
 {

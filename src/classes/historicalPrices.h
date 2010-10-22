@@ -1,10 +1,11 @@
 #ifndef HISTORICALPRICES_H
 #define HISTORICALPRICES_H
 
-#include <QMap>
 #include <QSharedData>
-#include "queriesBatch.h"
 
+template <class T, class V>
+class QMap;
+class queries;
 class historicalPricesData;
 class historicalPrices
 {

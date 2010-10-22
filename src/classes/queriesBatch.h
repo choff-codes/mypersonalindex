@@ -1,9 +1,8 @@
 #ifndef QUERIESBATCH_H
 #define QUERIESBATCH_H
 
-#include <QVariant>
-#include "queries.h"
-
+class QVariant;
+class queries;
 class queriesBatch
 {
 public:

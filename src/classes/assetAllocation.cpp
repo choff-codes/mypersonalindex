@@ -1,4 +1,8 @@
 #include "assetAllocation.h"
+#include <QSqlQuery>
+#include <QMap>
+#include <QVariant>
+#include "queries.h"
 
 bool assetAllocation::operator==(const assetAllocation &other_) const
 {

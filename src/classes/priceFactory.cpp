@@ -1,4 +1,7 @@
 #include "priceFactory.h"
+#include <QSqlQuery>
+#include <QVariant>
+#include "queries.h"
 
 QHash<QString, QHash<QString, historicalPrices> > priceFactory::m_historicalPricesCache;
 
@@ -52,4 +55,9 @@ historicalPrices priceFactory::getHistoricalPrices(const QString &symbol_, const
         );
 
     return priceData;
+}
+
+void priceFactory::close(const queries &dataSource_)
+{
+    m_historicalPricesCache.remove(dataSource_.getDatabaseLocation());
 }

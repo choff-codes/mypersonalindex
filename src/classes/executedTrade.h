@@ -2,11 +2,10 @@
 #define EXECUTEDTRADE_H
 
 #include <QMap>
-#include <QPair>
-#include <QHash>
 #include "queriesBatch.h"
 #include "objectBase.h"
 
+class QSqlQuery;
 class executedTrade
 {
 public:
@@ -36,6 +35,8 @@ public:
     bool operator!=(const executedTrade &other_) const { return !(*this == other_); }
 };
 
+template <class T, class V>
+class QHash;
 class executedTradeMap: public objectBase, public queriesBatch
 {
 public:
@@ -47,24 +48,23 @@ public:
     QMap<int, executedTrade>::const_iterator constBegin() const { return m_trades.constBegin(); }
     QMap<int, executedTrade>::const_iterator constEnd() const { return m_trades.constEnd(); }
 
-    void insert(int date_, const executedTrade &executedTrade_, bool toDatabase_ = true);
+    void insert(int date_, const executedTrade &executedTrade_);
 
-    void updateAssociatedTradeID(QHash<int, int> tradeIDMapping_);
+    void updateAssociatedTradeID(const QHash<int, int> &tradeIDMapping_);
 
-    void remove(const queries &dataSource_);
-    void remove(const queries &dataSource_, int beginDate_);
+    void remove();
+    void remove(int beginDate_);
 
     bool operator==(const executedTradeMap &other_) const { return m_trades == other_.m_trades; }
     bool operator!=(const executedTradeMap &other_) const { return !(*this == other_); }
 
     void insertBatch(queries dataSource_);
 
-    int rowsToBeInserted() const { return m_toDatabase.count(); }
+    int rowsToBeInserted() const { return m_trades.count(); }
     QVariant data(int row_, int column_) const;
 
 private:
    QMap<int, executedTrade> m_trades;
-   QList<QMap<int, executedTrade>::iterator> m_toDatabase;
 };
 
 #endif // EXECUTEDTRADE_H

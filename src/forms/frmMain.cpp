@@ -1,4 +1,7 @@
 #include "frmMain.h"
+#include <QCloseEvent>
+#include "frmEdit.h"
+#include "settingsFactory.h"
 
 frmMain::frmMain(QWidget *parent): QMainWindow(parent)
 {
@@ -17,6 +20,7 @@ frmMain::frmMain(QWidget *parent): QMainWindow(parent)
 void frmMain::connectSlots()
 {
     connect(ui.portfolioEdit, SIGNAL(triggered()), this, SLOT(showPortfolioEdit()));
+    connect(ui.helpAbout, SIGNAL(triggered()), this, SLOT(about()));
 }
 
 void frmMain::showPortfolioEdit()
@@ -33,3 +37,12 @@ void frmMain::closeEvent(QCloseEvent */*event_*/)
     m_settings.save();
 }
 
+
+void frmMain::about()
+{
+    QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString::number(APP_VERSION / 100.0) + "</h2>"
+        "<p>Copyright &copy; 2010"
+        "<p>By Matthew Wikler"
+        "<p>Create personal indexes and perform analysis to make better investing decisions."
+        "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
+}

@@ -2,26 +2,24 @@
 #define NAV_H
 
 #include <QMap>
-#include "queries.h"
-#include "calculatorNAV.h"
-#include "portfolio.h"
+#include "trade.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
+class portfolio;
+class assetAllocation;
+class account;
+class security;
+class calculatorNAV;
+class executedTrade;
 class calculatorTrade
 {
 public:
-    calculatorTrade(queries dataSource_):
-        m_dataSource(dataSource_)
-    {}
-
     void run(int beginDate_, const QList<portfolio> &portfolios_);
 
 private:
-    queries m_dataSource;
-
     typedef QMap<int, trade>::const_iterator tradeIterator;
     typedef QHash<int, QList<tradeIterator> > tradeDay;
 
@@ -29,7 +27,6 @@ private:
     void removeDividendReinvestmentPlaceholders(portfolio portfolio_);
 
     void clearExecutedTrades(portfolio portfolio_, int beginDate_, bool recalculateAll_);
-    void batchSaveExecutedTrades(portfolio portfolio_);
 
     void calculate(portfolio portfolio_, int beginDate_);
 

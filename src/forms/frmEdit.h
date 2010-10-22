@@ -3,13 +3,9 @@
 
 #include <QDialog>
 #include <QMessageBox>
-#include <QMimeData>
-#include <QApplication>
-#include <QClipboard>
 #include "frmEdit_UI.h"
 #include "portfolio.h"
 #include "objectKeyEditModel.h"
-#include "securityAAModel.h"
 
 class frmEdit : public QDialog
 {

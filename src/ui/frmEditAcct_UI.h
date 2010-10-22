@@ -10,7 +10,6 @@
 #include <QToolButton>
 #include <QComboBox>
 #include <QCheckBox>
-#include "account.h"
 
 class frmEditAcct_UI
 {

@@ -2,7 +2,6 @@
 #define OBJECTKEY_H
 
 #include <QString>
-#include <QMetaType>
 #include "objectBase.h"
 
 enum objectType {
@@ -38,9 +37,5 @@ public:
     bool operator!=(const objectKey &other_) const { return !(*this == other_); }
     bool operator<(const objectKey &other_) const;
 };
-
-//Q_DECLARE_METATYPE(objectKey);
-//inline uint qHash(const objectKey &key_) { return key_.type ^ key_.id; }
-
 
 #endif // OBJECTKEY_H

@@ -1,4 +1,7 @@
 #include "account.h"
+#include <QSqlQuery>
+#include "queries.h"
+#include "functions.h"
 
 bool account::operator==(const account &other_) const
 {

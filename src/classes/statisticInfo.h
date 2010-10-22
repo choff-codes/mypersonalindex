@@ -1,10 +1,7 @@
 #ifndef STATISTICINFO_H
 #define STATISTICINFO_H
 
-#include <qmath.h>
-#include <qnumeric.h>
 #include "historicalNAV.h"
-#include "tradeDateCalendar.h"
 
 class statisticInfo
 {

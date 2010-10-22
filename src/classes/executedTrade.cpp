@@ -1,4 +1,8 @@
 #include "executedTrade.h"
+#include <QSqlQuery>
+#include <QHash>
+#include <QVariant>
+#include "queries.h"
 
 bool executedTrade::operator==(const executedTrade &other_) const
 {
@@ -18,41 +22,33 @@ executedTrade executedTrade::load(const QSqlQuery &q_)
         );
 }
 
-void executedTradeMap::insert(int date_, const executedTrade &executedTrade_, bool toDatabase_)
+void executedTradeMap::insert(int date_, const executedTrade &executedTrade_)
 {
-    QMap<int, executedTrade>::iterator i = m_trades.insertMulti(date_, executedTrade_);
-    if (toDatabase_)
-        m_toDatabase.append(i);
+    m_trades.insertMulti(date_, executedTrade_);
 }
 
-void executedTradeMap::updateAssociatedTradeID(QHash<int, int> tradeIDMapping_)
+void executedTradeMap::updateAssociatedTradeID(const QHash<int, int> &tradeIDMapping_)
 {
     for(QMap<int, executedTrade>::iterator i = m_trades.begin(); i != m_trades.end(); ++i)
         if (tradeIDMapping_.contains(i.value().associatedTradeID))
             i.value().associatedTradeID = tradeIDMapping_.value(i.value().associatedTradeID);
 }
 
-void executedTradeMap::remove(const queries &dataSource_, int beginDate_)
+void executedTradeMap::remove(int beginDate_)
 {
     QMap<int, executedTrade>::iterator i = m_trades.lowerBound(beginDate_);
     while (i != m_trades.end())
             i = m_trades.erase(i);
-
-    if (this->hasParent())
-        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent, beginDate_);
 }
 
-void executedTradeMap::remove(const queries &dataSource_)
+void executedTradeMap::remove()
 {
     m_trades.clear();
-
-    if (this->hasParent())
-        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
 }
 
 QVariant executedTradeMap::data(int row_, int column_) const
 {
-    QMap<int, executedTrade>::iterator i = m_toDatabase.at(row_);
+    QMap<int, executedTrade>::const_iterator i = m_trades.constBegin() + row_;
     switch(column_)
     {
         case queries::portfolioSecurityTradeExecutionColumns_Date:
@@ -77,6 +73,6 @@ void executedTradeMap::insertBatch(queries dataSource_)
     if (!this->hasParent())
         return;
 
+    dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
     dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, this);
-    m_toDatabase.clear();
 }

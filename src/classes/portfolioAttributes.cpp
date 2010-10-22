@@ -1,4 +1,9 @@
 #include "portfolioAttributes.h"
+#include <QDate>
+#include <QMap>
+#include <QVariant>
+#include <QSqlQuery>
+#include "queries.h"
 
 portfolioAttributes::portfolioAttributes(int id_, const QString description_):
     objectKey(description_, id_),

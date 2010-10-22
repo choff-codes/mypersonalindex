@@ -1,4 +1,11 @@
 #include "calculatorTrade.h"
+#include "snapshot.h"
+#include "portfolio.h"
+#include "security.h"
+#include "calculatorNAV.h"
+#include "portfolioAttributes.h"
+#include "assetAllocation.h"
+#include "functions.h"
 
 void calculatorTrade::run(int beginDate_, const QList<portfolio> &portfolios_)
 {
@@ -14,7 +21,6 @@ void calculatorTrade::run(int beginDate_, const QList<portfolio> &portfolios_)
         calculate(p, beginDate_);
 
         removeDividendReinvestmentPlaceholders(p);
-        batchSaveExecutedTrades(p);
     }
 
 #ifdef CLOCKTIME
@@ -40,15 +46,9 @@ void calculatorTrade::clearExecutedTrades(portfolio portfolio_, int beginDate_, 
 {
     for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
         if (recalculateAll_)
-            sec.value().executedTrades.remove(m_dataSource);
+            sec.value().executedTrades.remove();
         else
-            sec.value().executedTrades.remove(m_dataSource, beginDate_);
-}
-
-void calculatorTrade::batchSaveExecutedTrades(portfolio portfolio_)
-{
-    for(QMap<int, security>::iterator sec = portfolio_.securities().begin(); sec != portfolio_.securities().end(); ++sec)
-        sec.value().executedTrades.insertBatch(m_dataSource);
+            sec.value().executedTrades.remove(beginDate_);
 }
 
 void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)

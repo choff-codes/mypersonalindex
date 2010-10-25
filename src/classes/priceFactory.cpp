@@ -28,7 +28,7 @@ historicalPrices priceFactory::getPrices(const QString &symbol_, const queries &
     return price;
 }
 
-void priceFactory::insertBatch(const queries &dataSource_)
+void priceFactory::save(const queries &dataSource_)
 {
     foreach (historicalPrices prices, m_historicalPricesCache.value(dataSource_.getDatabaseLocation()))
         prices.insertBatch(dataSource_);
@@ -57,7 +57,7 @@ historicalPrices priceFactory::getHistoricalPrices(const QString &symbol_, const
     return priceData;
 }
 
-void priceFactory::close(const queries &dataSource_)
+void priceFactory::close(const QString &location_)
 {
-    m_historicalPricesCache.remove(dataSource_.getDatabaseLocation());
+    m_historicalPricesCache.remove(location_);
 }

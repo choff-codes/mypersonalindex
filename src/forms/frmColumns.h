@@ -1,8 +1,11 @@
 #ifndef FRMCOLUMNS_H
 #define FRMCOLUMNS_H
 
-#include "frmColumns_UI.h"
+#include <QDialog>
+#include <QMap>
 
+class QListWidget;
+class frmColumns_UI;
 class frmColumns : public QDialog
 {
     Q_OBJECT
@@ -13,13 +16,15 @@ public:
     frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, const QString &windowTitle_,
         QDialog::DialogCode dialogCodeOnNoChange_, QWidget *parent_ = 0);
 
+    ~frmColumns();
+
 private:
     enum direction {
         direction_up = -1,
         direction_down = 1
     };
 
-    frmColumns_UI ui;
+    frmColumns_UI *ui;
     QList<int> m_selectedItems;
     QMap<int, QString> m_items;
     QDialog::DialogCode m_dialogCodeOnNoChange;
@@ -31,8 +36,8 @@ private slots:
     void accept();
     void moveDown() { move(direction_down); }
     void moveUp() { move(direction_up); }
-    void remove() { switchSelected(ui.addedItemsList, ui.removedItemsList); }
-    void add() { switchSelected(ui.removedItemsList, ui.addedItemsList); }
+    void remove();
+    void add();
 };
 
 #endif // FRMCOLUMNS_H

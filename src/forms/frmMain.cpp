@@ -1,12 +1,35 @@
 #include "frmMain.h"
+#include "frmMain_UI.h"
 #include <QCloseEvent>
+#include <QMessageBox>
+#include <QFileDialog>
 #include "frmEdit.h"
 #include "settingsFactory.h"
+#include "portfolioFactory.h"
+#include "priceFactory.h"
 
-frmMain::frmMain(QWidget *parent): QMainWindow(parent)
+frmMain::frmMain(QWidget *parent):
+    QMainWindow(parent),
+    ui(new frmMain_UI)
 {
-    ui.setupUI(this);
+    ui->setupUI(this);
     connectSlots();
+    loadSettings();
+}
+
+frmMain::~frmMain()
+{
+    delete ui;
+}
+
+void frmMain::connectSlots()
+{
+    connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(showPortfolioEdit()));
+    connect(ui->helpAbout, SIGNAL(triggered()), this, SLOT(about()));
+}
+
+void frmMain::loadSettings()
+{
     m_settings = settingsFactory().getSettings();
     if (m_settings.windowState != Qt::WindowActive)
     {
@@ -17,26 +40,41 @@ frmMain::frmMain(QWidget *parent): QMainWindow(parent)
     }
 }
 
-void frmMain::connectSlots()
-{
-    connect(ui.portfolioEdit, SIGNAL(triggered()), this, SLOT(showPortfolioEdit()));
-    connect(ui.helpAbout, SIGNAL(triggered()), this, SLOT(about()));
-}
-
 void frmMain::showPortfolioEdit()
 {
     frmEdit form(portfolio(), this);
     form.exec();
 }
 
+void frmMain::open()
+{
+    filePath = QFileDialog::getOpenFileName(this, "Open file...", QString(), "My Personal Index File (*.mpi)");
+
+    if (filePath.isEmpty())
+        return;
+
+    queries file(filePath);
+
+    if (file.getDatabaseVersion() == UNASSIGNED)
+        return;
+
+    priceFactory::close(m_fileLocation);
+    m_portfolios = portfolioFactory(file).getPortfolios(true);
+    m_fileLocation = filePath;
+}
+
 void frmMain::closeEvent(QCloseEvent */*event_*/)
+{
+    saveSettings();
+}
+
+void frmMain::saveSettings()
 {
     m_settings.windowSize = size();
     m_settings.windowLocation = pos();
     m_settings.windowState = isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState;
     m_settings.save();
 }
-
 
 void frmMain::about()
 {

@@ -182,7 +182,7 @@ QString trade::validate() const
                 return "Value cannot be negative!";
         }
 
-    if (functions::massage(this->price) < 0)
+    if (functions::massage(this->price) < 0 && functions::massage(UNASSIGNED - this->price) != 0)
         return "The price cannot be negative!";
 
     if (this->frequency == tradeDateCalendar::frequency_Once && this->startDate > this->date)

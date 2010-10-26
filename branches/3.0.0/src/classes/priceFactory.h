@@ -15,7 +15,7 @@ public:
 
     static historicalPrices getPrices(const QString &symbol_, const queries &dataSource_);
     static void save(const queries &dataSource_);
-    static void close(const QString &location_);
+    static void close();
 
 private:
     static QHash<QString, QHash<QString, historicalPrices> > m_historicalPricesCache;

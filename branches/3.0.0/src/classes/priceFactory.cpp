@@ -57,7 +57,7 @@ historicalPrices priceFactory::getHistoricalPrices(const QString &symbol_, const
     return priceData;
 }
 
-void priceFactory::close(const QString &location_)
+void priceFactory::close()
 {
-    m_historicalPricesCache.remove(location_);
+    m_historicalPricesCache.clear();
 }

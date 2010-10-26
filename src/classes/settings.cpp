@@ -84,9 +84,16 @@ void settings::load()
     splits = settings.value("splits", true).toBool();
 }
 
-void settings::addRecentFile(const QString &fileName_)
+void settings::addRecentFile(const QString &filePath_)
 {
+    int i = m_recentFiles.indexOf(filePath_);
+    if (i != -1)
+    {
+        m_recentFiles.takeAt(i);
+        m_recentFiles.prepend(filePath_);
+        return;
+    }
     if (m_recentFiles.count() > RECENT_FILES)
         m_recentFiles.removeLast();
-    m_recentFiles.append(fileName_);
+    m_recentFiles.prepend(filePath_);
 }

@@ -2,7 +2,6 @@
 
 void frmMain_UI::setupUI(QMainWindow *mainWindow)
 {    
-    mainWindow->setWindowTitle("My Personal Index");
     mainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
 
     menubar = new QMenuBar(mainWindow);
@@ -12,7 +11,6 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     fileNew = new QAction("New...", mainWindow);
     fileOpen = new QAction("Open...", mainWindow);
     fileRecent = new QMenu("Recent", file);
-    fileClose = new QAction("Close", mainWindow);
     fileSave = new QAction("Save", mainWindow);
     fileSaveAs = new QAction("Save As...", mainWindow);
     fileExit = new QAction("Exit", mainWindow);
@@ -51,8 +49,6 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     file->addAction(fileNew);
     file->addAction(fileOpen);
     file->addAction(fileRecent->menuAction());
-    file->addSeparator();
-    file->addAction(fileClose);
     file->addSeparator();
     file->addAction(fileSave);
     file->addAction(fileSaveAs);

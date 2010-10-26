@@ -48,7 +48,7 @@ public:
     void load();
 
     QStringList recentFiles() { return m_recentFiles; }
-    void addRecentFile(const QString &fileName_);
+    void addRecentFile(const QString &filePath_);
 
 private:
     QStringList m_recentFiles;

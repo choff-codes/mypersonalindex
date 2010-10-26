@@ -16,7 +16,6 @@ public:
     QAction *fileNew;
     QAction *fileOpen;
     QMenu *fileRecent;
-    QAction *fileClose;
     QAction *fileSave;
     QAction *fileSaveAs;
     QAction *fileExit;

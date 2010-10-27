@@ -28,6 +28,7 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
 
     connectSlots();
     loadPortfolio();
+    tabChange(tab_portfolio);
 }
 
 frmEdit::~frmEdit()
@@ -278,8 +279,8 @@ void frmEdit::loadTrade()
     ui->tradeForm.freqCmb->setCurrentIndex(ui->tradeForm.freqCmb->findData(t->frequency));
     if (functions::massage(t->price) >= 0)
     {
-        ui->tradeForm.priceTxt->setText(QString::number(t->price, 'f', 4));
         ui->tradeForm.priceChk->setChecked(true);
+        ui->tradeForm.priceTxt->setText(QString::number(t->price, 'f', 4));
     }
     else
         ui->tradeForm.priceChk->setChecked(false);

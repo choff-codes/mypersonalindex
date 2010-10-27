@@ -26,63 +26,71 @@ public:
         attributes.save(dataSource_);
 
         // save asset allocation
-        for(QMap<int, assetAllocation>::iterator i = assetAllocations.begin(); i != assetAllocations.end(); ++i)
+        QList<assetAllocation> aaList = assetAllocations.values();
+        assetAllocations.clear();
+
+        for(QList<assetAllocation>::iterator i = aaList.begin(); i != aaList.end(); ++i)
         {
-            int origID = i.value().id;
+            int origID = i->id;
+            i->parent = attributes.id;
+            i->save(dataSource_);
+            assetAllocations.insert(i->id, *i);
 
-            i.value().parent = attributes.id;
-            i.value().save(dataSource_);
-
-            if (origID > UNASSIGNED)
-                continue;
-
-            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++i)
-                x.value().targets.updateAssetAllocationID(origID, i.value().id);
+            if (origID < UNASSIGNED)
+                for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++x)
+                    x.value().targets.updateAssetAllocationID(origID, i->id);
         }
+        aaList.clear();
 
         // save accounts
-        for(QMap<int, account>::iterator i = accounts.begin(); i != accounts.end(); ++i)
+        QList<account> acctList = accounts.values();
+        accounts.clear();
+        for(QList<account>::iterator i = acctList.begin(); i != acctList.end(); ++i)
         {
-            int origID = i.value().id;
+            int origID = i->id;
+            i->parent = attributes.id;
+            i->save(dataSource_);
+            accounts.insert(i->id, *i);
 
-            i.value().parent = attributes.id;
-            i.value().save(dataSource_);
-
-            if (origID > UNASSIGNED)
-                continue;
-
-            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++i)
-                if (x.value().account == origID)
-                    x.value().account = i.value().id;
+            if (origID < UNASSIGNED)
+                for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++x)
+                    if (x.value().account == origID)
+                        x.value().account = i->id;
         }
+        acctList.clear();
 
         QHash<int, int> tradeIDMapping;
 
         // save securities
-        for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
+        QList<security> secList = securities.values();
+        securities.clear();
+        for(QList<security>::iterator i = secList.begin(); i != secList.end(); ++i)
         {
-            i.value().parent = attributes.id;
-            i.value().save(dataSource_);
+            i->parent = attributes.id;
+            i->save(dataSource_);
 
             // save AA targets
-            i.value().targets.parent = i.value().id;
-            i.value().targets.insertBatch(dataSource_);
+            i->targets.parent = i->id;
+            i->targets.insertBatch(dataSource_);
 
             // save trades (keep map of old id -> new id for executed trades associated trade id)
-            for(QMap<int, trade>::iterator x = i.value().trades.begin(); x != i.value().trades.end(); ++x)
+            QList<trade> tradeList = i->trades.values();
+            i->trades.clear();
+            for(QList<trade>::iterator x = tradeList.begin(); x != tradeList.end(); ++x)
             {
-                int origID = x.value().id;
-
-                x.value().parent = i.value().id;
-                x.value().save(dataSource_);
-
+                int origID = x->id;
+                x->parent = i->id;
+                x->save(dataSource_);
+                i->trades.insert(x->id, *x);
                 if (origID < UNASSIGNED)
-                    tradeIDMapping.insert(origID, x.value().id);
+                    tradeIDMapping.insert(origID, x->id);
             }
 
             // set executed trades parent (save after all trades are saved)
-            i.value().executedTrades.parent = i.value().id;
+            i->executedTrades.parent = i->id;
+            securities.insert(i->id, *i);
         }
+        secList.clear();
 
         // save executed trades (need all securities and trades to be saved first to properly set associatedTradeID)
         for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)

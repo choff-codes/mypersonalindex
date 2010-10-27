@@ -24,6 +24,7 @@ private slots:
     bool saveAs();
     void newFile();
     void recentFileSelected();
+    void addPortfolio();
 
 private:
     frmMain_UI *ui;

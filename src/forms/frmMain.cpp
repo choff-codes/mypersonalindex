@@ -8,6 +8,7 @@
 #include "settingsFactory.h"
 #include "portfolioFactory.h"
 #include "priceFactory.h"
+#include "portfolioAttributes.h"
 
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
@@ -33,6 +34,7 @@ void frmMain::connectSlots()
     connect(ui->fileSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->fileSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(ui->fileNew, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(ui->portfolioAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
 }
 
 void frmMain::loadSettings()
@@ -55,8 +57,12 @@ void frmMain::showPortfolioEdit()
 
 void frmMain::newFile()
 {
-    if (maybeSave())
-        setCurrentFile("");
+    if (!maybeSave())
+        return;
+
+    m_portfolios.clear();
+    priceFactory::close();
+    setCurrentFile("");
 }
 
 bool frmMain::maybeSave()
@@ -95,23 +101,30 @@ bool frmMain::saveAs()
 
 bool frmMain::saveFile(const QString &filePath_)
 {
-    if (windowFilePath().isEmpty())
+    if (windowFilePath() != filePath_)
     {
-        if (!QFile::copy("MPI.sqlite", filePath_))
-        {
-            QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
+        if (QFile::exists(filePath_) && !QFile::remove(filePath_)) {
+            QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not overwrite the existing file %1!").arg(filePath_));
             return false;
         }
-    }
-    else
-    {
-        if (windowFilePath() != filePath_)
+
+        if (windowFilePath().isEmpty()) // new file
+        {
+            if (!QFile::copy("MPI.sqlite", filePath_))
+            {
+                QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
+                return false;
+            }
+        }
+        else
+        {
             if (!QFile::copy(windowFilePath(), filePath_))
             {
                 QMessageBox::warning(this, QCoreApplication::applicationName(),
                     QString("Could not save to %1 OR the original file was deleted at %2!").arg(filePath_, windowFilePath()));
                 return false;
             }
+        }
     }
 
     queries file(filePath_);
@@ -122,11 +135,18 @@ bool frmMain::saveFile(const QString &filePath_)
         return false;
     }
 
-    foreach(portfolio p, m_portfolios)
-        p.save(file);
+    QList<portfolio> portfolioList = m_portfolios.values();
+    m_portfolios.clear();
+    for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
+    {
+        i->save(file);
+        m_portfolios.insert(i->attributes().id, *i);
+    }
 
     priceFactory::save(file);
     setCurrentFile(filePath_);
+    m_settings.addRecentFile(filePath_);
+    updateRecentFileActions();
     return true;
 }
 
@@ -198,6 +218,19 @@ void frmMain::recentFileSelected()
     QAction *action = qobject_cast<QAction*>(sender());
     if (action && maybeSave())
         loadFile(action->text());
+}
+
+void frmMain::addPortfolio()
+{
+    frmEdit f(portfolio(portfolio::getOpenIdentity()), this);
+    if (f.exec() != QDialog::Accepted)
+        return;
+
+    setWindowModified(true);
+    portfolio p = f.getPortfolio();
+    m_portfolios.insert(p.attributes().id, p);
+    ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
+    ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
 }
 
 void frmMain::about()

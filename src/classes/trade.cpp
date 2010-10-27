@@ -196,11 +196,12 @@ QString trade::validate() const
 
 QString trade::displayText() const
 {
-    return QString("%1 %2, %3 on %4%5%6").arg
+    return QString("%1 %2, %3 at %4 on %5%6%7").arg
         (
             tradeTypeToString(this->action),
             valueToString(this->action, this->value),
             frequencyToString(this->frequency).toLower(),
+            functions::massage(this->price) < 0 ? "market price" : functions::doubleToCurrency(this->price),
             dateToString(this->frequency, this->date),
             this->startDate == 0 ? QString() : QString(", starting on %1").arg(QDate::fromJulianDay(this->startDate).toString(Qt::SystemLocaleShortDate)),
             this->endDate == 0 ? QString() : QString(", ending on %1").arg(QDate::fromJulianDay(this->endDate).toString(Qt::SystemLocaleShortDate))

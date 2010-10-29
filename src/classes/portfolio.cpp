@@ -22,15 +22,27 @@ public:
     {
         // Note: order of saving matters!
 
+        // portfolio deleted?
+        if (attributes.deleted)
+        {
+            attributes.remove(dataSource_);
+            return;
+        }
+
         // save portfolio
         attributes.save(dataSource_);
 
         // save asset allocation
         QList<assetAllocation> aaList = assetAllocations.values();
         assetAllocations.clear();
-
         for(QList<assetAllocation>::iterator i = aaList.begin(); i != aaList.end(); ++i)
         {
+            if (i->deleted)
+            {
+                i->remove(dataSource_);
+                continue;
+            }
+
             int origID = i->id;
             i->parent = attributes.id;
             i->save(dataSource_);
@@ -47,6 +59,12 @@ public:
         accounts.clear();
         for(QList<account>::iterator i = acctList.begin(); i != acctList.end(); ++i)
         {
+            if (i->deleted)
+            {
+                i->remove(dataSource_);
+                continue;
+            }
+
             int origID = i->id;
             i->parent = attributes.id;
             i->save(dataSource_);
@@ -59,6 +77,7 @@ public:
         }
         acctList.clear();
 
+        // keep track of original trade id -> new trade id for executed trades associated trade id
         QHash<int, int> tradeIDMapping;
 
         // save securities
@@ -66,6 +85,12 @@ public:
         securities.clear();
         for(QList<security>::iterator i = secList.begin(); i != secList.end(); ++i)
         {
+            if (i->deleted)
+            {
+                i->remove(dataSource_);
+                continue;
+            }
+
             i->parent = attributes.id;
             i->save(dataSource_);
 
@@ -73,11 +98,17 @@ public:
             i->targets.parent = i->id;
             i->targets.insertBatch(dataSource_);
 
-            // save trades (keep map of old id -> new id for executed trades associated trade id)
+            // save trades
             QList<trade> tradeList = i->trades.values();
             i->trades.clear();
             for(QList<trade>::iterator x = tradeList.begin(); x != tradeList.end(); ++x)
             {
+                if (x->deleted)
+                {
+                    x->remove(dataSource_);
+                    continue;
+                }
+
                 int origID = x->id;
                 x->parent = i->id;
                 x->save(dataSource_);

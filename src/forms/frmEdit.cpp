@@ -43,6 +43,7 @@ void frmEdit::connectSlots()
     connect(ui->okCancelBtn, SIGNAL(accepted()), this, SLOT(accept()));
     connect(ui->okCancelBtn->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(save()));
     connect(ui->okCancelBtn->button(QDialogButtonBox::Apply), SIGNAL(clicked()), this, SLOT(apply()));
+    connect(ui->okCancelBtn, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui->tabs, SIGNAL(currentChanged(int)), this, SLOT(save()));
     connect(ui->tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
     connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
@@ -61,6 +62,7 @@ void frmEdit::connectSlots()
     connect(ui->securityForm.aaBtnDelete, SIGNAL(clicked()), this, SLOT(securityDeleteAA()));
     connect(ui->tradeAdd, SIGNAL(clicked()), this, SLOT(add()));
     connect(ui->tradeDelete, SIGNAL(clicked()), this, SLOT(remove()));
+    connect(ui->tradeFilterCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(save()));
     connect(ui->tradeFilterCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeSecurityFilterChange()));
     connect(ui->tradeForm.startingChk, SIGNAL(toggled(bool)), ui->tradeForm.startingDateEdit, SLOT(setEnabled(bool)));
     connect(ui->tradeForm.endingChk, SIGNAL(toggled(bool)), ui->tradeForm.endingDateEdit, SLOT(setEnabled(bool)));
@@ -109,6 +111,11 @@ void frmEdit::apply()
 void frmEdit::tabChange(int currentIndex_)
 {
     m_currentTab = (tab)currentIndex_;
+    // prevent signals from firing on focus
+    ui->aaList->setDisabled(true);
+    ui->acctList->setDisabled(true);
+    ui->securityList->setDisabled(true);
+    ui->tradeList->setDisabled(true);
 
     switch(m_currentTab)
     {
@@ -126,27 +133,20 @@ void frmEdit::tabChange(int currentIndex_)
             break;
     }
 
-    objectKeyEditModel* model = currentModel();
-    QListView *listView = currentListView();
-    if (!model || !listView)
-    {
-        m_currentItem = 0;
+    if (!isValidCurrentModel())
         return;
-    }
-    m_currentItem = model->get(listView->currentIndex().row());
+
+    currentListView()->setEnabled(true);
+    m_currentItem = currentModel()->get(currentListView()->currentIndex().row());
 }
 
 void frmEdit::listChange(const QModelIndex &current_, const QModelIndex &previous_)
 {
-    objectKeyEditModel* model = currentModel();
-    QListView *listView = currentListView();
-    if (!model || !listView)
-    {
-        m_currentItem = 0;
+    if (!isValidCurrentModel())
         return;
-    }
-    model->refresh(previous_);
-    m_currentItem = model->get(current_.row());
+
+    currentModel()->refresh(previous_);
+    m_currentItem = currentModel()->get(current_.row());
     load();
 }
 
@@ -340,9 +340,7 @@ void frmEdit::load()
 
 void frmEdit::add()
 {
-    objectKeyEditModel* model = currentModel();
-    QListView *listView = currentListView();
-    if (!model || !listView)
+    if (!isValidCurrentModel())
         return;
 
     objectKey *key;
@@ -367,33 +365,31 @@ void frmEdit::add()
         case tab_portfolio:
             return;
     }
-    model->insert(key);
-    listView->setCurrentIndex(model->index(model->rowCount(QModelIndex()) - 1));
+    currentModel()->insert(key);
+    currentListView()->setCurrentIndex(currentModel()->index(currentModel()->rowCount(QModelIndex()) - 1));
 }
 
 void frmEdit::remove()
 {
-    objectKeyEditModel* model = currentModel();
-    QListView *listView = currentListView();
-    if (!model || !listView || !m_currentItem)
+    if (!isValidCurrentModel() || !m_currentItem)
         return;
 
     objectKey *key = m_currentItem;
 
-    model->remove(key);
+    currentModel()->remove(key);
     switch(m_currentTab)
     {
         case tab_account:
-            m_portfolio.accounts().remove(key->id);
+            m_portfolio.accounts()[key->id].deleted = true;
             break;
         case tab_assetAllocation:
-            m_portfolio.assetAllocations().remove(key->id);
+            m_portfolio.assetAllocations()[key->id].deleted = true;
             break;
         case tab_security:
-            m_portfolio.securities().remove(key->id);
+            m_portfolio.securities()[key->id].deleted = true;
             break;
         case tab_trade:
-            m_portfolio.securities()[key->parent].trades.remove(key->id);
+            m_portfolio.securities()[key->parent].trades[key->id].deleted = true;
             break;
         case tab_portfolio:
             break;
@@ -436,28 +432,13 @@ QListView* frmEdit::currentListView()
     return 0;
 }
 
-bool frmEdit::validate()
+bool frmEdit::isValidCurrentModel()
 {
-    QString message = m_portfolio.attributes().validate();
-    if (!message.isEmpty())
+    if (!currentModel() || !currentListView())
     {
-        QMessageBox::critical(this, "Portfolio validation error", message);
-        ui->tabs->setCurrentIndex(tab_portfolio);
+        m_currentItem = 0;
         return false;
     }
-
-    if (!validateObjectKeys(m_portfolio.accounts(), tab_account, "Account validation error"))
-        return false;
-
-    if (!validateObjectKeys(m_portfolio.assetAllocations(), tab_assetAllocation, "Asset class validation error"))
-        return false;
-
-    if (!validateObjectKeys(m_portfolio.securities(), tab_security, "Security validation error"))
-        return false;
-
-    if (!validateTrades())
-        return false;
-
     return true;
 }
 
@@ -479,7 +460,11 @@ void frmEdit::populateSecurityTab()
     ui->securityForm.aaCmb->clear();
     // don't use foreach, weird stuff happens with the existing references
     for(QMap<int, assetAllocation>::const_iterator i = m_portfolio.assetAllocations().begin(); i != m_portfolio.assetAllocations().end(); ++i)
+    {
+        if (i.value().deleted)
+            continue;
         ui->securityForm.aaCmb->addItem(i.value().displayText(), i.value().id);
+    }
     ui->securityForm.aaCmb->model()->sort(0);
     if (ui->securityForm.aaCmb->count() != 0)
         ui->securityForm.aaCmb->setCurrentIndex(0);
@@ -488,7 +473,11 @@ void frmEdit::populateSecurityTab()
     ui->securityForm.acctCmb->addItem("", UNASSIGNED);
     // don't use foreach, weird stuff happens with the existing references
     for(QMap<int, account>::const_iterator i = m_portfolio.accounts().begin(); i != m_portfolio.accounts().end(); ++i)
+    {
+        if (i.value().deleted)
+            continue;
         ui->securityForm.acctCmb->addItem(i.value().displayText(), i.value().id);
+    }
     ui->securityForm.acctCmb->model()->sort(0);
 }
 
@@ -496,7 +485,6 @@ void frmEdit::populateTradeTab()
 {
     int currentSecurityFilter = currentTradeSecurityID();
     ui->tradeFilterCmb->blockSignals(true);
-
     ui->tradeFilterCmb->clear();
     ui->tradeForm.cashCmb->clear();
 
@@ -505,6 +493,9 @@ void frmEdit::populateTradeTab()
     // don't use foreach, weird stuff happens with the existing references
     for(QMap<int, security>::const_iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
     {
+        if (i.value().deleted)
+            continue;
+
         QString item = functions::formatForComboBox(i.value().displayText(), i.value().note);
         ui->tradeFilterCmb->addItem(item, i.value().id);
         ui->tradeForm.cashCmb->addItem(item, i.value().id);
@@ -514,13 +505,10 @@ void frmEdit::populateTradeTab()
 
     int selectRow = ui->tradeFilterCmb->findData(currentSecurityFilter);
     if (selectRow != -1)
-        ui->tradeFilterCmb->setCurrentIndex(selectRow == -1 ? 0 : selectRow);
+        ui->tradeFilterCmb->setCurrentIndex(selectRow);
     else
-    {
-        if (ui->tradeFilterCmb->count() != 0)
-            ui->tradeFilterCmb->setCurrentIndex(0);
         tradeSecurityFilterChange();
-    }
+
     ui->tradeFilterCmb->blockSignals(false);
 }
 
@@ -529,21 +517,23 @@ void frmEdit::tradeSecurityFilterChange()
     int securityID = currentTradeSecurityID();
     if (securityID == -1)
     {
-        QAbstractItemModel *model = currentModel();
-        ui->tradeList->setModel(0);
-        delete model;
+        delete currentModel();
         ui->tradeFormWidget->setEnabled(false);
         return;
     }
 
     QAbstractItemModel *model = currentModel();
     ui->tradeList->setModel(new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades), ui->tradeList));
-    connect(ui->tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
-    connect(ui->tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
     delete model;
 
     if (currentModel()->rowCount(QModelIndex()) > 0)
+    {
         ui->tradeList->setCurrentIndex(currentModel()->index(0, 0));
+        listChange(ui->tradeList->model()->index(0, 0), QModelIndex());
+    }
+
+    connect(ui->tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
+    connect(ui->tradeList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
 }
 
 void frmEdit::copy()
@@ -686,21 +676,71 @@ template <class T>
 QList<objectKey*> frmEdit::mapToList(QMap<int, T> &map_)
 {
     QList<objectKey*> list;
-    for(typename QMap<int, T>::iterator i = map_.begin(); i != map_.end(); ++i)
-        list.append(&i.value());
+    if (map_.isEmpty())
+        return list;
+
+    typename QMap<int, T>::iterator i = map_.end();
+    do
+    {
+        --i;
+        if (i.value().deleted)
+            continue;
+
+        if (i.value().id < 0)
+            list.append(&i.value());
+        else
+            list.prepend(&i.value());
+
+    } while (i != map_.begin());
+
     return list;
 }
 
+// implementations
 template QList<objectKey*> frmEdit::mapToList(QMap<int, account> &map_);
 template QList<objectKey*> frmEdit::mapToList(QMap<int, assetAllocation> &map_);
 template QList<objectKey*> frmEdit::mapToList(QMap<int, security> &map_);
 template QList<objectKey*> frmEdit::mapToList(QMap<int, trade> &map_);
+
+bool frmEdit::validate()
+{
+    QString message = m_portfolio.attributes().validate();
+    if (!message.isEmpty())
+    {
+        QMessageBox::critical(this, "Portfolio validation error", message);
+        ui->tabs->setCurrentIndex(tab_portfolio);
+        return false;
+    }
+
+    if (!validateObjectKeys(m_portfolio.accounts(), tab_account, "Account validation error"))
+        return false;
+
+    if (!validateObjectKeys(m_portfolio.assetAllocations(), tab_assetAllocation, "Asset class validation error"))
+        return false;
+
+    if (!validateObjectKeys(m_portfolio.securities(), tab_security, "Security validation error"))
+        return false;
+
+    for(QMap<int, security>::iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
+    {
+        if (i.value().deleted)
+            continue;
+
+        if (!validateObjectKeys(i.value().trades, tab_trade, "Trade validation error"))
+            return false;
+    }
+
+    return true;
+}
 
 template <class T>
 bool frmEdit::validateObjectKeys(QMap<int, T> &map_, tab tab_, const QString &title_)
 {
     for(typename QMap<int, T>::iterator i = map_.begin(); i != map_.end(); ++i)
     {
+        if (i.value().deleted)
+            continue;
+
         QString error = i.value().validate();
         if (error.isEmpty())
             continue;
@@ -708,12 +748,14 @@ bool frmEdit::validateObjectKeys(QMap<int, T> &map_, tab tab_, const QString &ti
         QMessageBox::critical(this, title_, error);
         ui->tabs->setCurrentIndex(tab_);
 
-        objectKeyEditModel* model = currentModel();
-        QListView *listView = currentListView();
-        if (!model || !listView)
+        //special case
+        if (tab_ == tab_trade)
+            ui->tradeFilterCmb->setCurrentIndex(ui->tradeFilterCmb->findData(i.value().parent));
+
+        if (!isValidCurrentModel())
             return false;
 
-        listView->setCurrentIndex(model->find(&i.value()));
+        currentListView()->setCurrentIndex(currentModel()->find(&i.value()));
         return false;
     }
     return true;
@@ -722,27 +764,4 @@ bool frmEdit::validateObjectKeys(QMap<int, T> &map_, tab tab_, const QString &ti
 template bool frmEdit::validateObjectKeys(QMap<int, account> &map_, tab tab_, const QString &title_);
 template bool frmEdit::validateObjectKeys(QMap<int, assetAllocation> &map_, tab tab_, const QString &title_);
 template bool frmEdit::validateObjectKeys(QMap<int, security> &map_, tab tab_, const QString &title_);
-
-bool frmEdit::validateTrades()
-{
-    for(QMap<int, security>::iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
-        for(QMap<int, trade>::iterator x = i.value().trades.begin(); x != i.value().trades.end(); ++x)
-        {
-            QString error = x.value().validate();
-            if (error.isEmpty())
-                continue;
-
-            QMessageBox::critical(this, "Trade validation error", error);
-            ui->tabs->setCurrentIndex(tab_trade);
-            ui->tradeFilterCmb->setCurrentIndex(ui->tradeFilterCmb->findData(i.value().id));
-
-            objectKeyEditModel* model = currentModel();
-            QListView *listView = currentListView();
-            if (!model || !listView)
-                return false;
-
-            listView->setCurrentIndex(model->find(&x.value()));
-            return false;
-        }
-    return true;
-}
+template bool frmEdit::validateObjectKeys(QMap<int, trade> &map_, tab tab_, const QString &title_);

@@ -24,7 +24,7 @@ public:
     bool operator==(const objectBase &other_) const { return this->parent == other_.parent; }
     bool operator!=(const objectBase &other_) const { return !(*this == other_); }
 
-    bool hasParent() const { return parent != UNASSIGNED; }
+    bool hasParent() const { return parent > UNASSIGNED; }
 };
 
 #endif // OBJECTBASE_H

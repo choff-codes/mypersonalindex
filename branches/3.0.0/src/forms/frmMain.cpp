@@ -12,7 +12,8 @@
 
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
-    ui(new frmMain_UI)
+    ui(new frmMain_UI),
+    m_currentPortfolio(0)
 {
     ui->setupUI(this);
     connectSlots();
@@ -28,13 +29,16 @@ frmMain::~frmMain()
 
 void frmMain::connectSlots()
 {
-    connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(showPortfolioEdit()));
     connect(ui->helpAbout, SIGNAL(triggered()), this, SLOT(about()));
     connect(ui->fileOpen, SIGNAL(triggered()), this, SLOT(open()));
     connect(ui->fileSave, SIGNAL(triggered()), this, SLOT(save()));
     connect(ui->fileSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
     connect(ui->fileNew, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(ui->fileExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(ui->portfolioAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
+    connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
+    connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
+    connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioChange(int)));
 }
 
 void frmMain::loadSettings()
@@ -47,12 +51,6 @@ void frmMain::loadSettings()
         if (m_settings.windowState != Qt::WindowNoState)
             this->setWindowState(this->windowState() | m_settings.windowState);
     }
-}
-
-void frmMain::showPortfolioEdit()
-{
-    frmEdit form(portfolio(), this);
-    form.exec();
 }
 
 void frmMain::newFile()
@@ -135,18 +133,22 @@ bool frmMain::saveFile(const QString &filePath_)
         return false;
     }
 
+    int currentID = m_currentPortfolio ? m_currentPortfolio->attributes().id : UNASSIGNED;
     QList<portfolio> portfolioList = m_portfolios.values();
     m_portfolios.clear();
     for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
     {
+        int id = i->attributes().id;
         i->save(file);
         m_portfolios.insert(i->attributes().id, *i);
+        if (id == currentID)
+            currentID = i->attributes().id;
     }
-
     priceFactory::save(file);
     setCurrentFile(filePath_);
     m_settings.addRecentFile(filePath_);
     updateRecentFileActions();
+    refreshPortfolioCmb(currentID == UNASSIGNED ? -1 : currentID);
     return true;
 }
 
@@ -173,11 +175,36 @@ void frmMain::loadFile(const QString &filePath_)
         return;
     }
 
+    ui->portfolioDropDownCmb->clear();
+
     priceFactory::close();
     m_portfolios = portfolioFactory(file).getPortfolios(true);
+    refreshPortfolioCmb();
     setCurrentFile(filePath_);
     m_settings.addRecentFile(filePath_);
     updateRecentFileActions();
+}
+
+void frmMain::refreshPortfolioCmb(int id)
+{
+    ui->portfolioDropDownCmb->blockSignals(true);
+    foreach(const portfolio &p, m_portfolios)
+    {
+        if (p.attributes().deleted)
+            continue;
+
+        ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
+    }
+
+    int index = ui->portfolioDropDownCmb->findData(id);
+    if (index == -1 && ui->portfolioDropDownCmb->count() != 0)
+        index = 0;
+
+    if (index != -1)
+        ui->portfolioDropDownCmb->setCurrentIndex(index);
+
+    portfolioChange(ui->portfolioDropDownCmb->currentIndex());
+    ui->portfolioDropDownCmb->blockSignals(false);
 }
 
 void frmMain::setCurrentFile(const QString &filePath_)
@@ -190,9 +217,15 @@ void frmMain::setCurrentFile(const QString &filePath_)
         setWindowTitle(QString("%1[*] - %2").arg(QFileInfo(filePath_).fileName(), QCoreApplication::applicationName()));
 }
 
-void frmMain::closeEvent(QCloseEvent */*event_*/)
+void frmMain::closeEvent(QCloseEvent *event_)
 {
-    saveSettings();
+    if (maybeSave())
+    {
+        event_->accept();
+        saveSettings();
+    }
+    else
+        event_->ignore();
 }
 
 void frmMain::saveSettings()
@@ -222,15 +255,55 @@ void frmMain::recentFileSelected()
 
 void frmMain::addPortfolio()
 {
-    frmEdit f(portfolio(portfolio::getOpenIdentity()), this);
-    if (f.exec() != QDialog::Accepted)
+    portfolio p(portfolio::getOpenIdentity());
+    frmEdit f(p, this);
+    f.exec();
+    if (p == f.getPortfolio())
         return;
 
     setWindowModified(true);
-    portfolio p = f.getPortfolio();
-    m_portfolios.insert(p.attributes().id, p);
-    ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
+    portfolio newPortfolio = f.getPortfolio();
+    m_portfolios.insert(newPortfolio.attributes().id, newPortfolio);
+    ui->portfolioDropDownCmb->addItem(newPortfolio.attributes().description, newPortfolio.attributes().id);
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
+}
+
+void frmMain::editPortfolio()
+{
+    if (!m_currentPortfolio)
+        return;
+
+    frmEdit f(*m_currentPortfolio, this);
+    f.exec();
+    if (*m_currentPortfolio == f.getPortfolio())
+        return;
+
+    setWindowModified(true);;
+    m_portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();;
+    m_currentPortfolio = &m_portfolios[m_currentPortfolio->attributes().id];
+    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
+}
+
+void frmMain::deletePortfolio()
+{
+    if (!m_currentPortfolio)
+        return;
+
+    if (QMessageBox::question(this, QCoreApplication::applicationName(), QString("Are you sure you want to delete portfolio %1?")
+        .arg(m_currentPortfolio->attributes().description), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+        return;
+
+    setWindowModified(true);
+    m_currentPortfolio->attributes().deleted = true;
+    ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
+}
+
+void frmMain::portfolioChange(int currentIndex_)
+{
+    if (currentIndex_ == -1)
+        m_currentPortfolio = 0;
+    else
+        m_currentPortfolio = &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()];
 }
 
 void frmMain::about()

@@ -30,14 +30,14 @@ CREATE VIEW "PortfolioSecurityAAView" AS SELECT aa.*, s.PortfolioID FROM Portfol
 CREATE VIEW "PortfolioSecurityTradeView" AS SELECT trades.*, s.PortfolioID FROM PortfolioSecurityTrade trades INNER JOIN PortfolioSecurity s ON trades.SecurityID = s.ID
 
 CREATE TRIGGER "PortfolioTrigger" BEFORE DELETE ON Portfolio FOR EACH ROW BEGIN
-DELETE FROM PortfolioSecurity WHERE PortfolioSecurity.PortfolioID = old.ID;
-DELETE FROM PortfolioAA WHERE PortfolioAA.PortfolioID = old.ID;
-DELETE FROM PortfolioAcctount WHERE PortfolioAccount.PortfolioID = old.ID; END
+DELETE FROM PortfolioSecurity WHERE PortfolioID = old.ID;
+DELETE FROM PortfolioAA WHERE PortfolioID = old.ID;
+DELETE FROM PortfolioAccount WHERE PortfolioID = old.ID; END
 
 CREATE TRIGGER "PortfolioSecurityTrigger" BEFORE DELETE ON PortfolioSecurity FOR EACH ROW BEGIN
-DELETE FROM PortfolioSecurityAA WHERE PortfolioSecurityAA.SecurityID = old.ID;
-DELETE FROM PortfolioSecurityTrade WHERE PortfolioSecurityTrade.SecurityID = old.ID;
-DELETE FROM PortfolioSecurityTradeExecution WHERE PortfolioSecurityTrade.SecurityID = old.ID; END
+DELETE FROM PortfolioSecurityAA WHERE SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTrade WHERE SecurityID = old.ID;
+DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END
 
 CREATE INDEX "HistoricalPriceIndex" ON "HistoricalPrice" ("Symbol" ASC)
 

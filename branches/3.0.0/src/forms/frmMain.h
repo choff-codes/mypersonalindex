@@ -17,7 +17,6 @@ public:
     ~frmMain();
 
 private slots:
-    void showPortfolioEdit();
     void about();
     void open();
     bool save();
@@ -25,11 +24,14 @@ private slots:
     void newFile();
     void recentFileSelected();
     void addPortfolio();
+    void editPortfolio();
+    void deletePortfolio();
+    void portfolioChange(int currentIndex_);
 
 private:
     frmMain_UI *ui;
     QMap<int, portfolio> m_portfolios;
-    portfolio m_portfolio;
+    portfolio* m_currentPortfolio;
     settings m_settings;
 
     void connectSlots();
@@ -41,6 +43,7 @@ private:
     bool maybeSave();
     bool saveFile(const QString &filePath_);
     void updateRecentFileActions();
+    void refreshPortfolioCmb(int id = -1);
 };
 
 #endif // FRMMAIN_H

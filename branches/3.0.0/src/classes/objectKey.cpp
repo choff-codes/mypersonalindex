@@ -5,6 +5,7 @@ bool objectKey::operator==(const objectKey &other_) const
     return objectBase::operator ==(other_)
             && this->description == other_.description
             && this->id == other_.id
+            && this->deleted == other_.deleted
             && this->type() == other_.type();
 }
 

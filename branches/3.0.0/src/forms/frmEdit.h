@@ -58,6 +58,7 @@ private:
 
     void connectSlots();
 
+    bool isValidCurrentModel();
     objectKeyEditModel* currentModel();
     QListView* currentListView();
     int currentTradeSecurityID();
@@ -79,7 +80,6 @@ private:
     QList<objectKey*> mapToList(QMap<int, T> &map_);
 
     bool validate();
-    bool validateTrades();
 
     template <class T>
     bool validateObjectKeys(QMap<int, T> &map_, tab tab_, const QString &title_);

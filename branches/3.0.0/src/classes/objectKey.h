@@ -18,16 +18,18 @@ class objectKey: public objectBase
 public:
     QString description;
     int id;
+    bool deleted;
 
     objectKey(const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectBase(parent_),
         description(description_),
-        id(id_)
+        id(id_),
+        deleted(false)
     {}
 
     virtual objectType type() const = 0;
     void clearIdentity() { id = UNASSIGNED; }
-    bool hasIdentity() const { return this->id != UNASSIGNED; }
+    bool hasIdentity() const { return this->id > UNASSIGNED; }
 
     // return an empty string if there are no validation errors, otherwise return the error message
     virtual QString validate() const = 0;

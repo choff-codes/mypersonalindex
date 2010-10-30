@@ -27,10 +27,13 @@ public:
         {
             case historicalPrices::type_price:
                 it = prices.insert(date_, value_);
+                break;
             case historicalPrices::type_dividend:
                 it = dividends.insert(date_, value_);
+                break;
             case historicalPrices::type_split:
                 it = splits.insert(date_, value_);
+                break;
         }
         if (toDatabase_)
             m_toDatabase.append(priceKey(type_, it));
@@ -56,7 +59,7 @@ public:
             case queries::historicalPriceColumns_Symbol:
                 return symbol;
             case queries::historicalPriceColumns_Type:
-                return m_toDatabase.at(row_).keyType;
+                return (int)m_toDatabase.at(row_).keyType;
             case queries::historicalPriceColumns_Value:
                 return m_toDatabase.at(row_).keyIterator.value();
         }
@@ -185,7 +188,7 @@ int historicalPrices::beginDate(type type_) const
     return 0;
 }
 
-QString historicalPrices::symbol() const
+QString& historicalPrices::symbol() const
 {
     return d->symbol;
 }

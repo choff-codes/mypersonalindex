@@ -201,7 +201,7 @@ QStringList portfolio::symbols() const
 {
     QStringList list;
     foreach(const security &s, d->securities)
-        if (!s.cashAccount)
+        if (!s.cashAccount && !s.deleted)
             list.append(s.description);
 
     list.removeDuplicates();

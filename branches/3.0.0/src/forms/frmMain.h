@@ -27,6 +27,7 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void portfolioChange(int currentIndex_);
+    void importYahoo();
 
 private:
     frmMain_UI *ui;

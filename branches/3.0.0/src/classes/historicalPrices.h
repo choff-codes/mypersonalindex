@@ -26,7 +26,7 @@ public:
     double value(int date_, type type_) const;
     QMap<int, double> values(type type_) const;
 
-    QString symbol() const;
+    QString& symbol() const;
 
     bool contains(int date_, type type_) const;
 

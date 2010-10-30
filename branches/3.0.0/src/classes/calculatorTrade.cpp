@@ -113,12 +113,15 @@ QMap<int, calculatorTrade::tradeDay> calculatorTrade::calculateTradeDates(portfo
     {
         const security &security = sec.value();
 
-        if (!security.includeInCalc)
+        if (!security.includeInCalc || security.deleted)
             continue;
 
         for(QMap<int, trade>::const_iterator x = sec->trades.constBegin(); x != sec->trades.constEnd(); ++x)
         {
             const trade &trade = x.value();
+
+            if (trade.deleted)
+                continue;
 
             if (trade.action == trade::tradeAction_ReinvestDividendsAuto) // get each dividend date greater than or equal to current date
             {

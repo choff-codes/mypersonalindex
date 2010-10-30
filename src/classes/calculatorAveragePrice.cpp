@@ -16,6 +16,10 @@ QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_,
     QMap<int, double> avgPrices;
 
     foreach(const security &s, portfolio_.securities())
+    {
+        if (s.deleted)
+            continue;
+
         avgPrices.insert(
             s.id,
             calculate(
@@ -26,6 +30,7 @@ QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_,
                 splits(s.splits(), date_)
             )
         );
+    }
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (avg price): %d ms", t.elapsed());

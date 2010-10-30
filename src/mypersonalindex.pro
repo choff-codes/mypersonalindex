@@ -41,3 +41,7 @@ unix {
     CONFIG(debug, debug|release):DESTDIR = debug
     else:DESTDIR = release
 }
+
+database.path += $${DESTDIR}
+database.files += ../database/MPI.sqlite
+INSTALLS += database

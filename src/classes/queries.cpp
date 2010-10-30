@@ -337,19 +337,6 @@ QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_
     return resultSet;
 }
 
-QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const
-{
-    QSqlQuery resultSet(m_database);
-    QString sql("SELECT %1 FROM %2 WHERE %3 = ?");
-
-    resultSet.setForwardOnly(true);
-    resultSet.prepare(sql.arg(columns_.join(","), tableName_, whereColumn_));
-    resultSet.addBindValue(whereValue_);
-    resultSet.exec();
-
-    return resultSet;
-}
-
 int queries::getIdentity() const
 {
     QSqlQuery query("SELECT last_insert_rowid()", m_database);

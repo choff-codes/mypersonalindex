@@ -39,7 +39,5 @@ DELETE FROM PortfolioSecurityAA WHERE SecurityID = old.ID;
 DELETE FROM PortfolioSecurityTrade WHERE SecurityID = old.ID;
 DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END
 
-CREATE INDEX "HistoricalPriceIndex" ON "HistoricalPrice" ("Symbol" ASC)
-
 INSERT INTO "main"."Settings" ("Version") VALUES (310)
 UPDATE PortfolioAccount SET CostBasis = CostBasis - 1

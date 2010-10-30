@@ -68,7 +68,7 @@ void portfolioFactory::loadPortfolioSecurity(bool includePricing_)
     {
         security sec = security::load(q);
         if(!sec.cashAccount && includePricing_)
-            sec.setHistoricalPrices(priceFactory::getPrices(sec.description, m_dataSource));
+            sec.setHistoricalPrices(priceFactory::getPrices(sec.description));
         m_portfolios[sec.parent].securities().insert(sec.id, sec);
     }
 }

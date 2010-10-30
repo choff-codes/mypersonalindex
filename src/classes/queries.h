@@ -158,7 +158,6 @@ public:
     void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
-    QSqlQuery select(const QString &tableName_, const QStringList &columns_, const QString &whereColumn_, const QVariant &whereValue_) const;
 
     int getIdentity() const;
     int getDatabaseVersion() const;

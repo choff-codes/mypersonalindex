@@ -1,6 +1,8 @@
 #include "frmMain.h"
 #include "frmMain_UI.h"
 #include <QCoreApplication>
+#include <QtConcurrentMap>
+#include <QFutureWatcher>
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileDialog>
@@ -9,6 +11,8 @@
 #include "portfolioFactory.h"
 #include "priceFactory.h"
 #include "portfolioAttributes.h"
+#include "updatePrices.h"
+#include "tradeDateCalendar.h"
 
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
@@ -39,6 +43,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioChange(int)));
+    connect(ui->importYahoo, SIGNAL(triggered()), this, SLOT(importYahoo()));
 }
 
 void frmMain::loadSettings()
@@ -52,6 +57,54 @@ void frmMain::loadSettings()
             this->setWindowState(this->windowState() | m_settings.windowState);
     }
 }
+
+void frmMain::importYahoo()
+{
+    if (!updatePrices::isInternetConnection())
+    {
+        QMessageBox::critical(this, QCoreApplication::applicationName(), "Cannot contact Yahoo! Finance, please check your internet connection.");
+        return;
+    }
+
+    QFutureWatcher<void> w;
+    QEventLoop q;
+
+    int beginDate = QDate::currentDate().toJulianDay() + 1;
+    QHash<QString, historicalPrices> updates;
+    foreach(const portfolio &p, m_portfolios)
+    {
+        foreach(const QString symbol, p.symbols())
+            if (!updates.contains(symbol))
+                updates.insert(symbol, priceFactory::getPrices(symbol));
+        beginDate = qMin(beginDate, p.attributes().startDate);
+    }
+
+    updatePricesOptions o(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
+
+    connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
+    QFuture<updatePricesReturnValue> future = QtConcurrent::mapped(updates.values(), updatePrices(o));
+    w.setFuture(future);
+
+    q.exec();
+
+    int earliestUpdate = QDate::currentDate().toJulianDay() + 1;
+    QStringList failures;
+    foreach(const updatePricesReturnValue &result, future)
+    {
+        if (result.date == UNASSIGNED)
+            failures.append(result.symbol);
+        else
+            earliestUpdate = qMin(earliestUpdate, result.date);
+    }
+
+    if (earliestUpdate <= o.endDate)
+        setWindowModified(true);
+
+    if (!failures.isEmpty())
+        QMessageBox::information(this, QCoreApplication::applicationName(), "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
+            failures.join(", "));
+}
+
 
 void frmMain::newFile()
 {
@@ -178,6 +231,7 @@ void frmMain::loadFile(const QString &filePath_)
     ui->portfolioDropDownCmb->clear();
 
     priceFactory::close();
+    priceFactory::open(file);
     m_portfolios = portfolioFactory(file).getPortfolios(true);
     refreshPortfolioCmb();
     setCurrentFile(filePath_);

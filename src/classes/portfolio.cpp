@@ -179,6 +179,25 @@ void portfolio::save(const queries &dataSource_)
     d->save(dataSource_);
 }
 
+QMap<int, portfolio> portfolio::save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, int *id_)
+{
+    QMap<int, portfolio> returnMap;
+    QList<portfolio> portfolioList = portfolios_.values();
+
+    for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
+    {
+        int oldID = i->attributes().id;
+        i->save(dataSource_);
+
+        if (!i->attributes().deleted)
+            returnMap.insert(i->attributes().id, *i);
+
+        if (id_ && oldID == *id_)
+            *id_ = i->attributes().id;
+    }
+    return returnMap;
+}
+
 void portfolio::remove(const queries &dataSource_) const
 {
     d->attributes.remove(dataSource_);
@@ -204,6 +223,16 @@ QStringList portfolio::symbols() const
         if (!s.cashAccount && !s.deleted)
             list.append(s.description);
 
+    list.removeDuplicates();
+    return list;
+}
+
+QStringList portfolio::symbols(const QMap<int, portfolio> portfolios_)
+{
+    QStringList list;
+    foreach(const portfolio &p, portfolios_)
+        foreach(const QString &symbol, p.symbols())
+            list.append(symbol);
     list.removeDuplicates();
     return list;
 }

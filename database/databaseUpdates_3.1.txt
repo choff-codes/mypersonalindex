@@ -24,6 +24,8 @@ ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Dividends" INTEGER
 ALTER TABLE "main"."PortfolioSecurityTrade" ADD COLUMN "Description" VARCHAR
 ALTER TABLE "main"."PortfolioAA" ADD COLUMN "Threshold" INTEGER
 ALTER TABLE "main"."PortfolioAA" ADD COLUMN "RebalanceBand" NUMERIC
+ALTER TABLE "main"."PortfolioAA" ADD COLUMN "Hide" INTEGER
+ALTER TABLE "main"."PortfolioAccount" ADD COLUMN "Hide" INTEGER
 
 CREATE VIEW "PortfolioSecurityTradeExecutionView" AS SELECT e.*, s.PortfolioID FROM PortfolioSecurityTradeExecution e INNER JOIN PortfolioSecurity s ON e.SecurityID = s.ID
 CREATE VIEW "PortfolioSecurityAAView" AS SELECT aa.*, s.PortfolioID FROM PortfolioSecurityAA aa INNER JOIN PortfolioSecurity s ON aa.SecurityID = s.ID

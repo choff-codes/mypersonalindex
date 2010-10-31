@@ -9,6 +9,7 @@
 #include <QDoubleSpinBox>
 #include <QToolButton>
 #include <QComboBox>
+#include <QCheckBox>
 
 class frmEditAA_UI
 {
@@ -26,6 +27,7 @@ public:
     QSpinBox *rebalanceBandSpinBox;
     QLabel *threshold;
     QComboBox *thresholdCmb;
+    QCheckBox *hideChk;
 
     void setupUI(QWidget* parent = 0);    
 };

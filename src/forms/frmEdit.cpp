@@ -173,6 +173,7 @@ void frmEdit::saveAccount()
     acct->taxRate = ui->acctForm.taxRateSpinBox->value();
     acct->taxDeferred = ui->acctForm.taxDeferredChk->isChecked();
     acct->costBasis = (account::costBasisMethod)ui->acctForm.costBasisCmb->itemData(ui->acctForm.costBasisCmb->currentIndex()).toInt();
+    acct->hide = ui->acctForm.hideChk->isChecked();
 }
 
 void frmEdit::loadAccount()
@@ -184,6 +185,7 @@ void frmEdit::loadAccount()
     ui->acctForm.taxRateSpinBox->setValue(acct->taxRate);
     ui->acctForm.taxDeferredChk->setChecked(acct->taxDeferred);
     ui->acctForm.costBasisCmb->setCurrentIndex(ui->acctForm.costBasisCmb->findData(acct->costBasis));
+    ui->acctForm.hideChk->setChecked(acct->hide);
 }
 
 void frmEdit::saveAssetAllocation()
@@ -195,6 +197,7 @@ void frmEdit::saveAssetAllocation()
     aa->rebalanceBand = ui->aaForm.rebalanceBandSpinBox->value();
     aa->target = ui->aaForm.targetSpinBox->value();
     aa->threshold = (assetAllocation::thresholdMethod)ui->aaForm.thresholdCmb->itemData(ui->aaForm.thresholdCmb->currentIndex()).toInt();
+    aa->hide = ui->aaForm.hideChk->isChecked();
 }
 
 void frmEdit::loadAssetAllocation()
@@ -206,6 +209,7 @@ void frmEdit::loadAssetAllocation()
     ui->aaForm.rebalanceBandSpinBox->setValue(aa->rebalanceBand);
     ui->aaForm.targetSpinBox->setValue(aa->target);
     ui->aaForm.thresholdCmb->setCurrentIndex(ui->aaForm.thresholdCmb->findData(aa->threshold));
+    ui->aaForm.hideChk->setChecked(aa->hide);
 }
 
 void frmEdit::saveSecurity()

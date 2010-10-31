@@ -51,6 +51,11 @@ void frmEditAA_UI::setupUI(QWidget *parent)
     thresholdCmb->addItem("Asset Class Value", assetAllocation::thresholdMethod_AA);
     layoutAA->setWidget(3, QFormLayout::FieldRole, thresholdCmb);
 
+    // no label
+    layoutAA->setWidget(4, QFormLayout::LabelRole, new QLabel(parent));
+    hideChk = new QCheckBox("&Hide in Portfolio", parent);
+    layoutAA->setWidget(4, QFormLayout::FieldRole, hideChk);
+
     desc->setBuddy(descTxt);
     target->setBuddy(targetSpinBox);
     rebalanceBand->setBuddy(rebalanceBandSpinBox);

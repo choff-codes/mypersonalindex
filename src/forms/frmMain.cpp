@@ -22,7 +22,6 @@ frmMain::frmMain(QWidget *parent):
     ui->setupUI(this);
     connectSlots();
     loadSettings();
-    updateRecentFileActions();
     setCurrentFile("");
 }
 
@@ -58,54 +57,6 @@ void frmMain::loadSettings()
     }
 }
 
-void frmMain::importYahoo()
-{
-    if (!updatePrices::isInternetConnection())
-    {
-        QMessageBox::critical(this, QCoreApplication::applicationName(), "Cannot contact Yahoo! Finance, please check your internet connection.");
-        return;
-    }
-
-    QFutureWatcher<void> w;
-    QEventLoop q;
-
-    int beginDate = QDate::currentDate().toJulianDay() + 1;
-    QHash<QString, historicalPrices> updates;
-    foreach(const portfolio &p, m_portfolios)
-    {
-        foreach(const QString symbol, p.symbols())
-            if (!updates.contains(symbol))
-                updates.insert(symbol, priceFactory::getPrices(symbol));
-        beginDate = qMin(beginDate, p.attributes().startDate);
-    }
-
-    updatePricesOptions o(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
-
-    connect(&w, SIGNAL(finished()), &q, SLOT(quit()));
-    QFuture<updatePricesReturnValue> future = QtConcurrent::mapped(updates.values(), updatePrices(o));
-    w.setFuture(future);
-
-    q.exec();
-
-    int earliestUpdate = QDate::currentDate().toJulianDay() + 1;
-    QStringList failures;
-    foreach(const updatePricesReturnValue &result, future)
-    {
-        if (result.date == UNASSIGNED)
-            failures.append(result.symbol);
-        else
-            earliestUpdate = qMin(earliestUpdate, result.date);
-    }
-
-    if (earliestUpdate <= o.endDate)
-        setWindowModified(true);
-
-    if (!failures.isEmpty())
-        QMessageBox::information(this, QCoreApplication::applicationName(), "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
-            failures.join(", "));
-}
-
-
 void frmMain::newFile()
 {
     if (!maybeSave())
@@ -123,7 +74,8 @@ bool frmMain::maybeSave()
 
     QMessageBox::StandardButton ret = QMessageBox::warning(this, QCoreApplication::applicationName(), "The document has been modified.\n\n"
         "Do you want to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-     if (ret == QMessageBox::Save)
+
+    if (ret == QMessageBox::Save)
         return save();
 
      if (ret == QMessageBox::Cancel)
@@ -152,56 +104,54 @@ bool frmMain::saveAs()
 
 bool frmMain::saveFile(const QString &filePath_)
 {
-    if (windowFilePath() != filePath_)
-    {
-        if (QFile::exists(filePath_) && !QFile::remove(filePath_)) {
-            QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not overwrite the existing file %1!").arg(filePath_));
-            return false;
-        }
-
-        if (windowFilePath().isEmpty()) // new file
-        {
-            if (!QFile::copy("MPI.sqlite", filePath_))
-            {
-                QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
-                return false;
-            }
-        }
-        else
-        {
-            if (!QFile::copy(windowFilePath(), filePath_))
-            {
-                QMessageBox::warning(this, QCoreApplication::applicationName(),
-                    QString("Could not save to %1 OR the original file was deleted at %2!").arg(filePath_, windowFilePath()));
-                return false;
-            }
-        }
-    }
+    if (!prepareFileForSave(filePath_))
+        return false;
 
     queries file(filePath_);
-
-    if (file.getDatabaseVersion() == UNASSIGNED)
+    if (!file.isValid())
     {
         QMessageBox::critical(this, QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return false;
     }
 
-    int currentID = m_currentPortfolio ? m_currentPortfolio->attributes().id : UNASSIGNED;
-    QList<portfolio> portfolioList = m_portfolios.values();
-    m_portfolios.clear();
-    for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
-    {
-        int id = i->attributes().id;
-        i->save(file);
-        m_portfolios.insert(i->attributes().id, *i);
-        if (id == currentID)
-            currentID = i->attributes().id;
-    }
-    priceFactory::save(file);
-    setCurrentFile(filePath_);
-    m_settings.addRecentFile(filePath_);
-    updateRecentFileActions();
+    int currentID = m_currentPortfolio ? m_currentPortfolio->attributes().id : UNASSIGNED; // track current portfolio
+    m_portfolios = portfolio::save(m_portfolios, file, &currentID);
     refreshPortfolioCmb(currentID == UNASSIGNED ? -1 : currentID);
+
+    priceFactory::save(file);
+
+    setCurrentFile(filePath_);
+    return true;
+}
+
+bool frmMain::prepareFileForSave(const QString &filePath_)
+{
+    if (windowFilePath() == filePath_)
+        return true;
+
+    if (QFile::exists(filePath_) && !QFile::remove(filePath_)) {
+        QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not overwrite the existing file %1!").arg(filePath_));
+        return false;
+    }
+
+    if (windowFilePath().isEmpty()) // new file
+    {
+        if (!QFile::copy("MPI.sqlite", filePath_))
+        {
+            QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
+            return false;
+        }
+    }
+    else
+    {
+        if (!QFile::copy(windowFilePath(), filePath_))
+        {
+            QMessageBox::warning(this, QCoreApplication::applicationName(),
+                QString("Could not save to %1 OR the original file was deleted at %2!").arg(filePath_, windowFilePath()));
+            return false;
+        }
+    }
+
     return true;
 }
 
@@ -211,7 +161,6 @@ void frmMain::open()
         return;
 
     QString filePath = QFileDialog::getOpenFileName(this, "Open file...", QString(), "My Personal Index File (*.mpi);;All Files (*)");
-
     if (filePath.isEmpty())
         return;
 
@@ -221,8 +170,7 @@ void frmMain::open()
 void frmMain::loadFile(const QString &filePath_)
 {
     queries file(filePath_);
-
-    if (file.getDatabaseVersion() == UNASSIGNED)
+    if (!file.isValid())
     {
         QMessageBox::critical(this, QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return;
@@ -232,33 +180,11 @@ void frmMain::loadFile(const QString &filePath_)
 
     priceFactory::close();
     priceFactory::open(file);
+
     m_portfolios = portfolioFactory(file).getPortfolios(true);
     refreshPortfolioCmb();
+
     setCurrentFile(filePath_);
-    m_settings.addRecentFile(filePath_);
-    updateRecentFileActions();
-}
-
-void frmMain::refreshPortfolioCmb(int id)
-{
-    ui->portfolioDropDownCmb->blockSignals(true);
-    foreach(const portfolio &p, m_portfolios)
-    {
-        if (p.attributes().deleted)
-            continue;
-
-        ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
-    }
-
-    int index = ui->portfolioDropDownCmb->findData(id);
-    if (index == -1 && ui->portfolioDropDownCmb->count() != 0)
-        index = 0;
-
-    if (index != -1)
-        ui->portfolioDropDownCmb->setCurrentIndex(index);
-
-    portfolioChange(ui->portfolioDropDownCmb->currentIndex());
-    ui->portfolioDropDownCmb->blockSignals(false);
 }
 
 void frmMain::setCurrentFile(const QString &filePath_)
@@ -269,17 +195,42 @@ void frmMain::setCurrentFile(const QString &filePath_)
         setWindowTitle(QString("untitled.mpi[*] - %1").arg(QCoreApplication::applicationName()));
     else
         setWindowTitle(QString("%1[*] - %2").arg(QFileInfo(filePath_).fileName(), QCoreApplication::applicationName()));
+
+    updateRecentFileActions(filePath_);
+}
+
+void frmMain::refreshPortfolioCmb(int id_)
+{
+    ui->portfolioDropDownCmb->blockSignals(true);
+    foreach(const portfolio &p, m_portfolios)
+    {
+        if (p.attributes().deleted)
+            continue;
+
+        ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
+    }
+
+    int index = ui->portfolioDropDownCmb->findData(id_);
+    if (index == -1 && ui->portfolioDropDownCmb->count() != 0)
+        index = 0;
+
+    if (index != -1)
+        ui->portfolioDropDownCmb->setCurrentIndex(index);
+
+    portfolioChange(ui->portfolioDropDownCmb->currentIndex());
+    ui->portfolioDropDownCmb->blockSignals(false);
 }
 
 void frmMain::closeEvent(QCloseEvent *event_)
 {
-    if (maybeSave())
+    if (!maybeSave())
     {
-        event_->accept();
-        saveSettings();
-    }
-    else
         event_->ignore();
+        return;
+    }
+
+    event_->accept();
+    saveSettings();
 }
 
 void frmMain::saveSettings()
@@ -290,14 +241,14 @@ void frmMain::saveSettings()
     m_settings.save();
 }
 
-void frmMain::updateRecentFileActions()
+void frmMain::updateRecentFileActions(const QString &newFilePath_)
 {
+    if (!newFilePath_.isEmpty())
+        m_settings.addRecentFile(newFilePath_);
+
     ui->fileRecent->clear();
     foreach(const QString &s, m_settings.recentFiles())
-    {
-        QAction *action = ui->fileRecent->addAction(s);
-        connect(action, SIGNAL(triggered()), this, SLOT(recentFileSelected()));
-    }
+        connect(ui->fileRecent->addAction(s), SIGNAL(triggered()), this, SLOT(recentFileSelected()));
 }
 
 void frmMain::recentFileSelected()
@@ -367,4 +318,46 @@ void frmMain::about()
         "<p>By Matthew Wikler"
         "<p>Create personal indexes and perform analysis to make better investing decisions."
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
+}
+
+
+void frmMain::importYahoo()
+{
+    if (!updatePrices::isInternetConnection())
+    {
+        QMessageBox::critical(this, QCoreApplication::applicationName(), "Cannot contact Yahoo! Finance, please check your internet connection.");
+        return;
+    }
+
+    int beginDate = tradeDateCalendar::endDate() + 1;
+    foreach(const portfolio &p, m_portfolios)
+        beginDate = qMin(beginDate, p.attributes().startDate);
+
+    QList<historicalPrices> prices;
+    foreach(const QString &s, portfolio::symbols(m_portfolios))
+        prices.append(priceFactory::getPrices(s));
+
+    updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
+
+    QFutureWatcher<updatePricesReturnValue> watcher;
+    QEventLoop eventLoop;
+    connect(&watcher, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    watcher.setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
+
+    eventLoop.exec();
+
+    int earliestUpdate = options.endDate + 1;
+    QStringList failures;
+    foreach(const updatePricesReturnValue &result, watcher.future())
+        if (result.date == UNASSIGNED)
+            failures.append(result.symbol);
+        else
+            earliestUpdate = qMin(earliestUpdate, result.date);
+
+    if (earliestUpdate <= options.endDate)
+        setWindowModified(true);
+
+    if (!failures.isEmpty())
+        QMessageBox::information(this, QCoreApplication::applicationName(), "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
+            failures.join(", "));
 }

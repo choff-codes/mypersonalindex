@@ -10,7 +10,8 @@
 //    portfolioAAColumns_Description,
 //    portfolioAAColumns_Target,
 //    portfolioAAColumns_RebalanceBand,
-//    portfolioAAColumns_Threshold
+//    portfolioAAColumns_Threshold,
+//    portfolioAAColumns_Hide
 //};
 
 const QStringList queries::portfolioAAColumns = QStringList()
@@ -19,7 +20,8 @@ const QStringList queries::portfolioAAColumns = QStringList()
                                                 << "Description"
                                                 << "Target"
                                                 << "RebalanceBand"
-                                                << "Threshold";
+                                                << "Threshold"
+                                                << "Hide";
 
 //enum {
 //    portfolioAccountColumns_ID,
@@ -27,7 +29,8 @@ const QStringList queries::portfolioAAColumns = QStringList()
 //    portfolioAccountColumns_Description,
 //    portfolioAccountColumns_TaxRate,
 //    portfolioAccountColumns_TaxDeferred,
-//    portfolioAccountColumns_CostBasis
+//    portfolioAccountColumns_CostBasis,
+//    portfolioAccountColumns_Hide
 //};
 
 const QStringList queries::portfolioAccountColumns = QStringList()
@@ -36,7 +39,8 @@ const QStringList queries::portfolioAccountColumns = QStringList()
                                                      << "Description"
                                                      << "TaxRate"
                                                      << "TaxDeferred"
-                                                     << "CostBasis";
+                                                     << "CostBasis"
+                                                     << "Hide";
 
 //enum {
 //    historicalPriceColumns_Date,
@@ -355,6 +359,11 @@ int queries::getDatabaseVersion() const
         return query.value(0).toInt();
 
     return UNASSIGNED;
+}
+
+bool queries::isValid() const
+{
+    return getDatabaseVersion() !=  UNASSIGNED;
 }
 
 void queries::deleteTable(const QString &table_) const

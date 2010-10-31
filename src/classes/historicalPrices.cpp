@@ -20,67 +20,66 @@ public:
         symbol(symbol_)
     {}
 
-    void insert(int date_, double value_, historicalPrices::type type_, bool toDatabase_)
+    void insert(int date_, double value_, historicalPrices::type type_)
     {
-        QMap<int, double>::iterator it;
         switch(type_)
         {
             case historicalPrices::type_price:
-                it = prices.insert(date_, value_);
+                prices.insert(date_, value_);
                 break;
             case historicalPrices::type_dividend:
-                it = dividends.insert(date_, value_);
+                dividends.insert(date_, value_);
                 break;
             case historicalPrices::type_split:
-                it = splits.insert(date_, value_);
+                splits.insert(date_, value_);
                 break;
-        }
-        if (toDatabase_)
-            m_toDatabase.append(priceKey(type_, it));
+        };
     }
 
-    void insertBatch(queries dataSource_)
+    void insertBatch(const queries &dataSource_)
     {
         if (symbol.isEmpty())
             return;
 
-        dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, this);
-        m_toDatabase.clear();
+        m_position = prices.constBegin();
+        m_positionType = historicalPrices::type_price;
+        dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, prices.count() + dividends.count() + splits.count(), this);
     }
 
-    int rowsToBeInserted() const { return m_toDatabase.count(); }
-
-    QVariant data(int row_, int column_) const
+    QVariant data(int column_, bool newRow_)
     {
+        if (newRow_)
+            ++m_position;
+
+        if (m_position == prices.constEnd())
+        {
+            m_position = dividends.constBegin();
+            m_positionType = historicalPrices::type_dividend;
+        }
+
+        if (m_position == dividends.constEnd())
+        {
+            m_position = splits.constBegin();
+            m_positionType = historicalPrices::type_split;
+        }
+
         switch(column_)
         {
             case queries::historicalPriceColumns_Date:
-                return m_toDatabase.at(row_).keyIterator.key();
+                return m_position.key();
             case queries::historicalPriceColumns_Symbol:
                 return symbol;
             case queries::historicalPriceColumns_Type:
-                return (int)m_toDatabase.at(row_).keyType;
+                return (int)m_positionType;
             case queries::historicalPriceColumns_Value:
-                return m_toDatabase.at(row_).keyIterator.value();
+                return m_position.value();
         }
         return QVariant();
     }
 
 private:
-    struct priceKey
-    {
-        historicalPrices::type keyType;
-        QMap<int, double>::iterator keyIterator;
-
-        priceKey(historicalPrices::type type_, QMap<int, double>::iterator iterator_):
-            keyType(type_),
-            keyIterator(iterator_)
-        {}
-
-        bool operator==(const priceKey &other_) const { return this->keyType == other_.keyType && this->keyIterator == other_.keyIterator;}
-    };
-
-    QList<priceKey> m_toDatabase;
+    QMap<int, double>::const_iterator m_position;
+    historicalPrices::type m_positionType;
 };
 
 historicalPrices::historicalPrices():
@@ -150,12 +149,12 @@ bool historicalPrices::contains(int date_, type type_) const
     return false;
 }
 
-void historicalPrices::insert(int date_, double value_, type type_, bool toDatabase_)
+void historicalPrices::insert(int date_, double value_, type type_)
 {
-    d->insert(date_, value_, type_, toDatabase_);
+    d->insert(date_, value_, type_);
 }
 
-void historicalPrices::insertBatch(queries dataSource_)
+void historicalPrices::insertBatch(const queries &dataSource_)
 {
     d->insertBatch(dataSource_);
 }

@@ -46,6 +46,10 @@ private:
     bool prepareFileForSave(const QString &filePath_);
     void updateRecentFileActions(const QString &newFilePath_);
     void refreshPortfolioCmb(int id_ = -1);
+
+    void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
+    void recalculateTrades(int beginDate_ = 0);
+    void recalculateTrades(QList<portfolio> portfolios_, int beginDate_);
 };
 
 #endif // FRMMAIN_H

@@ -4,10 +4,6 @@
 #include <QHash>
 #include "historicalPrices.h"
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class queries;
 class priceFactory
 {

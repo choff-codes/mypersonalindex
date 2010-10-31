@@ -7,21 +7,20 @@
 #include "assetAllocation.h"
 #include "functions.h"
 
-void calculatorTrade::run(int beginDate_, const QList<portfolio> &portfolios_)
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
+void calculatorTrade::operator()(portfolio &portfolio_)
 {
 #ifdef CLOCKTIME
     QTime t;
     t.start();
 #endif
 
-    foreach(portfolio p, portfolios_)
-    {
-        insertDividendReinvestmentPlaceholders(p);
-
-        calculate(p, beginDate_);
-
-        removeDividendReinvestmentPlaceholders(p);
-    }
+    insertDividendReinvestmentPlaceholders(portfolio_);
+    calculate(portfolio_, m_beginDate);
+    removeDividendReinvestmentPlaceholders(portfolio_);
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (trades): %d ms", t.elapsed());

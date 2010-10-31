@@ -254,12 +254,10 @@ void queries::executeNonQuery(const QString &query_) const
     QSqlQuery(query_, m_database);
 }
 
-void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_)
+void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch *object_) const
 {
     if (tableName_.isEmpty() || columns_.isEmpty())
         return;
-
-    m_database.transaction();
 
     QSqlQuery query(m_database);
     QStringList parameters;
@@ -270,20 +268,17 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
 
     query.prepare(sql.arg(tableName_, columns_.join(","), parameters.join(",")));
 
-    int rowCount = object_->rowsToBeInserted();
     int columnCount = columns_.count();
-    for (int i = 0; i < rowCount; ++i)
+    for (int i = 0; i < rowCount_; ++i)
     {
         for (int x = 0; x < columnCount; ++x)
-            query.addBindValue(object_->data(i, x));
+            query.addBindValue(object_->data(x, x == 0 && i != 0));
 
         query.exec();
     }
-
-    m_database.commit();
 }
 
-int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const
+int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_, bool getIdentity_) const
 {
     if (tableName_.isEmpty() || values_.isEmpty())
         return id_;
@@ -310,7 +305,7 @@ int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &va
         query.addBindValue(value);
 
     query.exec();
-    return getIdentity();
+    return getIdentity_ ? getIdentity() : 0;
 }
 
 void queries::update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const

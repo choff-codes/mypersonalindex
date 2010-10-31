@@ -157,9 +157,12 @@ public:
 
     queries(const QString &databaseLocation_);
 
-    void bulkInsert(const QString &tableName_, const QStringList &columns_, queriesBatch *object_);
-    int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
+    void bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch *object_) const;
+    int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_, bool getIdentity_ = true) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
+
+    void beginTransaction() { m_database.transaction(); }
+    void commit() { m_database.commit(); }
 
     int getIdentity() const;
     int getDatabaseVersion() const;

@@ -35,13 +35,13 @@ public:
     friend QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_);
     friend QDataStream& operator>>(QDataStream &stream_, assetAllocationTarget &target_);
 
-    void insertBatch(queries dataSource_);
+    void insertBatch(const queries &dataSource_);
 
-    int rowsToBeInserted() const { return m_targets.count(); }
-    QVariant data(int row_, int column_) const;
+    QVariant data(int column_, bool newRow_);
 
 private:
     QMap<int, double> m_targets;
+    QMap<int, double>::const_iterator m_position;
 };
 
 QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_);

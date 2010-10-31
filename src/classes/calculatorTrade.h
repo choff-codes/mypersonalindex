@@ -4,10 +4,6 @@
 #include <QMap>
 #include "trade.h"
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class portfolio;
 class assetAllocation;
 class account;
@@ -17,11 +13,17 @@ class executedTrade;
 class calculatorTrade
 {
 public:
-    void run(int beginDate_, const QList<portfolio> &portfolios_);
+    calculatorTrade(int beginDate_):
+        m_beginDate(beginDate_)
+    {}
+
+    void operator()(portfolio &portfolio_);
 
 private:
     typedef QMap<int, trade>::const_iterator tradeIterator;
     typedef QHash<int, QList<tradeIterator> > tradeDay;
+
+    int m_beginDate;
 
     void insertDividendReinvestmentPlaceholders(portfolio portfolio_);
     void removeDividendReinvestmentPlaceholders(portfolio portfolio_);

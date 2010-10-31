@@ -3,6 +3,10 @@
 #include <QVariant>
 #include "queries.h"
 
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
 QHash<QString, historicalPrices> priceFactory::m_historicalPricesCache;
 
 historicalPrices priceFactory::getPrices(const QString &symbol_)
@@ -28,8 +32,7 @@ void priceFactory::open(const queries &dataSource_)
         m_historicalPricesCache[q.value(queries::historicalPriceColumns_Symbol).toString()].insert(
             q.value(queries::historicalPriceColumns_Date).toInt(),
             q.value(queries::historicalPriceColumns_Value).toInt(),
-            (historicalPrices::type)q.value(queries::historicalPriceColumns_Type).toInt(),
-            false
+            (historicalPrices::type)q.value(queries::historicalPriceColumns_Type).toInt()
         );
 
     for(QHash<QString, historicalPrices>::iterator i = m_historicalPricesCache.begin(); i != m_historicalPricesCache.end(); ++i)
@@ -42,6 +45,7 @@ void priceFactory::open(const queries &dataSource_)
 
 void priceFactory::save(const queries &dataSource_)
 {
+    dataSource_.deleteTable(queries::table_HistoricalPrice);
     foreach (historicalPrices prices, m_historicalPricesCache)
         prices.insertBatch(dataSource_);
 }

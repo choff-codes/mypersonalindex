@@ -40,25 +40,26 @@ void assetAllocationTarget::updateAssetAllocationID(int fromID_, int toID_)
     m_targets.insert(toID_, target);
 }
 
-void assetAllocationTarget::insertBatch(queries dataSource_)
+void assetAllocationTarget::insertBatch(const queries &dataSource_)
 {
     if (!this->hasParent())
         return;
 
-    if (this->hasParent())
-        dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityAA, this->parent);
-
-    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, this);
+    m_position = m_targets.constBegin();
+    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, m_targets.count(), this);
 }
 
-QVariant assetAllocationTarget::data(int row_, int column_) const
+QVariant assetAllocationTarget::data(int column_, bool newRow_)
 {
+    if (newRow_)
+        ++m_position;
+
     switch(column_)
     {
         case queries::portfolioSecurityAAColumns_AAID:
-            return (m_targets.constBegin() + row_).key();
+            return m_position.key();
         case queries::portfolioSecurityAAColumns_Percent:
-            return (m_targets.constBegin() + row_).value();
+            return m_position.value();
         case queries::portfolioSecurityAAColumns_SecurityID:
             return this->parent;
     }

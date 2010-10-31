@@ -29,6 +29,9 @@ public:
             return;
         }
 
+        dataSource_.deleteTable(queries::table_PortfolioSecurityTradeExecution);
+        dataSource_.deleteTable(queries::table_PortfolioSecurityAA);
+
         // save portfolio
         attributes.save(dataSource_);
 

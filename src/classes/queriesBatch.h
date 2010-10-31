@@ -6,10 +6,9 @@ class queries;
 class queriesBatch
 {
 public:
-    virtual void insertBatch(queries dataSource_) = 0;
+    virtual void insertBatch(const queries &dataSource_) = 0;
 
-    virtual int rowsToBeInserted() const = 0;
-    virtual QVariant data(int row_, int column_) const = 0;
+    virtual QVariant data(int column_, bool newRow_) = 0;
 };
 
 #endif // QUERIESBATCH_H

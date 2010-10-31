@@ -58,13 +58,13 @@ public:
     bool operator==(const executedTradeMap &other_) const { return m_trades == other_.m_trades; }
     bool operator!=(const executedTradeMap &other_) const { return !(*this == other_); }
 
-    void insertBatch(queries dataSource_);
+    void insertBatch(const queries &dataSource_);
 
-    int rowsToBeInserted() const { return m_trades.count(); }
-    QVariant data(int row_, int column_) const;
+    QVariant data(int column_, bool newRow_);
 
 private:
    QMap<int, executedTrade> m_trades;
+   QMap<int, executedTrade>::const_iterator m_position;
 };
 
 #endif // EXECUTEDTRADE_H

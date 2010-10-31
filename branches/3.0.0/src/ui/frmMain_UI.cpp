@@ -29,7 +29,9 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     portfolio = new QMenu("Portfolio", menubar);
     portfolioAdd = new QAction("Add New...", mainWindow);
     portfolioEdit = new QAction("Edit...", mainWindow);
+    portfolioEdit->setDisabled(true);
     portfolioDelete = new QAction("Delete...", mainWindow);
+    portfolioDelete->setDisabled(true);
 
     import = new QMenu("Import", menubar);
     importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow);
@@ -65,10 +67,10 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     view->addAction(viewCorrelations);
     view->addAction(viewPerformance);
 
-    portfolio->addAction(portfolioAdd);
-    portfolio->addSeparator();
     portfolio->addAction(portfolioEdit);
     portfolio->addAction(portfolioDelete);
+    portfolio->addSeparator();
+    portfolio->addAction(portfolioAdd);
 
     import->addAction(importYahoo);
     import->addAction(importPrices);
@@ -84,6 +86,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     portfolioDropDown = new QLabel("Portfolio: ", portfolioDropDownWidget);
     portfolioDropDownCmb = new QComboBox(portfolioDropDownWidget);
     portfolioDropDownCmb->setFixedHeight(menubar->sizeHint().height());
+    portfolioDropDownCmb->setDisabled(true);
 
     portfolioDropDownLayout->addWidget(portfolioDropDown);
     portfolioDropDownLayout->addWidget(portfolioDropDownCmb);

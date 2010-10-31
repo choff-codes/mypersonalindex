@@ -13,6 +13,11 @@
 #include "portfolioAttributes.h"
 #include "updatePrices.h"
 #include "tradeDateCalendar.h"
+#include "calculatorTrade.h"
+
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
 
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
@@ -63,6 +68,7 @@ void frmMain::newFile()
         return;
 
     m_portfolios.clear();
+    refreshPortfolioCmb();
     priceFactory::close();
     setCurrentFile("");
 }
@@ -113,12 +119,32 @@ bool frmMain::saveFile(const QString &filePath_)
         QMessageBox::critical(this, QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return false;
     }
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+    file.beginTransaction();
 
     int currentID = m_currentPortfolio ? m_currentPortfolio->attributes().id : UNASSIGNED; // track current portfolio
     m_portfolios = portfolio::save(m_portfolios, file, &currentID);
     refreshPortfolioCmb(currentID == UNASSIGNED ? -1 : currentID);
 
+    file.commit();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (save porfolios): %d ms", t.elapsed());
+#endif
+    file.beginTransaction();
+
     priceFactory::save(file);
+
+    file.commit();
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (save prices): %d ms", t.elapsed());
+#endif
+
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (save): %d ms", t.elapsed());
+#endif
 
     setCurrentFile(filePath_);
     return true;
@@ -176,8 +202,6 @@ void frmMain::loadFile(const QString &filePath_)
         return;
     }
 
-    ui->portfolioDropDownCmb->clear();
-
     priceFactory::close();
     priceFactory::open(file);
 
@@ -202,6 +226,7 @@ void frmMain::setCurrentFile(const QString &filePath_)
 void frmMain::refreshPortfolioCmb(int id_)
 {
     ui->portfolioDropDownCmb->blockSignals(true);
+    ui->portfolioDropDownCmb->clear();
     foreach(const portfolio &p, m_portfolios)
     {
         if (p.attributes().deleted)
@@ -254,7 +279,11 @@ void frmMain::updateRecentFileActions(const QString &newFilePath_)
 void frmMain::recentFileSelected()
 {
     QAction *action = qobject_cast<QAction*>(sender());
-    if (action && maybeSave())
+
+    if (!action || action->text() == windowFilePath())
+        return;
+
+    if (maybeSave())
         loadFile(action->text());
 }
 
@@ -287,6 +316,7 @@ void frmMain::editPortfolio()
     m_portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();;
     m_currentPortfolio = &m_portfolios[m_currentPortfolio->attributes().id];
     ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
+    recalculateTrades(*m_currentPortfolio, 0);
 }
 
 void frmMain::deletePortfolio()
@@ -305,10 +335,10 @@ void frmMain::deletePortfolio()
 
 void frmMain::portfolioChange(int currentIndex_)
 {
-    if (currentIndex_ == -1)
-        m_currentPortfolio = 0;
-    else
-        m_currentPortfolio = &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()];
+    ui->portfolioDelete->setDisabled(currentIndex_ == -1);
+    ui->portfolioEdit->setDisabled(currentIndex_ == -1);
+    ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
+    m_currentPortfolio = currentIndex_ == -1 ? 0 : &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()];
 }
 
 void frmMain::about()
@@ -360,4 +390,24 @@ void frmMain::importYahoo()
     if (!failures.isEmpty())
         QMessageBox::information(this, QCoreApplication::applicationName(), "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
             failures.join(", "));
+}
+
+void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)
+{
+    recalculateTrades(QList<portfolio>() << portfolio_, beginDate_);
+}
+
+void frmMain::recalculateTrades(int beginDate_)
+{
+    recalculateTrades(m_portfolios.values(), beginDate_);
+}
+
+void frmMain::recalculateTrades(QList<portfolio> portfolios_, int beginDate_)
+{
+    QFutureWatcher<void> watcher;
+    QEventLoop eventLoop;
+    connect(&watcher, SIGNAL(finished()), &eventLoop, SLOT(quit()));
+    watcher.setFuture(QtConcurrent::map(portfolios_, calculatorTrade(beginDate_)));
+
+    eventLoop.exec();
 }

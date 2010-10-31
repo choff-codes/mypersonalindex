@@ -1,5 +1,9 @@
 #include "settingsFactory.h"
 
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
 settings settingsFactory::getSettings()
 {
 #ifdef CLOCKTIME

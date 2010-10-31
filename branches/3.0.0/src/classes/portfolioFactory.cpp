@@ -8,6 +8,10 @@
 #include "portfolioAttributes.h"
 #include "priceFactory.h"
 
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
 QMap<int, portfolio> portfolioFactory::getPortfolios(bool includePricing_)
 {
 #ifdef CLOCKTIME

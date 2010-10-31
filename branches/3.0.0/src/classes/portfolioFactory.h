@@ -5,10 +5,6 @@
 #include "portfolio.h"
 #include "queries.h"
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class portfolioFactory
 {
 public:

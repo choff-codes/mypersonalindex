@@ -33,9 +33,9 @@ public:
     int endDate(type type_) const;
     int beginDate(type type_) const;
 
-    void insert(int date_, double value_, type type_, bool toDatabase_ = true);
+    void insert(int date_, double value_, type type_);
 
-    void insertBatch(queries dataSource_);
+    void insertBatch(const queries &dataSource_);
 
 private:
     QExplicitlySharedDataPointer<historicalPricesData> d;

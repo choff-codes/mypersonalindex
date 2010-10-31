@@ -46,33 +46,35 @@ void executedTradeMap::remove()
     m_trades.clear();
 }
 
-QVariant executedTradeMap::data(int row_, int column_) const
+QVariant executedTradeMap::data(int column_, bool newRow_)
 {
-    QMap<int, executedTrade>::const_iterator i = m_trades.constBegin() + row_;
+    if (newRow_)
+        ++m_position;
+
     switch(column_)
     {
         case queries::portfolioSecurityTradeExecutionColumns_Date:
-            return i.key();
+            return m_position.key();
         case queries::portfolioSecurityTradeExecutionColumns_SecurityID:
             return this->parent;
         case queries::portfolioSecurityTradeExecutionColumns_Shares:
-            return i.value().shares;
+            return m_position.value().shares;
         case queries::portfolioSecurityTradeExecutionColumns_Price:
-            return i.value().price;
+            return m_position.value().price;
         case queries::portfolioSecurityTradeExecutionColumns_Commission:
-            return i.value().commission;
+            return m_position.value().commission;
         case queries::portfolioSecurityTradeExecutionColumns_AssociatedTradeID:
-            return i.value().associatedTradeID;
+            return m_position.value().associatedTradeID;
     }
 
     return QVariant();
 }
 
-void executedTradeMap::insertBatch(queries dataSource_)
+void executedTradeMap::insertBatch(const queries &dataSource_)
 {
     if (!this->hasParent())
         return;
 
-    dataSource_.deleteSecurityItems(queries::table_PortfolioSecurityTradeExecution, this->parent);
-    dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, this);
+    m_position = m_trades.constBegin();
+    dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, m_trades.count(), this);
 }

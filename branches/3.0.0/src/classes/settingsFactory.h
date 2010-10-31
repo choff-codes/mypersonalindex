@@ -3,10 +3,6 @@
 
 #include "settings.h"
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class settingsFactory
 {
 public:

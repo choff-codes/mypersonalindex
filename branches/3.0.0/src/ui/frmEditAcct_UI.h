@@ -26,6 +26,7 @@ public:
     QLabel *costBasis;
     QComboBox *costBasisCmb;
     QCheckBox *taxDeferredChk;
+    QCheckBox *hideChk;
 
     void setupUI(QWidget* parent = 0);
 };

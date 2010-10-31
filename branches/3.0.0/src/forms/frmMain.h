@@ -43,8 +43,9 @@ private:
     void setCurrentFile(const QString &filePath_);
     bool maybeSave();
     bool saveFile(const QString &filePath_);
-    void updateRecentFileActions();
-    void refreshPortfolioCmb(int id = -1);
+    bool prepareFileForSave(const QString &filePath_);
+    void updateRecentFileActions(const QString &newFilePath_);
+    void refreshPortfolioCmb(int id_ = -1);
 };
 
 #endif // FRMMAIN_H

@@ -46,9 +46,13 @@ void frmEditAcct_UI::setupUI(QWidget *parent)
 
     // no label
     layoutAcct->setWidget(3, QFormLayout::LabelRole, new QLabel(parent));
-
     taxDeferredChk = new QCheckBox("T&ax Deferred", parent);
     layoutAcct->setWidget(3, QFormLayout::FieldRole, taxDeferredChk);
+
+    // no label
+    layoutAcct->setWidget(4, QFormLayout::LabelRole, new QLabel(parent));
+    hideChk = new QCheckBox("&Hide in Portfolio", parent);
+    layoutAcct->setWidget(4, QFormLayout::FieldRole, hideChk);
 
     desc->setBuddy(descTxt);
     taxRate->setBuddy(taxRateSpinBox);

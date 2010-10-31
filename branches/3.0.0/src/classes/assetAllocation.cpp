@@ -9,7 +9,8 @@ bool assetAllocation::operator==(const assetAllocation &other_) const
     return objectKey::operator==(other_)
             && this->target == other_.target
             && this->rebalanceBand == other_.rebalanceBand
-            && this->threshold == other_.threshold;
+            && this->threshold == other_.threshold
+            && this->hide == other_.hide;
 }
 
 void assetAllocation::save(const queries &dataSource_)
@@ -23,6 +24,7 @@ void assetAllocation::save(const queries &dataSource_)
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), this->target);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_RebalanceBand), this->rebalanceBand);
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Threshold), (int)this->threshold);
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Hide), (int)this->hide);
 
     this->id = dataSource_.insert(queries::table_PortfolioAA, values, this->id);
 }
@@ -46,6 +48,7 @@ assetAllocation assetAllocation::load(const QSqlQuery &q_)
     aa.target = q_.value(queries::portfolioAAColumns_Target).toDouble();
     aa.rebalanceBand = q_.value(queries::portfolioAAColumns_RebalanceBand).toDouble();
     aa.threshold = (thresholdMethod)q_.value(queries::portfolioAAColumns_Threshold).toInt();
+    aa.hide = q_.value(queries::portfolioAAColumns_Hide).toBool();
 
     return aa;
 }

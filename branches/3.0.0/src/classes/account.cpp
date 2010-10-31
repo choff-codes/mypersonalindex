@@ -8,7 +8,8 @@ bool account::operator==(const account &other_) const
     return objectKey::operator ==(other_)
             && this->taxRate == other_.taxRate
             && this->taxDeferred == other_.taxDeferred
-            && this->costBasis == other_.costBasis;
+            && this->costBasis == other_.costBasis
+            && this->hide == other_.hide;
 }
 
 void account::save(const queries &dataSource_)
@@ -22,6 +23,7 @@ void account::save(const queries &dataSource_)
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxRate), this->taxRate);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxDeferred), (int)this->taxDeferred);
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_CostBasis), (int)this->costBasis);
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAccountColumns_Hide), (int)this->hide);
 
     this->id = dataSource_.insert(queries::table_PortfolioAccount, values, this->id);
 }
@@ -45,6 +47,7 @@ account account::load(const QSqlQuery &q_)
     acct.taxRate = q_.value(queries::portfolioAccountColumns_TaxRate).toDouble();
     acct.taxDeferred = q_.value(queries::portfolioAccountColumns_TaxDeferred).toBool();
     acct.costBasis = (costBasisMethod)q_.value(queries::portfolioAccountColumns_CostBasis).toInt();
+    acct.hide = q_.value(queries::portfolioAccountColumns_Hide).toBool();
 
     return acct;
 }

@@ -19,12 +19,14 @@ public:
     double taxRate;
     bool taxDeferred;
     costBasisMethod costBasis;
+    bool hide;
 
     account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         taxRate(0),
         taxDeferred(false),
-        costBasis(costBasisMethod_FIFO)
+        costBasis(costBasisMethod_FIFO),
+        hide(false)
     {}
 
     bool operator==(const account &other_) const;

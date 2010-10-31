@@ -46,7 +46,8 @@ public:
         portfolioAAColumns_Description,
         portfolioAAColumns_Target,
         portfolioAAColumns_RebalanceBand,
-        portfolioAAColumns_Threshold
+        portfolioAAColumns_Threshold,
+        portfolioAAColumns_Hide
     };
 
     enum {
@@ -55,7 +56,8 @@ public:
         portfolioAccountColumns_Description,
         portfolioAccountColumns_TaxRate,
         portfolioAccountColumns_TaxDeferred,
-        portfolioAccountColumns_CostBasis
+        portfolioAccountColumns_CostBasis,
+        portfolioAccountColumns_Hide
     };
 
     enum {
@@ -162,6 +164,7 @@ public:
     int getIdentity() const;
     int getDatabaseVersion() const;
     QString getDatabaseLocation() const { return m_database.databaseName(); }
+    bool isValid() const;
 
     void deleteTable(const QString &table_) const;
     void deleteItem(const QString &table_, int id_) const;

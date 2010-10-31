@@ -17,12 +17,14 @@ public:
     double target;
     thresholdMethod threshold;
     double rebalanceBand;
+    bool hide;
 
     assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         target(0),
         threshold(thresholdMethod_Portfolio),
-        rebalanceBand(5)
+        rebalanceBand(5),
+        hide(false)
     {}
 
     bool operator==(const assetAllocation &other_) const;

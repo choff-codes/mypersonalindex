@@ -24,6 +24,7 @@ public:
     portfolio& operator=(const portfolio &other_);
 
     QStringList symbols() const;
+    static QStringList symbols(const QMap<int, portfolio> portfolios_);
     int endDate() const;
 
     static int getOpenIdentity() { return --IDENTITY_COUNTER; }
@@ -37,6 +38,7 @@ public:
     portfolioAttributes& attributes() const;
 
     void save(const queries &dataSource_);
+    static QMap<int, portfolio> save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, int *id_);
     void remove(const queries &dataSource_) const;
 
     void detach();

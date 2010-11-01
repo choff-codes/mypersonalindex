@@ -2,12 +2,12 @@
 #include <QtNetwork>
 #include "objectBase.h"
 
-updatePricesReturnValue updatePrices::operator()(const historicalPrices &prices_)
+int updatePrices::operator()(const historicalPrices &prices_)
 {
     int result = NO_DATA; // track earliest date saved to database for recalc
 
     if (m_options.beginDate >= NO_DATA) // begin date is after end date, nothing to do
-        return updatePricesReturnValue(prices_.symbol(), result);
+        return result;
 
     if (prices_.beginDate(historicalPrices::type_price) > m_options.beginDate || prices_.endDate(historicalPrices::type_price) < m_options.endDate)
         result = getPrices(
@@ -18,7 +18,7 @@ updatePricesReturnValue updatePrices::operator()(const historicalPrices &prices_
                 );
 
     if (result == UNASSIGNED) // symbol does not exist
-        return updatePricesReturnValue(prices_.symbol(), result);
+        return result;
 
     if (prices_.beginDate(historicalPrices::type_dividend) > m_options.beginDate || prices_.endDate(historicalPrices::type_dividend) < m_options.endDate)
         result =
@@ -44,7 +44,7 @@ updatePricesReturnValue updatePrices::operator()(const historicalPrices &prices_
                     )
                 );
 
-    return updatePricesReturnValue(prices_.symbol(), result);
+    return result;
 }
 
 int updatePrices::computeBeginDate(const historicalPrices &prices_, historicalPrices::type type_, int beginDate_)
@@ -160,8 +160,8 @@ int updatePrices::getDividends(const QString &symbol_, historicalPrices priceHis
 int updatePrices::getSplits(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_)
 {
     int earliestUpdate = NO_DATA;
-    const QString htmlSplitTrue = "Splits:<nobr>";  // but signifying splits
-    const QString htmlSplitNone = "Splits:none</center>"; // same line, but signifying no splits
+    static const QString htmlSplitTrue = "Splits:<nobr>";  // but signifying splits
+    static const QString htmlSplitNone = "Splits:none</center>"; // same line, but signifying no splits
     QList<QByteArray> lines = downloadFile(QUrl(getSplitAddress(symbol_)), false);
 
     if (lines.isEmpty())

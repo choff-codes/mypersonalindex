@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include <QMap>
+#include <QFutureWatcher>
 #include "settings.h"
 #include "portfolio.h"
 
@@ -28,12 +29,16 @@ private slots:
     void deletePortfolio();
     void portfolioChange(int currentIndex_);
     void importYahoo();
+    void importYahooFinished();
+    void recalculateTradesFinished();
 
 private:
     frmMain_UI *ui;
     QMap<int, portfolio> m_portfolios;
     portfolio* m_currentPortfolio;
     settings m_settings;
+    QFutureWatcher<int> *m_futureWatcherYahoo;
+    QFutureWatcher<void> *m_futureWatcherTrade;
 
     void connectSlots();
     void closeEvent(QCloseEvent *event_);
@@ -46,10 +51,12 @@ private:
     bool prepareFileForSave(const QString &filePath_);
     void updateRecentFileActions(const QString &newFilePath_);
     void refreshPortfolioCmb(int id_ = -1);
+    void showProgressBar(const QString &description_, int steps_);
+    void hideProgressBar();
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(int beginDate_ = 0);
-    void recalculateTrades(QList<portfolio> portfolios_, int beginDate_);
+    void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);
 };
 
 #endif // FRMMAIN_H

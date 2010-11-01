@@ -80,16 +80,24 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
 
     help->addAction(helpAbout);
 
+    cornerWidget = new QStackedWidget(menubar);
+
     portfolioDropDownWidget = new QWidget(menubar);
     portfolioDropDownLayout = new QHBoxLayout(portfolioDropDownWidget);
     portfolioDropDownLayout->setMargin(0);
+
     portfolioDropDown = new QLabel("Portfolio: ", portfolioDropDownWidget);
     portfolioDropDownCmb = new QComboBox(portfolioDropDownWidget);
     portfolioDropDownCmb->setFixedHeight(menubar->sizeHint().height());
+    portfolioDropDownCmb->setMinimumContentsLength(20);
     portfolioDropDownCmb->setDisabled(true);
 
     portfolioDropDownLayout->addWidget(portfolioDropDown);
     portfolioDropDownLayout->addWidget(portfolioDropDownCmb);
+    cornerWidget->addWidget(portfolioDropDownWidget);
 
-    menubar->setCornerWidget(portfolioDropDownWidget);
+    progressBar = new QProgressBar(portfolioDropDownWidget);
+    cornerWidget->addWidget(progressBar);
+
+    menubar->setCornerWidget(cornerWidget);
 }

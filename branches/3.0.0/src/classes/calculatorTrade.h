@@ -17,7 +17,9 @@ public:
         m_beginDate(beginDate_)
     {}
 
-    void operator()(portfolio &portfolio_);
+    typedef bool result_type;
+
+    result_type operator()(const portfolio &portfolio_);
 
 private:
     typedef QMap<int, trade>::const_iterator tradeIterator;

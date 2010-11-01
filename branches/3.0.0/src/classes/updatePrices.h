@@ -40,9 +40,9 @@ public:
         NO_DATA(m_options.endDate + 1)
     {}
 
-    typedef updatePricesReturnValue result_type;
+    typedef int result_type;
 
-    updatePricesReturnValue operator()(const historicalPrices &prices_);
+    result_type operator()(const historicalPrices &prices_);
 
     static bool isInternetConnection();
 

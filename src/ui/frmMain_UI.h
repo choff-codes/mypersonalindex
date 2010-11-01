@@ -8,6 +8,8 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QStackedWidget>
+#include <QProgressBar>
 
 class frmMain_UI
 {
@@ -41,6 +43,8 @@ public:
     QMenu *help;
     QAction *helpAbout;
     QMenuBar *menubar;
+    QStackedWidget *cornerWidget;
+    QProgressBar *progressBar;
     QWidget *portfolioDropDownWidget;
     QHBoxLayout *portfolioDropDownLayout;
     QLabel *portfolioDropDown;

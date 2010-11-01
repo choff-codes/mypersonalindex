@@ -22,7 +22,9 @@
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
     ui(new frmMain_UI),
-    m_currentPortfolio(0)
+    m_currentPortfolio(0),
+    m_futureWatcherYahoo(0),
+    m_futureWatcherTrade(0)
 {
     ui->setupUI(this);
     connectSlots();
@@ -32,6 +34,19 @@ frmMain::frmMain(QWidget *parent):
 
 frmMain::~frmMain()
 {
+    if (m_futureWatcherYahoo)
+    {
+        m_futureWatcherYahoo->cancel();
+        m_futureWatcherYahoo->waitForFinished();
+    }
+
+    if (m_futureWatcherTrade)
+    {
+        m_futureWatcherTrade->cancel();
+        m_futureWatcherTrade->waitForFinished();
+    }
+
+
     delete ui;
 }
 
@@ -279,7 +294,6 @@ void frmMain::updateRecentFileActions(const QString &newFilePath_)
 void frmMain::recentFileSelected()
 {
     QAction *action = qobject_cast<QAction*>(sender());
-
     if (!action || action->text() == windowFilePath())
         return;
 
@@ -300,6 +314,7 @@ void frmMain::addPortfolio()
     m_portfolios.insert(newPortfolio.attributes().id, newPortfolio);
     ui->portfolioDropDownCmb->addItem(newPortfolio.attributes().description, newPortfolio.attributes().id);
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
+    recalculateTrades(*m_currentPortfolio);
 }
 
 void frmMain::editPortfolio()
@@ -367,29 +382,32 @@ void frmMain::importYahoo()
     foreach(const QString &s, portfolio::symbols(m_portfolios))
         prices.append(priceFactory::getPrices(s));
 
+    showProgressBar("Downloading", prices.count());
     updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
 
-    QFutureWatcher<updatePricesReturnValue> watcher;
-    QEventLoop eventLoop;
-    connect(&watcher, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-    watcher.setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
+    m_futureWatcherYahoo = new QFutureWatcher<int>();
+    connect(m_futureWatcherYahoo, SIGNAL(finished()), this, SLOT(importYahooFinished()));
+    connect(m_futureWatcherYahoo, SIGNAL(progressValueChanged(int)), ui->progressBar, SLOT(setValue(int)));
+    m_futureWatcherYahoo->setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
+}
 
-    eventLoop.exec();
+void frmMain::importYahooFinished()
+{
+    hideProgressBar();
 
-    int earliestUpdate = options.endDate + 1;
-    QStringList failures;
-    foreach(const updatePricesReturnValue &result, watcher.future())
-        if (result.date == UNASSIGNED)
-            failures.append(result.symbol);
-        else
-            earliestUpdate = qMin(earliestUpdate, result.date);
+    int earliestUpdate = tradeDateCalendar::endDate() + 1;
+    foreach(const int &result, m_futureWatcherYahoo->future())
+        if (result != UNASSIGNED)
+            earliestUpdate = qMin(earliestUpdate, result);
 
-    if (earliestUpdate <= options.endDate)
-        setWindowModified(true);
+    delete m_futureWatcherYahoo;
+    m_futureWatcherYahoo = 0;
 
-    if (!failures.isEmpty())
-        QMessageBox::information(this, QCoreApplication::applicationName(), "The following securities were not updated (Yahoo! Finance may not yet have today's price):\n\n" +
-            failures.join(", "));
+    if (earliestUpdate > tradeDateCalendar::endDate())
+        return;
+
+    setWindowModified(true);
+    recalculateTrades(earliestUpdate);
 }
 
 void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)
@@ -402,12 +420,30 @@ void frmMain::recalculateTrades(int beginDate_)
     recalculateTrades(m_portfolios.values(), beginDate_);
 }
 
-void frmMain::recalculateTrades(QList<portfolio> portfolios_, int beginDate_)
+void frmMain::recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_)
 {
-    QFutureWatcher<void> watcher;
-    QEventLoop eventLoop;
-    connect(&watcher, SIGNAL(finished()), &eventLoop, SLOT(quit()));
-    watcher.setFuture(QtConcurrent::map(portfolios_, calculatorTrade(beginDate_)));
+    showProgressBar("Calculating", portfolios_.count());
+    m_futureWatcherTrade = new QFutureWatcher<void>();
+    connect(m_futureWatcherTrade, SIGNAL(finished()), this, SLOT(recalculateTradesFinished()));
+    m_futureWatcherTrade->setFuture(QtConcurrent::mapped(portfolios_, calculatorTrade(beginDate_)));
+}
 
-    eventLoop.exec();
+void frmMain::recalculateTradesFinished()
+{
+    delete m_futureWatcherTrade;
+    m_futureWatcherTrade = 0;
+    hideProgressBar();
+}
+
+void frmMain::showProgressBar(const QString &description_, int steps_)
+{
+    ui->progressBar->setMaximum(steps_);
+    ui->progressBar->setValue(0);
+    ui->progressBar->setFormat(QString("%1: %p%").arg(description_));
+    ui->cornerWidget->setCurrentIndex(1);
+}
+
+void frmMain::hideProgressBar()
+{
+    ui->cornerWidget->setCurrentIndex(0);
 }

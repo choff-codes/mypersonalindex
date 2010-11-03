@@ -6,6 +6,7 @@
 #include <QFutureWatcher>
 #include "settings.h"
 #include "portfolio.h"
+#include "historicalPrices.h"
 
 class frmMain_UI;
 class portfolio;
@@ -37,6 +38,7 @@ private:
     QMap<int, portfolio> m_portfolios;
     portfolio* m_currentPortfolio;
     settings m_settings;
+    historicalPricesMap m_historicalPricesMap;
     QFutureWatcher<int> *m_futureWatcherYahoo;
     QFutureWatcher<void> *m_futureWatcherTrade;
 
@@ -51,6 +53,7 @@ private:
     bool prepareFileForSave(const QString &filePath_);
     void updateRecentFileActions(const QString &newFilePath_);
     void refreshPortfolioCmb(int id_ = -1);
+    void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
 

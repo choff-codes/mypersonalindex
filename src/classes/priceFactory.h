@@ -1,22 +1,20 @@
 #ifndef PRICEFACTORY_H
 #define PRICEFACTORY_H
 
-#include <QHash>
-#include "historicalPrices.h"
+#include "queries.h"
 
-class queries;
+class historicalPricesMap;
 class priceFactory
 {
 public:
-    static historicalPrices getPrices(const QString &symbol_);
-    static void open(const queries &dataSource_);
-    static void save(const queries &dataSource_);
-    static void close();
+    priceFactory(const queries &dataSource_):
+        m_dataSource(dataSource_)
+    {}
+
+    historicalPricesMap getHistoricalPrices();
 
 private:
-    static QHash<QString, historicalPrices> m_historicalPricesCache;
-
-    static historicalPrices getHistoricalPrices(const QString &symbol_, const queries &dataSource_);
+    queries m_dataSource;
 };
 
 #endif // PRICEFACTORY_H

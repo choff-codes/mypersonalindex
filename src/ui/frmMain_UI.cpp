@@ -7,15 +7,21 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     menubar = new QMenuBar(mainWindow);
     mainWindow->setMenuBar(menubar);
 
-    file = new QMenu("File", menubar);
+    file = new QMenu("&File", menubar);
     fileNew = new QAction("New...", mainWindow);
+    fileNew->setShortcut(QKeySequence::New);
     fileOpen = new QAction("Open...", mainWindow);
+    fileOpen->setShortcut(QKeySequence::Open);
     fileRecent = new QMenu("Recent", file);
     fileSave = new QAction("Save", mainWindow);
+    fileSave->setShortcut(QKeySequence::Save);
     fileSaveAs = new QAction("Save As...", mainWindow);
+    fileSaveAs->setShortcut(QKeySequence::SaveAs);
     fileExit = new QAction("Exit", mainWindow);
+    fileExit->setShortcut(QKeySequence::Quit);
 
-    view = new QMenu("View", menubar);
+
+    view = new QMenu("&View", menubar);
     viewSummary = new QAction("Summary", mainWindow);
     viewTrades = new QAction("Trade Register", mainWindow);
     viewAccounts = new QAction("Accounts", mainWindow);
@@ -26,20 +32,25 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     viewCorrelations = new QAction("Correlations", mainWindow);
     viewPerformance = new QAction("Performance", mainWindow);
 
-    portfolio = new QMenu("Portfolio", menubar);
+    portfolio = new QMenu("&Portfolio", menubar);
     portfolioAdd = new QAction("Add New...", mainWindow);
+    portfolioAdd->setShortcut(QKeySequence::AddTab);
     portfolioEdit = new QAction("Edit...", mainWindow);
     portfolioEdit->setDisabled(true);
+    portfolioEdit->setShortcut(QString("Ctrl+E"));
     portfolioDelete = new QAction("Delete...", mainWindow);
     portfolioDelete->setDisabled(true);
+    portfolioDelete->setShortcut(QString("Ctrl+D"));
 
-    import = new QMenu("Import", menubar);
+    import = new QMenu("&Import", menubar);
     importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow);
+    importYahoo->setShortcut(QString("Ctrl+U"));
     importPrices = new QAction("Manually Import Price Information...", mainWindow);
     importPortfolio = new QAction("From Other Portfolio...", mainWindow);
     importFile = new QAction("From Other File...", mainWindow);
+    importFile->setShortcut(QString("Ctrl+I"));
 
-    help = new QMenu("Help", menubar);
+    help = new QMenu("&Help", menubar);
     helpAbout = new QAction("About", mainWindow);
 
     menubar->addAction(file->menuAction());

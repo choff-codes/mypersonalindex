@@ -12,14 +12,14 @@ public:
         m_dataSource(dataSource_)
     { }
 
-    QMap<int, portfolio> getPortfolios(bool includePricing_);
+    QMap<int, portfolio> getPortfolios();
 
 private:
     QMap<int, portfolio> m_portfolios;
     queries m_dataSource;
 
     void loadPortfolio();
-    void loadPortfolioSecurity(bool includePricing_);
+    void loadPortfolioSecurity();
     void loadPortfolioSecurityAA();
     void loadPortfolioSecurityTrades();
     void loadPortfolioSecurityTradesExecution();

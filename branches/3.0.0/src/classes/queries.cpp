@@ -256,7 +256,7 @@ void queries::executeNonQuery(const QString &query_) const
 
 void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch *object_) const
 {
-    if (tableName_.isEmpty() || columns_.isEmpty())
+    if (tableName_.isEmpty() || columns_.isEmpty() || rowCount_ == 0)
         return;
 
     QSqlQuery query(m_database);

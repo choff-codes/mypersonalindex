@@ -6,13 +6,12 @@
 #include "assetAllocation.h"
 #include "security.h"
 #include "portfolioAttributes.h"
-#include "priceFactory.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
-QMap<int, portfolio> portfolioFactory::getPortfolios(bool includePricing_)
+QMap<int, portfolio> portfolioFactory::getPortfolios()
 {
 #ifdef CLOCKTIME
     QTime t;
@@ -22,7 +21,7 @@ QMap<int, portfolio> portfolioFactory::getPortfolios(bool includePricing_)
     loadPortfolio();
     loadPortfolioAA();
     loadPortfolioAccount();
-    loadPortfolioSecurity(includePricing_);
+    loadPortfolioSecurity();
     loadPortfolioSecurityAA();
     loadPortfolioSecurityTrades();
     loadPortfolioSecurityTradesExecution();
@@ -65,14 +64,12 @@ void portfolioFactory::loadPortfolioAccount()
     }
 }
 
-void portfolioFactory::loadPortfolioSecurity(bool includePricing_)
+void portfolioFactory::loadPortfolioSecurity()
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioSecurity, queries::portfolioSecurityColumns);
     while(q.next())
     {
         security sec = security::load(q);
-        if(!sec.cashAccount && includePricing_)
-            sec.setHistoricalPrices(priceFactory::getPrices(sec.description));
         m_portfolios[sec.parent].securities().insert(sec.id, sec);
     }
 }

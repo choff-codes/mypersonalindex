@@ -234,8 +234,9 @@ QStringList portfolio::symbols(const QMap<int, portfolio> portfolios_)
 {
     QStringList list;
     foreach(const portfolio &p, portfolios_)
-        foreach(const QString &symbol, p.symbols())
-            list.append(symbol);
+        if (!p.attributes().deleted)
+            foreach(const QString &symbol, p.symbols())
+                list.append(symbol);
     list.removeDuplicates();
     return list;
 }

@@ -191,3 +191,10 @@ QString& historicalPrices::symbol() const
 {
     return d->symbol;
 }
+
+void historicalPricesMap::save(const queries &dataSource_)
+{
+    dataSource_.deleteTable(queries::table_HistoricalPrice);
+    for(QHash<QString, historicalPrices>::iterator i = m_historicalPrices.begin(); i != m_historicalPrices.end(); i++)
+        i->insertBatch(dataSource_);
+}

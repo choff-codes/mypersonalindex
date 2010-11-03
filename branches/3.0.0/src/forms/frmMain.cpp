@@ -9,11 +9,12 @@
 #include "frmEdit.h"
 #include "settingsFactory.h"
 #include "portfolioFactory.h"
-#include "priceFactory.h"
 #include "portfolioAttributes.h"
 #include "updatePrices.h"
 #include "tradeDateCalendar.h"
 #include "calculatorTrade.h"
+#include "priceFactory.h"
+#include "security.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -84,7 +85,7 @@ void frmMain::newFile()
 
     m_portfolios.clear();
     refreshPortfolioCmb();
-    priceFactory::close();
+    m_historicalPricesMap.clear();
     setCurrentFile("");
 }
 
@@ -150,7 +151,7 @@ bool frmMain::saveFile(const QString &filePath_)
 #endif
     file.beginTransaction();
 
-    priceFactory::save(file);
+    m_historicalPricesMap.save(file);
 
     file.commit();
 #ifdef CLOCKTIME
@@ -217,10 +218,9 @@ void frmMain::loadFile(const QString &filePath_)
         return;
     }
 
-    priceFactory::close();
-    priceFactory::open(file);
-
-    m_portfolios = portfolioFactory(file).getPortfolios(true);
+    m_historicalPricesMap = priceFactory(file).getHistoricalPrices();
+    m_portfolios = portfolioFactory(file).getPortfolios();
+    refreshPortfolioPrices();
     refreshPortfolioCmb();
 
     setCurrentFile(filePath_);
@@ -287,8 +287,12 @@ void frmMain::updateRecentFileActions(const QString &newFilePath_)
         m_settings.addRecentFile(newFilePath_);
 
     ui->fileRecent->clear();
-    foreach(const QString &s, m_settings.recentFiles())
+    foreach(const QString &s, m_settings.recentFiles())     
         connect(ui->fileRecent->addAction(s), SIGNAL(triggered()), this, SLOT(recentFileSelected()));
+
+    int counter = 1;
+    foreach(QAction *action, ui->fileRecent->actions())
+        action->setShortcut(QString("Ctrl+%1").arg(QString::number(counter++)));
 }
 
 void frmMain::recentFileSelected()
@@ -312,6 +316,7 @@ void frmMain::addPortfolio()
     setWindowModified(true);
     portfolio newPortfolio = f.getPortfolio();
     m_portfolios.insert(newPortfolio.attributes().id, newPortfolio);
+    refreshPortfolioPrices();
     ui->portfolioDropDownCmb->addItem(newPortfolio.attributes().description, newPortfolio.attributes().id);
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
     recalculateTrades(*m_currentPortfolio);
@@ -329,6 +334,8 @@ void frmMain::editPortfolio()
 
     setWindowModified(true);;
     m_portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();;
+    refreshPortfolioPrices();
+
     m_currentPortfolio = &m_portfolios[m_currentPortfolio->attributes().id];
     ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
     recalculateTrades(*m_currentPortfolio, 0);
@@ -348,6 +355,13 @@ void frmMain::deletePortfolio()
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
+void frmMain::refreshPortfolioPrices()
+{
+    for(QMap<int, portfolio>::iterator i = m_portfolios.begin(); i != m_portfolios.end(); ++i)
+        for(QMap<int, security>::iterator x = i->securities().begin(); x != i->securities().end(); ++x)
+            x->setHistoricalPrices(m_historicalPricesMap.getHistoricalPrice(x->description));
+}
+
 void frmMain::portfolioChange(int currentIndex_)
 {
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
@@ -365,7 +379,6 @@ void frmMain::about()
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
 }
 
-
 void frmMain::importYahoo()
 {
     if (!updatePrices::isInternetConnection())
@@ -376,11 +389,16 @@ void frmMain::importYahoo()
 
     int beginDate = tradeDateCalendar::endDate() + 1;
     foreach(const portfolio &p, m_portfolios)
+    {
+        if (p.attributes().deleted)
+            continue;
+
         beginDate = qMin(beginDate, p.attributes().startDate);
+    }
 
     QList<historicalPrices> prices;
     foreach(const QString &s, portfolio::symbols(m_portfolios))
-        prices.append(priceFactory::getPrices(s));
+        prices.append(m_historicalPricesMap.getHistoricalPrice(s));
 
     showProgressBar("Downloading", prices.count());
     updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits);

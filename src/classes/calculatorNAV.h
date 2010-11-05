@@ -3,10 +3,6 @@
 
 #include <QSharedData>
 
-#ifdef CLOCKTIME
-#include <QTime>
-#endif
-
 class portfolio;
 class objectKey;
 class snapshot;
@@ -28,7 +24,7 @@ public:
     snapshot accountSnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot symbolSnapshot(int date_, int id_, int beginDate_);
 
-    historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_ = 1);
+    historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, double navValue_ = 1);
 
 private:
     QExplicitlySharedDataPointer<calculatorNAVData> d;
@@ -39,6 +35,5 @@ private:
 
     double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
 };
-
 
 #endif // CALCULATIONS_H

@@ -22,6 +22,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
 
 
     view = new QMenu("&View", menubar);
+    viewGroup = new QActionGroup(mainWindow);
     viewSummary = new QAction("Summary", mainWindow);
     viewTrades = new QAction("Trade Register", mainWindow);
     viewAccounts = new QAction("Accounts", mainWindow);
@@ -68,15 +69,16 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     file->addSeparator();
     file->addAction(fileExit);
 
-    view->addAction(viewSummary);
-    view->addAction(viewTrades);
-    view->addAction(viewAccounts);
-    view->addAction(viewAssetAllocation);
-    view->addAction(viewSecurities);
-    view->addAction(viewStatistics);
-    view->addAction(viewCharts);
-    view->addAction(viewCorrelations);
-    view->addAction(viewPerformance);
+    viewGroup->addAction(viewSummary);
+    viewGroup->addAction(viewTrades);
+    viewGroup->addAction(viewAccounts);
+    viewGroup->addAction(viewAssetAllocation);
+    viewGroup->addAction(viewSecurities);
+    viewGroup->addAction(viewStatistics);
+    viewGroup->addAction(viewCharts);
+    viewGroup->addAction(viewCorrelations);
+    viewGroup->addAction(viewPerformance);
+    view->addActions(viewGroup->actions());
 
     portfolio->addAction(portfolioEdit);
     portfolio->addAction(portfolioDelete);

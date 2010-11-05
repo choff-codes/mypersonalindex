@@ -347,7 +347,7 @@ void frmEdit::add()
     if (!isValidCurrentModel())
         return;
 
-    objectKey *key;
+    objectKey *key = 0;
     int identity = portfolio::getOpenIdentity();
 
     switch(m_currentTab)

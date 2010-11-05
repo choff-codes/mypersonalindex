@@ -50,15 +50,15 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
 
     // check if it needs to be calculated
     security s = d->currentPortfolio.securities().value(id_);
-    if (!s.includeInCalc)
+    if (!s.includeInCalc || s.executedTrades.isEmpty())
         return snapshotSecurity(date_);
 
     // check if prior day is cached
     value = d->securitiesCache.value(
-            priorDate_ == 0 ?
-                tradeDateCalendar::previousTradeDate(date_) :
-                priorDate_
-        ).value(id_);
+                priorDate_ == 0 ?
+                    tradeDateCalendar::previousTradeDate(date_) :
+                    priorDate_
+            ).value(id_);
 
     splits splitRatio(s.splits(), date_, value.date);
 
@@ -82,6 +82,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     account acct = d->currentPortfolio.accounts().value(s.account);
     value.setTaxLiability(acct.taxRate, acct.taxDeferred);
 
+    d->securitiesCache[date_].insert(id_, value);
     return value;
 }
 
@@ -203,7 +204,7 @@ int calculatorNAV::endDateByKey(const objectKey &key_)
     return 0;
 }
 
-historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, bool dividends_, double navValue_)
+historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, double navValue_)
 {
     historicalNAV navHistory;
 
@@ -230,7 +231,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate
                         priorSnapshot.totalValue,
                         currentSnapshot.totalValue,
                         currentSnapshot.costBasis - priorSnapshot.costBasis,
-                        dividends_ ? currentSnapshot.dividendAmount : 0,
+                        currentSnapshot.dividendAmount,
                         navValue_
                     );
 

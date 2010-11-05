@@ -15,6 +15,10 @@
 #include "calculatorTrade.h"
 #include "priceFactory.h"
 #include "security.h"
+#include "frmMainAA_UI.h"
+#include "mainAAModel.h"
+#include "calculatorNAV.h"
+#include "historicalNAV.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -22,8 +26,10 @@
 
 frmMain::frmMain(QWidget *parent):
     QMainWindow(parent),
-    ui(new frmMain_UI),
+    ui(new frmMain_UI()),
+    ui_assetAllocation(new frmMainAA_UI()),
     m_currentPortfolio(0),
+    m_currentCalculator(0),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
 {
@@ -49,6 +55,7 @@ frmMain::~frmMain()
 
 
     delete ui;
+    delete ui_assetAllocation;
 }
 
 void frmMain::connectSlots()
@@ -64,6 +71,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioChange(int)));
     connect(ui->importYahoo, SIGNAL(triggered()), this, SLOT(importYahoo()));
+    connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(tabAA()));
 }
 
 void frmMain::loadSettings()
@@ -146,6 +154,7 @@ bool frmMain::saveFile(const QString &filePath_)
     refreshPortfolioCmb(currentID == UNASSIGNED ? -1 : currentID);
 
     file.commit();
+
 #ifdef CLOCKTIME
     qDebug("Time elapsed (save porfolios): %d ms", t.elapsed());
 #endif
@@ -464,4 +473,50 @@ void frmMain::showProgressBar(const QString &description_, int steps_)
 void frmMain::hideProgressBar()
 {
     ui->cornerWidget->setCurrentIndex(0);
+}
+
+void frmMain::tabAA()
+{
+    if (!m_currentPortfolio || m_currentTab == tab_assetAllocation)
+        return;
+
+    delete m_tabs.take(m_currentTab);
+
+    ui_assetAllocation->setupUI(this);
+    connect(ui_assetAllocation->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(tabAARefresh()));
+    connect(ui_assetAllocation->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(tabAARefresh()));
+    connect(ui_assetAllocation->toolbarShowHidden, SIGNAL(triggered()), this, SLOT(tabAARefresh()));
+    connect(ui_assetAllocation->toolbarShowUnassigned, SIGNAL(triggered()), this, SLOT(tabAARefresh()));
+
+    this->setCentralWidget(ui_assetAllocation->widget);
+    m_tabs.insert(tab_assetAllocation, ui_assetAllocation->widget);
+    m_currentTab = tab_assetAllocation;
+
+    tabAARefresh();
+}
+
+void frmMain::tabAARefresh()
+{
+    if (!m_currentPortfolio)
+        return;
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+    calculatorNAV navCalc(*m_currentPortfolio);
+    int beginDate = ui_assetAllocation->toolbarDateBeginEdit->date().toJulianDay();
+    int endDate = ui_assetAllocation->toolbarDateEndEdit->date().toJulianDay();
+
+    QList<baseRow*> rows = aaRow::getRows(
+        m_currentPortfolio->assetAllocations(), beginDate, endDate, navCalc, m_settings.viewableColumnsSorting.value(settings::columns_AA),
+        ui_assetAllocation->toolbarShowUnassigned->isChecked(), ui_assetAllocation->toolbarShowUnassigned->isChecked()
+    );
+
+    ui_assetAllocation->table->setModel(
+        new mainAAModel(rows, navCalc.portfolioSnapshot(endDate), navCalc.changeOverTime(m_currentPortfolio->attributes(), beginDate, endDate).nav(endDate),
+        QList<int>() << 0 << 1 << 2 << 3 << 4, ui_assetAllocation->table)
+    );
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (aa tab): %d ms", t.elapsed());
+#endif
 }

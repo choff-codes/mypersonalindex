@@ -9,7 +9,9 @@
 #include "historicalPrices.h"
 
 class frmMain_UI;
+class frmMainAA_UI;
 class portfolio;
+class calculatorNAV;
 class frmMain : public QMainWindow
 {
     Q_OBJECT
@@ -32,15 +34,33 @@ private slots:
     void importYahoo();
     void importYahooFinished();
     void recalculateTradesFinished();
+    void tabAA();
+    void tabAARefresh();
 
 private:
+    enum tab {
+        tab_summary,
+        tab_trade,
+        tab_account,
+        tab_assetAllocation,
+        tab_security,
+        tab_statistic,
+        tab_chart,
+        tab_correlation,
+        tab_performance
+    };
+
     frmMain_UI *ui;
+    frmMainAA_UI *ui_assetAllocation;
     QMap<int, portfolio> m_portfolios;
     portfolio* m_currentPortfolio;
+    calculatorNAV* m_currentCalculator;
     settings m_settings;
     historicalPricesMap m_historicalPricesMap;
     QFutureWatcher<int> *m_futureWatcherYahoo;
     QFutureWatcher<void> *m_futureWatcherTrade;
+    QMap<int, QWidget*> m_tabs;
+    tab m_currentTab;
 
     void connectSlots();
     void closeEvent(QCloseEvent *event_);

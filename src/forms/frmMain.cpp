@@ -19,6 +19,8 @@
 #include "mainAAModel.h"
 #include "calculatorNAV.h"
 #include "historicalNAV.h"
+#include "frmSort.h"
+#include "frmColumns.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -165,10 +167,6 @@ bool frmMain::saveFile(const QString &filePath_)
     file.commit();
 #ifdef CLOCKTIME
     qDebug("Time elapsed (save prices): %d ms", t.elapsed());
-#endif
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (save): %d ms", t.elapsed());
 #endif
 
     setCurrentFile(filePath_);
@@ -480,13 +478,25 @@ void frmMain::tabAA()
     if (!m_currentPortfolio || m_currentTab == tab_assetAllocation)
         return;
 
-    delete m_tabs.take(m_currentTab);
+    if (m_tabs.contains(tab_assetAllocation))
+    {
+        this->setCentralWidget(m_tabs.value(tab_assetAllocation));
+        m_currentTab = tab_assetAllocation;
+        return;
+    }
 
     ui_assetAllocation->setupUI(this);
+    ui_assetAllocation->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->attributes().startDate));
+    ui_assetAllocation->toolbarDateEndEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->endDate()));
+    setSortDropDown(m_settings.viewableColumnsSorting.value(settings::columns_AA), ui_assetAllocation->toolbarSortCmb);
     connect(ui_assetAllocation->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(tabAARefresh()));
     connect(ui_assetAllocation->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(tabAARefresh()));
     connect(ui_assetAllocation->toolbarShowHidden, SIGNAL(triggered()), this, SLOT(tabAARefresh()));
     connect(ui_assetAllocation->toolbarShowUnassigned, SIGNAL(triggered()), this, SLOT(tabAARefresh()));
+    connect(ui_assetAllocation->toolbarSortCmb, SIGNAL(activated(int)), this, SLOT(sortChanged(int)));
+    connect(ui_assetAllocation->toolbarReorder, SIGNAL(triggered()), this, SLOT(modifyColumns()));
+    connect(ui_assetAllocation->toolbarExport, SIGNAL(triggered()), ui_assetAllocation->table, SLOT(exportTable()));
+    connect(ui_assetAllocation->tableCopy, SIGNAL(activated()), ui_assetAllocation->table, SLOT(copyTable()));
 
     this->setCentralWidget(ui_assetAllocation->widget);
     m_tabs.insert(tab_assetAllocation, ui_assetAllocation->widget);
@@ -514,9 +524,62 @@ void frmMain::tabAARefresh()
 
     ui_assetAllocation->table->setModel(
         new mainAAModel(rows, navCalc.portfolioSnapshot(endDate), navCalc.changeOverTime(m_currentPortfolio->attributes(), beginDate, endDate).nav(endDate),
-        QList<int>() << 0 << 1 << 2 << 3 << 4, ui_assetAllocation->table)
+            m_settings.viewableColumns.value(settings::columns_AA), ui_assetAllocation->table)
     );
 #ifdef CLOCKTIME
     qDebug("Time elapsed (aa tab): %d ms", t.elapsed());
 #endif
 }
+
+void frmMain::setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_)
+{
+    dropDown_->blockSignals(true);
+
+    if (sort_.isEmpty()) // no sort
+        dropDown_->setCurrentIndex(0);
+    else if (sort_.at(0).direction == orderBy::order_descending || sort_.count() > 1) // custom sort
+        dropDown_->setCurrentIndex(dropDown_->count() - 1);
+    else
+        dropDown_->setCurrentIndex(dropDown_->findData(sort_.at(0).column));
+
+    dropDown_->blockSignals(false);
+}
+
+void frmMain::sortChanged(int index_)
+{
+    int columnID = static_cast<QComboBox*>(sender())->itemData(index_).toInt();
+
+    switch(columnID)
+    {
+    case -1:
+        m_settings.viewableColumnsSorting[settings::columns_AA].clear();
+        break;
+    case -2:
+        {
+            frmSort f(m_settings.viewableColumnsSorting.value(settings::columns_AA), aaRow::fieldNames(), this);
+            if (f.exec())
+                 m_settings.viewableColumnsSorting[settings::columns_AA] = f.getReturnValues();
+            else
+                return;
+        }
+        break;
+    default:
+        m_settings.viewableColumnsSorting[settings::columns_AA].clear();
+        m_settings.viewableColumnsSorting[settings::columns_AA].append(orderBy(columnID, orderBy::order_ascending));
+        break;
+    }
+    setSortDropDown(m_settings.viewableColumnsSorting.value(settings::columns_AA), static_cast<QComboBox*>(sender()));
+    static_cast<mpiViewModelBase*>(ui_assetAllocation->table->model())->setColumnSort(m_settings.viewableColumnsSorting.value(settings::columns_AA));
+}
+
+void frmMain::modifyColumns()
+{
+    frmColumns f(m_settings.viewableColumns.value(settings::columns_AA), aaRow::fieldNames(), this);
+    if (!f.exec())
+        return;
+
+    m_settings.viewableColumns[settings::columns_AA] = f.getReturnValues();
+    static_cast<mpiViewModelBase*>(ui_assetAllocation->table->model())->setViewableColumns(m_settings.viewableColumns.value(settings::columns_AA));
+}
+
+

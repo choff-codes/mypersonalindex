@@ -14,13 +14,13 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSnapshot_, const assetAllocation &aa_, const QList<sort> &columnSort_);
+    aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSnapshot_, const assetAllocation &aa_, const QList<orderBy> &columnSort_);
 
     QVariant columnType(int column_) const { return columnsType.at(column_); }
     static QMap<int, QString> fieldNames();
 
     static QList<baseRow*> getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const QList<sort> &columnSort_, bool showHidden_, bool showUnassigned_);
+        const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_);
 };
 
 class mainAAModel: public mpiViewModelBase

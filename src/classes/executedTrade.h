@@ -47,6 +47,8 @@ public:
     QMap<int, executedTrade>::const_iterator lowerBound(int date_) const { return m_trades.lowerBound(date_); }
     QMap<int, executedTrade>::const_iterator constBegin() const { return m_trades.constBegin(); }
     QMap<int, executedTrade>::const_iterator constEnd() const { return m_trades.constEnd(); }
+    bool isEmpty() const { return m_trades.isEmpty(); }
+    int count() const { return m_trades.count(); }
 
     void insert(int date_, const executedTrade &executedTrade_);
 

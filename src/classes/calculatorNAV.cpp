@@ -65,13 +65,12 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     // start loop depending on cached date
     for(QMap<int, executedTrade>::const_iterator i = s.executedTrades.lowerBound(value.date); i != s.executedTrades.constEnd(); ++i)
     {
-        if (i.key() > date_)
-            break;
+       if (i.key() > date_)
+           break;
 
-        value.shares += i->shares * splitRatio.ratio(i.key());
-        value.costBasis += (i->shares * i->price) + i->commission;
+       value.shares += i->shares * splitRatio.ratio(i.key());
+       value.costBasis += (i->shares * i->price) + i->commission;
     }
-
 
     value.shares = functions::massage(value.shares); // zero out if needed
     value.date = date_;
@@ -217,7 +216,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate
 
     beginDate_ = calendar.date();
     snapshot priorSnapshot = snapshotByKey(beginDate_, key_, beginDate_, 0);
-    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue);
+    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue); // baseline nav
 
     foreach(const int &date, ++calendar)
     {

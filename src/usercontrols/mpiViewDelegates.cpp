@@ -1,4 +1,5 @@
 #include "mpiViewDelegates.h"
+#include <QDoubleSpinBox>
 
 QWidget* spinBoxDelegate::createEditor(QWidget *parent_, const QStyleOptionViewItem&, const QModelIndex&) const
 {

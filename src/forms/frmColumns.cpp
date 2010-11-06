@@ -1,15 +1,13 @@
 #include "frmColumns.h"
 #include "frmColumns_UI.h"
 
-frmColumns::frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, const QString &windowTitle_,QDialog::DialogCode dialogCodeOnNoChange_, QWidget *parent_):
+frmColumns::frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, QWidget *parent_):
     QDialog(parent_),
     ui(new frmColumns_UI),
     m_selectedItems(selectedItems_),
-    m_items(items_),
-    m_dialogCodeOnNoChange(dialogCodeOnNoChange_)
+    m_items(items_)
 {
     ui->setupUI(this);
-    this->setWindowTitle(windowTitle_);
 
     // since selectedItems can be unsorted, this is not efficient, but the lists are never large so far
     for(QMap<int, QString>::const_iterator i = m_items.constBegin(); i != m_items.constEnd(); ++i)
@@ -61,7 +59,7 @@ void frmColumns::accept()
 
     if (selected == m_selectedItems)
     {
-        QDialog::done(m_dialogCodeOnNoChange);
+        QDialog::reject();
         return;
     }
 

@@ -1,4 +1,6 @@
 #include "mpiChart.h"
+#include <QFileDialog>
+#include <QMessageBox>
 
 void mpiChart::exportChart()
 {
@@ -6,7 +8,7 @@ void mpiChart::exportChart()
     QPixmap qPix = QPixmap::grabWidget(this);
 
     QString fileType, filePath;
-    filePath = QFileDialog::getSaveFileName(parentWidget(), "Export to...", QDir::homePath(),
+    filePath = QFileDialog::getSaveFileName(parentWidget(), "Export to...", QString(),
         "JPEG (*.jpeg);;PNG (*.png);;24-bit Bitmap (*.bmp)", &fileType);
 
     if (filePath.isEmpty())

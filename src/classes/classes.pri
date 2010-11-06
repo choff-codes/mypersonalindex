@@ -26,7 +26,7 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/assetAllocationTarget.cpp \
     $$PWD/calculatorCorrelation.cpp \
     $$PWD/calculatorAveragePrice.cpp \
-    $$PWD/sort.cpp
+    $$PWD/orderBy.cpp
 HEADERS += $$PWD/queries.h \
     $$PWD/functions.h \
     $$PWD/calculatorTrade.h \
@@ -58,4 +58,4 @@ HEADERS += $$PWD/queries.h \
     $$PWD/calculatorCorrelation.h \
     $$PWD/calculatorAveragePrice.h \
     $$PWD/symbol.h \
-    $$PWD/sort.h
+    $$PWD/orderBy.h

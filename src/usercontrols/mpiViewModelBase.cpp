@@ -1,44 +1,55 @@
 #include "mpiViewModelBase.h"
+#include "functions.h"
 
 // return true if less than, false otherwise
 // Note: if column sort is descending, returns false if less than
 bool baseRow::baseRowSort(const baseRow *row1_, const baseRow *row2_)
 {
-    if (row1_->columnSort().isEmpty())
+    if (row1_->columnSort.isEmpty())
         return false;
 
     // assume row1 and row2 have the same sort
-    foreach(const sort &s, row1_->columnSort())
+    foreach(const orderBy &o, row1_->columnSort)
     {
-        if (functions::equal(row1_->values.at(s.column), row2_->values.at(s.column), row1_->columnType(s.column)))
+        if (functions::equal(row1_->values.at(o.column), row2_->values.at(o.column), row1_->columnType(o.column)))
             continue;
 
-        if (functions::lessThan(row1_->values.at(s.column), row2_->values.at(s.column), row1_->columnType(s.column)))
-            return s.orderColumn == sort::order_ascending; // return true if ascending (row1 should come first)
+        if (functions::lessThan(row1_->values.at(o.column), row2_->values.at(o.column), row1_->columnType(o.column)))
+            return o.direction == orderBy::order_ascending; // return true if ascending (row1 should come first)
 
-        return s.orderColumn == sort::order_descending; // greater than, return false if ascending (row1 should come second)
+        return o.direction == orderBy::order_descending; // greater than, return false if ascending (row1 should come second)
     }
     return false;
 }
 
-QList<baseRow*> mpiViewModelBase::selectedItems()
+void mpiViewModelBase::setColumnSort(const QList<orderBy> &columnSort_)
 {
-    QList<baseRow*> items;
-
-    QModelIndexList model = m_parent->selectionModel()->selectedRows();
-    if (model.isEmpty())
-        return items;
-
-    foreach(const QModelIndex &q, model)
-        items.append(m_rows.at(q.row()));
-
-    return items;
+    foreach(baseRow *row, m_rows)
+        row->columnSort = columnSort_;
+    sortColumns();
+    dataChanged(index(0, m_viewableColumns.count() - 1), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
 }
 
-QStringList mpiViewModelBase::selectedItems(int column_)
+
+void mpiViewModelBase::setViewableColumns(const QList<int> &viewableColumns_)
 {
-    QStringList returnList;
-    foreach(baseRow *row, selectedItems())
-        returnList.append(row->values.at(column_).toString());
-    return returnList;
+    int currentColumns = m_viewableColumns.count();
+    int newColumns = viewableColumns_.count();
+
+    m_viewableColumns = viewableColumns_;
+
+    if (newColumns > currentColumns)
+    {
+        beginInsertColumns(QModelIndex(), currentColumns, newColumns - 1);
+        insertColumns(currentColumns, newColumns - 1);
+        endInsertColumns();
+    }
+    else if (currentColumns > newColumns)
+    {
+        beginRemoveColumns(QModelIndex(), newColumns, currentColumns - 1);
+        removeColumns(newColumns, currentColumns - 1);
+        endRemoveColumns();
+    }
+
+    dataChanged(index(0, m_viewableColumns.count() - 1), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
 }

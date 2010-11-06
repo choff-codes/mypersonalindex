@@ -3,6 +3,7 @@
 void frmColumns_UI::setupUI(QDialog *dialog)
 {
     dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    dialog->setWindowTitle("Add/Remove");
 
     okCancelBtn = new QDialogButtonBox(dialog);
     okCancelBtn->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);

@@ -38,18 +38,18 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     portfolioAdd->setShortcut(QKeySequence::AddTab);
     portfolioEdit = new QAction("Edit...", mainWindow);
     portfolioEdit->setDisabled(true);
-    portfolioEdit->setShortcut(QString("Ctrl+E"));
+    portfolioEdit->setShortcut(Qt::CTRL + Qt::Key_E);
     portfolioDelete = new QAction("Delete...", mainWindow);
     portfolioDelete->setDisabled(true);
-    portfolioDelete->setShortcut(QString("Ctrl+D"));
+    portfolioDelete->setShortcut(Qt::CTRL + Qt::Key_D);
 
     import = new QMenu("&Import", menubar);
     importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow);
-    importYahoo->setShortcut(QString("Ctrl+U"));
+    importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
     importPrices = new QAction("Manually Import Price Information...", mainWindow);
     importPortfolio = new QAction("From Other Portfolio...", mainWindow);
     importFile = new QAction("From Other File...", mainWindow);
-    importFile->setShortcut(QString("Ctrl+I"));
+    importFile->setShortcut(Qt::CTRL + Qt::Key_I);
 
     help = new QMenu("&Help", menubar);
     helpAbout = new QAction("About", mainWindow);

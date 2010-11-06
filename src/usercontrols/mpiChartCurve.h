@@ -2,7 +2,6 @@
 #define MPICHARTCURVE_H
 
 #include <QVector>
-#include <qwt_plot.h>
 #include <qwt_plot_curve.h>
 
 class mpiChartCurve

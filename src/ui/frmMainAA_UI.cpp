@@ -1,4 +1,5 @@
 #include "frmMainAA_UI.h"
+#include "mainAAModel.h"
 
 void frmMainAA_UI::setupUI(QWidget *parent)
 {
@@ -17,6 +18,12 @@ void frmMainAA_UI::setupUI(QWidget *parent)
     toolbarSort = new QLabel(" Sort By: ", toolbar);
     toolbarSortCmb = new QComboBox(toolbar);
     toolbarSortCmb->setMinimumContentsLength(15);
+    QMap<int, QString> items = aaRow::fieldNames();
+    toolbarSortCmb->addItem("(None)", -1);
+    for (QMap<int, QString>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+            toolbarSortCmb->addItem(i.value(), i.key());
+    toolbarSortCmb->addItem("Custom...", -2);
+
     toolbarShowUnassigned = new QAction("Show Unassigned", toolbar);
     toolbarShowUnassigned->setCheckable(true);
     toolbarShowHidden = new QAction("Show Hidden", toolbar);

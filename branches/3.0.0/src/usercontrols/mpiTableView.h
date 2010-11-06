@@ -3,15 +3,6 @@
 
 #include <QObject>
 #include <QTableView>
-#include <QWidget>
-#include <QTextStream>
-#include <QFileDialog>
-#include <QHeaderView>
-#include <QMessageBox>
-#include <QApplication>
-#include <QClipboard>
-#include "functions.h"
-
 
 class mpiTableView : public QTableView
 {

@@ -4,7 +4,7 @@
 #include <QMap>
 #include <QString>
 #include <QDialog>
-#include "sort.h"
+#include "orderBy.h"
 
 class frmSort_UI;
 class frmSort : public QDialog
@@ -12,14 +12,14 @@ class frmSort : public QDialog
     Q_OBJECT
 
 public:
-    QList<sort> getReturnValues() const { return m_sort; }
+    QList<orderBy> getReturnValues() const { return m_orderBy; }
 
-    frmSort(const QList<sort> &sort_, const QMap<int, QString> &columns_, QWidget *parent_ = 0);
+    frmSort(const QList<orderBy> &sort_, const QMap<int, QString> &columns_, QWidget *parent_ = 0);
     ~frmSort();
 
 private:
     frmSort_UI *ui;
-    QList<sort> m_sort;
+    QList<orderBy> m_orderBy;
     QMap<int, QString> m_columns;
 
 private slots:

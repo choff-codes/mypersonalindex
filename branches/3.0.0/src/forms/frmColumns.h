@@ -13,8 +13,7 @@ class frmColumns : public QDialog
 public:
     QList<int> getReturnValues() const { return m_selectedItems; }
 
-    frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, const QString &windowTitle_,
-        QDialog::DialogCode dialogCodeOnNoChange_, QWidget *parent_ = 0);
+    frmColumns(const QList<int> &selectedItems_, const QMap<int, QString> &items_, QWidget *parent_ = 0);
 
     ~frmColumns();
 
@@ -27,7 +26,6 @@ private:
     frmColumns_UI *ui;
     QList<int> m_selectedItems;
     QMap<int, QString> m_items;
-    QDialog::DialogCode m_dialogCodeOnNoChange;
 
     void switchSelected(QListWidget *from, QListWidget* to);
     void move(direction direction_);

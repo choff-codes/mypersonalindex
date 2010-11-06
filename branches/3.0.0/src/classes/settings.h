@@ -11,7 +11,7 @@
 #include <QList>
 #include <QMetaType>
 #include <QStringList>
-#include "sort.h"
+#include "orderBy.h"
 
 class settings
 {
@@ -25,7 +25,7 @@ public:
 
     // user qint32 for platform compatability
     typedef QList<qint32> columns;
-    typedef QList<sort> columnsSorting;
+    typedef QList<orderBy> columnsSorting;
 
     bool splits;
     QSize windowSize;

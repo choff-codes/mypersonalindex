@@ -243,20 +243,17 @@ QStringList portfolio::symbols(const QMap<int, portfolio> portfolios_)
 
 int portfolio::endDate() const
 {
-    //TODO
     int date = 0;
     bool nonCashAccount = false;
+
     foreach(const security &s, d->securities)
     {
-        if (s.cashAccount)
+        if (s.cashAccount || s.deleted)
             continue;
 
         nonCashAccount = true;
         date = qMax(date, s.endDate());
     }
 
-    if (!nonCashAccount)
-        return tradeDateCalendar::endDate();
-
-    return date;
+    return date == 0 || !nonCashAccount ? tradeDateCalendar::endDate() : date;
 }

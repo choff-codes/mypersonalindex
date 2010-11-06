@@ -1,4 +1,11 @@
 #include "mpiTableView.h"
+#include <QTextStream>
+#include <QFileDialog>
+#include <QHeaderView>
+#include <QMessageBox>
+#include <QApplication>
+#include <QClipboard>
+#include "functions.h"
 
 void mpiTableView::exportTable(bool toClipboard_)
 {

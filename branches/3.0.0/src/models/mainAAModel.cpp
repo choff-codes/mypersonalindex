@@ -12,7 +12,7 @@ const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::Str
     << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int) << QVariant(QVariant::Double);
 
 
-aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSnapshot_, const assetAllocation &aa_, const QList<sort> &columnSort_):
+aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSnapshot_, const assetAllocation &aa_, const QList<orderBy> &columnSort_):
     baseRow(columnSort_)
 {    
     //row_Description
@@ -56,7 +56,7 @@ QMap<int, QString> aaRow::fieldNames()
 }
 
 QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const QList<sort> &columnSort_, bool showHidden_, bool showUnassigned_)
+    const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_)
 {
     QList<baseRow*> returnList;
 

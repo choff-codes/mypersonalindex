@@ -12,6 +12,7 @@ class frmMain_UI;
 class frmMainAA_UI;
 class portfolio;
 class calculatorNAV;
+class QComboBox;
 class frmMain : public QMainWindow
 {
     Q_OBJECT
@@ -36,6 +37,8 @@ private slots:
     void recalculateTradesFinished();
     void tabAA();
     void tabAARefresh();
+    void sortChanged(int index_);
+    void modifyColumns();
 
 private:
     enum tab {
@@ -76,6 +79,7 @@ private:
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
+    void setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(int beginDate_ = 0);

@@ -1,7 +1,7 @@
 CREATE TABLE "HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC);
 CREATE TABLE "Portfolio" ("ID" INTEGER PRIMARY KEY  NOT NULL,"Description" VARCHAR,"StartValue" INTEGER,"StartDate" INTEGER);
-CREATE TABLE "PortfolioAA" ("ID" INTEGER PRIMARY KEY  NOT NULL , "PortfolioID" INTEGER, "Description" VARCHAR, "Target" NUMERIC, "Threshold" INTEGER, "RebalanceBand" NUMERIC);
-CREATE TABLE "PortfolioAccount" ("ID" INTEGER PRIMARY KEY  NOT NULL , "PortfolioID" INTEGER, "Description" VARCHAR, "TaxRate" NUMERIC, "TaxDeferred" INTEGER, "CostBasis" INTEGER);
+CREATE TABLE "PortfolioAA" ("ID" INTEGER PRIMARY KEY  NOT NULL , "PortfolioID" INTEGER, "Description" VARCHAR, "Target" NUMERIC, "Threshold" INTEGER, "RebalanceBand" NUMERIC, "Hide" INTEGER);
+CREATE TABLE "PortfolioAccount" ("ID" INTEGER PRIMARY KEY  NOT NULL , "PortfolioID" INTEGER, "Description" VARCHAR, "TaxRate" NUMERIC, "TaxDeferred" INTEGER, "CostBasis" INTEGER, "Hide" INTEGER);
 CREATE TABLE "PortfolioSecurity" ("ID" INTEGER PRIMARY KEY  NOT NULL ,"PortfolioID" INTEGER,"Symbol" VARCHAR,"Account" INTEGER,"Expense" DOUBLE,"DivReinvest" INTEGER,"CashAccount" INTEGER,"IncludeInCalc" INTEGER,"Hide" INTEGER, "Note" VARCHAR, "Dividends" INTEGER);
 CREATE TABLE "PortfolioSecurityAA" ("SecurityID" INTEGER, "AAID" INTEGER, "Percent" NUMERIC);
 CREATE TABLE "PortfolioSecurityTrade" ("ID" INTEGER PRIMARY KEY  NOT NULL , "SecurityID" INTEGER, "Type" INTEGER, "Value" NUMERIC, "Price" NUMERIC, "Commission" NUMERIC, "CashAccountID" INTEGER, "Frequency" INTEGER, "Date" INTEGER, "StartDate" INTEGER, "EndDate" INTEGER, "Description" VARCHAR);

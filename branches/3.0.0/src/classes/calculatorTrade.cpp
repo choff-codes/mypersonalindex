@@ -70,7 +70,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
         // loop through each security that has a trade that day
         for(tradeDay::const_iterator trades = i.value().constBegin(); trades != i.value().constEnd(); ++trades)
         {
-            security s = portfolio_.securities().value(trades.key());
+            const security &s = portfolio_.securities()[trades.key()];
 
             // loop through each trade and calculate
             foreach(const tradeIterator &trade, trades.value())
@@ -142,7 +142,7 @@ QMap<int, calculatorTrade::tradeDay> calculatorTrade::calculateTradeDates(portfo
             QList<int> dates =
                 tradeDateCalendar::computeFrequencyTradeDates(
                     trade.date,
-                    qMax(trade.startDate, date_),
+                    qMax(security.beginDate(), qMax(trade.startDate, date_)),
                     trade.endDate == 0 ?
                         security.endDate():
                         qMin(trade.endDate, security.endDate()),

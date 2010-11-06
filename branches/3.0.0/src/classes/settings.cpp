@@ -1,5 +1,6 @@
 #include "settings.h"
 #include <QSettings>
+#include <QMessageBox>
 
 void settings::save()
 {    
@@ -44,7 +45,21 @@ void settings::load()
         settings.value(
             "holdings",
             qVariantFromValue(
-                columns() << 1
+                columns()
+                << 1
+                << 2
+                << 3
+                << 4
+                << 5
+                << 6
+                << 7
+                << 8
+                << 9
+                << 10
+                << 11
+                << 12
+                << 13
+                << 14
             )
         ).value<columns>();
 
@@ -52,7 +67,16 @@ void settings::load()
         settings.value(
             "aa",
             qVariantFromValue(
-                columns() << 1
+                columns()
+                << 1
+                << 2
+                << 3
+                << 4
+                << 5
+                << 6
+                << 7
+                << 8
+                << 9
             )
         ).value<columns>();
 
@@ -60,7 +84,16 @@ void settings::load()
         settings.value(
             "acct",
             qVariantFromValue(
-                columns() << 1
+                columns()
+                << 1
+                << 2
+                << 3
+                << 4
+                << 5
+                << 6
+                << 7
+                << 8
+                << 9
             )
         ).value<columns>();
 
@@ -68,7 +101,7 @@ void settings::load()
         settings.value(
             "stat",
             qVariantFromValue(
-                columns() << 1
+                columns()
             )
         ).value<columns>();
 

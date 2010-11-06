@@ -2,11 +2,8 @@
 #define MPICHART_H
 
 #include <QObject>
-#include <QWidget>
-#include <QFileDialog>
-#include <QDir>
-#include <QMessageBox>
 #include "qwt_plot.h"
+
 
 class mpiChart : public QwtPlot
 {

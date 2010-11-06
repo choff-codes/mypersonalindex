@@ -92,7 +92,7 @@ private:
 
     static int checkTradeDate(int date_, direction direction_ )
     {
-        while(holidays.contains(date_) || date_ % 7 > 4) // 5 = Saturday, 6 = Sunday
+        while(date_ % 7 > 4 || holidays.contains(date_)) // 5 = Saturday, 6 = Sunday
             date_ += direction_;
         return date_;
     }

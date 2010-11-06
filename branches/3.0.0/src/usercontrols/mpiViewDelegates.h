@@ -2,7 +2,6 @@
 #define MPIVIEWDELEGATES_H
 
 #include <QItemDelegate>
-#include <QDoubleSpinBox>
 
 class spinBoxDelegate : public QItemDelegate
 {

@@ -20,7 +20,7 @@ public:
     int id;
     bool deleted;
 
-    objectKey(const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
+    explicit objectKey(const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectBase(parent_),
         description(description_),
         id(id_),

@@ -17,7 +17,6 @@
 #include "security.h"
 #include "frmMainAA_UI.h"
 #include "mainAAModel.h"
-#include "calculatorNAV.h"
 #include "historicalNAV.h"
 #include "frmSort.h"
 #include "frmColumns.h"
@@ -31,7 +30,6 @@ frmMain::frmMain(QWidget *parent):
     ui(new frmMain_UI()),
     ui_assetAllocation(new frmMainAA_UI()),
     m_currentPortfolio(0),
-    m_currentCalculator(0),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
 {
@@ -71,7 +69,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
-    connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioChange(int)));
+    connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioDropDownChange(int)));
     connect(ui->importYahoo, SIGNAL(triggered()), this, SLOT(importYahoo()));
     connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(tabAA()));
 }
@@ -245,6 +243,13 @@ void frmMain::setCurrentFile(const QString &filePath_)
     updateRecentFileActions(filePath_);
 }
 
+void frmMain::setCurrentPortfolio(portfolio *portfolio_)
+{
+    m_currentPortfolio = portfolio_;
+    if (portfolio_)
+        m_currentCalculator.setPortfolio(*portfolio_);
+}
+
 void frmMain::refreshPortfolioCmb(int id_)
 {
     ui->portfolioDropDownCmb->blockSignals(true);
@@ -264,7 +269,7 @@ void frmMain::refreshPortfolioCmb(int id_)
     if (index != -1)
         ui->portfolioDropDownCmb->setCurrentIndex(index);
 
-    portfolioChange(ui->portfolioDropDownCmb->currentIndex());
+    portfolioDropDownChange(ui->portfolioDropDownCmb->currentIndex());
     ui->portfolioDropDownCmb->blockSignals(false);
 }
 
@@ -343,7 +348,7 @@ void frmMain::editPortfolio()
     m_portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();;
     refreshPortfolioPrices();
 
-    m_currentPortfolio = &m_portfolios[m_currentPortfolio->attributes().id];
+    setCurrentPortfolio(&m_portfolios[m_currentPortfolio->attributes().id]);
     ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
     recalculateTrades(*m_currentPortfolio, 0);
 }
@@ -369,12 +374,12 @@ void frmMain::refreshPortfolioPrices()
             x->setHistoricalPrices(m_historicalPricesMap.getHistoricalPrice(x->description));
 }
 
-void frmMain::portfolioChange(int currentIndex_)
+void frmMain::portfolioDropDownChange(int currentIndex_)
 {
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
     ui->portfolioEdit->setDisabled(currentIndex_ == -1);
     ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
-    m_currentPortfolio = currentIndex_ == -1 ? 0 : &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()];
+    setCurrentPortfolio(currentIndex_ == -1 ? 0 : &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()]);
 }
 
 void frmMain::about()
@@ -432,17 +437,12 @@ void frmMain::importYahooFinished()
         return;
 
     setWindowModified(true);
-    recalculateTrades(earliestUpdate);
+    recalculateTrades(m_portfolios.values(), earliestUpdate);
 }
 
 void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)
 {
     recalculateTrades(QList<portfolio>() << portfolio_, beginDate_);
-}
-
-void frmMain::recalculateTrades(int beginDate_)
-{
-    recalculateTrades(m_portfolios.values(), beginDate_);
 }
 
 void frmMain::recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_)
@@ -513,17 +513,19 @@ void frmMain::tabAARefresh()
     QTime t;
     t.start();
 #endif
-    calculatorNAV navCalc(*m_currentPortfolio);
+
     int beginDate = ui_assetAllocation->toolbarDateBeginEdit->date().toJulianDay();
     int endDate = ui_assetAllocation->toolbarDateEndEdit->date().toJulianDay();
 
+    snapshot portfolioValue = m_currentCalculator.portfolioSnapshot(endDate);
+
     QList<baseRow*> rows = aaRow::getRows(
-        m_currentPortfolio->assetAllocations(), beginDate, endDate, navCalc, m_settings.viewableColumnsSorting.value(settings::columns_AA),
+        m_currentPortfolio->assetAllocations(), beginDate, endDate, m_currentCalculator, portfolioValue, m_settings.viewableColumnsSorting.value(settings::columns_AA),
         ui_assetAllocation->toolbarShowUnassigned->isChecked(), ui_assetAllocation->toolbarShowUnassigned->isChecked()
     );
 
     ui_assetAllocation->table->setModel(
-        new mainAAModel(rows, navCalc.portfolioSnapshot(endDate), navCalc.changeOverTime(m_currentPortfolio->attributes(), beginDate, endDate).nav(endDate),
+        new mainAAModel(rows, portfolioValue, m_currentCalculator.changeOverTime(m_currentPortfolio->attributes(), beginDate, endDate).nav(endDate),
             m_settings.viewableColumns.value(settings::columns_AA), ui_assetAllocation->table)
     );
 #ifdef CLOCKTIME
@@ -560,7 +562,10 @@ void frmMain::sortChanged(int index_)
             if (f.exec())
                  m_settings.viewableColumnsSorting[settings::columns_AA] = f.getReturnValues();
             else
+            {
+                setSortDropDown(m_settings.viewableColumnsSorting.value(settings::columns_AA), static_cast<QComboBox*>(sender()));
                 return;
+            }
         }
         break;
     default:

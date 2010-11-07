@@ -8,7 +8,7 @@
 class assetAllocationTarget: public objectBase, public queriesBatch
 {
 public:
-    assetAllocationTarget(int parent_ = UNASSIGNED):
+    explicit assetAllocationTarget(int parent_ = UNASSIGNED):
         objectBase(parent_)
     {
         // default to 100% unassigned

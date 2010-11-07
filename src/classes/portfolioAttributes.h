@@ -12,7 +12,7 @@ public:
     int startValue;
     int startDate;
 
-    portfolioAttributes(int id_, const QString description_ = QString());
+    explicit portfolioAttributes(int id_, const QString description_ = QString());
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

@@ -29,7 +29,7 @@ public:
     QMap<int, trade> trades;
     executedTradeMap executedTrades;
 
-    security(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
+    explicit security(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         account(UNASSIGNED),
         expenseRatio(0),

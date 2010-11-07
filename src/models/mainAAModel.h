@@ -1,6 +1,7 @@
 #ifndef MAINAAMODEL_H
 #define MAINAAMODEL_H
 
+#include <QStringList>
 #include "mpiViewModelBase.h"
 #include "assetAllocation.h"
 #include "snapshot.h"
@@ -10,7 +11,21 @@ class calculatorNAV;
 class aaRow: public baseRow
 {
 public:
-    enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Variance, row_Rebalance, row_Holdings, row_ID, row_IRR };
+    enum {
+        row_Description,
+        row_CostBasis,
+        row_Value,
+        row_ValueP,
+        row_Gain,
+        row_GainP,
+        row_NAV,
+        row_Target,
+        row_Variance,
+        row_RebalanceBand,
+        row_Rebalance,
+        row_Holdings
+    };
+
     static const QStringList columns;
     static const QVariantList columnsType;
 
@@ -20,14 +35,14 @@ public:
     static QMap<int, QString> fieldNames();
 
     static QList<baseRow*> getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_);
+        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_);
 };
 
 class mainAAModel: public mpiViewModelBase
 {
 public:
 
-    mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QTableView *parent_ = 0);
+    mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_ = 0);
 
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;

@@ -19,7 +19,14 @@ public:
     calculatorNAVData(const portfolio &portfolio_):
         currentPortfolio(portfolio_)
     {}
+
+    calculatorNAVData() {}
 };
+
+calculatorNAV::calculatorNAV():
+    d(new calculatorNAVData())
+{
+}
 
 calculatorNAV::calculatorNAV(const portfolio &portfolio_):
     d(new calculatorNAVData(portfolio_))
@@ -39,6 +46,12 @@ calculatorNAV& calculatorNAV::operator=(const calculatorNAV &other_)
 {
     d = other_.d;
     return *this;
+}
+
+void calculatorNAV::setPortfolio(const portfolio &portfolio_)
+{
+    d->securitiesCache.clear();
+    d->currentPortfolio = portfolio_;
 }
 
 snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDate_)

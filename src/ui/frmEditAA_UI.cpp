@@ -38,9 +38,14 @@ void frmEditAA_UI::setupUI(QWidget *parent)
     rebalanceBand = new QLabel("&Rebalance Band:", parent);
     layoutAA->setWidget(2, QFormLayout::LabelRole, rebalanceBand);
 
-    rebalanceBandSpinBox = new QSpinBox(parent);
+    rebalanceBandSpinBox = new QDoubleSpinBox(parent);
+    rebalanceBandSpinBox->setDecimals(2);
+    rebalanceBandSpinBox->setMinimum(0);
     rebalanceBandSpinBox->setMaximum(100);
+    rebalanceBandSpinBox->setSingleStep(1);
     rebalanceBandSpinBox->setSuffix("%");
+    rebalanceBandSpinBox->setSpecialValueText("None");
+    rebalanceBandSpinBox->setValue(0);
     layoutAA->setWidget(2, QFormLayout::FieldRole, rebalanceBandSpinBox);
 
     threshold = new QLabel("Rebalance &Denominator:", parent);

@@ -21,7 +21,7 @@ public:
     costBasisMethod costBasis;
     bool hide;
 
-    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
+    explicit account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         taxRate(0),
         taxDeferred(false),

@@ -17,7 +17,7 @@ class portfolioData;
 class portfolio
 {
 public:
-    portfolio(int id_ = UNASSIGNED, const QString &description_ = QString());
+    explicit portfolio(int id_ = UNASSIGNED, const QString &description_ = QString());
     portfolio(const portfolio &other_);
     ~portfolio();
 

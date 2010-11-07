@@ -19,7 +19,6 @@ public:
     static const QString table_PortfolioSecurityAA;
     static const QString table_PortfolioSecurityTrade;
     static const QString table_PortfolioSecurityTradeExecution;
-    static const QString table_Settings;
 
     static const QString view_PortfolioSecurityAA;
     static const QString view_PortfolioSecurityTrade;
@@ -33,7 +32,6 @@ public:
     static const QStringList portfolioSecurityAAColumns;
     static const QStringList portfolioSecurityTradeColumns;
     static const QStringList portfolioSecurityTradeExecutionColumns;
-    static const QStringList settingsColumns;
 
     static const QStringList portfolioSecurityAAViewColumns;
     static const QStringList portfolioSecurityTradeViewColumns;
@@ -72,10 +70,6 @@ public:
         portfolioColumns_Description,
         portfolioColumns_StartValue,
         portfolioColumns_StartDate
-    };
-
-    enum {
-        settingsColumns_Version
     };
 
     enum {

@@ -6,10 +6,10 @@
 class splits
 {
 public:
-    splits(const QMap<int, double> &splits_, int date_) { initialize(splits_, date_, 0); }
-    splits(const QMap<int, double> &splits_, int date_, int beginDate_) { initialize(splits_, date_, beginDate_); }
+    explicit splits(const QMap<int, double> &splits_, int date_) { initialize(splits_, date_, 0); }
+    explicit splits(const QMap<int, double> &splits_, int date_, int beginDate_) { initialize(splits_, date_, beginDate_); }
 
-    double ratio (int date_); // must be called in date ascending order only! (Same date is okay)
+    double ratio(int date_); // must be called in date ascending order only! (Same date is okay)
 
 private:
     QMap<int, double> m_splits;

@@ -6,7 +6,6 @@ DROP TABLE "main"."Splits"
 DROP TABLE "main"."ExecutedTrades"
 DROP TABLE "main"."NAV"
 
-CREATE TABLE "main"."Settings" ("Version" INTEGER NOT NULL)
 CREATE TABLE "main"."PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Date" INTEGER,"Shares" NUMERIC,"Price" NUMERIC,"Commission" NUMERIC, "AssociatedTradeID" INTEGER)
 CREATE TABLE "main"."HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC)
 CREATE TABLE "main"."Portfolio" ("ID" INTEGER PRIMARY KEY  NOT NULL,"Description" VARCHAR,"StartValue" INTEGER,"StartDate" INTEGER)

@@ -22,7 +22,7 @@ public:
             associatedTradeID(0)
     {}
 
-    executedTrade(double shares_, double price_, double commission_, int associatedTradeID_):
+    explicit executedTrade(double shares_, double price_, double commission_, int associatedTradeID_):
         shares(shares_),
         price(price_),
         commission(commission_),

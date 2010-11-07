@@ -36,7 +36,7 @@ public:
     int startDate;
     int endDate;
 
-    trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
+    explicit trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
         objectKey(QString(), id_, parent_),
         action(tradeAction_Purchase),
         value(0),

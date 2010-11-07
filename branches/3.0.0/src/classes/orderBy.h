@@ -19,7 +19,7 @@ public:
         direction(order_ascending)
     {}
 
-    orderBy(int column_, order orderColumn_):
+    explicit orderBy(int column_, order orderColumn_):
         column(column_),
         direction(orderColumn_)
     {}

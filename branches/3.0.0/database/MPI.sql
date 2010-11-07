@@ -6,7 +6,6 @@ CREATE TABLE "PortfolioSecurity" ("ID" INTEGER PRIMARY KEY  NOT NULL ,"Portfolio
 CREATE TABLE "PortfolioSecurityAA" ("SecurityID" INTEGER, "AAID" INTEGER, "Percent" NUMERIC);
 CREATE TABLE "PortfolioSecurityTrade" ("ID" INTEGER PRIMARY KEY  NOT NULL , "SecurityID" INTEGER, "Type" INTEGER, "Value" NUMERIC, "Price" NUMERIC, "Commission" NUMERIC, "CashAccountID" INTEGER, "Frequency" INTEGER, "Date" INTEGER, "StartDate" INTEGER, "EndDate" INTEGER, "Description" VARCHAR);
 CREATE TABLE "PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Date" INTEGER,"Shares" NUMERIC,"Price" NUMERIC,"Commission" NUMERIC, "AssociatedTradeID" INTEGER);
-CREATE TABLE "Settings" ("Version" INTEGER NOT NULL);
 CREATE VIEW "PortfolioSecurityAAView" AS SELECT aa.*, s.PortfolioID FROM PortfolioSecurityAA aa INNER JOIN PortfolioSecurity s ON aa.SecurityID = s.ID;
 CREATE VIEW "PortfolioSecurityTradeExecutionView" AS SELECT e.*, s.PortfolioID FROM PortfolioSecurityTradeExecution e INNER JOIN PortfolioSecurity s ON e.SecurityID = s.ID;
 CREATE VIEW "PortfolioSecurityTradeView" AS SELECT trades.*, s.PortfolioID FROM PortfolioSecurityTrade trades INNER JOIN PortfolioSecurity s ON trades.SecurityID = s.ID;

@@ -20,7 +20,6 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     fileExit = new QAction("Exit", mainWindow);
     fileExit->setShortcut(QKeySequence::Quit);
 
-
     view = new QMenu("&View", menubar);
     viewGroup = new QActionGroup(mainWindow);
     viewSummary = new QAction("Summary", mainWindow);

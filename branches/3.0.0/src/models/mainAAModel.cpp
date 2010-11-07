@@ -1,47 +1,90 @@
 #include "mainAAModel.h"
+#include <QColor>
 #include "functions.h"
 #include "calculatorNAV.h"
 #include "historicalNAV.h"
 
-//enum { row_Description, row_CostBasis, row_Value, row_ValueP, row_Gain, row_GainP, row_Target, row_Offset, row_Holdings };
-const QStringList aaRow::columns = QStringList() << "Asset Class" << "Cost Basis" << "Total Value" << "% of Portfolio"
-    << "Gain/Loss" << "% Gain Loss" << "Target" << "Variance" << "Rebalance\nAmount" << "# Holdings" << "ID" << "NAV";
+//enum {
+//    row_Description,
+//    row_CostBasis,
+//    row_Value,
+//    row_ValueP,
+//    row_Gain,
+//    row_GainP,
+//    row_NAV,
+//    row_Target,
+//    row_Variance,
+//    row_RebalanceBand,
+//    row_Rebalance,
+//    row_Holdings
+//};
 
-const QVariantList aaRow::columnsType = QVariantList() << QVariant(QVariant::String) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-    << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double) << QVariant(QVariant::Double)
-    << QVariant(QVariant::Double) << QVariant(QVariant::Int) << QVariant(QVariant::Int) << QVariant(QVariant::Double);
+const QStringList aaRow::columns = QStringList()
+                                   << "Asset Class"
+                                   << "Cost Basis"
+                                   << "Total Value"
+                                   << "% of Portfolio"
+                                   << "Gain/Loss"
+                                   << "% Gain Loss"
+                                   << "NAV"
+                                   << "Target"
+                                   << "Variance"
+                                   << "Rebalance\nBand"
+                                   << "Rebalance\nAmount"
+                                   << "# Holdings";
+
+const QVariantList aaRow::columnsType = QVariantList()
+                                        << QVariant(QVariant::String)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Double)
+                                        << QVariant(QVariant::Int);
 
 
 aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSnapshot_, const assetAllocation &aa_, const QList<orderBy> &columnSort_):
     baseRow(columnSort_)
 {    
-    //row_Description
+    //    row_Description,
     this->values.append(aa_.description);
-    //row_CostBasis
+    //    row_CostBasis,
     this->values.append(snapshot_.costBasis);
-    //row_Value
+    //    row_Value,
     this->values.append(snapshot_.totalValue);
-    //row_ValueP
+    //    row_ValueP,
     this->values.append(functions::isZero(portfolioSnapshot_.totalValue) ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
-    //row_Gain
+    //    row_Gain,
     this->values.append(snapshot_.totalValue - snapshot_.costBasis);
-    //row_GainP
+    //    row_GainP,
     this->values.append(functions::isZero(snapshot_.costBasis) || functions::isZero(snapshot_.totalValue) ? QVariant() : (snapshot_.totalValue / snapshot_.costBasis) - 1);
-    //row_Target
-    this->values.append(functions::isZero(aa_.target) ? QVariant() : aa_.target);
-    //row_Variance
-    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ? QVariant() :
-        aa_.threshold == assetAllocation::thresholdMethod_AA ? ((snapshot_.totalValue / (portfolioSnapshot_.totalValue * aa_.target)) - 1) :
-        (snapshot_.totalValue / snapshot_.totalValue) - aa_.target);
-    //row_Rebalance
-    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ? QVariant() :
-        -1 * portfolioSnapshot_.totalValue * ((snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target));
-    //row_Holdings
-    this->values.append(snapshot_.count);
-    //row_ID
-    this->values.append(aa_.id);
-    //row_IRR
+    //    row_NAV,
     this->values.append(nav_ - 1);
+    //    row_Target,
+    this->values.append(functions::isZero(aa_.target) ? QVariant() : aa_.target);
+    //    row_Variance,
+    this->values.append(
+        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ?
+            QVariant() :
+            aa_.threshold == assetAllocation::thresholdMethod_AA ?
+                (snapshot_.totalValue / (portfolioSnapshot_.totalValue * aa_.target)) - 1 :
+                (snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target
+        );
+    //    row_RebalanceBand,
+    this->values.append(functions::isZero(aa_.rebalanceBand) ? QVariant() : aa_.rebalanceBand);
+    //    row_Rebalance,
+    this->values.append(
+        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ?
+            QVariant() :
+            -1 * portfolioSnapshot_.totalValue * ((snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target)
+        );
+    //    row_Holdings
+    this->values.append(snapshot_.count);
 }
 
 QMap<int, QString> aaRow::fieldNames()
@@ -51,16 +94,13 @@ QMap<int, QString> aaRow::fieldNames()
     for (int i = 0; i < columns.count(); ++i)
         names[i] = QString(columns.at(i)).replace('\n', ' ');
 
-    names.remove(row_ID);
     return names;
 }
 
 QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_)
+    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_)
 {
     QList<baseRow*> returnList;
-
-    snapshot portfolioSnapshot = calculator_.portfolioSnapshot(endDate_);
 
     foreach(const assetAllocation &aa, assetAllocation_)
     {
@@ -70,20 +110,20 @@ QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> assetAllocation_
         if (aa.hide && !showHidden_)
             continue;
 
-        returnList.append(new aaRow(calculator_.changeOverTime(aa, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, aa.id), portfolioSnapshot, aa, columnSort_));
+        returnList.append(new aaRow(calculator_.changeOverTime(aa, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, aa.id), portfolioSnapshot_, aa, columnSort_));
     }
 
     if (showUnassigned_)
     {
         assetAllocation unassignedAA;
         unassignedAA.description = "Unassigned";
-        returnList.append(new aaRow(calculator_.changeOverTime(unassignedAA, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, unassignedAA.id), portfolioSnapshot, unassignedAA, columnSort_));
+        returnList.append(new aaRow(calculator_.changeOverTime(unassignedAA, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, unassignedAA.id), portfolioSnapshot_, unassignedAA, columnSort_));
     }
 
     return returnList;
 }
 
-mainAAModel::mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QTableView *parent_):
+mainAAModel::mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_):
     mpiViewModelBase(rows_, viewableColumns_, parent_), m_portfolioSnapshot(portfolioSnapshot_), m_portfolioNAV(portfolioNAV_), m_target(0)
 {
     foreach(const baseRow *r, rows_)
@@ -114,7 +154,8 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
             case aaRow::row_Target:
             case aaRow::row_Variance:
             case aaRow::row_GainP:
-            case aaRow::row_IRR:
+            case aaRow::row_NAV:
+            case aaRow::row_RebalanceBand:
                 return functions::doubleToPercentage(value.toDouble());
         }
 
@@ -123,7 +164,7 @@ QVariant mainAAModel::data(const QModelIndex &index, int role) const
 
     if (role == Qt::TextColorRole && column == aaRow::row_Variance)
     {
-        double threshold = m_rows.at(index.row())->values.at(aaRow::row_Target).toDouble();
+        double threshold = m_rows.at(index.row())->values.at(aaRow::row_RebalanceBand).toDouble();
         if (functions::isZero(threshold))
             return QVariant();
 
@@ -170,7 +211,7 @@ QVariant mainAAModel::headerData(int section, Qt::Orientation orientation, int r
         case aaRow::row_Target:
             extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_target));
             break;
-        case aaRow::row_IRR:
+        case aaRow::row_NAV:
             extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
     }

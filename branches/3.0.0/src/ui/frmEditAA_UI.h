@@ -24,7 +24,7 @@ public:
     QDoubleSpinBox *targetSpinBox;
     QToolButton *targetBtnClear;
     QLabel *rebalanceBand;
-    QSpinBox *rebalanceBandSpinBox;
+    QDoubleSpinBox *rebalanceBandSpinBox;
     QLabel *threshold;
     QComboBox *thresholdCmb;
     QCheckBox *hideChk;

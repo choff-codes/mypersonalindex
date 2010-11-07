@@ -194,8 +194,8 @@ void frmEdit::saveAssetAllocation()
         return;
     assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
     aa->description = ui->aaForm.descTxt->text();
-    aa->rebalanceBand = ui->aaForm.rebalanceBandSpinBox->value();
-    aa->target = ui->aaForm.targetSpinBox->value();
+    aa->rebalanceBand = ui->aaForm.rebalanceBandSpinBox->value() / 100;
+    aa->target = ui->aaForm.targetSpinBox->value() / 100;
     aa->threshold = (assetAllocation::thresholdMethod)ui->aaForm.thresholdCmb->itemData(ui->aaForm.thresholdCmb->currentIndex()).toInt();
     aa->hide = ui->aaForm.hideChk->isChecked();
 }
@@ -206,8 +206,8 @@ void frmEdit::loadAssetAllocation()
         return;
     assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
     ui->aaForm.descTxt->setText(aa->description);
-    ui->aaForm.rebalanceBandSpinBox->setValue(aa->rebalanceBand);
-    ui->aaForm.targetSpinBox->setValue(aa->target);
+    ui->aaForm.rebalanceBandSpinBox->setValue(aa->rebalanceBand * 100);
+    ui->aaForm.targetSpinBox->setValue(aa->target * 100);
     ui->aaForm.thresholdCmb->setCurrentIndex(ui->aaForm.thresholdCmb->findData(aa->threshold));
     ui->aaForm.hideChk->setChecked(aa->hide);
 }

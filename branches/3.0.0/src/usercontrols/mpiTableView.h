@@ -15,11 +15,14 @@ public:
     {}
 
 public slots:
-    void exportTable(bool toClipboard_ = false);
-    void copyTable() { exportTable(true); }
+    void exportTable();
+    void copyTable();
 
-private:
+private:  
     bool m_hasRowLabels;
+
+    QStringList formatTableForExport(const QList<int> &rows_, const QString &delimiter_);
+    QString formatHeaderForExport(const QString &delimiter_);
 };
 
 #endif // MPITABLEVIEW_H

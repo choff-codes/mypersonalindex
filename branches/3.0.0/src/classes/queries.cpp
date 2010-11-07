@@ -69,13 +69,6 @@ const QStringList queries::portfolioColumns = QStringList()
                                               << "StartDate";
 
 //enum {
-//    settingsColumns_Version
-//};
-
-const QStringList queries::settingsColumns = QStringList()
-                                             << "Version";
-
-//enum {
 //    portfolioSecurityColumns_ID,
 //    portfolioSecurityColumns_PortfolioID,
 //    portfolioSecurityColumns_Symbol,
@@ -232,7 +225,6 @@ const QString queries::table_PortfolioSecurity = "PortfolioSecurity";
 const QString queries::table_PortfolioSecurityAA = "PortfolioSecurityAA";
 const QString queries::table_PortfolioSecurityTrade = "PortfolioSecurityTrade";
 const QString queries::table_PortfolioSecurityTradeExecution = "PortfolioSecurityTradeExecution";
-const QString queries::table_Settings = "Settings";
 
 const QString queries::view_PortfolioSecurityAA = "PortfolioSecurityAAView";
 const QString queries::view_PortfolioSecurityTrade = "PortfolioSecurityTradeView";
@@ -348,7 +340,7 @@ int queries::getIdentity() const
 
 int queries::getDatabaseVersion() const
 {
-    QSqlQuery query("SELECT Version FROM Settings", m_database);
+    QSqlQuery query("PRAGMA user_version", m_database);
 
     if (query.isActive() && query.first())
         return query.value(0).toInt();

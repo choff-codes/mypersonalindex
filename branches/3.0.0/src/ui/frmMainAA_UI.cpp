@@ -1,4 +1,5 @@
 #include "frmMainAA_UI.h"
+#include <QHeaderView>
 #include "mainAAModel.h"
 
 void frmMainAA_UI::setupUI(QWidget *parent)

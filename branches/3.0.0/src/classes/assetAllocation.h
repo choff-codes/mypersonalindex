@@ -19,7 +19,7 @@ public:
     double rebalanceBand;
     bool hide;
 
-    assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
+    explicit assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
         objectKey(description_, id_, parent_),
         target(0),
         threshold(thresholdMethod_Portfolio),

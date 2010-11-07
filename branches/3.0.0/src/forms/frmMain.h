@@ -7,6 +7,7 @@
 #include "settings.h"
 #include "portfolio.h"
 #include "historicalPrices.h"
+#include "calculatorNAV.h"
 
 class frmMain_UI;
 class frmMainAA_UI;
@@ -31,7 +32,7 @@ private slots:
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();
-    void portfolioChange(int currentIndex_);
+    void portfolioDropDownChange(int currentIndex_);
     void importYahoo();
     void importYahooFinished();
     void recalculateTradesFinished();
@@ -53,17 +54,34 @@ private:
         tab_performance
     };
 
+    // ui pointers (to delete on destory)
     frmMain_UI *ui;
     frmMainAA_UI *ui_assetAllocation;
+
+    // all portfolios in the current file
     QMap<int, portfolio> m_portfolios;
-    portfolio* m_currentPortfolio;
-    calculatorNAV* m_currentCalculator;
-    settings m_settings;
+
+    // all prices in the current file
     historicalPricesMap m_historicalPricesMap;
-    QFutureWatcher<int> *m_futureWatcherYahoo;
-    QFutureWatcher<void> *m_futureWatcherTrade;
+
+    // track the currently selected portfolio
+    portfolio* m_currentPortfolio;
+    calculatorNAV m_currentCalculator;
+
+    // track the currently selected tab
     QMap<int, QWidget*> m_tabs;
     tab m_currentTab;
+
+    // settings saved to INI
+    settings m_settings;
+
+    // threaded operation watchers
+    // Note: it is possible to have these be local variables,
+    // but it causes a seg fault when the application is closed;
+    // as memeber variables they can be deleted cleanly before
+    // the application closes
+    QFutureWatcher<int> *m_futureWatcherYahoo;
+    QFutureWatcher<void> *m_futureWatcherTrade;
 
     void connectSlots();
     void closeEvent(QCloseEvent *event_);
@@ -75,6 +93,7 @@ private:
     bool saveFile(const QString &filePath_);
     bool prepareFileForSave(const QString &filePath_);
     void updateRecentFileActions(const QString &newFilePath_);
+    void setCurrentPortfolio(portfolio *portfolio_);
     void refreshPortfolioCmb(int id_ = -1);
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
@@ -82,7 +101,6 @@ private:
     void setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
-    void recalculateTrades(int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);
 };
 

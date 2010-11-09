@@ -112,4 +112,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
     cornerWidget->addWidget(progressBar);
 
     menubar->setCornerWidget(cornerWidget);
+
+    centralWidget = new QStackedWidget(mainWindow);
+    mainWindow->setCentralWidget(centralWidget);
 }

@@ -489,7 +489,7 @@ QWidget* frmMain::setupTable(tab tab_, frmMainTableView_UI *ui_)
     connect(ui_->toolbarExport, SIGNAL(triggered()), ui_->table, SLOT(exportTable()));
     connect(ui_->tableCopy, SIGNAL(activated()), ui_->table, SLOT(copyTable()));
 
-    this->setCentralWidget(ui_->widget);
+    ui->centralWidget->addWidget(ui_->widget);
     return ui_->widget;
 }
 
@@ -500,7 +500,7 @@ void frmMain::switchToTab(tab tab_)
 
     if (m_tabs.contains(tab_))
     {
-        this->setCentralWidget(m_tabs.value(tab_));
+        ui->centralWidget->setCurrentWidget(m_tabs.value(tab_));
         m_currentTab = tab_;
         return;
     }
@@ -515,6 +515,7 @@ void frmMain::switchToTab(tab tab_)
             break;
     }
 
+    ui->centralWidget->setCurrentWidget(m_tabs.value(tab_));
     m_currentTab = tab_;
     refreshTab();
 }

@@ -51,6 +51,7 @@ public:
     QHBoxLayout *portfolioDropDownLayout;
     QLabel *portfolioDropDown;
     QComboBox *portfolioDropDownCmb;
+    QStackedWidget *centralWidget;
 
     void setupUI(QMainWindow *mainWindow);
 };

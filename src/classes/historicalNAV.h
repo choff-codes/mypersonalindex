@@ -9,7 +9,7 @@ struct navPair
     double totalValue;
 
     navPair():
-        nav(0),
+        nav(1),
         totalValue(0)
     {}
 

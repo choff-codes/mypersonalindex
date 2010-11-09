@@ -45,18 +45,18 @@ bool functions::equal(const QVariant &left_, const QVariant &right_, const QVari
     };
 }
 
-QString functions::formatForComboBox(const QString &value1_, const QString &value2_)
+QString functions::join(const QString &value1_, const QString &value2_, const QString &delimiter_)
 {
-    QString returnValue = value1_;
+    if (value2_.isEmpty())
+        return value1_;
 
-    if (!value2_.isEmpty())
-        returnValue.append(" | ");
-    else
-        return returnValue;
+    return QString("%1%2%3").arg(value1_, delimiter_, value2_);
+}
 
-    QString value2Modified = QString(value2_).replace("\n", " ");
-    if (value2Modified.length() > 20)
-        value2Modified = value2Modified.left(17).append("...");
+QString functions::fitString(const QString &value_, int characters_)
+{
+    if (value_.length() > characters_)
+        return value_.left(characters_ - 3).append("...");
 
-    return returnValue.append(value2Modified);
+    return value_;
 }

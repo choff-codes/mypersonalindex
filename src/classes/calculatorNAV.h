@@ -27,6 +27,7 @@ public:
     snapshot accountSnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot symbolSnapshot(int date_, int id_, int beginDate_);
 
+    double nav(const objectKey &key_, int beginDate_, int endDate_, double navValue_ = 1);
     historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, double navValue_ = 1);
 
 private:

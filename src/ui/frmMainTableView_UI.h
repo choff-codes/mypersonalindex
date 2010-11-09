@@ -10,7 +10,7 @@
 #include "mpiDateEdit.h"
 #include "mpiTableView.h"
 
-class frmMainAA_UI
+class frmMainTableView_UI
 {
 public:
     QWidget *widget;
@@ -22,14 +22,12 @@ public:
     mpiDateEdit *toolbarDateEndEdit;
     QLabel *toolbarSort;
     QComboBox *toolbarSortCmb;
-    QAction *toolbarShowUnassigned;
-    QAction *toolbarShowHidden;
     QAction *toolbarReorder;
     QAction *toolbarExport;
     mpiTableView *table;
     QShortcut *tableCopy;
 
-    void setupUI(QWidget* parent = 0);
+    void setupUI(const QMap<int, QString> &columnNames, QWidget* parent = 0);
 };
 
 #endif // FRMMAINAA_UI_H

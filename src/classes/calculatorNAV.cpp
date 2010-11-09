@@ -216,6 +216,11 @@ int calculatorNAV::endDateByKey(const objectKey &key_)
     return 0;
 }
 
+double calculatorNAV::nav(const objectKey &key_, int beginDate_, int endDate_, double navValue_)
+{
+    return changeOverTime(key_, beginDate_, endDate_, navValue_).nav(endDate_);
+}
+
 historicalNAV calculatorNAV::changeOverTime(const objectKey &key_, int beginDate_, int endDate_, double navValue_)
 {
     historicalNAV navHistory;

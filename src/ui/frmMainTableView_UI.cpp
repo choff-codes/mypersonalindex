@@ -1,8 +1,7 @@
-#include "frmMainAA_UI.h"
+#include "frmMainTableView_UI.h"
 #include <QHeaderView>
-#include "mainAAModel.h"
 
-void frmMainAA_UI::setupUI(QWidget *parent)
+void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames, QWidget *parent)
 {
     widget = new QWidget(parent);
 
@@ -19,16 +18,11 @@ void frmMainAA_UI::setupUI(QWidget *parent)
     toolbarSort = new QLabel(" Sort By: ", toolbar);
     toolbarSortCmb = new QComboBox(toolbar);
     toolbarSortCmb->setMinimumContentsLength(15);
-    QMap<int, QString> items = aaRow::fieldNames();
     toolbarSortCmb->addItem("(None)", -1);
-    for (QMap<int, QString>::const_iterator i = items.constBegin(); i != items.constEnd(); ++i)
+    for (QMap<int, QString>::const_iterator i = columnNames.constBegin(); i != columnNames.constEnd(); ++i)
             toolbarSortCmb->addItem(i.value(), i.key());
     toolbarSortCmb->addItem("Custom...", -2);
 
-    toolbarShowUnassigned = new QAction("Show Unassigned", toolbar);
-    toolbarShowUnassigned->setCheckable(true);
-    toolbarShowHidden = new QAction("Show Hidden", toolbar);
-    toolbarShowHidden->setCheckable(true);
     toolbarReorder = new QAction("Modify Columns...", toolbar);
     toolbarReorder->setIconText("Modify Columns...");
     toolbarExport = new QAction("Export...", toolbar);
@@ -41,8 +35,6 @@ void frmMainAA_UI::setupUI(QWidget *parent)
     toolbar->addSeparator();
     toolbar->addWidget(toolbarSort);
     toolbar->addWidget(toolbarSortCmb);
-    toolbar->addAction(toolbarShowUnassigned);
-    toolbar->addAction(toolbarShowHidden);
     toolbar->addSeparator();
     toolbar->addAction(toolbarReorder);
     toolbar->addSeparator();

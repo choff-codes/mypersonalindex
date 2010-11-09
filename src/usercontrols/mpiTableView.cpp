@@ -61,14 +61,14 @@ QStringList mpiTableView::formatTableForExport(const QList<int> &rows_, const QS
         QStringList rowText;
 
         if (m_hasRowLabels)
-            rowText.append(functions::formatForExport(model()->headerData(rows_.at(i), Qt::Vertical, Qt::DisplayRole), delimiter_));
+            rowText.append(functions::removeNewLines(model()->headerData(rows_.at(i), Qt::Vertical, Qt::DisplayRole).toString().remove(delimiter_)));
 
         for (int x = 0; x < model()->columnCount(); ++x)
         {
             QVariant v = model()->data(model()->index(rows_.at(i), x), Qt::CheckStateRole); // is this a true/false column?
 
             if (v.isNull())
-                rowText.append(functions::formatForExport(model()->data(model()->index(rows_.at(i), x), Qt::DisplayRole), delimiter_));
+                rowText.append(functions::removeNewLines(model()->data(model()->index(rows_.at(i), x), Qt::DisplayRole).toString().remove(delimiter_)));
             else
                 rowText.append(v.toInt() == Qt::Checked ? "Yes" : "No");
         }
@@ -87,7 +87,7 @@ QString mpiTableView::formatHeaderForExport(const QString &delimiter_)
         header.append("");
 
     for(int i = 0; i < model()->columnCount(); ++i)
-        header.append(functions::formatForExport(model()->headerData(i, Qt::Horizontal, Qt::DisplayRole), delimiter_));
+        header.append(functions::removeNewLines(model()->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString().remove(delimiter_)));
 
     return header.join(delimiter_);
 }

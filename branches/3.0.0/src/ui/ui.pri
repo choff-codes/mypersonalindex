@@ -8,7 +8,7 @@ SOURCES += $$PWD/frmEditSecurity_UI.cpp \
     $$PWD/frmColumns_UI.cpp \
     $$PWD/frmSort_UI.cpp \
     $$PWD/frmEdit_UI.cpp \
-    ui/frmMainAA_UI.cpp
+    $$PWD/frmMainTableView_UI.cpp
 HEADERS += $$PWD/frmEditPortfolio_UI.h \
     $$PWD/frmMain_UI.h \
     $$PWD/frmEditSecurity_UI.h \
@@ -18,4 +18,4 @@ HEADERS += $$PWD/frmEditPortfolio_UI.h \
     $$PWD/frmColumns_UI.h \
     $$PWD/frmSort_UI.h \
     $$PWD/frmEdit_UI.h \
-    ui/frmMainAA_UI.h
+    $$PWD/frmMainTableView_UI.h

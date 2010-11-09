@@ -1,6 +1,7 @@
 #include "mainAAModel.h"
 #include <QColor>
 #include "functions.h"
+#include "assetAllocation.h"
 #include "calculatorNAV.h"
 #include "historicalNAV.h"
 
@@ -92,35 +93,39 @@ QMap<int, QString> aaRow::fieldNames()
     QMap<int, QString> names;
 
     for (int i = 0; i < columns.count(); ++i)
-        names[i] = QString(columns.at(i)).replace('\n', ' ');
+        names[i] = functions::removeNewLines(columns.at(i));
 
     return names;
 }
 
-QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_)
+QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
+    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_)
 {
     QList<baseRow*> returnList;
 
     foreach(const assetAllocation &aa, assetAllocation_)
     {
-        if (aa.deleted)
+        if (aa.deleted || aa.hide)
             continue;
 
-        if (aa.hide && !showHidden_)
-            continue;
-
-        returnList.append(new aaRow(calculator_.changeOverTime(aa, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, aa.id), portfolioSnapshot_, aa, columnSort_));
+        returnList.append(getRow(aa, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
     }
 
-    if (showUnassigned_)
-    {
-        assetAllocation unassignedAA;
-        unassignedAA.description = "Unassigned";
-        returnList.append(new aaRow(calculator_.changeOverTime(unassignedAA, beginDate_, endDate_).nav(endDate_), calculator_.assetAllocationSnapshot(endDate_, unassignedAA.id), portfolioSnapshot_, unassignedAA, columnSort_));
-    }
+    // check if any securities have an unassigned value
+    snapshot unassigned = calculator_.assetAllocationSnapshot(endDate_, UNASSIGNED);
+    if (unassigned.count != 0)
+        returnList.append(getRow(assetAllocation(UNASSIGNED, UNASSIGNED, "(Unassigned)"), beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
 
     return returnList;
+}
+
+baseRow* aaRow::getRow(const assetAllocation &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_, const snapshot &portfolioSnapshot_,
+    const QList<orderBy> &columnSort_)
+{
+    return new aaRow(
+        calculator_.nav(assetAllocation_, beginDate_, endDate_),
+        calculator_.assetAllocationSnapshot(endDate_, assetAllocation_.id), portfolioSnapshot_, assetAllocation_, columnSort_
+    );
 }
 
 mainAAModel::mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_):
@@ -205,7 +210,7 @@ QVariant mainAAModel::headerData(int section, Qt::Orientation orientation, int r
             break;
         case aaRow::row_GainP:
             extra = QString("\n[%1]").arg(functions::doubleToPercentage(
-                        m_portfolioSnapshot.costBasis == 0 ? 0 : (m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis) / m_portfolioSnapshot.costBasis)
+                        functions::isZero(m_portfolioSnapshot.costBasis) ? 0 : (m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis) / m_portfolioSnapshot.costBasis)
                     );
             break;
         case aaRow::row_Target:

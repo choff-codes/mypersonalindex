@@ -16,8 +16,8 @@
 class settings
 {
 public:
-    enum {
-        columns_Holdings,
+    enum column {
+        columns_Security,
         columns_AA,
         columns_Acct,
         columns_Stat

@@ -3,11 +3,11 @@
 
 #include <QStringList>
 #include "mpiViewModelBase.h"
-#include "assetAllocation.h"
 #include "snapshot.h"
 
 class historicalNAV;
 class calculatorNAV;
+class assetAllocation;
 class aaRow: public baseRow
 {
 public:
@@ -34,14 +34,17 @@ public:
     QVariant columnType(int column_) const { return columnsType.at(column_); }
     static QMap<int, QString> fieldNames();
 
-    static QList<baseRow*> getRows(const QMap<int, assetAllocation> assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_, bool showHidden_, bool showUnassigned_);
+    static QList<baseRow*> getRows(const QMap<int, assetAllocation> &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
+        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_);
+
+private:
+    static baseRow* getRow(const assetAllocation &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
+        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_);
 };
 
 class mainAAModel: public mpiViewModelBase
 {
 public:
-
     mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_ = 0);
 
     QVariant data(const QModelIndex &index, int role) const;

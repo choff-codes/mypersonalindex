@@ -10,10 +10,11 @@
 #include "calculatorNAV.h"
 
 class frmMain_UI;
-class frmMainAA_UI;
+class frmMainTableView_UI;
 class portfolio;
 class calculatorNAV;
 class QComboBox;
+class QAbstractItemModel;
 class frmMain : public QMainWindow
 {
     Q_OBJECT
@@ -36,8 +37,9 @@ private slots:
     void importYahoo();
     void importYahooFinished();
     void recalculateTradesFinished();
-    void tabAA();
-    void tabAARefresh();
+    void tabAA() { switchToTab(tab_assetAllocation); }
+    void tabSecurity() { switchToTab(tab_security); }
+    void refreshTab();
     void sortChanged(int index_);
     void modifyColumns();
 
@@ -56,7 +58,8 @@ private:
 
     // ui pointers (to delete on destory)
     frmMain_UI *ui;
-    frmMainAA_UI *ui_assetAllocation;
+    frmMainTableView_UI *ui_assetAllocation;
+    frmMainTableView_UI *ui_security;
 
     // all portfolios in the current file
     QMap<int, portfolio> m_portfolios;
@@ -99,6 +102,12 @@ private:
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
     void setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_);
+    QWidget* setupTable(tab tab_, frmMainTableView_UI *ui_);
+    QAbstractItemModel* createModel(tab tab_, int beginDate_, int endDate_);
+    QAbstractItemModel* getModel(tab tab_);
+    void switchToTab(tab tab_);
+    QMap<int, QString> tableColumns(tab tab_);
+    settings::column settingsColumn(tab tab_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);

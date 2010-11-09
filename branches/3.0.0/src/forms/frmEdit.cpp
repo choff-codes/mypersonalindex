@@ -500,7 +500,7 @@ void frmEdit::populateTradeTab()
         if (i.value().deleted)
             continue;
 
-        QString item = functions::formatForComboBox(i.value().displayText(), i.value().note);
+        QString item = functions::join(i.value().displayText(), functions::fitString(functions::removeNewLines(i.value().note), 20), " | ");
         ui->tradeFilterCmb->addItem(item, i.value().id);
         ui->tradeForm.cashCmb->addItem(item, i.value().id);
     }

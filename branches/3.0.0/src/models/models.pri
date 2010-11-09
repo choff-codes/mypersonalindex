@@ -1,7 +1,7 @@
 INCLUDEPATH += $$PWD
 HEADERS += $$PWD/securityAAModel.h \
     #$$PWD/securityTradeModel.h \
-    #$$PWD/mainHoldingsModel.h \
+    $$PWD/mainSecurityModel.h \
     #$$PWD/mainPerformanceModel.h \
     #$$PWD/mainAcctModel.h \
     $$PWD/mainAAModel.h \
@@ -10,7 +10,7 @@ HEADERS += $$PWD/securityAAModel.h \
     #$$PWD/securityHistoryModel.h \
     $$PWD/objectKeyEditModel.h
 SOURCES += $$PWD/securityAAModel.cpp \
-    #$$PWD/mainHoldingsModel.cpp \
+    $$PWD/mainSecurityModel.cpp \
     #$$PWD/mainAcctModel.cpp \
     $$PWD/mainAAModel.cpp \
     #$$PWD/mainPerformanceModel.cpp \

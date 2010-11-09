@@ -13,14 +13,14 @@ void settings::save()
     settings.endGroup();
 
     settings.beginGroup("columns");
-    settings.setValue("holdings", qVariantFromValue(viewableColumns.value(columns_Holdings)));
+    settings.setValue("holdings", qVariantFromValue(viewableColumns.value(columns_Security)));
     settings.setValue("aa", qVariantFromValue(viewableColumns.value(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumns.value(columns_Acct)));
     settings.setValue("stat", qVariantFromValue(viewableColumns.value(columns_Stat)));
     settings.endGroup();
 
     settings.beginGroup("columnsSorting");
-    settings.setValue("holdings", qVariantFromValue(viewableColumnsSorting.value(columns_Holdings)));
+    settings.setValue("holdings", qVariantFromValue(viewableColumnsSorting.value(columns_Security)));
     settings.setValue("aa", qVariantFromValue(viewableColumnsSorting.value(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumnsSorting.value(columns_Acct)));
     settings.endGroup();
@@ -41,7 +41,7 @@ void settings::load()
 
     settings.beginGroup("columns");
 
-    viewableColumns[columns_Holdings] =
+    viewableColumns[columns_Security] =
         settings.value(
             "holdings",
             qVariantFromValue(
@@ -108,7 +108,7 @@ void settings::load()
     settings.endGroup();
 
     settings.beginGroup("columnsSorting");
-    viewableColumnsSorting[columns_Holdings] = settings.value("holdings").value<columnsSorting>();
+    viewableColumnsSorting[columns_Security] = settings.value("holdings").value<columnsSorting>();
     viewableColumnsSorting[columns_AA] = settings.value("aa").value<columnsSorting>();
     viewableColumnsSorting[columns_Acct] = settings.value("acct").value<columnsSorting>();
     settings.endGroup();

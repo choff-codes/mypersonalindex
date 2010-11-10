@@ -26,16 +26,7 @@ public:
     QVBoxLayout *layout;
     QTabWidget *tabs;
     QWidget *portfolioTab;
-    QHBoxLayout *portfolioLayout;
-    QWidget *portfolioFormWidget;
     QWidget *acctTab;
-    QHBoxLayout *acctLayout;
-    QGridLayout *acctLayoutLeft;
-    QListView *acctList;
-    QPushButton *acctAdd;
-    QPushButton *acctDelete;
-    QWidget *acctFormWidget;
-
     QWidget *aaTab;
 
     QWidget *securityTab;
@@ -56,17 +47,12 @@ public:
     QWidget *tradeFormWidget;
     QDialogButtonBox *okCancelBtn;
 
-    frmEditPortfolio_UI portfolioForm;
-    //frmEditAA_UI aaForm;
-    frmEditAcct_UI acctForm;
     frmEditSecurity_UI securityForm;
     frmEditTrade_UI tradeForm;
 
     QMenu *copyPastePopup;
     QAction *copyAction;
     QAction *pasteAction;
-    QShortcut *acctCopyShortcut;
-    QShortcut *acctPasteShortcut;
     QShortcut *securityCopyShortcut;
     QShortcut *securityPasteShortcut;
     QShortcut *tradeCopyShortcut;

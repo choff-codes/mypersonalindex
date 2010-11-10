@@ -1,12 +1,13 @@
-#ifndef FRMEDITSTATE_PORTFOLIO_H
-#define FRMEDITSTATE_PORTFOLIO_H
+#ifndef FRMEDITPORTFOLIO_STATE_H
+#define FRMEDITPORTFOLIO_STATE_H
 
+#include <QObject>
 #include "frmEditState.h"
 
-class QWidget;
 class frmEditPortfolio_UI;
-class frmEditPortfolio_State : public frmEditState
+class frmEditPortfolio_State : public QObject, public frmEditState
 {
+    Q_OBJECT
 public:
     explicit frmEditPortfolio_State(portfolio portfolio_, QWidget *parent_ = 0);
     ~frmEditPortfolio_State();
@@ -14,6 +15,8 @@ public:
     void enter() {} // no-op
     void leave() {} // no-op
     bool validate();
+
+public slots:
     void save();
 
 private:
@@ -28,4 +31,4 @@ private:
     void remove() {} // no-op
 };
 
-#endif // FRMEDITSTATE_PORTFOLIO_H
+#endif // FRMEDITPORTFOLIO_STATE_H

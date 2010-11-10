@@ -1,14 +1,14 @@
-#include "frmEditAA_State.h"
+#include "frmEditAcct_State.h"
 #include <QMessageBox>
-#include "frmEditAA_UI.h"
-#include "assetAllocation.h"
+#include "frmEditAcct_UI.h"
+#include "account.h"
 #include "objectKeyEditModel.h"
 #include "portfolioAttributes.h"
 
-frmEditAA_State::frmEditAA_State(portfolio portfolio_, QWidget *parent_):
+frmEditAcct_State::frmEditAcct_State(portfolio portfolio_, QWidget *parent_):
     QObject(parent_),
     frmEditStateMap(portfolio_),
-    ui(new frmEditAA_UI),
+    ui(new frmEditAcct_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.assetAllocations())))
 {
@@ -20,96 +20,96 @@ frmEditAA_State::frmEditAA_State(portfolio portfolio_, QWidget *parent_):
     connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
     connect(ui->addBtn, SIGNAL(clicked()), this, SLOT(add()));
     connect(ui->deleteBtn, SIGNAL(clicked()), this, SLOT(remove()));
-    connect(ui->targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
+    connect(ui->taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
     connect(ui->list, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->copyShortcut, SIGNAL(activated()), this, SLOT(copySlot()));
     connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(pasteSlot()));
 }
 
-frmEditAA_State::~frmEditAA_State()
+frmEditAcct_State::~frmEditAcct_State()
 {
     delete ui;
 }
 
-void frmEditAA_State::enter()
+void frmEditAcct_State::enter()
 {
     ui->list->setEnabled(true);
 }
 
-void frmEditAA_State::leave()
+void frmEditAcct_State::leave()
 {
     ui->list->setEnabled(false);
 }
 
-void frmEditAA_State::listChange(const QModelIndex &current_, const QModelIndex &previous_)
+void frmEditAcct_State::listChange(const QModelIndex &current_, const QModelIndex &previous_)
 {
     m_model->refresh(previous_);
-    m_currentItem = static_cast<assetAllocation*>(m_model->get(current_.row()));
+    m_currentItem = static_cast<account*>(m_model->get(current_.row()));
     load();
 }
 
-void frmEditAA_State::resetTarget()
+void frmEditAcct_State::resetTaxRate()
 {
-    ui->targetSpinBox->setValue(0);
+    ui->taxRateSpinBox->setValue(0);
 }
 
-void frmEditAA_State::customContextMenuRequested(const QPoint&)
+void frmEditAcct_State::customContextMenuRequested(const QPoint&)
 {
     ui->copyPastePopup->popup(QCursor::pos());
 }
 
-void frmEditAA_State::save()
+void frmEditAcct_State::save()
 {
     if (!m_currentItem)
         return;
     m_currentItem->description = ui->descTxt->text();
-    m_currentItem->rebalanceBand = ui->rebalanceBandSpinBox->value() / 100;
-    m_currentItem->target = ui->targetSpinBox->value() / 100;
-    m_currentItem->threshold = (assetAllocation::thresholdMethod)ui->thresholdCmb->itemData(ui->thresholdCmb->currentIndex()).toInt();
+    m_currentItem->taxRate = ui->taxRateSpinBox->value();
+    m_currentItem->taxDeferred = ui->taxDeferredChk->isChecked();
+    m_currentItem->costBasis = (account::costBasisMethod)ui->costBasisCmb->itemData(ui->costBasisCmb->currentIndex()).toInt();
     m_currentItem->hide = ui->hideChk->isChecked();
 }
 
-bool frmEditAA_State::validate()
+bool frmEditAcct_State::validate()
 {
-    return validateMap(m_portfolio.assetAllocations());
+    return validateMap(m_portfolio.accounts());
 }
 
-void frmEditAA_State::validationError(objectKey* key_, const QString &errorMessage_)
+void frmEditAcct_State::validationError(objectKey* key_, const QString &errorMessage_)
 {
-    QMessageBox::critical(0, "Asset Allocation validation error", errorMessage_);
+    QMessageBox::critical(0, "Account validation error", errorMessage_);
     ui->list->setCurrentIndex(m_model->find(key_));
 }
 
-void frmEditAA_State::add()
+void frmEditAcct_State::add()
 {
     int identity = portfolio::getOpenIdentity();
-    objectKey *key = &m_portfolio.assetAllocations().insert(identity, assetAllocation(identity, m_portfolio.attributes().id)).value();
+    objectKey *key = &m_portfolio.accounts().insert(identity, account(identity, m_portfolio.attributes().id)).value();
     m_model->insert(key);
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));
 }
 
-void frmEditAA_State::load()
+void frmEditAcct_State::load()
 {
     if (!m_currentItem)
         return;
     ui->descTxt->setText(m_currentItem->description);
-    ui->rebalanceBandSpinBox->setValue(m_currentItem->rebalanceBand * 100);
-    ui->targetSpinBox->setValue(m_currentItem->target * 100);
-    ui->thresholdCmb->setCurrentIndex(ui->thresholdCmb->findData(m_currentItem->threshold));
+    ui->taxRateSpinBox->setValue(m_currentItem->taxRate);
+    ui->taxDeferredChk->setChecked(m_currentItem->taxDeferred);
+    ui->costBasisCmb->setCurrentIndex(ui->costBasisCmb->findData(m_currentItem->costBasis));
     ui->hideChk->setChecked(m_currentItem->hide);
 }
 
-void frmEditAA_State::remove()
+void frmEditAcct_State::remove()
 {
     if (!m_currentItem)
         return;
 
-    assetAllocation *aa = m_currentItem;
+    account *acct = m_currentItem;
     m_model->remove(m_currentItem);
-    m_portfolio.assetAllocations()[aa->id].deleted = true;
+    m_portfolio.accounts()[acct->id].deleted = true;
 }
 
-bool frmEditAA_State::internalCopy(QDataStream &stream_)
+bool frmEditAcct_State::internalCopy(QDataStream &stream_)
 {
     if (!m_currentItem)
         return false;
@@ -118,10 +118,11 @@ bool frmEditAA_State::internalCopy(QDataStream &stream_)
     return true;
 }
 
-void frmEditAA_State::internalPaste(QDataStream &stream_)
+void frmEditAcct_State::internalPaste(QDataStream &stream_)
 {
     if (!m_currentItem)
         return;
 
     stream_ >> *m_currentItem;
 }
+

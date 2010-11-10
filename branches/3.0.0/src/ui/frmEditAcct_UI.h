@@ -10,13 +10,21 @@
 #include <QToolButton>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QListView>
+#include <QPushButton>
+#include <QMenu>
+#include <QShortcut>
 
 class frmEditAcct_UI
 {
 public:
     QHBoxLayout *layout;
+    QGridLayout *layoutLeft;
+    QListView *list;
+    QPushButton *addBtn;
+    QPushButton *deleteBtn;
     QGroupBox *groupBox;
-    QFormLayout *layoutAcct;
+    QFormLayout *layoutForm;
     QLabel *desc;
     QLineEdit *descTxt;
     QLabel *taxRate;
@@ -27,8 +35,13 @@ public:
     QComboBox *costBasisCmb;
     QCheckBox *taxDeferredChk;
     QCheckBox *hideChk;
+    QMenu *copyPastePopup;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QShortcut *copyShortcut;
+    QShortcut *pasteShortcut;
 
-    void setupUI(QWidget* parent = 0);
+    void setupUI(QWidget* parent_ = 0);
 };
 
 #endif // FRMEDITACCT_UI_H

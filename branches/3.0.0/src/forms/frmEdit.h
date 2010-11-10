@@ -8,6 +8,8 @@
 class QListView;
 class frmEdit_UI;
 class frmEditAA_State;
+class frmEditPortfolio_State;
+class frmEditAcct_State;
 class frmEdit : public QDialog
 {
     Q_OBJECT
@@ -57,6 +59,8 @@ private:
     objectKey *m_currentItem;
     tab m_currentTab;
     frmEditAA_State *aaState;
+    frmEditPortfolio_State *portfolioState;
+    frmEditAcct_State *acctState;
 
     void connectSlots();
 

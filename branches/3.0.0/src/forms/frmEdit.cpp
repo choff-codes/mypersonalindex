@@ -10,6 +10,8 @@
 #include "functions.h"
 #include "account.h"
 #include "frmEditAA_State.h"
+#include "frmEditPortfolio_State.h"
+#include "frmEditAcct_State.h"
 
 const int frmEdit::m_magicNumber = rand();
 
@@ -25,13 +27,14 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
     ui->setupUI(this);
 
     aaState = new frmEditAA_State(m_portfolio, ui->aaTab);
-
-    ui->acctList->setModel(new objectKeyEditModel(mapToList(m_portfolio.accounts()), ui->acctList));
+    portfolioState = new frmEditPortfolio_State(m_portfolio, ui->portfolioTab);
+    acctState = new frmEditAcct_State(m_portfolio, ui->acctTab);
+//    ui->acctList->setModel(new objectKeyEditModel(mapToList(m_portfolio.accounts()), ui->acctList));
     //ui->aaList->setModel(new objectKeyEditModel(mapToList(m_portfolio.assetAllocations()), ui->aaList));
     ui->securityList->setModel(new objectKeyEditModel(mapToList(m_portfolio.securities()), ui->securityList));
 
     connectSlots();
-    loadPortfolio();
+    //loadPortfolio();
     tabChange(tab_portfolio);
 }
 
@@ -54,10 +57,10 @@ void frmEdit::connectSlots()
 //    connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
 //    connect(ui->aaAdd, SIGNAL(clicked()), this, SLOT(add()));
 //    connect(ui->aaDelete, SIGNAL(clicked()), this, SLOT(remove()));
-    connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
-    connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
-    connect(ui->acctAdd, SIGNAL(clicked()), this, SLOT(add()));
-    connect(ui->acctDelete, SIGNAL(clicked()), this, SLOT(remove()));
+//    connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
+//    connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
+//    connect(ui->acctAdd, SIGNAL(clicked()), this, SLOT(add()));
+//    connect(ui->acctDelete, SIGNAL(clicked()), this, SLOT(remove()));
     connect(ui->securityList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
     connect(ui->securityList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
     connect(ui->securityAdd, SIGNAL(clicked()), this, SLOT(add()));
@@ -75,17 +78,17 @@ void frmEdit::connectSlots()
     connect(ui->tradeForm.priceChk, SIGNAL(toggled(bool)), this, SLOT(tradePriceChange(bool)));
 
 //    connect(ui->aaForm.targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
-    connect(ui->acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
+//    connect(ui->acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
     connect(ui->securityForm.expenseBtnClear, SIGNAL(clicked()), this, SLOT(resetExpenseRatio()));
 
     connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
-    connect(ui->acctList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+//    connect(ui->acctList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
 //    connect(ui->aaList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->securityList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->tradeList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
-    connect(ui->acctCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
-    connect(ui->acctPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+//    connect(ui->acctCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+//    connect(ui->acctPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
 //    connect(ui->aaCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
 //    connect(ui->aaPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
     connect(ui->securityCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
@@ -109,7 +112,7 @@ void frmEdit::apply()
         return;
 
     m_portfolioToReturn = m_portfolio;
-    m_portfolio.detach();
+    m_portfolioToReturn.detach();
 }
 
 void frmEdit::tabChange(int currentIndex_)
@@ -117,7 +120,7 @@ void frmEdit::tabChange(int currentIndex_)
     m_currentTab = (tab)currentIndex_;
     // prevent signals from firing on focus
     //ui->aaList->setDisabled(true);
-    ui->acctList->setDisabled(true);
+    //ui->acctList->setDisabled(true);
     ui->securityList->setDisabled(true);
     ui->tradeList->setDisabled(true);
 
@@ -133,7 +136,7 @@ void frmEdit::tabChange(int currentIndex_)
             populateTradeTab();
             break;
         case tab_account:
-            break;
+            return;
         case tab_assetAllocation:
             return;
     }
@@ -155,43 +158,43 @@ void frmEdit::listChange(const QModelIndex &current_, const QModelIndex &previou
     load();
 }
 
-void frmEdit::savePortfolio()
-{
-    m_portfolio.attributes().description = ui->portfolioForm.descTxt->text();
-    m_portfolio.attributes().startDate = ui->portfolioForm.startDateDateEdit->date().toJulianDay();
-    m_portfolio.attributes().startValue = ui->portfolioForm.startValueTxt->text().toInt();
-}
+//void frmEdit::savePortfolio()
+//{
+//    m_portfolio.attributes().description = ui->portfolioForm.descTxt->text();
+//    m_portfolio.attributes().startDate = ui->portfolioForm.startDateDateEdit->date().toJulianDay();
+//    m_portfolio.attributes().startValue = ui->portfolioForm.startValueTxt->text().toInt();
+//}
 
-void frmEdit::loadPortfolio()
-{
-    ui->portfolioForm.descTxt->setText(m_portfolio.attributes().description);
-    ui->portfolioForm.startDateDateEdit->setDate(QDate::fromJulianDay(m_portfolio.attributes().startDate));
-    ui->portfolioForm.startValueTxt->setText(QString::number(m_portfolio.attributes().startValue));
-}
+//void frmEdit::loadPortfolio()
+//{
+//    ui->portfolioForm.descTxt->setText(m_portfolio.attributes().description);
+//    ui->portfolioForm.startDateDateEdit->setDate(QDate::fromJulianDay(m_portfolio.attributes().startDate));
+//    ui->portfolioForm.startValueTxt->setText(QString::number(m_portfolio.attributes().startValue));
+//}
 
-void frmEdit::saveAccount()
-{
-    if (!m_currentItem)
-        return;
-    account *acct = static_cast<account*>(m_currentItem);
-    acct->description = ui->acctForm.descTxt->text();
-    acct->taxRate = ui->acctForm.taxRateSpinBox->value();
-    acct->taxDeferred = ui->acctForm.taxDeferredChk->isChecked();
-    acct->costBasis = (account::costBasisMethod)ui->acctForm.costBasisCmb->itemData(ui->acctForm.costBasisCmb->currentIndex()).toInt();
-    acct->hide = ui->acctForm.hideChk->isChecked();
-}
+//void frmEdit::saveAccount()
+//{
+//    if (!m_currentItem)
+//        return;
+//    account *acct = static_cast<account*>(m_currentItem);
+//    acct->description = ui->acctForm.descTxt->text();
+//    acct->taxRate = ui->acctForm.taxRateSpinBox->value();
+//    acct->taxDeferred = ui->acctForm.taxDeferredChk->isChecked();
+//    acct->costBasis = (account::costBasisMethod)ui->acctForm.costBasisCmb->itemData(ui->acctForm.costBasisCmb->currentIndex()).toInt();
+//    acct->hide = ui->acctForm.hideChk->isChecked();
+//}
 
-void frmEdit::loadAccount()
-{
-    if (!m_currentItem)
-        return;
-    account *acct = static_cast<account*>(m_currentItem);
-    ui->acctForm.descTxt->setText(acct->description);
-    ui->acctForm.taxRateSpinBox->setValue(acct->taxRate);
-    ui->acctForm.taxDeferredChk->setChecked(acct->taxDeferred);
-    ui->acctForm.costBasisCmb->setCurrentIndex(ui->acctForm.costBasisCmb->findData(acct->costBasis));
-    ui->acctForm.hideChk->setChecked(acct->hide);
-}
+//void frmEdit::loadAccount()
+//{
+//    if (!m_currentItem)
+//        return;
+//    account *acct = static_cast<account*>(m_currentItem);
+//    ui->acctForm.descTxt->setText(acct->description);
+//    ui->acctForm.taxRateSpinBox->setValue(acct->taxRate);
+//    ui->acctForm.taxDeferredChk->setChecked(acct->taxDeferred);
+//    ui->acctForm.costBasisCmb->setCurrentIndex(ui->acctForm.costBasisCmb->findData(acct->costBasis));
+//    ui->acctForm.hideChk->setChecked(acct->hide);
+//}
 
 //void frmEdit::saveAssetAllocation()
 //{
@@ -304,10 +307,10 @@ void frmEdit::save()
     switch(m_currentTab)
     {
         case tab_portfolio:
-            savePortfolio();
+            //savePortfolio();
             break;
         case tab_account:
-            saveAccount();
+            //saveAccount();
             break;
         case tab_assetAllocation:
             //saveAssetAllocation();
@@ -326,11 +329,11 @@ void frmEdit::load()
     switch(m_currentTab)
     {
         case tab_portfolio:
-            loadPortfolio();
+            //loadPortfolio();
             break;
         case tab_account:
-            ui->acctFormWidget->setEnabled(m_currentItem);
-            loadAccount();
+//            ui->acctFormWidget->setEnabled(m_currentItem);
+//            loadAccount();
             break;
         case tab_assetAllocation:
             //ui->aaFormWidget->setEnabled(m_currentItem);
@@ -410,7 +413,7 @@ objectKeyEditModel* frmEdit::currentModel()
     switch(m_currentTab)
     {
         case tab_account:
-            return static_cast<objectKeyEditModel*>(ui->acctList->model());
+            //return static_cast<objectKeyEditModel*>(ui->acctList->model());
         case tab_assetAllocation:
             //return static_cast<objectKeyEditModel*>(ui->aaList->model());
         case tab_security:
@@ -428,7 +431,7 @@ QListView* frmEdit::currentListView()
     switch(m_currentTab)
     {
         case tab_account:
-            return ui->acctList;
+            //return ui->acctList;
         case tab_assetAllocation:
             //return ui->aaList;
         case tab_security:
@@ -643,7 +646,7 @@ void frmEdit::paste()
 
 void frmEdit::resetTaxRate()
 {
-    ui->acctForm.taxRateSpinBox->setValue(0);
+    //ui->acctForm.taxRateSpinBox->setValue(0);
 }
 
 void frmEdit::resetTarget()

@@ -2,12 +2,14 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/frmEditState.h \
-    state/frmEditPortfolio_State.h \
-    state/frmEditStateMap.h \
-    state/frmEditAA_State.h
+    $$PWD/frmEditPortfolio_State.h \
+    $$PWD/frmEditStateMap.h \
+    $$PWD/frmEditAA_State.h \
+    $$PWD/frmEditAcct_State.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
-    state/frmEditPortfolio_State.cpp \
-    state/frmEditStateMap.cpp \
-    state/frmEditAA_State.cpp
+    $$PWD/frmEditPortfolio_State.cpp \
+    $$PWD/frmEditStateMap.cpp \
+    $$PWD/frmEditAA_State.cpp \
+    $$PWD/frmEditAcct_State.cpp

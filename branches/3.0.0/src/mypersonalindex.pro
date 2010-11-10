@@ -1,5 +1,6 @@
 include(forms/forms.pri)
 include(classes/classes.pri)
+include(state/state.pri)
 include(models/models.pri)
 include(ui/ui.pri)
 include(usercontrols/usercontrols.pri)

@@ -9,6 +9,7 @@
 #include "security.h"
 #include "functions.h"
 #include "account.h"
+#include "frmEditAA_State.h"
 
 const int frmEdit::m_magicNumber = rand();
 
@@ -22,8 +23,11 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
     m_portfolio.detach();
 
     ui->setupUI(this);
+
+    aaState = new frmEditAA_State(m_portfolio, ui->aaTab);
+
     ui->acctList->setModel(new objectKeyEditModel(mapToList(m_portfolio.accounts()), ui->acctList));
-    ui->aaList->setModel(new objectKeyEditModel(mapToList(m_portfolio.assetAllocations()), ui->aaList));
+    //ui->aaList->setModel(new objectKeyEditModel(mapToList(m_portfolio.assetAllocations()), ui->aaList));
     ui->securityList->setModel(new objectKeyEditModel(mapToList(m_portfolio.securities()), ui->securityList));
 
     connectSlots();
@@ -46,10 +50,10 @@ void frmEdit::connectSlots()
     connect(ui->okCancelBtn, SIGNAL(rejected()), this, SLOT(reject()));
     connect(ui->tabs, SIGNAL(currentChanged(int)), this, SLOT(save()));
     connect(ui->tabs, SIGNAL(currentChanged(int)), this, SLOT(tabChange(int)));
-    connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
-    connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
-    connect(ui->aaAdd, SIGNAL(clicked()), this, SLOT(add()));
-    connect(ui->aaDelete, SIGNAL(clicked()), this, SLOT(remove()));
+//    connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
+//    connect(ui->aaList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
+//    connect(ui->aaAdd, SIGNAL(clicked()), this, SLOT(add()));
+//    connect(ui->aaDelete, SIGNAL(clicked()), this, SLOT(remove()));
     connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
     connect(ui->acctList->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));
     connect(ui->acctAdd, SIGNAL(clicked()), this, SLOT(add()));
@@ -70,20 +74,20 @@ void frmEdit::connectSlots()
     connect(ui->tradeForm.actionCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeActionChange(int)));
     connect(ui->tradeForm.priceChk, SIGNAL(toggled(bool)), this, SLOT(tradePriceChange(bool)));
 
-    connect(ui->aaForm.targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
+//    connect(ui->aaForm.targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
     connect(ui->acctForm.taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
     connect(ui->securityForm.expenseBtnClear, SIGNAL(clicked()), this, SLOT(resetExpenseRatio()));
 
     connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
     connect(ui->acctList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
-    connect(ui->aaList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
+//    connect(ui->aaList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->securityList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->tradeList, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
     connect(ui->acctCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
     connect(ui->acctPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
-    connect(ui->aaCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
-    connect(ui->aaPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+//    connect(ui->aaCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+//    connect(ui->aaPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
     connect(ui->securityCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
     connect(ui->securityPasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
     connect(ui->tradeCopyShortcut, SIGNAL(activated()), this, SLOT(copy()));
@@ -112,7 +116,7 @@ void frmEdit::tabChange(int currentIndex_)
 {
     m_currentTab = (tab)currentIndex_;
     // prevent signals from firing on focus
-    ui->aaList->setDisabled(true);
+    //ui->aaList->setDisabled(true);
     ui->acctList->setDisabled(true);
     ui->securityList->setDisabled(true);
     ui->tradeList->setDisabled(true);
@@ -129,8 +133,9 @@ void frmEdit::tabChange(int currentIndex_)
             populateTradeTab();
             break;
         case tab_account:
-        case tab_assetAllocation:
             break;
+        case tab_assetAllocation:
+            return;
     }
 
     if (!isValidCurrentModel())
@@ -188,29 +193,29 @@ void frmEdit::loadAccount()
     ui->acctForm.hideChk->setChecked(acct->hide);
 }
 
-void frmEdit::saveAssetAllocation()
-{
-    if (!m_currentItem)
-        return;
-    assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
-    aa->description = ui->aaForm.descTxt->text();
-    aa->rebalanceBand = ui->aaForm.rebalanceBandSpinBox->value() / 100;
-    aa->target = ui->aaForm.targetSpinBox->value() / 100;
-    aa->threshold = (assetAllocation::thresholdMethod)ui->aaForm.thresholdCmb->itemData(ui->aaForm.thresholdCmb->currentIndex()).toInt();
-    aa->hide = ui->aaForm.hideChk->isChecked();
-}
+//void frmEdit::saveAssetAllocation()
+//{
+//    if (!m_currentItem)
+//        return;
+//    assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
+//    aa->description = ui->aaForm.descTxt->text();
+//    aa->rebalanceBand = ui->aaForm.rebalanceBandSpinBox->value() / 100;
+//    aa->target = ui->aaForm.targetSpinBox->value() / 100;
+//    aa->threshold = (assetAllocation::thresholdMethod)ui->aaForm.thresholdCmb->itemData(ui->aaForm.thresholdCmb->currentIndex()).toInt();
+//    aa->hide = ui->aaForm.hideChk->isChecked();
+//}
 
-void frmEdit::loadAssetAllocation()
-{
-    if (!m_currentItem)
-        return;
-    assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
-    ui->aaForm.descTxt->setText(aa->description);
-    ui->aaForm.rebalanceBandSpinBox->setValue(aa->rebalanceBand * 100);
-    ui->aaForm.targetSpinBox->setValue(aa->target * 100);
-    ui->aaForm.thresholdCmb->setCurrentIndex(ui->aaForm.thresholdCmb->findData(aa->threshold));
-    ui->aaForm.hideChk->setChecked(aa->hide);
-}
+//void frmEdit::loadAssetAllocation()
+//{
+//    if (!m_currentItem)
+//        return;
+//    assetAllocation *aa = static_cast<assetAllocation*>(m_currentItem);
+//    ui->aaForm.descTxt->setText(aa->description);
+//    ui->aaForm.rebalanceBandSpinBox->setValue(aa->rebalanceBand * 100);
+//    ui->aaForm.targetSpinBox->setValue(aa->target * 100);
+//    ui->aaForm.thresholdCmb->setCurrentIndex(ui->aaForm.thresholdCmb->findData(aa->threshold));
+//    ui->aaForm.hideChk->setChecked(aa->hide);
+//}
 
 void frmEdit::saveSecurity()
 {
@@ -305,7 +310,7 @@ void frmEdit::save()
             saveAccount();
             break;
         case tab_assetAllocation:
-            saveAssetAllocation();
+            //saveAssetAllocation();
             break;
         case tab_security:
             saveSecurity();
@@ -328,8 +333,8 @@ void frmEdit::load()
             loadAccount();
             break;
         case tab_assetAllocation:
-            ui->aaFormWidget->setEnabled(m_currentItem);
-            loadAssetAllocation();
+            //ui->aaFormWidget->setEnabled(m_currentItem);
+            //loadAssetAllocation();
             break;
         case tab_security:
             ui->securityFormWidget->setEnabled(m_currentItem);
@@ -407,7 +412,7 @@ objectKeyEditModel* frmEdit::currentModel()
         case tab_account:
             return static_cast<objectKeyEditModel*>(ui->acctList->model());
         case tab_assetAllocation:
-            return static_cast<objectKeyEditModel*>(ui->aaList->model());
+            //return static_cast<objectKeyEditModel*>(ui->aaList->model());
         case tab_security:
             return static_cast<objectKeyEditModel*>(ui->securityList->model());
         case tab_trade:
@@ -425,7 +430,7 @@ QListView* frmEdit::currentListView()
         case tab_account:
             return ui->acctList;
         case tab_assetAllocation:
-            return ui->aaList;
+            //return ui->aaList;
         case tab_security:
             return ui->securityList;
         case tab_trade:
@@ -643,7 +648,7 @@ void frmEdit::resetTaxRate()
 
 void frmEdit::resetTarget()
 {
-    ui->aaForm.targetSpinBox->setValue(0);
+ //   ui->aaForm.targetSpinBox->setValue(0);
 }
 
 void frmEdit::resetExpenseRatio()

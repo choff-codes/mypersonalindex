@@ -44,23 +44,6 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
     tabs->addTab(acctTab, "Accounts");
 
     aaTab = new QWidget(dialog);
-    aaLayout = new QHBoxLayout(aaTab);
-    aaLayoutLeft = new QGridLayout();
-    aaList = new QListView(aaTab);
-    aaList->setContextMenuPolicy(Qt::CustomContextMenu);
-    aaAdd = new QPushButton("Add", aaTab);
-    aaDelete = new QPushButton("Delete", aaTab);
-    aaFormWidget = new QWidget(aaTab);
-    aaFormWidget->setEnabled(false);
-
-    aaLayoutLeft->addWidget(aaList, 0, 0, 1, 2);
-    aaLayoutLeft->addWidget(aaAdd, 1, 0, 1, 1);
-    aaLayoutLeft->addWidget(aaDelete, 1, 1, 1, 1);
-
-    aaLayout->addLayout(aaLayoutLeft);
-    aaLayout->addWidget(aaFormWidget);
-    aaForm.setupUI(aaFormWidget);
-
     tabs->addTab(aaTab, "Asset Allocation");
 
     securityTab = new QWidget(dialog);
@@ -120,8 +103,6 @@ void frmEdit_UI::setupUI(QDialog* dialog) {
 
     acctCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, acctList);
     acctPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, acctList);
-    aaCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, aaList);
-    aaPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, aaList);
     securityCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, securityList);
     securityPasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, securityList);
     tradeCopyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, tradeList);

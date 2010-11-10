@@ -10,13 +10,21 @@
 #include <QToolButton>
 #include <QComboBox>
 #include <QCheckBox>
+#include <QListView>
+#include <QPushButton>
+#include <QShortcut>
+#include <QMenu>
 
 class frmEditAA_UI
 {
 public:
     QHBoxLayout *layout;
+    QGridLayout *layoutLeft;
+    QListView *list;
+    QPushButton *addBtn;
+    QPushButton *deleteBtn;
     QGroupBox *groupBox;
-    QFormLayout *layoutAA;
+    QFormLayout *layoutForm;
     QLabel *desc;
     QLineEdit *descTxt;
     QLabel *target;
@@ -28,8 +36,13 @@ public:
     QLabel *threshold;
     QComboBox *thresholdCmb;
     QCheckBox *hideChk;
+    QMenu *copyPastePopup;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QShortcut *copyShortcut;
+    QShortcut *pasteShortcut;
 
-    void setupUI(QWidget* parent = 0);    
+    void setupUI(QWidget* parent_ = 0);
 };
 
 #endif // FRMEDITAA_UI_H

@@ -4,7 +4,7 @@
 #include "portfolioAttributes.h"
 
 frmEditPortfolio_State::frmEditPortfolio_State(portfolio portfolio_, QWidget *parent_):
-    frmEditState(portfolio_),
+    frmEditState(portfolio_, parent_),
     ui(new frmEditPortfolio_UI())
 {
     ui->setupUI(parent_);
@@ -36,6 +36,6 @@ bool frmEditPortfolio_State::validate()
     if (validation.isEmpty())
         return true;
 
-    QMessageBox::critical(0, "Portfolio validation error", validation);
+    QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Portfolio validation error", validation);
     return false;
 }

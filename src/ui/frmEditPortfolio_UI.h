@@ -24,7 +24,7 @@ public:
     QLabel *startDate;
     mpiDateEdit *startDateDateEdit;
 
-    void setupUI(QWidget* parent = 0);
+    void setupUI(QWidget* parent_ = 0);
 };
 
 #endif // FRMEDITPORTFOLIO_UI_H

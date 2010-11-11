@@ -27,7 +27,7 @@ public:
     mpiTableView *table;
     QShortcut *tableCopy;
 
-    void setupUI(const QMap<int, QString> &columnNames, QWidget* parent = 0);
+    void setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_ = 0);
 };
 
 #endif // FRMMAINAA_UI_H

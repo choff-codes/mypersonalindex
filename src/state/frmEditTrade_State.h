@@ -1,34 +1,37 @@
-#ifndef FRMEDITAA_STATE_H
-#define FRMEDITAA_STATE_H
+#ifndef FRMEDITTRADE_STATE_H
+#define FRMEDITTRADE_STATE_H
 
 #include "frmEditStateMap.h"
 
 class QPoint;
 class QModelIndex;
-class frmEditAA_UI;
-class assetAllocation;
+class frmEditTrade_UI;
+class trade;
 class objectKeyEditModel;
-class frmEditAA_State : public frmEditStateMap
+class frmEditTrade_State : public frmEditStateMap
 {
     Q_OBJECT
 public:
-    explicit frmEditAA_State(portfolio portfolio_, QWidget *parent_ = 0);
-    ~frmEditAA_State();
+    explicit frmEditTrade_State(portfolio portfolio_, QWidget *parent_ = 0);
+    ~frmEditTrade_State();
 
     void enter();
     void leave();
     bool validate();
 
 private slots:
-    void resetTarget();
     void customContextMenuRequested(const QPoint&);
     void listChange(const QModelIndex &current_, const QModelIndex&);
     void add();
     void remove();
+    void tradeFrequencyChange(int index_);
+    void tradeActionChange(int index_);
+    void tradePriceChange(bool checked_);
+    void securityFilterChange(int index_);
 
 private:
-    frmEditAA_UI *ui;
-    assetAllocation *m_currentItem;
+    frmEditTrade_UI *ui;
+    trade *m_currentItem;
     objectKeyEditModel *m_model;
 
     void load();
@@ -36,9 +39,9 @@ private:
 
     void validationError(objectKey* key_, const QString &errorMessage_);
 
-    QString mimeType() const { return "application/mypersonalindex-assetallocation"; }
+    QString mimeType() const { return "application/mypersonalindex-trade"; }
     bool internalCopy(QDataStream &stream_) const;
     void internalPaste(QDataStream &stream_);
 };
 
-#endif // FRMEDITAA_STATE_H
+#endif // FRMEDITTRADE_STATE_H

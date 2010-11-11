@@ -18,6 +18,7 @@ void frmEditAA_UI::setupUI(QWidget *parent_)
     layout->addLayout(layoutLeft);
 
     groupBox = new QGroupBox("Asset Class", parent_);
+    groupBox->setEnabled(false);
     layout->addWidget(groupBox);
 
     layoutForm = new QFormLayout(groupBox);

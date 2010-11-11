@@ -9,7 +9,7 @@ class objectKey;
 class frmEditStateMap : public frmEditState
 {
 public:
-    frmEditStateMap(portfolio portfolio_);
+    frmEditStateMap(portfolio portfolio_, QObject *parent_);
     virtual ~frmEditStateMap() {}
 
 protected:
@@ -19,7 +19,7 @@ protected:
     bool validateMap(QMap<int, T> &map_);
 
     template <class T>
-    QList<objectKey*> mapToList(QMap<int, T> &map_);
+    QList<objectKey*> mapToList(QMap<int, T> &map_) const;
 };
 
 #endif // FRMEDITSTATEMAP_H

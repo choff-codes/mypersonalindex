@@ -1,34 +1,36 @@
-#ifndef FRMEDITAA_STATE_H
-#define FRMEDITAA_STATE_H
+#ifndef FRMEDITSECURITY_STATE_H
+#define FRMEDITSECURITY_STATE_H
 
 #include "frmEditStateMap.h"
 
 class QPoint;
 class QModelIndex;
-class frmEditAA_UI;
-class assetAllocation;
+class frmEditSecurity_UI;
+class security;
 class objectKeyEditModel;
-class frmEditAA_State : public frmEditStateMap
+class frmEditSecurity_State : public frmEditStateMap
 {
     Q_OBJECT
 public:
-    explicit frmEditAA_State(portfolio portfolio_, QWidget *parent_ = 0);
-    ~frmEditAA_State();
+    explicit frmEditSecurity_State(portfolio portfolio_, QWidget *parent_ = 0);
+    ~frmEditSecurity_State();
 
     void enter();
     void leave();
     bool validate();
 
 private slots:
-    void resetTarget();
+    void resetExpenseRatio();
     void customContextMenuRequested(const QPoint&);
     void listChange(const QModelIndex &current_, const QModelIndex&);
     void add();
     void remove();
+    void addAA();
+    void deleteAA();
 
 private:
-    frmEditAA_UI *ui;
-    assetAllocation *m_currentItem;
+    frmEditSecurity_UI *ui;
+    security *m_currentItem;
     objectKeyEditModel *m_model;
 
     void load();
@@ -36,9 +38,9 @@ private:
 
     void validationError(objectKey* key_, const QString &errorMessage_);
 
-    QString mimeType() const { return "application/mypersonalindex-assetallocation"; }
+    QString mimeType() const { return "application/mypersonalindex-security"; }
     bool internalCopy(QDataStream &stream_) const;
     void internalPaste(QDataStream &stream_);
 };
 
-#endif // FRMEDITAA_STATE_H
+#endif // FRMEDITSECURITY_STATE_H

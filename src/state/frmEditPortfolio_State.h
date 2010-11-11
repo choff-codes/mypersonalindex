@@ -1,33 +1,29 @@
 #ifndef FRMEDITPORTFOLIO_STATE_H
 #define FRMEDITPORTFOLIO_STATE_H
 
-#include <QObject>
 #include "frmEditState.h"
 
 class frmEditPortfolio_UI;
-class frmEditPortfolio_State : public QObject, public frmEditState
+class frmEditPortfolio_State : public frmEditState
 {
-    Q_OBJECT
 public:
     explicit frmEditPortfolio_State(portfolio portfolio_, QWidget *parent_ = 0);
     ~frmEditPortfolio_State();
 
     void enter() {} // no-op
-    void leave() {} // no-op
+    void leave() { save(); }
     bool validate();
-
-public slots:
-    void save();
 
 private:
     frmEditPortfolio_UI *ui;
 
-    QString mimeType() { return QString(); } // no-op
-    bool internalCopy(QDataStream&) { return false; } // no-op
+    QString mimeType() const { return QString(); } // no-op
+    bool internalCopy(QDataStream&) const { return false; } // no-op
     void internalPaste(QDataStream&) {} // no-op
 
     void add() {} // no-op
     void load();
+    void save();
     void remove() {} // no-op
 };
 

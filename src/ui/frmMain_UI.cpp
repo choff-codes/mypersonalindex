@@ -1,57 +1,57 @@
 #include "frmMain_UI.h"
 
-void frmMain_UI::setupUI(QMainWindow *mainWindow)
+void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 {    
-    mainWindow->setWindowIcon(QIcon(":/icons/MPI.ico"));
+    mainWindow_->setWindowIcon(QIcon(":/icons/MPI.ico"));
 
-    menubar = new QMenuBar(mainWindow);
-    mainWindow->setMenuBar(menubar);
+    menubar = new QMenuBar(mainWindow_);
+    mainWindow_->setMenuBar(menubar);
 
     file = new QMenu("&File", menubar);
-    fileNew = new QAction("New...", mainWindow);
+    fileNew = new QAction("New...", mainWindow_);
     fileNew->setShortcut(QKeySequence::New);
-    fileOpen = new QAction("Open...", mainWindow);
+    fileOpen = new QAction("Open...", mainWindow_);
     fileOpen->setShortcut(QKeySequence::Open);
     fileRecent = new QMenu("Recent", file);
-    fileSave = new QAction("Save", mainWindow);
+    fileSave = new QAction("Save", mainWindow_);
     fileSave->setShortcut(QKeySequence::Save);
-    fileSaveAs = new QAction("Save As...", mainWindow);
+    fileSaveAs = new QAction("Save As...", mainWindow_);
     fileSaveAs->setShortcut(QKeySequence::SaveAs);
-    fileExit = new QAction("Exit", mainWindow);
+    fileExit = new QAction("Exit", mainWindow_);
     fileExit->setShortcut(QKeySequence::Quit);
 
     view = new QMenu("&View", menubar);
-    viewGroup = new QActionGroup(mainWindow);
-    viewSummary = new QAction("Summary", mainWindow);
-    viewTrades = new QAction("Trade Register", mainWindow);
-    viewAccounts = new QAction("Accounts", mainWindow);
-    viewAssetAllocation = new QAction("Asset Allocation", mainWindow);
-    viewSecurities = new QAction("Securities", mainWindow);
-    viewStatistics = new QAction("Statistics", mainWindow);
-    viewCharts = new QAction("Charts", mainWindow);
-    viewCorrelations = new QAction("Correlations", mainWindow);
-    viewPerformance = new QAction("Performance", mainWindow);
+    viewGroup = new QActionGroup(mainWindow_);
+    viewSummary = new QAction("Summary", mainWindow_);
+    viewTrades = new QAction("Trade Register", mainWindow_);
+    viewAccounts = new QAction("Accounts", mainWindow_);
+    viewAssetAllocation = new QAction("Asset Allocation", mainWindow_);
+    viewSecurities = new QAction("Securities", mainWindow_);
+    viewStatistics = new QAction("Statistics", mainWindow_);
+    viewCharts = new QAction("Charts", mainWindow_);
+    viewCorrelations = new QAction("Correlations", mainWindow_);
+    viewPerformance = new QAction("Performance", mainWindow_);
 
     portfolio = new QMenu("&Portfolio", menubar);
-    portfolioAdd = new QAction("Add New...", mainWindow);
+    portfolioAdd = new QAction("Add New...", mainWindow_);
     portfolioAdd->setShortcut(QKeySequence::AddTab);
-    portfolioEdit = new QAction("Edit...", mainWindow);
+    portfolioEdit = new QAction("Edit...", mainWindow_);
     portfolioEdit->setDisabled(true);
     portfolioEdit->setShortcut(Qt::CTRL + Qt::Key_E);
-    portfolioDelete = new QAction("Delete...", mainWindow);
+    portfolioDelete = new QAction("Delete...", mainWindow_);
     portfolioDelete->setDisabled(true);
     portfolioDelete->setShortcut(Qt::CTRL + Qt::Key_D);
 
     import = new QMenu("&Import", menubar);
-    importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow);
+    importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow_);
     importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
-    importPrices = new QAction("Manually Import Price Information...", mainWindow);
-    importPortfolio = new QAction("From Other Portfolio...", mainWindow);
-    importFile = new QAction("From Other File...", mainWindow);
+    importPrices = new QAction("Manually Import Price Information...", mainWindow_);
+    importPortfolio = new QAction("From Other Portfolio...", mainWindow_);
+    importFile = new QAction("From Other File...", mainWindow_);
     importFile->setShortcut(Qt::CTRL + Qt::Key_I);
 
     help = new QMenu("&Help", menubar);
-    helpAbout = new QAction("About", mainWindow);
+    helpAbout = new QAction("About", mainWindow_);
 
     menubar->addAction(file->menuAction());
     menubar->addAction(view->menuAction());
@@ -113,6 +113,6 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow)
 
     menubar->setCornerWidget(cornerWidget);
 
-    centralWidget = new QStackedWidget(mainWindow);
-    mainWindow->setCentralWidget(centralWidget);
+    centralWidget = new QStackedWidget(mainWindow_);
+    mainWindow_->setCentralWidget(centralWidget);
 }

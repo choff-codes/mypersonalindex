@@ -28,37 +28,11 @@ public:
     QWidget *portfolioTab;
     QWidget *acctTab;
     QWidget *aaTab;
-
     QWidget *securityTab;
-    QHBoxLayout *securityLayout;
-    QGridLayout *securityLayoutLeft;
-    QListView *securityList;
-    QPushButton *securityAdd;
-    QPushButton *securityDelete;
-    QWidget *securityFormWidget;
     QWidget *tradeTab;
-    QVBoxLayout *tradeLayout;
-    QGridLayout *tradeLayoutTop;
-    QListView *tradeList;
-    QLabel *tradeFilter;
-    QComboBox *tradeFilterCmb;
-    QPushButton *tradeAdd;
-    QPushButton *tradeDelete;
-    QWidget *tradeFormWidget;
     QDialogButtonBox *okCancelBtn;
 
-    frmEditSecurity_UI securityForm;
-    frmEditTrade_UI tradeForm;
-
-    QMenu *copyPastePopup;
-    QAction *copyAction;
-    QAction *pasteAction;
-    QShortcut *securityCopyShortcut;
-    QShortcut *securityPasteShortcut;
-    QShortcut *tradeCopyShortcut;
-    QShortcut *tradePasteShortcut;
-
-    void setupUI(QDialog* dialog);
+    void setupUI(QDialog *dialog_);
 };
 
 #endif // FRMEDIT_UI_H

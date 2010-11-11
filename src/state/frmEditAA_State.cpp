@@ -6,14 +6,12 @@
 #include "portfolioAttributes.h"
 
 frmEditAA_State::frmEditAA_State(portfolio portfolio_, QWidget *parent_):
-    QObject(parent_),
-    frmEditStateMap(portfolio_),
+    frmEditStateMap(portfolio_, parent_),
     ui(new frmEditAA_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.assetAllocations())))
 {
     ui->setupUI(parent_);
-    m_model->setParent(ui->list);
     ui->list->setModel(m_model);
 
     connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
@@ -22,12 +20,15 @@ frmEditAA_State::frmEditAA_State(portfolio portfolio_, QWidget *parent_):
     connect(ui->deleteBtn, SIGNAL(clicked()), this, SLOT(remove()));
     connect(ui->targetBtnClear, SIGNAL(clicked()), this, SLOT(resetTarget()));
     connect(ui->list, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
-    connect(ui->copyShortcut, SIGNAL(activated()), this, SLOT(copySlot()));
-    connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(pasteSlot()));
+    connect(ui->copyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+    connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+    connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
 }
 
 frmEditAA_State::~frmEditAA_State()
 {
+    delete m_model;
     delete ui;
 }
 
@@ -38,12 +39,12 @@ void frmEditAA_State::enter()
 
 void frmEditAA_State::leave()
 {
+    save();
     ui->list->setEnabled(false);
 }
 
-void frmEditAA_State::listChange(const QModelIndex &current_, const QModelIndex &previous_)
+void frmEditAA_State::listChange(const QModelIndex &current_, const QModelIndex&)
 {
-    m_model->refresh(previous_);
     m_currentItem = static_cast<assetAllocation*>(m_model->get(current_.row()));
     load();
 }
@@ -62,6 +63,9 @@ void frmEditAA_State::save()
 {
     if (!m_currentItem)
         return;
+
+    m_model->refresh(m_model->find(m_currentItem));
+
     m_currentItem->description = ui->descTxt->text();
     m_currentItem->rebalanceBand = ui->rebalanceBandSpinBox->value() / 100;
     m_currentItem->target = ui->targetSpinBox->value() / 100;
@@ -76,7 +80,7 @@ bool frmEditAA_State::validate()
 
 void frmEditAA_State::validationError(objectKey* key_, const QString &errorMessage_)
 {
-    QMessageBox::critical(0, "Asset Allocation validation error", errorMessage_);
+    QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Asset Allocation validation error", errorMessage_);
     ui->list->setCurrentIndex(m_model->find(key_));
 }
 
@@ -90,8 +94,10 @@ void frmEditAA_State::add()
 
 void frmEditAA_State::load()
 {
+    ui->groupBox->setEnabled(m_currentItem);
     if (!m_currentItem)
         return;
+
     ui->descTxt->setText(m_currentItem->description);
     ui->rebalanceBandSpinBox->setValue(m_currentItem->rebalanceBand * 100);
     ui->targetSpinBox->setValue(m_currentItem->target * 100);
@@ -109,7 +115,7 @@ void frmEditAA_State::remove()
     m_portfolio.assetAllocations()[aa->id].deleted = true;
 }
 
-bool frmEditAA_State::internalCopy(QDataStream &stream_)
+bool frmEditAA_State::internalCopy(QDataStream &stream_) const
 {
     if (!m_currentItem)
         return false;

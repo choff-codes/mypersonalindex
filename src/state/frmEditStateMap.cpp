@@ -4,8 +4,8 @@
 #include "security.h"
 #include "trade.h"
 
-frmEditStateMap::frmEditStateMap(portfolio portfolio_):
-    frmEditState(portfolio_)
+frmEditStateMap::frmEditStateMap(portfolio portfolio_, QObject *parent_):
+    frmEditState(portfolio_, parent_)
 {
 }
 
@@ -34,7 +34,7 @@ template bool frmEditStateMap::validateMap(QMap<int, security> &map_);
 template bool frmEditStateMap::validateMap(QMap<int, trade> &map_);
 
 template <class T>
-QList<objectKey*> frmEditStateMap::mapToList(QMap<int, T> &map_)
+QList<objectKey*> frmEditStateMap::mapToList(QMap<int, T> &map_) const
 {
     QList<objectKey*> list;
     if (map_.isEmpty())
@@ -58,7 +58,7 @@ QList<objectKey*> frmEditStateMap::mapToList(QMap<int, T> &map_)
 }
 
 // implementations
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, account> &map_);
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, assetAllocation> &map_);
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, security> &map_);
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, trade> &map_);
+template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, account> &map_) const;
+template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, assetAllocation> &map_) const;
+template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, security> &map_) const;
+template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, trade> &map_) const;

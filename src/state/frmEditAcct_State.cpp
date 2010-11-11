@@ -6,14 +6,12 @@
 #include "portfolioAttributes.h"
 
 frmEditAcct_State::frmEditAcct_State(portfolio portfolio_, QWidget *parent_):
-    QObject(parent_),
-    frmEditStateMap(portfolio_),
+    frmEditStateMap(portfolio_, parent_),
     ui(new frmEditAcct_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.assetAllocations())))
 {
     ui->setupUI(parent_);
-    m_model->setParent(ui->list);
     ui->list->setModel(m_model);
 
     connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
@@ -22,12 +20,15 @@ frmEditAcct_State::frmEditAcct_State(portfolio portfolio_, QWidget *parent_):
     connect(ui->deleteBtn, SIGNAL(clicked()), this, SLOT(remove()));
     connect(ui->taxRateBtnClear, SIGNAL(clicked()), this, SLOT(resetTaxRate()));
     connect(ui->list, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(customContextMenuRequested(QPoint)));
-    connect(ui->copyShortcut, SIGNAL(activated()), this, SLOT(copySlot()));
-    connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(pasteSlot()));
+    connect(ui->copyShortcut, SIGNAL(activated()), this, SLOT(copy()));
+    connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
+    connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
+    connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
 }
 
 frmEditAcct_State::~frmEditAcct_State()
 {
+    delete m_model;
     delete ui;
 }
 
@@ -38,12 +39,12 @@ void frmEditAcct_State::enter()
 
 void frmEditAcct_State::leave()
 {
+    save();
     ui->list->setEnabled(false);
 }
 
-void frmEditAcct_State::listChange(const QModelIndex &current_, const QModelIndex &previous_)
+void frmEditAcct_State::listChange(const QModelIndex &current_, const QModelIndex&)
 {
-    m_model->refresh(previous_);
     m_currentItem = static_cast<account*>(m_model->get(current_.row()));
     load();
 }
@@ -62,6 +63,9 @@ void frmEditAcct_State::save()
 {
     if (!m_currentItem)
         return;
+
+    m_model->refresh(m_model->find(m_currentItem));
+
     m_currentItem->description = ui->descTxt->text();
     m_currentItem->taxRate = ui->taxRateSpinBox->value();
     m_currentItem->taxDeferred = ui->taxDeferredChk->isChecked();
@@ -76,7 +80,7 @@ bool frmEditAcct_State::validate()
 
 void frmEditAcct_State::validationError(objectKey* key_, const QString &errorMessage_)
 {
-    QMessageBox::critical(0, "Account validation error", errorMessage_);
+    QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Account validation error", errorMessage_);
     ui->list->setCurrentIndex(m_model->find(key_));
 }
 
@@ -90,8 +94,10 @@ void frmEditAcct_State::add()
 
 void frmEditAcct_State::load()
 {
+    ui->groupBox->setEnabled(m_currentItem);
     if (!m_currentItem)
         return;
+
     ui->descTxt->setText(m_currentItem->description);
     ui->taxRateSpinBox->setValue(m_currentItem->taxRate);
     ui->taxDeferredChk->setChecked(m_currentItem->taxDeferred);
@@ -109,7 +115,7 @@ void frmEditAcct_State::remove()
     m_portfolio.accounts()[acct->id].deleted = true;
 }
 
-bool frmEditAcct_State::internalCopy(QDataStream &stream_)
+bool frmEditAcct_State::internalCopy(QDataStream &stream_) const
 {
     if (!m_currentItem)
         return false;

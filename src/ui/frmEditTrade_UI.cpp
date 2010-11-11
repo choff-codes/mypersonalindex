@@ -1,17 +1,36 @@
 #include "frmEditTrade_UI.h"
 #include "trade.h"
 
-void frmEditTrade_UI::setupUI(QWidget *parent)
+void frmEditTrade_UI::setupUI(QWidget *parent_)
 {
-    layout = new QHBoxLayout(parent);
+    layout = new QVBoxLayout(parent_);
 
-    groupBoxTrade = new QGroupBox("Trade", parent);
-    tradeLayout = new QFormLayout(groupBoxTrade);
+    layoutTop = new QGridLayout();
+    list = new QListView(parent_);
+    list->setContextMenuPolicy(Qt::CustomContextMenu);
+    filter = new QLabel("Choose Security:", parent_);
+    filterCmb = new QComboBox(parent_);
+    addBtn = new QPushButton("Add", parent_);
+    deleteBtn = new QPushButton("Delete", parent_);
 
-    sharePriceValidator = new mpiDoubleValidator(-100000000, 100000000, 4, parent);
+    layoutTop->addWidget(list, 0, 0, 1, 5);
+    layoutTop->addWidget(filter, 1, 0, 1, 1);
+    layoutTop->addWidget(filterCmb, 1, 1, 1, 2);
+    layoutTop->addWidget(addBtn, 1, 3, 1, 1);
+    layoutTop->addWidget(deleteBtn, 1, 4, 1, 1);
 
-    action = new QLabel("&Action:", groupBoxTrade);
-    actionCmb = new QComboBox(groupBoxTrade);
+    layout->addLayout(layoutTop, 2);
+
+    widgetBottom = new QWidget(parent_);
+    layoutBottom = new QHBoxLayout(widgetBottom);
+
+    groupBox = new QGroupBox("Trade", widgetBottom);
+    layoutForm = new QFormLayout(groupBox);
+
+    sharePriceValidator = new mpiDoubleValidator(-100000000, 100000000, 4, parent_);
+
+    action = new QLabel("&Action:", groupBox);
+    actionCmb = new QComboBox(groupBox);
 
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_Purchase), trade::tradeAction_Purchase);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchaseFixedAmount), trade::tradeAction_PurchaseFixedAmount);
@@ -24,35 +43,35 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfPortfolioValue), trade::tradeAction_PurchasePercentOfPortfolioValue);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfAATarget), trade::tradeAction_PurchasePercentOfAATarget);
 
-    tradeLayout->setWidget(0, QFormLayout::LabelRole, action);
-    tradeLayout->setWidget(0, QFormLayout::FieldRole, actionCmb);
-    shares = new QLabel("&Shares:", groupBoxTrade);
-    sharesTxt = new QLineEdit(groupBoxTrade);
+    layoutForm->setWidget(0, QFormLayout::LabelRole, action);
+    layoutForm->setWidget(0, QFormLayout::FieldRole, actionCmb);
+    shares = new QLabel("&Shares:", groupBox);
+    sharesTxt = new QLineEdit(groupBox);
     sharesTxt->setValidator(sharePriceValidator);
-    tradeLayout->setWidget(1, QFormLayout::LabelRole, shares);
-    tradeLayout->setWidget(1, QFormLayout::FieldRole, sharesTxt);
-    priceChk = new QCheckBox("&Price:", groupBoxTrade);
-    priceTxt = new QLineEdit("Previous Close", groupBoxTrade);
+    layoutForm->setWidget(1, QFormLayout::LabelRole, shares);
+    layoutForm->setWidget(1, QFormLayout::FieldRole, sharesTxt);
+    priceChk = new QCheckBox("&Price:", groupBox);
+    priceTxt = new QLineEdit("Previous Close", groupBox);
     priceTxt->setEnabled(false);
     priceTxt->setValidator(sharePriceValidator);
-    tradeLayout->setWidget(2, QFormLayout::LabelRole, priceChk);
-    tradeLayout->setWidget(2, QFormLayout::FieldRole, priceTxt);
-    commission = new QLabel("&Commission:", groupBoxTrade);
-    commissionTxt = new QLineEdit(groupBoxTrade);
+    layoutForm->setWidget(2, QFormLayout::LabelRole, priceChk);
+    layoutForm->setWidget(2, QFormLayout::FieldRole, priceTxt);
+    commission = new QLabel("&Commission:", groupBox);
+    commissionTxt = new QLineEdit(groupBox);
     commissionTxt->setValidator(sharePriceValidator);
-    tradeLayout->setWidget(3, QFormLayout::LabelRole, commission);
-    tradeLayout->setWidget(3, QFormLayout::FieldRole, commissionTxt);
-    cash = new QLabel("T&o/From Cash:", groupBoxTrade);
-    cashCmb = new QComboBox(groupBoxTrade);
-    tradeLayout->setWidget(4, QFormLayout::LabelRole, cash);
-    tradeLayout->setWidget(4, QFormLayout::FieldRole, cashCmb);
-    note = new QLabel("&Notes:", groupBoxTrade);
-    noteTxt = new QTextEdit(groupBoxTrade);
+    layoutForm->setWidget(3, QFormLayout::LabelRole, commission);
+    layoutForm->setWidget(3, QFormLayout::FieldRole, commissionTxt);
+    cash = new QLabel("T&o/From Cash:", groupBox);
+    cashCmb = new QComboBox(groupBox);
+    layoutForm->setWidget(4, QFormLayout::LabelRole, cash);
+    layoutForm->setWidget(4, QFormLayout::FieldRole, cashCmb);
+    note = new QLabel("&Notes:", groupBox);
+    noteTxt = new QTextEdit(groupBox);
     noteTxt->setAcceptRichText(false);
-    tradeLayout->setWidget(5, QFormLayout::LabelRole, note);
-    tradeLayout->setWidget(5, QFormLayout::FieldRole, noteTxt);
+    layoutForm->setWidget(5, QFormLayout::LabelRole, note);
+    layoutForm->setWidget(5, QFormLayout::FieldRole, noteTxt);
 
-    groupBoxDate = new QGroupBox("Date", parent);
+    groupBoxDate = new QGroupBox("Date", widgetBottom);
     dateLayout = new QFormLayout(groupBoxDate);
 
     freq = new QLabel("&Frequency:", groupBoxDate);
@@ -80,8 +99,22 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     dateLayout->setWidget(3, QFormLayout::LabelRole, endingChk);
     dateLayout->setWidget(3, QFormLayout::FieldRole, endingDateEdit);
 
-    layout->addWidget(groupBoxTrade, 1);
-    layout->addWidget(groupBoxDate, 1);
+    layoutBottom->addWidget(groupBox, 1);
+    layoutBottom->addWidget(groupBoxDate, 1);
+
+    layout->addWidget(widgetBottom, 1);
+    widgetBottom->setEnabled(false);
+
+    copyPastePopup = new QMenu(parent_);
+    copyAction = new QAction("Copy", copyPastePopup);
+    copyAction->setShortcut(Qt::CTRL + Qt::Key_C);
+    copyPastePopup->addAction(copyAction);
+    pasteAction = new QAction("Paste", copyPastePopup);
+    pasteAction->setShortcut(Qt::CTRL + Qt::Key_V);
+    copyPastePopup->addAction(pasteAction);
+
+    copyShortcut = new QShortcut(Qt::CTRL + Qt::Key_C, list);
+    pasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, list);
 
     action->setBuddy(actionCmb);
     shares->setBuddy(sharesTxt);
@@ -90,80 +123,4 @@ void frmEditTrade_UI::setupUI(QWidget *parent)
     freq->setBuddy(freqCmb);
     date->setBuddy(dateDateEdit);
     note->setBuddy(noteTxt);
-}
-
-void frmEditTrade_UI::tradeFrequencyChange(int index_)
-{
-    dateDateEdit->setEnabled(true);
-    switch ((tradeDateCalendar::frequency)freqCmb->itemData(index_).toInt())
-    {
-        case tradeDateCalendar::frequency_Daily:
-            dateDateEdit->setDisabled(true);
-            break;
-        case tradeDateCalendar::frequency_Monthly:
-            dateDateEdit->setDisplayFormat("dd");
-            dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
-            dateDateEdit->setMaximumDate(QDate(2009, 1, 31));
-            dateDateEdit->setCalendarPopup(false);
-            dateDateEdit->setDate(QDate(2009, 1, 1));
-            break;
-        case tradeDateCalendar::frequency_Once:
-            dateDateEdit->setDisplayFormat(QLocale::system().dateFormat(QLocale::ShortFormat));
-            dateDateEdit->clearMinimumDate();
-            dateDateEdit->clearMaximumDate();
-            dateDateEdit->setCalendarPopup(true);
-            dateDateEdit->setDate(QDate::currentDate());
-            break;
-        case tradeDateCalendar::frequency_Weekly:
-            dateDateEdit->setDisplayFormat("dddd");
-            dateDateEdit->setMinimumDate(QDate(2009, 1, 5));
-            dateDateEdit->setMaximumDate(QDate(2009, 1, 9));
-            dateDateEdit->setCalendarPopup(false);
-            dateDateEdit->setDate(QDate(2009, 1, 5));
-            break;
-        case tradeDateCalendar::frequency_Yearly:
-            dateDateEdit->setDisplayFormat("dd MMM");
-            dateDateEdit->setMinimumDate(QDate(2009, 1, 1));
-            dateDateEdit->setMaximumDate(QDate(2009, 12, 31));
-            dateDateEdit->setCalendarPopup(false);
-            dateDateEdit->setDate(QDate(2009, 1, 1));
-            break;
-    }
-}
-
-void frmEditTrade_UI::tradeActionChange(int index_)
-{
-    switch ((trade::tradeAction)actionCmb->itemData(index_).toInt())
-    {
-        case trade::tradeAction_Purchase:
-        case trade::tradeAction_Sell:
-        case trade::tradeAction_ReinvestDividends:
-            shares->setText("Shares:");
-            break;
-        case trade::tradeAction_ReceiveInterest:
-        case trade::tradeAction_PurchaseFixedAmount:
-        case trade::tradeAction_SellFixedAmount:
-            shares->setText("Amount ($):");
-            break;
-        case trade::tradeAction_PurchasePercentOfSecurityValue:
-            shares->setText("% of Value:");
-            break;
-        case trade::tradeAction_ReceiveInterestPercent:
-            shares->setText("Rate (%):");
-            break;
-        case trade::tradeAction_PurchasePercentOfPortfolioValue:
-            shares->setText("% of Total");
-            break;
-        case trade::tradeAction_PurchasePercentOfAATarget:
-            shares->setText("% of Target:");
-            break;
-        case trade::tradeAction_ReinvestDividendsAuto:
-            break;
-    }
-}
-
-void frmEditTrade_UI::tradePriceChange(bool checked_)
-{
-    priceTxt->setEnabled(checked_);
-    priceTxt->setText(checked_ ? "0.0000" : "Previous Close");
 }

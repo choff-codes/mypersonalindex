@@ -1,15 +1,15 @@
 #include "frmSort_UI.h"
 
-void frmSort_UI::setupUI(QDialog *dialog)
+void frmSort_UI::setupUI(QDialog *dialog_)
 {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
-    dialog->setWindowTitle("Custom Sort");
+    dialog_->setWindowFlags(dialog_->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    dialog_->setWindowTitle("Custom Sort");
 
-    okCancelBtn = new QDialogButtonBox(dialog);
+    okCancelBtn = new QDialogButtonBox(dialog_);
     okCancelBtn->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-    layout = new QVBoxLayout(dialog);
-    groupBox = new QGroupBox("Columns", dialog);
+    layout = new QVBoxLayout(dialog_);
+    groupBox = new QGroupBox("Columns", dialog_);
     groupLayout = new QVBoxLayout(groupBox);
 
     sort1Layout = new QGridLayout();

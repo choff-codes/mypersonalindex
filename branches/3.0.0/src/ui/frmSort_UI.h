@@ -34,7 +34,7 @@ public:
     QRadioButton *group3SortDescRadio;
     QDialogButtonBox *okCancelBtn;
 
-    void setupUI(QDialog* dialog);
+    void setupUI(QDialog *dialog_);
 };
 
 #endif // FRMSORT_UI_H

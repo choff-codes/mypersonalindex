@@ -25,7 +25,7 @@ public:
     QToolButton *reorderBtnMoveDown;
     QDialogButtonBox *okCancelBtn;
 
-    void setupUI(QDialog* dialog);
+    void setupUI(QDialog *dialog_);
 };
 
 #endif // FRMCOLUMNS_UI_H

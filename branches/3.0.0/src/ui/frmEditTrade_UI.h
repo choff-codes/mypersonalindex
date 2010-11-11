@@ -9,15 +9,27 @@
 #include <QLineEdit>
 #include <QCheckBox>
 #include <QTextEdit>
+#include <QListView>
+#include <QPushButton>
+#include <QMenu>
+#include <QShortcut>
 #include "mpiValidator.h"
 #include "mpiDateEdit.h"
 
 class frmEditTrade_UI
 {
 public:
-    QHBoxLayout *layout;
-    QGroupBox *groupBoxTrade;
-    QFormLayout *tradeLayout;
+    QVBoxLayout *layout;
+    QGridLayout *layoutTop;
+    QListView *list;
+    QLabel *filter;
+    QComboBox *filterCmb;
+    QPushButton *addBtn;
+    QPushButton *deleteBtn;
+    QGroupBox *groupBox;
+    QWidget *widgetBottom;
+    QHBoxLayout *layoutBottom;
+    QFormLayout *layoutForm;
     QLabel *action;
     QComboBox *actionCmb;
     mpiDoubleValidator *sharePriceValidator;
@@ -41,11 +53,13 @@ public:
     mpiDateEdit *startingDateEdit;
     QCheckBox *endingChk;
     mpiDateEdit *endingDateEdit;
+    QMenu *copyPastePopup;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QShortcut *copyShortcut;
+    QShortcut *pasteShortcut;
 
-    void setupUI(QWidget* parent = 0);
-    void tradeFrequencyChange(int index_);
-    void tradeActionChange(int index_);
-    void tradePriceChange(bool checked_);
+    void setupUI(QWidget* parent_ = 0);
 };
 
 #endif // FRMEDITTRADE_UI_H

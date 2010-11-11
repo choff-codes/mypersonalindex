@@ -1,15 +1,15 @@
 #include "frmColumns_UI.h"
 
-void frmColumns_UI::setupUI(QDialog *dialog)
+void frmColumns_UI::setupUI(QDialog *dialog_)
 {
-    dialog->setWindowFlags(dialog->windowFlags() & (~Qt::WindowContextHelpButtonHint));
-    dialog->setWindowTitle("Add/Remove");
+    dialog_->setWindowFlags(dialog_->windowFlags() & (~Qt::WindowContextHelpButtonHint));
+    dialog_->setWindowTitle("Add/Remove");
 
-    okCancelBtn = new QDialogButtonBox(dialog);
+    okCancelBtn = new QDialogButtonBox(dialog_);
     okCancelBtn->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
 
-    layout = new QVBoxLayout(dialog);
-    groupBox = new QGroupBox("Add/Remove", dialog);
+    layout = new QVBoxLayout(dialog_);
+    groupBox = new QGroupBox("Add/Remove", dialog_);
     groupBoxLayout = new QHBoxLayout(groupBox);
 
     removedItemsList = new QListWidget(groupBox);

@@ -15,13 +15,22 @@
 #include <QPushButton>
 #include <QTableView>
 #include <QHeaderView>
+#include <QListView>
+#include <QShortcut>
+#include <QMenu>
 
 class frmEditSecurity_UI
 {
 public:
-    QVBoxLayout *layout;
-    QGroupBox *securityGroupBox;
-    QFormLayout *securityLayout;
+    QHBoxLayout *layout;
+    QGridLayout *layoutLeft;
+    QWidget *widgetRight;
+    QVBoxLayout *layoutRight;
+    QListView *list;
+    QPushButton *addBtn;
+    QPushButton *deleteBtn;
+    QGroupBox *groupBox;
+    QFormLayout *layoutForm;
     QLabel *symbol;
     QLineEdit *symbolTxt;
     QLabel *notes;
@@ -42,10 +51,15 @@ public:
     QTableView *aa;
     QGridLayout *aaLayoutBottom;
     QComboBox *aaCmb;
-    QPushButton *aaBtnAdd;
-    QPushButton *aaBtnDelete;
+    QPushButton *aaAddBtn;
+    QPushButton *aaDeleteBtn;
+    QMenu *copyPastePopup;
+    QAction *copyAction;
+    QAction *pasteAction;
+    QShortcut *copyShortcut;
+    QShortcut *pasteShortcut;
 
-    void setupUI(QWidget* parent = 0);
+    void setupUI(QWidget* parent_ = 0);
 };
 
 #endif // FRMEDITSECURITY_UI_H

@@ -1,9 +1,9 @@
 #include "frmMainTableView_UI.h"
 #include <QHeaderView>
 
-void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames, QWidget *parent)
+void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_)
 {
-    widget = new QWidget(parent);
+    widget = new QWidget(parent_);
 
     layout = new QVBoxLayout(widget);
     layout->setSpacing(0);
@@ -19,7 +19,7 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames, QWidget
     toolbarSortCmb = new QComboBox(toolbar);
     toolbarSortCmb->setMinimumContentsLength(15);
     toolbarSortCmb->addItem("(None)", -1);
-    for (QMap<int, QString>::const_iterator i = columnNames.constBegin(); i != columnNames.constEnd(); ++i)
+    for (QMap<int, QString>::const_iterator i = columnNames_.constBegin(); i != columnNames_.constEnd(); ++i)
             toolbarSortCmb->addItem(i.value(), i.key());
     toolbarSortCmb->addItem("Custom...", -2);
 

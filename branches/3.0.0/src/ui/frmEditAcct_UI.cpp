@@ -18,6 +18,7 @@ void frmEditAcct_UI::setupUI(QWidget *parent_)
     layout->addLayout(layoutLeft);
 
     groupBox = new QGroupBox("Account", parent_);
+    groupBox->setEnabled(false);
     layout->addWidget(groupBox);
 
     layoutForm = new QFormLayout(groupBox);

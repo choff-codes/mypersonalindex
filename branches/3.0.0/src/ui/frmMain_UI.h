@@ -53,7 +53,7 @@ public:
     QComboBox *portfolioDropDownCmb;
     QStackedWidget *centralWidget;
 
-    void setupUI(QMainWindow *mainWindow);
+    void setupUI(QMainWindow *mainWindow_);
 };
 
 #endif // FRMMAIN_UI_H

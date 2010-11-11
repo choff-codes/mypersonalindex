@@ -1,7 +1,6 @@
 #ifndef FRMEDITACCT_STATE_H
 #define FRMEDITACCT_STATE_H
 
-#include <QObject>
 #include "frmEditStateMap.h"
 
 class QPoint;
@@ -9,7 +8,7 @@ class QModelIndex;
 class frmEditAcct_UI;
 class account;
 class objectKeyEditModel;
-class frmEditAcct_State : public QObject, public frmEditStateMap
+class frmEditAcct_State : public frmEditStateMap
 {
     Q_OBJECT
 public:
@@ -20,15 +19,10 @@ public:
     void leave();
     bool validate();
 
-public slots:
-    void save();
-
 private slots:
     void resetTaxRate();
     void customContextMenuRequested(const QPoint&);
-    void listChange(const QModelIndex &current_, const QModelIndex &previous_);
-    void copySlot() { copy(); }
-    void pasteSlot() { paste(); }
+    void listChange(const QModelIndex &current_, const QModelIndex&);
     void add();
     void remove();
 
@@ -38,11 +32,12 @@ private:
     objectKeyEditModel *m_model;
 
     void load();
+    void save();
 
     void validationError(objectKey* key_, const QString &errorMessage_);
 
-    QString mimeType() { return "application/mypersonalindex-account"; }
-    bool internalCopy(QDataStream &stream_);
+    QString mimeType() const { return "application/mypersonalindex-account"; }
+    bool internalCopy(QDataStream &stream_) const;
     void internalPaste(QDataStream &stream_);
 };
 

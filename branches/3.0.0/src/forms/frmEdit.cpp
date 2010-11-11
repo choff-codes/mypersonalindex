@@ -30,6 +30,7 @@ frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
 
 frmEdit::~frmEdit()
 {
+    qDeleteAll(m_tabs);
     delete ui;
 }
 

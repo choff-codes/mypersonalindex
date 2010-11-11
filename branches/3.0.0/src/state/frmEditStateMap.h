@@ -3,8 +3,6 @@
 
 #include "frmEditState.h"
 
-template<class T>
-class QList;
 class objectKey;
 class frmEditStateMap : public frmEditState
 {

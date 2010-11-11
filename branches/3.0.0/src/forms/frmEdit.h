@@ -3,9 +3,8 @@
 
 #include <QDialog>
 #include "portfolio.h"
-#include "objectKeyEditModel.h"
+#include <QMap>
 
-class QListView;
 class frmEdit_UI;
 class frmEditState;
 class frmEdit : public QDialog

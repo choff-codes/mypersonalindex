@@ -5,7 +5,6 @@
 #include "portfolio.h"
 
 class QDataStream;
-class objectKey;
 class frmEditState : public QObject
 {
     Q_OBJECT

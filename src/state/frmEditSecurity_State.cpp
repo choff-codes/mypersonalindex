@@ -8,7 +8,7 @@
 #include "securityAAModel.h"
 #include "portfolioAttributes.h"
 
-frmEditSecurity_State::frmEditSecurity_State(portfolio portfolio_, QWidget *parent_):
+frmEditSecurity_State::frmEditSecurity_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditStateMap(portfolio_, parent_),
     ui(new frmEditSecurity_UI),
     m_currentItem(0),

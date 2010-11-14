@@ -7,7 +7,7 @@ class objectKey;
 class frmEditStateMap : public frmEditState
 {
 public:
-    frmEditStateMap(portfolio portfolio_, QObject *parent_);
+    frmEditStateMap(const portfolio &portfolio_, QObject *parent_);
     virtual ~frmEditStateMap() {}
 
 protected:

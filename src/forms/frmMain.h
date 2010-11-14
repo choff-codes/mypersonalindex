@@ -5,14 +5,14 @@
 #include <QMap>
 #include <QFutureWatcher>
 #include "settings.h"
-#include "portfolio.h"
-#include "historicalPrices.h"
 #include "calculatorNAV.h"
+
 
 class frmMain_UI;
 class frmMainTableView_UI;
-class portfolio;
+class mpiFile_State;
 class calculatorNAV;
+class portfolio;
 class QComboBox;
 class QAbstractItemModel;
 class frmMain : public QMainWindow
@@ -20,15 +20,11 @@ class frmMain : public QMainWindow
     Q_OBJECT
 
 public:
-    frmMain(QWidget *parent = 0);
+    frmMain(QWidget *parent_ = 0);
     ~frmMain();
 
 private slots:
     void about();
-    void open();
-    bool save();
-    bool saveAs();
-    void newFile();
     void recentFileSelected();
     void addPortfolio();
     void editPortfolio();
@@ -42,6 +38,7 @@ private slots:
     void refreshTab();
     void sortChanged(int index_);
     void modifyColumns();
+    void fileChange(const QString &filePath_, bool newFile_);
 
 private:
     enum tab {
@@ -61,11 +58,8 @@ private:
     frmMainTableView_UI *ui_assetAllocation;
     frmMainTableView_UI *ui_security;
 
-    // all portfolios in the current file
-    QMap<int, portfolio> m_portfolios;
-
-    // all prices in the current file
-    historicalPricesMap m_historicalPricesMap;
+    // current file
+    mpiFile_State *m_file;
 
     // track the currently selected portfolio
     portfolio* m_currentPortfolio;
@@ -90,11 +84,7 @@ private:
     void closeEvent(QCloseEvent *event_);
     void loadSettings();
     void saveSettings();
-    void loadFile(const QString &filePath_);
-    void setCurrentFile(const QString &filePath_);
-    bool maybeSave();
-    bool saveFile(const QString &filePath_);
-    bool prepareFileForSave(const QString &filePath_);
+
     void updateRecentFileActions(const QString &newFilePath_);
     void setCurrentPortfolio(portfolio *portfolio_);
     void refreshPortfolioCmb(int id_ = -1);

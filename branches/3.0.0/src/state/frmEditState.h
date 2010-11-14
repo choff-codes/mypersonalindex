@@ -10,7 +10,7 @@ class frmEditState : public QObject
     Q_OBJECT
 
 public:
-    frmEditState(portfolio portfolio_, QObject *parent_):
+    frmEditState(const portfolio &portfolio_, QObject *parent_):
         QObject(parent_),
         m_portfolio(portfolio_)
     {}

@@ -12,7 +12,7 @@ class frmEditTrade_State : public frmEditStateMap
 {
     Q_OBJECT
 public:
-    explicit frmEditTrade_State(portfolio portfolio_, QWidget *parent_ = 0);
+    explicit frmEditTrade_State(const portfolio &portfolio_, QWidget *parent_ = 0);
     ~frmEditTrade_State();
 
     void enter();

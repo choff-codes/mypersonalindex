@@ -6,7 +6,7 @@
 #include "functions.h"
 #include "objectKeyEditModel.h"
 
-frmEditTrade_State::frmEditTrade_State(portfolio portfolio_, QWidget *parent_):
+frmEditTrade_State::frmEditTrade_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditStateMap(portfolio_, parent_),
     ui(new frmEditTrade_UI),
     m_currentItem(0),
@@ -94,6 +94,7 @@ void frmEditTrade_State::securityFilterChange(int index_)
     if (securityID == -1)
     {
         delete m_model;
+        m_model = 0;
         ui->layoutBottom->setEnabled(false);
         return;
     }

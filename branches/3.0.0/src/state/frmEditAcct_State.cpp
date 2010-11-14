@@ -5,7 +5,7 @@
 #include "objectKeyEditModel.h"
 #include "portfolioAttributes.h"
 
-frmEditAcct_State::frmEditAcct_State(portfolio portfolio_, QWidget *parent_):
+frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditStateMap(portfolio_, parent_),
     ui(new frmEditAcct_UI),
     m_currentItem(0),

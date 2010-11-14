@@ -12,7 +12,7 @@ class frmEditAcct_State : public frmEditStateMap
 {
     Q_OBJECT
 public:
-    explicit frmEditAcct_State(portfolio portfolio_, QWidget *parent_ = 0);
+    explicit frmEditAcct_State(const portfolio &portfolio_, QWidget *parent_ = 0);
     ~frmEditAcct_State();
 
     void enter();

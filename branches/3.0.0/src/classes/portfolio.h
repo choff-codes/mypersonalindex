@@ -38,7 +38,7 @@ public:
     portfolioAttributes& attributes() const;
 
     void save(const queries &dataSource_);
-    static QMap<int, portfolio> save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, int *id_);
+    static QMap<int, int> save(QMap<int, portfolio> &portfolios_, const queries &dataSource_);
     void remove(const queries &dataSource_) const;
 
     void detach();

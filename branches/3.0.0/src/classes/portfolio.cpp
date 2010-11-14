@@ -182,21 +182,22 @@ void portfolio::save(const queries &dataSource_)
     d->save(dataSource_);
 }
 
-QMap<int, portfolio> portfolio::save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, int *id_)
+QMap<int, int> portfolio::save(QMap<int, portfolio> &portfolios_, const queries &dataSource_)
 {
-    QMap<int, portfolio> returnMap;
+    QMap<int, int> returnMap;
     QList<portfolio> portfolioList = portfolios_.values();
+    portfolios_.clear();
 
     for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
     {
         int oldID = i->attributes().id;
         i->save(dataSource_);
 
-        if (!i->attributes().deleted)
-            returnMap.insert(i->attributes().id, *i);
+        if (i->attributes().deleted)
+            continue;
 
-        if (id_ && oldID == *id_)
-            *id_ = i->attributes().id;
+        portfolios_.insert(i->attributes().id, *i);
+        returnMap.insert(oldID, i->attributes().id);
     }
     return returnMap;
 }

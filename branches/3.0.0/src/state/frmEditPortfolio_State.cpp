@@ -3,7 +3,7 @@
 #include "frmEditPortfolio_UI.h"
 #include "portfolioAttributes.h"
 
-frmEditPortfolio_State::frmEditPortfolio_State(portfolio portfolio_, QWidget *parent_):
+frmEditPortfolio_State::frmEditPortfolio_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditState(portfolio_, parent_),
     ui(new frmEditPortfolio_UI())
 {

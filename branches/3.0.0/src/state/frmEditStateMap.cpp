@@ -4,7 +4,7 @@
 #include "security.h"
 #include "trade.h"
 
-frmEditStateMap::frmEditStateMap(portfolio portfolio_, QObject *parent_):
+frmEditStateMap::frmEditStateMap(const portfolio &portfolio_, QObject *parent_):
     frmEditState(portfolio_, parent_)
 {
 }

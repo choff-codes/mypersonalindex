@@ -5,15 +5,13 @@
 #include <QFutureWatcher>
 #include <QCloseEvent>
 #include <QMessageBox>
-#include <QFileDialog>
+#include <QFileInfo>
 #include "frmEdit.h"
 #include "settingsFactory.h"
-#include "portfolioFactory.h"
 #include "portfolioAttributes.h"
 #include "updatePrices.h"
 #include "tradeDateCalendar.h"
 #include "calculatorTrade.h"
-#include "priceFactory.h"
 #include "security.h"
 #include "frmMainTableView_UI.h"
 #include "mainAAModel.h"
@@ -21,16 +19,18 @@
 #include "historicalNAV.h"
 #include "frmSort.h"
 #include "frmColumns.h"
+#include "mpiFile_State.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
 #endif
 
-frmMain::frmMain(QWidget *parent):
-    QMainWindow(parent),
+frmMain::frmMain(QWidget *parent_):
+    QMainWindow(parent_),
     ui(new frmMain_UI()),
     ui_assetAllocation(new frmMainTableView_UI()),
     ui_security(new frmMainTableView_UI()),
+    m_file(new mpiFile_State(this)),
     m_currentPortfolio(0),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
@@ -38,7 +38,7 @@ frmMain::frmMain(QWidget *parent):
     ui->setupUI(this);
     connectSlots();
     loadSettings();
-    setCurrentFile("");
+    m_file->newFile();
 }
 
 frmMain::~frmMain()
@@ -55,19 +55,20 @@ frmMain::~frmMain()
         m_futureWatcherTrade->waitForFinished();
     }
 
-
     delete ui;
     delete ui_assetAllocation;
+    delete m_file;
 }
 
 void frmMain::connectSlots()
 {
     connect(ui->helpAbout, SIGNAL(triggered()), this, SLOT(about()));
-    connect(ui->fileOpen, SIGNAL(triggered()), this, SLOT(open()));
-    connect(ui->fileSave, SIGNAL(triggered()), this, SLOT(save()));
-    connect(ui->fileSaveAs, SIGNAL(triggered()), this, SLOT(saveAs()));
-    connect(ui->fileNew, SIGNAL(triggered()), this, SLOT(newFile()));
+    connect(ui->fileOpen, SIGNAL(triggered()), m_file, SLOT(open()));
+    connect(ui->fileSave, SIGNAL(triggered()), m_file, SLOT(save()));
+    connect(ui->fileSaveAs, SIGNAL(triggered()), m_file, SLOT(saveAs()));
+    connect(ui->fileNew, SIGNAL(triggered()), m_file, SLOT(newFile()));
     connect(ui->fileExit, SIGNAL(triggered()), this, SLOT(close()));
+    connect(m_file, SIGNAL(fileNameChange(QString,bool)), this, SLOT(fileChange(QString,bool)));
     connect(ui->portfolioAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
@@ -89,154 +90,9 @@ void frmMain::loadSettings()
     }
 }
 
-void frmMain::newFile()
+void frmMain::fileChange(const QString &filePath_, bool newFile_)
 {
-    if (!maybeSave())
-        return;
-
-    m_portfolios.clear();
-    refreshPortfolioCmb();
-    m_historicalPricesMap.clear();
-    setCurrentFile("");
-}
-
-bool frmMain::maybeSave()
-{
-    if (!isWindowModified())
-        return true;
-
-    QMessageBox::StandardButton ret = QMessageBox::warning(this, QCoreApplication::applicationName(), "The document has been modified.\n\n"
-        "Do you want to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-
-    if (ret == QMessageBox::Save)
-        return save();
-
-     if (ret == QMessageBox::Cancel)
-         return false;
-
-     return true;
-}
-
-bool frmMain::save()
-{
-    if (windowFilePath().isEmpty())
-        return saveAs();
-
-    return saveFile(windowFilePath());
-}
-
-bool frmMain::saveAs()
-{
-    QString fileName = QFileDialog::getSaveFileName(this, "Save As...", QString(), "My Personal Index File (*.mpi);;All Files (*)");
-
-    if (fileName.isEmpty())
-        return false;
-
-    return saveFile(fileName);
-}
-
-bool frmMain::saveFile(const QString &filePath_)
-{
-    if (!prepareFileForSave(filePath_))
-        return false;
-
-    queries file(filePath_);
-    if (!file.isValid())
-    {
-        QMessageBox::critical(this, QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
-        return false;
-    }
-#ifdef CLOCKTIME
-    QTime t;
-    t.start();
-#endif
-    file.beginTransaction();
-
-    int currentID = m_currentPortfolio ? m_currentPortfolio->attributes().id : UNASSIGNED; // track current portfolio
-    m_portfolios = portfolio::save(m_portfolios, file, &currentID);
-    refreshPortfolioCmb(currentID == UNASSIGNED ? -1 : currentID);
-
-    file.commit();
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (save porfolios): %d ms", t.elapsed());
-#endif
-    file.beginTransaction();
-
-    m_historicalPricesMap.save(file);
-
-    file.commit();
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (save prices): %d ms", t.elapsed());
-#endif
-
-    setCurrentFile(filePath_);
-    return true;
-}
-
-bool frmMain::prepareFileForSave(const QString &filePath_)
-{
-    if (windowFilePath() == filePath_)
-        return true;
-
-    if (QFile::exists(filePath_) && !QFile::remove(filePath_)) {
-        QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not overwrite the existing file %1!").arg(filePath_));
-        return false;
-    }
-
-    if (windowFilePath().isEmpty()) // new file
-    {
-        if (!QFile::copy("MPI.sqlite", filePath_))
-        {
-            QMessageBox::warning(this, QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
-            return false;
-        }
-    }
-    else
-    {
-        if (!QFile::copy(windowFilePath(), filePath_))
-        {
-            QMessageBox::warning(this, QCoreApplication::applicationName(),
-                QString("Could not save to %1 OR the original file was deleted at %2!").arg(filePath_, windowFilePath()));
-            return false;
-        }
-    }
-
-    return true;
-}
-
-void frmMain::open()
-{
-    if(!maybeSave())
-        return;
-
-    QString filePath = QFileDialog::getOpenFileName(this, "Open file...", QString(), "My Personal Index File (*.mpi);;All Files (*)");
-    if (filePath.isEmpty())
-        return;
-
-    loadFile(filePath);
-}
-
-void frmMain::loadFile(const QString &filePath_)
-{
-    queries file(filePath_);
-    if (!file.isValid())
-    {
-        QMessageBox::critical(this, QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
-        return;
-    }
-
-    m_historicalPricesMap = priceFactory(file).getHistoricalPrices();
-    m_portfolios = portfolioFactory(file).getPortfolios();
-    refreshPortfolioPrices();
-    refreshPortfolioCmb();
-
-    setCurrentFile(filePath_);
-}
-
-void frmMain::setCurrentFile(const QString &filePath_)
-{
-    setWindowFilePath(filePath_);
+    m_currentPortfolio = 0; // invalidated
     setWindowModified(false);
     if (filePath_.isEmpty())
         setWindowTitle(QString("untitled.mpi[*] - %1").arg(QCoreApplication::applicationName()));
@@ -244,6 +100,16 @@ void frmMain::setCurrentFile(const QString &filePath_)
         setWindowTitle(QString("%1[*] - %2").arg(QFileInfo(filePath_).fileName(), QCoreApplication::applicationName()));
 
     updateRecentFileActions(filePath_);
+
+    // track current portfolio
+    int currentID = ui->portfolioDropDownCmb->currentIndex() == -1 || newFile_ ?
+        UNASSIGNED :
+        m_file->portfolioIdentities.value(ui->portfolioDropDownCmb->itemData(ui->portfolioDropDownCmb->currentIndex()).toInt(), UNASSIGNED);
+
+    if (newFile_)
+        refreshPortfolioPrices();
+
+    refreshPortfolioCmb(currentID);
 }
 
 void frmMain::setCurrentPortfolio(portfolio *portfolio_)
@@ -257,7 +123,7 @@ void frmMain::refreshPortfolioCmb(int id_)
 {
     ui->portfolioDropDownCmb->blockSignals(true);
     ui->portfolioDropDownCmb->clear();
-    foreach(const portfolio &p, m_portfolios)
+    foreach(const portfolio &p, m_file->portfolios)
     {
         if (p.attributes().deleted)
             continue;
@@ -278,7 +144,7 @@ void frmMain::refreshPortfolioCmb(int id_)
 
 void frmMain::closeEvent(QCloseEvent *event_)
 {
-    if (!maybeSave())
+    if (!m_file->maybeSave())
     {
         event_->ignore();
         return;
@@ -313,11 +179,10 @@ void frmMain::updateRecentFileActions(const QString &newFilePath_)
 void frmMain::recentFileSelected()
 {
     QAction *action = qobject_cast<QAction*>(sender());
-    if (!action || action->text() == windowFilePath())
+    if (!action || action->text() == m_file->path())
         return;
 
-    if (maybeSave())
-        loadFile(action->text());
+    m_file->open(action->text());
 }
 
 void frmMain::addPortfolio()
@@ -329,8 +194,9 @@ void frmMain::addPortfolio()
         return;
 
     setWindowModified(true);
+    m_file->modified = true;
     portfolio newPortfolio = f.getPortfolio();
-    m_portfolios.insert(newPortfolio.attributes().id, newPortfolio);
+    m_file->portfolios.insert(newPortfolio.attributes().id, newPortfolio);
     refreshPortfolioPrices();
     ui->portfolioDropDownCmb->addItem(newPortfolio.attributes().description, newPortfolio.attributes().id);
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
@@ -347,11 +213,12 @@ void frmMain::editPortfolio()
     if (*m_currentPortfolio == f.getPortfolio())
         return;
 
-    setWindowModified(true);;
-    m_portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();;
+    setWindowModified(true);
+    m_file->modified = true;
+    m_file->portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();
     refreshPortfolioPrices();
 
-    setCurrentPortfolio(&m_portfolios[m_currentPortfolio->attributes().id]);
+    setCurrentPortfolio(&m_file->portfolios[m_currentPortfolio->attributes().id]);
     ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
     recalculateTrades(*m_currentPortfolio, 0);
 }
@@ -366,15 +233,16 @@ void frmMain::deletePortfolio()
         return;
 
     setWindowModified(true);
+    m_file->modified = true;
     m_currentPortfolio->attributes().deleted = true;
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
 void frmMain::refreshPortfolioPrices()
 {
-    for(QMap<int, portfolio>::iterator i = m_portfolios.begin(); i != m_portfolios.end(); ++i)
+    for(QMap<int, portfolio>::iterator i = m_file->portfolios.begin(); i != m_file->portfolios.end(); ++i)
         for(QMap<int, security>::iterator x = i->securities().begin(); x != i->securities().end(); ++x)
-            x->setHistoricalPrices(m_historicalPricesMap.getHistoricalPrice(x->description));
+            x->setHistoricalPrices(m_file->prices.getHistoricalPrice(x->description));
 }
 
 void frmMain::portfolioDropDownChange(int currentIndex_)
@@ -382,7 +250,7 @@ void frmMain::portfolioDropDownChange(int currentIndex_)
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
     ui->portfolioEdit->setDisabled(currentIndex_ == -1);
     ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
-    setCurrentPortfolio(currentIndex_ == -1 ? 0 : &m_portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()]);
+    setCurrentPortfolio(currentIndex_ == -1 ? 0 : &m_file->portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()]);
 }
 
 void frmMain::about()
@@ -403,7 +271,7 @@ void frmMain::importYahoo()
     }
 
     int beginDate = tradeDateCalendar::endDate() + 1;
-    foreach(const portfolio &p, m_portfolios)
+    foreach(const portfolio &p, m_file->portfolios)
     {
         if (p.attributes().deleted)
             continue;
@@ -412,8 +280,8 @@ void frmMain::importYahoo()
     }
 
     QList<historicalPrices> prices;
-    foreach(const QString &s, portfolio::symbols(m_portfolios))
-        prices.append(m_historicalPricesMap.getHistoricalPrice(s));
+    foreach(const QString &s, portfolio::symbols(m_file->portfolios))
+        prices.append(m_file->prices.getHistoricalPrice(s));
 
     showProgressBar("Downloading", prices.count());
     updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
@@ -440,7 +308,8 @@ void frmMain::importYahooFinished()
         return;
 
     setWindowModified(true);
-    recalculateTrades(m_portfolios.values(), earliestUpdate);
+    m_file->modified = true;
+    recalculateTrades(m_file->portfolios.values(), earliestUpdate);
 }
 
 void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)

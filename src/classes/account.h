@@ -1,12 +1,13 @@
 #ifndef ACCOUNT_H
 #define ACCOUNT_H
 
-#include <QString>
 #include "objectKey.h"
 
+class QString;
 class queries;
 class QSqlQuery;
-class account: public objectKey
+class accountData;
+class account: public objectKey<accountData>
 {
 public:
     enum costBasisMethod {
@@ -16,28 +17,37 @@ public:
         costBasisMethod_HIFO
     };
 
-    double taxRate;
-    bool taxDeferred;
-    costBasisMethod costBasis;
-    bool hide;
+    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString());
+    account(const account &other_);
 
-    explicit account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString()):
-        objectKey(description_, id_, parent_),
-        taxRate(0),
-        taxDeferred(false),
-        costBasis(costBasisMethod_FIFO),
-        hide(false)
-    {}
+    ~account();
+
+    account& operator=(const account &other_);
 
     bool operator==(const account &other_) const;
     bool operator!=(const account &other_) const { return !(*this == other_); }
 
-    objectType type() const { return objectType_Account; }
+    double taxRate() const;
+    void setTaxRate(double taxRate_);
+
+    bool taxDeferred() const;
+    void setTaxDeferred(bool taxDeferred_);
+
+    costBasisMethod costBasis() const;
+    void setCostBasis(costBasisMethod costBasis_);
+
+    bool hidden() const;
+    void setHidden(bool hidden_);
+
+    objectType type() const;
+
     QString validate() const;
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
     static account load(const QSqlQuery &q_);
+
+    friend QDataStream& operator>>(QDataStream &stream_, account &acct_);
 };
 
 QDataStream& operator<<(QDataStream &stream_, const account &acct_);

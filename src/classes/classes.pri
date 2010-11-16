@@ -17,7 +17,6 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/trade.cpp \
     $$PWD/statisticInfo.cpp \ # $$PWD/import.cpp \
     $$PWD/updatePrices.cpp \
-    $$PWD/portfolioAttributes.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
     $$PWD/tradeDateCalendar.cpp \
@@ -26,7 +25,8 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/assetAllocationTarget.cpp \
     $$PWD/calculatorCorrelation.cpp \
     $$PWD/calculatorAveragePrice.cpp \
-    $$PWD/orderBy.cpp
+    $$PWD/orderBy.cpp \
+    $$PWD/symbol.cpp
 HEADERS += $$PWD/queries.h \
     $$PWD/functions.h \
     $$PWD/calculatorTrade.h \
@@ -45,7 +45,6 @@ HEADERS += $$PWD/queries.h \
     $$PWD/trade.h \
     $$PWD/statisticInfo.h \ # $$PWD/import.h \
     $$PWD/updatePrices.h \
-    $$PWD/portfolioAttributes.h \
     $$PWD/splits.h \
     $$PWD/objectKey.h \
     $$PWD/epsilon.h \

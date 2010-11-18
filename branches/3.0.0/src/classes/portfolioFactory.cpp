@@ -5,7 +5,9 @@
 #include "account.h"
 #include "assetAllocation.h"
 #include "security.h"
-#include "portfolioAttributes.h"
+#include "assetAllocationTarget.h"
+#include "trade.h"
+#include "executedTrade.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -38,9 +40,8 @@ void portfolioFactory::loadPortfolio()
     QSqlQuery q = m_dataSource.select(queries::table_Portfolio, queries::portfolioColumns);
     while(q.next())
     {
-        portfolio p;
-        p.attributes() = portfolioAttributes::load(q);
-        m_portfolios.insert(p.attributes().id, p);
+        portfolio p = portfolio::load(q);
+        m_portfolios.insert(p.id(), p);
     }
 }
 
@@ -50,7 +51,7 @@ void portfolioFactory::loadPortfolioAA()
     while(q.next())
     {
         assetAllocation aa = assetAllocation::load(q);
-        m_portfolios[aa.parent].assetAllocations().insert(aa.id, aa);
+        m_portfolios[aa.parent()].assetAllocations().insert(aa.id(), aa);
     }
 }
 
@@ -60,7 +61,7 @@ void portfolioFactory::loadPortfolioAccount()
     while(q.next())
     {
         account acct = account::load(q);
-        m_portfolios[acct.parent].accounts().insert(acct.id, acct);
+        m_portfolios[acct.parent()].accounts().insert(acct.id(), acct);
     }
 }
 
@@ -70,7 +71,7 @@ void portfolioFactory::loadPortfolioSecurity()
     while(q.next())
     {
         security sec = security::load(q);
-        m_portfolios[sec.parent].securities().insert(sec.id, sec);
+        m_portfolios[sec.parent()].securities().insert(sec.id(), sec);
     }
 }
 
@@ -79,7 +80,7 @@ void portfolioFactory::loadPortfolioSecurityAA()
     QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityAA, queries::portfolioSecurityAAViewColumns);
     while(q.next())
         m_portfolios[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
-            [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets.insert(
+            [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets().insert(
                 q.value(queries::portfolioSecurityAAViewColumns_AAID).toInt(),
                 q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble()
             );
@@ -91,7 +92,7 @@ void portfolioFactory::loadPortfolioSecurityTrades()
     while(q.next())
     {
         trade t = trade::load(q);
-        m_portfolios[q.value(queries::portfolioSecurityTradeViewColumns_PortfolioID).toInt()].securities()[t.parent].trades.insert(t.id, t);
+        m_portfolios[q.value(queries::portfolioSecurityTradeViewColumns_PortfolioID).toInt()].securities()[t.parent()].trades().insert(t.id(), t);
     }
 }
 
@@ -102,7 +103,7 @@ void portfolioFactory::loadPortfolioSecurityTradesExecution()
     while(q.next())
         m_portfolios[q.value(queries::portfolioSecurityTradeExecutionViewColumns_PortfolioID).toInt()]
             .securities()[q.value(queries::portfolioSecurityTradeExecutionViewColumns_SecurityID).toInt()]
-            .executedTrades.insert
+            .executedTrades().insert
             (
                 q.value(queries::portfolioSecurityTradeExecutionViewColumns_Date).toInt(),
                 executedTrade::load(q)

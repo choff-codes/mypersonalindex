@@ -6,14 +6,11 @@
 
 class QString;
 class symbolData;
-class symbol: public objectKey<symbolData>
+class symbol: public objectKey
 {
 public:
     // for now id is a security id which has the same symbol, may revise later
-    explicit symbol(const QString &symbol_, bool dividends_):
-        objectKey(symbol_, id_)
-    {}
-
+    symbol(const QString &symbol_, bool dividends_);
     symbol(const symbol &other_);
 
     ~symbol();
@@ -26,9 +23,14 @@ public:
     bool dividends() const;
     void setDividends(bool dividends_);
 
-    objectType type() const { return objectType_Symbol; }
-    QString validate() const { return QString(); }
-    QString displayText() const { return description; }
+    objectType type() const;
+    QString validate() const;
+    QString displayText() const;
+
+    void detach();
+
+private:
+    QExplicitlySharedDataPointer<symbolData> d;
 };
 
 #endif // SYMBOL_H

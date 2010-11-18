@@ -7,7 +7,7 @@ class QString;
 class queries;
 class QSqlQuery;
 class assetAllocationData;
-class assetAllocation: public objectKey<assetAllocationData>
+class assetAllocation: public objectKey
 {
 public:
     enum thresholdMethod {
@@ -46,6 +46,12 @@ public:
 
     friend QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_);
 
+    void detach();
+
+private:
+    QExplicitlySharedDataPointer<assetAllocationData> d;
+
+    objectKeyData* data() const;
 };
 
 QDataStream& operator<<(QDataStream &stream_, const assetAllocation &aa_);

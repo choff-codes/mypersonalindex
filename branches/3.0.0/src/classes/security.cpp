@@ -1,4 +1,5 @@
 #include "security.h"
+#include <QSharedData>
 #include <QSqlQuery>
 #include "queries.h"
 #include "functions.h"
@@ -9,6 +10,7 @@
 
 class securityData: public objectKeyData
 {
+public:
     int account;
     double expenseRatio;
     bool dividendReinvestment;
@@ -22,7 +24,7 @@ class securityData: public objectKeyData
     executedTradeMap executedTrades;
     historicalPrices prices;
 
-    explicit security(int id_, int parent_, const QString &description_):
+    explicit securityData(int id_, int parent_, const QString &description_):
         objectKeyData(description_, id_, parent_),
         account(UNASSIGNED),
         expenseRatio(0),
@@ -30,11 +32,30 @@ class securityData: public objectKeyData
         dividendNAVAdjustment(true),
         cashAccount(false),
         includeInCalc(true),
-        hide(false),
+        hidden(false),
         executedTrades(id_),
         prices(historicalPrices(description_))
     {}
 };
+
+security::security(int id_, int parent_, const QString &description_):
+    d(new securityData(id_, parent_, description_))
+{}
+
+security::security(const security &other_):
+    d(other_.d)
+{}
+
+security::~security()
+{}
+
+security& security::operator=(const security &other_)
+{
+    d = other_.d;
+    return *this;
+}
+
+objectKeyData* security::data() const { return d.data(); }
 
 bool security::operator==(const security &other_) const
 {
@@ -44,7 +65,7 @@ bool security::operator==(const security &other_) const
             && d->dividendReinvestment == other_.d->dividendReinvestment
             && d->cashAccount == other_.d->cashAccount
             && d->includeInCalc == other_.d->includeInCalc
-            && d->hide == other_.d->hide
+            && d->hidden == other_.d->hidden
             && d->targets == other_.d->targets
             && d->trades == other_.d->trades
             && d->note == other_.d->note
@@ -62,7 +83,7 @@ bool security::dividendReinvestment() const { return d->dividendReinvestment; }
 void security::setDividendReinvestment(bool dividendReinvestment_) { d->dividendReinvestment = dividendReinvestment_; }
 
 bool security::dividendNAVAdjustment() const { return d->dividendNAVAdjustment; }
-void security::setDividendNAVAdjustment(bool dividendNAVAdjustment) { d->dividendNAVAdjustment = dividendNAVAdjustment_; }
+void security::setDividendNAVAdjustment(bool dividendNAVAdjustment_) { d->dividendNAVAdjustment = dividendNAVAdjustment_; }
 
 bool security::cashAccount() const { return d->cashAccount; }
 void security::setCashAccount(bool cashAccount_) { d->cashAccount = cashAccount_; }
@@ -148,10 +169,10 @@ security security::load(const QSqlQuery &q_)
 
 QString security::validate() const
 {
-    if (this->description.isEmpty())
+    if (this->description().isEmpty())
         return "Please enter a description!";
 
-    if (functions::massage(1 - this->targets.totalAssignedPercentage()) < 0)
+    if (functions::massage(1 - this->targets().totalAssignedPercentage()) < 0)
         return "Asset allocation should not sum to more than 100!";
 
     return QString();
@@ -162,6 +183,11 @@ objectType security::type() const
     return objectType_Security;
 }
 
+void security::detach()
+{
+    d.detach();
+}
+
 QDataStream& operator<<(QDataStream &stream_, const security &sec_)
 {
     stream_ << sec_.account();
@@ -170,7 +196,7 @@ QDataStream& operator<<(QDataStream &stream_, const security &sec_)
     stream_ << sec_.dividendNAVAdjustment();
     stream_ << sec_.dividendReinvestment();
     stream_ << sec_.expenseRatio();
-    stream_ << sec_.hide;
+    stream_ << sec_.hidden();
     stream_ << sec_.includeInCalc();
     stream_ << sec_.note();
     stream_ << sec_.targets();
@@ -185,7 +211,7 @@ QDataStream& operator>>(QDataStream &stream_, security &sec_)
     stream_ >> sec_.d->dividendNAVAdjustment;
     stream_ >> sec_.d->dividendReinvestment;
     stream_ >> sec_.d->expenseRatio;
-    stream_ >> sec_.d->hide;
+    stream_ >> sec_.d->hidden;
     stream_ >> sec_.d->includeInCalc;
     stream_ >> sec_.d->note;
     stream_ >> sec_.d->targets;

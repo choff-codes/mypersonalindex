@@ -3,7 +3,6 @@
 #include "frmEditAcct_UI.h"
 #include "account.h"
 #include "objectKeyEditModel.h"
-#include "portfolioAttributes.h"
 
 frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditStateMap(portfolio_, parent_),
@@ -64,13 +63,13 @@ void frmEditAcct_State::save()
     if (!m_currentItem)
         return;
 
-    m_model->refresh(m_model->find(m_currentItem));
+    m_currentItem->setDescription(ui->descTxt->text());
+    m_currentItem->setTaxRate(ui->taxRateSpinBox->value());
+    m_currentItem->setTaxDeferred(ui->taxDeferredChk->isChecked());
+    m_currentItem->setCostBasis((account::costBasisMethod)ui->costBasisCmb->itemData(ui->costBasisCmb->currentIndex()).toInt());
+    m_currentItem->setHidden(ui->hideChk->isChecked());
 
-    m_currentItem->description = ui->descTxt->text();
-    m_currentItem->taxRate = ui->taxRateSpinBox->value();
-    m_currentItem->taxDeferred = ui->taxDeferredChk->isChecked();
-    m_currentItem->costBasis = (account::costBasisMethod)ui->costBasisCmb->itemData(ui->costBasisCmb->currentIndex()).toInt();
-    m_currentItem->hide = ui->hideChk->isChecked();
+    m_model->refresh(m_model->find(m_currentItem));
 }
 
 bool frmEditAcct_State::validate()
@@ -78,17 +77,17 @@ bool frmEditAcct_State::validate()
     return validateMap(m_portfolio.accounts());
 }
 
-void frmEditAcct_State::validationError(objectKey* key_, const QString &errorMessage_)
+void frmEditAcct_State::validationError(const objectKeyBase &key_, const QString &errorMessage_)
 {
     QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Account validation error", errorMessage_);
-    ui->list->setCurrentIndex(m_model->find(key_));
+    ui->list->setCurrentIndex(m_model->find(&key_));
 }
 
 void frmEditAcct_State::add()
 {
-    int identity = portfolio::getOpenIdentity();
-    objectKey *key = &m_portfolio.accounts().insert(identity, account(identity, m_portfolio.attributes().id)).value();
-    m_model->insert(key);
+    account acct(portfolio::getOpenIdentity(), m_portfolio.id());
+    m_portfolio.accounts().insert(acct.id(), acct);
+    m_model->insert(new account(acct));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));
 }
 
@@ -98,11 +97,11 @@ void frmEditAcct_State::load()
     if (!m_currentItem)
         return;
 
-    ui->descTxt->setText(m_currentItem->description);
-    ui->taxRateSpinBox->setValue(m_currentItem->taxRate);
-    ui->taxDeferredChk->setChecked(m_currentItem->taxDeferred);
-    ui->costBasisCmb->setCurrentIndex(ui->costBasisCmb->findData(m_currentItem->costBasis));
-    ui->hideChk->setChecked(m_currentItem->hide);
+    ui->descTxt->setText(m_currentItem->description());
+    ui->taxRateSpinBox->setValue(m_currentItem->taxRate());
+    ui->taxDeferredChk->setChecked(m_currentItem->taxDeferred());
+    ui->costBasisCmb->setCurrentIndex(ui->costBasisCmb->findData(m_currentItem->costBasis()));
+    ui->hideChk->setChecked(m_currentItem->hidden());
 }
 
 void frmEditAcct_State::remove()
@@ -110,9 +109,9 @@ void frmEditAcct_State::remove()
     if (!m_currentItem)
         return;
 
-    account *acct = m_currentItem;
+    m_portfolio.accounts()[m_currentItem->id()].setDeleted(true);
     m_model->remove(m_currentItem);
-    m_portfolio.accounts()[acct->id].deleted = true;
+
 }
 
 bool frmEditAcct_State::internalCopy(QDataStream &stream_) const

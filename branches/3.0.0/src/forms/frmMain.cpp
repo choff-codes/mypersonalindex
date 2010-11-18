@@ -8,7 +8,6 @@
 #include <QFileInfo>
 #include "frmEdit.h"
 #include "settingsFactory.h"
-#include "portfolioAttributes.h"
 #include "updatePrices.h"
 #include "tradeDateCalendar.h"
 #include "calculatorTrade.h"
@@ -125,10 +124,10 @@ void frmMain::refreshPortfolioCmb(int id_)
     ui->portfolioDropDownCmb->clear();
     foreach(const portfolio &p, m_file->portfolios)
     {
-        if (p.attributes().deleted)
+        if (p.deleted())
             continue;
 
-        ui->portfolioDropDownCmb->addItem(p.attributes().description, p.attributes().id);
+        ui->portfolioDropDownCmb->addItem(p.description(), p.id());
     }
 
     int index = ui->portfolioDropDownCmb->findData(id_);
@@ -196,9 +195,9 @@ void frmMain::addPortfolio()
     setWindowModified(true);
     m_file->modified = true;
     portfolio newPortfolio = f.getPortfolio();
-    m_file->portfolios.insert(newPortfolio.attributes().id, newPortfolio);
+    m_file->portfolios.insert(newPortfolio.id(), newPortfolio);
     refreshPortfolioPrices();
-    ui->portfolioDropDownCmb->addItem(newPortfolio.attributes().description, newPortfolio.attributes().id);
+    ui->portfolioDropDownCmb->addItem(newPortfolio.description(), newPortfolio.id());
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
     recalculateTrades(*m_currentPortfolio);
 }
@@ -215,11 +214,11 @@ void frmMain::editPortfolio()
 
     setWindowModified(true);
     m_file->modified = true;
-    m_file->portfolios[m_currentPortfolio->attributes().id] = f.getPortfolio();
+    m_file->portfolios[m_currentPortfolio->id()] = f.getPortfolio();
     refreshPortfolioPrices();
 
-    setCurrentPortfolio(&m_file->portfolios[m_currentPortfolio->attributes().id]);
-    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->attributes().description);
+    setCurrentPortfolio(&m_file->portfolios[m_currentPortfolio->id()]);
+    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->description());
     recalculateTrades(*m_currentPortfolio, 0);
 }
 
@@ -229,20 +228,30 @@ void frmMain::deletePortfolio()
         return;
 
     if (QMessageBox::question(this, QCoreApplication::applicationName(), QString("Are you sure you want to delete portfolio %1?")
-        .arg(m_currentPortfolio->attributes().description), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+        .arg(m_currentPortfolio->description()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
         return;
 
     setWindowModified(true);
     m_file->modified = true;
-    m_currentPortfolio->attributes().deleted = true;
+    m_currentPortfolio->setDeleted(true);
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
 void frmMain::refreshPortfolioPrices()
 {
-    for(QMap<int, portfolio>::iterator i = m_file->portfolios.begin(); i != m_file->portfolios.end(); ++i)
-        for(QMap<int, security>::iterator x = i->securities().begin(); x != i->securities().end(); ++x)
-            x->setHistoricalPrices(m_file->prices.getHistoricalPrice(x->description));
+    foreach(portfolio p, m_file->portfolios)
+    {
+        if (p.deleted())
+            continue;
+
+        foreach(security s, p.securities())
+        {
+            if (s.deleted())
+                continue;
+
+            s.setHistoricalPrices(m_file->prices.getHistoricalPrice(s.description()));
+        }
+    }
 }
 
 void frmMain::portfolioDropDownChange(int currentIndex_)
@@ -273,10 +282,10 @@ void frmMain::importYahoo()
     int beginDate = tradeDateCalendar::endDate() + 1;
     foreach(const portfolio &p, m_file->portfolios)
     {
-        if (p.attributes().deleted)
+        if (p.deleted())
             continue;
 
-        beginDate = qMin(beginDate, p.attributes().startDate);
+        beginDate = qMin(beginDate, p.startDate());
     }
 
     QList<historicalPrices> prices;
@@ -348,7 +357,7 @@ void frmMain::hideProgressBar()
 QWidget* frmMain::setupTable(tab tab_, frmMainTableView_UI *ui_)
 {
     ui_->setupUI(tableColumns(tab_), this);
-    ui_->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->attributes().startDate));
+    ui_->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->startDate()));
     ui_->toolbarDateEndEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->endDate()));
     setSortDropDown(m_settings.viewableColumnsSorting.value(settingsColumn(tab_)), ui_->toolbarSortCmb);
     connect(ui_->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
@@ -406,7 +415,7 @@ QAbstractItemModel* frmMain::createModel(tab tab_, int beginDate_, int endDate_)
                     m_settings.viewableColumnsSorting.value(settings::columns_AA)
                 ),
                 portfolioValue,
-                m_currentCalculator.nav(m_currentPortfolio->attributes(), beginDate_, endDate_),
+                m_currentCalculator.nav(*m_currentPortfolio, beginDate_, endDate_),
                 m_settings.viewableColumns.value(settings::columns_AA),
                 ui_assetAllocation->table
             );
@@ -423,7 +432,7 @@ QAbstractItemModel* frmMain::createModel(tab tab_, int beginDate_, int endDate_)
                     m_settings.viewableColumnsSorting.value(settings::columns_Security)
                 ),
                 portfolioValue,
-                m_currentCalculator.nav(m_currentPortfolio->attributes(), beginDate_, endDate_),
+                m_currentCalculator.nav(*m_currentPortfolio, beginDate_, endDate_),
                 m_settings.viewableColumns.value(settings::columns_Security),
                 ui_security->table
             );

@@ -1,7 +1,6 @@
 #include "frmEditPortfolio_State.h"
 #include <QMessageBox>
 #include "frmEditPortfolio_UI.h"
-#include "portfolioAttributes.h"
 
 frmEditPortfolio_State::frmEditPortfolio_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditState(portfolio_, parent_),
@@ -18,21 +17,21 @@ frmEditPortfolio_State::~frmEditPortfolio_State()
 
 void frmEditPortfolio_State::save()
 {
-    m_portfolio.attributes().description = ui->descTxt->text();
-    m_portfolio.attributes().startDate = ui->startDateDateEdit->date().toJulianDay();
-    m_portfolio.attributes().startValue = ui->startValueTxt->text().toInt();
+    m_portfolio.setDescription(ui->descTxt->text());
+    m_portfolio.setStartDate(ui->startDateDateEdit->date().toJulianDay());
+    m_portfolio.setStartValue(ui->startValueTxt->text().toInt());
 }
 
 void frmEditPortfolio_State::load()
 {
-    ui->descTxt->setText(m_portfolio.attributes().description);
-    ui->startDateDateEdit->setDate(QDate::fromJulianDay(m_portfolio.attributes().startDate));
-    ui->startValueTxt->setText(QString::number(m_portfolio.attributes().startValue));
+    ui->descTxt->setText(m_portfolio.description());
+    ui->startDateDateEdit->setDate(QDate::fromJulianDay(m_portfolio.startDate()));
+    ui->startValueTxt->setText(QString::number(m_portfolio.startValue()));
 }
 
 bool frmEditPortfolio_State::validate()
 {
-    QString validation = m_portfolio.attributes().validate();
+    QString validation = m_portfolio.validate();
     if (validation.isEmpty())
         return true;
 

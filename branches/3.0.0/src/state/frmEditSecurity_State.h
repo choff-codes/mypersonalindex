@@ -36,7 +36,7 @@ private:
     void load();
     void save();
 
-    void validationError(objectKey* key_, const QString &errorMessage_);
+    void validationError(const objectKeyBase &key_, const QString &errorMessage_);
 
     QString mimeType() const { return "application/mypersonalindex-security"; }
     bool internalCopy(QDataStream &stream_) const;

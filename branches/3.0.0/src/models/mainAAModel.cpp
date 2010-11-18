@@ -53,7 +53,7 @@ aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSn
     baseRow(columnSort_)
 {    
     //    row_Description,
-    this->values.append(aa_.description);
+    this->values.append(aa_.description());
     //    row_CostBasis,
     this->values.append(snapshot_.costBasis);
     //    row_Value,
@@ -67,22 +67,22 @@ aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSn
     //    row_NAV,
     this->values.append(nav_ - 1);
     //    row_Target,
-    this->values.append(functions::isZero(aa_.target) ? QVariant() : aa_.target);
+    this->values.append(functions::isZero(aa_.target()) ? QVariant() : aa_.target());
     //    row_Variance,
     this->values.append(
-        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ?
+        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target()) ?
             QVariant() :
-            aa_.threshold == assetAllocation::thresholdMethod_AA ?
-                (snapshot_.totalValue / (portfolioSnapshot_.totalValue * aa_.target)) - 1 :
-                (snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target
+            aa_.threshold() == assetAllocation::thresholdMethod_AA ?
+                (snapshot_.totalValue / (portfolioSnapshot_.totalValue * aa_.target())) - 1 :
+                (snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target()
         );
     //    row_RebalanceBand,
-    this->values.append(functions::isZero(aa_.rebalanceBand) ? QVariant() : aa_.rebalanceBand);
+    this->values.append(functions::isZero(aa_.rebalanceBand()) ? QVariant() : aa_.rebalanceBand());
     //    row_Rebalance,
     this->values.append(
-        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target) ?
+        functions::isZero(portfolioSnapshot_.totalValue) || functions::isZero(aa_.target()) ?
             QVariant() :
-            -1 * portfolioSnapshot_.totalValue * ((snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target)
+            -1 * portfolioSnapshot_.totalValue * ((snapshot_.totalValue / portfolioSnapshot_.totalValue) - aa_.target())
         );
     //    row_Holdings
     this->values.append(snapshot_.count);
@@ -105,7 +105,7 @@ QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> &assetAllocation
 
     foreach(const assetAllocation &aa, assetAllocation_)
     {
-        if (aa.deleted || aa.hide)
+        if (aa.deleted() || aa.hidden())
             continue;
 
         returnList.append(getRow(aa, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
@@ -124,7 +124,7 @@ baseRow* aaRow::getRow(const assetAllocation &assetAllocation_, int beginDate_, 
 {
     return new aaRow(
         calculator_.nav(assetAllocation_, beginDate_, endDate_),
-        calculator_.assetAllocationSnapshot(endDate_, assetAllocation_.id), portfolioSnapshot_, assetAllocation_, columnSort_
+        calculator_.assetAllocationSnapshot(endDate_, assetAllocation_.id()), portfolioSnapshot_, assetAllocation_, columnSort_
     );
 }
 

@@ -27,7 +27,7 @@ QVariant securityAAModel::data(const QModelIndex &index_, int role_) const
     if (role_ == Qt::DisplayRole)
     {
         if (index_.column() == 0)
-            return m_keys.at(index_.row()) == UNASSIGNED ? "(Unassigned)" : m_descriptions.value(m_keys.at(index_.row())).description;
+            return m_keys.at(index_.row()) == UNASSIGNED ? "(Unassigned)" : m_descriptions.value(m_keys.at(index_.row())).description();
 
         if (index_.column() == 1)
             return functions::doubleToPercentage(m_target.value(m_keys.at(index_.row())));

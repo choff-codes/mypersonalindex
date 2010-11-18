@@ -83,7 +83,7 @@ bool mpiFile_State::saveFile(const QString &filePath_)
 #endif
     file.beginTransaction();
 
-    portfolioIdentities = portfolio::save(portfolios, file);
+    portfolioIdentities = portfolio::save(&portfolios, file);
     file.commit();
 
 #ifdef CLOCKTIME

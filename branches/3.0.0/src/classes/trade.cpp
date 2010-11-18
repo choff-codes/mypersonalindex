@@ -6,6 +6,7 @@
 
 class tradeData: public objectKeyData
 {
+public:
     trade::tradeAction action;
     double value;
     double price;
@@ -31,11 +32,11 @@ class tradeData: public objectKeyData
 };
 
 trade::trade(int id_, int parent_):
-    objectKey(new tradeData(id_, parent_))
+    d(new tradeData(id_, parent_))
 {}
 
 trade::trade(const trade &other_):
-    objectKey(other_)
+    d(other_.d)
 {}
 
 trade::~trade()
@@ -46,6 +47,8 @@ trade& trade::operator=(const trade &other_)
     d = other_.d;
     return *this;
 }
+
+objectKeyData* trade::data() const { return d.data(); }
 
 bool trade::operator==(const trade &other_) const
 {
@@ -62,32 +65,32 @@ bool trade::operator==(const trade &other_) const
 }
 
 
-tradeAction action() const { return d->action; }
-void setAction(tradeAction action_) { d->action = action_; }
+trade::tradeAction trade::action() const { return d->action; }
+void trade::setAction(tradeAction action_) { d->action = action_; }
 
-double value() const { return d->value; }
-void setValue(double value_) { d->value = value_; }
+double trade::value() const { return d->value; }
+void trade::setValue(double value_) { d->value = value_; }
 
-double price() const { return d->price; }
-void setPrice(double price_) { d->price = price_; }
+double trade::price() const { return d->price; }
+void trade::setPrice(double price_) { d->price = price_; }
 
-double commission() const { return d->commission; }
-void setCommission(double commission_) { d->commission = commission_; }
+double trade::commission() const { return d->commission; }
+void trade::setCommission(double commission_) { d->commission = commission_; }
 
-int cashAccount() const { return d->cashAccount; }
-void setCashAccount(int cashAccount_) { d->cashAccount = cashAccount_; }
+int trade::cashAccount() const { return d->cashAccount; }
+void trade::setCashAccount(int cashAccount_) { d->cashAccount = cashAccount_; }
 
-tradeDateCalendar::frequency frequency() const { return d->frequency; }
-void setFrequency(tradeDateCalendar::frequency frequency_) { d->frequency = frequency_; }
+tradeDateCalendar::frequency trade::frequency() const { return d->frequency; }
+void trade::setFrequency(tradeDateCalendar::frequency frequency_) { d->frequency = frequency_; }
 
-int date() const { return d->date; }
-void setDate(int date_) { d->date = date_; }
+int trade::date() const { return d->date; }
+void trade::setDate(int date_) { d->date = date_; }
 
-int startDate() const { return d->startDate; }
-void setStartDate(int startDate_) { d->startDate = startDate_; }
+int trade::startDate() const { return d->startDate; }
+void trade::setStartDate(int startDate_) { d->startDate = startDate_; }
 
-int endDate() const { return d->endDate; }
-void setEndDate(int endDate_) { d->endDate = endDate_; }
+int trade::endDate() const { return d->endDate; }
+void trade::setEndDate(int endDate_) { d->endDate = endDate_; }
 
 void trade::save(const queries &dataSource_)
 {
@@ -233,8 +236,8 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
 
 QString trade::validate() const
 {
-    if (functions::massage(this->value) < 0)
-        switch (this->action)
+    if (functions::massage(this->value()) < 0)
+        switch (this->action())
         {
             case tradeAction_Purchase:
             case tradeAction_Sell:
@@ -253,13 +256,13 @@ QString trade::validate() const
                 return "Value cannot be negative!";
         }
 
-    if (functions::massage(this->price) < 0 && functions::massage(UNASSIGNED - this->price) != 0)
+    if (functions::massage(this->price()) < 0 && functions::massage(UNASSIGNED - this->price()) != 0)
         return "The price cannot be negative!";
 
-    if (this->frequency == tradeDateCalendar::frequency_Once && this->startDate > this->date)
+    if (this->frequency() == tradeDateCalendar::frequency_Once && this->startDate() > this->date())
         return "The start date cannot be after the trade date!";
 
-    if(this->frequency == tradeDateCalendar::frequency_Once && this->endDate < this->date && this->endDate != 0)
+    if(this->frequency() == tradeDateCalendar::frequency_Once && this->endDate() < this->date() && this->endDate() != 0)
         return "The end date cannot be before the trade date!";
 
     return QString();
@@ -270,6 +273,11 @@ objectType trade::type() const
     return objectType_Trade;
 }
 
+void trade::detach()
+{
+    d.detach();
+}
+
 QString trade::displayText() const
 {
     return QString("%1 %2, %3 at %4 on %5%6%7").arg
@@ -277,7 +285,7 @@ QString trade::displayText() const
             tradeTypeToString(this->action()),
             valueToString(this->action(), this->value()),
             frequencyToString(this->frequency()).toLower(),
-            functions::massage(this->price()) < 0 ? "market price" : functions::doubleToCurrency(this->price),
+            functions::massage(this->price()) < 0 ? "market price" : functions::doubleToCurrency(this->price()),
             dateToString(this->frequency(), this->date()),
             this->startDate() == 0 ? QString() : QString(", starting on %1").arg(QDate::fromJulianDay(this->startDate()).toString(Qt::SystemLocaleShortDate)),
             this->endDate() == 0 ? QString() : QString(", ending on %1").arg(QDate::fromJulianDay(this->endDate()).toString(Qt::SystemLocaleShortDate))

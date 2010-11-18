@@ -12,7 +12,7 @@ class security;
 class assetAllocation;
 class account;
 class portfolioData;
-class portfolio: public objectKey<portfolioData>
+class portfolio: public objectKey
 {
 public:
     portfolio(int id_ = UNASSIGNED, const QString &description_ = QString());
@@ -26,7 +26,7 @@ public:
     bool operator!=(const portfolio &other_) const { return !(*this == other_); }
 
     QStringList symbols() const;
-    static QStringList symbols(const QMap<int, portfolio> portfolios_);
+    static QStringList symbols(const QMap<int, portfolio> &portfolios_);
     int endDate() const;
 
     static int getOpenIdentity() { return --IDENTITY_COUNTER; }
@@ -45,7 +45,7 @@ public:
     QString validate() const;
 
     void save(const queries &dataSource_);
-    static QMap<int, int> save(QMap<int, portfolio> &portfolios_, const queries &dataSource_);
+    static QMap<int, int> save(QMap<int, portfolio> *portfolios_, const queries &dataSource_);
     void remove(const queries &dataSource_) const;
     static portfolio load(const QSqlQuery &q_);
 
@@ -53,6 +53,9 @@ public:
 
 private:
     static int IDENTITY_COUNTER;
+    QExplicitlySharedDataPointer<portfolioData> d;
+
+    objectKeyData* data() const;
 };
 
 #endif // PORTFOLIO_H

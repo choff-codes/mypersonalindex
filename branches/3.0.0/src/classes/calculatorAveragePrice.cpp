@@ -5,6 +5,7 @@
 #include "security.h"
 #include "account.h"
 #include "functions.h"
+#include "executedTrade.h"
 
 QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_, int date_)
 {
@@ -17,16 +18,16 @@ QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_,
 
     foreach(const security &s, portfolio_.securities())
     {
-        if (s.deleted)
+        if (s.deleted())
             continue;
 
         avgPrices.insert(
-            s.id,
+            s.id(),
             calculate(
                 date_,
-                s.executedTrades,
+                s.executedTrades(),
                 // cash should always be computed as average
-                s.cashAccount ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account).costBasis,
+                s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
                 splits(s.splits(), date_)
             )
         );

@@ -16,7 +16,7 @@ class assetAllocationTarget;
 class executedTradeMap;
 class trade;
 class historicalPrices;
-class security: public objectKey<securityData>
+class security: public objectKey
 {
 public:
 
@@ -74,15 +74,21 @@ public:
     int endDate() const;
     int beginDate() const;
 
-    objectType type() const { return objectType_Security; }
+    objectType type() const;
     QString validate() const;
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;
     static security load(const QSqlQuery &q_);
 
-
     friend QDataStream& operator>>(QDataStream &stream_, security &sec_);
+
+    void detach();
+
+private:
+    QExplicitlySharedDataPointer<securityData> d;
+
+    objectKeyData* data() const;
 };
 
 QDataStream& operator<<(QDataStream &stream_, const security &sec_);

@@ -15,7 +15,7 @@ QVariant objectKeyEditModel::data(const QModelIndex &index_, int role_) const
     return QVariant();
 }
 
-void objectKeyEditModel::insert(objectKey* key_)
+void objectKeyEditModel::insert(objectKeyBase* key_)
 {
     beginInsertRows(QModelIndex(), rowCount(QModelIndex()), rowCount(QModelIndex()) + 1);
     m_items.append(key_);
@@ -23,12 +23,30 @@ void objectKeyEditModel::insert(objectKey* key_)
     endInsertRows();
 }
 
-void objectKeyEditModel::remove(objectKey* key_) {
-    int row = m_items.indexOf(key_);
-    if (row == -1)
+void objectKeyEditModel::remove(objectKeyBase* key_) {
+    QModelIndex index = find(key_);
+    if (!index.isValid())
         return;
 
+    int row = index.row();
     beginRemoveRows(QModelIndex(), row, row);
-    m_items.removeAt(row);
+
+    objectKeyBase* toRemove = m_items.takeAt(row);
+    delete toRemove;
+
     endRemoveRows();
+}
+
+
+QModelIndex objectKeyEditModel::find(const objectKeyBase* key_) const
+{
+    int row = -1;
+    for(int i = 0; i < m_items.count(); ++i)
+        if (m_items.at(i)->id() == key_->id())
+        {
+            row = i;
+            break;
+        }
+
+    return index(row);
 }

@@ -7,7 +7,7 @@ class QString;
 class queries;
 class QSqlQuery;
 class accountData;
-class account: public objectKey<accountData>
+class account: public objectKey
 {
 public:
     enum costBasisMethod {
@@ -48,6 +48,13 @@ public:
     static account load(const QSqlQuery &q_);
 
     friend QDataStream& operator>>(QDataStream &stream_, account &acct_);
+
+    void detach();
+
+private:
+    QExplicitlySharedDataPointer<accountData> d;
+
+    objectKeyData* data() const;
 };
 
 QDataStream& operator<<(QDataStream &stream_, const account &acct_);

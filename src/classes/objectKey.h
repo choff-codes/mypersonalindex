@@ -44,59 +44,39 @@ class objectKeyBase
 public:
     virtual ~objectKeyBase() {}
 
-    virtual int id() const = 0;
-    virtual bool hasIdentity() const = 0;
+    int id() const { return data()->id; }
+    bool hasIdentity() const { return id() > UNASSIGNED; }
 
-    virtual int parent() const = 0;
-    virtual bool hasParent() const = 0;
+    int parent() const { return data()->parent; }
+    bool hasParent() const { return data()->hasParent(); }
 
-    virtual bool deleted() const = 0;
+    bool deleted() const { return data()->deleted; }
 
-    virtual QString description() const = 0;
-    virtual QString displayText() const = 0;
+    QString description() const { return data()->description; }
+    virtual QString displayText() const { return description().isEmpty() ? "(New)" : description(); }
 
     // return an empty string if there are no validation errors, otherwise return the error message
     virtual QString validate() const = 0;
 
     virtual objectType type() const = 0;
+
+protected:
+    virtual objectKeyData* data() const = 0;
 };
 
-template<class T>
 class objectKey: public objectKeyBase
 {
 public:
-    objectKey(T* data_):
-        d(data_)
-    {}
-
-    objectKey(const T &other_):
-        d(other_.d)
-    {}
-
     virtual ~objectKey() {}
 
-    QString description() const { return d->description; }
-    void setDescription(const QString &description_) { d->description = description_; }
-
-    int id() const { return d->id; }
-    void setID(int id_) { d->id = id_; }
-
-    int parent() const { return d->parent; }
-    void setParent(int id_) { d->parent = id_; }
-    bool hasParent() const { return d->hasParent(); }
-
-    bool deleted() const { return d->deleted; }
-    void setDeleted(bool deleted_) { d->deleted = deleted_; }
+    void setDescription(const QString &description_) { data()->description = description_; }
+    void setID(int id_) { data()->id = id_; }
+    void setParent(int parent_) { data()->parent = parent_; }
+    void setDeleted(bool deleted_) { data()->deleted = deleted_; }
 
     void clearIdentity() { setID(UNASSIGNED); }
-    bool hasIdentity() const { return id() > UNASSIGNED; }
 
-    QString displayText() const { return description().isEmpty() ? "(New)" : description(); }
-
-    virtual void detach() { d.detach(); }
-
-protected:
-    QExplicitlySharedDataPointer<T> d;
+    virtual void detach() = 0;
 };
 
 

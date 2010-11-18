@@ -11,7 +11,7 @@ public:
     account::costBasisMethod costBasis;
     bool hidden;
 
-    explicit account(int id_, int parent_, const QString &description_):
+    explicit accountData(int id_, int parent_, const QString &description_):
         objectKeyData(description_, id_, parent_),
         taxRate(0),
         taxDeferred(false),
@@ -21,11 +21,11 @@ public:
 };
 
 account::account(int id_, int parent_, const QString &description_):
-    objectKey(new accountData(id_, parent_, description_))
+    d(new accountData(id_, parent_, description_))
 {}
 
 account::account(const account &other_):
-    objectKey(other_)
+    d(other_.d)
 {}
 
 account::~account()
@@ -36,6 +36,8 @@ account& account::operator=(const account &other_)
     d = other_.d;
     return *this;
 }
+
+objectKeyData* account::data() const { return d.data(); }
 
 bool account::operator==(const account &other_) const
 {
@@ -52,7 +54,7 @@ void account::setTaxRate(double taxRate_) { d->taxRate = taxRate_; }
 bool account::taxDeferred() const { return d->taxDeferred; }
 void account::setTaxDeferred(bool taxDeferred_) { d->taxDeferred = taxDeferred_; }
 
-costBasisMethod account::costBasis() const { return d->costBasis; }
+account::costBasisMethod account::costBasis() const { return d->costBasis; }
 void account::setCostBasis(costBasisMethod costBasis_) { d->costBasis = costBasis_; }
 
 bool account::hidden() const { return d->hidden; }
@@ -109,6 +111,11 @@ QString account::validate() const
 objectType account::type() const
 {
     return objectType_Account;
+}
+
+void account::detach()
+{
+    d.detach();
 }
 
 QDataStream& operator<<(QDataStream &stream_, const account &acct_)

@@ -3,7 +3,6 @@
 #include "frmEditAA_UI.h"
 #include "assetAllocation.h"
 #include "objectKeyEditModel.h"
-#include "portfolioAttributes.h"
 
 frmEditAA_State::frmEditAA_State(const portfolio &portfolio_, QWidget *parent_):
     frmEditStateMap(portfolio_, parent_),
@@ -64,13 +63,13 @@ void frmEditAA_State::save()
     if (!m_currentItem)
         return;
 
-    m_model->refresh(m_model->find(m_currentItem));
+    m_currentItem->setDescription(ui->descTxt->text());
+    m_currentItem->setRebalanceBand(ui->rebalanceBandSpinBox->value() / 100);
+    m_currentItem->setTarget(ui->targetSpinBox->value() / 100);
+    m_currentItem->setThreshold((assetAllocation::thresholdMethod)ui->thresholdCmb->itemData(ui->thresholdCmb->currentIndex()).toInt());
+    m_currentItem->setHidden(ui->hideChk->isChecked());
 
-    m_currentItem->description = ui->descTxt->text();
-    m_currentItem->rebalanceBand = ui->rebalanceBandSpinBox->value() / 100;
-    m_currentItem->target = ui->targetSpinBox->value() / 100;
-    m_currentItem->threshold = (assetAllocation::thresholdMethod)ui->thresholdCmb->itemData(ui->thresholdCmb->currentIndex()).toInt();
-    m_currentItem->hide = ui->hideChk->isChecked();
+    m_model->refresh(m_model->find(m_currentItem));
 }
 
 bool frmEditAA_State::validate()
@@ -78,17 +77,17 @@ bool frmEditAA_State::validate()
     return validateMap(m_portfolio.assetAllocations());
 }
 
-void frmEditAA_State::validationError(objectKey* key_, const QString &errorMessage_)
+void frmEditAA_State::validationError(const objectKeyBase &key_, const QString &errorMessage_)
 {
     QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Asset Allocation validation error", errorMessage_);
-    ui->list->setCurrentIndex(m_model->find(key_));
+    ui->list->setCurrentIndex(m_model->find(&key_));
 }
 
 void frmEditAA_State::add()
 {
-    int identity = portfolio::getOpenIdentity();
-    objectKey *key = &m_portfolio.assetAllocations().insert(identity, assetAllocation(identity, m_portfolio.attributes().id)).value();
-    m_model->insert(key);
+    assetAllocation aa(portfolio::getOpenIdentity(), m_portfolio.id());
+    m_portfolio.assetAllocations().insert(aa.id(), aa);
+    m_model->insert(new assetAllocation(aa));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));
 }
 
@@ -98,11 +97,11 @@ void frmEditAA_State::load()
     if (!m_currentItem)
         return;
 
-    ui->descTxt->setText(m_currentItem->description);
-    ui->rebalanceBandSpinBox->setValue(m_currentItem->rebalanceBand * 100);
-    ui->targetSpinBox->setValue(m_currentItem->target * 100);
-    ui->thresholdCmb->setCurrentIndex(ui->thresholdCmb->findData(m_currentItem->threshold));
-    ui->hideChk->setChecked(m_currentItem->hide);
+    ui->descTxt->setText(m_currentItem->description());
+    ui->rebalanceBandSpinBox->setValue(m_currentItem->rebalanceBand() * 100);
+    ui->targetSpinBox->setValue(m_currentItem->target() * 100);
+    ui->thresholdCmb->setCurrentIndex(ui->thresholdCmb->findData(m_currentItem->threshold()));
+    ui->hideChk->setChecked(m_currentItem->hidden());
 }
 
 void frmEditAA_State::remove()
@@ -110,9 +109,8 @@ void frmEditAA_State::remove()
     if (!m_currentItem)
         return;
 
-    assetAllocation *aa = m_currentItem;
+    m_portfolio.assetAllocations()[m_currentItem->id()].setDeleted(true);
     m_model->remove(m_currentItem);
-    m_portfolio.assetAllocations()[aa->id].deleted = true;
 }
 
 bool frmEditAA_State::internalCopy(QDataStream &stream_) const

@@ -1,10 +1,16 @@
 #include "portfolio.h"
 #include <QDate>
+#include <QMap>
+#include <QSqlQuery>
+#include <QVariant>
 #include "queries.h"
 #include "security.h"
 #include "account.h"
 #include "assetAllocation.h"
 #include "tradeDateCalendar.h"
+#include "assetAllocationTarget.h"
+#include "trade.h"
+#include "executedTrade.h"
 
 class portfolioData: public objectKeyData
 {
@@ -45,11 +51,23 @@ portfolio& portfolio::operator=(const portfolio &other_)
     return *this;
 }
 
-int startValue() const { return d->startValue; }
-void setStartValue(int startValue_) { d->startValue = startValue_; }
+objectKeyData* portfolio::data() const { return d.data(); }
 
-int startDate() const { return d->startDate; }
-void setStartDate(int startDate_) { d->startDate = startDate_; }
+bool portfolio::operator==(const portfolio &other_) const
+{
+    return d->objectKeyData::operator==(*other_.d)
+        && d->securities == other_.d->securities
+        && d->assetAllocations == other_.d->assetAllocations
+        && d->accounts == other_.d->accounts
+        && d->startValue == other_.d->startValue
+        && d->startDate == other_.d->startDate;
+}
+
+int portfolio::startValue() const { return d->startValue; }
+void portfolio::setStartValue(int startValue_) { d->startValue = startValue_; }
+
+int portfolio::startDate() const { return d->startDate; }
+void portfolio::setStartDate(int startDate_) { d->startDate = startDate_; }
 
 QMap<int, security>& portfolio::securities() const { return d->securities; }
 
@@ -75,9 +93,9 @@ void portfolio::save(const queries &dataSource_)
     // Note: order of saving matters!
 
     // portfolio deleted?
-    if (attributes.deleted)
+    if (deleted())
     {
-        attributes.remove(dataSource_);
+        remove(dataSource_);
         return;
     }
 
@@ -85,57 +103,55 @@ void portfolio::save(const queries &dataSource_)
     dataSource_.deleteTable(queries::table_PortfolioSecurityAA);
 
     // save portfolio
-    attributes.save(dataSource_);
-
     QMap<QString, QVariant> values;
-    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_Description), description);
-    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartValue), startValue);
-    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartDate), startDate);
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_Description), description());
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartValue), startValue());
+    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartDate), startDate());
 
-    this->id = dataSource_.insert(queries::table_Portfolio, values, this->id);
+    this->setID(dataSource_.insert(queries::table_Portfolio, values, this->id()));
 
     // save asset allocation
-    QList<assetAllocation> aaList = assetAllocations.values();
-    assetAllocations.clear();
-    for(QList<assetAllocation>::iterator i = aaList.begin(); i != aaList.end(); ++i)
+    QList<assetAllocation> aaList = assetAllocations().values();
+    assetAllocations().clear();
+    foreach(assetAllocation aa, aaList)
     {
-        if (i->deleted)
+        if (aa.deleted())
         {
-            i->remove(dataSource_);
+            aa.remove(dataSource_);
             continue;
         }
 
-        int origID = i->id;
-        i->parent = attributes.id;
-        i->save(dataSource_);
-        assetAllocations.insert(i->id, *i);
+        int origID = aa.id();
+        aa.setParent(id());
+        aa.save(dataSource_);
+        assetAllocations().insert(aa.id(), aa);
 
         if (origID < UNASSIGNED)
-            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++x)
-                x.value().targets.updateAssetAllocationID(origID, i->id);
+            foreach(security s, securities())
+                s.targets().updateAssetAllocationID(origID, aa.id());
     }
     aaList.clear();
 
     // save accounts
-    QList<account> acctList = accounts.values();
-    accounts.clear();
-    for(QList<account>::iterator i = acctList.begin(); i != acctList.end(); ++i)
+    QList<account> acctList = accounts().values();
+    accounts().clear();
+    foreach(account acct, acctList)
     {
-        if (i->deleted)
+        if (acct.deleted())
         {
-            i->remove(dataSource_);
+            acct.remove(dataSource_);
             continue;
         }
 
-        int origID = i->id;
-        i->parent = attributes.id;
-        i->save(dataSource_);
-        accounts.insert(i->id, *i);
+        int origID = acct.id();
+        acct.setParent(id());
+        acct.save(dataSource_);
+        accounts().insert(acct.id(), acct);
 
         if (origID < UNASSIGNED)
-            for(QMap<int, security>::iterator x = securities.begin(); x != securities.end(); ++x)
-                if (x.value().account == origID)
-                    x.value().account = i->id;
+            foreach(security s, securities())
+                if (s.account() == origID)
+                    s.setAccount(acct.id());
     }
     acctList.clear();
 
@@ -143,73 +159,77 @@ void portfolio::save(const queries &dataSource_)
     QHash<int, int> tradeIDMapping;
 
     // save securities
-    QList<security> secList = securities.values();
-    securities.clear();
-    for(QList<security>::iterator i = secList.begin(); i != secList.end(); ++i)
+    QList<security> secList = securities().values();
+    securities().clear();
+    foreach(security sec, securities())
     {
-        if (i->deleted)
+        if (sec.deleted())
         {
-            i->remove(dataSource_);
+            sec.remove(dataSource_);
             continue;
         }
 
-        i->parent = attributes.id;
-        i->save(dataSource_);
+        sec.setParent(id());
+        sec.save(dataSource_);
 
         // save AA targets
-        i->targets.parent = i->id;
-        i->targets.insertBatch(dataSource_);
+        sec.targets().parent = sec.id();
+        sec.targets().insertBatch(dataSource_);
 
         // save trades
-        QList<trade> tradeList = i->trades.values();
-        i->trades.clear();
-        for(QList<trade>::iterator x = tradeList.begin(); x != tradeList.end(); ++x)
+        QList<trade> tradeList = sec.trades().values();
+        sec.trades().clear();
+        foreach(trade t, tradeList)
         {
-            if (x->deleted)
+            if (t.deleted())
             {
-                x->remove(dataSource_);
+                t.remove(dataSource_);
                 continue;
             }
 
-            int origID = x->id;
-            x->parent = i->id;
-            x->save(dataSource_);
-            i->trades.insert(x->id, *x);
+            int origID = t.id();
+            t.setParent(sec.id());
+            t.save(dataSource_);
+            sec.trades().insert(t.id(), t);
             if (origID < UNASSIGNED)
-                tradeIDMapping.insert(origID, x->id);
+                tradeIDMapping.insert(origID, t.id());
         }
 
         // set executed trades parent (save after all trades are saved)
-        i->executedTrades.parent = i->id;
-        securities.insert(i->id, *i);
+        sec.executedTrades().parent = sec.id();
+        securities().insert(sec.id(), sec);
     }
     secList.clear();
 
     // save executed trades (need all securities and trades to be saved first to properly set associatedTradeID)
-    for(QMap<int, security>::iterator i = securities.begin(); i != securities.end(); ++i)
+    foreach(security s, securities())
     {
-        i.value().executedTrades.updateAssociatedTradeID(tradeIDMapping);
-        i.value().executedTrades.insertBatch(dataSource_);
+        s.executedTrades().updateAssociatedTradeID(tradeIDMapping);
+        s.executedTrades().insertBatch(dataSource_);
     }
 }
 
-QMap<int, int> portfolio::save(QMap<int, portfolio> &portfolios_, const queries &dataSource_)
+QMap<int, int> portfolio::save(QMap<int, portfolio> *portfolios_, const queries &dataSource_)
 {
+    if (!portfolios_)
+        return QMap<int, int>();
+
     QMap<int, int> returnMap;
-    QList<portfolio> portfolioList = portfolios_.values();
-    portfolios_.clear();
+    QList<portfolio> portfolioList = portfolios_->values();
+    portfolios_->clear();
 
-    for(QList<portfolio>::iterator i = portfolioList.begin(); i != portfolioList.end(); ++i)
+    foreach(portfolio p, portfolioList)
     {
-        int oldID = i->attributes().id;
-        i->save(dataSource_);
+        int oldID = p.id();
+        p.save(dataSource_);
 
-        if (i->attributes().deleted)
+        if (p.deleted())
             continue;
 
-        portfolios_.insert(i->attributes().id, *i);
-        returnMap.insert(oldID, i->attributes().id);
+        portfolios_->insert(p.id(), p);
+        returnMap.insert(oldID, p.id());
     }
+
     return returnMap;
 }
 
@@ -224,22 +244,26 @@ void portfolio::remove(const queries &dataSource_) const
 void portfolio::detach()
 {
     d.detach();
-}
 
-bool portfolio::operator==(const portfolio &other_) const
-{
-    return d->objectKeyData::operator==(*other_.d)
-        && d->securities == other_.d->securities
-        && d->assetAllocations == other_.d->assetAllocations
-        && d->accounts == other_.d->accounts
-        && d->startValue == other_.d->startValue
-        && d->startDate == other_.d->startDate;
+    for(QMap<int, account>::iterator i = accounts().begin(); i != accounts().end(); ++i)
+        i.value().detach();
+
+    for(QMap<int, assetAllocation>::iterator i = assetAllocations().begin(); i != assetAllocations().end(); ++i)
+        i.value().detach();
+
+    for(QMap<int, security>::iterator i = securities().begin(); i != securities().end(); ++i)
+    {
+        i.value().detach();
+
+        for(QMap<int, trade>::iterator x = i.value().trades().begin(); x != i.value().trades().end(); ++x)
+            x.value().detach();
+    }
 }
 
 QStringList portfolio::symbols() const
 {
     QStringList list;
-    foreach(const security &s, d->securities)
+    foreach(const security &s, securities())
         if (!s.cashAccount() && !s.deleted())
             list.append(s.description());
 
@@ -247,7 +271,7 @@ QStringList portfolio::symbols() const
     return list;
 }
 
-QStringList portfolio::symbols(const QMap<int, portfolio> portfolios_)
+QStringList portfolio::symbols(const QMap<int, portfolio> &portfolios_)
 {
     QStringList list;
     foreach(const portfolio &p, portfolios_)
@@ -279,7 +303,7 @@ int portfolio::endDate() const
     int date = 0;
     bool nonCashAccount = false;
 
-    foreach(const security &s, d->securities)
+    foreach(const security &s, securities())
     {
         if (s.cashAccount() || s.deleted())
             continue;

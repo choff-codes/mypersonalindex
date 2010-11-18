@@ -7,6 +7,7 @@
 #include "functions.h"
 #include "calculatorAveragePrice.h"
 #include "splits.h"
+#include "assetAllocationTarget.h"
 
 //enum {
 //    row_Active,
@@ -77,13 +78,13 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     baseRow(columnSort_)
 {
     //    row_Active,
-    this->values.append((int)security_.includeInCalc);
+    this->values.append((int)security_.includeInCalc());
     //    row_Symbol,
-    this->values.append(security_.description);
+    this->values.append(security_.description());
     //    row_Note,
-    this->values.append(functions::fitString(functions::removeNewLines(security_.note), 20));
+    this->values.append(functions::fitString(functions::removeNewLines(security_.note()), 20));
     //    row_Cash,
-    this->values.append((int)security_.cashAccount);
+    this->values.append((int)security_.cashAccount());
     //    row_Price,
     double price = security_.price(snapshot_.date);
     this->values.append(functions::isZero(price) == 0 ? QVariant() : price);
@@ -93,9 +94,9 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     this->values.append(
         functions::isZero(snapshot_.shares) ?
             QVariant() :
-            security_.cashAccount ?
+            security_.cashAccount() ?
                 1 :
-                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades, costBasis_, splits(security_.splits(), snapshot_.date))
+                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades(), costBasis_, splits(security_.splits(), snapshot_.date))
     );
     //    row_Cost,
     this->values.append(snapshot_.costBasis);
@@ -118,9 +119,9 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_NetValue,
     this->values.append(snapshot_.totalValue - snapshot_.taxLiability);
     //    row_ReinvestDividends,
-    this->values.append((int)security_.dividendReinvestment);
+    this->values.append((int)security_.dividendReinvestment());
     //    row_AdjustForDividends
-    this->values.append((int)security_.dividendNAVAdjustment);
+    this->values.append((int)security_.dividendNAVAdjustment());
 }
 
 QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, const QMap<int, assetAllocation> &assetAllocation_,
@@ -131,23 +132,23 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
 
     foreach(const security &sec, securities_)
     {
-        if (sec.deleted || sec.hide)
+        if (sec.deleted() || sec.hidden())
             continue;
 
         QStringList aaDescription;
-        for(QMap<int, double>::const_iterator i = sec.targets.constBegin(); i != sec.targets.constEnd(); ++i)
+        for(QMap<int, double>::const_iterator i = sec.targets().constBegin(); i != sec.targets().constEnd(); ++i)
             aaDescription.prepend(
-                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : assetAllocation_.value(i.key()).description, functions::doubleToPercentage(i.value()))
+                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : assetAllocation_.value(i.key()).description(), functions::doubleToPercentage(i.value()))
             );
 
         returnList.append(
             new securityRow(
                 calculator_.nav(sec, beginDate_, endDate_),
-                calculator_.securitySnapshot(endDate_, sec.id),
-                accounts_.value(sec.account).costBasis,
+                calculator_.securitySnapshot(endDate_, sec.id()),
+                accounts_.value(sec.account()).costBasis(),
                 portfolioSnapshot_,
                 sec,
-                accounts_.value(sec.account).description,
+                accounts_.value(sec.account()).description(),
                 aaDescription.join(", "),
                 columnSort_
             )

@@ -3,7 +3,6 @@
 #include <QMimeData>
 #include <QApplication>
 #include <QClipboard>
-#include "portfolioAttributes.h"
 
 const int frmEditState::m_magicNumber = qrand();
 
@@ -15,7 +14,7 @@ void frmEditState::copy()
     QDataStream stream(&data, QIODevice::WriteOnly);
     QMimeData *mimeData = new QMimeData();
 
-    stream << m_magicNumber << m_portfolio.attributes().id;
+    stream << m_magicNumber << m_portfolio.id();
     if (!internalCopy(stream))
         return;
 
@@ -37,7 +36,7 @@ void frmEditState::paste()
     stream >> magicNumber;
     stream >> portfolioID;
 
-    if (magicNumber != m_magicNumber || portfolioID != m_portfolio.attributes().id)
+    if (magicNumber != m_magicNumber || portfolioID != m_portfolio.id())
         return;
 
     add();

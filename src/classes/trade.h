@@ -8,7 +8,7 @@ class QString;
 class QSqlQuery;
 class queries;
 class tradeData;
-class trade: public objectKey<tradeData>
+class trade: public objectKey
 {
 public:
 
@@ -77,6 +77,13 @@ public:
     static QString dateToString(tradeDateCalendar::frequency freq_, int date_);
 
     friend QDataStream& operator>>(QDataStream &stream_, trade &trade_);
+
+    void detach();
+
+private:
+    QExplicitlySharedDataPointer<tradeData> d;
+
+    objectKeyData* data() const;
 };
 
 QDataStream& operator<<(QDataStream &stream_, const trade &trade_);

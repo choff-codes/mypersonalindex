@@ -1,4 +1,5 @@
 #include "frmEditStateMap.h"
+#include <QMap>
 #include "assetAllocation.h"
 #include "account.h"
 #include "security.h"
@@ -10,55 +11,55 @@ frmEditStateMap::frmEditStateMap(const portfolio &portfolio_, QObject *parent_):
 }
 
 template <class T>
-bool frmEditStateMap::validateMap(QMap<int, T> &map_)
+bool frmEditStateMap::validateMap(const QMap<int, T> &map_)
 {
-    for(typename QMap<int, T>::iterator i = map_.begin(); i != map_.end(); ++i)
+    foreach(T item, map_.values())
     {
-        if (i.value().deleted)
+        if (item.deleted())
             continue;
 
-        QString error = i.value().validate();
+        QString error = item.validate();
         if (error.isEmpty())
             continue;
 
-        validationError(&i.value(), error);
+        validationError(item, error);
         return false;
     }
     return true;
 }
 
 // implementations
-template bool frmEditStateMap::validateMap(QMap<int, account> &map_);
-template bool frmEditStateMap::validateMap(QMap<int, assetAllocation> &map_);
-template bool frmEditStateMap::validateMap(QMap<int, security> &map_);
-template bool frmEditStateMap::validateMap(QMap<int, trade> &map_);
+template bool frmEditStateMap::validateMap(const QMap<int, account> &map_);
+template bool frmEditStateMap::validateMap(const QMap<int, assetAllocation> &map_);
+template bool frmEditStateMap::validateMap(const QMap<int, security> &map_);
+template bool frmEditStateMap::validateMap(const QMap<int, trade> &map_);
 
 template <class T>
-QList<objectKey*> frmEditStateMap::mapToList(QMap<int, T> &map_) const
+QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, T> &map_) const
 {
-    QList<objectKey*> list;
+    QList<objectKeyBase*> list;
     if (map_.isEmpty())
         return list;
 
-    typename QMap<int, T>::iterator i = map_.end();
+    typename QMap<int, T>::const_iterator i = map_.constEnd();
     do
     {
         --i;
-        if (i.value().deleted)
+        if (i.value().deleted())
             continue;
 
-        if (i.value().id < 0)
-            list.append(&i.value());
+        if (i.value().id() < UNASSIGNED)
+            list.append(new T(i.value()));
         else
-            list.prepend(&i.value());
+            list.prepend(new T(i.value()));
 
-    } while (i != map_.begin());
+    } while (i != map_.constBegin());
 
     return list;
 }
 
 // implementations
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, account> &map_) const;
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, assetAllocation> &map_) const;
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, security> &map_) const;
-template QList<objectKey*> frmEditStateMap::mapToList(QMap<int, trade> &map_) const;
+template QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, account> &map_) const;
+template QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, assetAllocation> &map_) const;
+template QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, security> &map_) const;
+template QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, trade> &map_) const;

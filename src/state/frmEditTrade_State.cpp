@@ -47,15 +47,14 @@ void frmEditTrade_State::enter()
 
     ui->cashCmb->addItem("", UNASSIGNED);
 
-    // don't use foreach, weird stuff happens with the existing references
-    for(QMap<int, security>::const_iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
+    foreach(const security &s, m_portfolio.securities())
     {
-        if (i.value().deleted)
+        if (s.deleted())
             continue;
 
-        QString item = functions::join(i.value().displayText(), functions::fitString(functions::removeNewLines(i.value().note), 20), " | ");
-        ui->filterCmb->addItem(item, i.value().id);
-        ui->cashCmb->addItem(item, i.value().id);
+        QString item = functions::join(s.displayText(), functions::fitString(functions::removeNewLines(s.note()), 20), " | ");
+        ui->filterCmb->addItem(item, s.id());
+        ui->cashCmb->addItem(item, s.id());
     }
     ui->filterCmb->model()->sort(0);
     ui->cashCmb->model()->sort(0);
@@ -100,7 +99,7 @@ void frmEditTrade_State::securityFilterChange(int index_)
     }
 
     QAbstractItemModel *model = m_model;
-    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades), ui->list);
+    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades()), ui->list);
     ui->list->setModel(m_model);
     delete model;
 
@@ -124,39 +123,39 @@ void frmEditTrade_State::save()
     if (!m_currentItem)
         return;
 
-    m_model->refresh(m_model->find(m_currentItem));
+    m_currentItem->setAction((trade::tradeAction)ui->actionCmb->itemData(ui->actionCmb->currentIndex()).toInt());
+    m_currentItem->setCashAccount(ui->cashCmb->itemData(ui->cashCmb->currentIndex()).toInt());
+    m_currentItem->setCommission(ui->commissionTxt->text().toDouble());
+    m_currentItem->setDate(ui->dateDateEdit->isEnabled() ? ui->dateDateEdit->date().toJulianDay() : 0);
+    m_currentItem->setStartDate(ui->startingDateEdit->isEnabled() ? ui->startingDateEdit->date().toJulianDay() : 0);
+    m_currentItem->setEndDate(ui->endingDateEdit->isEnabled() ? ui->endingDateEdit->date().toJulianDay() : 0);
+    m_currentItem->setDescription(ui->noteTxt->toPlainText());
+    m_currentItem->setFrequency((tradeDateCalendar::frequency)ui->freqCmb->itemData(ui->freqCmb->currentIndex()).toInt());
+    m_currentItem->setPrice(ui->priceChk->isChecked() && !ui->priceTxt->text().isEmpty() ? ui->priceTxt->text().toDouble() : -1);
+    m_currentItem->setValue(ui->sharesTxt->text().toDouble());
 
-    m_currentItem->action = (trade::tradeAction)ui->actionCmb->itemData(ui->actionCmb->currentIndex()).toInt();
-    m_currentItem->cashAccount = ui->cashCmb->itemData(ui->cashCmb->currentIndex()).toInt();
-    m_currentItem->commission = ui->commissionTxt->text().toDouble();
-    m_currentItem->date = ui->dateDateEdit->isEnabled() ? ui->dateDateEdit->date().toJulianDay() : 0;
-    m_currentItem->startDate = ui->startingDateEdit->isEnabled() ? ui->startingDateEdit->date().toJulianDay() : 0;
-    m_currentItem->endDate = ui->endingDateEdit->isEnabled() ? ui->endingDateEdit->date().toJulianDay() : 0;
-    m_currentItem->description = ui->noteTxt->toPlainText();
-    m_currentItem->frequency = (tradeDateCalendar::frequency)ui->freqCmb->itemData(ui->freqCmb->currentIndex()).toInt();
-    m_currentItem->price = ui->priceChk->isChecked() && !ui->priceTxt->text().isEmpty() ? ui->priceTxt->text().toDouble() : -1;
-    m_currentItem->value = ui->sharesTxt->text().toDouble();
+    m_model->refresh(m_model->find(m_currentItem));
 }
 
 bool frmEditTrade_State::validate()
 {
-    for(QMap<int, security>::iterator i = m_portfolio.securities().begin(); i != m_portfolio.securities().end(); ++i)
+    foreach(const security &s, m_portfolio.securities())
     {
-        if (i.value().deleted)
+        if (s.deleted())
             continue;
 
-        if (!validateMap(i.value().trades))
+        if (!validateMap(s.trades()))
             return false;
     }
 
     return true;
 }
 
-void frmEditTrade_State::validationError(objectKey* key_, const QString &errorMessage_)
+void frmEditTrade_State::validationError(const objectKeyBase &key_, const QString &errorMessage_)
 {
     QMessageBox::critical(static_cast<QWidget*>(this->parent()), "Trade validation error", errorMessage_);
-    ui->filterCmb->setCurrentIndex(ui->filterCmb->findData(key_->parent));
-    ui->list->setCurrentIndex(m_model->find(key_));
+    ui->filterCmb->setCurrentIndex(ui->filterCmb->findData(key_.parent()));
+    ui->list->setCurrentIndex(m_model->find(&key_));
 }
 
 void frmEditTrade_State::add()
@@ -164,10 +163,9 @@ void frmEditTrade_State::add()
     if (ui->filterCmb->currentIndex() == -1)
         return;
 
-    int identity = portfolio::getOpenIdentity();
-    objectKey *key = &m_portfolio.securities()[ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt()].trades.insert
-        (identity, trade(identity, ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt())).value();
-    m_model->insert(key);
+    trade t(portfolio::getOpenIdentity(), ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt());
+    m_portfolio.securities()[t.parent()].trades().insert(t.id(), t);
+    m_model->insert(new trade(t));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));
 }
 
@@ -177,24 +175,24 @@ void frmEditTrade_State::load()
     if (!m_currentItem)
         return;
 
-    ui->actionCmb->setCurrentIndex(ui->actionCmb->findData(m_currentItem->action));
-    ui->cashCmb->setCurrentIndex(ui->cashCmb->findData(m_currentItem->cashAccount));
-    ui->commissionTxt->setText(QString::number(m_currentItem->commission, 'f', 4));
-    ui->dateDateEdit->setDate(m_currentItem->date != 0 ? QDate::fromJulianDay(m_currentItem->date) : QDate::currentDate());
-    ui->startingChk->setChecked(m_currentItem->startDate != 0);
-    ui->startingDateEdit->setDate(m_currentItem->startDate != 0 ? QDate::fromJulianDay(m_currentItem->startDate) : QDate::currentDate());
-    ui->endingChk->setChecked(m_currentItem->endDate != 0);
-    ui->endingDateEdit->setDate(m_currentItem->endDate != 0 ? QDate::fromJulianDay(m_currentItem->endDate) : QDate::currentDate());
-    ui->noteTxt->setPlainText(m_currentItem->description);
-    ui->freqCmb->setCurrentIndex(ui->freqCmb->findData(m_currentItem->frequency));
-    if (functions::massage(m_currentItem->price) >= 0)
+    ui->actionCmb->setCurrentIndex(ui->actionCmb->findData(m_currentItem->action()));
+    ui->cashCmb->setCurrentIndex(ui->cashCmb->findData(m_currentItem->cashAccount()));
+    ui->commissionTxt->setText(QString::number(m_currentItem->commission(), 'f', 4));
+    ui->dateDateEdit->setDate(m_currentItem->date() != 0 ? QDate::fromJulianDay(m_currentItem->date()) : QDate::currentDate());
+    ui->startingChk->setChecked(m_currentItem->startDate() != 0);
+    ui->startingDateEdit->setDate(m_currentItem->startDate() != 0 ? QDate::fromJulianDay(m_currentItem->startDate()) : QDate::currentDate());
+    ui->endingChk->setChecked(m_currentItem->endDate() != 0);
+    ui->endingDateEdit->setDate(m_currentItem->endDate() != 0 ? QDate::fromJulianDay(m_currentItem->endDate()) : QDate::currentDate());
+    ui->noteTxt->setPlainText(m_currentItem->description());
+    ui->freqCmb->setCurrentIndex(ui->freqCmb->findData(m_currentItem->frequency()));
+    if (functions::massage(m_currentItem->price()) >= 0)
     {
         ui->priceChk->setChecked(true);
-        ui->priceTxt->setText(QString::number(m_currentItem->price, 'f', 4));
+        ui->priceTxt->setText(QString::number(m_currentItem->price(), 'f', 4));
     }
     else
         ui->priceChk->setChecked(false);
-    ui->sharesTxt->setText(QString::number(m_currentItem->value, 'f', 4));
+    ui->sharesTxt->setText(QString::number(m_currentItem->value(), 'f', 4));
 }
 
 void frmEditTrade_State::remove()
@@ -202,9 +200,8 @@ void frmEditTrade_State::remove()
     if (!m_currentItem)
         return;
 
-    trade *trade = m_currentItem;
+    m_portfolio.securities()[m_currentItem->parent()].trades()[m_currentItem->id()].setDeleted(true);
     m_model->remove(m_currentItem);
-    m_portfolio.securities()[trade->parent].trades[trade->id].deleted = true;
 }
 
 bool frmEditTrade_State::internalCopy(QDataStream &stream_) const

@@ -4,7 +4,7 @@
 #include <QSharedData>
 
 class portfolio;
-class objectKey;
+class objectKeyBase;
 class snapshot;
 class snapshotSecurity;
 class historicalNAV;
@@ -27,15 +27,15 @@ public:
     snapshot accountSnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot symbolSnapshot(int date_, int id_, int beginDate_);
 
-    double nav(const objectKey &key_, int beginDate_, int endDate_, double navValue_ = 1);
-    historicalNAV changeOverTime(const objectKey &key_, int beginDate_, int endDate_, double navValue_ = 1);
+    double nav(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_ = 1);
+    historicalNAV changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_ = 1);
 
 private:
     QExplicitlySharedDataPointer<calculatorNAVData> d;
 
-    snapshot snapshotByKey(int date_, const objectKey &key_, int beginDate_, int priorDate_);
-    int beginDateByKey(const objectKey &key_);
-    int endDateByKey(const objectKey &key_);
+    snapshot snapshotByKey(int date_, const objectKeyBase &key_, int beginDate_, int priorDate_);
+    int beginDateByKey(const objectKeyBase &key_);
+    int endDateByKey(const objectKeyBase &key_);
 
     double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
 };

@@ -3,7 +3,7 @@
 
 #include "frmEditState.h"
 
-class objectKey;
+class objectKeyBase;
 class frmEditStateMap : public frmEditState
 {
 public:
@@ -11,13 +11,13 @@ public:
     virtual ~frmEditStateMap() {}
 
 protected:
-    virtual void validationError(objectKey* key_, const QString &errorMessage_) = 0;
+    virtual void validationError(const objectKeyBase &key_, const QString &errorMessage_) = 0;
 
     template <class T>
-    bool validateMap(QMap<int, T> &map_);
+    bool validateMap(const QMap<int, T> &map_);
 
     template <class T>
-    QList<objectKey*> mapToList(QMap<int, T> &map_) const;
+    QList<objectKeyBase*> mapToList(const QMap<int, T> &map_) const;
 };
 
 #endif // FRMEDITSTATEMAP_H

@@ -1,4 +1,5 @@
 #include "settingsFactory.h"
+#include "settings.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -11,11 +12,11 @@ settings settingsFactory::getSettings()
     t.start();
 #endif
 
-    m_settings.load();
+    settings set = settings::load();
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (settings)", t.elapsed());
 #endif
 
-    return m_settings;
+    return set;
 }

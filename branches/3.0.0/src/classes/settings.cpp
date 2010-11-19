@@ -1,51 +1,97 @@
 #include "settings.h"
 #include <QSettings>
-#include <QMessageBox>
+#include <QSize>
+#include <QPoint>
+#include <QHash>
+#include <QList>
+#include <QStringList>
+
+class settingsData: public QSharedData
+{
+public:
+    bool splits;
+    QSize windowSize;
+    QPoint windowLocation;
+    Qt::WindowState windowState;
+    QMap<settings::columns, QList<qint32> > viewableColumns;
+    QMap<settings::columns, QList<orderBy> > viewableColumnsSorting;
+    QStringList recentFiles;
+
+    settingsData():
+        splits(true),
+        windowState(Qt::WindowActive)
+    {
+        qRegisterMetaType<QList<qint32> >("columnList");
+        qRegisterMetaTypeStreamOperators<QList<qint32> >("columnList");
+        qRegisterMetaType<QList<orderBy> >("columnListSort");
+        qRegisterMetaTypeStreamOperators<QList<orderBy> >("columnListSort");
+    }
+};
+
+settings::settings():
+    d(new settingsData())
+{}
+
+settings::settings(const settings &other_):
+    d(other_.d)
+{}
+
+settings::~settings()
+{}
+
+settings& settings::operator=(const settings &other_)
+{
+    d = other_.d;
+    return *this;
+}
 
 void settings::save()
 {    
     QSettings settings;
 
     settings.beginGroup("mainwindow");
-    settings.setValue("size", windowSize);
-    settings.setValue("pos", windowLocation);
-    settings.setValue("state", windowState);
+    settings.setValue("size", windowSize());
+    settings.setValue("pos", windowLocation());
+    settings.setValue("state", windowState());
     settings.endGroup();
 
     settings.beginGroup("columns");
-    settings.setValue("holdings", qVariantFromValue(viewableColumns.value(columns_Security)));
-    settings.setValue("aa", qVariantFromValue(viewableColumns.value(columns_AA)));
-    settings.setValue("acct", qVariantFromValue(viewableColumns.value(columns_Acct)));
-    settings.setValue("stat", qVariantFromValue(viewableColumns.value(columns_Stat)));
+    settings.setValue("holdings", qVariantFromValue(viewableColumns(columns_Security)));
+    settings.setValue("aa", qVariantFromValue(viewableColumns(columns_AA)));
+    settings.setValue("acct", qVariantFromValue(viewableColumns(columns_Acct)));
+    settings.setValue("stat", qVariantFromValue(viewableColumns(columns_Stat)));
     settings.endGroup();
 
     settings.beginGroup("columnsSorting");
-    settings.setValue("holdings", qVariantFromValue(viewableColumnsSorting.value(columns_Security)));
-    settings.setValue("aa", qVariantFromValue(viewableColumnsSorting.value(columns_AA)));
-    settings.setValue("acct", qVariantFromValue(viewableColumnsSorting.value(columns_Acct)));
+    settings.setValue("holdings", qVariantFromValue(viewableColumnsSorting(columns_Security)));
+    settings.setValue("aa", qVariantFromValue(viewableColumnsSorting(columns_AA)));
+    settings.setValue("acct", qVariantFromValue(viewableColumnsSorting(columns_Acct)));
+    settings.setValue("stat", qVariantFromValue(viewableColumnsSorting(columns_Stat)));
     settings.endGroup();
 
-    settings.setValue("recentfiles", m_recentFiles);
-    settings.setValue("splits", splits);
+    settings.setValue("recentfiles", recentFiles());
+    settings.setValue("splits", splits());
 }
 
-void settings::load()
+settings settings::load()
 {
-    QSettings settings;
+    settings set;
+    QSettings settingsFile;
 
-    settings.beginGroup("mainwindow");
-    windowSize = settings.value("size", QSize(800, 600)).toSize();
-    windowLocation = settings.value("pos", QPoint(0, 0)).toPoint();
-    windowState = (Qt::WindowState)settings.value("state", Qt::WindowActive).toInt();
-    settings.endGroup();
+    settingsFile.beginGroup("mainwindow");
+    set.setWindowSize(settingsFile.value("size", QSize(800, 600)).toSize());
+    set.setWindowLocation(settingsFile.value("pos", QPoint(0, 0)).toPoint());
+    set.setWindowState((Qt::WindowState)settingsFile.value("state", Qt::WindowActive).toInt());
+    settingsFile.endGroup();
 
-    settings.beginGroup("columns");
+    settingsFile.beginGroup("columns");
 
-    viewableColumns[columns_Security] =
-        settings.value(
+    set.setViewableColumns(
+        columns_Security,
+        settingsFile.value(
             "holdings",
             qVariantFromValue(
-                columns()
+                QList<qint32>()
                 << 1
                 << 2
                 << 3
@@ -61,13 +107,15 @@ void settings::load()
                 << 13
                 << 14
             )
-        ).value<columns>();
+        ).value<QList<qint32> >()
+    );
 
-    viewableColumns[columns_AA] =
-        settings.value(
+    set.setViewableColumns(
+        columns_AA,
+        settingsFile.value(
             "aa",
             qVariantFromValue(
-                columns()
+                QList<qint32>()
                 << 1
                 << 2
                 << 3
@@ -78,13 +126,15 @@ void settings::load()
                 << 8
                 << 9
             )
-        ).value<columns>();
+        ).value<QList<qint32> >()
+    );
 
-    viewableColumns[columns_Acct] =
-        settings.value(
+    set.setViewableColumns(
+        columns_Acct,
+        settingsFile.value(
             "acct",
             qVariantFromValue(
-                columns()
+                QList<qint32>()
                 << 1
                 << 2
                 << 3
@@ -95,38 +145,63 @@ void settings::load()
                 << 8
                 << 9
             )
-        ).value<columns>();
+        ).value<QList<qint32> >()
+    );
 
-    viewableColumns[columns_Stat] =
-        settings.value(
+    set.setViewableColumns(
+        columns_Stat,
+        settingsFile.value(
             "stat",
             qVariantFromValue(
-                columns()
+                QList<qint32>()
             )
-        ).value<columns>();
+        ).value<QList<qint32> >()
+    );
 
-    settings.endGroup();
+    settingsFile.endGroup();
 
-    settings.beginGroup("columnsSorting");
-    viewableColumnsSorting[columns_Security] = settings.value("holdings").value<columnsSorting>();
-    viewableColumnsSorting[columns_AA] = settings.value("aa").value<columnsSorting>();
-    viewableColumnsSorting[columns_Acct] = settings.value("acct").value<columnsSorting>();
-    settings.endGroup();
+    settingsFile.beginGroup("columnsSorting");
+    set.setViewableColumnsSorting(columns_Security, settingsFile.value("holdings").value<QList<orderBy> >());
+    set.setViewableColumnsSorting(columns_AA, settingsFile.value("aa").value<QList<orderBy> >());
+    set.setViewableColumnsSorting(columns_Acct, settingsFile.value("acct").value<QList<orderBy> >());
+    set.setViewableColumnsSorting(columns_Stat, settingsFile.value("stat").value<QList<orderBy> >());
+    settingsFile.endGroup();
 
-    m_recentFiles = settings.value("recentfiles").toStringList();
-    splits = settings.value("splits", true).toBool();
+    set.d->recentFiles = settingsFile.value("recentfiles").toStringList();
+    set.d->splits = settingsFile.value("splits", true).toBool();
+
+    return set;
 }
 
-void settings::addRecentFile(const QString &filePath_)
+bool settings::splits() { return d->splits; }
+
+Qt::WindowState settings::windowState() { return d->windowState; }
+void settings::setWindowState(Qt::WindowState windowState_) { d->windowState = windowState_; }
+
+QSize settings::windowSize() { return d->windowSize; }
+void settings::setWindowSize(const QSize &windowSize_) { d->windowSize = windowSize_; }
+
+QPoint settings::windowLocation() { return d->windowLocation; }
+void settings::setWindowLocation(const QPoint &windowLocation_) { d->windowLocation = windowLocation_; }
+
+QList<qint32> settings::viewableColumns(columns columns_) { return d->viewableColumns.value(columns_); }
+void settings::setViewableColumns(columns columns_, const QList<qint32> &viewableColumns_) { d->viewableColumns[columns_] = viewableColumns_; }
+
+QList<orderBy> settings::viewableColumnsSorting(columns columns_) { return d->viewableColumnsSorting.value(columns_); }
+void settings::setViewableColumnsSorting(columns columns_, const QList<orderBy> &viewableColumnsSorting_)  { d->viewableColumnsSorting[columns_] = viewableColumnsSorting_; }
+
+QStringList settings::recentFiles() { return d->recentFiles; }
+
+void settings::setRecentFile(const QString &filePath_)
 {
-    int i = m_recentFiles.indexOf(filePath_);
+    int i = d->recentFiles.indexOf(filePath_);
     if (i != -1)
     {
-        m_recentFiles.takeAt(i);
-        m_recentFiles.prepend(filePath_);
+        d->recentFiles.takeAt(i);
+        d->recentFiles.prepend(filePath_);
         return;
     }
-    if (m_recentFiles.count() > RECENT_FILES)
-        m_recentFiles.removeLast();
-    m_recentFiles.prepend(filePath_);
+    if (d->recentFiles.count() > RECENT_FILES)
+        d->recentFiles.removeLast();
+    d->recentFiles.prepend(filePath_);
 }

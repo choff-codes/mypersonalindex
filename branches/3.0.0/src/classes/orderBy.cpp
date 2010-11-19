@@ -1,4 +1,5 @@
 #include "orderBy.h"
+#include <QDataStream>
 
 QDataStream& operator<<(QDataStream &stream_, const orderBy &orderBy_)
 {

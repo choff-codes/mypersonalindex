@@ -6,19 +6,17 @@
 #include <QCloseEvent>
 #include <QMessageBox>
 #include <QFileInfo>
+#include <QFutureWatcher>
 #include "frmEdit.h"
 #include "settingsFactory.h"
 #include "updatePrices.h"
 #include "tradeDateCalendar.h"
 #include "calculatorTrade.h"
 #include "security.h"
-#include "frmMainTableView_UI.h"
-#include "mainAAModel.h"
-#include "mainSecurityModel.h"
 #include "historicalNAV.h"
-#include "frmSort.h"
-#include "frmColumns.h"
 #include "mpiFile_State.h"
+#include "frmMainAA_State.h"
+#include "frmMainSecurity_State.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -27,8 +25,6 @@
 frmMain::frmMain(QWidget *parent_):
     QMainWindow(parent_),
     ui(new frmMain_UI()),
-    ui_assetAllocation(new frmMainTableView_UI()),
-    ui_security(new frmMainTableView_UI()),
     m_file(new mpiFile_State(this)),
     m_currentPortfolio(0),
     m_futureWatcherYahoo(0),
@@ -54,8 +50,9 @@ frmMain::~frmMain()
         m_futureWatcherTrade->waitForFinished();
     }
 
+    qDeleteAll(m_tabs);
+
     delete ui;
-    delete ui_assetAllocation;
     delete m_file;
 }
 
@@ -80,12 +77,12 @@ void frmMain::connectSlots()
 void frmMain::loadSettings()
 {
     m_settings = settingsFactory().getSettings();
-    if (m_settings.windowState != Qt::WindowActive)
+    if (m_settings.windowState() != Qt::WindowActive)
     {
-        resize(m_settings.windowSize);
-        move(m_settings.windowLocation);
-        if (m_settings.windowState != Qt::WindowNoState)
-            this->setWindowState(this->windowState() | m_settings.windowState);
+        resize(m_settings.windowSize());
+        move(m_settings.windowLocation());
+        if (m_settings.windowState() != Qt::WindowNoState)
+            this->setWindowState(this->windowState() | m_settings.windowState());
     }
 }
 
@@ -155,16 +152,16 @@ void frmMain::closeEvent(QCloseEvent *event_)
 
 void frmMain::saveSettings()
 {
-    m_settings.windowSize = size();
-    m_settings.windowLocation = pos();
-    m_settings.windowState = isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState;
+    m_settings.setWindowSize(size());
+    m_settings.setWindowLocation(pos());
+    m_settings.setWindowState(isMaximized() ? Qt::WindowMaximized : isMinimized() ? Qt::WindowMinimized : Qt::WindowNoState);
     m_settings.save();
 }
 
 void frmMain::updateRecentFileActions(const QString &newFilePath_)
 {
     if (!newFilePath_.isEmpty())
-        m_settings.addRecentFile(newFilePath_);
+        m_settings.setRecentFile(newFilePath_);
 
     ui->fileRecent->clear();
     foreach(const QString &s, m_settings.recentFiles())     
@@ -293,7 +290,7 @@ void frmMain::importYahoo()
         prices.append(m_file->prices.getHistoricalPrice(s));
 
     showProgressBar("Downloading", prices.count());
-    updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits);
+    updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits());
 
     m_futureWatcherYahoo = new QFutureWatcher<int>();
     connect(m_futureWatcherYahoo, SIGNAL(finished()), this, SLOT(importYahooFinished()));
@@ -354,23 +351,6 @@ void frmMain::hideProgressBar()
     ui->cornerWidget->setCurrentIndex(0);
 }
 
-QWidget* frmMain::setupTable(tab tab_, frmMainTableView_UI *ui_)
-{
-    ui_->setupUI(tableColumns(tab_), this);
-    ui_->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->startDate()));
-    ui_->toolbarDateEndEdit->setDate(QDate::fromJulianDay(m_currentPortfolio->endDate()));
-    setSortDropDown(m_settings.viewableColumnsSorting.value(settingsColumn(tab_)), ui_->toolbarSortCmb);
-    connect(ui_->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
-    connect(ui_->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
-    connect(ui_->toolbarSortCmb, SIGNAL(activated(int)), this, SLOT(sortChanged(int)));
-    connect(ui_->toolbarReorder, SIGNAL(triggered()), this, SLOT(modifyColumns()));
-    connect(ui_->toolbarExport, SIGNAL(triggered()), ui_->table, SLOT(exportTable()));
-    connect(ui_->tableCopy, SIGNAL(activated()), ui_->table, SLOT(copyTable()));
-
-    ui->centralWidget->addWidget(ui_->widget);
-    return ui_->widget;
-}
-
 void frmMain::switchToTab(tab tab_)
 {
     if (!m_currentPortfolio || m_currentTab == tab_)
@@ -378,7 +358,7 @@ void frmMain::switchToTab(tab tab_)
 
     if (m_tabs.contains(tab_))
     {
-        ui->centralWidget->setCurrentWidget(m_tabs.value(tab_));
+        ui->centralWidget->setCurrentWidget(m_tabs.value(tab_)->mainWidget());
         m_currentTab = tab_;
         return;
     }
@@ -386,178 +366,16 @@ void frmMain::switchToTab(tab tab_)
     switch (tab_)
     {
         case tab_assetAllocation:
-            m_tabs.insert(tab_assetAllocation, setupTable(tab_assetAllocation, ui_assetAllocation));
+            m_tabs.insert(tab_assetAllocation, new frmMainAA_State(*m_currentPortfolio, m_currentCalculator, m_settings, this));
             break;
         case tab_security:
-            m_tabs.insert(tab_security, setupTable(tab_assetAllocation, ui_security));
+            m_tabs.insert(tab_security, new frmMainSecurity_State(*m_currentPortfolio, m_currentCalculator, m_settings, this));
             break;
     }
 
-    ui->centralWidget->setCurrentWidget(m_tabs.value(tab_));
+    ui->centralWidget->addWidget(m_tabs.value(tab_)->mainWidget());
+    ui->centralWidget->setCurrentWidget(m_tabs.value(tab_)->mainWidget());
     m_currentTab = tab_;
-    refreshTab();
-}
-
-QAbstractItemModel* frmMain::createModel(tab tab_, int beginDate_, int endDate_)
-{
-    snapshot portfolioValue = m_currentCalculator.portfolioSnapshot(endDate_);
-
-    switch(tab_)
-    {
-        case tab_assetAllocation:
-            return new mainAAModel(
-                aaRow::getRows(
-                    m_currentPortfolio->assetAllocations(),
-                    beginDate_,
-                    endDate_,
-                    m_currentCalculator,
-                    portfolioValue,
-                    m_settings.viewableColumnsSorting.value(settings::columns_AA)
-                ),
-                portfolioValue,
-                m_currentCalculator.nav(*m_currentPortfolio, beginDate_, endDate_),
-                m_settings.viewableColumns.value(settings::columns_AA),
-                ui_assetAllocation->table
-            );
-        case tab_security:
-            return new mainSecurityModel(
-                securityRow::getRows(
-                    m_currentPortfolio->securities(),
-                    m_currentPortfolio->assetAllocations(),
-                    m_currentPortfolio->accounts(),
-                    beginDate_,
-                    endDate_,
-                    m_currentCalculator,
-                    portfolioValue,
-                    m_settings.viewableColumnsSorting.value(settings::columns_Security)
-                ),
-                portfolioValue,
-                m_currentCalculator.nav(*m_currentPortfolio, beginDate_, endDate_),
-                m_settings.viewableColumns.value(settings::columns_Security),
-                ui_security->table
-            );
-    }
-
-    return 0;
-}
-
-QAbstractItemModel* frmMain::getModel(tab tab_)
-{
-    switch(tab_)
-    {
-        case tab_assetAllocation:
-            return ui_assetAllocation->table->model();
-        case tab_security:
-            return ui_security->table->model();
-    }
-
-    return 0;
-}
-
-void frmMain::refreshTab()
-{
-    if (!m_currentPortfolio)
-        return;
-#ifdef CLOCKTIME
-    QTime t;
-    t.start();
-#endif
-
-    switch(m_currentTab)
-    {
-    case tab_assetAllocation:
-        ui_assetAllocation->table->setModel(createModel(tab_assetAllocation, ui_assetAllocation->toolbarDateBeginEdit->date().toJulianDay(), ui_assetAllocation->toolbarDateEndEdit->date().toJulianDay()));
-        break;
-    case tab_security:
-        ui_security->table->setModel(createModel(tab_security, ui_security->toolbarDateBeginEdit->date().toJulianDay(), ui_security->toolbarDateEndEdit->date().toJulianDay()));
-        break;
-    }
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (refresh): %d ms", t.elapsed());
-#endif
-}
-
-void frmMain::setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_)
-{
-    dropDown_->blockSignals(true);
-
-    if (sort_.isEmpty()) // no sort
-        dropDown_->setCurrentIndex(0);
-    else if (sort_.at(0).direction == orderBy::order_descending || sort_.count() > 1) // custom sort
-        dropDown_->setCurrentIndex(dropDown_->count() - 1);
-    else
-        dropDown_->setCurrentIndex(dropDown_->findData(sort_.at(0).column));
-
-    dropDown_->blockSignals(false);
-}
-
-void frmMain::sortChanged(int index_)
-{
-    int columnID = static_cast<QComboBox*>(sender())->itemData(index_).toInt();
-    settings::column col = settingsColumn(m_currentTab);
-
-    switch(columnID)
-    {
-    case -1:
-        m_settings.viewableColumnsSorting[col].clear();
-        break;
-    case -2:
-        {
-            frmSort f(m_settings.viewableColumnsSorting.value(col), tableColumns(m_currentTab), this);
-            if (f.exec())
-                 m_settings.viewableColumnsSorting[col] = f.getReturnValues();
-            else
-            {
-                setSortDropDown(m_settings.viewableColumnsSorting.value(col), static_cast<QComboBox*>(sender()));
-                return;
-            }
-        }
-        break;
-    default:
-        m_settings.viewableColumnsSorting[col].clear();
-        m_settings.viewableColumnsSorting[col].append(orderBy(columnID, orderBy::order_ascending));
-        break;
-    }
-    setSortDropDown(m_settings.viewableColumnsSorting.value(col), static_cast<QComboBox*>(sender()));
-    static_cast<mpiViewModelBase*>(getModel(m_currentTab))->setColumnSort(m_settings.viewableColumnsSorting.value(col));
-}
-
-settings::column frmMain::settingsColumn(tab tab_)
-{
-    switch(tab_)
-    {
-        case tab_assetAllocation:
-            return settings::columns_AA;
-        case tab_security:
-            return settings::columns_Security;
-    }
-
-    return settings::columns_Security;
-}
-
-QMap<int, QString> frmMain::tableColumns(tab tab_)
-{
-    switch(tab_)
-    {
-        case tab_assetAllocation:
-            return aaRow::fieldNames();
-        case tab_security:
-            return securityRow::fieldNames();
-    }
-
-    return QMap<int, QString>();
-}
-
-void frmMain::modifyColumns()
-{
-    settings::column col = settingsColumn(m_currentTab);
-    frmColumns f(m_settings.viewableColumns.value(col), tableColumns(m_currentTab), this);
-    if (!f.exec())
-        return;
-
-    m_settings.viewableColumns[col] = f.getReturnValues();
-    static_cast<mpiViewModelBase*>(getModel(m_currentTab))->setViewableColumns(m_settings.viewableColumns.value(col));
 }
 
 

@@ -5,56 +5,58 @@
 #define RECENT_FILES 5
 #endif
 
-#include <QSize>
-#include <QPoint>
-#include <QHash>
-#include <QList>
+#include <QSharedData>
 #include <QMetaType>
-#include <QStringList>
 #include "orderBy.h"
 
+class settingsData;
 class settings
 {
 public:
-    enum column {
+    enum columns {
         columns_Security,
         columns_AA,
         columns_Acct,
         columns_Stat
     };
 
-    // user qint32 for platform compatability
-    typedef QList<qint32> columns;
-    typedef QList<orderBy> columnsSorting;
+    // Note: use qint32 for platform compatability
 
-    bool splits;
-    QSize windowSize;
-    QPoint windowLocation;
-    Qt::WindowState windowState;
-    QHash<int, columns> viewableColumns;
-    QHash<int, columnsSorting> viewableColumnsSorting;
+    settings();
+    settings(const settings &other_);
 
-    settings():
-        splits(true),
-        windowState(Qt::WindowActive)
-    {
-        qRegisterMetaType<columns>("columnList");
-        qRegisterMetaTypeStreamOperators<columns>("columnList");
-        qRegisterMetaType<columnsSorting>("columnListSort");
-        qRegisterMetaTypeStreamOperators<columnsSorting>("columnListSort");
-    }
+    ~settings();
+
+    settings& operator=(const settings &other_);
+
+    bool splits();
+
+    Qt::WindowState windowState();
+    void setWindowState(Qt::WindowState windowState_);
+
+    QSize windowSize();
+    void setWindowSize(const QSize &windowSize_);
+
+    QPoint windowLocation();
+    void setWindowLocation(const QPoint &windowLocation_);
+
+    QList<qint32> viewableColumns(columns columns_);
+    void setViewableColumns(columns columns_, const QList<qint32> &viewableColumns_);
+
+    QList<orderBy> viewableColumnsSorting(columns columns_);
+    void setViewableColumnsSorting(columns columns_, const QList<orderBy> &viewableColumnsSorting_);
+
+    QStringList recentFiles();
+    void setRecentFile(const QString &filePath_);
 
     void save();
-    void load();
-
-    QStringList recentFiles() { return m_recentFiles; }
-    void addRecentFile(const QString &filePath_);
+    static settings load();
 
 private:
-    QStringList m_recentFiles;
+    QExplicitlySharedDataPointer<settingsData> d;
 };
 
-Q_DECLARE_METATYPE(settings::columns)
-Q_DECLARE_METATYPE(settings::columnsSorting)
+Q_DECLARE_METATYPE(QList<qint32>)
+Q_DECLARE_METATYPE(QList<orderBy>)
 
 #endif // SETTINGS_H

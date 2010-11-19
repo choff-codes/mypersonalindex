@@ -7,7 +7,6 @@
 
 class frmMainState : public QObject
 {
-    Q_OBJECT
 public:
     frmMainState(const portfolio &portfolio_, const calculatorNAV &calculator_, QObject *parent_):
         QObject(parent_),
@@ -15,7 +14,11 @@ public:
         m_calculator(calculator_)
     {}
 
-private:
+    virtual ~frmMainState() {}
+
+    virtual QWidget* mainWidget() = 0;
+
+protected:
     portfolio m_portfolio;
     calculatorNAV m_calculator;
 };

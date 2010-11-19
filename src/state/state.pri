@@ -10,7 +10,9 @@ HEADERS += \
     $$PWD/frmEditSecurity_State.h \
     $$PWD/mpiFile_State.h \
     $$PWD/frmMainState.h \
-    $$PWD/frmMainStateTable.h
+    $$PWD/frmMainStateTable.h \
+    $$PWD/frmMainAA_State.h \
+    $$PWD/frmMainSecurity_State.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
@@ -22,4 +24,6 @@ SOURCES += \
     $$PWD/frmEditSecurity_State.cpp \
     $$PWD/mpiFile_State.cpp \
     $$PWD/frmMainState.cpp \
-    $$PWD/frmMainStateTable.cpp
+    $$PWD/frmMainStateTable.cpp \
+    $$PWD/frmMainAA_State.cpp \
+    $$PWD/frmMainSecurity_State.cpp

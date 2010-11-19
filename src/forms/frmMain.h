@@ -3,18 +3,17 @@
 
 #include <QMainWindow>
 #include <QMap>
-#include <QFutureWatcher>
 #include "settings.h"
 #include "calculatorNAV.h"
 
-
+template<class T>
+class QFutureWatcher;
 class frmMain_UI;
 class frmMainTableView_UI;
 class mpiFile_State;
 class calculatorNAV;
 class portfolio;
-class QComboBox;
-class QAbstractItemModel;
+class frmMainState;
 class frmMain : public QMainWindow
 {
     Q_OBJECT
@@ -35,9 +34,6 @@ private slots:
     void recalculateTradesFinished();
     void tabAA() { switchToTab(tab_assetAllocation); }
     void tabSecurity() { switchToTab(tab_security); }
-    void refreshTab();
-    void sortChanged(int index_);
-    void modifyColumns();
     void fileChange(const QString &filePath_, bool newFile_);
 
 private:
@@ -55,8 +51,6 @@ private:
 
     // ui pointers (to delete on destory)
     frmMain_UI *ui;
-    frmMainTableView_UI *ui_assetAllocation;
-    frmMainTableView_UI *ui_security;
 
     // current file
     mpiFile_State *m_file;
@@ -66,7 +60,7 @@ private:
     calculatorNAV m_currentCalculator;
 
     // track the currently selected tab
-    QMap<int, QWidget*> m_tabs;
+    QMap<int, frmMainState*> m_tabs;
     tab m_currentTab;
 
     // settings saved to INI
@@ -91,13 +85,7 @@ private:
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
-    void setSortDropDown(const QList<orderBy> &sort_, QComboBox *dropDown_);
-    QWidget* setupTable(tab tab_, frmMainTableView_UI *ui_);
-    QAbstractItemModel* createModel(tab tab_, int beginDate_, int endDate_);
-    QAbstractItemModel* getModel(tab tab_);
     void switchToTab(tab tab_);
-    QMap<int, QString> tableColumns(tab tab_);
-    settings::column settingsColumn(tab tab_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);

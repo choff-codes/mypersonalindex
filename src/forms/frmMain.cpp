@@ -17,6 +17,7 @@
 #include "mpiFile_State.h"
 #include "frmMainAA_State.h"
 #include "frmMainSecurity_State.h"
+#include "frmMainPerformance_State.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -26,7 +27,7 @@ frmMain::frmMain(QWidget *parent_):
     QMainWindow(parent_),
     ui(new frmMain_UI()),
     m_file(new mpiFile_State(this)),
-    m_currentPortfolio(0),
+    m_currentPortfolio(UNASSIGNED),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
 {
@@ -42,12 +43,14 @@ frmMain::~frmMain()
     {
         m_futureWatcherYahoo->cancel();
         m_futureWatcherYahoo->waitForFinished();
+        delete m_futureWatcherYahoo;
     }
 
     if (m_futureWatcherTrade)
     {
         m_futureWatcherTrade->cancel();
         m_futureWatcherTrade->waitForFinished();
+        delete m_futureWatcherTrade;
     }
 
     qDeleteAll(m_tabs);
@@ -72,23 +75,24 @@ void frmMain::connectSlots()
     connect(ui->importYahoo, SIGNAL(triggered()), this, SLOT(importYahoo()));
     connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(tabAA()));
     connect(ui->viewSecurities, SIGNAL(triggered()), this, SLOT(tabSecurity()));
+    connect(ui->viewPerformance, SIGNAL(triggered()), this, SLOT(tabPerformance()));
 }
 
 void frmMain::loadSettings()
 {
     m_settings = settingsFactory().getSettings();
-    if (m_settings.windowState() != Qt::WindowActive)
-    {
-        resize(m_settings.windowSize());
-        move(m_settings.windowLocation());
-        if (m_settings.windowState() != Qt::WindowNoState)
-            this->setWindowState(this->windowState() | m_settings.windowState());
-    }
+    if (m_settings.windowState() == Qt::WindowActive)
+        return;
+
+    resize(m_settings.windowSize());
+    move(m_settings.windowLocation());
+    if (m_settings.windowState() != Qt::WindowNoState)
+        this->setWindowState(this->windowState() | m_settings.windowState());
 }
 
 void frmMain::fileChange(const QString &filePath_, bool newFile_)
 {
-    m_currentPortfolio = 0; // invalidated
+    m_currentPortfolio = UNASSIGNED; // invalidated
     setWindowModified(false);
     if (filePath_.isEmpty())
         setWindowTitle(QString("untitled.mpi[*] - %1").arg(QCoreApplication::applicationName()));
@@ -97,22 +101,18 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
 
     updateRecentFileActions(filePath_);
 
-    // track current portfolio
-    int currentID = ui->portfolioDropDownCmb->currentIndex() == -1 || newFile_ ?
-        UNASSIGNED :
-        m_file->portfolioIdentities.value(ui->portfolioDropDownCmb->itemData(ui->portfolioDropDownCmb->currentIndex()).toInt(), UNASSIGNED);
-
     if (newFile_)
         refreshPortfolioPrices();
 
-    refreshPortfolioCmb(currentID);
+    refreshPortfolioCmb(
+        ui->portfolioDropDownCmb->currentIndex() == -1 || newFile_ ? UNASSIGNED : m_file->portfolioIdentities.value(m_currentPortfolio, UNASSIGNED)
+    );
 }
 
-void frmMain::setCurrentPortfolio(portfolio *portfolio_)
+void frmMain::setCurrentPortfolio(const portfolio &portfolio_)
 {
-    m_currentPortfolio = portfolio_;
-    if (portfolio_)
-        m_currentCalculator.setPortfolio(*portfolio_);
+    m_currentPortfolio = portfolio_.id();
+    m_currentCalculator.setPortfolio(portfolio_);
 }
 
 void frmMain::refreshPortfolioCmb(int id_)
@@ -196,47 +196,47 @@ void frmMain::addPortfolio()
     refreshPortfolioPrices();
     ui->portfolioDropDownCmb->addItem(newPortfolio.description(), newPortfolio.id());
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
-    recalculateTrades(*m_currentPortfolio);
+    recalculateTrades(newPortfolio);
 }
 
 void frmMain::editPortfolio()
 {
-    if (!m_currentPortfolio)
+    if (m_currentPortfolio == UNASSIGNED)
         return;
 
-    frmEdit f(*m_currentPortfolio, this);
+    frmEdit f(m_file->portfolios.value(m_currentPortfolio), this);
     f.exec();
-    if (*m_currentPortfolio == f.getPortfolio())
+    if (m_file->portfolios.value(m_currentPortfolio) == f.getPortfolio())
         return;
 
+    portfolio newPortfolio = f.getPortfolio();
     setWindowModified(true);
     m_file->modified = true;
-    m_file->portfolios[m_currentPortfolio->id()] = f.getPortfolio();
+    m_file->portfolios[m_currentPortfolio] = newPortfolio;
     refreshPortfolioPrices();
 
-    setCurrentPortfolio(&m_file->portfolios[m_currentPortfolio->id()]);
-    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), m_currentPortfolio->description());
-    recalculateTrades(*m_currentPortfolio, 0);
+    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), newPortfolio.description());
+    recalculateTrades(newPortfolio, 0);
 }
 
 void frmMain::deletePortfolio()
 {
-    if (!m_currentPortfolio)
+    if (m_currentPortfolio == UNASSIGNED)
         return;
 
     if (QMessageBox::question(this, QCoreApplication::applicationName(), QString("Are you sure you want to delete portfolio %1?")
-        .arg(m_currentPortfolio->description()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+        .arg(m_file->portfolios.value(m_currentPortfolio).description()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
         return;
 
     setWindowModified(true);
     m_file->modified = true;
-    m_currentPortfolio->setDeleted(true);
+    m_file->portfolios[m_currentPortfolio].setDeleted(true);
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
 void frmMain::refreshPortfolioPrices()
 {
-    foreach(portfolio p, m_file->portfolios)
+    foreach(const portfolio &p, m_file->portfolios)
     {
         if (p.deleted())
             continue;
@@ -256,7 +256,7 @@ void frmMain::portfolioDropDownChange(int currentIndex_)
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
     ui->portfolioEdit->setDisabled(currentIndex_ == -1);
     ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
-    setCurrentPortfolio(currentIndex_ == -1 ? 0 : &m_file->portfolios[ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()]);
+    setCurrentPortfolio(currentIndex_ == -1 ? portfolio() : m_file->portfolios.value(ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()));
 }
 
 void frmMain::about()
@@ -353,7 +353,7 @@ void frmMain::hideProgressBar()
 
 void frmMain::switchToTab(tab tab_)
 {
-    if (!m_currentPortfolio || m_currentTab == tab_)
+    if (m_currentPortfolio == UNASSIGNED || m_currentTab == tab_)
         return;
 
     if (m_tabs.contains(tab_))
@@ -366,10 +366,13 @@ void frmMain::switchToTab(tab tab_)
     switch (tab_)
     {
         case tab_assetAllocation:
-            m_tabs.insert(tab_assetAllocation, new frmMainAA_State(*m_currentPortfolio, m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_assetAllocation, new frmMainAA_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
             break;
         case tab_security:
-            m_tabs.insert(tab_security, new frmMainSecurity_State(*m_currentPortfolio, m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_security, new frmMainSecurity_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            break;
+        case tab_performance:
+            m_tabs.insert(tab_performance, new frmMainPerformance_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
             break;
     }
 

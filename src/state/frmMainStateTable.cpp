@@ -5,6 +5,10 @@
 #include "frmMainTableView_UI.h"
 #include "mpiViewModelBase.h"
 
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
 frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_):
     frmMainState(portfolio_, calculator_, parent_),
     m_settings(settings_),
@@ -37,9 +41,18 @@ frmMainStateTable::~frmMainStateTable()
 
 void frmMainStateTable::refreshTab()
 {
+#ifdef CLOCKTIME
+    QTime t;
+    t.start();
+#endif
+
     QAbstractItemModel *model = ui->table->model();
     ui->table->setModel(createModel(ui->toolbarDateBeginEdit->date().toJulianDay(), ui->toolbarDateEndEdit->date().toJulianDay()));
     delete model;
+
+#ifdef CLOCKTIME
+    qDebug("Time elapsed: %d ms (load tab)", t.elapsed());
+#endif
 }
 
 void frmMainStateTable::setSortDropDown()

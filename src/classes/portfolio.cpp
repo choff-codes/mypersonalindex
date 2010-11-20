@@ -161,7 +161,7 @@ void portfolio::save(const queries &dataSource_)
     // save securities
     QList<security> secList = securities().values();
     securities().clear();
-    foreach(security sec, securities())
+    foreach(security sec, secList)
     {
         if (sec.deleted())
         {

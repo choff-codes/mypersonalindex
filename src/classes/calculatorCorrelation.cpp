@@ -9,8 +9,8 @@ double calculatorCorrelation::correlation(const historicalNAV &first_, const his
     if (first_.isEmpty() || second_.isEmpty())
         return 0;
 
-    int beginDate = qMax(first_.firstDate(), second_.firstDate());
-    int endDate = qMin(first_.lastDate(), second_.lastDate());
+    int beginDate = qMax(first_.beginDate(), second_.beginDate());
+    int endDate = qMin(first_.endDate(), second_.endDate());
 
     tradeDateCalendar calendar(beginDate);
 

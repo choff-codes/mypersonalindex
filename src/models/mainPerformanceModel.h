@@ -1,34 +1,39 @@
 #ifndef MAINPERFORMANCEMODEL_H
 #define MAINPERFORMANCEMODEL_H
 
-#include <QAbstractTableModel>
-#include <QTableView>
-#include <QMap>
-#include <QDate>
-#include "functions.h"
-#include "historicalNAV.h"
+#include "mpiViewModelBase.h"
 
-class mainPerformanceModel: public QAbstractTableModel
+class historicalNAV;
+class performanceRow: public baseRow
 {
 public:
+    enum {
+        row_Date,
+        row_TotalValue,
+        row_Dividend,
+        row_Index,
+        row_Change,
+        row_Gain
+    };
 
-    enum { row_Date, row_TotalValue, row_Index, row_Change, row_Gain, row_Count };
+    static const QStringList columns;
+    static const QVariantList columnsType;
 
-    mainPerformanceModel(const QMap<int, navPair> &nav, const bool &desc, const double startValue, QTableView *parent = 0):
-        QAbstractTableModel(parent), m_nav(nav), m_desc(desc), m_startValue(startValue)
-    {
-        insertRows(0, m_nav.count());
-    }
+    performanceRow(int date_, double totalValue_, double dividend_, double index_, double change_, double gain_, const QList<orderBy> &columnSort_);
 
-    int rowCount(const QModelIndex&) const { return m_nav.count(); }
-    int columnCount (const QModelIndex&) const { return row_Count; }
+    QVariant columnType(int column) const { return columnsType.at(column); }
+    static QMap<int, QString> fieldNames();
+
+    static QList<baseRow*> getRows(const historicalNAV &nav_, const QList<orderBy> &columnSort_);
+};
+
+class mainPerformanceModel: public mpiViewModelBase
+{
+public:
+    mainPerformanceModel(const QList<baseRow*> &rows_, const QList<int> &viewableColumns_, QObject *parent_ = 0);
+
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
-private:
-    const QMap<int, navPair> m_nav;
-    bool m_desc;
-    double m_startValue;
 };
 
 #endif // MAINPERFORMANCEMODEL_H

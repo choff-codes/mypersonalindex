@@ -7,15 +7,18 @@ struct navPair
 {
     double nav;
     double totalValue;
+    double dividend;
 
     navPair():
         nav(1),
-        totalValue(0)
+        totalValue(0),
+        dividend(0)
     {}
 
-    navPair(double nav_, double totalValue_):
+    navPair(double nav_, double totalValue_, double dividend_):
         nav(nav_),
-        totalValue(totalValue_)
+        totalValue(totalValue_),
+        dividend(dividend_)
     {}
 };
 
@@ -34,17 +37,20 @@ public:
         m_lastDate(0)
     {}
 
-    void insert(int date_, double nav_, double totalValue_);
+    void insert(int date_, double nav_, double totalValue_, double dividend_);
 
     double nav(int date_) const { return m_nav.value(date_).nav; }
     double totalValue(int date_) const { return m_nav.value(date_).totalValue; }
+    double dividend(int date_) const { return m_nav.value(date_).dividend; }
+
+    navPair value(int date_) const { return m_nav.value(date_); }
 
     int count() const { return m_nav.count(); }
     bool isEmpty() const { return m_nav.isEmpty(); }
 
     // must check IsEmpty first when calling
-    int firstDate() const { return m_firstDate; }
-    int lastDate() const { return m_lastDate; }
+    int beginDate() const { return m_firstDate; }
+    int endDate() const { return m_lastDate; }
 
 private:
     QHash<int, navPair> m_nav;

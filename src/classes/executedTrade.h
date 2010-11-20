@@ -40,7 +40,7 @@ class QHash;
 class executedTradeMap: public objectBase, public queriesBatch
 {
 public:
-    executedTradeMap(int parent_):
+    explicit executedTradeMap(int parent_):
         objectBase(parent_)
     {}
 

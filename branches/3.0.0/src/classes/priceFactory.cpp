@@ -24,7 +24,7 @@ historicalPricesMap priceFactory::getHistoricalPrices()
     while(q.next())
         returnMap[q.value(queries::historicalPriceColumns_Symbol).toString()].insert(
             q.value(queries::historicalPriceColumns_Date).toInt(),
-            q.value(queries::historicalPriceColumns_Value).toInt(),
+            q.value(queries::historicalPriceColumns_Value).toDouble(),
             (historicalPrices::type)q.value(queries::historicalPriceColumns_Type).toInt()
         );
 

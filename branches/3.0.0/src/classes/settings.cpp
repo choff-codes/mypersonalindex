@@ -60,6 +60,7 @@ void settings::save()
     settings.setValue("aa", qVariantFromValue(viewableColumns(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumns(columns_Acct)));
     settings.setValue("stat", qVariantFromValue(viewableColumns(columns_Stat)));
+    settings.setValue("performance", qVariantFromValue(viewableColumns(columns_Performance)));
     settings.endGroup();
 
     settings.beginGroup("columnsSorting");
@@ -67,6 +68,7 @@ void settings::save()
     settings.setValue("aa", qVariantFromValue(viewableColumnsSorting(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumnsSorting(columns_Acct)));
     settings.setValue("stat", qVariantFromValue(viewableColumnsSorting(columns_Stat)));
+    settings.setValue("performance", qVariantFromValue(viewableColumnsSorting(columns_Performance)));
     settings.endGroup();
 
     settings.setValue("recentfiles", recentFiles());
@@ -158,6 +160,16 @@ settings settings::load()
         ).value<QList<qint32> >()
     );
 
+    set.setViewableColumns(
+        columns_Performance,
+        settingsFile.value(
+            "performance",
+            qVariantFromValue(
+                QList<qint32>()
+            )
+        ).value<QList<qint32> >()
+    );
+
     settingsFile.endGroup();
 
     settingsFile.beginGroup("columnsSorting");
@@ -165,6 +177,7 @@ settings settings::load()
     set.setViewableColumnsSorting(columns_AA, settingsFile.value("aa").value<QList<orderBy> >());
     set.setViewableColumnsSorting(columns_Acct, settingsFile.value("acct").value<QList<orderBy> >());
     set.setViewableColumnsSorting(columns_Stat, settingsFile.value("stat").value<QList<orderBy> >());
+    set.setViewableColumnsSorting(columns_Performance, settingsFile.value("performance").value<QList<orderBy> >());
     settingsFile.endGroup();
 
     set.d->recentFiles = settingsFile.value("recentfiles").toStringList();

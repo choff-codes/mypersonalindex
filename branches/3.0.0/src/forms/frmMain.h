@@ -9,10 +9,7 @@
 template<class T>
 class QFutureWatcher;
 class frmMain_UI;
-class frmMainTableView_UI;
 class mpiFile_State;
-class calculatorNAV;
-class portfolio;
 class frmMainState;
 class frmMain : public QMainWindow
 {
@@ -34,6 +31,7 @@ private slots:
     void recalculateTradesFinished();
     void tabAA() { switchToTab(tab_assetAllocation); }
     void tabSecurity() { switchToTab(tab_security); }
+    void tabPerformance() { switchToTab(tab_performance); }
     void fileChange(const QString &filePath_, bool newFile_);
 
 private:
@@ -56,7 +54,7 @@ private:
     mpiFile_State *m_file;
 
     // track the currently selected portfolio
-    portfolio* m_currentPortfolio;
+    int m_currentPortfolio;
     calculatorNAV m_currentCalculator;
 
     // track the currently selected tab
@@ -80,7 +78,7 @@ private:
     void saveSettings();
 
     void updateRecentFileActions(const QString &newFilePath_);
-    void setCurrentPortfolio(portfolio *portfolio_);
+    void setCurrentPortfolio(const portfolio &portfolio_);
     void refreshPortfolioCmb(int id_ = -1);
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);

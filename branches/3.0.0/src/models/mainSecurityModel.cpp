@@ -103,13 +103,13 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Value,
     this->values.append(snapshot_.totalValue);
     //    row_ValueP,
-    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) == 0 ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
+    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
     //    row_Gain,
     this->values.append(functions::isZero(snapshot_.shares) ? QVariant() : snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,
     this->values.append(functions::isZero(snapshot_.shares) || functions::isZero(snapshot_.costBasis) ? QVariant() : (snapshot_.totalValue / snapshot_.costBasis) - 1);
     //    row_NAV,
-    this->values.append(nav_ - 1);
+    this->values.append(nav_);
     //    row_Acct,
     this->values.append(account_);
     //    row_AA,
@@ -197,13 +197,14 @@ QVariant mainSecurityModel::data(const QModelIndex &index, int role) const
             case securityRow::row_Value:
             case securityRow::row_TaxLiability:
             case securityRow::row_NetValue:
-            case securityRow::row_NAV:
                 return functions::doubleToCurrency(value.toDouble());
             case securityRow::row_GainP:
             case securityRow::row_ValueP:
                 return functions::doubleToPercentage(value.toDouble());
             case securityRow::row_Shares:
                 return functions::doubleToLocalFormat(value.toDouble(), 4);
+            case securityRow::row_NAV:
+                return functions::doubleToLocalFormat(value.toDouble());
         }
 
         return value;
@@ -262,7 +263,7 @@ QVariant mainSecurityModel::headerData(int section, Qt::Orientation orientation,
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.taxLiability));
             break;
         case securityRow::row_NAV:
-            extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioNAV));
+            extra = QString("\n[%1]").arg(functions::doubleToLocalFormat(m_portfolioNAV));
             break;
     }
 

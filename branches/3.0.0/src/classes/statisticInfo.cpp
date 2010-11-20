@@ -28,18 +28,18 @@ statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNA
     if (days <= 0)
         return;
 
-    beginNAV = historicalNAV_.nav(historicalNAV_.firstDate());
-    beginTotalValue = historicalNAV_.totalValue(historicalNAV_.firstDate());
-    endNAV = historicalNAV_.nav(historicalNAV_.lastDate());
-    endTotalValue = historicalNAV_.totalValue(historicalNAV_.lastDate());
+    beginNAV = historicalNAV_.nav(historicalNAV_.beginDate());
+    beginTotalValue = historicalNAV_.totalValue(historicalNAV_.beginDate());
+    endNAV = historicalNAV_.nav(historicalNAV_.endDate());
+    endTotalValue = historicalNAV_.totalValue(historicalNAV_.endDate());
     minNAVValue = beginNAV;
-    minNAVValueDay = historicalNAV_.firstDate();
+    minNAVValueDay = historicalNAV_.beginDate();
     maxNAVValue = beginNAV;
-    maxNAVValueDay = historicalNAV_.firstDate();
+    maxNAVValueDay = historicalNAV_.beginDate();
     minTotalValue = beginTotalValue;
-    minTotalValueDay = historicalNAV_.firstDate();
+    minTotalValueDay = historicalNAV_.beginDate();
     maxTotalValue = beginTotalValue;
-    maxTotalValueDay = historicalNAV_.firstDate();
+    maxTotalValueDay = historicalNAV_.beginDate();
 
     double previousNAV = beginNAV;
 
@@ -50,10 +50,10 @@ statisticInfo::statisticInfo(const historicalNAV &historicalNAV_, double beginNA
     double newS = 0;
     int count = 1;
 
-    tradeDateCalendar calendar(historicalNAV_.firstDate() + 1);
+    tradeDateCalendar calendar(historicalNAV_.beginDate() + 1);
     foreach(const int &date, calendar)
     {
-        if (date > historicalNAV_.lastDate())
+        if (date > historicalNAV_.endDate())
             break;
 
         double newNav = historicalNAV_.nav(date);

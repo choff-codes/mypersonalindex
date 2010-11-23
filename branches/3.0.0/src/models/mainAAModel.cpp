@@ -129,7 +129,10 @@ baseRow* aaRow::getRow(const assetAllocation &assetAllocation_, int beginDate_, 
 }
 
 mainAAModel::mainAAModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_):
-    mpiViewModelBase(rows_, viewableColumns_, parent_), m_portfolioSnapshot(portfolioSnapshot_), m_portfolioNAV(portfolioNAV_), m_target(0)
+    mpiViewModelBase(rows_, viewableColumns_, parent_),
+    m_portfolioSnapshot(portfolioSnapshot_),
+    m_portfolioNAV(portfolioNAV_),
+    m_target(0)
 {
     foreach(const baseRow *r, rows_)
         m_target += r->values.at(aaRow::row_Target).toDouble();

@@ -18,6 +18,7 @@
 #include "frmMainAA_State.h"
 #include "frmMainSecurity_State.h"
 #include "frmMainPerformance_State.h"
+#include "frmMainAcct_State.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -28,6 +29,7 @@ frmMain::frmMain(QWidget *parent_):
     ui(new frmMain_UI()),
     m_file(new mpiFile_State(this)),
     m_currentPortfolio(UNASSIGNED),
+    m_currentTab(tab_assetAllocation),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
 {
@@ -76,6 +78,7 @@ void frmMain::connectSlots()
     connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(tabAA()));
     connect(ui->viewSecurities, SIGNAL(triggered()), this, SLOT(tabSecurity()));
     connect(ui->viewPerformance, SIGNAL(triggered()), this, SLOT(tabPerformance()));
+    connect(ui->viewAccounts, SIGNAL(triggered()), this, SLOT(tabAccount()));
 }
 
 void frmMain::loadSettings()
@@ -253,10 +256,12 @@ void frmMain::refreshPortfolioPrices()
 
 void frmMain::portfolioDropDownChange(int currentIndex_)
 {
+    clearTabs();
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
     ui->portfolioEdit->setDisabled(currentIndex_ == -1);
     ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
     setCurrentPortfolio(currentIndex_ == -1 ? portfolio() : m_file->portfolios.value(ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()));
+    switchToTab(m_currentTab, true);
 }
 
 void frmMain::about()
@@ -336,6 +341,8 @@ void frmMain::recalculateTradesFinished()
     delete m_futureWatcherTrade;
     m_futureWatcherTrade = 0;
     hideProgressBar();
+    clearTabs();
+    switchToTab(m_currentTab, true);
 }
 
 void frmMain::showProgressBar(const QString &description_, int steps_)
@@ -351,9 +358,21 @@ void frmMain::hideProgressBar()
     ui->cornerWidget->setCurrentIndex(0);
 }
 
-void frmMain::switchToTab(tab tab_)
+void frmMain::clearTabs()
 {
-    if (m_currentPortfolio == UNASSIGNED || m_currentTab == tab_)
+    foreach(frmMainState *state, m_tabs)
+    {
+        ui->centralWidget->removeWidget(state->mainWidget());
+        delete state->mainWidget();
+    }
+
+    qDeleteAll(m_tabs);
+    m_tabs.clear();
+}
+
+void frmMain::switchToTab(tab tab_, bool force_)
+{
+    if ((!force_ && m_currentTab == tab_) || m_currentPortfolio == UNASSIGNED )
         return;
 
     if (m_tabs.contains(tab_))
@@ -367,6 +386,9 @@ void frmMain::switchToTab(tab tab_)
     {
         case tab_assetAllocation:
             m_tabs.insert(tab_assetAllocation, new frmMainAA_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            break;
+        case tab_account:
+            m_tabs.insert(tab_account, new frmMainAcct_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
             break;
         case tab_security:
             m_tabs.insert(tab_security, new frmMainSecurity_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));

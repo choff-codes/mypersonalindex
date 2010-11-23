@@ -30,6 +30,7 @@ private slots:
     void importYahooFinished();
     void recalculateTradesFinished();
     void tabAA() { switchToTab(tab_assetAllocation); }
+    void tabAccount() { switchToTab(tab_account); }
     void tabSecurity() { switchToTab(tab_security); }
     void tabPerformance() { switchToTab(tab_performance); }
     void fileChange(const QString &filePath_, bool newFile_);
@@ -83,7 +84,8 @@ private:
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
-    void switchToTab(tab tab_);
+    void switchToTab(tab tab_, bool force_ = false);
+    void clearTabs();
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);

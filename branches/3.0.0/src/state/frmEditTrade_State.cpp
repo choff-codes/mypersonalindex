@@ -89,8 +89,10 @@ void frmEditTrade_State::listChange(const QModelIndex &current_, const QModelInd
 
 void frmEditTrade_State::securityFilterChange(int index_)
 {
-    int securityID = index_ == -1 ? -1 : ui->filterCmb->itemData(index_).toInt();
-    if (securityID == -1)
+    m_currentItem = 0;
+
+    int securityID = index_ == -1 ? UNASSIGNED : ui->filterCmb->itemData(index_).toInt();
+    if (securityID == UNASSIGNED)
     {
         delete m_model;
         m_model = 0;

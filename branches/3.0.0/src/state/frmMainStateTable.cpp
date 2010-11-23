@@ -16,6 +16,11 @@ frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const calculat
 {
 }
 
+QWidget* frmMainStateTable::mainWidget()
+{
+    return ui->widget;
+}
+
 void frmMainStateTable::setupUI()
 {
     ui->setupUI(tableColumns(), static_cast<QWidget*>(this->parent()));

@@ -87,7 +87,7 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     this->values.append((int)security_.cashAccount());
     //    row_Price,
     double price = security_.price(snapshot_.date);
-    this->values.append(functions::isZero(price) == 0 ? QVariant() : price);
+    this->values.append(functions::isZero(price) ? QVariant() : price);
     //    row_Shares,
     this->values.append(snapshot_.shares);
     //    row_Avg,

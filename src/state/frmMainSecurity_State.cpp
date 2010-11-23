@@ -12,11 +12,6 @@ frmMainSecurity_State::~frmMainSecurity_State()
 {
 }
 
-QWidget* frmMainSecurity_State::mainWidget()
-{
-    return ui->widget;
-}
-
 settings::columns frmMainSecurity_State::columnsValues()
 {
     return settings::columns_Security;

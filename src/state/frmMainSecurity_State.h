@@ -11,8 +11,6 @@ public:
 
     ~frmMainSecurity_State();
 
-    QWidget* mainWidget();
-
 private:
     settings::columns columnsValues();
     QComboBox* sortDropDown();

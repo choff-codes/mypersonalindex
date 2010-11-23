@@ -13,11 +13,6 @@ frmMainPerformance_State::~frmMainPerformance_State()
 {
 }
 
-QWidget* frmMainPerformance_State::mainWidget()
-{
-    return ui->widget;
-}
-
 settings::columns frmMainPerformance_State::columnsValues()
 {
     return settings::columns_Performance;

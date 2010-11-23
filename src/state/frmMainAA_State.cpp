@@ -12,11 +12,6 @@ frmMainAA_State::~frmMainAA_State()
 {
 }
 
-QWidget* frmMainAA_State::mainWidget()
-{
-    return ui->widget;
-}
-
 settings::columns frmMainAA_State::columnsValues()
 {
     return settings::columns_AA;

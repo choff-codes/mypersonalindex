@@ -13,7 +13,8 @@ HEADERS += \
     $$PWD/frmMainStateTable.h \
     $$PWD/frmMainAA_State.h \
     $$PWD/frmMainSecurity_State.h \
-    $$PWD/frmMainPerformance_State.h
+    $$PWD/frmMainPerformance_State.h \
+    state/frmMainAcct_State.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
@@ -28,4 +29,5 @@ SOURCES += \
     $$PWD/frmMainStateTable.cpp \
     $$PWD/frmMainAA_State.cpp \
     $$PWD/frmMainSecurity_State.cpp \
-    $$PWD/frmMainPerformance_State.cpp
+    $$PWD/frmMainPerformance_State.cpp \
+    state/frmMainAcct_State.cpp

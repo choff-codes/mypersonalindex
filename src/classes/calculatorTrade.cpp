@@ -138,10 +138,10 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
             QList<int> dates =
                 tradeDateCalendar::computeFrequencyTradeDates(
                     t.date(),
-                    qMax(sec.beginDate(), qMax(t.startDate(), date_)),
+                    qMax(sec.beginDate() + 1, qMax(t.startDate(), date_)),
                     t.endDate() == 0 ?
-                        sec.endDate() :
-                        qMin(t.endDate(), sec.endDate()),
+                        sec.endDate() + 1 :
+                        qMin(t.endDate(), sec.endDate() + 1),
                     t.frequency()
                 );
 
@@ -195,7 +195,7 @@ double calculatorTrade::calculateTradePrice(trade::tradeAction type_, double pri
     if (type_ == trade::tradeAction_ReceiveInterest || type_ == trade::tradeAction_ReceiveInterestPercent)
         return 0;
 
-    if (price_ >= 0)
+    if (price_ > EPSILONNEGATIVE)
         return price_;
 
     return priorDayPrice_;

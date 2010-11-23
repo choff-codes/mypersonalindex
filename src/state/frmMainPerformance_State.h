@@ -11,8 +11,6 @@ public:
 
     ~frmMainPerformance_State();
 
-    QWidget* mainWidget();
-
 private:
     settings::columns columnsValues();
     QMap<int, QString> tableColumns();

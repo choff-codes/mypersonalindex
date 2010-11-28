@@ -2,32 +2,23 @@
 #define FRMMAINAA_UI_H
 
 #include <QVBoxLayout>
-#include <QToolBar>
-#include <QLabel>
-#include <QComboBox>
 #include <QShortcut>
-#include <QAction>
-#include "mpiDateEdit.h"
 #include "mpiTableView.h"
+#include "frmMainToolbar_UI.h"
 
-class frmMainTableView_UI
+class frmMainTableView_UI: public frmMainToolbar_UI
 {
 public:
     QWidget *widget;
     QVBoxLayout *layout;
-    QToolBar *toolbar;
-    QLabel *toolbarDateBegin;
-    mpiDateEdit *toolbarDateBeginEdit;
-    QLabel *toolbarDateEnd;
-    mpiDateEdit *toolbarDateEndEdit;
-    QLabel *toolbarSort;
-    QComboBox *toolbarSortCmb;
-    QAction *toolbarReorder;
-    QAction *toolbarExport;
+    QWidget *widgetTable;
+    QHBoxLayout *layoutTable;
     mpiTableView *table;
     QShortcut *tableCopy;
 
-    void setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_ = 0);
+    virtual ~frmMainTableView_UI() {}
+
+    virtual void setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_ = 0);
 };
 
 #endif // FRMMAINAA_UI_H

@@ -11,8 +11,7 @@
 
 frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_):
     frmMainState(portfolio_, calculator_, parent_),
-    m_settings(settings_),
-    ui(new frmMainTableView_UI())
+    m_settings(settings_)
 {
 }
 
@@ -21,8 +20,14 @@ QWidget* frmMainStateTable::mainWidget()
     return ui->widget;
 }
 
+frmMainTableView_UI* frmMainStateTable::createUI()
+{
+    return new frmMainTableView_UI();
+}
+
 void frmMainStateTable::setupUI()
 {
+    ui = createUI();
     ui->setupUI(tableColumns(), static_cast<QWidget*>(this->parent()));
 
     ui->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_portfolio.startDate()));
@@ -50,10 +55,12 @@ void frmMainStateTable::refreshTab()
     QTime t;
     t.start();
 #endif
-
+    //ui->table->setVisible(false);
     QAbstractItemModel *model = ui->table->model();
     ui->table->setModel(createModel(ui->toolbarDateBeginEdit->date().toJulianDay(), ui->toolbarDateEndEdit->date().toJulianDay()));
     delete model;
+    //ui->table->resizeColumnsToContents();
+   // ui->table->setVisible(true);
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (load tab)", t.elapsed());
@@ -62,7 +69,7 @@ void frmMainStateTable::refreshTab()
 
 void frmMainStateTable::setSortDropDown()
 {
-    QList<orderBy> sort = m_settings.viewableColumnsSorting(columnsValues());
+    QList<orderBy> sort = m_settings.viewableColumnsSorting(columnEnumValue());
     ui->toolbarSortCmb->blockSignals(true);
 
     if (sort.isEmpty()) // no sort
@@ -81,13 +88,13 @@ void frmMainStateTable::sortIndexChanged(int index_)
     switch(columnID)
     {
     case -1:
-        m_settings.setViewableColumnsSorting(columnsValues(), QList<orderBy>());
+        m_settings.setViewableColumnsSorting(columnEnumValue(), QList<orderBy>());
         break;
     case -2:
         {
-            frmSort f(m_settings.viewableColumnsSorting(columnsValues()), tableColumns(), static_cast<QWidget*>(this->parent()));
+            frmSort f(m_settings.viewableColumnsSorting(columnEnumValue()), tableColumns(), static_cast<QWidget*>(this->parent()));
             if (f.exec())
-                 m_settings.setViewableColumnsSorting(columnsValues(), f.getReturnValues());
+                 m_settings.setViewableColumnsSorting(columnEnumValue(), f.getReturnValues());
             else
             {
                 setSortDropDown();
@@ -96,19 +103,19 @@ void frmMainStateTable::sortIndexChanged(int index_)
         }
         break;
     default:
-        m_settings.setViewableColumnsSorting(columnsValues(), QList<orderBy>() << orderBy(columnID, orderBy::order_ascending));
+        m_settings.setViewableColumnsSorting(columnEnumValue(), QList<orderBy>() << orderBy(columnID, orderBy::order_ascending));
         break;
     }
     setSortDropDown();
-    static_cast<mpiViewModelBase*>(ui->table->model())->setColumnSort(m_settings.viewableColumnsSorting(columnsValues()));
+    static_cast<mpiViewModelBase*>(ui->table->model())->setColumnSort(m_settings.viewableColumnsSorting(columnEnumValue()));
 }
 
 void frmMainStateTable::modifyColumns()
 {
-    frmColumns f(m_settings.viewableColumns(columnsValues()), tableColumns(), static_cast<QWidget*>(this->parent()));
+    frmColumns f(m_settings.viewableColumns(columnEnumValue()), tableColumns(), static_cast<QWidget*>(this->parent()));
     if (!f.exec())
         return;
 
-    m_settings.setViewableColumns(columnsValues(), f.getReturnValues());
-    static_cast<mpiViewModelBase*>(ui->table->model())->setViewableColumns(m_settings.viewableColumns(columnsValues()));
+    m_settings.setViewableColumns(columnEnumValue(), f.getReturnValues());
+    static_cast<mpiViewModelBase*>(ui->table->model())->setViewableColumns(m_settings.viewableColumns(columnEnumValue()));
 }

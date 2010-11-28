@@ -16,7 +16,7 @@ public:
 
     virtual ~frmMainStateTable();
 
-    virtual QWidget* mainWidget();
+    QWidget* mainWidget();
 
 protected slots:
     void sortIndexChanged(int index_);
@@ -28,8 +28,9 @@ protected:
     frmMainTableView_UI *ui;
 
     void setupUI();
-    virtual settings::columns columnsValues() = 0;
+    virtual settings::columns columnEnumValue() = 0;
     virtual QMap<int, QString> tableColumns() = 0;
+    virtual frmMainTableView_UI* createUI();
     virtual mpiViewModelBase* createModel(int beginDate_, int endDate_) = 0;
 
     void setSortDropDown();

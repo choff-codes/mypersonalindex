@@ -95,7 +95,6 @@ void frmMain::loadSettings()
 
 void frmMain::fileChange(const QString &filePath_, bool newFile_)
 {
-    m_currentPortfolio = UNASSIGNED; // invalidated
     setWindowModified(false);
     if (filePath_.isEmpty())
         setWindowTitle(QString("untitled.mpi[*] - %1").arg(QCoreApplication::applicationName()));
@@ -104,12 +103,11 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
 
     updateRecentFileActions(filePath_);
 
-    if (newFile_)
-        refreshPortfolioPrices();
+    if (!newFile_)
+        return;
 
-    refreshPortfolioCmb(
-        ui->portfolioDropDownCmb->currentIndex() == -1 || newFile_ ? UNASSIGNED : m_file->portfolioIdentities.value(m_currentPortfolio, UNASSIGNED)
-    );
+    refreshPortfolioPrices();
+    refreshPortfolioCmb(UNASSIGNED);
 }
 
 void frmMain::setCurrentPortfolio(const portfolio &portfolio_)
@@ -342,6 +340,10 @@ void frmMain::recalculateTradesFinished()
     m_futureWatcherTrade = 0;
     hideProgressBar();
     clearTabs();
+
+    if (m_currentPortfolio != UNASSIGNED)
+        setCurrentPortfolio(m_file->portfolios.value(m_currentPortfolio));
+
     switchToTab(m_currentTab, true);
 }
 
@@ -394,7 +396,7 @@ void frmMain::switchToTab(tab tab_, bool force_)
             m_tabs.insert(tab_security, new frmMainSecurity_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
             break;
         case tab_performance:
-            m_tabs.insert(tab_performance, new frmMainPerformance_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_performance, new frmMainPerformance_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, m_file->prices.getHistoricalPrices(), this));
             break;
     }
 

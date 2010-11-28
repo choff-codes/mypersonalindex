@@ -91,6 +91,8 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Shares,
     this->values.append(snapshot_.shares);
     //    row_Avg,
+    // cash should always be computed as average
+    //s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
     this->values.append(
         functions::isZero(snapshot_.shares) ?
             QVariant() :

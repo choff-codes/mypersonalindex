@@ -12,6 +12,7 @@ void snapshot::add(const snapshot &other_, double multiplier_)
     this->totalValue += other_.totalValue * multiplier_;
     this->taxLiability += other_.taxLiability * multiplier_;
     this->dividendAmount += other_.dividendAmount * multiplier_;
+    this->dividendAmountNAV += other_.dividendAmountNAV * multiplier_;
     this->expenseRatio = // allocate based on total value percentage
         (
             (startingTotalValue / this->totalValue) * this->expenseRatio

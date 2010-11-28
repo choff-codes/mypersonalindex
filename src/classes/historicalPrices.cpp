@@ -198,3 +198,8 @@ void historicalPricesMap::save(const queries &dataSource_)
     for(QHash<QString, historicalPrices>::iterator i = m_historicalPrices.begin(); i != m_historicalPrices.end(); i++)
         i->insertBatch(dataSource_);
 }
+
+QHash<QString, historicalPrices> historicalPricesMap::getHistoricalPrices() const
+{
+    return m_historicalPrices;
+}

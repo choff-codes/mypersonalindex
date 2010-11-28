@@ -4,8 +4,11 @@
 #include <QString>
 #include "objectKey.h"
 
+template <class T, class V>
+class QMap;
 class QString;
 class symbolData;
+class historicalPrices;
 class symbol: public objectKey
 {
 public:
@@ -20,8 +23,21 @@ public:
     bool operator==(const symbol &other_) const;
     bool operator!=(const symbol &other_) const { return !(*this == other_); }
 
-    bool dividends() const;
-    void setDividends(bool dividends_);
+    bool includeDividends() const;
+    void setIncludeDividends(bool dividends_);
+
+    double price(int date_) const;
+
+    double dividend(int date_) const;
+    QMap<int, double> dividends() const;
+
+    double split(int date_) const;
+    QMap<int, double> splits() const;
+
+    int endDate() const;
+    int beginDate() const;
+
+    void setHistoricalPrices(const historicalPrices &prices_);
 
     objectType type() const;
     QString validate() const;
@@ -31,6 +47,8 @@ public:
 
 private:
     QExplicitlySharedDataPointer<symbolData> d;
+
+    objectKeyData* data() const;
 };
 
 #endif // SYMBOL_H

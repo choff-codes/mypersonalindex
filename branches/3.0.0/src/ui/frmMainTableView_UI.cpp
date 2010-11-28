@@ -9,36 +9,10 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, QWidge
     layout->setSpacing(0);
     layout->setMargin(1);
 
-    toolbar = new QToolBar(widget);
+    frmMainToolbar_UI::setupUI(columnNames_, widget);
 
-    toolbarDateBegin = new QLabel(" Begin Date: ", toolbar);
-    toolbarDateBeginEdit = new mpiDateEdit(toolbar);
-    toolbarDateEnd = new QLabel(" End Date: ", toolbar);
-    toolbarDateEndEdit = new mpiDateEdit(toolbar);
-    toolbarSort = new QLabel(" Sort By: ", toolbar);
-    toolbarSortCmb = new QComboBox(toolbar);
-    toolbarSortCmb->setMinimumContentsLength(15);
-    toolbarSortCmb->addItem("(None)", -1);
-    for (QMap<int, QString>::const_iterator i = columnNames_.constBegin(); i != columnNames_.constEnd(); ++i)
-            toolbarSortCmb->addItem(i.value(), i.key());
-    toolbarSortCmb->addItem("Custom...", -2);
-
-    toolbarReorder = new QAction("Modify Columns...", toolbar);
-    toolbarReorder->setIconText("Modify Columns...");
-    toolbarExport = new QAction("Export...", toolbar);
-    toolbarExport->setIconText("Export...");
-
-    toolbar->addWidget(toolbarDateBegin);
-    toolbar->addWidget(toolbarDateBeginEdit);
-    toolbar->addWidget(toolbarDateEnd);
-    toolbar->addWidget(toolbarDateEndEdit);
-    toolbar->addSeparator();
-    toolbar->addWidget(toolbarSort);
-    toolbar->addWidget(toolbarSortCmb);
-    toolbar->addSeparator();
-    toolbar->addAction(toolbarReorder);
-    toolbar->addSeparator();
-    toolbar->addAction(toolbarExport);
+    widgetTable = new QWidget(widget);
+    layoutTable = new QHBoxLayout(widgetTable);
 
     table = new mpiTableView(false, widget);
     tableCopy = new QShortcut(Qt::CTRL + Qt::Key_C, table);
@@ -48,8 +22,9 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, QWidge
     table->setAlternatingRowColors(true);
     table->horizontalHeader()->setHighlightSections(false);
     table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 2);
-    table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    //table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    layoutTable->addWidget(table, 2);
 
     layout->addWidget(toolbar);
-    layout->addWidget(table);
+    layout->addWidget(widgetTable);
 }

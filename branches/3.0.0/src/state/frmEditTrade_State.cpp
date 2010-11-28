@@ -52,7 +52,7 @@ void frmEditTrade_State::enter()
         if (s.deleted())
             continue;
 
-        QString item = functions::join(s.displayText(), functions::fitString(functions::removeNewLines(s.note()), 20), " | ");
+        QString item = s.displayText();
         ui->filterCmb->addItem(item, s.id());
         ui->cashCmb->addItem(item, s.id());
     }

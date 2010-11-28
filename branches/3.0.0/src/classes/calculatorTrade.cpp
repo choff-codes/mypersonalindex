@@ -33,7 +33,11 @@ void calculatorTrade::insertDividendReinvestmentPlaceholders(portfolio portfolio
 {
     foreach(security s, portfolio_.securities())
         if (s.dividendReinvestment())
-            s.trades().insert(DIVIDEND_REINVESTMENT_TRADE_ID, trade(DIVIDEND_REINVESTMENT_TRADE_ID, s.id()));
+        {
+            trade t(DIVIDEND_REINVESTMENT_TRADE_ID, s.id());
+            t.setAction(trade::tradeAction_ReinvestDividendsAuto);
+            s.trades().insert(DIVIDEND_REINVESTMENT_TRADE_ID, t);
+        }
 }
 
 void calculatorTrade::removeDividendReinvestmentPlaceholders(portfolio portfolio_)
@@ -138,10 +142,19 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
             QList<int> dates =
                 tradeDateCalendar::computeFrequencyTradeDates(
                     t.date(),
-                    qMax(sec.beginDate() + 1, qMax(t.startDate(), date_)),
-                    t.endDate() == 0 ?
-                        sec.endDate() + 1 :
-                        qMin(t.endDate(), sec.endDate() + 1),
+                    qMax(
+                        t.frequency() == tradeDateCalendar::frequency_Once ?
+                            0 :
+                            sec.beginDate() + 1,
+                        qMax(t.startDate(), date_)
+                    ),
+                    t.frequency() == tradeDateCalendar::frequency_Once ?
+                        t.endDate() == 0 ?
+                            tradeDateCalendar::endDate() :
+                            qMin(t.endDate(), tradeDateCalendar::endDate()) :
+                        t.endDate() == 0 ?
+                            sec.endDate() + 1 :
+                            qMin(t.endDate(), sec.endDate() + 1),
                     t.frequency()
                 );
 

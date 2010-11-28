@@ -76,6 +76,7 @@ public:
 
     objectType type() const;
     QString validate() const;
+    QString displayText() const;
 
     void save(const queries &dataSource_);
     void remove(const queries &dataSource_) const;

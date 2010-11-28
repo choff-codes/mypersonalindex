@@ -6,6 +6,7 @@
 #include "account.h"
 #include "splits.h"
 #include "snapshot.h"
+#include "symbol.h"
 #include "historicalNAV.h"
 #include "functions.h"
 #include "tradeDateCalendar.h"
@@ -82,7 +83,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
         value.shares = value.shares * splitRatio.ratio(value.date);
 
     // start loop depending on cached date
-    for(QMap<int, executedTrade>::const_iterator i = s.executedTrades().lowerBound(value.date); i != s.executedTrades().constEnd(); ++i)
+    for(QMap<int, executedTrade>::const_iterator i = s.executedTrades().lowerBound(value.date + 1); i != s.executedTrades().constEnd(); ++i)
     {
        if (i.key() > date_)
            break;
@@ -94,6 +95,8 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     value.shares = functions::massage(value.shares); // zero out if needed
     value.date = date_;
     value.dividendAmount = value.shares * s.dividend(date_);
+    if (s.dividendNAVAdjustment())
+        value.dividendAmountNAV = value.dividendAmount;
     value.totalValue = value.shares * s.price(date_);
     value.expenseRatio = s.expenseRatio();
 
@@ -151,16 +154,17 @@ snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
     return value;
 }
 
-snapshot calculatorNAV::symbolSnapshot(int date_, int id_, int beginDate_)
+snapshot calculatorNAV::symbolSnapshot(int date_, const symbol &key_, int beginDate_)
 {
     snapshot value(date_);
-    security s = d->currentPortfolio.securities().value(id_);
-    splits splitRatio(s.splits(), date_, beginDate_);
+    splits splitRatio(key_.splits(), date_, beginDate_);
 
     value.count = 1;
-    value.costBasis = s.price(beginDate_);
-    value.dividendAmount = s.dividend(date_) * splitRatio.ratio(beginDate_);
-    value.totalValue = s.price(date_) * splitRatio.ratio(beginDate_);
+    value.costBasis = key_.price(beginDate_);
+    value.dividendAmount = key_.dividend(date_) * splitRatio.ratio(beginDate_);
+    if (key_.includeDividends())
+        value.dividendAmountNAV = value.dividendAmount;
+    value.totalValue = key_.price(date_) * splitRatio.ratio(beginDate_);
 
     return value;
 }
@@ -178,7 +182,7 @@ snapshot calculatorNAV::snapshotByKey(int date_, const objectKeyBase &key_, int 
         case objectType_Security:
             return securitySnapshot(date_, key_.id(), priorDate_);
         case objectType_Symbol:
-            return symbolSnapshot(date_, key_.id(), beginDate_);
+            return symbolSnapshot(date_, static_cast<const symbol&>(key_), beginDate_);
         case objectType_Trade:
             // not implemented yet, a little too granular...
             return snapshot(0);
@@ -196,7 +200,7 @@ int calculatorNAV::beginDateByKey(const objectKeyBase &key_)
         case objectType_Security:
             return d->currentPortfolio.startDate();
         case objectType_Symbol:
-            return d->currentPortfolio.securities().value(key_.id()).beginDate();
+            return static_cast<const symbol&>(key_).beginDate();
         case objectType_Trade:
             // not implemented yet, a little too granular...
             return 0;
@@ -214,7 +218,7 @@ int calculatorNAV::endDateByKey(const objectKeyBase &key_)
         case objectType_Security:
             return tradeDateCalendar::endDate();
         case objectType_Symbol:
-            return d->currentPortfolio.securities().value(key_.id()).endDate();
+            return static_cast<const symbol&>(key_).endDate();
         case objectType_Trade:
             // not implemented yet, a little too granular...
             return 0;
@@ -240,7 +244,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
 
     beginDate_ = calendar.date();
     snapshot priorSnapshot = snapshotByKey(beginDate_, key_, beginDate_, 0);
-    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue, priorSnapshot.dividendAmount); // baseline nav
+    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue, priorSnapshot.dividendAmountNAV); // baseline nav
 
     foreach(const int &date, ++calendar)
     {
@@ -254,7 +258,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
                         priorSnapshot.totalValue,
                         currentSnapshot.totalValue,
                         currentSnapshot.costBasis - priorSnapshot.costBasis,
-                        currentSnapshot.dividendAmount,
+                        currentSnapshot.dividendAmountNAV,
                         navValue_
                     );
 

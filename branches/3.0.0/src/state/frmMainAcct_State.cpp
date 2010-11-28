@@ -12,7 +12,7 @@ frmMainAcct_State::~frmMainAcct_State()
 {
 }
 
-settings::columns frmMainAcct_State::columnsValues()
+settings::columns frmMainAcct_State::columnEnumValue()
 {
     return settings::columns_Acct;
 }
@@ -33,11 +33,11 @@ mpiViewModelBase* frmMainAcct_State::createModel(int beginDate_, int endDate_)
             endDate_,
             m_calculator,
             portfolioValue,
-            m_settings.viewableColumnsSorting(columnsValues())
+            m_settings.viewableColumnsSorting(columnEnumValue())
         ),
         portfolioValue,
         m_calculator.nav(m_portfolio, beginDate_, endDate_),
-        m_settings.viewableColumns(columnsValues()),
+        m_settings.viewableColumns(columnEnumValue()),
         ui->table
     );
 }

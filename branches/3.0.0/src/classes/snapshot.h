@@ -10,6 +10,7 @@ public:
     double costBasis;
     double taxLiability;
     double dividendAmount;
+    double dividendAmountNAV;
     double expenseRatio;
 
     snapshot(int date_):
@@ -19,6 +20,7 @@ public:
             costBasis(0),
             taxLiability(0),
             dividendAmount(0),
+            dividendAmountNAV(0),
             expenseRatio(0)
     {}
 

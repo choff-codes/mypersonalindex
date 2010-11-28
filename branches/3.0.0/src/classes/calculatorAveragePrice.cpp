@@ -1,51 +1,23 @@
-#include <QTime>
 #include "calculatorAveragePrice.h"
-#include "portfolio.h"
 #include "splits.h"
-#include "security.h"
-#include "account.h"
 #include "functions.h"
 #include "executedTrade.h"
 
-QMap<int, double> calculatorAveragePrice::calculate(const portfolio &portfolio_, int date_)
+#ifdef CLOCKTIME
+#include <QTime>
+#endif
+
+double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_)
 {
 #ifdef CLOCKTIME
     QTime t;
     t.start();
 #endif
 
-    QMap<int, double> avgPrices;
-
-    foreach(const security &s, portfolio_.securities())
-    {
-        if (s.deleted())
-            continue;
-
-        avgPrices.insert(
-            s.id(),
-            calculate(
-                date_,
-                s.executedTrades(),
-                // cash should always be computed as average
-                s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
-                splits(s.splits(), date_)
-            )
-        );
-    }
-
-#ifdef CLOCKTIME
-    qDebug("Time elapsed (avg price): %d ms", t.elapsed());
-#endif
-
-    return avgPrices;
-}
-
-
-double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_)
-{
     QMap<double, sharePricePair> runningTrades;
     double shares = 0;
     double total = 0;
+    int counter = 0;
 
     for(QMap<int, executedTrade>::const_iterator i = executedTrades_.constBegin(); i != executedTrades_.constEnd(); ++i)
     {
@@ -61,8 +33,8 @@ double calculatorAveragePrice::calculate(int date_, const executedTradeMap &exec
             runningTrades.insertMulti( // insert depending on cost basis (should be inserted in the order to remove)
                 (
                     costBasis_ == account::costBasisMethod_HIFO ? t.price :
-                    costBasis_ == account::costBasisMethod_LIFO ? -1 * runningTrades.count():
-                    runningTrades.count() // FIFO
+                    costBasis_ == account::costBasisMethod_LIFO ? counter--:
+                    counter++ // FIFO
                 ),
                 sharePricePair(t.shares, t.price)
             );
@@ -95,6 +67,10 @@ double calculatorAveragePrice::calculate(int date_, const executedTradeMap &exec
             }
         }
     }
+
+#ifdef CLOCKTIME
+    qDebug("Time elapsed (avg price): %d ms", t.elapsed());
+#endif
 
     return functions::isZero(shares) ? 0 : total / shares;
 }

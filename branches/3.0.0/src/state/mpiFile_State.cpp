@@ -11,7 +11,8 @@
 #endif
 
 mpiFile_State::mpiFile_State(QWidget *parent_) :
-    QObject(parent_)
+    QObject(parent_),
+    modified(false)
 {
 }
 

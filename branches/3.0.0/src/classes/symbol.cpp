@@ -1,10 +1,13 @@
 #include "symbol.h"
+#include <QMap>
 #include "objectKey.h"
+#include "historicalPrices.h"
 
 class symbolData: public objectKeyData
 {
 public:
     bool dividends;
+    historicalPrices prices;
 
     explicit symbolData(const QString &symbol_, bool dividends_):
         objectKeyData(symbol_, UNASSIGNED, UNASSIGNED),
@@ -35,8 +38,23 @@ bool symbol::operator==(const symbol &other_) const
             && d->dividends == other_.d->dividends;
 }
 
-bool symbol::dividends() const { return d->dividends; }
-void symbol::setDividends(bool dividends_) { d->dividends = dividends_; }
+bool symbol::includeDividends() const { return d->dividends; }
+void symbol::setIncludeDividends(bool dividends_) { d->dividends = dividends_; }
+
+double symbol::price(int date_) const { return d->prices.value(date_, historicalPrices::type_price); }
+
+double symbol::dividend(int date_) const { return d->prices.value(date_, historicalPrices::type_dividend); }
+QMap<int, double> symbol::dividends() const { return d->prices.values(historicalPrices::type_dividend); }
+
+double symbol::split(int date_) const { return d->prices.value(date_, historicalPrices::type_split); }
+QMap<int, double> symbol::splits() const { return d->prices.values(historicalPrices::type_split); }
+
+void symbol::setHistoricalPrices(const historicalPrices &prices_) { d->prices = prices_; }
+
+int symbol::endDate() const { return d->prices.endDate(historicalPrices::type_price); }
+int symbol::beginDate() const { return d->prices.beginDate(historicalPrices::type_price); }
+
+objectKeyData* symbol::data() const { return d.data(); }
 
 objectType symbol::type() const
 {

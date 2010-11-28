@@ -12,7 +12,7 @@ public:
     ~frmMainSecurity_State();
 
 private:
-    settings::columns columnsValues();
+    settings::columns columnEnumValue();
     QComboBox* sortDropDown();
     QMap<int, QString> tableColumns();
 

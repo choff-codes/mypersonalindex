@@ -162,7 +162,7 @@ security security::load(const QSqlQuery &q_)
     sec.setIncludeInCalc(q_.value(queries::portfolioSecurityColumns_IncludeInCalc).toBool());
     sec.setHidden(q_.value(queries::portfolioSecurityColumns_Hide).toBool());
     sec.setNote(q_.value(queries::portfolioSecurityColumns_Note).toString());
-    sec.setDividendReinvestment(q_.value(queries::portfolioSecurityColumns_Dividends).toBool());
+    sec.setDividendNAVAdjustment(q_.value(queries::portfolioSecurityColumns_Dividends).toBool());
 
     return sec;
 }
@@ -181,6 +181,11 @@ QString security::validate() const
 objectType security::type() const
 {
     return objectType_Security;
+}
+
+QString security::displayText() const
+{
+    return description().isEmpty() ? "(New)" : functions::join(description(), functions::fitString(functions::removeNewLines(note()), 20), " | ");
 }
 
 void security::detach()

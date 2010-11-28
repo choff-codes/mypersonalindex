@@ -12,7 +12,7 @@ public:
     ~frmMainAA_State();
 
 private:
-    settings::columns columnsValues();
+    settings::columns columnEnumValue();
     QMap<int, QString> tableColumns();
 
     mpiViewModelBase* createModel(int beginDate_, int endDate_);

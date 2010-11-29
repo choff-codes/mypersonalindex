@@ -2,31 +2,30 @@
 #define MAINCORRELATIONMODEL_H
 
 #include <QAbstractTableModel>
-#include <QTableView>
-#include <QMap>
-#include <QHash>
-#include "functions.h"
-#include "objectKey.h"
+#include <QStringList>
 
 class mainCorrelationModel: public QAbstractTableModel
 {
 public:
 
-    typedef QMap<objectKey, QHash<objectKey, double> > correlationList;
+    typedef QList<QList<double> > correlationMatrix;
 
-    mainCorrelationModel(const correlationList &correlations, QTableView *parent = 0):
-        QAbstractTableModel(parent), m_correlationList(correlations)
+    mainCorrelationModel(const QStringList &rows_, const correlationMatrix &correlationMatrix_, QObject *parent_ = 0):
+        QAbstractTableModel(parent_),
+        m_rows(rows_),
+        m_correlationMatrix(correlationMatrix_)
     {
-        insertRows(0, m_correlationList.count());
+        insertRows(0, m_rows.count());
     }
 
-    int rowCount(const QModelIndex&) const { return m_correlationList.count(); }
-    int columnCount (const QModelIndex&) const { return m_correlationList.count(); }
+    int rowCount(const QModelIndex&) const { return m_rows.count(); }
+    int columnCount (const QModelIndex&) const { return m_rows.count(); }
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
 
 private:
-    const correlationList m_correlationList;
+    QStringList m_rows;
+    correlationMatrix m_correlationMatrix;
 };
 
 #endif // MAINCORRELATIONMODEL_H

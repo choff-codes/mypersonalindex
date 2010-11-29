@@ -279,21 +279,19 @@ void frmMain::importYahoo()
         return;
     }
 
-    int beginDate = tradeDateCalendar::endDate() + 1;
-    foreach(const portfolio &p, m_file->portfolios)
-    {
-        if (p.deleted())
-            continue;
+    QList<historicalPrices> prices;
+    QMap<QString, updatePricesOptions> options;
+    QMap<QString, int> symbols = portfolio::symbols(m_file->portfolios);
+    if (symbols.isEmpty())
+        return;
 
-        beginDate = qMin(beginDate, p.startDate());
+    for(QMap<QString, int>::const_iterator i = symbols.constBegin(); i != symbols.constEnd(); ++i)
+    {
+        prices.append(m_file->prices.getHistoricalPrice(i.key()));
+        options.insert(i.key(), updatePricesOptions(i.value(), tradeDateCalendar::endDate(), m_settings.splits()));
     }
 
-    QList<historicalPrices> prices;
-    foreach(const QString &s, portfolio::symbols(m_file->portfolios))
-        prices.append(m_file->prices.getHistoricalPrice(s));
-
     showProgressBar("Downloading", prices.count());
-    updatePricesOptions options(beginDate, tradeDateCalendar::endDate(), m_settings.splits());
 
     m_futureWatcherYahoo = new QFutureWatcher<int>();
     connect(m_futureWatcherYahoo, SIGNAL(finished()), this, SLOT(importYahooFinished()));
@@ -307,7 +305,7 @@ void frmMain::importYahooFinished()
 
     int earliestUpdate = tradeDateCalendar::endDate() + 1;
     foreach(const int &result, m_futureWatcherYahoo->future())
-        if (result != UNASSIGNED)
+        if (result != -1)
             earliestUpdate = qMin(earliestUpdate, result);
 
     delete m_futureWatcherYahoo;

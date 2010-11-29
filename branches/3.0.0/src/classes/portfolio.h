@@ -26,7 +26,7 @@ public:
     bool operator!=(const portfolio &other_) const { return !(*this == other_); }
 
     QStringList symbols() const;
-    static QStringList symbols(const QMap<int, portfolio> &portfolios_);
+    static QMap<QString, int> symbols(const QMap<int, portfolio> &portfolios_);
     int endDate() const;
 
     static int getOpenIdentity() { return --IDENTITY_COUNTER; }

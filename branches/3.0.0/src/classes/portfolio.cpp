@@ -271,15 +271,18 @@ QStringList portfolio::symbols() const
     return list;
 }
 
-QStringList portfolio::symbols(const QMap<int, portfolio> &portfolios_)
+QMap<QString, int> portfolio::symbols(const QMap<int, portfolio> &portfolios_)
 {
-    QStringList list;
+    QMap<QString, int> returnMap;
     foreach(const portfolio &p, portfolios_)
         if (!p.deleted())
             foreach(const QString &symbol, p.symbols())
-                list.append(symbol);
-    list.removeDuplicates();
-    return list;
+                if (returnMap.contains(symbol))
+                    returnMap[symbol] = qMin(returnMap.value(symbol), p.startDate());
+                else
+                    returnMap.insert(symbol, p.startDate());
+
+    return returnMap;
 }
 
 QString portfolio::validate() const

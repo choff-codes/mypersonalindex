@@ -1,4 +1,6 @@
 #include "mainCorrelationModel.h"
+#include <QColor>
+#include "functions.h"
 
 QVariant mainCorrelationModel::data(const QModelIndex &index, int role) const
 {
@@ -8,16 +10,12 @@ QVariant mainCorrelationModel::data(const QModelIndex &index, int role) const
     if (role != Qt::DisplayRole && role != Qt::BackgroundRole)
         return QVariant();
 
-    double value = 1;
-    int row = index.column() > index.row() ? index.column() : index.row();
-    int column = index.column() > index.row() ? index.row() : index.column();
-
-    if (row != column)
-        value = (m_correlationList.constBegin() + column).value().value((m_correlationList.constBegin() + row).key());
+    double value = m_correlationMatrix.at(index.row()).at(index.column());
 
     if(role == Qt::DisplayRole)
         return functions::doubleToPercentage(value);
 
+    // Qt::BackgroundRole
     value *= 127;
     if (value < 0) // Background Role
         return QColor((int)(255 + value), 255, (int)(255 + value));
@@ -30,5 +28,5 @@ QVariant mainCorrelationModel::headerData(int section, Qt::Orientation /* not us
     if (role != Qt::DisplayRole)
         return QVariant();
 
-    return (m_correlationList.constBegin() + section).key().description;
+    return m_rows.at(section);
 }

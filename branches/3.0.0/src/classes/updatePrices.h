@@ -2,6 +2,7 @@
 #define UPDATEPRICES_H
 
 #include <QString>
+#include <QMap>
 #include "historicalPrices.h"
 
 struct updatePricesOptions
@@ -10,24 +11,17 @@ struct updatePricesOptions
     int endDate;
     bool splits;
 
+    updatePricesOptions():
+        beginDate(0),
+        endDate(0),
+        splits(false)
+    {}
+
     updatePricesOptions(int beginDate_, int endDate_, bool splits_):
         beginDate(beginDate_),
         endDate(endDate_),
         splits(splits_)
-    {}
-};
-
-struct updatePricesReturnValue
-{
-    QString symbol;
-    int date;
-
-    updatePricesReturnValue() {}
-
-    updatePricesReturnValue(const QString &symbol_, int date_):
-        symbol(symbol_),
-        date(date_)
-    {}
+    {} 
 };
 
 class QUrl;
@@ -35,9 +29,8 @@ class QDate;
 class updatePrices
 {
 public:
-    updatePrices(updatePricesOptions options_):
-        m_options(options_),
-        NO_DATA(m_options.endDate + 1)
+    updatePrices(const QMap<QString, updatePricesOptions> &options_):
+        m_options(options_)
     {}
 
     typedef int result_type;
@@ -47,9 +40,7 @@ public:
     static bool isInternetConnection();
 
 private:
-    updatePricesOptions m_options;
-
-    const int NO_DATA;
+    QMap<QString, updatePricesOptions> m_options;
 
     static const char stockPrices = 'd';
     static const char stockDividends = 'v';

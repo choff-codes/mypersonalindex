@@ -1,31 +1,42 @@
 #ifndef MAINCORRELATIONMODEL_H
 #define MAINCORRELATIONMODEL_H
 
-#include <QAbstractTableModel>
-#include <QStringList>
+#include "mpiViewModelBase.h"
+#include "objectKey.h"
 
-class mainCorrelationModel: public QAbstractTableModel
+class correlationRow: public baseRow
+{
+public:
+    enum {
+        row_ObjectType,
+        row_ID,
+        row_Description
+    };
+
+    static const QList<orderBy> correlationOrder;
+    static const QVariantList columnsType;
+
+    QMap<correlationRow, double> correlationValues;
+
+    correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
+
+    bool operator==(const correlationRow &other_) const;
+    bool operator!=(const correlationRow &other_) const { return !(*this == other_); }
+    bool operator<(const correlationRow &other_) const;
+    QVariant columnType(int column) const { return columnsType.at(column); }
+};
+
+class mainCorrelationModel: public mpiViewModelBase
 {
 public:
 
-    typedef QList<QList<double> > correlationMatrix;
+    mainCorrelationModel(const QList<baseRow*> &rows_, QObject *parent_ = 0);
 
-    mainCorrelationModel(const QStringList &rows_, const correlationMatrix &correlationMatrix_, QObject *parent_ = 0):
-        QAbstractTableModel(parent_),
-        m_rows(rows_),
-        m_correlationMatrix(correlationMatrix_)
-    {
-        insertRows(0, m_rows.count());
-    }
+    QVariant data(const QModelIndex &index_, int role_) const;
+    QVariant headerData(int section_, Qt::Orientation orientation_, int role_) const;
 
-    int rowCount(const QModelIndex&) const { return m_rows.count(); }
-    int columnCount (const QModelIndex&) const { return m_rows.count(); }
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
-private:
-    QStringList m_rows;
-    correlationMatrix m_correlationMatrix;
+    void add(correlationRow *row_, const correlationRow &key_);
+    void remove(const correlationRow &key_);
 };
 
 #endif // MAINCORRELATIONMODEL_H

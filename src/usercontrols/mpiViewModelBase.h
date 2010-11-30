@@ -43,7 +43,6 @@ public:
 protected:
     QList<baseRow*> m_rows;
     QList<int> m_viewableColumns;
-    int m_rowCount;
 
     void sortColumns() { qStableSort(m_rows.begin(), m_rows.end(), baseRow::baseRowSort); }
 };

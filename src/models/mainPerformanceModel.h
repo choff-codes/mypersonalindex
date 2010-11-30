@@ -32,8 +32,8 @@ class mainPerformanceModel: public mpiViewModelBase
 public:
     mainPerformanceModel(const QList<baseRow*> &rows_, const QList<int> &viewableColumns_, QObject *parent_ = 0);
 
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant data(const QModelIndex &index_, int role_) const;
+    QVariant headerData(int section, Qt::Orientation orientation_, int role_) const;
 };
 
 #endif // MAINPERFORMANCEMODEL_H

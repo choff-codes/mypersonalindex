@@ -1,5 +1,5 @@
-#include "frmMainPerformance_State.h"
-#include "mainPerformanceModel.h"
+#include "frmMainCorrelation_State.h"
+#include "mainCorrelationModel.h"
 #include "frmMainTableViewTree_UI.h"
 #include "historicalNAV.h"
 #include "account.h"
@@ -7,48 +7,56 @@
 #include "security.h"
 #include "symbol.h"
 
-frmMainPerformance_State::frmMainPerformance_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
+frmMainCorrelation_State::frmMainCorrelation_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
     const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
     frmMainStateTableWithTree(portfolio_, calculator_, settings_, prices_, parent_)
 {
     setupUI();
+    connect(static_cast<frmMainTableViewTree_UI*>(ui)->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString description_)
+QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString description_)
 {
-    return new QTreeWidgetItem(QStringList() << description_, type_);
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, type_);
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    return item;
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString description_, const QString itemData_)
+QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString description_, const QString itemData_)
 {
     QTreeWidgetItem* item = createTreeItem(type_, description_);
     item->setData(0, Qt::UserRole, itemData_);
     return item;
 }
 
-frmMainPerformance_State::~frmMainPerformance_State()
+frmMainCorrelation_State::~frmMainCorrelation_State()
 {
 }
 
-settings::columns frmMainPerformance_State::columnEnumValue()
+settings::columns frmMainCorrelation_State::columnEnumValue()
 {
-    return settings::columns_Performance;
+    return settings::columns_Dummy;
 }
 
-QMap<int, QString> frmMainPerformance_State::tableColumns()
+QMap<int, QString> frmMainCorrelation_State::tableColumns()
 {
-    return performanceRow::fieldNames();
+    return QMap<int, QString>();
 }
 
-mpiViewModelBase* frmMainPerformance_State::createModel(int beginDate_, int endDate_)
+void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int column_)
+{
+
+}
+
+mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endDate_)
 {
     QList<QTreeWidgetItem*> items = static_cast<frmMainTableViewTree_UI*>(ui)->tree->selectedItems();
     if (items.isEmpty())
-        return new mainPerformanceModel(QList<baseRow*>(), m_settings.viewableColumns(columnEnumValue()), ui->table);
+        return new mainCorrelationModel(QList<baseRow*>(), ui->table);
 
     QTreeWidgetItem* item = items.at(0);
     if (!item->parent())
-        return new mainPerformanceModel(QList<baseRow*>(), m_settings.viewableColumns(columnEnumValue()), ui->table);
+        return new mainCorrelationModel(QList<baseRow*>(), ui->table);
 
     historicalNAV nav;
     switch((objectType)item->parent()->type())
@@ -76,12 +84,5 @@ mpiViewModelBase* frmMainPerformance_State::createModel(int beginDate_, int endD
             break; //no implemented
     }
 
-    return new mainPerformanceModel(
-        performanceRow::getRows(
-            nav,
-            m_settings.viewableColumnsSorting(columnEnumValue())
-        ),
-        m_settings.viewableColumns(columnEnumValue()),
-        ui->table
-    );
+    return new mainCorrelationModel(QList<baseRow*>(), ui->table);
 }

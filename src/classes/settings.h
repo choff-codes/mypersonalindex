@@ -18,7 +18,8 @@ public:
         columns_AA,
         columns_Acct,
         columns_Stat,
-        columns_Performance
+        columns_Performance,
+        columns_Dummy // not used
     };
 
     // Note: use qint32 for platform compatability

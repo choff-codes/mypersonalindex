@@ -49,8 +49,8 @@ class mainAcctModel: public mpiViewModelBase
 public:
     mainAcctModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_ = 0);
 
-    QVariant data(const QModelIndex &index, int role) const;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant data(const QModelIndex &index_, int role_) const;
+    QVariant headerData(int section_, Qt::Orientation orientation_, int role_) const;
 
 private:
     snapshot m_portfolioSnapshot;

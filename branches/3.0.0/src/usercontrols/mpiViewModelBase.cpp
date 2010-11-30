@@ -27,7 +27,7 @@ void mpiViewModelBase::setColumnSort(const QList<orderBy> &columnSort_)
     foreach(baseRow *row, m_rows)
         row->columnSort = columnSort_;
     sortColumns();
-    dataChanged(index(0, m_viewableColumns.count() - 1), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
+    emit dataChanged(index(0, 0), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
 }
 
 
@@ -51,5 +51,5 @@ void mpiViewModelBase::setViewableColumns(const QList<int> &viewableColumns_)
         endRemoveColumns();
     }
 
-    dataChanged(index(0, m_viewableColumns.count() - 1), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
+    emit dataChanged(index(0, 0), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
 }

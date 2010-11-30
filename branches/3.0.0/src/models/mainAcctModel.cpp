@@ -121,15 +121,15 @@ mainAcctModel::mainAcctModel(const QList<baseRow*> &rows_, const snapshot &portf
 {
 }
 
-QVariant mainAcctModel::data(const QModelIndex &index, int role) const
+QVariant mainAcctModel::data(const QModelIndex &index_, int role_) const
 {
-    if (!index.isValid())
+    if (!index_.isValid())
         return QVariant();
 
-    int column = m_viewableColumns.at(index.column());
-    QVariant value = m_rows.at(index.row())->values.at(column);
+    int column = m_viewableColumns.at(index_.column());
+    QVariant value = m_rows.at(index_.row())->values.at(column);
 
-    if (role == Qt::DisplayRole)
+    if (role_ == Qt::DisplayRole)
     {
         if (value.isNull())
             return QVariant();
@@ -152,25 +152,25 @@ QVariant mainAcctModel::data(const QModelIndex &index, int role) const
         return value;
     }
 
-    if (role == Qt::TextColorRole && column == acctRow::row_GainP)
+    if (role_ == Qt::TextColorRole && column == acctRow::row_GainP)
         return value.toDouble() == 0 ? QVariant() :
             value.toDouble() > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
 
     return QVariant();
 }
 
-QVariant mainAcctModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant mainAcctModel::headerData(int section_, Qt::Orientation orientation_, int role_) const
 {
-    if (section >= m_viewableColumns.count())
+    if (section_ >= m_viewableColumns.count())
         return QVariant();
 
-    if (role == Qt::TextAlignmentRole)
+    if (role_ == Qt::TextAlignmentRole)
         return (int)Qt::AlignLeft | Qt::AlignVCenter;
 
-    if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+    if (orientation_ != Qt::Horizontal || role_ != Qt::DisplayRole)
         return QVariant();
 
-    int column = m_viewableColumns.at(section);
+    int column = m_viewableColumns.at(section_);
     QString extra;
     switch(column)
     {

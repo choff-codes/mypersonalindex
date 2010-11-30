@@ -1,16 +1,21 @@
-#ifndef FRMMAINPERFORMANCE_STATE_H
-#define FRMMAINPERFORMANCE_STATE_H
+#ifndef FRMMAINCORRELATION_STATE_H
+#define FRMMAINCORRELATION_STATE_H
 
 #include "frmMainStateTableWithTree.h"
 
 class QTreeWidgetItem;
-class frmMainPerformance_State : public frmMainStateTableWithTree
+class frmMainCorrelation_State : public frmMainStateTableWithTree
 {
+    Q_OBJECT
+
 public:
-    frmMainPerformance_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
+    frmMainCorrelation_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
         const QHash<QString, historicalPrices> &prices_, QWidget *parent_);
 
-    ~frmMainPerformance_State();
+    ~frmMainCorrelation_State();
+
+protected slots:
+    void itemChecked(QTreeWidgetItem *item_, int column_);
 
 protected:
     settings::columns columnEnumValue();
@@ -22,4 +27,5 @@ protected:
 
 };
 
-#endif // FRMMAINPERFORMANCE_STATE_H
+
+#endif // FRMMAINCORRELATION_STATE_H

@@ -1,7 +1,7 @@
-#include "frmMainTableViewList_UI.h"
+#include "frmMainTableViewTree_UI.h"
 #include <QHeaderView>
 
-void frmMainTableViewList_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_)
+void frmMainTableViewTree_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_)
 {
     frmMainTableView_UI::setupUI(columnNames_, parent_);
     tree = new QTreeWidget(widget);

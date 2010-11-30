@@ -88,16 +88,16 @@ mainPerformanceModel::mainPerformanceModel(const QList<baseRow*> &rows_, const Q
 {
 }
 
-QVariant mainPerformanceModel::data(const QModelIndex &index, int role) const
+QVariant mainPerformanceModel::data(const QModelIndex &index_, int role_) const
 {
-    if (!index.isValid())
+    if (!index_.isValid())
         return QVariant();
 
-    if (role != Qt::DisplayRole)
+    if (role_ != Qt::DisplayRole)
         return QVariant();
 
-    int column = m_viewableColumns.at(index.column());
-    QVariant value = m_rows.at(index.row())->values.at(column);
+    int column = m_viewableColumns.at(index_.column());
+    QVariant value = m_rows.at(index_.row())->values.at(column);
 
     switch (column)
     {
@@ -115,16 +115,16 @@ QVariant mainPerformanceModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-QVariant mainPerformanceModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant mainPerformanceModel::headerData(int section_, Qt::Orientation orientation_, int role_) const
 {
-     if (section >= m_viewableColumns.count())
+     if (section_ >= m_viewableColumns.count())
         return QVariant();
 
-    if (role == Qt::TextAlignmentRole)
+    if (role_ == Qt::TextAlignmentRole)
         return (int)Qt::AlignLeft | Qt::AlignVCenter;
 
-    if (orientation != Qt::Horizontal || role != Qt::DisplayRole)
+    if (orientation_ != Qt::Horizontal || role_ != Qt::DisplayRole)
         return QVariant();
 
-    return performanceRow::columns.at(m_viewableColumns.at(section));
+    return performanceRow::columns.at(m_viewableColumns.at(section_));
 }

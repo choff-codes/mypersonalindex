@@ -33,7 +33,7 @@ public:
         insertRows(0, rows_.count());
     }
 
-    ~mpiViewModelBase() { qDeleteAll(m_rows); }
+    virtual ~mpiViewModelBase() { qDeleteAll(m_rows); }
 
     int rowCount(const QModelIndex&) const { return m_rows.count(); }
     int columnCount (const QModelIndex&) const { return m_viewableColumns.count(); }

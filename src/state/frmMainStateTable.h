@@ -27,7 +27,7 @@ protected:
     settings m_settings;
     frmMainTableView_UI *ui;
 
-    virtual void setupUI();
+    virtual void setupUI(bool hasRowLabels_ = false);
     virtual settings::columns columnEnumValue() = 0;
     virtual QMap<int, QString> tableColumns() = 0;
     virtual frmMainTableView_UI* createUI();

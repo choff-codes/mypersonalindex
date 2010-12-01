@@ -18,6 +18,15 @@ const QVariantList correlationRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::String);
 
+correlationRow::correlationRow(objectType type_, int id_):
+    baseRow(correlationOrder)
+{
+    //    row_ObjectType,
+        values.append((int)type_);
+    //    row_ID,
+        values.append(id_);
+}
+
 correlationRow::correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
     baseRow(correlationOrder),
     correlationValues(correlationValues_)
@@ -45,7 +54,7 @@ bool correlationRow::operator<(const correlationRow &other_) const
 }
 
 mainCorrelationModel::mainCorrelationModel(const QList<baseRow*> &rows_, QObject *parent_):
-    mpiViewModelBase(rows_, QVector<int>(rows_.size(), 0).toList(), parent_)
+    mpiViewModelBase(rows_, QVector<int>(rows_.count(), 0).toList(), parent_)
 {
 }
 
@@ -65,11 +74,12 @@ QVariant mainCorrelationModel::data(const QModelIndex &index_, int role_) const
         return functions::doubleToPercentage(value);
 
     // Qt::BackgroundRole
-    value *= 127;
-    if (value < 0) // Background Role
-        return QColor((int)(255 + value), 255, (int)(255 + value));
+    QColor c(205, 92, 92);
+
+    if (value < 0)
+        return c.lighter(100 + (150 * value));
     else
-        return QColor(255, (int)(255 - value), (int)(255 - value));
+        return c.darker(100 + (150 * value));
 }
 
 QVariant mainCorrelationModel::headerData(int section_, Qt::Orientation /* not used */, int role_) const
@@ -111,10 +121,9 @@ void mainCorrelationModel::remove(const correlationRow &key_)
         return;
 
     beginRemoveRows(QModelIndex(), index, index);
-    m_rows.removeAt(index);
-    endRemoveRows();
-
     beginRemoveColumns(QModelIndex(), index, index);
+    m_rows.removeAt(index);   
     m_viewableColumns.removeLast();
-    endInsertColumns();
+    endRemoveRows();
+    endRemoveColumns();
 }

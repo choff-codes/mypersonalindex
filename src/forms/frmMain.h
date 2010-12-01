@@ -33,6 +33,7 @@ private slots:
     void tabAccount() { switchToTab(tab_account); }
     void tabSecurity() { switchToTab(tab_security); }
     void tabPerformance() { switchToTab(tab_performance); }
+    void tabCorrelation() { switchToTab(tab_correlation); }
     void fileChange(const QString &filePath_, bool newFile_);
 
 private:

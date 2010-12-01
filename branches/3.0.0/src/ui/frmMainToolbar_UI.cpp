@@ -34,6 +34,12 @@ void frmMainToolbar_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget 
         toolbar->addSeparator();
         toolbar->addAction(toolbarReorder);
     }
+    else
+    {
+        toolbarSort->setVisible(false);
+        toolbarSortCmb->setVisible(false);
+        toolbarReorder->setVisible(false);
+    }
     toolbar->addSeparator();
     toolbar->addAction(toolbarExport);
 }

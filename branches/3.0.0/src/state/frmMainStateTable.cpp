@@ -25,10 +25,10 @@ frmMainTableView_UI* frmMainStateTable::createUI()
     return new frmMainTableView_UI();
 }
 
-void frmMainStateTable::setupUI()
+void frmMainStateTable::setupUI(bool hasRowLabels_)
 {
     ui = createUI();
-    ui->setupUI(tableColumns(), static_cast<QWidget*>(this->parent()));
+    ui->setupUI(tableColumns(), hasRowLabels_, static_cast<QWidget*>(this->parent()));
 
     ui->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_portfolio.startDate()));
     ui->toolbarDateEndEdit->setDate(QDate::fromJulianDay(m_portfolio.endDate()));

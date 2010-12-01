@@ -25,6 +25,7 @@ protected:
     QTreeWidgetItem* createTreeItem(int type_, const QString description_);
     QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_);
 
+    QList<QTreeWidgetItem*> selectedItems();
 };
 
 

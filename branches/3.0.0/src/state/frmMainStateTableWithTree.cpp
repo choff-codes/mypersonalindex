@@ -3,6 +3,8 @@
 #include "account.h"
 #include "assetAllocation.h"
 #include "security.h"
+#include "symbol.h"
+#include "historicalNAV.h"
 
 frmMainStateTableWithTree::frmMainStateTableWithTree(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
     const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
@@ -13,21 +15,20 @@ frmMainStateTableWithTree::frmMainStateTableWithTree(const portfolio &portfolio_
 
 frmMainStateTableWithTree::~frmMainStateTableWithTree()
 {
-
 }
 
-void frmMainStateTableWithTree::setupUI()
+void frmMainStateTableWithTree::setupUI(bool hasRowLabels_)
 {
-    frmMainStateTable::setupUI();
+    frmMainStateTable::setupUI(hasRowLabels_);
 
     QTreeWidget *tree = static_cast<frmMainTableViewTree_UI*>(ui)->tree;
 
     QList<QTreeWidgetItem*> items;
-    items << createTreeItem(objectType_Portfolio, "Portfolio")
-          << createTreeItem(objectType_Account, "Accounts")
-          << createTreeItem(objectType_AA, "Asset Classes")
-          << createTreeItem(objectType_Security, "Securities")
-          << createTreeItem(objectType_Symbol, "Symbols");
+    items << new QTreeWidgetItem(QStringList() << "Portfolio", objectType_Portfolio)
+          << new QTreeWidgetItem(QStringList() << "Accounts", objectType_Account)
+          << new QTreeWidgetItem(QStringList() << "Asset Classes", objectType_AA)
+          << new QTreeWidgetItem(QStringList() << "Securities", objectType_Security)
+          << new QTreeWidgetItem(QStringList() << "Symbols", objectType_Symbol);
 
     foreach(QTreeWidgetItem* item, items)
     {
@@ -80,4 +81,31 @@ void frmMainStateTableWithTree::setupUI()
 frmMainTableView_UI* frmMainStateTableWithTree::createUI()
 {
     return new frmMainTableViewTree_UI();
+}
+
+historicalNAV frmMainStateTableWithTree::calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_)
+{
+    if (!item_->parent())
+        return historicalNAV();
+
+    switch((objectType)item_->parent()->type())
+    {
+        case objectType_Portfolio:
+            return m_calculator.changeOverTime(m_portfolio, beginDate_, endDate_, m_portfolio.startValue());
+        case objectType_Account:
+            return m_calculator.changeOverTime(m_portfolio.accounts().value(item_->type()), beginDate_, endDate_);
+        case objectType_AA:
+            return m_calculator.changeOverTime(m_portfolio.assetAllocations().value(item_->type()), beginDate_, endDate_);
+        case objectType_Security:
+            return m_calculator.changeOverTime(m_portfolio.securities().value(item_->type()), beginDate_, endDate_);
+        case objectType_Symbol:
+        {
+            symbol s(item_->data(0, Qt::UserRole).toString(), item_->type() == 1);
+            s.setHistoricalPrices(m_prices.value(s.description()));
+            return m_calculator.changeOverTime(s, beginDate_, endDate_);
+        }
+        case objectType_Trade:
+            break;
+    }
+    return historicalNAV();
 }

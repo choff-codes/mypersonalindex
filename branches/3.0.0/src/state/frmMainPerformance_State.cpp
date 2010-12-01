@@ -2,10 +2,6 @@
 #include "mainPerformanceModel.h"
 #include "frmMainTableViewTree_UI.h"
 #include "historicalNAV.h"
-#include "account.h"
-#include "assetAllocation.h"
-#include "security.h"
-#include "symbol.h"
 
 frmMainPerformance_State::frmMainPerformance_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
     const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
@@ -50,31 +46,7 @@ mpiViewModelBase* frmMainPerformance_State::createModel(int beginDate_, int endD
     if (!item->parent())
         return new mainPerformanceModel(QList<baseRow*>(), m_settings.viewableColumns(columnEnumValue()), ui->table);
 
-    historicalNAV nav;
-    switch((objectType)item->parent()->type())
-    {
-        case objectType_Portfolio:
-            nav = m_calculator.changeOverTime(m_portfolio, beginDate_, endDate_, m_portfolio.startValue());
-            break;
-        case objectType_Account:
-            nav = m_calculator.changeOverTime(m_portfolio.accounts().value(item->type()), beginDate_, endDate_);
-            break;
-        case objectType_AA:
-            nav = m_calculator.changeOverTime(m_portfolio.assetAllocations().value(item->type()), beginDate_, endDate_);
-            break;
-        case objectType_Security:
-            nav = m_calculator.changeOverTime(m_portfolio.securities().value(item->type()), beginDate_, endDate_);
-            break;
-        case objectType_Symbol:
-        {
-            symbol s(item->data(0, Qt::UserRole).toString(), item->type() == 1);
-            s.setHistoricalPrices(m_prices.value(s.description()));
-            nav = m_calculator.changeOverTime(s, beginDate_, endDate_);
-            break;
-        }
-        case objectType_Trade:
-            break; //no implemented
-    }
+    historicalNAV nav = calculateNAV(item, beginDate_, endDate_);
 
     return new mainPerformanceModel(
         performanceRow::getRows(

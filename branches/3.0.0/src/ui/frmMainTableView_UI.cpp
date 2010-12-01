@@ -1,7 +1,7 @@
 #include "frmMainTableView_UI.h"
 #include <QHeaderView>
 
-void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_)
+void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, bool hasRowLabels_, QWidget *parent_)
 {
     widget = new QWidget(parent_);
 
@@ -14,15 +14,16 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, QWidge
     widgetTable = new QWidget(widget);
     layoutTable = new QHBoxLayout(widgetTable);
 
-    table = new mpiTableView(false, widget);
+    table = new mpiTableView(hasRowLabels_, widget);
     tableCopy = new QShortcut(Qt::CTRL + Qt::Key_C, table);
-    table->verticalHeader()->hide();
+    if (!hasRowLabels_)
+        table->verticalHeader()->hide();
     table->setSelectionMode(QAbstractItemView::ExtendedSelection);
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setAlternatingRowColors(true);
     table->horizontalHeader()->setHighlightSections(false);
     table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 2);
-    //table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+    table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     layoutTable->addWidget(table, 2);
 
     layout->addWidget(toolbar);

@@ -18,7 +18,7 @@ public:
 
     virtual ~frmMainTableView_UI() {}
 
-    virtual void setupUI(const QMap<int, QString> &columnNames_, QWidget *parent_ = 0);
+    virtual void setupUI(const QMap<int, QString> &columnNames_, bool hasRowLabels_, QWidget *parent_ = 0);
 };
 
 #endif // FRMMAINAA_UI_H

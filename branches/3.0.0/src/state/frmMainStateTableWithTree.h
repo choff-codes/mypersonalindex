@@ -17,12 +17,13 @@ public:
 protected:
     QHash<QString, historicalPrices> m_prices;
 
-    virtual void setupUI();
+    virtual void setupUI(bool hasRowLabels_ = false);
 
     virtual frmMainTableView_UI* createUI();
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_) = 0;
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_) = 0;
 
+    historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
 };
 
 #endif // FRMMAINSTATETABLEWITHTREE_H

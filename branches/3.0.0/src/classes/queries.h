@@ -68,7 +68,6 @@ public:
     enum {
         portfolioColumns_ID,
         portfolioColumns_Description,
-        portfolioColumns_StartValue,
         portfolioColumns_StartDate
     };
 
@@ -152,7 +151,7 @@ public:
     queries(const QString &databaseLocation_);
 
     void bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch *object_) const;
-    int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_, bool getIdentity_ = true) const;
+    int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
 
     void beginTransaction() { m_database.transaction(); }
@@ -166,18 +165,12 @@ public:
     void deleteTable(const QString &table_) const;
     void deleteItem(const QString &table_, int id_) const;
     void deleteItem(const QString &table_, int id_, int beginDate_) const;
-    void deleteSecurityItems(const QString &table_, int securityID_) const;
-    void deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const;
-    void deletePortfolioItems(const QString &table_, int portfolioID_) const;
-    void deletePortfolioItems(const QString &table_, int portfolioID_, int beginDate_) const;
 
 private:
     QSqlDatabase m_database;
 
     void executeNonQuery(const QString &query_) const;
     void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
-    void deleteItem(const QString &table_, const QString &identifier_, int id_) const;
-    void deleteItem(const QString &table_, const QString &identifier_, int id_, int beginDate_) const;
 };
 
 #endif // QUERIES_H

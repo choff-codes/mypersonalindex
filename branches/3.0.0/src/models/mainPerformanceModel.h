@@ -11,7 +11,6 @@ public:
         row_Date,
         row_TotalValue,
         row_Dividend,
-        row_Index,
         row_Change,
         row_Gain
     };
@@ -19,7 +18,7 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    performanceRow(int date_, double totalValue_, double dividend_, double index_, double change_, double gain_, const QList<orderBy> &columnSort_);
+    performanceRow(int date_, double totalValue_, double dividend_, double nav_, double change_, const QList<orderBy> &columnSort_);
 
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();

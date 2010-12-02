@@ -12,7 +12,6 @@
 //    row_ValueP,
 //    row_Gain,
 //    row_GainP,
-//    row_NAV,
 //    row_Target,
 //    row_Variance,
 //    row_RebalanceBand,
@@ -27,7 +26,6 @@ const QStringList aaRow::columns = QStringList()
                                    << "% of Portfolio"
                                    << "Gain/Loss"
                                    << "% Gain Loss"
-                                   << "NAV"
                                    << "Target"
                                    << "Variance"
                                    << "Rebalance\nBand"
@@ -36,7 +34,6 @@ const QStringList aaRow::columns = QStringList()
 
 const QVariantList aaRow::columnsType = QVariantList()
                                         << QVariant(QVariant::String)
-                                        << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
@@ -63,8 +60,6 @@ aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSn
     //    row_Gain,
     this->values.append(snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,
-    this->values.append(functions::isZero(snapshot_.costBasis) || functions::isZero(snapshot_.totalValue) ? QVariant() : (snapshot_.totalValue / snapshot_.costBasis) - 1);
-    //    row_NAV,
     this->values.append(nav_ - 1);
     //    row_Target,
     this->values.append(functions::isZero(aa_.target()) ? QVariant() : aa_.target());
@@ -162,7 +157,6 @@ QVariant mainAAModel::data(const QModelIndex &index_, int role_) const
             case aaRow::row_Target:
             case aaRow::row_Variance:
             case aaRow::row_GainP:
-            case aaRow::row_NAV:
             case aaRow::row_RebalanceBand:
                 return functions::doubleToPercentage(value.toDouble());
         }
@@ -212,15 +206,10 @@ QVariant mainAAModel::headerData(int section_, Qt::Orientation orientation_, int
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis));
             break;
         case aaRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(
-                        functions::isZero(m_portfolioSnapshot.costBasis) ? 0 : (m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis) / m_portfolioSnapshot.costBasis)
-                    );
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
         case aaRow::row_Target:
             extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_target));
-            break;
-        case aaRow::row_NAV:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
     }
 

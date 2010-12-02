@@ -27,7 +27,6 @@ public:
         row_ValueP,
         row_Gain,
         row_GainP,
-        row_NAV,
         row_Acct,
         row_AA,
         row_TaxLiability,

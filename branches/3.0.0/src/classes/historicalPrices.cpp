@@ -187,9 +187,14 @@ int historicalPrices::beginDate(type type_) const
     return 0;
 }
 
-QString& historicalPrices::symbol() const
+QString historicalPrices::symbol() const
 {
     return d->symbol;
+}
+
+void historicalPrices::setSymbol(const QString &symbol_)
+{
+    d->symbol = symbol_;
 }
 
 void historicalPricesMap::save(const queries &dataSource_)

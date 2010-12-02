@@ -19,14 +19,12 @@ void frmEditPortfolio_State::save()
 {
     m_portfolio.setDescription(ui->descTxt->text());
     m_portfolio.setStartDate(ui->startDateDateEdit->date().toJulianDay());
-    m_portfolio.setStartValue(ui->startValueTxt->text().toInt());
 }
 
 void frmEditPortfolio_State::load()
 {
     ui->descTxt->setText(m_portfolio.description());
     ui->startDateDateEdit->setDate(QDate::fromJulianDay(m_portfolio.startDate()));
-    ui->startValueTxt->setText(QString::number(m_portfolio.startValue()));
 }
 
 bool frmEditPortfolio_State::validate()

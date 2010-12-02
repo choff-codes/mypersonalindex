@@ -4,8 +4,8 @@
 #include "objectKey.h"
 
 class QString;
-class queries;
 class QSqlQuery;
+class queries;
 class assetAllocationData;
 class assetAllocation: public objectKey
 {

@@ -226,13 +226,14 @@ int calculatorNAV::endDateByKey(const objectKeyBase &key_)
     return 0;
 }
 
-double calculatorNAV::nav(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_)
+double calculatorNAV::nav(const objectKeyBase &key_, int beginDate_, int endDate_)
 {
-    return changeOverTime(key_, beginDate_, endDate_, navValue_).nav(endDate_);
+    return changeOverTime(key_, beginDate_, endDate_).nav(endDate_);
 }
 
-historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_)
+historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_)
 {
+    double navValue = 1;
     historicalNAV navHistory;
 
     beginDate_ = qMax(beginDateByKey(key_), beginDate_);
@@ -244,25 +245,25 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
 
     beginDate_ = calendar.date();
     snapshot priorSnapshot = snapshotByKey(beginDate_, key_, beginDate_, 0);
-    navHistory.insert(beginDate_, navValue_, priorSnapshot.totalValue, priorSnapshot.dividendAmountNAV); // baseline nav
+    navHistory.insert(beginDate_, navValue, priorSnapshot.totalValue, priorSnapshot.dividendAmount); // baseline nav
 
-    foreach(const int &date, ++calendar)
+    foreach(int date, ++calendar)
     {
         if (date > endDate_)
             break;
 
         snapshot currentSnapshot = snapshotByKey(date, key_, beginDate_, priorSnapshot.date);
 
-        navValue_ =
+        navValue =
                     change(
                         priorSnapshot.totalValue,
                         currentSnapshot.totalValue,
                         currentSnapshot.costBasis - priorSnapshot.costBasis,
                         currentSnapshot.dividendAmountNAV,
-                        navValue_
+                        navValue
                     );
 
-        navHistory.insert(date, navValue_, currentSnapshot.totalValue, currentSnapshot.dividendAmount);
+        navHistory.insert(date, navValue, currentSnapshot.totalValue, currentSnapshot.dividendAmount);
         priorSnapshot = currentSnapshot;
     }
 

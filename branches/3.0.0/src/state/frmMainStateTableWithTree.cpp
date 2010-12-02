@@ -91,7 +91,7 @@ historicalNAV frmMainStateTableWithTree::calculateNAV(QTreeWidgetItem *item_, in
     switch((objectType)item_->parent()->type())
     {
         case objectType_Portfolio:
-            return m_calculator.changeOverTime(m_portfolio, beginDate_, endDate_, m_portfolio.startValue());
+            return m_calculator.changeOverTime(m_portfolio, beginDate_, endDate_);
         case objectType_Account:
             return m_calculator.changeOverTime(m_portfolio.accounts().value(item_->type()), beginDate_, endDate_);
         case objectType_AA:

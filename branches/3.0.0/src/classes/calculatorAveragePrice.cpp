@@ -7,7 +7,7 @@
 #include <QTime>
 #endif
 
-double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_)
+double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits &splits_)
 {
 #ifdef CLOCKTIME
     QTime t;
@@ -47,16 +47,19 @@ double calculatorAveragePrice::calculate(int date_, const executedTradeMap &exec
         if (costBasis_ == account::costBasisMethod_AVG) // only positive trades factor into average
             continue;
 
-        while (!functions::isZero(t.shares) && !runningTrades.isEmpty()) // continue while shares to sell
+        while (!runningTrades.isEmpty()) // continue while shares to sell
         {
             QMap<double, sharePricePair>::iterator firstOut = runningTrades.begin();
 
-            if (firstOut->shares <= -1 * t.shares) // the sold shares are greater than the purchase, remove the entire buy
+            if (functions::massage(t.shares + firstOut->shares) <= 0) // the sold shares are greater than or equal to the purchase, remove the entire buy
             {
                 t.shares += firstOut->shares;
                 shares -= firstOut->shares;
                 total -= firstOut->shares * firstOut->price;
                 runningTrades.erase(firstOut);
+
+                if (functions::isZero(t.shares)) // all shares sold
+                    break;
             }
             else // the sold shares are less than the purchase, just subtract the sold shares from the buy
             {

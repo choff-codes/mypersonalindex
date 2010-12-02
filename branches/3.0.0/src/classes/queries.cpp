@@ -58,14 +58,12 @@ const QStringList queries::historicalPriceColumns = QStringList()
 //enum {
 //    portfolioColumns_ID,
 //    portfolioColumns_Description,
-//    portfolioColumns_StartValue,
 //    portfolioColumns_StartDate
 //};
 
 const QStringList queries::portfolioColumns = QStringList()
                                               << "ID"
                                               << "Description"
-                                              << "StartValue"
                                               << "StartDate";
 
 //enum {
@@ -270,7 +268,7 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
     }
 }
 
-int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_, bool getIdentity_) const
+int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const
 {
     if (tableName_.isEmpty() || values_.isEmpty())
         return id_;
@@ -297,7 +295,7 @@ int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &va
         query.addBindValue(value);
 
     query.exec();
-    return getIdentity_ ? getIdentity() : 0;
+    return getIdentity();
 }
 
 void queries::update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const
@@ -360,40 +358,10 @@ void queries::deleteTable(const QString &table_) const
 
 void queries::deleteItem(const QString &table_, int id_) const
 {
-    deleteItem(table_, "ID", id_);
+    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table_, QString::number(id_)));
 }
 
 void queries::deleteItem(const QString &table_, int id_, int beginDate_) const
 {
-    deleteItem(table_, "ID", id_, beginDate_);
-}
-
-void queries::deletePortfolioItems(const QString &table_, int portfolioID_) const
-{
-    deleteItem(table_, "PortfolioID", portfolioID_);
-}
-
-void queries::deletePortfolioItems(const QString &table_, int portfolioID_, int beginDate_) const
-{
-    deleteItem(table_, "PortfolioID", portfolioID_, beginDate_);
-}
-
-void queries::deleteSecurityItems(const QString &table_, int securityID_) const
-{
-    deleteItem(table_, "SecurityID", securityID_);
-}
-
-void queries::deleteSecurityItems(const QString &table_, int securityID_, int beginDate_) const
-{
-    deleteItem(table_, "SecurityID", securityID_, beginDate_);
-}
-
-void queries::deleteItem(const QString &table_, const QString &identifier_, int id_) const
-{
-    executeNonQuery(QString("DELETE FROM %1 WHERE %2 = %3").arg(table_,identifier_, QString::number(id_)));
-}
-
-void queries::deleteItem(const QString &table_, const QString &identifier_, int id_, int beginDate_) const
-{
-    executeNonQuery(QString("DELETE FROM %1 WHERE %2 = %3 AND Date >= %4").arg(table_, identifier_, QString::number(id_), QString::number(beginDate_)));
+    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table_, QString::number(id_), QString::number(beginDate_)));
 }

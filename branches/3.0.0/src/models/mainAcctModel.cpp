@@ -13,7 +13,6 @@
 //    row_ValueP,
 //    row_Gain,
 //    row_GainP,
-//    row_NAV,
 //    row_TaxRate,
 //    row_TaxLiability,
 //    row_Net,
@@ -27,7 +26,6 @@ const QStringList acctRow::columns = QStringList()
                                      << "% of Portfolio"
                                      << "Gain/Loss"
                                      << "% Gain/Loss"
-                                     << "NAV"
                                      << "Tax Rate"
                                      << "Tax Liability"
                                      << "After Tax Value"
@@ -35,7 +33,6 @@ const QStringList acctRow::columns = QStringList()
 
 const QVariantList acctRow::columnsType = QVariantList()
                                         << QVariant(QVariant::String)
-                                        << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
                                         << QVariant(QVariant::Double)
@@ -61,8 +58,6 @@ acctRow::acctRow(double nav_, const snapshot &snapshot_, const snapshot &portfol
     //    row_Gain,
     this->values.append(snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,
-    this->values.append(functions::isZero(snapshot_.costBasis) || functions::isZero(snapshot_.totalValue) ? QVariant() : (snapshot_.totalValue / snapshot_.costBasis) - 1);
-    //    row_NAV,
     this->values.append(nav_ - 1);
     //    row_TaxRate,
     this->values.append(account_.taxRate());
@@ -145,7 +140,6 @@ QVariant mainAcctModel::data(const QModelIndex &index_, int role_) const
             case acctRow::row_ValueP:
             case acctRow::row_GainP:
             case acctRow::row_TaxRate:
-            case acctRow::row_NAV:
                 return functions::doubleToPercentage(value.toDouble());
         }
 
@@ -184,18 +178,13 @@ QVariant mainAcctModel::headerData(int section_, Qt::Orientation orientation_, i
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis));
             break;
         case acctRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(
-                    functions::isZero(m_portfolioSnapshot.costBasis) ? 0 : (m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis) / m_portfolioSnapshot.costBasis)
-                );
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
         case acctRow::row_Net:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.taxLiability));
             break;
         case acctRow::row_TaxLiability:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.taxLiability));
-            break;
-        case acctRow::row_NAV:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
     }
 

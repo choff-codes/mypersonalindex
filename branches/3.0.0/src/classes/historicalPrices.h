@@ -28,7 +28,8 @@ public:
     double value(int date_, type type_) const;
     QMap<int, double> values(type type_) const;
 
-    QString& symbol() const;
+    QString symbol() const;
+    void setSymbol(const QString &symbol_);
 
     bool contains(int date_, type type_) const;
 
@@ -49,7 +50,7 @@ public:
     historicalPricesMap()
     {}
 
-    historicalPricesMap(const QHash<QString, historicalPrices> historicalPrices_):
+    historicalPricesMap(const QHash<QString, historicalPrices> &historicalPrices_):
         m_historicalPrices(historicalPrices_)
     {}
 

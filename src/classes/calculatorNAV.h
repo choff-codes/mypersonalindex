@@ -28,8 +28,8 @@ public:
     snapshot accountSnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot symbolSnapshot(int date_, const symbol &key_, int beginDate_);
 
-    double nav(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_ = 1);
-    historicalNAV changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_, double navValue_ = 1);
+    double nav(const objectKeyBase &key_, int beginDate_, int endDate_);
+    historicalNAV changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_);
 
 private:
     QExplicitlySharedDataPointer<calculatorNAVData> d;
@@ -38,7 +38,7 @@ private:
     int beginDateByKey(const objectKeyBase &key_);
     int endDateByKey(const objectKeyBase &key_);
 
-    double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_ = 1);
+    double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_);
 };
 
 #endif // CALCULATIONS_H

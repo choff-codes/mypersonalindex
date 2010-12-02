@@ -19,12 +19,10 @@ public:
     QMap<int, assetAllocation> assetAllocations;
     QMap<int, account> accounts;
 
-    int startValue;
     int startDate;
 
     explicit portfolioData(int id_, const QString &description_):
         objectKeyData(description_, id_),
-        startValue(100),
         startDate(QDate::currentDate().toJulianDay())
     {}
 };
@@ -59,12 +57,8 @@ bool portfolio::operator==(const portfolio &other_) const
         && d->securities == other_.d->securities
         && d->assetAllocations == other_.d->assetAllocations
         && d->accounts == other_.d->accounts
-        && d->startValue == other_.d->startValue
         && d->startDate == other_.d->startDate;
 }
-
-int portfolio::startValue() const { return d->startValue; }
-void portfolio::setStartValue(int startValue_) { d->startValue = startValue_; }
 
 int portfolio::startDate() const { return d->startDate; }
 void portfolio::setStartDate(int startDate_) { d->startDate = startDate_; }
@@ -83,7 +77,6 @@ portfolio portfolio::load(const QSqlQuery &q_)
     );
 
     p.setStartDate(q_.value(queries::portfolioColumns_StartDate).toInt());
-    p.setStartValue(q_.value(queries::portfolioColumns_StartValue).toInt());
 
     return p;
 }
@@ -105,7 +98,6 @@ void portfolio::save(const queries &dataSource_)
     // save portfolio
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioColumns.at(queries::portfolioColumns_Description), description());
-    values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartValue), startValue());
     values.insert(queries::portfolioColumns.at(queries::portfolioColumns_StartDate), startDate());
 
     this->setID(dataSource_.insert(queries::table_Portfolio, values, this->id()));
@@ -289,9 +281,6 @@ QString portfolio::validate() const
 {
     if (this->description().isEmpty())
         return "Please enter a description!";
-
-    if (this->startValue() < 1 || this->startValue() > 1000000)
-        return "Beginning NAV must be between 1 and 1000000!";
 
     return QString();
 }

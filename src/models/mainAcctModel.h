@@ -20,7 +20,6 @@ public:
         row_ValueP,
         row_Gain,
         row_GainP,
-        row_NAV,
         row_TaxRate,
         row_TaxLiability,
         row_Net,

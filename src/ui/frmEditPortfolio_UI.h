@@ -17,10 +17,6 @@ public:
     QFormLayout *layoutPortfolio;
     QLabel *desc;
     QLineEdit *descTxt;
-    QLabel *startValue;
-    QLineEdit *startValueTxt;
-    mpiIntValidator *startValueValidator;
-
     QLabel *startDate;
     mpiDateEdit *startDateDateEdit;
 

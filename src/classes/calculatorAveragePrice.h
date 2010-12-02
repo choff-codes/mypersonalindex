@@ -8,7 +8,7 @@ class splits;
 class calculatorAveragePrice
 {
 public:
-    static double calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_);
+    static double calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits &splits_);
 
 private:
     struct sharePricePair

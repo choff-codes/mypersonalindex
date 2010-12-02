@@ -18,7 +18,6 @@ public:
         row_ValueP,
         row_Gain,
         row_GainP,
-        row_NAV,
         row_Target,
         row_Variance,
         row_RebalanceBand,

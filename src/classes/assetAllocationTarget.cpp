@@ -35,9 +35,7 @@ void assetAllocationTarget::updateAssetAllocationID(int fromID_, int toID_)
     if (!contains(fromID_))
         return;
 
-    double target = value(fromID_);
-    m_targets.remove(fromID_);
-    m_targets.insert(toID_, target);
+    m_targets.insert(toID_, m_targets.take(fromID_));
 }
 
 void assetAllocationTarget::insertBatch(const queries &dataSource_)

@@ -29,7 +29,7 @@ historicalPricesMap priceFactory::getHistoricalPrices()
         );
 
     for(QHash<QString, historicalPrices>::iterator i = returnMap.begin(); i != returnMap.end(); ++i)
-        i.value().symbol() = i.key();
+        i.value().setSymbol(i.key());
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed (prices): %d ms", t.elapsed());

@@ -17,7 +17,6 @@ const QStringList performanceRow::columns = QStringList()
                                             << "Date"
                                             << "Total Value"
                                             << "Dividends"
-                                            << "Index"
                                             << "% Change"
                                             << "% Gain";
 
@@ -26,10 +25,9 @@ const QVariantList performanceRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Double)
                                                  << QVariant(QVariant::Double)
                                                  << QVariant(QVariant::Double)
-                                                 << QVariant(QVariant::Double)
                                                  << QVariant(QVariant::Double);
 
-performanceRow::performanceRow(int date_, double totalValue_, double dividend_, double index_, double change_, double gain_, const QList<orderBy> &columnSort_):
+performanceRow::performanceRow(int date_, double totalValue_, double dividend_, double nav_, double change_, const QList<orderBy> &columnSort_):
     baseRow(columnSort_)
 {
     //    row_Date,
@@ -38,12 +36,10 @@ performanceRow::performanceRow(int date_, double totalValue_, double dividend_, 
     this->values.append(totalValue_);
     //    row_Dividend,
     this->values.append(dividend_);
-    //    row_Index,
-    this->values.append(index_);
     //    row_Change,
     this->values.append(change_);
     //    row_Gain
-    this->values.append(gain_);
+    this->values.append(nav_ - 1);
 }
 
 QList<baseRow*> performanceRow::getRows(const historicalNAV &nav_, const QList<orderBy> &columnSort_)
@@ -56,12 +52,11 @@ QList<baseRow*> performanceRow::getRows(const historicalNAV &nav_, const QList<o
     int endDate = nav_.endDate();
 
     navPair previousNAV = nav_.value(calendar.date());
-    double beginNAV = previousNAV.nav;
 
     foreach(const int &date, calendar)
     {
         navPair nav = nav_.value(date);
-        returnList.append(new performanceRow(date, nav.totalValue, nav.dividend, nav.nav, (nav.nav - previousNAV.nav) / previousNAV.nav, (nav.nav - beginNAV) / beginNAV, columnSort_));
+        returnList.append(new performanceRow(date, nav.totalValue, nav.dividend, nav.nav, (nav.nav - previousNAV.nav) / previousNAV.nav, columnSort_));
 
         if (date == endDate)
             break;
@@ -105,7 +100,6 @@ QVariant mainPerformanceModel::data(const QModelIndex &index_, int role_) const
             return QDate::fromJulianDay(value.toInt()).toString(Qt::SystemLocaleShortDate);
         case performanceRow::row_TotalValue:
         case performanceRow::row_Dividend:
-        case performanceRow::row_Index:
             return functions::doubleToLocalFormat(value.toDouble());
         case performanceRow::row_Change:
         case performanceRow::row_Gain:

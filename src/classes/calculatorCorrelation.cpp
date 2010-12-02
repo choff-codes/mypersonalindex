@@ -25,8 +25,7 @@ double calculatorCorrelation::correlation(const historicalNAV &first_, const his
     double security2Square = 0;
     double productSquare = 0;
 
-    ++calendar;
-    foreach(const int &date, calendar)
+    foreach(int date, ++calendar)
     {
         if (date > endDate)
             break;

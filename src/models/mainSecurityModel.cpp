@@ -44,7 +44,6 @@ const QStringList securityRow::columns = QStringList()
                                          << "% of\nPortfolio"
                                          << "Gain/Loss"
                                          << "% Gain/Loss"
-                                         << "NAV"
                                          << "Account"
                                          << "Asset Allocation"
                                          << "Tax Liability"
@@ -57,7 +56,6 @@ const QVariantList securityRow::columnsType = QVariantList()
                                               << QVariant(QVariant::String)
                                               << QVariant(QVariant::String)
                                               << QVariant(QVariant::Int)
-                                              << QVariant(QVariant::Double)
                                               << QVariant(QVariant::Double)
                                               << QVariant(QVariant::Double)
                                               << QVariant(QVariant::Double)
@@ -93,12 +91,13 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Avg,
     // cash should always be computed as average
     //s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
+    splits splitRatio(security_.splits(), snapshot_.date);
     this->values.append(
         functions::isZero(snapshot_.shares) ?
             QVariant() :
             security_.cashAccount() ?
                 1 :
-                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades(), costBasis_, splits(security_.splits(), snapshot_.date))
+                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades(), costBasis_, splitRatio)
     );
     //    row_Cost,
     this->values.append(snapshot_.costBasis);
@@ -107,11 +106,9 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_ValueP,
     this->values.append(functions::isZero(portfolioSnapshot_.totalValue) ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
     //    row_Gain,
-    this->values.append(functions::isZero(snapshot_.shares) ? QVariant() : snapshot_.totalValue - snapshot_.costBasis);
+    this->values.append(snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,
-    this->values.append(functions::isZero(snapshot_.shares) || functions::isZero(snapshot_.costBasis) ? QVariant() : (snapshot_.totalValue / snapshot_.costBasis) - 1);
-    //    row_NAV,
-    this->values.append(nav_);
+    this->values.append(nav_ - 1);
     //    row_Acct,
     this->values.append(account_);
     //    row_AA,
@@ -205,8 +202,6 @@ QVariant mainSecurityModel::data(const QModelIndex &index_, int role_) const
                 return functions::doubleToPercentage(value.toDouble());
             case securityRow::row_Shares:
                 return functions::doubleToLocalFormat(value.toDouble(), 4);
-            case securityRow::row_NAV:
-                return functions::doubleToLocalFormat(value.toDouble());
         }
 
         return value;
@@ -218,7 +213,7 @@ QVariant mainSecurityModel::data(const QModelIndex &index_, int role_) const
     }
 
     if (role_ == Qt::TextColorRole && column == securityRow::row_GainP)
-        return functions::isZero(value.toDouble()) == 0 ?
+        return functions::isZero(value.toDouble()) ?
             QVariant() :
             value.toDouble() > 0 ?
                 qVariantFromValue(QColor(Qt::darkGreen)) :
@@ -252,20 +247,13 @@ QVariant mainSecurityModel::headerData(int section_, Qt::Orientation orientation
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis));
             break;
         case securityRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(
-                functions::isZero(m_portfolioSnapshot.costBasis) ?
-                    0 :
-                    (m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis) / m_portfolioSnapshot.costBasis)
-                );
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV));
             break;
         case securityRow::row_TaxLiability:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.taxLiability));
             break;
         case securityRow::row_NetValue:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.taxLiability));
-            break;
-        case securityRow::row_NAV:
-            extra = QString("\n[%1]").arg(functions::doubleToLocalFormat(m_portfolioNAV));
             break;
     }
 

@@ -28,15 +28,15 @@ public:
         deleted(false)
     {}
 
+    virtual ~objectKeyData() {}
+
     bool operator ==(const objectKeyData &other_)
     {
         return this->objectBase::operator==(other_)
             && this->description == other_.description
             && this->id == other_.id
             && this->deleted == other_.deleted;
-    }
-
-    virtual ~objectKeyData() {}
+    }    
 };
 
 class objectKeyBase

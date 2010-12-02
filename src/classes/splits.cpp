@@ -1,6 +1,6 @@
 #include "splits.h"
 
-void splits::initialize(const QMap<int, double> &splits_, int date_, int beginDate_)
+splits::splits(const QMap<int, double> &splits_, int date_, int beginDate_)
 {
     m_splits = splits_;
     m_ratio = 1;

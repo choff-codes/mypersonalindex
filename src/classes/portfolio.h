@@ -31,9 +31,6 @@ public:
 
     static int getOpenIdentity() { return --IDENTITY_COUNTER; }
 
-    int startValue() const;
-    void setStartValue(int startValue_);
-
     int startDate() const;
     void setStartDate(int startDate_);
 

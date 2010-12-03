@@ -13,7 +13,7 @@ frmEditStateMap::frmEditStateMap(const portfolio &portfolio_, QObject *parent_):
 template <class T>
 bool frmEditStateMap::validateMap(const QMap<int, T> &map_)
 {
-    foreach(T item, map_.values())
+    foreach(T item, map_)
     {
         if (item.deleted())
             continue;
@@ -48,6 +48,7 @@ QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, T> &map_) const
         if (i.value().deleted())
             continue;
 
+        // add the items back in ascending order for saved items, but descending order for new (< UNASSIGNED) items
         if (i.value().id() < UNASSIGNED)
             list.append(new T(i.value()));
         else

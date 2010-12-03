@@ -93,7 +93,7 @@ void frmEditSecurity_State::addAA()
 
 void frmEditSecurity_State::deleteAA()
 {
-    static_cast<securityAAModel*>(ui->aa->model())->deleteSelected(ui->aa->selectionModel());
+    static_cast<securityAAModel*>(ui->aa->model())->deleteSelected(ui->aa->selectionModel()->selectedRows());
 }
 
 void frmEditSecurity_State::customContextMenuRequested(const QPoint&)

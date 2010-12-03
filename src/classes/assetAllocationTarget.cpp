@@ -25,7 +25,7 @@ void assetAllocationTarget::remove(int id_)
 double assetAllocationTarget::totalAssignedPercentage() const
 {
     double total = 0;
-    foreach(const double &d, m_targets)
+    foreach(double d, m_targets)
         total += d;
     return functions::massage(total - m_targets.value(UNASSIGNED));
 }

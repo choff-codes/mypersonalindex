@@ -175,8 +175,11 @@ QVariant mainAAModel::data(const QModelIndex &index_, int role_) const
     }
 
     if (role_ == Qt::TextColorRole && column == aaRow::row_GainP)
-        return value.toDouble() == 0 ? QVariant() :
-            value.toDouble() > 0 ? qVariantFromValue(QColor(Qt::darkGreen)) : qVariantFromValue(QColor(Qt::red));
+        return functions::isZero(value.toDouble()) ?
+            QVariant() :
+            value.toDouble() > 0 ?
+                qVariantFromValue(QColor(Qt::darkGreen)) :
+                qVariantFromValue(QColor(Qt::red));
 
     return QVariant();
 }

@@ -94,12 +94,14 @@ QVariant mainCorrelationModel::headerData(int section_, Qt::Orientation /* not u
 void mainCorrelationModel::add(correlationRow *row_, const correlationRow &key_)
 {
     beginInsertRows(QModelIndex(), m_rows.count(), m_rows.count());
+    // add correlation to every other row, which is calculated and passed in with the row_ object
     foreach(baseRow *row, m_rows)
         static_cast<correlationRow*>(row)->correlationValues.insert(key_, row_->correlationValues.value(*static_cast<correlationRow*>(row)));
     m_rows.append(row_);
     endInsertRows();
 
     beginInsertColumns(QModelIndex(), m_rows.count(), m_rows.count());
+    // add dummy column
     m_viewableColumns.append(0);
     endInsertColumns();
 
@@ -120,6 +122,7 @@ void mainCorrelationModel::remove(const correlationRow &key_)
     if (index == -1)
         return;
 
+    // remove row and column at the same time to prevent out of index exceptions
     beginRemoveRows(QModelIndex(), index, index);
     beginRemoveColumns(QModelIndex(), index, index);
     m_rows.removeAt(index);   

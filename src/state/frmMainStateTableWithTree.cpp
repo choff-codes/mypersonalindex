@@ -43,17 +43,29 @@ void frmMainStateTableWithTree::setupUI(bool hasRowLabels_)
     items.at(0)->addChild(createTreeItem(m_portfolio.id(), m_portfolio.displayText()));
 
     foreach(const account &acct, m_portfolio.accounts())
+    {
+        if (acct.deleted())
+            continue;
         items.at(1)->addChild(createTreeItem(acct.id(), acct.displayText()));
+    }
 
     foreach(const assetAllocation &aa, m_portfolio.assetAllocations())
+    {
+        if (aa.deleted())
+            continue;
         items.at(2)->addChild(createTreeItem(aa.id(), aa.displayText()));
+    }
 
     QSet<QString> symbolsWithDividends;
     QSet<QString> symbolsWithoutDividends;
 
     foreach(const security &sec, m_portfolio.securities())
     {
+        if (sec.deleted())
+            continue;
+
         items.at(3)->addChild(createTreeItem(sec.id(), sec.displayText()));
+
         if (sec.cashAccount())
             continue;
 

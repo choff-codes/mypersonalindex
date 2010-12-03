@@ -127,7 +127,7 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
 
             if (t.action() == trade::tradeAction_ReinvestDividendsAuto) // get each dividend date greater than or equal to current date
             {
-                foreach(const int &date, calculateDividendReinvestmentDates(date_, sec.dividends()))
+                foreach(int date, calculateDividendReinvestmentDates(date_, sec.dividends()))
                     calculatedTrades[date][sec.id()].append(t);
 
                 continue;
@@ -254,7 +254,7 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
             for(QMap<int, double>::const_iterator i = targets.constBegin(); i != targets.constEnd(); ++i)
             {
                 double target = aa.value(i.key()).target();
-                if (functions::massage(target) == 0)
+                if (functions::isZero(target))
                     continue;
 
                 shares +=

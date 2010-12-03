@@ -23,9 +23,6 @@ frmSort::frmSort(const QList<orderBy> &orderBy_, const QMap<int, QString> &colum
         ui->sort3Cmb->addItem(i.value(), i.key());
     }
 
-    if (m_orderBy.isEmpty())
-        return;
-
     for (int i = 0; i < m_orderBy.count(); ++i)
     {
         orderBy o = m_orderBy.at(i);

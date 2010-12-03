@@ -27,7 +27,7 @@ void snapshot::add(const snapshot &other_, double multiplier_)
 
 void snapshotSecurity::setTaxLiability(double taxRate_, bool taxDeferred_)
 {
-    if (functions::massage(taxRate_ ) == 0)
+    if (functions::isZero(taxRate_ ))
         return;
 
     if (taxDeferred_)

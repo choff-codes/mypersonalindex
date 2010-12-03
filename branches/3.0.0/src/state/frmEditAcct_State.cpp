@@ -8,7 +8,7 @@ frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *paren
     frmEditStateMap(portfolio_, parent_),
     ui(new frmEditAcct_UI),
     m_currentItem(0),
-    m_model(new objectKeyEditModel(mapToList(portfolio_.assetAllocations())))
+    m_model(new objectKeyEditModel(mapToList(portfolio_.accounts())))
 {
     ui->setupUI(parent_);
     ui->list->setModel(m_model);

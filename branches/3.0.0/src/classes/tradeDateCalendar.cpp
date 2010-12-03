@@ -35,7 +35,7 @@ QList<int> tradeDateCalendar::computeFrequencyTradeDaily(int minimumDate_, int m
     QList<int> tradeDates;
 
     tradeDateCalendar calendar(minimumDate_);
-    foreach(const int &date, calendar)
+    foreach(int date, calendar)
     {
         if (date > maximumDate_)
             break;

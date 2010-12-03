@@ -19,7 +19,7 @@ frmColumns::frmColumns(const QList<int> &selectedItems_, const QMap<int, QString
         item->setData(Qt::UserRole, i.key());
     }
 
-    foreach(const int &itemID, m_selectedItems)
+    foreach(int itemID, m_selectedItems)
     {
         if (!items_.contains(itemID))
             continue;

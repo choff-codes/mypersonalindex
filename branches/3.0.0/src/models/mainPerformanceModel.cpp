@@ -51,16 +51,17 @@ QList<baseRow*> performanceRow::getRows(const historicalNAV &nav_, const QList<o
     tradeDateCalendar calendar(nav_.beginDate());
     int endDate = nav_.endDate();
 
+    // baseline
     navPair previousNAV = nav_.value(calendar.date());
+    returnList.append(new performanceRow(calendar.date(), previousNAV.totalValue, previousNAV.dividend, previousNAV.nav, 0, columnSort_));
 
-    foreach(const int &date, calendar)
+    foreach(int date, ++calendar)
     {
-        navPair nav = nav_.value(date);
-        returnList.append(new performanceRow(date, nav.totalValue, nav.dividend, nav.nav, (nav.nav - previousNAV.nav) / previousNAV.nav, columnSort_));
-
-        if (date == endDate)
+        if (date > endDate)
             break;
 
+        navPair nav = nav_.value(date);
+        returnList.append(new performanceRow(date, nav.totalValue, nav.dividend, nav.nav, (nav.nav - previousNAV.nav) / previousNAV.nav, columnSort_));
         previousNAV = nav;
     }
 

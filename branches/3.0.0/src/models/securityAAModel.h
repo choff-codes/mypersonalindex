@@ -6,7 +6,6 @@
 #include "assetAllocationTarget.h"
 #include "assetAllocation.h"
 
-class QItemSelectionModel;
 class securityAAModel: public QAbstractTableModel
 {
 public:
@@ -22,7 +21,7 @@ public:
     }
 
     void addNew(int id_);
-    void deleteSelected(QItemSelectionModel *selection_);
+    void deleteSelected(const QModelIndexList &selection_);
 
 private:
     assetAllocationTarget m_target;

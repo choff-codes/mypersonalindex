@@ -2,8 +2,8 @@
 #define FRMEDIT_H
 
 #include <QDialog>
-#include "portfolio.h"
 #include <QMap>
+#include "portfolio.h"
 
 class frmEdit_UI;
 class frmEditState;

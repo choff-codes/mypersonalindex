@@ -1,5 +1,4 @@
 #include "securityAAModel.h"
-#include <QItemSelectionModel>
 #include "functions.h"
 
 Qt::ItemFlags securityAAModel::flags(const QModelIndex &index_) const
@@ -61,7 +60,6 @@ bool securityAAModel::setData(const QModelIndex &index_, const QVariant &value_,
         return true;
 
     }
-
     return false;
 }
 
@@ -80,10 +78,10 @@ void securityAAModel::addNew(int id_)
     endInsertRows();
 }
 
-void securityAAModel::deleteSelected(QItemSelectionModel *selection_)
+void securityAAModel::deleteSelected(const QModelIndexList &selection_)
 {
     QList<int> indexes;
-    foreach(const QModelIndex &q, selection_->selectedRows())
+    foreach(const QModelIndex &q, selection_)
         indexes.append(q.row());
     qSort(indexes);
 

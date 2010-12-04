@@ -1,6 +1,7 @@
 #include "mainCorrelationModel.h"
 #include <QColor>
 #include <QVector>
+#include <QPalette>
 #include "functions.h"
 
 const QList<orderBy> correlationRow::correlationOrder = QList<orderBy>()
@@ -18,13 +19,15 @@ const QVariantList correlationRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::String);
 
-correlationRow::correlationRow(objectType type_, int id_):
+correlationRow::correlationRow(objectType type_, int id_, const QString &description_):
     baseRow(correlationOrder)
 {
     //    row_ObjectType,
         values.append((int)type_);
     //    row_ID,
         values.append(id_);
+    //    row_Description
+        values.append(description_);
 }
 
 correlationRow::correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
@@ -42,7 +45,8 @@ correlationRow::correlationRow(objectType type_, int id_, const QString &descrip
 bool correlationRow::operator==(const correlationRow &other_) const
 {
     return values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
-        && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt();
+        && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt()
+        && values.at(row_Description).toString() == other_.values.at(row_Description).toString();
 }
 
 bool correlationRow::operator<(const correlationRow &other_) const
@@ -50,7 +54,10 @@ bool correlationRow::operator<(const correlationRow &other_) const
     if (values.at(row_ObjectType).toInt() < other_.values.at(row_ObjectType).toInt())
         return true;
 
-    return values.at(row_ID).toInt() < other_.values.at(row_ID).toInt();
+    if (values.at(row_ID).toInt() < other_.values.at(row_ID).toInt())
+        return true;
+
+    return values.at(row_Description).toString() < other_.values.at(row_Description).toString();
 }
 
 mainCorrelationModel::mainCorrelationModel(const QList<baseRow*> &rows_, QObject *parent_):
@@ -74,7 +81,7 @@ QVariant mainCorrelationModel::data(const QModelIndex &index_, int role_) const
         return functions::doubleToPercentage(value);
 
     // Qt::BackgroundRole
-    QColor c(205, 92, 92);
+    QColor c = QPalette().color(QPalette::ToolTipBase);
 
     if (value < 0)
         return c.lighter(100 + (150 * value));
@@ -111,21 +118,21 @@ void mainCorrelationModel::add(correlationRow *row_, const correlationRow &key_)
 
 void mainCorrelationModel::remove(const correlationRow &key_)
 {
-    int index = -1;
+    int row = -1;
     for(int i = 0; i < m_rows.count(); ++i)
         if (*static_cast<correlationRow*>(m_rows.at(i)) == key_)
         {
-            index = i;
+            row = i;
             break;
         }
 
-    if (index == -1)
+    if (row == -1)
         return;
 
     // remove row and column at the same time to prevent out of index exceptions
-    beginRemoveRows(QModelIndex(), index, index);
-    beginRemoveColumns(QModelIndex(), index, index);
-    m_rows.removeAt(index);   
+    beginRemoveRows(QModelIndex(), row, row);
+    beginRemoveColumns(QModelIndex(), row, row);
+    m_rows.removeAt(row);
     m_viewableColumns.removeLast();
     endRemoveRows();
     endRemoveColumns();

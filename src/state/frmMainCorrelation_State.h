@@ -1,9 +1,9 @@
 #ifndef FRMMAINCORRELATION_STATE_H
 #define FRMMAINCORRELATION_STATE_H
 
+#include <QTreeWidgetItem>
 #include "frmMainStateTableWithTree.h"
 
-class QTreeWidgetItem;
 class frmMainCorrelation_State : public frmMainStateTableWithTree
 {
     Q_OBJECT
@@ -26,6 +26,11 @@ protected:
     QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_);
 
     QList<QTreeWidgetItem*> selectedItems();
+
+    historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
+
+private:
+    QMap<QTreeWidgetItem*, historicalNAV> m_cache;
 };
 
 

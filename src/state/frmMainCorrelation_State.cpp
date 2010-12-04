@@ -50,7 +50,7 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
 
     if (item_->checkState(0) == Qt::Unchecked)
     {
-        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow((objectType)item_->parent()->type(), item_->type()));
+        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0)));
         return;
     }
 
@@ -65,12 +65,12 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
             continue;
 
         double correlation = calculatorCorrelation::correlation(nav, calculateNAV(selected, beginDate, endDate));
-        correlations.insert(correlationRow((objectType)selected->parent()->type(), selected->type()), correlation);
+        correlations.insert(correlationRow((objectType)selected->parent()->type(), selected->type(), selected->text(0)), correlation);
     }
 
     static_cast<mainCorrelationModel*>(ui->table->model())->add(
         new correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0), correlations),
-        correlationRow((objectType)item_->parent()->type(), item_->type())
+        correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0))
     );
 }
 
@@ -94,12 +94,13 @@ QList<QTreeWidgetItem*> frmMainCorrelation_State::selectedItems()
 
 mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endDate_)
 {
+    m_cache.clear();
+
     QList<QTreeWidgetItem*> items = selectedItems();
     if (items.isEmpty())
         return new mainCorrelationModel(QList<baseRow*>(), ui->table);
 
     QMap<QTreeWidgetItem*, correlationRow*> rowsMap;
-    QMap<QTreeWidgetItem*, historicalNAV> navCache;
     QList<baseRow*> rows;
 
     foreach(QTreeWidgetItem* item, items)
@@ -113,21 +114,23 @@ mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endD
     {
         QTreeWidgetItem *item1 = items.at(i);
 
-        if (i == 0)
-            navCache.insert(item1, calculateNAV(item1, beginDate_, endDate_));
-
         for (int x = i + 1; x < items.count(); ++x)
         {
             QTreeWidgetItem *item2 = items.at(x);
 
-            if (i == 0)
-                navCache.insert(item2, calculateNAV(item2, beginDate_, endDate_));
-
-            double correlation = calculatorCorrelation::correlation(navCache.value(item1), navCache.value(item2));
-            rowsMap[item1]->correlationValues.insert(correlationRow((objectType)item2->parent()->type(), item2->type()), correlation);
-            rowsMap[item2]->correlationValues.insert(correlationRow((objectType)item1->parent()->type(), item1->type()), correlation);
+            double correlation = calculatorCorrelation::correlation(calculateNAV(item1, beginDate_, endDate_), calculateNAV(item2, beginDate_, endDate_));
+            rowsMap[item1]->correlationValues.insert(correlationRow((objectType)item2->parent()->type(), item2->type(), item2->text(0)), correlation);
+            rowsMap[item2]->correlationValues.insert(correlationRow((objectType)item1->parent()->type(), item1->type(), item1->text(0)), correlation);
         }
     }
 
     return new mainCorrelationModel(rows, ui->table);
+}
+
+historicalNAV frmMainCorrelation_State::calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_)
+{
+    if (!m_cache.contains(item_))
+        m_cache.insert(item_, frmMainStateTableWithTree::calculateNAV(item_, beginDate_, endDate_));
+
+    return m_cache.value(item_);
 }

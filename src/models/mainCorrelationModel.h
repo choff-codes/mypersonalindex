@@ -18,7 +18,7 @@ public:
 
     QMap<correlationRow, double> correlationValues;
 
-    correlationRow(objectType type_, int id_);
+    correlationRow(objectType type_, int id_, const QString &description_);
     correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
 
     bool operator==(const correlationRow &other_) const;

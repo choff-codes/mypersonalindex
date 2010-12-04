@@ -24,18 +24,18 @@ void frmMainStateTableWithTree::setupUI(bool hasRowLabels_)
     QTreeWidget *tree = static_cast<frmMainTableViewTree_UI*>(ui)->tree;
 
     QList<QTreeWidgetItem*> items;
-    items << new QTreeWidgetItem(QStringList() << "Portfolio", objectType_Portfolio)
-          << new QTreeWidgetItem(QStringList() << "Accounts", objectType_Account)
-          << new QTreeWidgetItem(QStringList() << "Asset Classes", objectType_AA)
-          << new QTreeWidgetItem(QStringList() << "Securities", objectType_Security)
-          << new QTreeWidgetItem(QStringList() << "Symbols", objectType_Symbol);
+    items << createTreeItem(objectType_Portfolio, "Portfolio")
+          << createTreeItem(objectType_Account, "Accounts")
+          << createTreeItem(objectType_AA, "Asset Classes")
+          << createTreeItem(objectType_Security, "Securities")
+          << createTreeItem(objectType_Symbol, "Symbols");
 
     foreach(QTreeWidgetItem* item, items)
     {
         QFont font = item->font(0);
         font.setBold(true);
         item->setFont(0, font);
-        item->setFlags(Qt::ItemIsEnabled);
+        item->setFlags(item->flags() | Qt::ItemIsTristate);
     }
 
     tree->insertTopLevelItems(0, items);

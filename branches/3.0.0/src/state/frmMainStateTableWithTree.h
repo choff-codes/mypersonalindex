@@ -3,10 +3,11 @@
 
 #include "frmMainStateTable.h"
 #include "historicalPrices.h"
+#include "frmMainStateTree.h"
 
 class QTreeWidgetItem;
 class frmMainTableView_UI;
-class frmMainStateTableWithTree : public frmMainStateTable
+class frmMainStateTableWithTree : public frmMainStateTable, public frmMainStateTree
 {
 public:
     frmMainStateTableWithTree(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
@@ -18,12 +19,11 @@ protected:
     QHash<QString, historicalPrices> m_prices;
 
     virtual void setupUI(bool hasRowLabels_ = false);
+    QTreeWidget* treeWidget();
 
     virtual frmMainTableView_UI* createUI();
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_) = 0;
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_) = 0;
-
-    QList<QTreeWidgetItem*> selectedItems();
 
     virtual historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
 };

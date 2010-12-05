@@ -21,6 +21,7 @@
 #include "frmMainAcct_State.h"
 #include "frmMainCorrelation_State.h"
 #include "frmMainStatistic_State.h"
+#include "frmMainChart_State.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -83,6 +84,7 @@ void frmMain::connectSlots()
     connect(ui->viewAccounts, SIGNAL(triggered()), this, SLOT(tabAccount()));
     connect(ui->viewCorrelations, SIGNAL(triggered()), this, SLOT(tabCorrelation()));
     connect(ui->viewStatistics, SIGNAL(triggered()), this, SLOT(tabStatistic()));
+    connect(ui->viewCharts, SIGNAL(triggered()), this, SLOT(tabChart()));
 }
 
 void frmMain::loadSettings()
@@ -405,6 +407,9 @@ void frmMain::switchToTab(tab tab_, bool force_)
             break;
         case tab_statistic:
             m_tabs.insert(tab_statistic, new frmMainStatistic_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, m_file->prices.getHistoricalPrices(), this));
+            break;
+        case tab_chart:
+            m_tabs.insert(tab_chart, new frmMainChart_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_file->prices.getHistoricalPrices(), this));
             break;
     }
 

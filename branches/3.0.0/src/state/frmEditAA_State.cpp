@@ -2,6 +2,8 @@
 #include <QMessageBox>
 #include "frmEditAA_UI.h"
 #include "assetAllocation.h"
+#include "security.h"
+#include "assetAllocationTarget.h"
 #include "objectKeyEditModel.h"
 
 frmEditAA_State::frmEditAA_State(const portfolio &portfolio_, QWidget *parent_):
@@ -109,7 +111,20 @@ void frmEditAA_State::remove()
     if (!m_currentItem)
         return;
 
+    foreach(security s, m_portfolio.securities())
+        if (s.targets().contains(m_currentItem->id()))
+        {
+            if (QMessageBox::question(static_cast<QWidget*>(this->parent()), "Delete?",
+                QString("The asset class %1 is used is one or more securities, are you sure you want to delete?").arg(m_currentItem->displayText()),
+                QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+                    return;
+
+            break;
+        }
+
     m_portfolio.assetAllocations()[m_currentItem->id()].setDeleted(true);
+    foreach(security s, m_portfolio.securities())
+        s.targets().remove(m_currentItem->id());
     m_model->remove(m_currentItem);
 }
 

@@ -38,6 +38,7 @@ frmEditSecurity_State::~frmEditSecurity_State()
 
 void frmEditSecurity_State::enter()
 {
+    load(); // this could be modified by the AA and Acct tab, so reload the current item
     ui->list->setEnabled(true);
 
     ui->aaCmb->clear();

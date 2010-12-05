@@ -35,6 +35,7 @@ private slots:
     void tabPerformance() { switchToTab(tab_performance); }
     void tabCorrelation() { switchToTab(tab_correlation); }
     void tabStatistic() { switchToTab(tab_statistic); }
+    void tabChart() { switchToTab(tab_chart); }
     void fileChange(const QString &filePath_, bool newFile_);
 
 private:

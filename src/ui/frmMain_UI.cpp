@@ -28,7 +28,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     viewAssetAllocation = new QAction("Asset Allocation", mainWindow_);
     viewSecurities = new QAction("Securities", mainWindow_);
     viewStatistics = new QAction("Statistics", mainWindow_);
-    viewCharts = new QAction("Charts", mainWindow_);
+    viewCharts = new QAction("Charting", mainWindow_);
     viewCorrelations = new QAction("Correlations", mainWindow_);
     viewPerformance = new QAction("Performance", mainWindow_);
 

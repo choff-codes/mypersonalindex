@@ -24,7 +24,7 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, bool h
     table->horizontalHeader()->setHighlightSections(false);
     table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 2);
     table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    layoutTable->addWidget(table, 2);
+    layoutTable->addWidget(table, 3);
 
     layout->addWidget(toolbar);
     layout->addWidget(widgetTable);

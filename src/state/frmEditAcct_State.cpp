@@ -2,6 +2,7 @@
 #include <QMessageBox>
 #include "frmEditAcct_UI.h"
 #include "account.h"
+#include "security.h"
 #include "objectKeyEditModel.h"
 
 frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *parent_):
@@ -109,7 +110,20 @@ void frmEditAcct_State::remove()
     if (!m_currentItem)
         return;
 
+    foreach(security s, m_portfolio.securities())
+        if (s.account() == m_currentItem->id())
+        {
+            if (QMessageBox::question(static_cast<QWidget*>(this->parent()), "Delete?",
+                QString("The accout %1 is used is one or more securities, are you sure you want to delete?").arg(m_currentItem->displayText()),
+                QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+                    return;
+
+            break;
+        }
+
     m_portfolio.accounts()[m_currentItem->id()].setDeleted(true);
+    foreach(security s, m_portfolio.securities())
+        s.setAccount(UNASSIGNED);
     m_model->remove(m_currentItem);
 
 }

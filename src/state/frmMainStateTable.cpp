@@ -46,6 +46,7 @@ void frmMainStateTable::setupUI(bool hasRowLabels_)
 
 frmMainStateTable::~frmMainStateTable()
 {
+    delete ui->table->model();
     delete ui;
 }
 

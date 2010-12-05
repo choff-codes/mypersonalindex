@@ -1,22 +1,25 @@
 #include "mpiChartCurve.h"
+#include <qwt_plot_curve.h>
 
-void mpiChartCurve::setCurve(QwtPlotCurve *curve_)
+mpiChartCurve::mpiChartCurve(QwtPlot *chart_):
+    m_chart(chart_),
+    m_curve(new QwtPlotCurve())
 {
-    if (m_curve)
-    {
-        m_curve->detach();
-        delete m_curve;
-        m_xData.clear();
-        m_yData.clear();
-    }
-    m_curve = curve_;
 }
 
-void mpiChartCurve::attach(QwtPlot *chart_)
+mpiChartCurve::~mpiChartCurve()
 {
-    if (!m_curve)
-        return;
+    QVector<double> x, y;
+    m_curve->detach();
+    // hack for now?  qwt doesn't seem to redraw properly until a curve is attached after a detachment, so attach dummy
+    m_curve->setRawData(x.constData(), y.constData(), 0);
+    m_curve->attach(m_chart);
+    m_curve->detach();
+    delete m_curve;
+}
 
-    m_curve->setRawData(&m_xData[0], &m_yData[0], count());
-    m_curve->attach(chart_);
+void mpiChartCurve::attach()
+{
+    m_curve->setRawData(m_xData.constData(),m_yData.constData(), count());
+    m_curve->attach(m_chart);
 }

@@ -1,56 +1,35 @@
 #ifndef STATISTIC_H
 #define STATISTIC_H
 
-#include <QStringList>
-
-class statisticInfo;
+class historicalNAV;
 class statistic
 {
 public:
-    enum stat {
-        stat_BeginningIndexValue,
-        stat_BeginningValue,
-        stat_CostBasis,
-        stat_CurrentIndexValue,
-        stat_CurrentValue,
-        stat_DailyReturn,
-        stat_DailyStandardDeviation,
-        stat_Date,
-        stat_DaysInvested,
-        stat_GainLoss,
-        stat_HourlyReturn,
-        stat_MaxPercentDown,
-        stat_MaxPercentDownDay,
-        stat_MaxPercentUp,
-        stat_MaxPercentUpDay,
-        stat_MaximumIndexValue,
-        stat_MaximumIndexValueDay,
-        stat_MaximumPortfolioValue,
-        stat_MaximumPortfolioValueDay,
-        stat_MinimumIndexValue,
-        stat_MinimumIndexValueDay,
-        stat_MinimumPortfolioValue,
-        stat_MinimumPortfolioValueDay,
-        stat_MonthlyReturn,
-        stat_MonthlyStandardDeviation,
-        stat_NetChange,
-        stat_OverallReturn,
-        stat_ProbabilityOfYearlyGain,
-        stat_ProbabilityOfYearlyLoss,
-        stat_TaxLiability,
-        stat_YearlyReturn,
-        stat_YearlyStandardDeviation,
-        stat_WeightedExpenseRatio
-    };
+    statistic(const historicalNAV &historicalNAV_);
 
-    static const QStringList statisticDisplayNames;
-
-    static QString calculate(stat statistic_, const statisticInfo &statisticInfo_);
-    static QMap<int, QString> statisticList();
-
-private:
-    static double returnPercent(const statisticInfo &statisticInfo_, double divisor);
-    static double cumulativeNormalDistribution(const statisticInfo &statisticInfo_);
+    int beginDate;
+    int endDate;
+    double beginNAV;
+    double endNAV;
+    double beginTotalValue;
+    double endTotalValue;
+    int days;
+    double standardDeviation;
+    double maxChangePositive;
+    int maxChangePositiveDay;
+    double maxChangeNegative;
+    int maxChangeNegativeDay;
+    double minNAVValue;
+    int minNAVValueDay;
+    double maxNAVValue;
+    int maxNAVValueDay;
+    double minTotalValue;
+    int minTotalValueDay;
+    double maxTotalValue;
+    int maxTotalValueDay;
+    double expenseRatio;
+    double costBasis;
+    double taxLiability;
 };
 
 #endif // STATISTIC_H

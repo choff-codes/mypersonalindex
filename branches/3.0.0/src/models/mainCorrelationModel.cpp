@@ -19,23 +19,23 @@ const QVariantList correlationRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::String);
 
-correlationRow::correlationRow(objectType type_, int id_, const QString &description_):
+correlationRow::correlationRow(int type_, int id_, const QString &description_):
     baseRow(correlationOrder)
 {
     //    row_ObjectType,
-        values.append((int)type_);
+        values.append(type_);
     //    row_ID,
         values.append(id_);
     //    row_Description
         values.append(description_);
 }
 
-correlationRow::correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
+correlationRow::correlationRow(int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
     baseRow(correlationOrder),
     correlationValues(correlationValues_)
 {
 //    row_ObjectType,
-    values.append((int)type_);
+    values.append(type_);
 //    row_ID,
     values.append(id_);
 //    row_Description
@@ -61,7 +61,7 @@ bool correlationRow::operator<(const correlationRow &other_) const
 }
 
 mainCorrelationModel::mainCorrelationModel(const QList<baseRow*> &rows_, QObject *parent_):
-    mpiViewModelBase(rows_, QVector<int>(rows_.count(), 0).toList(), parent_)
+    mpiViewModelBase(rows_, QVector<int>(rows_.count(), 0).toList(), false, parent_)
 {
 }
 
@@ -113,26 +113,26 @@ void mainCorrelationModel::add(correlationRow *row_, const correlationRow &key_)
     endInsertColumns();
 
     sortColumns();
-    emit dataChanged(index(0, 0), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
+    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }
 
 void mainCorrelationModel::remove(const correlationRow &key_)
 {
-    int row = -1;
+    int x = -1;
     for(int i = 0; i < m_rows.count(); ++i)
         if (*static_cast<correlationRow*>(m_rows.at(i)) == key_)
         {
-            row = i;
+            x = i;
             break;
         }
 
-    if (row == -1)
+    if (x == -1)
         return;
 
     // remove row and column at the same time to prevent out of index exceptions
-    beginRemoveRows(QModelIndex(), row, row);
-    beginRemoveColumns(QModelIndex(), row, row);
-    m_rows.removeAt(row);
+    beginRemoveRows(QModelIndex(), x, x);
+    beginRemoveColumns(QModelIndex(), x, x);
+    m_rows.removeAt(x);
     m_viewableColumns.removeLast();
     endRemoveRows();
     endRemoveColumns();

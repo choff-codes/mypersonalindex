@@ -1,196 +1,115 @@
-#include <QDate>
+#include "statistic.h"
 #include <qmath.h>
 #include <qnumeric.h>
-#include "statistic.h"
-#include "functions.h"
-#include "statisticInfo.h"
+#include "tradeDateCalendar.h"
+#include "historicalNAV.h"
 
-//enum stat {
-//    stat_BeginningIndexValue,
-//    stat_BeginningValue,
-//    stat_CostBasis,
-//    stat_CurrentIndexValue,
-//    stat_CurrentValue,
-//    stat_DailyReturn,
-//    stat_DailyStandardDeviation,
-//    stat_Date,
-//    stat_DaysInvested,
-//    stat_GainLoss,
-//    stat_HourlyReturn,
-//    stat_MaxPercentDown,
-//    stat_MaxPercentDownDay,
-//    stat_MaxPercentUp,
-//    stat_MaxPercentUpDay,
-//    stat_MaximumIndexValue,
-//    stat_MaximumIndexValueDay,
-//    stat_MaximumPortfolioValue,
-//    stat_MaximumPortfolioValueDay,
-//    stat_MinimumIndexValue,
-//    stat_MinimumIndexValueDay,
-//    stat_MinimumPortfolioValue,
-//    stat_MinimumPortfolioValueDay,
-//    stat_MonthlyReturn,
-//    stat_MonthlyStandardDeviation,
-//    stat_NetChange,
-//    stat_OverallReturn,
-//    stat_ProbabilityOfYearlyGain,
-//    stat_ProbabilityOfYearlyLoss,
-//    stat_TaxLiability,
-//    stat_YearlyReturn,
-//    stat_YearlyStandardDeviation,
-//    stat_WeightedExpenseRatio
-//};
-
-const QStringList statistic::statisticDisplayNames = QStringList()
-                                                     << "Beginning Index Value"
-                                                     << "Beginning Value"
-                                                     << "Cost Basis"
-                                                     << "Current Index Value"
-                                                     << "Current Value"
-                                                     <<  "Daily Return"
-                                                     << "Daily Standard Deviation"
-                                                     << "Date" << "Days Invested"
-                                                     << "Gain Loss"
-                                                     << "Hourly Return"
-                                                     << "Max % Down"
-                                                     << "Max % Down Day"
-                                                     << "Max % Up"
-                                                     << "Max % Up Day"
-                                                     << "Maximum Index Value"
-                                                     << "Maximum Index Value Day"
-                                                     << "Maximum Portfolio Value"
-                                                     << "Maximum Portfolio Value Day"
-                                                     << "Minimum Index Value"
-                                                     << "Minimum Index Value Day"
-                                                     << "Minimum Portfolio Value"
-                                                     << "Minimum Portfolio Value Day"
-                                                     << "Monthly Return"
-                                                     << "Monthly Standard Deviation"
-                                                     << "Net Change"
-                                                     << "Overall Return"
-                                                     << "Probability Of Yearly Gain"
-                                                     << "Probability Of Yearly Loss"
-                                                     << "Tax Liability"
-                                                     << "Yearly Return"
-                                                     << "Yearly Standard Deviation"
-                                                     << "Weighted Expense Ratio";
-
-QMap<int, QString> statistic::statisticList()
+statistic::statistic(const historicalNAV &historicalNAV_):
+    beginDate(historicalNAV_.beginDate()),
+    endDate(historicalNAV_.endDate()),
+    beginNAV(1),
+    endNAV(1),
+    beginTotalValue(0),
+    endTotalValue(0),
+    days(0),
+    standardDeviation(0),
+    maxChangePositive(0),
+    maxChangePositiveDay(0),
+    maxChangeNegative(0),
+    maxChangeNegativeDay(0),
+    minNAVValue(0),
+    minNAVValueDay(0),
+    maxNAVValue(0),
+    maxNAVValueDay(0),
+    minTotalValue(0),
+    minTotalValueDay(0),
+    maxTotalValue(0),
+    maxTotalValueDay(0),
+    expenseRatio(historicalNAV_.expenseRatio),
+    costBasis(historicalNAV_.costBasis),
+    taxLiability(historicalNAV_.taxLiability)
 {
-    QMap<int, QString> stats;
-    for (int i = 0; i < statisticDisplayNames.count(); ++i)
-        stats[i] = statisticDisplayNames.at(i);
+    days = historicalNAV_.count() - 1; // first is baseline nav, so discard
+    if (days <= 0)
+        return;
 
-    return stats;
-}
+    beginNAV = historicalNAV_.nav(historicalNAV_.beginDate());
+    beginTotalValue = historicalNAV_.totalValue(historicalNAV_.beginDate());
+    endNAV = historicalNAV_.nav(historicalNAV_.endDate());
+    endTotalValue = historicalNAV_.totalValue(historicalNAV_.endDate());
+    minNAVValue = beginNAV;
+    minNAVValueDay = historicalNAV_.beginDate();
+    maxNAVValue = beginNAV;
+    maxNAVValueDay = historicalNAV_.beginDate();
+    minTotalValue = beginTotalValue;
+    minTotalValueDay = historicalNAV_.beginDate();
+    maxTotalValue = beginTotalValue;
+    maxTotalValueDay = historicalNAV_.beginDate();
 
-QString statistic::calculate(stat statistic_, const statisticInfo &statisticInfo_)
-{
-    switch(statistic_)
+    double previousNAV = beginNAV;
+
+    //http://www.johndcook.com/standard_deviation.html
+    double oldM = 0;
+    double oldS = 0;
+    double newM = 0;
+    double newS = 0;
+    int count = 1;
+
+    tradeDateCalendar calendar(historicalNAV_.beginDate());
+    foreach(int date, ++calendar)
     {
-        case stat_BeginningIndexValue:
-            return functions::doubleToLocalFormat(statisticInfo_.beginNAV);
-        case stat_BeginningValue:
-            return functions::doubleToCurrency(statisticInfo_.beginTotalValue);
-        case stat_CurrentIndexValue:
-            return functions::doubleToLocalFormat(statisticInfo_.endNAV);
-        case stat_CurrentValue:
-            return functions::doubleToCurrency(statisticInfo_.endTotalValue);
-        case stat_CostBasis:
-            return functions::doubleToCurrency(statisticInfo_.navHistory.costBasis);
-        case stat_DailyStandardDeviation:
-            return functions::doubleToPercentage(statisticInfo_.standardDeviation);
-        case stat_MonthlyStandardDeviation:
-            return functions::doubleToPercentage(sqrt(21) * statisticInfo_.standardDeviation);
-        case stat_YearlyStandardDeviation:
-            return functions::doubleToPercentage(sqrt(252) * statisticInfo_.standardDeviation);
-        case stat_DaysInvested:
-            return functions::doubleToLocalFormat(statisticInfo_.days, 0);
-        case stat_Date:
-            return QDate::fromJulianDay(statisticInfo_.endDate).toString(Qt::SystemLocaleShortDate);
-        case stat_GainLoss:
-            return functions::doubleToCurrency(statisticInfo_.navHistory.totalValue(statisticInfo_.endDate) - statisticInfo_.navHistory.costBasis);
-        case stat_DailyReturn:
-            return functions::doubleToPercentage(returnPercent(statisticInfo_, 1));
-        case stat_HourlyReturn:
-            return functions::doubleToPercentage(returnPercent(statisticInfo_, 1.0 / 6.5));
-        case stat_MonthlyReturn:
-            return functions::doubleToPercentage(returnPercent(statisticInfo_, 21));
-        case stat_YearlyReturn:
-            return functions::doubleToPercentage(returnPercent(statisticInfo_, 252));
-        case stat_NetChange:
-            return functions::doubleToCurrency(statisticInfo_.endTotalValue - statisticInfo_.beginTotalValue);
-        case stat_OverallReturn:
-            return functions::doubleToPercentage((statisticInfo_.endNAV / statisticInfo_.beginNAV) - 1);
-        case stat_TaxLiability:
-            return functions::doubleToCurrency(statisticInfo_.navHistory.taxLiability);
-        case stat_MaxPercentDown:
-            return functions::doubleToPercentage(statisticInfo_.maxChangeNegative);
-        case stat_MaxPercentDownDay:
-            return QDate::fromJulianDay(statisticInfo_.maxChangeNegativeDay).toString(Qt::SystemLocaleShortDate);
-        case stat_MaxPercentUp:
-            return functions::doubleToPercentage(statisticInfo_.maxChangePositive);
-        case stat_MaxPercentUpDay:
-            return QDate::fromJulianDay(statisticInfo_.maxChangePositiveDay).toString(Qt::SystemLocaleShortDate);
-        case stat_MaximumIndexValue:
-            return functions::doubleToLocalFormat(statisticInfo_.maxNAVValue);
-        case stat_MaximumIndexValueDay:
-            return QDate::fromJulianDay(statisticInfo_.maxNAVValueDay).toString(Qt::SystemLocaleShortDate);
-        case stat_MinimumIndexValue:
-            return functions::doubleToLocalFormat(statisticInfo_.minNAVValue);
-        case stat_MinimumIndexValueDay:
-            return QDate::fromJulianDay(statisticInfo_.minNAVValueDay).toString(Qt::SystemLocaleShortDate);
-        case stat_MinimumPortfolioValue:
-            return functions::doubleToCurrency(statisticInfo_.minTotalValue);
-        case stat_MinimumPortfolioValueDay:
-            return QDate::fromJulianDay(statisticInfo_.minTotalValueDay).toString(Qt::SystemLocaleShortDate);
-        case stat_MaximumPortfolioValue:
-            return functions::doubleToCurrency(statisticInfo_.maxTotalValue);
-        case stat_MaximumPortfolioValueDay:
-            return QDate::fromJulianDay(statisticInfo_.maxTotalValueDay).toString(Qt::SystemLocaleShortDate);
-        case stat_ProbabilityOfYearlyGain:
-            return functions::doubleToPercentage(cumulativeNormalDistribution(statisticInfo_));
-        case stat_ProbabilityOfYearlyLoss:
-            return functions::doubleToPercentage(1 - cumulativeNormalDistribution(statisticInfo_));
-        case stat_WeightedExpenseRatio:
-            return functions::doubleToPercentage(statisticInfo_.navHistory.expenseRatio);
-        default:
-            return QString();
-    }
-}
+        if (date > historicalNAV_.endDate())
+            break;
 
-double statistic::returnPercent(const statisticInfo &statisticInfo_, double divisor_)
-{
-    if (statisticInfo_.days <= 0 || statisticInfo_.beginNAV == 0)
-        return 0;
+        double newNav = historicalNAV_.nav(date);
+        double change = newNav / previousNAV - 1;
+        double totalValue = historicalNAV_.totalValue(date);
 
-    return pow(statisticInfo_.endNAV / statisticInfo_.beginNAV, 1.0 / (statisticInfo_.days / divisor_)) - 1;
-}
+        if (totalValue > maxTotalValue)
+        {
+           maxTotalValue = totalValue;
+           maxTotalValueDay = date;
+        }
 
-double statistic::cumulativeNormalDistribution(const statisticInfo &statisticInfo_)
-{
-    if (statisticInfo_.days < 2)
-        return 0;
+        if (totalValue < minTotalValue)
+        {
+           minTotalValue = totalValue;
+           minTotalValueDay = date;
+        }
 
-    //http://www.sitmo.com/doc/Calculating_the_Cumulative_Normal_Distribution
-    const double b1 =  0.319381530;
-    const double b2 = -0.356563782;
-    const double b3 =  1.781477937;
-    const double b4 = -1.821255978;
-    const double b5 =  1.330274429;
-    const double p  =  0.2316419;
-    const double c  =  0.39894228;
+        if (change > maxChangePositive || count == 1)
+        {
+            maxChangePositive = change;
+            maxChangePositiveDay = date;
+        }
+        if (change < maxChangeNegative || count == 1)
+        {
+            maxChangeNegative = change;
+            maxChangeNegativeDay = date;
+        }
+        if (newNav > maxNAVValue)
+        {
+            maxNAVValue = newNav;
+            maxNAVValueDay = date;
+        }
+        if (newNav < minNAVValue)
+        {
+            minNAVValue = newNav;
+            minNAVValueDay = date;
+        }
 
-    // x = Yearly Return / Yearly Standard Deviation
-    const double x = returnPercent(statisticInfo_, 252) / (sqrt(252) * statisticInfo_.standardDeviation);
-    double t;
+        newM = oldM + (change - oldM) / count;
+        newS = oldS + (change - oldM) * (change - newM);
 
-    if (x >= 0)
-    {
-        t = 1.0 / ( 1.0 + p * x );
-        return (1.0 - c * exp( -x * x / 2.0 ) * t * ( t *( t * ( t * ( t * b5 + b4 ) + b3 ) + b2 ) + b1 ));
+        // set up for next iteration
+        oldM = newM;
+        oldS = newS;
+
+        previousNAV = newNav;
+        ++count;
     }
 
-    t = 1.0 / ( 1.0 - p * x );
-    return ( c * exp( -x * x / 2.0 ) * t * ( t *( t * ( t * ( t * b5 + b4 ) + b3 ) + b2 ) + b1 ));
+    // standard deviation
+    if (--count != 1)
+        standardDeviation = sqrt(newS / (count - 1));
 }

@@ -1,7 +1,6 @@
 #ifndef MAINHOLDINGSMODEL_H
 #define MAINHOLDINGSMODEL_H
 
-#include <QStringList>
 #include "mpiViewModelBase.h"
 #include "snapshot.h"
 #include "account.h"

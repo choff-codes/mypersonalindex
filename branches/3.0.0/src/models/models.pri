@@ -5,7 +5,7 @@ HEADERS += $$PWD/securityAAModel.h \
     $$PWD/mainAcctModel.h \
     $$PWD/mainAAModel.h \
     $$PWD/mainCorrelationModel.h \
-    #$$PWD/mainStatisticModel.h \
+    $$PWD/mainStatisticModel.h \
     $$PWD/objectKeyEditModel.h
 SOURCES += $$PWD/securityAAModel.cpp \
     $$PWD/mainSecurityModel.cpp \
@@ -13,5 +13,5 @@ SOURCES += $$PWD/securityAAModel.cpp \
     $$PWD/mainAAModel.cpp \
     $$PWD/mainPerformanceModel.cpp \
     $$PWD/mainCorrelationModel.cpp \
-    #$$PWD/mainStatisticModel.cpp \
+    $$PWD/mainStatisticModel.cpp \
     $$PWD/objectKeyEditModel.cpp

@@ -16,7 +16,8 @@ HEADERS += \
     $$PWD/frmMainPerformance_State.h \
     $$PWD/frmMainAcct_State.h \
     $$PWD/frmMainStateTableWithTree.h \
-    $$PWD/frmMainCorrelation_State.h
+    $$PWD/frmMainCorrelation_State.h \
+    $$PWD/frmMainStatistic_State.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
@@ -34,4 +35,5 @@ SOURCES += \
     $$PWD/frmMainPerformance_State.cpp \
     $$PWD/frmMainAcct_State.cpp \
     $$PWD/frmMainStateTableWithTree.cpp \
-    $$PWD/frmMainCorrelation_State.cpp
+    $$PWD/frmMainCorrelation_State.cpp \
+    $$PWD/frmMainStatistic_State.cpp

@@ -168,7 +168,7 @@ QMap<int, QString> securityRow::fieldNames()
 }
 
 mainSecurityModel::mainSecurityModel(const QList<baseRow*> &rows_, const snapshot &portfolioSnapshot_, double portfolioNAV_, const QList<int> &viewableColumns_, QObject *parent_ ):
-    mpiViewModelBase(rows_, viewableColumns_, parent_),
+    mpiViewModelBase(rows_, viewableColumns_, false, parent_),
     m_portfolioSnapshot(portfolioSnapshot_),
     m_portfolioNAV(portfolioNAV_)
 {

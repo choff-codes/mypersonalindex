@@ -50,7 +50,7 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
 
     if (item_->checkState(0) == Qt::Unchecked)
     {
-        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0)));
+        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow(item_->parent()->type(), item_->type(), item_->text(0)));
         return;
     }
 
@@ -69,27 +69,9 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
     }
 
     static_cast<mainCorrelationModel*>(ui->table->model())->add(
-        new correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0), correlations),
-        correlationRow((objectType)item_->parent()->type(), item_->type(), item_->text(0))
+        new correlationRow(item_->parent()->type(), item_->type(), item_->text(0), correlations),
+        correlationRow(item_->parent()->type(), item_->type(), item_->text(0))
     );
-}
-
-QList<QTreeWidgetItem*> frmMainCorrelation_State::selectedItems()
-{
-    QList<QTreeWidgetItem*> items;
-    QTreeWidget *tree = static_cast<frmMainTableViewTree_UI*>(ui)->tree;
-
-    for(int i = 0; i < tree->topLevelItemCount(); ++i)
-    {
-        QTreeWidgetItem *parent = tree->topLevelItem(i);
-        for(int x = 0; x < parent->childCount(); ++x)
-        {
-            QTreeWidgetItem *item = parent->child(x);
-            if (item->checkState(0) == Qt::Checked)
-                items.append(item);
-        }
-    }
-    return items;
 }
 
 mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endDate_)
@@ -119,8 +101,8 @@ mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endD
             QTreeWidgetItem *item2 = items.at(x);
 
             double correlation = calculatorCorrelation::correlation(calculateNAV(item1, beginDate_, endDate_), calculateNAV(item2, beginDate_, endDate_));
-            rowsMap[item1]->correlationValues.insert(correlationRow((objectType)item2->parent()->type(), item2->type(), item2->text(0)), correlation);
-            rowsMap[item2]->correlationValues.insert(correlationRow((objectType)item1->parent()->type(), item1->type(), item1->text(0)), correlation);
+            rowsMap[item1]->correlationValues.insert(correlationRow(item2->parent()->type(), item2->type(), item2->text(0)), correlation);
+            rowsMap[item2]->correlationValues.insert(correlationRow(item1->parent()->type(), item1->type(), item1->text(0)), correlation);
         }
     }
 

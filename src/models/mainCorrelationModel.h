@@ -2,7 +2,6 @@
 #define MAINCORRELATIONMODEL_H
 
 #include "mpiViewModelBase.h"
-#include "objectKey.h"
 
 class correlationRow: public baseRow
 {
@@ -18,8 +17,8 @@ public:
 
     QMap<correlationRow, double> correlationValues;
 
-    correlationRow(objectType type_, int id_, const QString &description_);
-    correlationRow(objectType type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
+    correlationRow(int type_, int id_, const QString &description_);
+    correlationRow(int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
 
     bool operator==(const correlationRow &other_) const;
     bool operator!=(const correlationRow &other_) const { return !(*this == other_); }

@@ -1,7 +1,6 @@
 #ifndef MAINAAMODEL_H
 #define MAINAAMODEL_H
 
-#include <QStringList>
 #include "mpiViewModelBase.h"
 #include "snapshot.h"
 

@@ -23,6 +23,8 @@ protected:
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_) = 0;
     virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_) = 0;
 
+    QList<QTreeWidgetItem*> selectedItems();
+
     virtual historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
 };
 

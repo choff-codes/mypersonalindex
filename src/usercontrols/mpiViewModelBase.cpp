@@ -27,7 +27,7 @@ void mpiViewModelBase::setColumnSort(const QList<orderBy> &columnSort_)
     foreach(baseRow *row, m_rows)
         row->columnSort = columnSort_;
     sortColumns();
-    emit dataChanged(index(0, 0), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
+    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }
 
 
@@ -40,16 +40,33 @@ void mpiViewModelBase::setViewableColumns(const QList<int> &viewableColumns_)
 
     if (newColumns > currentColumns)
     {
-        beginInsertColumns(QModelIndex(), currentColumns, newColumns - 1);
-        insertColumns(currentColumns, newColumns - 1);
-        endInsertColumns();
+        if (m_verticalColumns)
+        {
+            beginInsertRows(QModelIndex(), currentColumns, newColumns - 1);
+            insertRows(currentColumns, newColumns - 1);
+            endInsertRows();
+        }
+        else
+        {
+            beginInsertColumns(QModelIndex(), currentColumns, newColumns - 1);
+            insertColumns(currentColumns, newColumns - 1);
+            endInsertColumns();
+        }
     }
     else if (currentColumns > newColumns)
     {
-        beginRemoveColumns(QModelIndex(), newColumns, currentColumns - 1);
-        removeColumns(newColumns, currentColumns - 1);
-        endRemoveColumns();
+        if (m_verticalColumns)
+        {
+            beginRemoveRows(QModelIndex(), newColumns, currentColumns - 1);
+            removeRows(newColumns, currentColumns - 1);
+            endRemoveRows();
+        }
+        else
+        {
+            beginRemoveColumns(QModelIndex(), newColumns, currentColumns - 1);
+            removeColumns(newColumns, currentColumns - 1);
+            endRemoveColumns();
+        }
     }
-
-    emit dataChanged(index(0, 0), index(m_rows.count() - 1, m_viewableColumns.count() - 1));
+    emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }

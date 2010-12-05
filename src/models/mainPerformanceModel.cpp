@@ -80,7 +80,7 @@ QMap<int, QString> performanceRow::fieldNames()
 
 
 mainPerformanceModel::mainPerformanceModel(const QList<baseRow*> &rows_, const QList<int> &viewableColumns_, QObject *parent_ ):
-    mpiViewModelBase(rows_, viewableColumns_, parent_)
+    mpiViewModelBase(rows_, viewableColumns_, false, parent_)
 {
 }
 

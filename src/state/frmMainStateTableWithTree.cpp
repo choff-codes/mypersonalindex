@@ -121,3 +121,21 @@ historicalNAV frmMainStateTableWithTree::calculateNAV(QTreeWidgetItem *item_, in
     }
     return historicalNAV();
 }
+
+QList<QTreeWidgetItem*> frmMainStateTableWithTree::selectedItems()
+{
+    QList<QTreeWidgetItem*> items;
+    QTreeWidget *tree = static_cast<frmMainTableViewTree_UI*>(ui)->tree;
+
+    for(int i = 0; i < tree->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem *parent = tree->topLevelItem(i);
+        for(int x = 0; x < parent->childCount(); ++x)
+        {
+            QTreeWidgetItem *item = parent->child(x);
+            if (item->checkState(0) == Qt::Checked)
+                items.append(item);
+        }
+    }
+    return items;
+}

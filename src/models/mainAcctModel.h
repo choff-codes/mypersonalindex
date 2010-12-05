@@ -3,7 +3,6 @@
 
 #include "mpiViewModelBase.h"
 
-#include <QStringList>
 #include "mpiViewModelBase.h"
 #include "snapshot.h"
 

@@ -13,6 +13,8 @@ public:
     ~mpiChartCurve();
 
     void attach();
+    // call before deleting the curve, but only if the parent plot is not being destroyed
+    void detach();
     QwtPlotCurve* curve() const { return m_curve; }
 
     void append(double x_, double y_) { m_xData.append(x_); m_yData.append(y_); }

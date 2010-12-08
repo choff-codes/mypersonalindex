@@ -11,8 +11,7 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, bool h
 
     frmMainToolbar_UI::setupUI(columnNames_, widget);
 
-    widgetTable = new QWidget(widget);
-    layoutTable = new QHBoxLayout(widgetTable);
+    tableSplitter = new QSplitter(widget);
 
     table = new mpiTableView(hasRowLabels_, widget);
     tableCopy = new QShortcut(Qt::CTRL + Qt::Key_C, table);
@@ -22,10 +21,11 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, bool h
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setAlternatingRowColors(true);
     table->horizontalHeader()->setHighlightSections(false);
-    table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 2);
+    table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 4);
     table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
-    layoutTable->addWidget(table, 3);
+    tableSplitter->addWidget(table);
+    tableSplitter->setStretchFactor(0, 3);
 
     layout->addWidget(toolbar);
-    layout->addWidget(widgetTable);
+    layout->addWidget(tableSplitter);
 }

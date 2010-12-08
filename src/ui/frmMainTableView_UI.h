@@ -3,6 +3,7 @@
 
 #include <QVBoxLayout>
 #include <QShortcut>
+#include <QSplitter>
 #include "mpiTableView.h"
 #include "frmMainToolbar_UI.h"
 
@@ -11,8 +12,7 @@ class frmMainTableView_UI: public frmMainToolbar_UI
 public:
     QWidget *widget;
     QVBoxLayout *layout;
-    QWidget *widgetTable;
-    QHBoxLayout *layoutTable;
+    QSplitter *tableSplitter;
     mpiTableView *table;
     QShortcut *tableCopy;
 

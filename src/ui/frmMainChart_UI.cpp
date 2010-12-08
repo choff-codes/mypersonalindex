@@ -15,12 +15,12 @@ void frmMainChart_UI::setupUI(QWidget *parent_)
 
     frmMainToolbar_UI::setupUI(QMap<int, QString>(), widget);
 
-    widgetChart = new QWidget(widget);
-    layoutChart = new QHBoxLayout(widgetChart);
+    chartSplitter = new QSplitter(widget);
 
     tree = new QTreeWidget(widget);
     tree->header()->setVisible(false);
-    layoutChart->addWidget(tree, 1);
+    chartSplitter->addWidget(tree);
+    chartSplitter->setStretchFactor(0, 1);
 
     chart = new mpiChart(widget);
     chart->setAxisScaleDraw(QwtPlot::xBottom, new mpiDateScale());
@@ -61,8 +61,9 @@ void frmMainChart_UI::setupUI(QWidget *parent_)
     chartGridLines->setPen(QPen(Qt::DotLine));
     chartGridLines->attach(chart);
 
-    layoutChart->addWidget(chart, 3);
+    chartSplitter->addWidget(chart);
+    chartSplitter->setStretchFactor(1, 3);
 
     layout->addWidget(toolbar);
-    layout->addWidget(widgetChart);
+    layout->addWidget(chartSplitter);
 }

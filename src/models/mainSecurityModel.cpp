@@ -137,7 +137,7 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
         QStringList aaDescription;
         for(QMap<int, double>::const_iterator i = sec.targets().constBegin(); i != sec.targets().constEnd(); ++i)
             aaDescription.prepend(
-                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : assetAllocation_.value(i.key()).description(), functions::doubleToPercentage(i.value()))
+                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : assetAllocation_.value(i.key()).displayText(), functions::doubleToPercentage(i.value()))
             );
 
         returnList.append(
@@ -147,7 +147,7 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
                 accounts_.value(sec.account()).costBasis(),
                 portfolioSnapshot_,
                 sec,
-                accounts_.value(sec.account()).description(),
+                accounts_.value(sec.account()).displayText(),
                 aaDescription.join(", "),
                 columnSort_
             )

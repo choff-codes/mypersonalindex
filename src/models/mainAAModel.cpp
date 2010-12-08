@@ -50,7 +50,7 @@ aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSn
     baseRow(columnSort_)
 {    
     //    row_Description,
-    this->values.append(aa_.description());
+    this->values.append(aa_.displayText());
     //    row_CostBasis,
     this->values.append(snapshot_.costBasis);
     //    row_Value,

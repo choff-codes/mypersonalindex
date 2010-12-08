@@ -48,7 +48,7 @@ acctRow::acctRow(double nav_, const snapshot &snapshot_, const snapshot &portfol
     baseRow(columnSort_)
 {
     //    row_Description,
-    this->values.append(account_.description());
+    this->values.append(account_.displayText());
     //    row_CostBasis,
     this->values.append(snapshot_.costBasis);
     //    row_Value,

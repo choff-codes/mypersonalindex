@@ -3,6 +3,7 @@
 
 #include <QVBoxLayout>
 #include <QTreeWidget>
+#include <QSplitter>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
 #include "frmMainToolbar_UI.h"
@@ -13,8 +14,7 @@ class frmMainChart_UI: public frmMainToolbar_UI
 public:
     QWidget *widget;
     QVBoxLayout *layout;
-    QWidget *widgetChart;
-    QHBoxLayout *layoutChart;
+    QSplitter *chartSplitter;
     QTreeWidget *tree;
     mpiChart *chart;
     QwtPlotGrid *chartGridLines;

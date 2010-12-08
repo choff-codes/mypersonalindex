@@ -30,13 +30,18 @@ frmMainChart_State::frmMainChart_State(const portfolio &portfolio_, const calcul
     ui->setupUI(static_cast<QWidget*>(this->parent()));
     populateTree(m_portfolio);
 
-    ui->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(m_portfolio.startDate()));
-    ui->toolbarDateEndEdit->setDate(QDate::fromJulianDay(m_portfolio.endDate()));
+    int beginDate = m_portfolio.startDate();
+    int endDate = m_portfolio.endDate();
+
+    ui->toolbarDateBeginEdit->setDate(QDate::fromJulianDay(beginDate));
+    ui->toolbarDateEndEdit->setDate(QDate::fromJulianDay(endDate));
 
     connect(ui->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
     connect(ui->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
     connect(ui->toolbarExport, SIGNAL(triggered()), ui->chart, SLOT(exportChart()));
     connect(ui->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
+
+    resetChart(beginDate, endDate);
 }
 
 frmMainChart_State::~frmMainChart_State()
@@ -79,31 +84,34 @@ void frmMainChart_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/)
     int endDate = ui->toolbarDateEndEdit->date().toJulianDay();
 
     if (item_->checkState(0) == Qt::Unchecked)
-        delete m_cache.take(item_);
+    {
+        mpiChartCurve *curve = m_cache.take(item_);
+        curve->detach();
+        delete curve;
+    }
     else
         getCurve(item_, beginDate, endDate)->attach();
 
-    ui->chart->setAxisScale(QwtPlot::xBottom, beginDate, endDate, 0);
-    ui->chart->setAxisAutoScale(QwtPlot::yLeft);
-    ui->chart->replot();
-    ui->chartZoomer->setZoomBase();
+    resetChart(beginDate, endDate);
 }
 
 void frmMainChart_State::refreshTab()
 {
     m_counter = 0;
-    qDeleteAll(m_cache);
+    foreach(mpiChartCurve *curve, m_cache)
+    {
+        curve->detach();
+        delete curve;
+    }
     m_cache.clear();
+
     int beginDate = ui->toolbarDateBeginEdit->date().toJulianDay();
     int endDate = ui->toolbarDateEndEdit->date().toJulianDay();
 
     foreach(QTreeWidgetItem *item, selectedItems())
         getCurve(item, beginDate, endDate)->attach();
 
-    ui->chart->setAxisScale(QwtPlot::xBottom, beginDate, endDate, 0);
-    ui->chart->setAxisAutoScale(QwtPlot::yLeft);
-    ui->chart->replot();
-    ui->chartZoomer->setZoomBase();
+    resetChart(beginDate, endDate);
 }
 
 mpiChartCurve* frmMainChart_State::getCurve(QTreeWidgetItem *item_, int beginDate, int endDate_)
@@ -130,4 +138,12 @@ mpiChartCurve* frmMainChart_State::getCurve(QTreeWidgetItem *item_, int beginDat
 
     m_counter = (m_counter + 1) % m_colors.count();
     return m_cache.value(item_);
+}
+
+void frmMainChart_State::resetChart(int beginDate_, int endDate_)
+{
+    ui->chart->setAxisScale(QwtPlot::xBottom, beginDate_, endDate_, 0);
+    ui->chart->setAxisAutoScale(QwtPlot::yLeft);
+    ui->chart->replot();
+    ui->chartZoomer->setZoomBase();
 }

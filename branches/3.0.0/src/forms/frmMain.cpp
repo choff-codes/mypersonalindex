@@ -131,7 +131,7 @@ void frmMain::refreshPortfolioCmb(int id_)
         if (p.deleted())
             continue;
 
-        ui->portfolioDropDownCmb->addItem(p.description(), p.id());
+        ui->portfolioDropDownCmb->addItem(p.displayText(), p.id());
     }
 
     int index = ui->portfolioDropDownCmb->findData(id_);
@@ -201,7 +201,7 @@ void frmMain::addPortfolio()
     portfolio newPortfolio = f.getPortfolio();
     m_file->portfolios.insert(newPortfolio.id(), newPortfolio);
     refreshPortfolioPrices();
-    ui->portfolioDropDownCmb->addItem(newPortfolio.description(), newPortfolio.id());
+    ui->portfolioDropDownCmb->addItem(newPortfolio.displayText(), newPortfolio.id());
     ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
     recalculateTrades(newPortfolio);
 }
@@ -222,7 +222,7 @@ void frmMain::editPortfolio()
     m_file->portfolios[m_currentPortfolio] = newPortfolio;
     refreshPortfolioPrices();
 
-    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), newPortfolio.description());
+    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), newPortfolio.displayText());
     recalculateTrades(newPortfolio, 0);
 }
 
@@ -232,7 +232,7 @@ void frmMain::deletePortfolio()
         return;
 
     if (QMessageBox::question(this, QCoreApplication::applicationName(), QString("Are you sure you want to delete portfolio %1?")
-        .arg(m_file->portfolios.value(m_currentPortfolio).description()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
+        .arg(m_file->portfolios.value(m_currentPortfolio).displayText()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
         return;
 
     setWindowModified(true);

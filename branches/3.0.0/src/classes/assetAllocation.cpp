@@ -52,8 +52,8 @@ bool assetAllocation::operator==(const assetAllocation &other_) const
 double assetAllocation::target() const { return d->target; }
 void assetAllocation::setTarget(double target_) { d->target = target_; }
 
-bool assetAllocation::rebalanceBand() const { return d->rebalanceBand; }
-void assetAllocation::setRebalanceBand(bool rebalanceBand_) { d->rebalanceBand = rebalanceBand_; }
+double assetAllocation::rebalanceBand() const { return d->rebalanceBand; }
+void assetAllocation::setRebalanceBand(double rebalanceBand_) { d->rebalanceBand = rebalanceBand_; }
 
 assetAllocation::thresholdMethod assetAllocation::threshold() const { return d->threshold; }
 void assetAllocation::setThreshold(thresholdMethod threshold_) { d->threshold = threshold_; }
@@ -125,6 +125,7 @@ QDataStream& operator<<(QDataStream &stream_, const assetAllocation &aa_)
     stream_ << aa_.rebalanceBand();
     stream_ << aa_.target();
     stream_ << aa_.threshold();
+    stream_ << aa_.hidden();
     return stream_;
 }
 
@@ -137,6 +138,8 @@ QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_)
     int tmp;
     stream_ >> tmp;
     aa_.d->threshold = (assetAllocation::thresholdMethod)tmp;
+
+    stream_ >> aa_.d->hidden;
 
     return stream_;
 }

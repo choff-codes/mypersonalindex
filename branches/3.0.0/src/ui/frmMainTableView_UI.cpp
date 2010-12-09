@@ -21,7 +21,7 @@ void frmMainTableView_UI::setupUI(const QMap<int, QString> &columnNames_, bool h
     table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setAlternatingRowColors(true);
     table->horizontalHeader()->setHighlightSections(false);
-    table->verticalHeader()->setDefaultSectionSize(table->fontMetrics().height() + 4);
+    table->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     table->horizontalHeader()->setResizeMode(QHeaderView::ResizeToContents);
     tableSplitter->addWidget(table);
     tableSplitter->setStretchFactor(0, 3);

@@ -40,6 +40,7 @@ public:
     QMenu *import;
     QAction *importYahoo;
     QAction *importPrices;
+    QAction *importPortfolioParts;
     QAction *importPortfolio;
     QAction *importFile;
     QMenu *help;

@@ -28,8 +28,8 @@ public:
     double target() const;
     void setTarget(double target_);
 
-    bool rebalanceBand() const;
-    void setRebalanceBand(bool rebalanceBand_);
+    double rebalanceBand() const;
+    void setRebalanceBand(double rebalanceBand_);
 
     thresholdMethod threshold() const;
     void setThreshold(thresholdMethod threshold_);

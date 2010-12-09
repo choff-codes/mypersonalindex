@@ -136,5 +136,6 @@ QDataStream& operator>>(QDataStream &stream_, account &acct_)
     acct_.d->costBasis = (account::costBasisMethod)tmp;
     stream_ >> acct_.d->taxDeferred;
     stream_ >> acct_.d->taxRate;
+    stream_ >> acct_.d->hidden;
     return stream_;
 }

@@ -23,14 +23,23 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     view = new QMenu("&View", menubar);
     viewGroup = new QActionGroup(mainWindow_);
     viewSummary = new QAction("Summary", mainWindow_);
+    viewSummary->setShortcut(Qt::Key_F1);
     viewTrades = new QAction("Trade Register", mainWindow_);
+    viewTrades->setShortcut(Qt::Key_F2);
     viewAccounts = new QAction("Accounts", mainWindow_);
+    viewAccounts->setShortcut(Qt::Key_F3);
     viewAssetAllocation = new QAction("Asset Allocation", mainWindow_);
+    viewAssetAllocation->setShortcut(Qt::Key_F4);
     viewSecurities = new QAction("Securities", mainWindow_);
+    viewSecurities->setShortcut(Qt::Key_F5);
     viewStatistics = new QAction("Statistics", mainWindow_);
+    viewStatistics->setShortcut(Qt::Key_F6);
     viewCharts = new QAction("Charting", mainWindow_);
+    viewCharts->setShortcut(Qt::Key_F7);
     viewCorrelations = new QAction("Correlations", mainWindow_);
+    viewCorrelations->setShortcut(Qt::Key_F8);
     viewPerformance = new QAction("Performance", mainWindow_);
+    viewPerformance->setShortcut(Qt::Key_F9);
 
     portfolio = new QMenu("&Portfolio", menubar);
     portfolioAdd = new QAction("Add New...", mainWindow_);
@@ -46,8 +55,9 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow_);
     importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
     importPrices = new QAction("Manually Import Price Information...", mainWindow_);
-    importPortfolio = new QAction("From Other Portfolio...", mainWindow_);
-    importFile = new QAction("From Other File...", mainWindow_);
+    importPortfolioParts = new QAction("Import from Another Portfolio...", mainWindow_);
+    importPortfolio = new QAction("Copy Portfolio", mainWindow_);
+    importFile = new QAction("Copy Portfolio From Another File...", mainWindow_);
     importFile->setShortcut(Qt::CTRL + Qt::Key_I);
 
     help = new QMenu("&Help", menubar);
@@ -87,6 +97,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     import->addAction(importYahoo);
     import->addAction(importPrices);
     import->addSeparator();
+    import->addAction(importPortfolioParts);
     import->addAction(importPortfolio);
     import->addAction(importFile);
 

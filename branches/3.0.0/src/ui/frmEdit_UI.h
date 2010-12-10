@@ -3,7 +3,6 @@
 
 #include <QButtonGroup>
 #include <QComboBox>
-#include <QDialog>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QHBoxLayout>

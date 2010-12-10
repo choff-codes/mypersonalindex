@@ -147,8 +147,8 @@ void portfolio::save(const queries &dataSource_)
     }
     acctList.clear();
 
-    // keep track of original trade id -> new trade id for executed trades associated trade id
-    QHash<int, int> tradeIDMapping;
+    // keep track of original security id -> new securty id for trades cash account
+    QHash<int, int> secIDMapping;
 
     // save securities
     QList<security> secList = securities().values();
@@ -161,13 +161,28 @@ void portfolio::save(const queries &dataSource_)
             continue;
         }
 
+        int origID = sec.id();
         sec.setParent(id());
         sec.save(dataSource_);
+        if (origID < UNASSIGNED)
+            secIDMapping.insert(origID, sec.id());
 
         // save AA targets
         sec.targets().parent = sec.id();
         sec.targets().insertBatch(dataSource_);
 
+        // set executed trades parent (save after all trades are saved)
+        sec.executedTrades().parent = sec.id();
+        securities().insert(sec.id(), sec);
+    }
+    secList.clear();
+
+    // keep track of original trade id -> new trade id for executed trades associated trade id
+    QHash<int, int> tradeIDMapping;
+
+    // save trades (need all securities to be saved first for ids)
+    foreach(security sec, securities())
+    {
         // save trades
         QList<trade> tradeList = sec.trades().values();
         sec.trades().clear();
@@ -181,23 +196,23 @@ void portfolio::save(const queries &dataSource_)
 
             int origID = t.id();
             t.setParent(sec.id());
+
+            // properly update cash account
+            if (t.cashAccount() < UNASSIGNED)
+                t.setCashAccount(secIDMapping.value(t.cashAccount(), UNASSIGNED));
+
             t.save(dataSource_);
             sec.trades().insert(t.id(), t);
             if (origID < UNASSIGNED)
                 tradeIDMapping.insert(origID, t.id());
         }
-
-        // set executed trades parent (save after all trades are saved)
-        sec.executedTrades().parent = sec.id();
-        securities().insert(sec.id(), sec);
     }
-    secList.clear();
 
-    // save executed trades (need all securities and trades to be saved first to properly set associatedTradeID)
-    foreach(security s, securities())
+    // save executed trades (need all trades to be saved first to properly set associatedTradeID)
+    foreach(security sec, securities())
     {
-        s.executedTrades().updateAssociatedTradeID(tradeIDMapping);
-        s.executedTrades().insertBatch(dataSource_);
+        sec.executedTrades().updateAssociatedTradeID(tradeIDMapping);
+        sec.executedTrades().insertBatch(dataSource_);
     }
 }
 

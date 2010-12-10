@@ -14,7 +14,7 @@ frmMainCorrelation_State::frmMainCorrelation_State(const portfolio &portfolio_, 
     disconnect(tree, SIGNAL(itemSelectionChanged()), 0, 0);
 }
 
-QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString description_)
+QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString &description_)
 {
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, type_);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -22,7 +22,7 @@ QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QStri
     return item;
 }
 
-QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString description_, const QString itemData_)
+QTreeWidgetItem* frmMainCorrelation_State::createTreeItem(int type_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem* item = createTreeItem(type_, description_);
     item->setData(0, Qt::UserRole, itemData_);

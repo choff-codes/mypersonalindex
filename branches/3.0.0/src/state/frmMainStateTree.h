@@ -20,8 +20,8 @@ public:
 
 protected:
     virtual QTreeWidget* treeWidget() = 0;
-    virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_) = 0;
-    virtual QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_) = 0;
+    virtual QTreeWidgetItem* createTreeItem(int type_, const QString &description_) = 0;
+    virtual QTreeWidgetItem* createTreeItem(int type_, const QString &description_, const QString &itemData_) = 0;
 
     QList<QTreeWidgetItem*> selectedItems();
 

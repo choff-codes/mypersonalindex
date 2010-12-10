@@ -33,8 +33,8 @@ private:
     frmMainChart_UI *ui;
     int m_counter;
 
-    QTreeWidgetItem* createTreeItem(int type_, const QString description_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_);
+    QTreeWidgetItem* createTreeItem(int type_, const QString &description_);
+    QTreeWidgetItem* createTreeItem(int type_, const QString &description_, const QString &itemData_);
 
     mpiChartCurve* getCurve(QTreeWidgetItem *item_, int beginDate, int endDate_);
     void resetChart(int beginDate_, int endDate_);

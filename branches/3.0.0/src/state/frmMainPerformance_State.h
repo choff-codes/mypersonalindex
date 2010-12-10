@@ -17,8 +17,8 @@ protected:
     QMap<int, QString> tableColumns();
 
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString description_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString description_, const QString itemData_);
+    QTreeWidgetItem* createTreeItem(int type_, const QString &description_);
+    QTreeWidgetItem* createTreeItem(int type_, const QString &description_, const QString &itemData_);
 
 };
 

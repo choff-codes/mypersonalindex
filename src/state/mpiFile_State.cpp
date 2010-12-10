@@ -134,15 +134,15 @@ bool mpiFile_State::prepareFileForSave(const QString &filePath_)
     return true;
 }
 
-void mpiFile_State::open(const QString &filePath_)
+void mpiFile_State::open(const QString &filePath_, bool pricing_)
 {
     if(!maybeSave())
         return;
 
-    loadFile(filePath_);
+    loadFile(filePath_, pricing_);
 }
 
-void mpiFile_State::open()
+void mpiFile_State::open(bool pricing_)
 {
     if(!maybeSave())
         return;
@@ -151,10 +151,10 @@ void mpiFile_State::open()
     if (filePath.isEmpty())
         return;
 
-    loadFile(filePath);
+    loadFile(filePath, pricing_);
 }
 
-void mpiFile_State::loadFile(const QString &filePath_)
+void mpiFile_State::loadFile(const QString &filePath_, bool pricing_)
 {
     queries file(filePath_);
     if (!file.isValid())
@@ -163,7 +163,8 @@ void mpiFile_State::loadFile(const QString &filePath_)
         return;
     }
 
-    prices = priceFactory(file).getHistoricalPrices();
+    if (pricing_)
+        prices = priceFactory(file).getHistoricalPrices();
     portfolios = portfolioFactory(file).getPortfolios();
     portfolioIdentities.clear();
 

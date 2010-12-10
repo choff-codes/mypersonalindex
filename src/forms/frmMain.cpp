@@ -22,6 +22,7 @@
 #include "frmMainCorrelation_State.h"
 #include "frmMainStatistic_State.h"
 #include "frmMainChart_State.h"
+#include "frmPortfolioImport.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -85,6 +86,8 @@ void frmMain::connectSlots()
     connect(ui->viewCorrelations, SIGNAL(triggered()), this, SLOT(tabCorrelation()));
     connect(ui->viewStatistics, SIGNAL(triggered()), this, SLOT(tabStatistic()));
     connect(ui->viewCharts, SIGNAL(triggered()), this, SLOT(tabChart()));
+    connect(ui->importPortfolio, SIGNAL(triggered()), this, SLOT(importPortfolio()));
+    connect(ui->importFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
 }
 
 void frmMain::loadSettings()
@@ -196,14 +199,7 @@ void frmMain::addPortfolio()
     if (p == f.getPortfolio())
         return;
 
-    setWindowModified(true);
-    m_file->modified = true;
-    portfolio newPortfolio = f.getPortfolio();
-    m_file->portfolios.insert(newPortfolio.id(), newPortfolio);
-    refreshPortfolioPrices();
-    ui->portfolioDropDownCmb->addItem(newPortfolio.displayText(), newPortfolio.id());
-    ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
-    recalculateTrades(newPortfolio);
+    addPortfolioToFile(f.getPortfolio());
 }
 
 void frmMain::editPortfolio()
@@ -216,14 +212,7 @@ void frmMain::editPortfolio()
     if (m_file->portfolios.value(m_currentPortfolio) == f.getPortfolio())
         return;
 
-    portfolio newPortfolio = f.getPortfolio();
-    setWindowModified(true);
-    m_file->modified = true;
-    m_file->portfolios[m_currentPortfolio] = newPortfolio;
-    refreshPortfolioPrices();
-
-    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), newPortfolio.displayText());
-    recalculateTrades(newPortfolio, 0);
+    editPortfolioToFile(f.getPortfolio());
 }
 
 void frmMain::deletePortfolio()
@@ -239,6 +228,28 @@ void frmMain::deletePortfolio()
     m_file->modified = true;
     m_file->portfolios[m_currentPortfolio].setDeleted(true);
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
+}
+
+void frmMain::addPortfolioToFile(const portfolio &portfolio_)
+{
+    setWindowModified(true);
+    m_file->modified = true;
+    m_file->portfolios.insert(portfolio_.id(), portfolio_);
+    refreshPortfolioPrices();
+    ui->portfolioDropDownCmb->addItem(portfolio_.displayText(), portfolio_.id());
+    ui->portfolioDropDownCmb->setCurrentIndex(ui->portfolioDropDownCmb->count() - 1);
+    recalculateTrades(portfolio_);
+}
+
+void frmMain::editPortfolioToFile(const portfolio &portfolio_)
+{
+    setWindowModified(true);
+    m_file->modified = true;
+    m_file->portfolios[m_currentPortfolio] = portfolio_;
+    refreshPortfolioPrices();
+
+    ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), portfolio_.displayText());
+    recalculateTrades(portfolio_, 0);
 }
 
 void frmMain::refreshPortfolioPrices()
@@ -418,4 +429,28 @@ void frmMain::switchToTab(tab tab_, bool force_)
     m_currentTab = tab_;
 }
 
+void frmMain::importPortfolio()
+{
+    QMap<int, portfolio> portfolios;
 
+    if (static_cast<QAction*>(sender()) == ui->importFile)
+    {
+        mpiFile_State file(this);
+        file.open(false);
+        if (file.path().isEmpty())
+            return;
+        else
+            portfolios = file.portfolios;
+    }
+    else
+        portfolios = m_file->portfolios;
+
+    frmPortfolioImport f(m_currentPortfolio == UNASSIGNED ? portfolio() : m_file->portfolios.value(m_currentPortfolio), portfolios, this);
+    if (f.exec() != QDialog::Accepted)
+        return;
+
+    if (f.getPortfolio().id() != m_file->portfolios.value(m_currentPortfolio).id())
+        addPortfolioToFile(f.getPortfolio());
+    else
+        editPortfolioToFile(f.getPortfolio());
+}

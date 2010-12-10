@@ -14,7 +14,7 @@ SOURCES += $$PWD/queries.cpp \
     $$PWD/snapshot.cpp \
     $$PWD/executedTrade.cpp \
     $$PWD/historicalPrices.cpp \
-    $$PWD/trade.cpp \ # $$PWD/import.cpp \
+    $$PWD/trade.cpp \
     $$PWD/updatePrices.cpp \
     $$PWD/splits.cpp \
     $$PWD/objectKey.cpp \
@@ -41,7 +41,7 @@ HEADERS += $$PWD/queries.h \
     $$PWD/snapshot.h \
     $$PWD/executedTrade.h \
     $$PWD/historicalPrices.h \
-    $$PWD/trade.h \ # $$PWD/import.h \
+    $$PWD/trade.h \
     $$PWD/updatePrices.h \
     $$PWD/splits.h \
     $$PWD/objectKey.h \

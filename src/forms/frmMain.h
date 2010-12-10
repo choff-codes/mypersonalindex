@@ -37,6 +37,7 @@ private slots:
     void tabStatistic() { switchToTab(tab_statistic); }
     void tabChart() { switchToTab(tab_chart); }
     void fileChange(const QString &filePath_, bool newFile_);
+    void importPortfolio();
 
 private:
     enum tab {
@@ -89,6 +90,8 @@ private:
     void hideProgressBar();
     void switchToTab(tab tab_, bool force_ = false);
     void clearTabs();
+    void addPortfolioToFile(const portfolio &portfolio_);
+    void editPortfolioToFile(const portfolio &portfolio_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);

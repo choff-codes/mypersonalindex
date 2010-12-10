@@ -1,4 +1,5 @@
 #include "frmEdit_UI.h"
+#include <QDialog>
 
 void frmEdit_UI::setupUI(QDialog* dialog_) {
     dialog_->setWindowFlags((dialog_->windowFlags() & (~Qt::WindowContextHelpButtonHint)) | Qt::WindowMinMaxButtonsHint);

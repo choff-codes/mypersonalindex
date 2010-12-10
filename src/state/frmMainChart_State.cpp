@@ -60,7 +60,7 @@ QTreeWidget* frmMainChart_State::treeWidget()
     return ui->tree;
 }
 
-QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString description_)
+QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString &description_)
 {
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, type_);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -68,7 +68,7 @@ QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString des
     return item;
 }
 
-QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString description_, const QString itemData_)
+QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem* item = createTreeItem(type_, description_);
     item->setData(0, Qt::UserRole, itemData_);

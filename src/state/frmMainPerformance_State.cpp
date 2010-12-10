@@ -10,12 +10,12 @@ frmMainPerformance_State::frmMainPerformance_State(const portfolio &portfolio_, 
     setupUI();
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString description_)
+QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString &description_)
 {
     return new QTreeWidgetItem(QStringList() << description_, type_);
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString description_, const QString itemData_)
+QTreeWidgetItem* frmMainPerformance_State::createTreeItem(int type_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem* item = createTreeItem(type_, description_);
     item->setData(0, Qt::UserRole, itemData_);

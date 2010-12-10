@@ -1,4 +1,5 @@
 #include "frmMain_UI.h"
+#include <QMainWindow>
 
 void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 {    
@@ -55,9 +56,8 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow_);
     importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
     importPrices = new QAction("Manually Import Price Information...", mainWindow_);
-    importPortfolioParts = new QAction("Import from Another Portfolio...", mainWindow_);
-    importPortfolio = new QAction("Copy Portfolio", mainWindow_);
-    importFile = new QAction("Copy Portfolio From Another File...", mainWindow_);
+    importPortfolio = new QAction("Import Portfolio...", mainWindow_);
+    importFile = new QAction("Import Portfolio From Another File...", mainWindow_);
     importFile->setShortcut(Qt::CTRL + Qt::Key_I);
 
     help = new QMenu("&Help", menubar);
@@ -97,7 +97,6 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     import->addAction(importYahoo);
     import->addAction(importPrices);
     import->addSeparator();
-    import->addAction(importPortfolioParts);
     import->addAction(importPortfolio);
     import->addAction(importFile);
 

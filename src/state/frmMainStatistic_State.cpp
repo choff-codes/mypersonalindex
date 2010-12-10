@@ -13,7 +13,7 @@ frmMainStatistic_State::frmMainStatistic_State(const portfolio &portfolio_, cons
     disconnect(tree, SIGNAL(itemSelectionChanged()), 0, 0);
 }
 
-QTreeWidgetItem* frmMainStatistic_State::createTreeItem(int type_, const QString description_)
+QTreeWidgetItem* frmMainStatistic_State::createTreeItem(int type_, const QString &description_)
 {
     QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, type_);
     item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
@@ -21,7 +21,7 @@ QTreeWidgetItem* frmMainStatistic_State::createTreeItem(int type_, const QString
     return item;
 }
 
-QTreeWidgetItem* frmMainStatistic_State::createTreeItem(int type_, const QString description_, const QString itemData_)
+QTreeWidgetItem* frmMainStatistic_State::createTreeItem(int type_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem* item = createTreeItem(type_, description_);
     item->setData(0, Qt::UserRole, itemData_);

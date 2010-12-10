@@ -102,6 +102,9 @@ void portfolio::save(const queries &dataSource_)
 
     this->setID(dataSource_.insert(queries::table_Portfolio, values, this->id()));
 
+    // keep track of original aa id -> aa securty id for security asset class targets
+    QMap<int, int> aaIDMapping;
+
     // save asset allocation
     QList<assetAllocation> aaList = assetAllocations().values();
     assetAllocations().clear();
@@ -119,10 +122,12 @@ void portfolio::save(const queries &dataSource_)
         assetAllocations().insert(aa.id(), aa);
 
         if (origID < UNASSIGNED)
-            foreach(security s, securities())
-                s.targets().updateAssetAllocationID(origID, aa.id());
+            aaIDMapping.insert(origID, aa.id());
     }
     aaList.clear();
+
+    // keep track of original security id -> new securty id for trades cash account
+    QMap<int, int> acctIDMapping;
 
     // save accounts
     QList<account> acctList = accounts().values();
@@ -141,14 +146,12 @@ void portfolio::save(const queries &dataSource_)
         accounts().insert(acct.id(), acct);
 
         if (origID < UNASSIGNED)
-            foreach(security s, securities())
-                if (s.account() == origID)
-                    s.setAccount(acct.id());
+            acctIDMapping.insert(origID, acct.id());
     }
     acctList.clear();
 
     // keep track of original security id -> new securty id for trades cash account
-    QHash<int, int> secIDMapping;
+    QMap<int, int> secIDMapping;
 
     // save securities
     QList<security> secList = securities().values();
@@ -163,22 +166,22 @@ void portfolio::save(const queries &dataSource_)
 
         int origID = sec.id();
         sec.setParent(id());
+        sec.setAccount(acctIDMapping.value(sec.account(), sec.account()));
         sec.save(dataSource_);
+        securities().insert(sec.id(), sec);
+
         if (origID < UNASSIGNED)
             secIDMapping.insert(origID, sec.id());
 
         // save AA targets
         sec.targets().parent = sec.id();
+        sec.targets().updateAssetAllocationID(aaIDMapping);
         sec.targets().insertBatch(dataSource_);
-
-        // set executed trades parent (save after all trades are saved)
-        sec.executedTrades().parent = sec.id();
-        securities().insert(sec.id(), sec);
     }
     secList.clear();
 
     // keep track of original trade id -> new trade id for executed trades associated trade id
-    QHash<int, int> tradeIDMapping;
+    QMap<int, int> tradeIDMapping;
 
     // save trades (need all securities to be saved first for ids)
     foreach(security sec, securities())
@@ -196,13 +199,11 @@ void portfolio::save(const queries &dataSource_)
 
             int origID = t.id();
             t.setParent(sec.id());
-
             // properly update cash account
-            if (t.cashAccount() < UNASSIGNED)
-                t.setCashAccount(secIDMapping.value(t.cashAccount(), UNASSIGNED));
-
+            t.setCashAccount(secIDMapping.value(t.cashAccount(), t.cashAccount()));
             t.save(dataSource_);
             sec.trades().insert(t.id(), t);
+
             if (origID < UNASSIGNED)
                 tradeIDMapping.insert(origID, t.id());
         }
@@ -211,6 +212,8 @@ void portfolio::save(const queries &dataSource_)
     // save executed trades (need all trades to be saved first to properly set associatedTradeID)
     foreach(security sec, securities())
     {
+        // set executed trades parent
+        sec.executedTrades().parent = sec.id();
         sec.executedTrades().updateAssociatedTradeID(tradeIDMapping);
         sec.executedTrades().insertBatch(dataSource_);
     }

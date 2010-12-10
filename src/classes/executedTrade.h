@@ -35,8 +35,6 @@ public:
     bool operator!=(const executedTrade &other_) const { return !(*this == other_); }
 };
 
-template <class T, class V>
-class QHash;
 class executedTradeMap: public objectBase, public queriesBatch
 {
 public:
@@ -52,7 +50,7 @@ public:
 
     void insert(int date_, const executedTrade &executedTrade_);
 
-    void updateAssociatedTradeID(const QHash<int, int> &tradeIDMapping_);
+    void updateAssociatedTradeID(const QMap<int, int> &tradeIDMapping_);
 
     void remove();
     void remove(int beginDate_);

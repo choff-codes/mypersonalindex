@@ -27,7 +27,7 @@ void executedTradeMap::insert(int date_, const executedTrade &executedTrade_)
     m_trades.insertMulti(date_, executedTrade_);
 }
 
-void executedTradeMap::updateAssociatedTradeID(const QHash<int, int> &tradeIDMapping_)
+void executedTradeMap::updateAssociatedTradeID(const QMap<int, int> &tradeIDMapping_)
 {
     for(QMap<int, executedTrade>::iterator i = m_trades.begin(); i != m_trades.end(); ++i)
         if (tradeIDMapping_.contains(i.value().associatedTradeID))

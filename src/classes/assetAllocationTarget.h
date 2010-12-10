@@ -18,7 +18,7 @@ public:
     void insert(int id_, double target_);
     void remove(int id_);
 
-    void updateAssetAllocationID(int fromID_, int toID_);
+    void updateAssetAllocationID(const QMap<int, int> &aaIDMapping_);
 
     bool contains(int id_) const { return m_targets.contains(id_); }
     double value(int id_) const { return m_targets.value(id_); }

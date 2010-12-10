@@ -30,12 +30,11 @@ double assetAllocationTarget::totalAssignedPercentage() const
     return functions::massage(total - m_targets.value(UNASSIGNED));
 }
 
-void assetAllocationTarget::updateAssetAllocationID(int fromID_, int toID_)
+void assetAllocationTarget::updateAssetAllocationID(const QMap<int, int> &aaIDMapping_)
 {
-    if (!contains(fromID_))
-        return;
-
-    m_targets.insert(toID_, m_targets.take(fromID_));
+    for(QMap<int, int>::const_iterator i = aaIDMapping_.begin(); i != aaIDMapping_.end(); ++i)
+        if (contains(i.key()))
+            m_targets.insert(i.value(), m_targets.take(i.key()));
 }
 
 void assetAllocationTarget::insertBatch(const queries &dataSource_)

@@ -133,9 +133,9 @@ void frmPortfolioImport::accept()
         m_portfolio.securities().clear();
     }
 
-    QMap<int, int> accountMapping;
-    QMap<int, int> aaMapping;
-    QMap<int, int> secMapping;
+    // based off the save method in portfolio.cpp, with slight tweaks
+
+    QMap<int, int> acctIDMapping;
 
     QTreeWidgetItem *acctItem = ui->tree->topLevelItem(0);
     for(int i = 0; i < acctItem->childCount(); ++i)
@@ -146,12 +146,14 @@ void frmPortfolioImport::accept()
             int id = portfolio::getOpenIdentity();
             account acct = importing.accounts().value(item->type());
             acct.detach();
-            accountMapping.insert(acct.id(), id);
+            acctIDMapping.insert(acct.id(), id);
             acct.setID(id);
             acct.setParent(m_portfolio.id());
             m_portfolio.accounts().insert(id, acct);
         }
     }
+
+    QMap<int, int> aaIDMapping;
 
     QTreeWidgetItem *aaItem = ui->tree->topLevelItem(1);
     for(int i = 0; i < aaItem->childCount(); ++i)
@@ -162,12 +164,14 @@ void frmPortfolioImport::accept()
             int id = portfolio::getOpenIdentity();
             assetAllocation aa = importing.assetAllocations().value(item->type());
             aa.detach();
-            aaMapping.insert(aa.id(), id);
+            aaIDMapping.insert(aa.id(), id);
             aa.setID(id);
             aa.setParent(m_portfolio.id());
             m_portfolio.assetAllocations().insert(id, aa);
         }
     }
+
+    QMap<int, int> secIDMapping;
 
     QTreeWidgetItem *secItem = ui->tree->topLevelItem(2);
     for(int i = 0; i < secItem->childCount(); ++i)
@@ -178,19 +182,19 @@ void frmPortfolioImport::accept()
             int id = portfolio::getOpenIdentity();
             security sec = importing.securities().value(item->type());
             sec.detach();
-            secMapping.insert(sec.id(), id);
+            secIDMapping.insert(sec.id(), id);
             sec.setID(id);
             sec.executedTrades().parent = id;
             sec.executedTrades().remove();
             sec.setParent(m_portfolio.id());
-            sec.setAccount(accountMapping.value(sec.account(), UNASSIGNED));
+            sec.setAccount(acctIDMapping.value(sec.account(), UNASSIGNED));
             sec.targets().parent = id;
             foreach(int aaID, sec.targets().keys())
             {
-                if (aaMapping.contains(aaID))
-                    sec.targets().updateAssetAllocationID(aaID, aaMapping.value(aaID));
-                else
-                    sec.targets().remove(aaID);
+                double value = sec.targets().value(aaID);
+                sec.targets().remove(aaID);
+                if (aaIDMapping.contains(aaID))
+                    sec.targets().insert(aaIDMapping.value(aaID), value);
             }
             m_portfolio.securities().insert(id, sec);
         }
@@ -199,7 +203,7 @@ void frmPortfolioImport::accept()
     for(int i = 0; i < secItem->childCount(); ++i)
     {
         QTreeWidgetItem *item = secItem->child(i);
-        security sec = m_portfolio.securities().value(secMapping.value(item->type()));
+        security sec = m_portfolio.securities().value(secIDMapping.value(item->type()));
 
         QList<trade> trades = sec.trades().values();
         sec.trades().clear();
@@ -208,7 +212,7 @@ void frmPortfolioImport::accept()
             t.detach();
             t.setID(portfolio::getOpenIdentity());
             t.setParent(sec.id());
-            t.setCashAccount(secMapping.value(t.cashAccount(), UNASSIGNED));
+            t.setCashAccount(secIDMapping.value(t.cashAccount(), UNASSIGNED));
             sec.trades().insert(t.id(), t);
         }
     }

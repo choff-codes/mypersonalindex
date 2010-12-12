@@ -8,6 +8,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     layoutTop = new QGridLayout();
     list = new QListView(parent_);
     list->setContextMenuPolicy(Qt::CustomContextMenu);
+    list->setEnabled(false);
     filter = new QLabel("Choose Security:", parent_);
     filterCmb = new QComboBox(parent_);
     addBtn = new QPushButton("Add", parent_);

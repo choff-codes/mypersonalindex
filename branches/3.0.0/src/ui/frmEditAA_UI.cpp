@@ -8,6 +8,7 @@ void frmEditAA_UI::setupUI(QWidget *parent_)
     layoutLeft = new QGridLayout();
     list = new QListView(parent_);
     list->setContextMenuPolicy(Qt::CustomContextMenu);
+    list->setEnabled(false);
     addBtn = new QPushButton("Add", parent_);
     deleteBtn = new QPushButton("Delete", parent_);
 

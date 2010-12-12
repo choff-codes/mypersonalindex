@@ -81,6 +81,7 @@ portfolio portfolio::load(const QSqlQuery &q_)
     return p;
 }
 
+// make private?  this shouldn't be called directly
 void portfolio::save(const queries &dataSource_)
 {
     // Note: order of saving matters!
@@ -91,9 +92,6 @@ void portfolio::save(const queries &dataSource_)
         remove(dataSource_);
         return;
     }
-
-    dataSource_.deleteTable(queries::table_PortfolioSecurityTradeExecution);
-    dataSource_.deleteTable(queries::table_PortfolioSecurityAA);
 
     // save portfolio
     QMap<QString, QVariant> values;
@@ -227,6 +225,10 @@ QMap<int, int> portfolio::save(QMap<int, portfolio> *portfolios_, const queries 
     QMap<int, int> returnMap;
     QList<portfolio> portfolioList = portfolios_->values();
     portfolios_->clear();
+
+    //truncate tables...
+    dataSource_.deleteTable(queries::table_PortfolioSecurityTradeExecution);
+    dataSource_.deleteTable(queries::table_PortfolioSecurityAA);
 
     foreach(portfolio p, portfolioList)
     {

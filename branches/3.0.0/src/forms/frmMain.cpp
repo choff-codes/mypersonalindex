@@ -113,7 +113,10 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
     updateRecentFileActions(filePath_);
 
     if (!newFile_)
+    {
+        m_currentPortfolio = m_file->portfolioIdentities.value(m_currentPortfolio, UNASSIGNED);
         return;
+    }
 
     refreshPortfolioPrices();
     refreshPortfolioCmb(UNASSIGNED);

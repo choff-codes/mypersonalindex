@@ -38,9 +38,6 @@ frmEditSecurity_State::~frmEditSecurity_State()
 
 void frmEditSecurity_State::enter()
 {
-    load(); // this could be modified by the AA and Acct tab, so reload the current item
-    ui->list->setEnabled(true);
-
     ui->aaCmb->clear();
     foreach(const assetAllocation &aa, m_portfolio.assetAllocations())
     {
@@ -61,6 +58,9 @@ void frmEditSecurity_State::enter()
         ui->acctCmb->addItem(acct.displayText(), acct.id());
     }
     ui->acctCmb->model()->sort(0);
+
+    load(); // this could be modified by the AA and Acct tab, so reload the current item
+    ui->list->setEnabled(true);
 }
 
 void frmEditSecurity_State::leave()

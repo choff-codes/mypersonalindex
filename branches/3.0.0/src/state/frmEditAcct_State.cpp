@@ -114,7 +114,7 @@ void frmEditAcct_State::remove()
         if (s.account() == m_currentItem->id())
         {
             if (QMessageBox::question(static_cast<QWidget*>(this->parent()), "Delete?",
-                QString("The accout %1 is used is one or more securities, are you sure you want to delete?").arg(m_currentItem->displayText()),
+                QString("The account %1 is used is one or more securities, are you sure you want to delete?").arg(m_currentItem->displayText()),
                 QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
                     return;
 
@@ -123,7 +123,8 @@ void frmEditAcct_State::remove()
 
     m_portfolio.accounts()[m_currentItem->id()].setDeleted(true);
     foreach(security s, m_portfolio.securities())
-        s.setAccount(UNASSIGNED);
+        if (s.account() == m_currentItem->id())
+            s.setAccount(UNASSIGNED);
     m_model->remove(m_currentItem);
 
 }

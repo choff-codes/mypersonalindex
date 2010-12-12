@@ -8,7 +8,7 @@ class objectKeyBase;
 class objectKeyEditModel : public QAbstractListModel
 {
 public:
-    objectKeyEditModel(QList<objectKeyBase*> items_, QObject *parent = 0):
+    objectKeyEditModel(const QList<objectKeyBase*> &items_, QObject *parent = 0):
         QAbstractListModel(parent),
         m_items(items_)
     {

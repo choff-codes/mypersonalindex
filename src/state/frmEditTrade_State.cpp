@@ -36,10 +36,22 @@ frmEditTrade_State::~frmEditTrade_State()
     delete ui;
 }
 
+QList<objectKeyBase*> frmEditTrade_State::sort(QList<objectKeyBase*> list_) const
+{
+    qStableSort(list_.begin(), list_.end(), tradeSort);
+    return list_;
+}
+
+bool frmEditTrade_State::tradeSort(const objectKeyBase *row1_, const objectKeyBase *row2_)
+{
+    if (static_cast<const trade*>(row1_)->frequency() == static_cast<const trade*>(row2_)->frequency())
+        return static_cast<const trade*>(row1_)->date() < static_cast<const trade*>(row2_)->date();
+
+    return static_cast<const trade*>(row1_)->frequency() < static_cast<const trade*>(row2_)->frequency();
+}
+
 void frmEditTrade_State::enter()
 {
-    ui->list->setEnabled(true);
-
     int currentSecurityFilter = ui->filterCmb->currentIndex() == -1 ? -1 : ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt();
     ui->filterCmb->blockSignals(true);
     ui->filterCmb->clear();
@@ -73,6 +85,7 @@ void frmEditTrade_State::enter()
         securityFilterChange(-1);
 
     ui->filterCmb->blockSignals(false);
+    ui->list->setEnabled(true);
 }
 
 void frmEditTrade_State::leave()
@@ -101,7 +114,7 @@ void frmEditTrade_State::securityFilterChange(int index_)
     }
 
     QAbstractItemModel *model = m_model;
-    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades()), ui->list);
+    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades()));
     ui->list->setModel(m_model);
     delete model;
 
@@ -110,6 +123,8 @@ void frmEditTrade_State::securityFilterChange(int index_)
         ui->list->setCurrentIndex(m_model->index(0, 0));
         listChange(ui->list->model()->index(0, 0), QModelIndex());
     }
+    else
+        ui->widgetBottom->setEnabled(false);
 
     connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(save()));
     connect(ui->list->selectionModel(), SIGNAL(currentChanged(QModelIndex,QModelIndex)), this, SLOT(listChange(QModelIndex,QModelIndex)));

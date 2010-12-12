@@ -147,7 +147,7 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
                 accounts_.value(sec.account()).costBasis(),
                 portfolioSnapshot_,
                 sec,
-                accounts_.value(sec.account()).displayText(),
+                sec.account() == UNASSIGNED ? QString() : accounts_.value(sec.account()).displayText(),
                 aaDescription.join(", "),
                 columnSort_
             )

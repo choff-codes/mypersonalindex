@@ -10,6 +10,17 @@ frmEditStateMap::frmEditStateMap(const portfolio &portfolio_, QObject *parent_):
 {
 }
 
+bool frmEditStateMap::objectKeyBaseSort(const objectKeyBase *row1_, const objectKeyBase *row2_)
+{
+    return row1_->displayText().toLower() < row2_->displayText().toLower();
+}
+
+QList<objectKeyBase*> frmEditStateMap::sort(QList<objectKeyBase*> list_) const
+{
+    qStableSort(list_.begin(), list_.end(), objectKeyBaseSort);
+    return list_;
+}
+
 template <class T>
 bool frmEditStateMap::validateMap(const QMap<int, T> &map_)
 {
@@ -38,25 +49,10 @@ template <class T>
 QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, T> &map_) const
 {
     QList<objectKeyBase*> list;
-    if (map_.isEmpty())
-        return list;
+    foreach(const T &item, map_)
+        list.append(new T(item));
 
-    typename QMap<int, T>::const_iterator i = map_.constEnd();
-    do
-    {
-        --i;
-        if (i.value().deleted())
-            continue;
-
-        // add the items back in ascending order for saved items, but descending order for new (< UNASSIGNED) items
-        if (i.value().id() < UNASSIGNED)
-            list.append(new T(i.value()));
-        else
-            list.prepend(new T(i.value()));
-
-    } while (i != map_.constBegin());
-
-    return list;
+    return sort(list);
 }
 
 // implementations

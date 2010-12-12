@@ -99,7 +99,7 @@ void securityAAModel::deleteSelected(const QModelIndexList &selection_)
         endRemoveRows();
     }
 
-    if (m_target.contains(UNASSIGNED) && m_keys.at(0) != UNASSIGNED)
+    if (m_target.contains(UNASSIGNED) && (m_keys.isEmpty() || m_keys.at(0) != UNASSIGNED))
         insertUnassigned();
 }
 

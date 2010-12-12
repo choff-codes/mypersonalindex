@@ -16,7 +16,7 @@ public:
         objectKeyData(description_, id_, parent_),
         target(0),
         threshold(assetAllocation::thresholdMethod_Portfolio),
-        rebalanceBand(5),
+        rebalanceBand(0),
         hidden(false)
     {}
 };

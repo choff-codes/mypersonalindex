@@ -7,6 +7,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     layoutLeft = new QGridLayout();
     list = new QListView(parent_);
     list->setContextMenuPolicy(Qt::CustomContextMenu);
+    list->setEnabled(false);
     addBtn = new QPushButton("Add", parent_);
     deleteBtn = new QPushButton("Delete", parent_);
 
@@ -105,6 +106,4 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     notes->setBuddy(notesTxt);
     acct->setBuddy(acctCmb);
     expense->setBuddy(expenseSpinBox);
-
-
 }

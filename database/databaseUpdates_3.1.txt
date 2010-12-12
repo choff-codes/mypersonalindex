@@ -10,7 +10,7 @@ CREATE TABLE "main"."PortfolioSecurityTradeExecution" ("SecurityID" INTEGER,"Dat
 CREATE TABLE "main"."HistoricalPrice" ("Date" INTEGER,"Symbol" VARCHAR,"Type" INTEGER,"Value" NUMERIC)
 CREATE TABLE "main"."Portfolio" ("ID" INTEGER PRIMARY KEY  NOT NULL,"Description" VARCHAR,"StartDate" INTEGER)
 
-INSERT INTO "main"."Portfolio" SELECT "ID","Description","StartValue","StartDate" FROM "main"."Portfolios"
+INSERT INTO "main"."Portfolio" SELECT "ID","Description","StartDate" FROM "main"."Portfolios"
 DROP TABLE "main"."Portfolios"
 
 ALTER TABLE "main"."AA" RENAME TO "PortfolioAA"
@@ -40,5 +40,4 @@ DELETE FROM PortfolioSecurityAA WHERE SecurityID = old.ID;
 DELETE FROM PortfolioSecurityTrade WHERE SecurityID = old.ID;
 DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END
 
-INSERT INTO "main"."Settings" ("Version") VALUES (310)
 UPDATE PortfolioAccount SET CostBasis = CostBasis - 1

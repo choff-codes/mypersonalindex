@@ -16,8 +16,13 @@ protected:
     template <class T>
     bool validateMap(const QMap<int, T> &map_);
 
+    virtual QList<objectKeyBase*> sort(QList<objectKeyBase*> list_) const;
+
     template <class T>
     QList<objectKeyBase*> mapToList(const QMap<int, T> &map_) const;
+
+private:
+    static bool objectKeyBaseSort(const objectKeyBase *row1_, const objectKeyBase *row2_);
 };
 
 #endif // FRMEDITSTATEMAP_H

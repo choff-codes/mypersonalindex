@@ -80,7 +80,7 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Symbol,
     this->values.append(security_.description());
     //    row_Note,
-    this->values.append(functions::fitString(functions::removeNewLines(security_.note()), 20));
+    this->values.append(security_.note());
     //    row_Cash,
     this->values.append((int)security_.cashAccount());
     //    row_Price,
@@ -91,13 +91,12 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Avg,
     // cash should always be computed as average
     //s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
-    splits splitRatio(security_.splits(), snapshot_.date);
     this->values.append(
         functions::isZero(snapshot_.shares) ?
             QVariant() :
             security_.cashAccount() ?
                 1 :
-                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades(), costBasis_, splitRatio)
+                calculatorAveragePrice::calculate(snapshot_.date, security_.executedTrades(), costBasis_, splits(security_.splits(), snapshot_.date))
     );
     //    row_Cost,
     this->values.append(snapshot_.costBasis);

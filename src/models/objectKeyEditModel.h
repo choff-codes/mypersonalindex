@@ -19,12 +19,12 @@ public:
 
     int rowCount(const QModelIndex&) const { return m_items.count(); }
     QVariant data(const QModelIndex &index_, int role_) const;
-    void insert(objectKeyBase* key_);
-    void remove(objectKeyBase* key_);
+    void insert(objectKeyBase* const key_);
+    void remove(const objectKeyBase* const key_);
     void refresh(const QModelIndex &index_) { emit dataChanged(index_, index_); }
 
     objectKeyBase* get(int row_) { return row_ < m_items.count() && row_ >= 0 ? m_items.at(row_) : 0; }
-    QModelIndex find(const objectKeyBase* key_) const;
+    QModelIndex find(const objectKeyBase* const key_) const;
 
 private:
     QList<objectKeyBase*> m_items;

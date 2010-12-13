@@ -38,7 +38,7 @@ private:
     void save();
 
     QList<objectKeyBase*> sort(QList<objectKeyBase*> list_) const;
-    static bool tradeSort(const objectKeyBase *row1_, const objectKeyBase *row2_);
+    static bool tradeSort(const objectKeyBase* const row1_, const objectKeyBase* const row2_);
 
     void validationError(const objectKeyBase &key_, const QString &errorMessage_);
 

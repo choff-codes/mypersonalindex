@@ -42,7 +42,7 @@ QList<objectKeyBase*> frmEditTrade_State::sort(QList<objectKeyBase*> list_) cons
     return list_;
 }
 
-bool frmEditTrade_State::tradeSort(const objectKeyBase *row1_, const objectKeyBase *row2_)
+bool frmEditTrade_State::tradeSort(const objectKeyBase* const row1_, const objectKeyBase* const row2_)
 {
     if (static_cast<const trade*>(row1_)->frequency() == static_cast<const trade*>(row2_)->frequency())
         return static_cast<const trade*>(row1_)->date() < static_cast<const trade*>(row2_)->date();

@@ -10,7 +10,7 @@ frmEditStateMap::frmEditStateMap(const portfolio &portfolio_, QObject *parent_):
 {
 }
 
-bool frmEditStateMap::objectKeyBaseSort(const objectKeyBase *row1_, const objectKeyBase *row2_)
+bool frmEditStateMap::objectKeyBaseSort(const objectKeyBase* const row1_, const objectKeyBase* const row2_)
 {
     return row1_->displayText().toLower() < row2_->displayText().toLower();
 }

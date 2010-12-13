@@ -18,7 +18,7 @@ public:
     virtual ~baseRow() {}
 
     virtual QVariant columnType(int column_) const = 0;
-    static bool baseRowSort(const baseRow *row1_, const baseRow *row2_);
+    static bool baseRowSort(const baseRow* const row1_, const baseRow* const row2_);
 };
 
 class mpiViewModelBase: public QAbstractTableModel

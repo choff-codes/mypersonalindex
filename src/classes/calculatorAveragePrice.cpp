@@ -7,7 +7,7 @@
 #include <QTime>
 #endif
 
-double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits &splits_)
+double calculatorAveragePrice::calculate(int date_, const executedTradeMap &executedTrades_, account::costBasisMethod costBasis_, splits splits_)
 {
 #ifdef CLOCKTIME
     QTime t;

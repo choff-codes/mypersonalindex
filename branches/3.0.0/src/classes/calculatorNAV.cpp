@@ -277,6 +277,9 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
 
 double calculatorNAV::change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_)
 {
+    if (functions::isZero(endValue_))
+        return beginNAV_;
+
     double nav;
     activity_ -= dividends_;
     if (activity_ < 0)

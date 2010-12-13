@@ -22,7 +22,7 @@ protected:
     QList<objectKeyBase*> mapToList(const QMap<int, T> &map_) const;
 
 private:
-    static bool objectKeyBaseSort(const objectKeyBase *row1_, const objectKeyBase *row2_);
+    static bool objectKeyBaseSort(const objectKeyBase* const row1_, const objectKeyBase* const row2_);
 };
 
 #endif // FRMEDITSTATEMAP_H

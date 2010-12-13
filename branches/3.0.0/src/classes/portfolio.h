@@ -42,7 +42,7 @@ public:
     QString validate() const;
 
     void save(const queries &dataSource_);
-    static QMap<int, int> save(QMap<int, portfolio> *portfolios_, const queries &dataSource_);
+    static QMap<int, int> save(QMap<int, portfolio> &portfolios_, const queries &dataSource_);
     void remove(const queries &dataSource_) const;
     static portfolio load(const QSqlQuery &q_);
 

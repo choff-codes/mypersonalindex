@@ -150,7 +150,7 @@ public:
 
     queries(const QString &databaseLocation_);
 
-    void bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch *object_) const;
+    void bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch* const object_) const;
     int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
 

@@ -3,7 +3,7 @@
 
 // return true if less than, false otherwise
 // Note: if column sort is descending, returns false if less than
-bool baseRow::baseRowSort(const baseRow *row1_, const baseRow *row2_)
+bool baseRow::baseRowSort(const baseRow* const row1_, const baseRow* const row2_)
 {
     if (row1_->columnSort.isEmpty())
         return false;

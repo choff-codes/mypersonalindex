@@ -217,14 +217,11 @@ void portfolio::save(const queries &dataSource_)
     }
 }
 
-QMap<int, int> portfolio::save(QMap<int, portfolio> *portfolios_, const queries &dataSource_)
+QMap<int, int> portfolio::save(QMap<int, portfolio> &portfolios_, const queries &dataSource_)
 {
-    if (!portfolios_)
-        return QMap<int, int>();
-
     QMap<int, int> returnMap;
-    QList<portfolio> portfolioList = portfolios_->values();
-    portfolios_->clear();
+    QList<portfolio> portfolioList = portfolios_.values();
+    portfolios_.clear();
 
     //truncate tables...
     dataSource_.deleteTable(queries::table_PortfolioSecurityTradeExecution);
@@ -238,7 +235,7 @@ QMap<int, int> portfolio::save(QMap<int, portfolio> *portfolios_, const queries 
         if (p.deleted())
             continue;
 
-        portfolios_->insert(p.id(), p);
+        portfolios_.insert(p.id(), p);
         returnMap.insert(oldID, p.id());
     }
 

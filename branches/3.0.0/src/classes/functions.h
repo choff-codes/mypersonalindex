@@ -15,7 +15,7 @@ public:
 
     // presentation functions
     static QString doubleToCurrency(double value_);
-    static QString doubleToPercentage(double value_) { return QString("%L1%").arg(value_ * 100, 0, 'f', 2); }
+    static QString doubleToPercentage(double value_, int precision_ = 2) { return QString("%L1%").arg(value_ * 100, 0, 'f', precision_); }
     static QString doubleToLocalFormat(double value_, int precision_ = 2) { return QString("%L1").arg(value_, 0, 'f', precision_); }
     static QVariant checkDivisor(double denominator, double numerator) { return isZero(denominator) ? QVariant() : numerator / denominator;  }
 

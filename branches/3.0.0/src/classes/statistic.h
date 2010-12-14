@@ -30,6 +30,7 @@ public:
     double expenseRatio;
     double costBasis;
     double taxLiability;
+    double dividends;
 };
 
 #endif // STATISTIC_H

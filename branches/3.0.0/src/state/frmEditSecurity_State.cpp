@@ -109,7 +109,7 @@ void frmEditSecurity_State::save()
 
     m_currentItem->setDescription(ui->symbolTxt->text());
     m_currentItem->setAccount(ui->acctCmb->itemData(ui->acctCmb->currentIndex()).toInt());
-    m_currentItem->setExpenseRatio(ui->expenseSpinBox->value());
+    m_currentItem->setExpenseRatio(ui->expenseSpinBox->value() / 100);
     m_currentItem->setCashAccount(ui->cashChk->isChecked());
     m_currentItem->setDividendNAVAdjustment(ui->dividendNAVAdjustmentChk->isChecked());
     m_currentItem->setDividendReinvestment(ui->dividendReinvestmentChk->isChecked());
@@ -149,7 +149,7 @@ void frmEditSecurity_State::load()
     ui->layoutRight->setEnabled(true);
     ui->symbolTxt->setText(m_currentItem->description());
     ui->acctCmb->setCurrentIndex(ui->acctCmb->findData(m_currentItem->account()));
-    ui->expenseSpinBox->setValue(m_currentItem->expenseRatio());
+    ui->expenseSpinBox->setValue(m_currentItem->expenseRatio() * 100);
     ui->cashChk->setChecked(m_currentItem->cashAccount());
     ui->dividendNAVAdjustmentChk->setChecked(m_currentItem->dividendNAVAdjustment());
     ui->dividendReinvestmentChk->setChecked(m_currentItem->dividendReinvestment());

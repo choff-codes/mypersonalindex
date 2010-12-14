@@ -103,7 +103,8 @@ public:
         portfolioSecurityTradeColumns_Date,
         portfolioSecurityTradeColumns_StartDate,
         portfolioSecurityTradeColumns_EndDate,
-        portfolioSecurityTradeColumns_Description
+        portfolioSecurityTradeColumns_Description,
+        portfolioSecurityTradeColumns_PriceType
     };
 
     enum {
@@ -145,6 +146,7 @@ public:
         portfolioSecurityTradeViewColumns_StartDate,
         portfolioSecurityTradeViewColumns_EndDate,
         portfolioSecurityTradeViewColumns_Description,
+        portfolioSecurityTradeViewColumns_PriceType,
         portfolioSecurityTradeViewColumns_PortfolioID
     };
 

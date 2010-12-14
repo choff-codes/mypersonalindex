@@ -21,6 +21,7 @@ ALTER TABLE "main"."SecurityTrades" RENAME TO "PortfolioSecurityTrade"
 ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Note" VARCHAR
 ALTER TABLE "main"."PortfolioSecurity" ADD COLUMN "Dividends" INTEGER
 ALTER TABLE "main"."PortfolioSecurityTrade" ADD COLUMN "Description" VARCHAR
+ALTER TABLE "main"."PortfolioSecurityTrade" ADD COLUMN "PriceType" INTEGER
 ALTER TABLE "main"."PortfolioAA" ADD COLUMN "Threshold" INTEGER
 ALTER TABLE "main"."PortfolioAA" ADD COLUMN "RebalanceBand" NUMERIC
 ALTER TABLE "main"."PortfolioAA" ADD COLUMN "Hide" INTEGER
@@ -41,3 +42,4 @@ DELETE FROM PortfolioSecurityTrade WHERE SecurityID = old.ID;
 DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END
 
 UPDATE PortfolioAccount SET CostBasis = CostBasis - 1
+UPDATE PortfolioSecurityTrade SET PriceType = 1 WHERE Price IS NULL

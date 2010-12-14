@@ -6,7 +6,6 @@
 #include <QGroupBox>
 #include <QLabel>
 #include <QLineEdit>
-#include "mpiValidator.h"
 #include "mpiDateEdit.h"
 
 class frmEditPortfolio_UI

@@ -142,14 +142,15 @@ void frmEditTrade_State::save()
 
     m_currentItem->setAction((trade::tradeAction)ui->actionCmb->itemData(ui->actionCmb->currentIndex()).toInt());
     m_currentItem->setCashAccount(ui->cashCmb->itemData(ui->cashCmb->currentIndex()).toInt());
-    m_currentItem->setCommission(ui->commissionTxt->text().toDouble());
+    m_currentItem->setCommission(ui->commissionSpinBox->value());
     m_currentItem->setDate(ui->dateDateEdit->isEnabled() ? ui->dateDateEdit->date().toJulianDay() : 0);
     m_currentItem->setStartDate(ui->startingDateEdit->isEnabled() ? ui->startingDateEdit->date().toJulianDay() : 0);
     m_currentItem->setEndDate(ui->endingDateEdit->isEnabled() ? ui->endingDateEdit->date().toJulianDay() : 0);
     m_currentItem->setDescription(ui->noteTxt->toPlainText());
     m_currentItem->setFrequency((tradeDateCalendar::frequency)ui->freqCmb->itemData(ui->freqCmb->currentIndex()).toInt());
-    m_currentItem->setPrice(ui->priceChk->isChecked() && !ui->priceTxt->text().isEmpty() ? ui->priceTxt->text().toDouble() : -1);
-    m_currentItem->setValue(ui->sharesTxt->text().toDouble());
+    m_currentItem->setPriceType(ui->priceChk->isChecked() ? trade::tradePriceType_UserDefined : (trade::tradePriceType)ui->priceCmb->itemData(ui->priceCmb->currentIndex()).toInt());
+    m_currentItem->setPrice(ui->priceChk->isChecked() ? ui->priceSpinBox->value() : 0);
+    m_currentItem->setValue(ui->sharesSpinBox->value());
 
     m_model->refresh(m_model->find(m_currentItem));
 }
@@ -194,7 +195,7 @@ void frmEditTrade_State::load()
 
     ui->actionCmb->setCurrentIndex(ui->actionCmb->findData(m_currentItem->action()));
     ui->cashCmb->setCurrentIndex(ui->cashCmb->findData(m_currentItem->cashAccount()));
-    ui->commissionTxt->setText(QString::number(m_currentItem->commission(), 'f', 4));
+    ui->commissionSpinBox->setValue(m_currentItem->commission());
     ui->dateDateEdit->setDate(m_currentItem->date() != 0 ? QDate::fromJulianDay(m_currentItem->date()) : QDate::currentDate());
     ui->startingChk->setChecked(m_currentItem->startDate() != 0);
     ui->startingDateEdit->setDate(m_currentItem->startDate() != 0 ? QDate::fromJulianDay(m_currentItem->startDate()) : QDate::currentDate());
@@ -202,14 +203,20 @@ void frmEditTrade_State::load()
     ui->endingDateEdit->setDate(m_currentItem->endDate() != 0 ? QDate::fromJulianDay(m_currentItem->endDate()) : QDate::currentDate());
     ui->noteTxt->setPlainText(m_currentItem->description());
     ui->freqCmb->setCurrentIndex(ui->freqCmb->findData(m_currentItem->frequency()));
-    if (functions::massage(m_currentItem->price()) >= 0)
+    ui->sharesSpinBox->setValue(m_currentItem->value());
+    if (m_currentItem->priceType() == trade::tradePriceType_UserDefined)
     {
         ui->priceChk->setChecked(true);
-        ui->priceTxt->setText(QString::number(m_currentItem->price(), 'f', 4));
+        ui->priceSpinBox->setValue(m_currentItem->price());
+        ui->priceWidget->setCurrentWidget(ui->priceSpinBox);
     }
     else
+    {
+        ui->priceSpinBox->setValue(0);
         ui->priceChk->setChecked(false);
-    ui->sharesTxt->setText(QString::number(m_currentItem->value(), 'f', 4));
+        ui->priceWidget->setCurrentWidget(ui->priceCmb);
+        ui->priceCmb->setCurrentIndex(ui->priceCmb->findData(m_currentItem->priceType()));
+    }
 }
 
 void frmEditTrade_State::remove()
@@ -310,6 +317,8 @@ void frmEditTrade_State::tradeActionChange(int index_)
 
 void frmEditTrade_State::tradePriceChange(bool checked_)
 {
-    ui->priceTxt->setEnabled(checked_);
-    ui->priceTxt->setText(checked_ ? "0.0000" : "Previous Close");
+    if (checked_)
+        ui->priceWidget->setCurrentWidget(ui->priceSpinBox);
+    else
+        ui->priceWidget->setCurrentWidget(ui->priceCmb);
 }

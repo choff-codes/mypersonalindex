@@ -147,7 +147,7 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
                     qMax(
                         t.frequency() == tradeDateCalendar::frequency_Once ?
                             0 :
-                            sec.beginDate() + 1,
+                            sec.beginDate() + (int)t.priceType(), // add 1 for trade price type of previous
                         qMax(t.startDate(), date_)
                     ),
                     t.frequency() == tradeDateCalendar::frequency_Once ?
@@ -155,8 +155,8 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
                             tradeDateCalendar::endDate() :
                             qMin(t.endDate(), tradeDateCalendar::endDate()) :
                         t.endDate() == 0 ?
-                            sec.endDate() + 1 :
-                            qMin(t.endDate(), sec.endDate() + 1),
+                            sec.endDate() + (int)t.priceType() : // add 1 for trade price type of previous
+                            qMin(t.endDate(), sec.endDate() + (int)t.priceType()), // add 1 for trade price type of previous
                     t.frequency()
                 );
 
@@ -187,32 +187,32 @@ QList<int> calculatorTrade::calculateDividendReinvestmentDates(int date_, const 
 executedTrade calculatorTrade::calculateExecutedTrade(int date_, const calculatorNAV &calc_, const QMap<int, assetAllocation> &aa, const security &parent_, const trade &trade_) const
 {
     double purchasePrice = calculateTradePrice(
-            trade_.action(),
-            trade_.price(),
-            parent_.splitAdjustedPriorDayPrice(date_)
-        );
+        trade_.action(),
+        trade_.priceType() == trade::tradePriceType_UserDefined ?
+            trade_.price() :
+            trade_.priceType() == trade::tradePriceType_CurrentClose ?
+                parent_.price(date_) :
+                parent_.splitAdjustedPriorDayPrice(date_)
+    );
 
     double shares = calculateTradeShares(
-            date_,
-            purchasePrice,
-            calc_,
-            aa,
-            parent_,
-            trade_
-        );
+        date_,
+        purchasePrice,
+        calc_,
+        aa,
+        parent_,
+        trade_
+    );
 
     return executedTrade(shares, purchasePrice, trade_.commission(), trade_.id());
 }
 
-double calculatorTrade::calculateTradePrice(trade::tradeAction type_, double price_, double priorDayPrice_) const
+double calculatorTrade::calculateTradePrice(trade::tradeAction type_, double price_) const
 {
     if (type_ == trade::tradeAction_ReceiveInterest || type_ == trade::tradeAction_ReceiveInterestPercent)
         return 0;
 
-    if (price_ > EPSILONNEGATIVE)
-        return price_;
-
-    return priorDayPrice_;
+    return price_;
 }
 
 double calculatorTrade::calculateTradeShares(int date_, double price_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa,

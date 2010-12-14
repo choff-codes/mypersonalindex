@@ -26,6 +26,13 @@ public:
         tradeAction_ReinvestDividendsAuto
     };
 
+    // order matters, calculatorTrade.h depends on tradePriceType_CurrentClose and tradePriceType_PreviousClose being 0 and 1
+    enum tradePriceType {
+        tradePriceType_CurrentClose,
+        tradePriceType_PreviousClose,
+        tradePriceType_UserDefined
+    };
+
     trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED);
     trade(const trade &other_);
 
@@ -41,6 +48,9 @@ public:
 
     double value() const;
     void setValue(double value_);
+
+    tradePriceType priceType() const;
+    void setPriceType(tradePriceType priceType_);
 
     double price() const;
     void setPrice(double price_);
@@ -75,6 +85,7 @@ public:
     static QString frequencyToString(tradeDateCalendar::frequency freq_);
     static QString valueToString(tradeAction type_, double value_);
     static QString dateToString(tradeDateCalendar::frequency freq_, int date_);
+    static QString priceToString(tradePriceType priceType_, double price_ = 0);
 
     friend QDataStream& operator>>(QDataStream &stream_, trade &trade_);
 

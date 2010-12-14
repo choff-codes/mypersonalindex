@@ -118,6 +118,7 @@ const QStringList queries::portfolioSecurityAAColumns = QStringList()
 //    portfolioSecurityTradeColumns_StartDate,
 //    portfolioSecurityTradeColumns_EndDate
 //    portfolioSecurityTradeColumns_Description
+//    portfolioSecurityTradeColumns_PriceType
 //};
 
 const QStringList queries::portfolioSecurityTradeColumns = QStringList()
@@ -132,7 +133,8 @@ const QStringList queries::portfolioSecurityTradeColumns = QStringList()
                                                            << "Date"
                                                            << "StartDate"
                                                            << "EndDate"
-                                                           << "Description";
+                                                           << "Description"
+                                                           << "PriceType";
 
 //enum {
 //    portfolioSecurityTradeExecutionColumns_SecurityID,
@@ -197,6 +199,7 @@ const QStringList queries::portfolioSecurityAAViewColumns = QStringList()
 //    portfolioSecurityTradeViewColumns_StartDate,
 //    portfolioSecurityTradeViewColumns_EndDate,
 //    portfolioSecurityTradeViewColumns_Description,
+//    portfolioSecurityTradeViewColumns_PriceType,
 //    portfolioSecurityTradeViewColumns_PortfolioID
 //};
 
@@ -213,6 +216,7 @@ const QStringList queries::portfolioSecurityTradeViewColumns = QStringList()
                                                                << "StartDate"
                                                                << "EndDate"
                                                                << "Description"
+                                                               << "PriceType"
                                                                << "PortfolioID";
 
 const QString queries::table_Portfolio = "Portfolio";

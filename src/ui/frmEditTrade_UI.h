@@ -13,7 +13,8 @@
 #include <QPushButton>
 #include <QMenu>
 #include <QShortcut>
-#include "mpiValidator.h"
+#include <QDoubleSpinBox>
+#include <QStackedWidget>
 #include "mpiDateEdit.h"
 
 class frmEditTrade_UI
@@ -32,13 +33,14 @@ public:
     QFormLayout *layoutForm;
     QLabel *action;
     QComboBox *actionCmb;
-    mpiDoubleValidator *sharePriceValidator;
     QLabel *shares;
-    QLineEdit *sharesTxt;
+    QDoubleSpinBox *sharesSpinBox;
     QCheckBox *priceChk;
-    QLineEdit *priceTxt;
+    QStackedWidget *priceWidget;
+    QDoubleSpinBox *priceSpinBox;
+    QComboBox *priceCmb;
     QLabel *commission;
-    QLineEdit *commissionTxt;
+    QDoubleSpinBox *commissionSpinBox;
     QLabel *cash;
     QComboBox *cashCmb;
     QLabel *note;

@@ -43,7 +43,7 @@ private:
 
     executedTrade calculateExecutedTradeReversal(const security &security_, int date_, double shares_, double price_, int spawningID_) const;
 
-    double calculateTradePrice(trade::tradeAction type_, double price_, double priorDayPrice_) const;
+    double calculateTradePrice(trade::tradeAction type_, double price_) const;
 
     double calculateTradeShares(int date_, double price_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa, const security &parent_,
         const trade &trade_) const;

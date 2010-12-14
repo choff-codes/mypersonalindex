@@ -28,8 +28,6 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     groupBox = new QGroupBox("Trade", widgetBottom);
     layoutForm = new QFormLayout(groupBox);
 
-    sharePriceValidator = new mpiDoubleValidator(-100000000, 100000000, 4, parent_);
-
     action = new QLabel("&Action:", groupBox);
     actionCmb = new QComboBox(groupBox);
 
@@ -47,21 +45,38 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     layoutForm->setWidget(0, QFormLayout::LabelRole, action);
     layoutForm->setWidget(0, QFormLayout::FieldRole, actionCmb);
     shares = new QLabel("&Shares:", groupBox);
-    sharesTxt = new QLineEdit(groupBox);
-    sharesTxt->setValidator(sharePriceValidator);
+    sharesSpinBox = new QDoubleSpinBox(groupBox);
+    sharesSpinBox->setDecimals(4);
+    sharesSpinBox->setMinimum(0);
+    sharesSpinBox->setSingleStep(1);
+    sharesSpinBox->setMaximum(99999999999);
+    sharesSpinBox->setValue(0);
     layoutForm->setWidget(1, QFormLayout::LabelRole, shares);
-    layoutForm->setWidget(1, QFormLayout::FieldRole, sharesTxt);
+    layoutForm->setWidget(1, QFormLayout::FieldRole, sharesSpinBox);
     priceChk = new QCheckBox("&Price:", groupBox);
-    priceTxt = new QLineEdit("Previous Close", groupBox);
-    priceTxt->setEnabled(false);
-    priceTxt->setValidator(sharePriceValidator);
+    priceWidget = new QStackedWidget(groupBox);
+    priceSpinBox = new QDoubleSpinBox(groupBox);
+    priceSpinBox->setDecimals(4);
+    priceSpinBox->setMinimum(0);
+    priceSpinBox->setSingleStep(1);
+    priceSpinBox->setMaximum(99999999999);
+    priceSpinBox->setValue(0);
+    priceCmb = new QComboBox(groupBox);
+    priceCmb->addItem(trade::priceToString(trade::tradePriceType_CurrentClose), trade::tradePriceType_CurrentClose);
+    priceCmb->addItem(trade::priceToString(trade::tradePriceType_PreviousClose), trade::tradePriceType_PreviousClose);
+    priceWidget->addWidget(priceCmb);
+    priceWidget->addWidget(priceSpinBox);
     layoutForm->setWidget(2, QFormLayout::LabelRole, priceChk);
-    layoutForm->setWidget(2, QFormLayout::FieldRole, priceTxt);
+    layoutForm->setWidget(2, QFormLayout::FieldRole, priceWidget);
     commission = new QLabel("&Commission:", groupBox);
-    commissionTxt = new QLineEdit(groupBox);
-    commissionTxt->setValidator(sharePriceValidator);
+    commissionSpinBox = new QDoubleSpinBox(groupBox);
+    commissionSpinBox->setDecimals(2);
+    commissionSpinBox->setMinimum(0);
+    commissionSpinBox->setSingleStep(1);
+    commissionSpinBox->setMaximum(99999999999);
+    commissionSpinBox->setValue(0);
     layoutForm->setWidget(3, QFormLayout::LabelRole, commission);
-    layoutForm->setWidget(3, QFormLayout::FieldRole, commissionTxt);
+    layoutForm->setWidget(3, QFormLayout::FieldRole, commissionSpinBox);
     cash = new QLabel("T&o/From Cash:", groupBox);
     cashCmb = new QComboBox(groupBox);
     layoutForm->setWidget(4, QFormLayout::LabelRole, cash);
@@ -118,8 +133,8 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     pasteShortcut = new QShortcut(Qt::CTRL + Qt::Key_V, list);
 
     action->setBuddy(actionCmb);
-    shares->setBuddy(sharesTxt);
-    commission->setBuddy(commissionTxt);
+    shares->setBuddy(sharesSpinBox);
+    commission->setBuddy(commissionSpinBox);
     cash->setBuddy(cashCmb);
     freq->setBuddy(freqCmb);
     date->setBuddy(dateDateEdit);

@@ -9,6 +9,7 @@ class tradeData: public objectKeyData
 public:
     trade::tradeAction action;
     double value;
+    trade::tradePriceType priceType;
     double price;
     double commission;
     int cashAccount;
@@ -21,7 +22,8 @@ public:
         objectKeyData(QString(), id_, parent_),
         action(trade::tradeAction_Purchase),
         value(0),
-        price(UNASSIGNED),
+        priceType(trade::tradePriceType_CurrentClose),
+        price(0),
         commission(0),
         cashAccount(UNASSIGNED),
         frequency(tradeDateCalendar::frequency_Once),
@@ -55,6 +57,7 @@ bool trade::operator==(const trade &other_) const
     return d->objectKeyData::operator==(*other_.d)
             && d->action == other_.d->action
             && d->value == other_.d->value
+            && d->priceType == other_.d->priceType
             && d->price == other_.d->price
             && d->commission == other_.d->commission
             && d->cashAccount == other_.d->cashAccount
@@ -73,6 +76,9 @@ void trade::setValue(double value_) { d->value = value_; }
 
 double trade::price() const { return d->price; }
 void trade::setPrice(double price_) { d->price = price_; }
+
+trade::tradePriceType trade::priceType() const { return d->priceType; }
+void trade::setPriceType(tradePriceType priceType_) { d->priceType = priceType_; }
 
 double trade::commission() const { return d->commission; }
 void trade::setCommission(double commission_) { d->commission = commission_; }
@@ -99,7 +105,8 @@ void trade::save(const queries &dataSource_)
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Description), this->description());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Type), (int)this->action());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Value), this->value());
-    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Price), functions::doubleToNull(this->price()));
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_PriceType), (int)this->priceType());
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Price), this->priceType() == tradePriceType_UserDefined ? this->price() : QVariant());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Commission), this->commission());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_CashAccountID), functions::intToNull(this->cashAccount()));
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Frequency), (int)this->frequency());
@@ -128,6 +135,7 @@ trade trade::load(const QSqlQuery &q_)
     t.setAction((trade::tradeAction)q_.value(queries::portfolioSecurityTradeViewColumns_Type).toInt());
     t.setValue(q_.value(queries::portfolioSecurityTradeViewColumns_Value).toDouble());
     t.setDescription(q_.value(queries::portfolioSecurityTradeViewColumns_Description).toString());
+    t.setPriceType((tradePriceType)q_.value(queries::portfolioSecurityTradeViewColumns_PriceType).toInt());
     if (!q_.value(queries::portfolioSecurityTradeViewColumns_Price).isNull())
         t.setPrice(q_.value(queries::portfolioSecurityTradeViewColumns_Price).toDouble());
     t.setCommission(q_.value(queries::portfolioSecurityTradeViewColumns_Commission).toDouble());
@@ -223,13 +231,27 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
         case tradeDateCalendar::frequency_Once:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString(Qt::SystemLocaleShortDate) : "";
         case tradeDateCalendar::frequency_Daily:
-            return "Market Days";
+            return "market days";
         case tradeDateCalendar::frequency_Weekly:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dddd") : "";
         case tradeDateCalendar::frequency_Monthly:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd") : "";
         case tradeDateCalendar::frequency_Yearly:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd MMM") : "";
+    }
+    return "";
+}
+
+QString trade::priceToString(tradePriceType priceType_, double price_)
+{
+    switch (priceType_)
+    {
+        case tradePriceType_CurrentClose:
+            return "Market close";
+        case tradePriceType_PreviousClose:
+            return "Previous close";
+        case tradePriceType_UserDefined:
+            return functions::doubleToCurrency(price_);
     }
     return "";
 }
@@ -256,7 +278,7 @@ QString trade::validate() const
                 return "Value cannot be negative!";
         }
 
-    if (functions::massage(this->price()) < 0 && functions::massage(UNASSIGNED - this->price()) != 0)
+    if (functions::massage(this->price()) < 0 && this->priceType() == tradePriceType_UserDefined)
         return "The price cannot be negative!";
 
     if (this->frequency() == tradeDateCalendar::frequency_Once && this->startDate() > this->date())
@@ -285,7 +307,7 @@ QString trade::displayText() const
             tradeTypeToString(this->action()),
             valueToString(this->action(), this->value()),
             frequencyToString(this->frequency()).toLower(),
-            functions::massage(this->price()) < 0 ? "market price" : functions::doubleToCurrency(this->price()),
+            priceToString(this->priceType(), this->price()).toLower(),
             dateToString(this->frequency(), this->date()),
             this->startDate() == 0 ? QString() : QString(", starting on %1").arg(QDate::fromJulianDay(this->startDate()).toString(Qt::SystemLocaleShortDate)),
             this->endDate() == 0 ? QString() : QString(", ending on %1").arg(QDate::fromJulianDay(this->endDate()).toString(Qt::SystemLocaleShortDate))
@@ -297,10 +319,11 @@ QDataStream& operator<<(QDataStream &stream_, const trade &trade_)
     stream_ << trade_.description();
     stream_ << trade_.action();
     stream_ << trade_.value();
+    stream_ << trade_.priceType();
     stream_ << trade_.price();
     stream_ << trade_.commission();
     stream_ << trade_.cashAccount();
-    stream_ << (int)trade_.frequency();
+    stream_ << trade_.frequency();
     stream_ << trade_.date();
     stream_ << trade_.startDate();
     stream_ << trade_.endDate();
@@ -314,6 +337,8 @@ QDataStream& operator>>(QDataStream &stream_, trade &trade_)
     stream_ >> tmp;
     trade_.d->action = (trade::tradeAction)tmp;
     stream_ >> trade_.d->value;
+    stream_ >> tmp;
+    trade_.d->priceType = (trade::tradePriceType)tmp;
     stream_ >> trade_.d->price;
     stream_ >> trade_.d->commission;
     stream_ >> trade_.d->cashAccount;

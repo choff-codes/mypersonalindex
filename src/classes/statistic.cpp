@@ -27,16 +27,22 @@ statistic::statistic(const historicalNAV &historicalNAV_):
     maxTotalValueDay(0),
     expenseRatio(historicalNAV_.expenseRatio),
     costBasis(historicalNAV_.costBasis),
-    taxLiability(historicalNAV_.taxLiability)
+    taxLiability(historicalNAV_.taxLiability),
+    dividends(0)
 {
     days = historicalNAV_.count() - 1; // first is baseline nav, so discard
     if (days <= 0)
         return;
 
-    beginNAV = historicalNAV_.nav(historicalNAV_.beginDate());
-    beginTotalValue = historicalNAV_.totalValue(historicalNAV_.beginDate());
-    endNAV = historicalNAV_.nav(historicalNAV_.endDate());
-    endTotalValue = historicalNAV_.totalValue(historicalNAV_.endDate());
+    navValue beginningNAV = historicalNAV_.value(historicalNAV_.beginDate());
+    beginNAV = beginningNAV.nav;
+    beginTotalValue = beginningNAV.totalValue;
+    dividends = beginningNAV.dividend;
+
+    navValue endingNAV = historicalNAV_.value(historicalNAV_.endDate());
+    endNAV = endingNAV.nav;
+    endTotalValue = endingNAV.totalValue;
+
     minNAVValue = beginNAV;
     minNAVValueDay = historicalNAV_.beginDate();
     maxNAVValue = beginNAV;
@@ -61,9 +67,11 @@ statistic::statistic(const historicalNAV &historicalNAV_):
         if (date > historicalNAV_.endDate())
             break;
 
-        double newNav = historicalNAV_.nav(date);
+        navValue currentNAV = historicalNAV_.value(date);
+        double newNav = currentNAV.nav;
         double change = newNav / previousNAV - 1;
-        double totalValue = historicalNAV_.totalValue(date);
+        double totalValue = currentNAV.totalValue;
+        dividends += currentNAV.dividend;
 
         if (totalValue > maxTotalValue)
         {

@@ -3,19 +3,19 @@
 
 #include <QHash>
 
-struct navPair
+struct navValue
 {
     double nav;
     double totalValue;
     double dividend;
 
-    navPair():
+    navValue():
         nav(1),
         totalValue(0),
         dividend(0)
     {}
 
-    navPair(double nav_, double totalValue_, double dividend_):
+    navValue(double nav_, double totalValue_, double dividend_):
         nav(nav_),
         totalValue(totalValue_),
         dividend(dividend_)
@@ -43,7 +43,7 @@ public:
     double totalValue(int date_) const { return m_nav.value(date_).totalValue; }
     double dividend(int date_) const { return m_nav.value(date_).dividend; }
 
-    navPair value(int date_) const { return m_nav.value(date_); }
+    navValue value(int date_) const { return m_nav.value(date_); }
 
     int count() const { return m_nav.count(); }
     bool isEmpty() const { return m_nav.isEmpty(); }
@@ -53,7 +53,7 @@ public:
     int endDate() const { return m_lastDate; }
 
 private:
-    QHash<int, navPair> m_nav;
+    QHash<int, navValue> m_nav;
     int m_firstDate;
     int m_lastDate;
 };

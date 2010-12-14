@@ -20,6 +20,7 @@
 //    row_DailyStandardDeviation,
 //    row_Date,
 //    row_DaysInvested,
+//    row_Dividends,
 //    row_GainLoss,
 //    row_HourlyReturn,
 //    row_MaxPercentDown,
@@ -57,6 +58,7 @@ const QStringList statisticRow::columns = QStringList()
                                           << "Daily Standard Deviation"
                                           << "Date"
                                           << "Days Invested"
+                                          << "Total Dividends"
                                           << "Gain Loss"
                                           << "Hourly Return"
                                           << "Max % Down"
@@ -93,6 +95,7 @@ const QVariantList statisticRow::columnsType = QVariantList()
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Int)
                                                << QVariant(QVariant::Int)
+                                               << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double)
@@ -153,6 +156,8 @@ statisticRow::statisticRow(int type_, int id_, const QString description_, const
     values.append(info.endDate);
     //    row_DaysInvested,
     values.append(info.days);
+    //    row_Dividends,
+    values.append(info.dividends);
     //    row_GainLoss,
     values.append(info.endTotalValue - info.costBasis);
     //    row_HourlyReturn,
@@ -288,6 +293,7 @@ QVariant mainStatisticModel::data(const QModelIndex &index_, int role_) const
         case statisticRow::row_MaximumTotalValue:
         case statisticRow::row_MinimumTotalValue:
         case statisticRow::row_CurrentValue:
+        case statisticRow::row_Dividends:
             return functions::doubleToCurrency(value.toDouble());
         case statisticRow::row_MaximumIndexValue:
         case statisticRow::row_MinimumIndexValue:
@@ -303,8 +309,9 @@ QVariant mainStatisticModel::data(const QModelIndex &index_, int role_) const
         case statisticRow::row_MaxPercentUp:
         case statisticRow::row_YearlyReturn:
         case statisticRow::row_YearlyStandardDeviation:
-        case statisticRow::row_WeightedExpenseRatio:
             return functions::doubleToPercentage(value.toDouble());
+        case statisticRow::row_WeightedExpenseRatio:
+            return functions::doubleToPercentage(value.toDouble(), 4);
         case statisticRow::row_Date:
         case statisticRow::row_MaxPercentDownDay:
         case statisticRow::row_MaxPercentUpDay:

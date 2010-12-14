@@ -19,6 +19,7 @@ public:
         row_DailyStandardDeviation,
         row_Date,
         row_DaysInvested,
+        row_Dividends,
         row_GainLoss,
         row_HourlyReturn,
         row_MaxPercentDown,

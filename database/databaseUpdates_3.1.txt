@@ -43,3 +43,4 @@ DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END
 
 UPDATE PortfolioAccount SET CostBasis = CostBasis - 1
 UPDATE PortfolioSecurityTrade SET PriceType = 1 WHERE Price IS NULL
+UPDATE PortfolioSecurityTrade SET PriceType = 2 WHERE Price IS NOT NULL

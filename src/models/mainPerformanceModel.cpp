@@ -52,7 +52,7 @@ QList<baseRow*> performanceRow::getRows(const historicalNAV &nav_, const QList<o
     int endDate = nav_.endDate();
 
     // baseline
-    navPair previousNAV = nav_.value(calendar.date());
+    navValue previousNAV = nav_.value(calendar.date());
     returnList.append(new performanceRow(calendar.date(), previousNAV.totalValue, previousNAV.dividend, previousNAV.nav, 0, columnSort_));
 
     foreach(int date, ++calendar)
@@ -60,7 +60,7 @@ QList<baseRow*> performanceRow::getRows(const historicalNAV &nav_, const QList<o
         if (date > endDate)
             break;
 
-        navPair nav = nav_.value(date);
+        navValue nav = nav_.value(date);
         returnList.append(new performanceRow(date, nav.totalValue, nav.dividend, nav.nav, (nav.nav - previousNAV.nav) / previousNAV.nav, columnSort_));
         previousNAV = nav;
     }

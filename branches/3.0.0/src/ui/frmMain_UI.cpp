@@ -53,7 +53,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     portfolioDelete->setShortcut(Qt::CTRL + Qt::Key_D);
 
     import = new QMenu("&Import", menubar);
-    importYahoo = new QAction("Update Prices From Yahoo! Finance", mainWindow_);
+    importYahoo = new QAction("Update Prices From Internet", mainWindow_);
     importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
     importPrices = new QAction("Manually Import Price Information...", mainWindow_);
     importPortfolio = new QAction("Import Portfolio...", mainWindow_);

@@ -324,7 +324,7 @@ void frmMain::importYahooFinished()
     hideProgressBar();
 
     int earliestUpdate = tradeDateCalendar::endDate() + 1;
-    foreach(const int &result, m_futureWatcherYahoo->future())
+    foreach(int result, m_futureWatcherYahoo->future())
         if (result != -1)
             earliestUpdate = qMin(earliestUpdate, result);
 

@@ -1,70 +1,27 @@
-#include "updatePrices.h"
-#include <QtNetwork>
+#include "priceGetterYahoo.h"
 
-int updatePrices::operator()(const historicalPrices &prices_)
-{
-    updatePricesOptions options = m_options.value(prices_.symbol());
-    int result = options.endDate + 1; // track earliest date for nav recalc
+#include <QUrl>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
+#include <QStringList>
+#include <QEventLoop>
+#include <QDate>
+#include "historicalPrices.h"
 
-    if (options.beginDate > options.endDate) // begin date is after end date, nothing to do
-        return result;
-
-    if (prices_.beginDate(historicalPrices::type_price) > options.beginDate || prices_.endDate(historicalPrices::type_price) < options.endDate)
-        result = getPrices(
-                    prices_.symbol(),
-                    prices_,
-                    computeBeginDate(prices_, historicalPrices::type_price, options.beginDate),
-                    options.endDate
-                );
-
-    if (result == -1) // symbol does not exist
-        return result;
-
-    if (prices_.beginDate(historicalPrices::type_dividend) > options.beginDate || prices_.endDate(historicalPrices::type_dividend) < options.endDate)
-        result =
-            qMin(
-                    result,
-                    getDividends(
-                        prices_.symbol(),
-                        prices_,
-                        computeBeginDate(prices_, historicalPrices::type_dividend, options.beginDate),
-                        options.endDate
-                    )
-                );
-
-    if (options.splits)
-        result =
-            qMin(
-                    result,
-                    getSplits(
-                        prices_.symbol(),
-                        prices_,
-                        options.beginDate,
-                        options.endDate
-                    )
-                );
-
-    return result;
-}
-
-int updatePrices::computeBeginDate(const historicalPrices &prices_, historicalPrices::type type_, int beginDate_)
-{
-    return prices_.beginDate(type_) > beginDate_ || prices_.endDate(type_) == 0 ? beginDate_ : prices_.endDate(type_) + 1;
-}
-
-QString updatePrices::getCSVAddress(const QString &symbol_, const QDate &beginDate_, const QDate &endDate_, const QString &type_)
+QString priceGetterYahoo::getCSVAddress(const QString &symbol_, const QDate &beginDate_, const QDate &endDate_, const QString &type_)
 {
     return QString("http://ichart.finance.yahoo.com/table.csv?s=%1&a=%2&b=%3&c=%4&d=%5&e=%6&f=%7&g=%8&ignore=.csv").arg(
         symbol_, QString::number(beginDate_.month() - 1), QString::number(beginDate_.day()), QString::number(beginDate_.year()),
                 QString::number(endDate_.month() - 1), QString::number(endDate_.day()), QString::number(endDate_.year()), type_);
 }
 
-QString updatePrices::getSplitAddress(const QString &symbol)
+QString priceGetterYahoo::getSplitAddress(const QString &symbol)
 {
     return QString("http://finance.yahoo.com/q/bc?t=my&l=on&z=l&q=l&p=&a=&c=&s=%1").arg(symbol);
 }
 
-QList<QByteArray> updatePrices::downloadFile(const QUrl &url_, bool splitResultByLineBreak_)
+QList<QByteArray> priceGetterYahoo::downloadFile(const QUrl &url_, bool splitResultByLineBreak_)
 {
     //http://lists.trolltech.com/qt-interest/2007-11/thread00759-0.html
 
@@ -89,7 +46,7 @@ QList<QByteArray> updatePrices::downloadFile(const QUrl &url_, bool splitResultB
     return lines;
 }
 
-int updatePrices::getPrices(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_)
+int priceGetterYahoo::getPrices(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_) const
 {
     int earliestUpdate = endDate_ + 1;
     QList<QByteArray> lines =
@@ -123,7 +80,7 @@ int updatePrices::getPrices(const QString &symbol_, historicalPrices priceHistor
     return earliestUpdate;
 }
 
-int updatePrices::getDividends(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_)
+int priceGetterYahoo::getDividends(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_) const
 {
     int earliestUpdate = endDate_ + 1;
     QList<QByteArray> lines =
@@ -157,7 +114,7 @@ int updatePrices::getDividends(const QString &symbol_, historicalPrices priceHis
     return earliestUpdate;
 }
 
-int updatePrices::getSplits(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_)
+int priceGetterYahoo::getSplits(const QString &symbol_, historicalPrices priceHistory_, int beginDate_, int endDate_) const
 {
     int earliestUpdate = endDate_ + 1;
     static const QString htmlSplitTrue = "Splits:<nobr>";  // but signifying splits
@@ -212,14 +169,4 @@ int updatePrices::getSplits(const QString &symbol_, historicalPrices priceHistor
     }
 
     return earliestUpdate;
-}
-
-bool updatePrices::isInternetConnection()
-{
-    QTcpSocket q;
-    q.connectToHost("yahoo.com", 80, QIODevice::ReadOnly);
-    while (q.waitForConnected(2000))
-        return true;
-
-    return false;
 }

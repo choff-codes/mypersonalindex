@@ -4,6 +4,8 @@ include(state/state.pri)
 include(models/models.pri)
 include(ui/ui.pri)
 include(usercontrols/usercontrols.pri)
+include(prices/prices.pri)
+include(calculators/calculators.pri)
 
 VERSION = 310
 DEFINES += APP_VERSION="$$VERSION"

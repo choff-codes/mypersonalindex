@@ -110,7 +110,7 @@ void frmPortfolioImport::accept()
 {
     if (ui->portfolioCmb->currentIndex() == -1)
     {
-        QDialog::accept();
+        QDialog::reject();
         return;
     }
 

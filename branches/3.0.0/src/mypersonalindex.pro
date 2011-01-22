@@ -24,9 +24,7 @@ unix:!macx{
 
 macx{
     INCLUDEPATH += shared/qwt
-
-    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwt.dylib
-        else: LIBS += shared/qwt/lib/libqwt.dylib
+    LIBS += shared/qwt/lib/libqwt.dylib
 }
 
 CONFIG(debug, debug|release): DEFINES += CLOCKTIME
@@ -44,7 +42,3 @@ unix {
     CONFIG(debug, debug|release):DESTDIR = debug
     else:DESTDIR = release
 }
-
-database.path += $${DESTDIR}
-database.files += ../database/MPI.sqlite
-INSTALLS += database

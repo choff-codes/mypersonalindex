@@ -46,6 +46,9 @@ private:
     bool saveFile(const QString &filePath_);
     bool prepareFileForSave(const QString &filePath_);
     QWidget* parent() const;
+
+    QString checkDatabaseVersion(const QString &filePath_);
+    void upgradeVersion300(queries file_);
 };
 
 #endif // MPIFILE_STATE_H

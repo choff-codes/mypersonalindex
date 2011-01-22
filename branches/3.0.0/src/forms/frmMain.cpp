@@ -93,10 +93,11 @@ void frmMain::connectSlots()
 void frmMain::loadSettings()
 {
     m_settings = settingsFactory().getSettings();
-    if (m_settings.windowState() == Qt::WindowActive)
+    resize(m_settings.windowSize());
+
+    if (m_settings.windowState() == Qt::WindowActive) // first time opening, no useful location saved yet
         return;
 
-    resize(m_settings.windowSize());
     move(m_settings.windowLocation());
     if (m_settings.windowState() != Qt::WindowNoState)
         this->setWindowState(this->windowState() | m_settings.windowState());

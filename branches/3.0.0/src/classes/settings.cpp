@@ -56,7 +56,7 @@ void settings::save()
     settings.endGroup();
 
     settings.beginGroup("columns");
-    settings.setValue("holdings", qVariantFromValue(viewableColumns(columns_Security)));
+    settings.setValue("security", qVariantFromValue(viewableColumns(columns_Security)));
     settings.setValue("aa", qVariantFromValue(viewableColumns(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumns(columns_Acct)));
     settings.setValue("stat", qVariantFromValue(viewableColumns(columns_Stat)));
@@ -64,7 +64,7 @@ void settings::save()
     settings.endGroup();
 
     settings.beginGroup("columnsSorting");
-    settings.setValue("holdings", qVariantFromValue(viewableColumnsSorting(columns_Security)));
+    settings.setValue("security", qVariantFromValue(viewableColumnsSorting(columns_Security)));
     settings.setValue("aa", qVariantFromValue(viewableColumnsSorting(columns_AA)));
     settings.setValue("acct", qVariantFromValue(viewableColumnsSorting(columns_Acct)));
     settings.setValue("stat", qVariantFromValue(viewableColumnsSorting(columns_Stat)));
@@ -91,9 +91,10 @@ settings settings::load()
     set.setViewableColumns(
         columns_Security,
         settingsFile.value(
-            "holdings",
+            "security",
             qVariantFromValue(
                 QList<qint32>()
+                << 0
                 << 1
                 << 2
                 << 3
@@ -108,6 +109,9 @@ settings settings::load()
                 << 12
                 << 13
                 << 14
+                << 15
+                << 16
+                << 17
             )
         ).value<QList<qint32> >()
     );
@@ -118,6 +122,7 @@ settings settings::load()
             "aa",
             qVariantFromValue(
                 QList<qint32>()
+                << 0
                 << 1
                 << 2
                 << 3
@@ -127,6 +132,7 @@ settings settings::load()
                 << 7
                 << 8
                 << 9
+                << 10
             )
         ).value<QList<qint32> >()
     );
@@ -137,6 +143,7 @@ settings settings::load()
             "acct",
             qVariantFromValue(
                 QList<qint32>()
+                << 0
                 << 1
                 << 2
                 << 3
@@ -156,6 +163,38 @@ settings settings::load()
             "stat",
             qVariantFromValue(
                 QList<qint32>()
+                << 3
+                << 4
+                << 5
+                << 6
+                << 7
+                << 8
+                << 9
+                << 10
+                << 11
+                << 12
+                << 13
+                << 14
+                << 15
+                << 16
+                << 17
+                << 18
+                << 19
+                << 20
+                << 21
+                << 22
+                << 23
+                << 24
+                << 25
+                << 26
+                << 27
+                << 28
+                << 29
+                << 30
+                << 31
+                << 32
+                << 33
+                << 34
             )
         ).value<QList<qint32> >()
     );
@@ -166,6 +205,11 @@ settings settings::load()
             "performance",
             qVariantFromValue(
                 QList<qint32>()
+                << 0
+                << 1
+                << 2
+                << 3
+                << 4
             )
         ).value<QList<qint32> >()
     );
@@ -173,7 +217,7 @@ settings settings::load()
     settingsFile.endGroup();
 
     settingsFile.beginGroup("columnsSorting");
-    set.setViewableColumnsSorting(columns_Security, settingsFile.value("holdings").value<QList<orderBy> >());
+    set.setViewableColumnsSorting(columns_Security, settingsFile.value("security").value<QList<orderBy> >());
     set.setViewableColumnsSorting(columns_AA, settingsFile.value("aa").value<QList<orderBy> >());
     set.setViewableColumnsSorting(columns_Acct, settingsFile.value("acct").value<QList<orderBy> >());
     set.setViewableColumnsSorting(columns_Stat, settingsFile.value("stat").value<QList<orderBy> >());

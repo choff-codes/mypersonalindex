@@ -168,10 +168,11 @@ public:
     void deleteItem(const QString &table_, int id_) const;
     void deleteItem(const QString &table_, int id_, int beginDate_) const;
 
+    void executeNonQuery(const QString &query_) const;
+
 private:
     QSqlDatabase m_database;
 
-    void executeNonQuery(const QString &query_) const;
     void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
 };
 

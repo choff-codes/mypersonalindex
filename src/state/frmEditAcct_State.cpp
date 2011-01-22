@@ -65,7 +65,7 @@ void frmEditAcct_State::save()
         return;
 
     m_currentItem->setDescription(ui->descTxt->text());
-    m_currentItem->setTaxRate(ui->taxRateSpinBox->value());
+    m_currentItem->setTaxRate(ui->taxRateSpinBox->value() / 100);
     m_currentItem->setTaxDeferred(ui->taxDeferredChk->isChecked());
     m_currentItem->setCostBasis((account::costBasisMethod)ui->costBasisCmb->itemData(ui->costBasisCmb->currentIndex()).toInt());
     m_currentItem->setHidden(ui->hideChk->isChecked());
@@ -99,7 +99,7 @@ void frmEditAcct_State::load()
         return;
 
     ui->descTxt->setText(m_currentItem->description());
-    ui->taxRateSpinBox->setValue(m_currentItem->taxRate());
+    ui->taxRateSpinBox->setValue(m_currentItem->taxRate() * 100);
     ui->taxDeferredChk->setChecked(m_currentItem->taxDeferred());
     ui->costBasisCmb->setCurrentIndex(ui->costBasisCmb->findData(m_currentItem->costBasis()));
     ui->hideChk->setChecked(m_currentItem->hidden());

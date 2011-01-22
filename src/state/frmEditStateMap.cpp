@@ -50,7 +50,12 @@ QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, T> &map_) const
 {
     QList<objectKeyBase*> list;
     foreach(const T &item, map_)
+    {
+        if (item.deleted())
+            continue;
+
         list.append(new T(item));
+    }
 
     return sort(list);
 }

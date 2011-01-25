@@ -37,11 +37,11 @@ public:
     QAction *portfolioAdd;
     QAction *portfolioEdit;
     QAction *portfolioDelete;
-    QMenu *import;
-    QAction *importYahoo;
-    QAction *importPrices;
-    QAction *importPortfolio;
-    QAction *importFile;
+    QAction *portfolioImport;
+    QAction *portfolioImportFile;
+    QMenu *price;
+    QAction *priceDownload;
+    QAction *priceImport;
     QMenu *help;
     QAction *helpAbout;
     QMenuBar *menubar;

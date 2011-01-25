@@ -28,6 +28,7 @@ frmEditSecurity_State::frmEditSecurity_State(const portfolio &portfolio_, QWidge
     connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
     connect(ui->aaAddBtn, SIGNAL(clicked()), this, SLOT(addAA()));
     connect(ui->aaDeleteBtn, SIGNAL(clicked()), this, SLOT(deleteAA()));
+    connect(ui->symbolTxt, SIGNAL(textChanged(QString)), this, SLOT(save()));
 }
 
 frmEditSecurity_State::~frmEditSecurity_State()
@@ -65,7 +66,6 @@ void frmEditSecurity_State::enter()
 
 void frmEditSecurity_State::leave()
 {
-    save();
     ui->list->setEnabled(false);
 }
 
@@ -147,7 +147,9 @@ void frmEditSecurity_State::load()
         return;
 
     ui->layoutRight->setEnabled(true);
+    ui->symbolTxt->blockSignals(true);
     ui->symbolTxt->setText(m_currentItem->description());
+    ui->symbolTxt->blockSignals(false);
     ui->acctCmb->setCurrentIndex(ui->acctCmb->findData(m_currentItem->account()));
     ui->expenseSpinBox->setValue(m_currentItem->expenseRatio() * 100);
     ui->cashChk->setChecked(m_currentItem->cashAccount());

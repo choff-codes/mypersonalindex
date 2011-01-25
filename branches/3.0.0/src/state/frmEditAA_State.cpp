@@ -25,6 +25,7 @@ frmEditAA_State::frmEditAA_State(const portfolio &portfolio_, QWidget *parent_):
     connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
     connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+    connect(ui->descTxt, SIGNAL(textChanged(QString)), this, SLOT(save()));
 }
 
 frmEditAA_State::~frmEditAA_State()
@@ -40,7 +41,6 @@ void frmEditAA_State::enter()
 
 void frmEditAA_State::leave()
 {
-    save();
     ui->list->setEnabled(false);
 }
 
@@ -65,7 +65,9 @@ void frmEditAA_State::save()
     if (!m_currentItem)
         return;
 
+    ui->descTxt->blockSignals(true);
     m_currentItem->setDescription(ui->descTxt->text());
+    ui->descTxt->blockSignals(false);
     m_currentItem->setRebalanceBand(ui->rebalanceBandSpinBox->value() / 100);
     m_currentItem->setTarget(ui->targetSpinBox->value() / 100);
     m_currentItem->setThreshold((assetAllocation::thresholdMethod)ui->thresholdCmb->itemData(ui->thresholdCmb->currentIndex()).toInt());

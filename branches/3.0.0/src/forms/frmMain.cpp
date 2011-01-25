@@ -78,7 +78,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui->portfolioDropDownCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(portfolioDropDownChange(int)));
-    connect(ui->importYahoo, SIGNAL(triggered()), this, SLOT(importYahoo()));
+    connect(ui->priceDownload, SIGNAL(triggered()), this, SLOT(importYahoo()));
     connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(tabAA()));
     connect(ui->viewSecurities, SIGNAL(triggered()), this, SLOT(tabSecurity()));
     connect(ui->viewPerformance, SIGNAL(triggered()), this, SLOT(tabPerformance()));
@@ -86,8 +86,8 @@ void frmMain::connectSlots()
     connect(ui->viewCorrelations, SIGNAL(triggered()), this, SLOT(tabCorrelation()));
     connect(ui->viewStatistics, SIGNAL(triggered()), this, SLOT(tabStatistic()));
     connect(ui->viewCharts, SIGNAL(triggered()), this, SLOT(tabChart()));
-    connect(ui->importPortfolio, SIGNAL(triggered()), this, SLOT(importPortfolio()));
-    connect(ui->importFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
+    connect(ui->portfolioImport, SIGNAL(triggered()), this, SLOT(importPortfolio()));
+    connect(ui->portfolioImportFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
 }
 
 void frmMain::loadSettings()
@@ -437,7 +437,7 @@ void frmMain::importPortfolio()
 {
     QMap<int, portfolio> portfolios;
 
-    if (static_cast<QAction*>(sender()) == ui->importFile)
+    if (static_cast<QAction*>(sender()) == ui->portfolioImportFile)
     {
         mpiFile_State file(this);
         file.open(false);

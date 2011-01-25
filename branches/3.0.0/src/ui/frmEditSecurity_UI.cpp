@@ -77,8 +77,8 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
 
     aaLayoutBottom = new QGridLayout();
     aaCmb = new QComboBox(aaGroupBox);
-    aaAddBtn = new QPushButton("A&dd", aaGroupBox);
-    aaDeleteBtn = new QPushButton("De&lete", aaGroupBox);
+    aaAddBtn = new QPushButton("A&dd Asset Class", aaGroupBox);
+    aaDeleteBtn = new QPushButton("De&lete Asset Class", aaGroupBox);
     aaLayoutBottom->addWidget(aaCmb, 0, 0, 1, 2);
     aaLayoutBottom->addWidget(aaAddBtn, 1, 0);
     aaLayoutBottom->addWidget(aaDeleteBtn, 1, 1);

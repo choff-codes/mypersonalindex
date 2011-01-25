@@ -24,6 +24,7 @@ frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *paren
     connect(ui->pasteShortcut, SIGNAL(activated()), this, SLOT(paste()));
     connect(ui->copyAction, SIGNAL(triggered()), this, SLOT(copy()));
     connect(ui->pasteAction, SIGNAL(triggered()), this, SLOT(paste()));
+    connect(ui->descTxt, SIGNAL(textChanged(QString)), this, SLOT(save()));
 }
 
 frmEditAcct_State::~frmEditAcct_State()
@@ -39,7 +40,6 @@ void frmEditAcct_State::enter()
 
 void frmEditAcct_State::leave()
 {
-    save();
     ui->list->setEnabled(false);
 }
 
@@ -64,7 +64,9 @@ void frmEditAcct_State::save()
     if (!m_currentItem)
         return;
 
+    ui->descTxt->blockSignals(true);
     m_currentItem->setDescription(ui->descTxt->text());
+    ui->descTxt->blockSignals(false);
     m_currentItem->setTaxRate(ui->taxRateSpinBox->value() / 100);
     m_currentItem->setTaxDeferred(ui->taxDeferredChk->isChecked());
     m_currentItem->setCostBasis((account::costBasisMethod)ui->costBasisCmb->itemData(ui->costBasisCmb->currentIndex()).toInt());

@@ -21,10 +21,12 @@ public:
     virtual void enter() = 0;
     virtual void leave() = 0;
 
+public slots:
+    virtual void save() = 0;
+
 protected slots:
     void copy();
     void paste();
-    virtual void save() = 0;
 
 protected:
     portfolio m_portfolio;

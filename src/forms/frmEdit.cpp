@@ -44,7 +44,7 @@ void frmEdit::connectSlots()
 
 void frmEdit::accept()
 {
-    m_tabs.value(m_currentTab)->leave();
+    m_tabs.value(m_currentTab)->save();;
 
     if (!validate())
         return;
@@ -55,7 +55,7 @@ void frmEdit::accept()
 
 void frmEdit::apply()
 {
-    m_tabs.value(m_currentTab)->leave();
+    m_tabs.value(m_currentTab)->save();
 
     if (!validate())
         return;
@@ -66,6 +66,7 @@ void frmEdit::apply()
 
 void frmEdit::tabChange(int currentIndex_)
 {
+    m_tabs.value(m_currentTab)->save();
     m_tabs.value(m_currentTab)->leave();
     m_currentTab = (tab)currentIndex_;
     m_tabs.value(m_currentTab)->enter();

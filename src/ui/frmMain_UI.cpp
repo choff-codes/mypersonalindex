@@ -51,14 +51,14 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     portfolioDelete = new QAction("Delete...", mainWindow_);
     portfolioDelete->setDisabled(true);
     portfolioDelete->setShortcut(Qt::CTRL + Qt::Key_D);
+    portfolioImport = new QAction("Import Portfolio...", mainWindow_);
+    portfolioImportFile = new QAction("Import Portfolio From Another File...", mainWindow_);
+    portfolioImportFile->setShortcut(Qt::CTRL + Qt::Key_I);
 
-    import = new QMenu("&Import", menubar);
-    importYahoo = new QAction("Update Prices From Internet", mainWindow_);
-    importYahoo->setShortcut(Qt::CTRL + Qt::Key_U);
-    importPrices = new QAction("Manually Import Price Information...", mainWindow_);
-    importPortfolio = new QAction("Import Portfolio...", mainWindow_);
-    importFile = new QAction("Import Portfolio From Another File...", mainWindow_);
-    importFile->setShortcut(Qt::CTRL + Qt::Key_I);
+    price = new QMenu("&Import", menubar);
+    priceDownload = new QAction("Update Prices From Internet", mainWindow_);
+    priceDownload->setShortcut(Qt::CTRL + Qt::Key_U);
+    priceImport = new QAction("Manually Import Price Information...", mainWindow_);
 
     help = new QMenu("&Help", menubar);
     helpAbout = new QAction("About", mainWindow_);
@@ -66,7 +66,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     menubar->addAction(file->menuAction());
     menubar->addAction(view->menuAction());
     menubar->addAction(portfolio->menuAction());
-    menubar->addAction(import->menuAction());
+    menubar->addAction(price->menuAction());
     menubar->addAction(help->menuAction());
 
     file->addAction(fileNew);
@@ -93,12 +93,12 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     portfolio->addAction(portfolioDelete);
     portfolio->addSeparator();
     portfolio->addAction(portfolioAdd);
+    portfolio->addSeparator();
+    portfolio->addAction(portfolioImport);
+    portfolio->addAction(portfolioImportFile);
 
-    import->addAction(importYahoo);
-    import->addAction(importPrices);
-    import->addSeparator();
-    import->addAction(importPortfolio);
-    import->addAction(importFile);
+    price->addAction(priceDownload);
+    price->addAction(priceImport);
 
     help->addAction(helpAbout);
 

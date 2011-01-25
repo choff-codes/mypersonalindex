@@ -90,7 +90,6 @@ void frmEditTrade_State::enter()
 
 void frmEditTrade_State::leave()
 {
-    save();
     ui->list->setEnabled(false);
 }
 

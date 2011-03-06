@@ -13,8 +13,8 @@ DEFINES += APP_VERSION="$$VERSION"
 win32{
     INCLUDEPATH += shared/qwt
 
-    CONFIG(debug, debug|release): LIBS += shared/qwt/lib/libqwtd6.a
-        else: LIBS += shared/qwt/lib/libqwt6.a
+    CONFIG(debug, debug|release): LIBS += ../src/shared/qwt/lib/libqwtd5.a
+        else: LIBS += ../src/shared/qwt/lib/libqwt5.a
 }
 
 unix:!macx{

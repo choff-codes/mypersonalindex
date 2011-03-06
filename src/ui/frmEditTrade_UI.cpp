@@ -49,7 +49,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     sharesSpinBox->setDecimals(4);
     sharesSpinBox->setMinimum(0);
     sharesSpinBox->setSingleStep(1);
-    sharesSpinBox->setMaximum(99999999999);
+    sharesSpinBox->setMaximum(999999999);
     sharesSpinBox->setValue(0);
     layoutForm->setWidget(1, QFormLayout::LabelRole, shares);
     layoutForm->setWidget(1, QFormLayout::FieldRole, sharesSpinBox);
@@ -59,7 +59,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     priceSpinBox->setDecimals(4);
     priceSpinBox->setMinimum(0);
     priceSpinBox->setSingleStep(1);
-    priceSpinBox->setMaximum(99999999999);
+    priceSpinBox->setMaximum(999999999);
     priceSpinBox->setValue(0);
     priceCmb = new QComboBox(groupBox);
     priceCmb->addItem(trade::priceToString(trade::tradePriceType_CurrentClose), trade::tradePriceType_CurrentClose);
@@ -73,7 +73,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     commissionSpinBox->setDecimals(2);
     commissionSpinBox->setMinimum(0);
     commissionSpinBox->setSingleStep(1);
-    commissionSpinBox->setMaximum(99999999999);
+    commissionSpinBox->setMaximum(999999999);
     commissionSpinBox->setValue(0);
     layoutForm->setWidget(3, QFormLayout::LabelRole, commission);
     layoutForm->setWidget(3, QFormLayout::FieldRole, commissionSpinBox);

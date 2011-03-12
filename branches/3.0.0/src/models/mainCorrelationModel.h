@@ -7,6 +7,7 @@ class correlationRow: public baseRow
 {
 public:
     enum {
+        row_PortfolioID,
         row_ObjectType,
         row_ID,
         row_Description
@@ -17,8 +18,8 @@ public:
 
     QMap<correlationRow, double> correlationValues;
 
-    correlationRow(int type_, int id_, const QString &description_);
-    correlationRow(int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
+    correlationRow(int portfolioID_, int type_, int id_, const QString &description_);
+    correlationRow(int portfolioID_, int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_);
 
     bool operator==(const correlationRow &other_) const;
     bool operator!=(const correlationRow &other_) const { return !(*this == other_); }

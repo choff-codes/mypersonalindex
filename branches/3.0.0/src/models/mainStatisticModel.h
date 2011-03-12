@@ -9,6 +9,7 @@ class statisticRow: public baseRow
 {
 public:
     enum {
+        row_PortfolioID,
         row_ObjectType,
         row_ID,
         row_Description,
@@ -49,8 +50,9 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    statisticRow(int type_, int id_, const QString description_);
-    statisticRow(int type_, int id_, const QString description_, const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_);
+    statisticRow(int portfolioID_, int type_, int id_, const QString description_);
+    statisticRow(int portfolioID_, int type_, int id_, const QString description_,
+        const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_);
 
     bool operator==(const statisticRow &other_) const;
     bool operator!=(const statisticRow &other_) const { return !(*this == other_); }

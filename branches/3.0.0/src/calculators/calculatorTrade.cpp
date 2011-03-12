@@ -25,6 +25,8 @@ bool calculatorTrade::operator()(const portfolio &portfolio_)
     int beginDate = qMax(m_beginDate, portfolio_.startDate());
     // clear out calculated trades from the begin date (or all trades if its the portfolio start date)
     clearExecutedTrades(portfolio_, beginDate, beginDate == portfolio_.startDate());
+    // clear calculator cache
+    portfolio_.calculator().clearCache();
     // calculate
     calculate(portfolio_, beginDate);
 
@@ -66,7 +68,6 @@ void calculatorTrade::clearExecutedTrades(portfolio portfolio_, int beginDate_, 
 void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
 {
     tradeMapByDate trades = calculateTradeDates(portfolio_, beginDate_, beginDate_ == portfolio_.startDate());
-    calculatorNAV calc(portfolio_); // keep a cache going
 
     // loop through each day
     for(tradeMapByDate::const_iterator i = trades.constBegin(); i != trades.constEnd(); ++i)
@@ -84,7 +85,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
                 // insert executed trade
                 executedTrade e = calculateExecutedTrade(
                         date,
-                        calc,
+                        portfolio_.calculator(),
                         portfolio_.assetAllocations(),
                         s,
                         t

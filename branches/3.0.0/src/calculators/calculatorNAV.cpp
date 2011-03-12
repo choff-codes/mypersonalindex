@@ -16,10 +16,10 @@
 class calculatorNAVData: public QSharedData
 {
 public:
-    portfolio currentPortfolio;
+    portfolio *currentPortfolio;
     QHash<int, QHash<int, snapshotSecurity> > securitiesCache;
 
-    calculatorNAVData(const portfolio &portfolio_):
+    calculatorNAVData(portfolio *portfolio_):
         currentPortfolio(portfolio_)
     {}
 
@@ -31,7 +31,7 @@ calculatorNAV::calculatorNAV():
 {
 }
 
-calculatorNAV::calculatorNAV(const portfolio &portfolio_):
+calculatorNAV::calculatorNAV(portfolio *portfolio_):
     d(new calculatorNAVData(portfolio_))
 {
 }
@@ -45,16 +45,25 @@ calculatorNAV::~calculatorNAV()
 {
 }
 
+void calculatorNAV::setPortfolio(portfolio *portfolio_)
+{
+    d->currentPortfolio = portfolio_;
+}
+
 calculatorNAV& calculatorNAV::operator=(const calculatorNAV &other_)
 {
     d = other_.d;
     return *this;
 }
 
-void calculatorNAV::setPortfolio(const portfolio &portfolio_)
+void calculatorNAV::clearCache()
 {
     d->securitiesCache.clear();
-    d->currentPortfolio = portfolio_;
+}
+
+void calculatorNAV::detach()
+{
+    d.detach();
 }
 
 snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDate_)
@@ -65,7 +74,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
         return value;
 
     // check if it needs to be calculated
-    security s = d->currentPortfolio.securities().value(id_);
+    security s = d->currentPortfolio->securities().value(id_);
     if (!s.includeInCalc() || s.executedTrades().isEmpty())
         return snapshotSecurity(date_);
 
@@ -100,7 +109,7 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     value.totalValue = value.shares * s.price(date_);
     value.expenseRatio = s.expenseRatio();
 
-    account acct = d->currentPortfolio.accounts().value(s.account());
+    account acct = d->currentPortfolio->accounts().value(s.account());
     value.setTaxLiability(acct.taxRate(), acct.taxDeferred());
 
     d->securitiesCache[date_].insert(id_, value);
@@ -111,7 +120,7 @@ snapshot calculatorNAV::portfolioSnapshot(int date_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio.securities())
+    foreach(const security &s, d->currentPortfolio->securities())
     {
         if (s.deleted())
             continue;
@@ -126,7 +135,7 @@ snapshot calculatorNAV::assetAllocationSnapshot(int date_, int id_, int priorDat
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio.securities())
+    foreach(const security &s, d->currentPortfolio->securities())
     {
         if (s.deleted())
             continue;
@@ -142,7 +151,7 @@ snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio.securities())
+    foreach(const security &s, d->currentPortfolio->securities())
     {
         if (s.deleted())
             continue;
@@ -198,7 +207,7 @@ int calculatorNAV::beginDateByKey(const objectKeyBase &key_)
         case objectType_Account:
         case objectType_Portfolio:
         case objectType_Security:
-            return d->currentPortfolio.startDate();
+            return d->currentPortfolio->startDate();
         case objectType_Symbol:
             return static_cast<const symbol&>(key_).beginDate();
         case objectType_Trade:

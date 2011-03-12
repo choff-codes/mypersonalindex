@@ -17,9 +17,15 @@ void frmMainChart_UI::setupUI(QWidget *parent_)
 
     chartSplitter = new QSplitter(widget);
 
+    treeWidget = new QWidget(widget);
+    treeLayout = new QVBoxLayout(treeWidget);
+    treeLayout->setMargin(0);
+    treeCmb = new QComboBox(widget);
     tree = new QTreeWidget(widget);
     tree->header()->setVisible(false);
-    chartSplitter->addWidget(tree);
+    treeLayout->addWidget(treeCmb);
+    treeLayout->addWidget(tree);
+    chartSplitter->insertWidget(0, treeWidget);
     chartSplitter->setStretchFactor(0, 1);
 
     chart = new mpiChart(widget);

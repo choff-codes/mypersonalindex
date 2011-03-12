@@ -9,21 +9,22 @@ class QTreeWidgetItem;
 class frmMainTableView_UI;
 class frmMainStateTableWithTree : public frmMainStateTable, public frmMainStateTree
 {
+    Q_OBJECT
+
 public:
-    frmMainStateTableWithTree(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
+    frmMainStateTableWithTree(int portfolioID_, const QMap<int, portfolio> &portfolios_, const settings &settings_,
         const QHash<QString, historicalPrices> &prices_, QWidget *parent_);
 
     virtual ~frmMainStateTableWithTree();
 
-protected:
-    QHash<QString, historicalPrices> m_prices;
+protected slots:
+    void portfolioChange(int index_);
 
+protected:
     virtual void setupUI(bool hasRowLabels_ = false);
     QTreeWidget* treeWidget();
 
     virtual frmMainTableView_UI* createUI();
-
-    virtual historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
 };
 
 #endif // FRMMAINSTATETABLEWITHTREE_H

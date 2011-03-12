@@ -1,9 +1,10 @@
 #include "frmMainAA_State.h"
 #include "frmMainTableView_UI.h"
 #include "mainAAModel.h"
+#include "calculatorNAV.h"
 
-frmMainAA_State::frmMainAA_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_):
-    frmMainStateTable(portfolio_, calculator_, settings_, parent_)
+frmMainAA_State::frmMainAA_State(const portfolio &portfolio_, const settings &settings_, QWidget *parent_):
+    frmMainStateTable(portfolio_, settings_, parent_)
 {
     setupUI();
 }
@@ -24,19 +25,19 @@ QMap<int, QString> frmMainAA_State::tableColumns()
 
 mpiViewModelBase* frmMainAA_State::createModel(int beginDate_, int endDate_)
 {
-    snapshot portfolioValue = m_calculator.portfolioSnapshot(endDate_);
+    snapshot portfolioValue = m_portfolio.calculator().portfolioSnapshot(endDate_);
 
     return new mainAAModel(
         aaRow::getRows(
             m_portfolio.assetAllocations(),
             beginDate_,
             endDate_,
-            m_calculator,
+            m_portfolio.calculator(),
             portfolioValue,
             m_settings.viewableColumnsSorting(columnEnumValue())
         ),
         portfolioValue,
-        m_calculator.nav(m_portfolio, beginDate_, endDate_),
+        m_portfolio.calculator().nav(m_portfolio, beginDate_, endDate_),
         m_settings.viewableColumns(columnEnumValue()),
         ui->table
     );

@@ -7,7 +7,7 @@ class frmMainTableView_UI;
 class frmMainSecurity_State : public frmMainStateTable
 {
 public:
-    frmMainSecurity_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_);
+    frmMainSecurity_State(const portfolio &portfolio_, const settings &settings_, QWidget *parent_);
 
     ~frmMainSecurity_State();
 

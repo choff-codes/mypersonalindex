@@ -6,10 +6,10 @@
 #include "symbol.h"
 #include "historicalNAV.h"
 
-frmMainStateTableWithTree::frmMainStateTableWithTree(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
+frmMainStateTableWithTree::frmMainStateTableWithTree(int portfolioID_, const QMap<int, portfolio> &portfolios_, const settings &settings_,
     const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
-    frmMainStateTable(portfolio_, calculator_, settings_, parent_),
-    m_prices(prices_)
+    frmMainStateTable(portfolios_.value(portfolioID_), settings_, parent_),
+    frmMainStateTree(portfolios_, prices_)
 {
 }
 
@@ -20,8 +20,17 @@ frmMainStateTableWithTree::~frmMainStateTableWithTree()
 void frmMainStateTableWithTree::setupUI(bool hasRowLabels_)
 {
     frmMainStateTable::setupUI(hasRowLabels_);
-    populateTree(m_portfolio);
-    connect(treeWidget(), SIGNAL(itemSelectionChanged()), this, SLOT(refreshTab()));
+    QComboBox* treeCmb = static_cast<frmMainTableViewTree_UI*>(ui)->treeCmb;
+    foreach(const portfolio &p, m_portfolios)
+        treeCmb->addItem(p.displayText(), p.id());
+    treeCmb->setCurrentIndex(treeCmb->findData(m_portfolio.id()));
+    populateTree(m_portfolio.id());
+    connect(treeCmb, SIGNAL(currentIndexChanged(int)), SLOT(portfolioChange(int)));
+}
+
+void frmMainStateTableWithTree::portfolioChange(int index_)
+{
+    populateTree(static_cast<frmMainTableViewTree_UI*>(ui)->treeCmb->itemData(index_).toInt());
 }
 
 frmMainTableView_UI* frmMainStateTableWithTree::createUI()
@@ -32,9 +41,4 @@ frmMainTableView_UI* frmMainStateTableWithTree::createUI()
 QTreeWidget* frmMainStateTableWithTree::treeWidget()
 {
     return static_cast<frmMainTableViewTree_UI*>(ui)->tree;
-}
-
-historicalNAV frmMainStateTableWithTree::calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_)
-{
-    return frmMainStateTree::calculateNAV(item_, beginDate_, endDate_, m_portfolio, m_calculator, m_prices);
 }

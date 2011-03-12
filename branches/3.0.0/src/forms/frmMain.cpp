@@ -126,7 +126,6 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
 void frmMain::setCurrentPortfolio(const portfolio &portfolio_)
 {
     m_currentPortfolio = portfolio_.id();
-    m_currentCalculator.setPortfolio(portfolio_);
 }
 
 void frmMain::refreshPortfolioCmb(int id_)
@@ -406,25 +405,25 @@ void frmMain::switchToTab(tab tab_, bool force_)
     switch (tab_)
     {
         case tab_assetAllocation:
-            m_tabs.insert(tab_assetAllocation, new frmMainAA_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_assetAllocation, new frmMainAA_State(m_file->portfolios.value(m_currentPortfolio), m_settings, this));
             break;
         case tab_account:
-            m_tabs.insert(tab_account, new frmMainAcct_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_account, new frmMainAcct_State(m_file->portfolios.value(m_currentPortfolio), m_settings, this));
             break;
         case tab_security:
-            m_tabs.insert(tab_security, new frmMainSecurity_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, this));
+            m_tabs.insert(tab_security, new frmMainSecurity_State(m_file->portfolios.value(m_currentPortfolio), m_settings, this));
             break;
         case tab_performance:
-            m_tabs.insert(tab_performance, new frmMainPerformance_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, m_file->prices.getHistoricalPrices(), this));
+            m_tabs.insert(tab_performance, new frmMainPerformance_State(m_currentPortfolio, m_file->portfolios, m_settings, m_file->prices.getHistoricalPrices(), this));
             break;
         case tab_correlation:
-            m_tabs.insert(tab_correlation, new frmMainCorrelation_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, m_file->prices.getHistoricalPrices(), this));
+            m_tabs.insert(tab_correlation, new frmMainCorrelation_State(m_currentPortfolio, m_file->portfolios, m_settings, m_file->prices.getHistoricalPrices(), this));
             break;
         case tab_statistic:
-            m_tabs.insert(tab_statistic, new frmMainStatistic_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_settings, m_file->prices.getHistoricalPrices(), this));
+            m_tabs.insert(tab_statistic, new frmMainStatistic_State(m_currentPortfolio, m_file->portfolios, m_settings, m_file->prices.getHistoricalPrices(), this));
             break;
         case tab_chart:
-            m_tabs.insert(tab_chart, new frmMainChart_State(m_file->portfolios.value(m_currentPortfolio), m_currentCalculator, m_file->prices.getHistoricalPrices(), this));
+            m_tabs.insert(tab_chart, new frmMainChart_State(m_currentPortfolio, m_file->portfolios, m_file->prices.getHistoricalPrices(), this));
             break;
     }
 

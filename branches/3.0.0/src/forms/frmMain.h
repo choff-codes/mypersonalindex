@@ -4,7 +4,7 @@
 #include <QMainWindow>
 #include <QMap>
 #include "settings.h"
-#include "calculatorNAV.h"
+#include <portfolio.h>
 
 template<class T>
 class QFutureWatcher;
@@ -60,7 +60,6 @@ private:
 
     // track the currently selected portfolio
     int m_currentPortfolio;
-    calculatorNAV m_currentCalculator;
 
     // track the currently selected tab
     QMap<int, frmMainState*> m_tabs;

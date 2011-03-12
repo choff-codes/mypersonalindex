@@ -10,16 +10,19 @@
 #include "calculatorNAV.h"
 #include "historicalPrices.h"
 
-void frmMainStateTree::populateTree(const portfolio &portfolio_)
+void frmMainStateTree::populateTree(int portfolioID_)
 {
+    portfolio p = m_portfolios.value(portfolioID_);
     QTreeWidget *tree = treeWidget();
+    tree->clear();
+    tree->blockSignals(true);
 
     QList<QTreeWidgetItem*> items;
-    items << createTreeItem(objectType_Portfolio, "Portfolio")
-          << createTreeItem(objectType_Account, "Accounts")
-          << createTreeItem(objectType_AA, "Asset Classes")
-          << createTreeItem(objectType_Security, "Securities")
-          << createTreeItem(objectType_Symbol, "Symbols");
+    items << createTreeItem(objectType_Portfolio, UNASSIGNED, objectType_Portfolio, "Portfolio")
+          << createTreeItem(objectType_Account, UNASSIGNED, objectType_Account, "Accounts")
+          << createTreeItem(objectType_AA, UNASSIGNED, objectType_AA, "Asset Classes")
+          << createTreeItem(objectType_Security, UNASSIGNED, objectType_Security, "Securities")
+          << createTreeItem(objectType_Symbol, UNASSIGNED, objectType_Symbol, "Symbols");
 
     foreach(QTreeWidgetItem* item, items)
     {
@@ -31,31 +34,31 @@ void frmMainStateTree::populateTree(const portfolio &portfolio_)
 
     tree->insertTopLevelItems(0, items);
 
-    items.at(0)->addChild(createTreeItem(portfolio_.id(), portfolio_.displayText()));
+    items.at(0)->addChild(createTreeItem(objectType_Portfolio, p.id(), p.id(), p.displayText()));
 
-    foreach(const account &acct, portfolio_.accounts())
+    foreach(const account &acct, p.accounts())
     {
         if (acct.deleted())
             continue;
-        items.at(1)->addChild(createTreeItem(acct.id(), acct.displayText()));
+        items.at(1)->addChild(createTreeItem(objectType_Account, p.id(), acct.id(), acct.displayText()));
     }
 
-    foreach(const assetAllocation &aa, portfolio_.assetAllocations())
+    foreach(const assetAllocation &aa, p.assetAllocations())
     {
         if (aa.deleted())
             continue;
-        items.at(2)->addChild(createTreeItem(aa.id(), aa.displayText()));
+        items.at(2)->addChild(createTreeItem(objectType_AA, p.id(), aa.id(), aa.displayText()));
     }
 
     QSet<QString> symbolsWithDividends;
     QSet<QString> symbolsWithoutDividends;
 
-    foreach(const security &sec, portfolio_.securities())
+    foreach(const security &sec, p.securities())
     {
         if (sec.deleted())
             continue;
 
-        items.at(3)->addChild(createTreeItem(sec.id(), sec.displayText()));
+        items.at(3)->addChild(createTreeItem(objectType_Security, p.id(), sec.id(), sec.displayText()));
 
         if (sec.cashAccount())
             continue;
@@ -67,39 +70,58 @@ void frmMainStateTree::populateTree(const portfolio &portfolio_)
     }
 
     foreach(const QString &sym, symbolsWithoutDividends)
-        items.at(4)->addChild(createTreeItem(0, QString("%1 (ex. dividends)").arg(sym), sym));
+        items.at(4)->addChild(createTreeItem(objectType_Symbol, p.id(), 0, QString("%1 (ex. dividends)").arg(sym), sym));
 
     foreach(const QString &sym, symbolsWithDividends)
-        items.at(4)->addChild(createTreeItem(1, sym, sym));
+        items.at(4)->addChild(createTreeItem(objectType_Symbol, p.id(), 1, sym, sym));
 
     foreach(QTreeWidgetItem* item, items)
     {
         item->setExpanded(true);
         item->sortChildren(0, Qt::AscendingOrder);
     }
+
+    tree->blockSignals(false);
 }
 
-historicalNAV frmMainStateTree::calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_, const portfolio &portfolio_,
-    calculatorNAV calculator_, const QHash<QString, historicalPrices> prices_)
+QTreeWidgetItem* frmMainStateTree::createTreeItem(objectType type_, int portfolioID_, int id_, const QString &description_, const QString &itemData_)
 {
-    if (!item_->parent())
+    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, id_);
+    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
+    if (!itemData_.isEmpty())
+        item->setData(0, Qt::UserRole, itemData_);
+
+    if (m_selectedItems.contains(treeItemKey(type_, portfolioID_, id_, description_, itemData_)))
+        item->setCheckState(0, Qt::Checked);
+    else
+        item->setCheckState(0, Qt::Unchecked);
+
+    return item;
+}
+
+historicalNAV frmMainStateTree::calculateNAV(const treeItemKey &item_, int beginDate_, int endDate_)
+{
+    if (!item_.id == UNASSIGNED)
         return historicalNAV();
 
-    switch((objectType)item_->parent()->type())
+    portfolio p = m_portfolios.value(item_.portfolioID);
+    calculatorNAV calc = p.calculator();
+
+    switch(item_.type)
     {
         case objectType_Portfolio:
-            return calculator_.changeOverTime(portfolio_, beginDate_, endDate_);
+            return calc.changeOverTime(p, beginDate_, endDate_);
         case objectType_Account:
-            return calculator_.changeOverTime(portfolio_.accounts().value(item_->type()), beginDate_, endDate_);
+            return calc.changeOverTime(p.accounts().value(item_.id), beginDate_, endDate_);
         case objectType_AA:
-            return calculator_.changeOverTime(portfolio_.assetAllocations().value(item_->type()), beginDate_, endDate_);
+            return calc.changeOverTime(p.assetAllocations().value(item_.id), beginDate_, endDate_);
         case objectType_Security:
-            return calculator_.changeOverTime(portfolio_.securities().value(item_->type()), beginDate_, endDate_);
+            return calc.changeOverTime(p.securities().value(item_.id), beginDate_, endDate_);
         case objectType_Symbol:
         {
-            symbol s(item_->data(0, Qt::UserRole).toString(), item_->type() == 1);
-            s.setHistoricalPrices(prices_.value(s.description()));
-            return calculator_.changeOverTime(s, beginDate_, endDate_);
+            symbol s(item_.symbol, item_.id == 1);
+            s.setHistoricalPrices(m_prices.value(s.description()));
+            return calc.changeOverTime(s, beginDate_, endDate_);
         }
         case objectType_Trade:
             break;
@@ -107,20 +129,11 @@ historicalNAV frmMainStateTree::calculateNAV(QTreeWidgetItem *item_, int beginDa
     return historicalNAV();
 }
 
-QList<QTreeWidgetItem*> frmMainStateTree::selectedItems()
+treeItemKey frmMainStateTree::createKeyFromTreeItem(QTreeWidgetItem *item_)
 {
-    QList<QTreeWidgetItem*> items;
-    QTreeWidget *tree = treeWidget();
+    if (!item_->parent())
+        return treeItemKey(objectType_Portfolio, UNASSIGNED, UNASSIGNED, QString());
 
-    for(int i = 0; i < tree->topLevelItemCount(); ++i)
-    {
-        QTreeWidgetItem *parent = tree->topLevelItem(i);
-        for(int x = 0; x < parent->childCount(); ++x)
-        {
-            QTreeWidgetItem *item = parent->child(x);
-            if (item->checkState(0) == Qt::Checked)
-                items.append(item);
-        }
-    }
-    return items;
+    return treeItemKey((objectType)item_->parent()->type(), treeWidget()->topLevelItem(0)->child(0)->type(),
+        item_->type(), item_->text(0), item_->data(0, Qt::UserRole).toString());
 }

@@ -21,14 +21,17 @@ const QStringList frmMainChart_State::m_colors = QStringList() << "mediumorchid"
     << "lightblue" << "forestgreen" << "red";
 
 
-frmMainChart_State::frmMainChart_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const QHash<QString, historicalPrices> &prices_, QObject *parent_):
-    frmMainState(portfolio_, calculator_, parent_),
-    m_prices(prices_),
+frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfolio> &portfolios_, const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
+    frmMainState(portfolios_.value(portfolioID_), parent_),
+    frmMainStateTree(portfolios_, prices_),
     ui(new frmMainChart_UI()),
     m_counter(0)
 {
     ui->setupUI(static_cast<QWidget*>(this->parent()));
-    populateTree(m_portfolio);
+    foreach(const portfolio &p, m_portfolios)
+       ui->treeCmb->addItem(p.displayText(), p.id());
+    ui->treeCmb->setCurrentIndex(ui->treeCmb->findData(m_portfolio.id()));
+    populateTree(portfolioID_);
 
     int beginDate = m_portfolio.startDate();
     int endDate = m_portfolio.endDate();
@@ -40,6 +43,7 @@ frmMainChart_State::frmMainChart_State(const portfolio &portfolio_, const calcul
     connect(ui->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
     connect(ui->toolbarExport, SIGNAL(triggered()), ui->chart, SLOT(exportChart()));
     connect(ui->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
+    connect(ui->treeCmb, SIGNAL(currentIndexChanged(int)), SLOT(portfolioChange(int)));
 
     resetChart(beginDate, endDate);
 }
@@ -48,6 +52,11 @@ frmMainChart_State::~frmMainChart_State()
 {
     qDeleteAll(m_cache);
     delete ui;
+}
+
+void frmMainChart_State::portfolioChange(int index_)
+{
+    populateTree(ui->treeCmb->itemData(index_).toInt());
 }
 
 QWidget* frmMainChart_State::mainWidget()
@@ -60,21 +69,6 @@ QTreeWidget* frmMainChart_State::treeWidget()
     return ui->tree;
 }
 
-QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString &description_)
-{
-    QTreeWidgetItem* item = new QTreeWidgetItem(QStringList() << description_, type_);
-    item->setFlags(item->flags() | Qt::ItemIsUserCheckable);
-    item->setCheckState(0, Qt::Unchecked);
-    return item;
-}
-
-QTreeWidgetItem* frmMainChart_State::createTreeItem(int type_, const QString &description_, const QString &itemData_)
-{
-    QTreeWidgetItem* item = createTreeItem(type_, description_);
-    item->setData(0, Qt::UserRole, itemData_);
-    return item;
-}
-
 void frmMainChart_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/)
 {
     if (!item_->parent())
@@ -82,15 +76,20 @@ void frmMainChart_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/)
 
     int beginDate = ui->toolbarDateBeginEdit->date().toJulianDay();
     int endDate = ui->toolbarDateEndEdit->date().toJulianDay();
+    treeItemKey key = createKeyFromTreeItem(item_);
 
     if (item_->checkState(0) == Qt::Unchecked)
     {
-        mpiChartCurve *curve = m_cache.take(item_);
+        m_selectedItems.remove(key);
+        mpiChartCurve *curve = m_cache.take(key);
         curve->detach();
         delete curve;
     }
     else
-        getCurve(item_, beginDate, endDate)->attach();
+    {
+        m_selectedItems.insert(key);
+        getCurve(key, beginDate, endDate)->attach();
+    }
 
     resetChart(beginDate, endDate);
 }
@@ -108,13 +107,13 @@ void frmMainChart_State::refreshTab()
     int beginDate = ui->toolbarDateBeginEdit->date().toJulianDay();
     int endDate = ui->toolbarDateEndEdit->date().toJulianDay();
 
-    foreach(QTreeWidgetItem *item, selectedItems())
+    foreach(const treeItemKey &item, m_selectedItems)
         getCurve(item, beginDate, endDate)->attach();
 
     resetChart(beginDate, endDate);
 }
 
-mpiChartCurve* frmMainChart_State::getCurve(QTreeWidgetItem *item_, int beginDate, int endDate_)
+mpiChartCurve* frmMainChart_State::getCurve(const treeItemKey &item_, int beginDate, int endDate_)
 {
     if (!m_cache.contains(item_))
     {
@@ -122,9 +121,9 @@ mpiChartCurve* frmMainChart_State::getCurve(QTreeWidgetItem *item_, int beginDat
         QPen p(QColor(m_colors.at(m_counter))); // random color
         p.setWidth(3);
         c->curve()->setPen(p);
-        c->curve()->setTitle(item_->text(0));
+        c->curve()->setTitle(item_.displayText);
 
-        historicalNAV nav = calculateNAV(item_, beginDate, endDate_, m_portfolio, m_calculator, m_prices);
+        historicalNAV nav = calculateNAV(item_, beginDate, endDate_);
         tradeDateCalendar calendar(nav.beginDate());
         foreach(int date, calendar)
         {

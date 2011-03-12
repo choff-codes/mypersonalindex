@@ -8,6 +8,7 @@ class QMap;
 class QSqlQuery;
 class QStringList;
 class queries;
+class calculatorNAV;
 class security;
 class assetAllocation;
 class account;
@@ -34,6 +35,7 @@ public:
     int startDate() const;
     void setStartDate(int startDate_);
 
+    calculatorNAV& calculator() const;
     QMap<int, security>& securities() const;
     QMap<int, assetAllocation>& assetAllocations() const;
     QMap<int, account>& accounts() const;

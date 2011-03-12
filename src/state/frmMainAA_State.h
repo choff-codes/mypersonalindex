@@ -7,7 +7,7 @@ class frmMainTableView_UI;
 class frmMainAA_State : public frmMainStateTable
 {
 public:
-    frmMainAA_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_);
+    frmMainAA_State(const portfolio &portfolio_, const settings &settings_, QWidget *parent_);
 
     ~frmMainAA_State();
 

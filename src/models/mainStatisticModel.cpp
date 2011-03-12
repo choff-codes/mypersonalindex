@@ -8,6 +8,7 @@
 #include "statistic.h"
 
 //enum {
+//    row_PortfolioID,
 //    row_ObjectType,
 //    row_ID,
 //    row_Description,
@@ -48,6 +49,7 @@
 //};
 
 const QStringList statisticRow::columns = QStringList()
+                                          << "PortfolioID"
                                           << "Type"
                                           << "ID"
                                           << "Description"
@@ -87,6 +89,7 @@ const QStringList statisticRow::columns = QStringList()
 const QVariantList statisticRow::columnsType = QVariantList()
                                                << QVariant(QVariant::Int)
                                                << QVariant(QVariant::Int)
+                                               << QVariant(QVariant::Int)
                                                << QVariant(QVariant::String)
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double)
@@ -121,9 +124,11 @@ const QVariantList statisticRow::columnsType = QVariantList()
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double);
 
-statisticRow::statisticRow(int type_, int id_, const QString description_):
+statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString description_):
     baseRow(QList<orderBy>())
 {
+    //    row_PortfolioID,
+    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
@@ -132,10 +137,13 @@ statisticRow::statisticRow(int type_, int id_, const QString description_):
     values.append(description_);
 }
 
-statisticRow::statisticRow(int type_, int id_, const QString description_, const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_):
+statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString description_,
+    const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_):
     baseRow(columnSort_)
 {
     statistic info(historicalNav_);
+    //    row_PortfolioID,
+    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
@@ -171,7 +179,7 @@ statisticRow::statisticRow(int type_, int id_, const QString description_, const
     //    row_MaxPercentUpDay,
     values.append(info.maxChangePositiveDay);
     //    row_MaximumIndexValue,
-    values.append((info.maxNAVValue / info.beginNAV) - 1);
+    values.append(info.days == 0 ? 0 : (info.maxNAVValue / info.beginNAV) - 1);
     //    row_MaximumIndexValueDay,
     values.append(info.maxNAVValueDay);
     //    row_MaximumTotalValue,
@@ -179,7 +187,7 @@ statisticRow::statisticRow(int type_, int id_, const QString description_, const
     //    row_MaximumTotalValueDay,
     values.append(info.maxTotalValueDay);
     //    row_MinimumIndexValue,
-    values.append((info.minNAVValue / info.beginNAV) - 1);
+    values.append(info.days == 0 ? 0 : (info.minNAVValue / info.beginNAV) - 1);
     //    row_MinimumIndexValueDay,
     values.append(info.minNAVValueDay);
     //    row_MinimumTotalValue,
@@ -198,20 +206,21 @@ statisticRow::statisticRow(int type_, int id_, const QString description_, const
     double distribution = cumulativeNormalDistribution(info);
     values.append(distribution);
     //    row_ProbabilityOfYearlyLoss,
-    values.append(1 - distribution);
+    values.append(info.days == 0 ? 0 : 1 - distribution);
     //    row_TaxLiability,
     values.append(info.taxLiability);
     //    row_YearlyReturn,
-    values.append(info.beginNAV);
+     values.append(indexReturn(info, 252));
     //    row_YearlyStandardDeviation,
-    values.append(indexReturn(info, 252));
+    values.append(sqrt(252) * info.standardDeviation);
     //    row_WeightedExpenseRatio
     values.append(info.expenseRatio);
 }
 
 bool statisticRow::operator==(const statisticRow &other_) const
 {
-    return values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
+    return values.at(row_PortfolioID).toInt() == other_.values.at(row_PortfolioID).toInt()
+        && values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
         && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt()
         && values.at(row_Description).toString() == other_.values.at(row_Description).toString();
 }
@@ -223,6 +232,7 @@ QMap<int, QString> statisticRow::fieldNames()
     for (int i = 0; i < columns.count(); ++i)
         names[i] = functions::removeNewLines(columns.at(i));
 
+    names.remove(row_PortfolioID);
     names.remove(row_ObjectType);
     names.remove(row_ID);
     names.remove(row_Description);

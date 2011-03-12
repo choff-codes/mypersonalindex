@@ -4,6 +4,7 @@
 #include <QVBoxLayout>
 #include <QTreeWidget>
 #include <QSplitter>
+#include <QComboBox>
 #include <qwt_plot_grid.h>
 #include <qwt_plot_zoomer.h>
 #include "frmMainToolbar_UI.h"
@@ -15,6 +16,9 @@ public:
     QWidget *widget;
     QVBoxLayout *layout;
     QSplitter *chartSplitter;
+    QWidget *treeWidget;
+    QVBoxLayout *treeLayout;
+    QComboBox *treeCmb;
     QTreeWidget *tree;
     mpiChart *chart;
     QwtPlotGrid *chartGridLines;

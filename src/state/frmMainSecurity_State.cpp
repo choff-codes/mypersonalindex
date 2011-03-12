@@ -1,9 +1,10 @@
 #include "frmMainSecurity_State.h"
 #include "frmMainTableView_UI.h"
 #include "mainSecurityModel.h"
+#include "calculatorNAV.h"
 
-frmMainSecurity_State::frmMainSecurity_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_):
-    frmMainStateTable(portfolio_, calculator_, settings_, parent_)
+frmMainSecurity_State::frmMainSecurity_State(const portfolio &portfolio_, const settings &settings_, QWidget *parent_):
+    frmMainStateTable(portfolio_, settings_, parent_)
 {
     setupUI();
 }
@@ -24,7 +25,7 @@ QMap<int, QString> frmMainSecurity_State::tableColumns()
 
 mpiViewModelBase* frmMainSecurity_State::createModel(int beginDate_, int endDate_)
 {
-    snapshot portfolioValue = m_calculator.portfolioSnapshot(endDate_);
+    snapshot portfolioValue = m_portfolio.calculator().portfolioSnapshot(endDate_);
 
     return new mainSecurityModel(
         securityRow::getRows(
@@ -33,12 +34,12 @@ mpiViewModelBase* frmMainSecurity_State::createModel(int beginDate_, int endDate
             m_portfolio.accounts(),
             beginDate_,
             endDate_,
-            m_calculator,
+            m_portfolio.calculator(),
             portfolioValue,
             m_settings.viewableColumnsSorting(columnEnumValue())
         ),
         portfolioValue,
-        m_calculator.nav(m_portfolio, beginDate_, endDate_),
+        m_portfolio.calculator().nav(m_portfolio, beginDate_, endDate_),
         m_settings.viewableColumns(columnEnumValue()),
         ui->table
     );

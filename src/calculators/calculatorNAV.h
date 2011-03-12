@@ -14,13 +14,15 @@ class calculatorNAV
 {
 public:
     calculatorNAV();
-    calculatorNAV(const portfolio &portfolio_);
+    calculatorNAV(portfolio *portfolio_);
     calculatorNAV(const calculatorNAV &other_);
     ~calculatorNAV();
 
     calculatorNAV& operator=(const calculatorNAV &other_);
 
-    void setPortfolio(const portfolio &portfolio_);
+    void setPortfolio(portfolio *portfolio_);
+    void clearCache();
+    void detach();
 
     snapshotSecurity securitySnapshot(int date_, int id_, int priorDate_ = 0);
     snapshot portfolioSnapshot(int date_, int priorDate_ = 0);

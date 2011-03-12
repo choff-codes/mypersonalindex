@@ -12,7 +12,7 @@ class frmMainStateTable : public frmMainState
     Q_OBJECT
 
 public:
-    frmMainStateTable(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_);
+    frmMainStateTable(const portfolio &portfolio_, const settings &settings_, QWidget *parent_);
 
     virtual ~frmMainStateTable();
 

@@ -9,6 +9,7 @@ const QList<orderBy> correlationRow::correlationOrder = QList<orderBy>()
                                                         << orderBy(correlationRow::row_Description, orderBy::order_ascending);
 
 //enum {
+//    row_PortfolioID,
 //    row_ObjectType,
 //    row_ID,
 //    row_Description
@@ -17,34 +18,40 @@ const QList<orderBy> correlationRow::correlationOrder = QList<orderBy>()
 const QVariantList correlationRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::Int)
+                                                 << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::String);
 
-correlationRow::correlationRow(int type_, int id_, const QString &description_):
+correlationRow::correlationRow(int portfolioID_, int type_, int id_, const QString &description_):
     baseRow(correlationOrder)
 {
+    //    row_PortfolioID,
+    values.append(portfolioID_);
     //    row_ObjectType,
-        values.append(type_);
+    values.append(type_);
     //    row_ID,
-        values.append(id_);
+    values.append(id_);
     //    row_Description
-        values.append(description_);
+     values.append(description_);
 }
 
-correlationRow::correlationRow(int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
+correlationRow::correlationRow(int portfolioID_, int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
     baseRow(correlationOrder),
     correlationValues(correlationValues_)
 {
-//    row_ObjectType,
+    //    row_PortfolioID,
+    values.append(portfolioID_);
+    //    row_ObjectType,
     values.append(type_);
-//    row_ID,
+    //    row_ID,
     values.append(id_);
-//    row_Description
+    //    row_Description
     values.append(description_);
 }
 
 bool correlationRow::operator==(const correlationRow &other_) const
 {
-    return values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
+    return values.at(row_PortfolioID).toInt() == other_.values.at(row_PortfolioID).toInt()
+        && values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
         && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt()
         && values.at(row_Description).toString() == other_.values.at(row_Description).toString();
 }

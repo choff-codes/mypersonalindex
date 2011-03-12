@@ -9,7 +9,7 @@ class frmMainStatistic_State : public frmMainStateTableWithTree
     Q_OBJECT
 
 public:
-    frmMainStatistic_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_,
+    frmMainStatistic_State(int portfolioID_, const QMap<int, portfolio> &portfolios_, const settings &settings_,
         const QHash<QString, historicalPrices> &prices_, QWidget *parent_);
 
     ~frmMainStatistic_State();
@@ -22,13 +22,6 @@ protected:
     QMap<int, QString> tableColumns();
 
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString &description_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString &description_, const QString &itemData_);
-
-    historicalNAV calculateNAV(QTreeWidgetItem *item_, int beginDate_, int endDate_);
-
-private:
-    QMap<QTreeWidgetItem*, historicalNAV> m_cache;
 };
 
 

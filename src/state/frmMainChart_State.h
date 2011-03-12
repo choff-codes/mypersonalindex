@@ -15,7 +15,7 @@ class frmMainChart_State: public frmMainState, public frmMainStateTree
     Q_OBJECT
 
 public:
-    frmMainChart_State(const portfolio &portfolio_, const calculatorNAV &calculator_, const QHash<QString, historicalPrices> &prices_, QObject *parent_);
+    frmMainChart_State(int portfolioID_, const QMap<int, portfolio> &portfolios_, const QHash<QString, historicalPrices> &prices_, QWidget *parent_);
 
     ~frmMainChart_State();
 
@@ -24,19 +24,16 @@ public:
 
 protected slots:
     void itemChecked(QTreeWidgetItem *item_, int column_);
+    void portfolioChange(int index_);
     void refreshTab();
 
 private:
     static const QStringList m_colors;
-    QMap<QTreeWidgetItem*, mpiChartCurve*> m_cache;
-    QHash<QString, historicalPrices> m_prices;
+    QHash<treeItemKey, mpiChartCurve*> m_cache;
     frmMainChart_UI *ui;
     int m_counter;
 
-    QTreeWidgetItem* createTreeItem(int type_, const QString &description_);
-    QTreeWidgetItem* createTreeItem(int type_, const QString &description_, const QString &itemData_);
-
-    mpiChartCurve* getCurve(QTreeWidgetItem *item_, int beginDate, int endDate_);
+    mpiChartCurve* getCurve(const treeItemKey &item_, int beginDate, int endDate_);
     void resetChart(int beginDate_, int endDate_);
 };
 

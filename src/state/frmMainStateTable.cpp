@@ -9,8 +9,8 @@
 #include <QTime>
 #endif
 
-frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const calculatorNAV &calculator_, const settings &settings_, QWidget *parent_):
-    frmMainState(portfolio_, calculator_, parent_),
+frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const settings &settings_, QWidget *parent_):
+    frmMainState(portfolio_, parent_),
     m_settings(settings_)
 {
 }

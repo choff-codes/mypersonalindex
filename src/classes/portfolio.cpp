@@ -11,18 +11,21 @@
 #include "assetAllocationTarget.h"
 #include "trade.h"
 #include "executedTrade.h"
+#include "calculatorNAV.h"
 
 class portfolioData: public objectKeyData
 {
 public:
+    calculatorNAV calculator;
     QMap<int, security> securities;
     QMap<int, assetAllocation> assetAllocations;
     QMap<int, account> accounts;
 
     int startDate;
 
-    explicit portfolioData(int id_, const QString &description_):
+    explicit portfolioData(portfolio *portfolio_, int id_, const QString &description_):
         objectKeyData(description_, id_),
+        calculator(calculatorNAV(portfolio_)),
         startDate(QDate::currentDate().toJulianDay())
     {}
 };
@@ -30,13 +33,14 @@ public:
 int portfolio::IDENTITY_COUNTER = UNASSIGNED_RESERVED - 1;
 
 portfolio::portfolio(int id_, const QString &description_):
-    d(new portfolioData(id_, description_))
+    d(new portfolioData(this, id_, description_))
 {
 }
 
 portfolio::portfolio(const portfolio &other_):
     d(other_.d)
 {
+    d->calculator.setPortfolio(this);
 }
 
 portfolio::~portfolio()
@@ -46,6 +50,7 @@ portfolio::~portfolio()
 portfolio& portfolio::operator=(const portfolio &other_)
 {
     d = other_.d;
+    d->calculator.setPortfolio(this);
     return *this;
 }
 
@@ -62,6 +67,8 @@ bool portfolio::operator==(const portfolio &other_) const
 
 int portfolio::startDate() const { return d->startDate; }
 void portfolio::setStartDate(int startDate_) { d->startDate = startDate_; }
+
+calculatorNAV& portfolio::calculator() const { return d->calculator; }
 
 QMap<int, security>& portfolio::securities() const { return d->securities; }
 
@@ -253,6 +260,7 @@ void portfolio::remove(const queries &dataSource_) const
 void portfolio::detach()
 {
     d.detach();
+    d->calculator.detach();
 
     for(QMap<int, account>::iterator i = accounts().begin(); i != accounts().end(); ++i)
         i.value().detach();

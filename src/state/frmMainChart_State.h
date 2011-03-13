@@ -29,7 +29,7 @@ protected slots:
 
 private:
     static const QStringList m_colors;
-    QHash<treeItemKey, mpiChartCurve*> m_cache;
+    QMap<treeItemKey, mpiChartCurve*> m_cache;
     frmMainChart_UI *ui;
     int m_counter;
 

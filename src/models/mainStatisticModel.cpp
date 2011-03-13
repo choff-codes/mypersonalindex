@@ -179,7 +179,7 @@ statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString d
     //    row_MaxPercentUpDay,
     values.append(info.maxChangePositiveDay);
     //    row_MaximumIndexValue,
-    values.append(info.days == 0 ? 0 : (info.maxNAVValue / info.beginNAV) - 1);
+    values.append(info.days <= 0 ? 0 : (info.maxNAVValue / info.beginNAV) - 1);
     //    row_MaximumIndexValueDay,
     values.append(info.maxNAVValueDay);
     //    row_MaximumTotalValue,
@@ -187,7 +187,7 @@ statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString d
     //    row_MaximumTotalValueDay,
     values.append(info.maxTotalValueDay);
     //    row_MinimumIndexValue,
-    values.append(info.days == 0 ? 0 : (info.minNAVValue / info.beginNAV) - 1);
+    values.append(info.days <= 0 ? 0 : (info.minNAVValue / info.beginNAV) - 1);
     //    row_MinimumIndexValueDay,
     values.append(info.minNAVValueDay);
     //    row_MinimumTotalValue,
@@ -206,7 +206,7 @@ statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString d
     double distribution = cumulativeNormalDistribution(info);
     values.append(distribution);
     //    row_ProbabilityOfYearlyLoss,
-    values.append(info.days == 0 ? 0 : 1 - distribution);
+    values.append(info.days <= 0 ? 0 : 1 - distribution);
     //    row_TaxLiability,
     values.append(info.taxLiability);
     //    row_YearlyReturn,

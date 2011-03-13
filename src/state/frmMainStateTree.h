@@ -1,7 +1,7 @@
 #ifndef FRMMAINSTATETREE_H
 #define FRMMAINSTATETREE_H
 
-#include <QSet>
+#include <QHash>
 #include <QMap>
 #include "portfolio.h"
 #include "historicalPrices.h"
@@ -23,18 +23,10 @@ public:
         symbol(symbol_)
     {}
 
-    bool operator==(const treeItemKey &other_) const
-    {
-        return type == other_.type && portfolioID == other_.portfolioID && id == other_.id && symbol == other_.symbol;
-    }
+    bool operator<(const treeItemKey &other_) const;
+    bool operator==(const treeItemKey &other_) const;
 };
 
-inline uint qHash(const treeItemKey &key_) { return key_.type ^ key_.id ^ qHash(key_.symbol); }
-
-template<class T>
-class QList;
-template<class T, class V>
-class QHash;
 class QTreeWidget;
 class QTreeWidgetItem;
 class QString;
@@ -52,7 +44,7 @@ public:
     virtual ~frmMainStateTree() {}
 
 protected:
-    QSet<treeItemKey> m_selectedItems;
+    QList<treeItemKey> m_selectedItems;
     QMap<int, portfolio> m_portfolios;
     QHash<QString, historicalPrices> m_prices;
 

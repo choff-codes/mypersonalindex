@@ -10,6 +10,22 @@
 #include "calculatorNAV.h"
 #include "historicalPrices.h"
 
+bool treeItemKey::operator<(const treeItemKey &other_) const
+{
+    if (type != other_.type)
+        return type < other_.type;
+    if (portfolioID != other_.portfolioID)
+        return portfolioID < other_.portfolioID;
+    if (id != other_.id)
+        return id < other_.id;
+    return symbol < other_.symbol;
+}
+
+bool treeItemKey::operator==(const treeItemKey &other_) const
+{
+    return type == other_.type && portfolioID == other_.portfolioID && id == other_.id && symbol == other_.symbol;
+}
+
 void frmMainStateTree::populateTree(int portfolioID_)
 {
     portfolio p = m_portfolios.value(portfolioID_);

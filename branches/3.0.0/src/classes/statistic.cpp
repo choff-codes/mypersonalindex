@@ -30,8 +30,8 @@ statistic::statistic(const historicalNAV &historicalNAV_):
     taxLiability(historicalNAV_.taxLiability),
     dividends(0)
 {
-    days = historicalNAV_.count() - 1; // first is baseline nav, so discard
-    if (days <= 0)
+    days = historicalNAV_.count() - 1;
+    if (days < 0)
         return;
 
     navValue beginningNAV = historicalNAV_.value(historicalNAV_.beginDate());

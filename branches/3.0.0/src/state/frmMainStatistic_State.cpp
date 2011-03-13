@@ -36,12 +36,12 @@ void frmMainStatistic_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/
 
     if (item_->checkState(0) == Qt::Unchecked)
     {
-        m_selectedItems.remove(key);
+        m_selectedItems.removeOne(key);
         static_cast<mainStatisticModel*>(ui->table->model())->remove(statisticRow(key.portfolioID, key.type, key.id, key.displayText));
         return;
     }
 
-    m_selectedItems.insert(key);
+    m_selectedItems.append(key);
     static_cast<mainStatisticModel*>(ui->table->model())->add(
         new statisticRow(key.portfolioID, key.type, key.id, key.displayText, calculateNAV(key, beginDate, endDate), m_settings.viewableColumnsSorting(columnEnumValue()))
     );

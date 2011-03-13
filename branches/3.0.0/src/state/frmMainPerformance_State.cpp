@@ -40,7 +40,7 @@ void frmMainPerformance_State::itemClicked(QTreeWidgetItem *item_, int /*column_
     if (!item_->parent())
         return;
 
-    m_selectedItems.insert(createKeyFromTreeItem(item_));
+    m_selectedItems.append(createKeyFromTreeItem(item_));
     refreshTab();
 }
 
@@ -49,7 +49,7 @@ mpiViewModelBase* frmMainPerformance_State::createModel(int beginDate_, int endD
     if (m_selectedItems.isEmpty())
         return new mainPerformanceModel(QList<baseRow*>(), m_settings.viewableColumns(columnEnumValue()), ui->table);
 
-    historicalNAV nav = calculateNAV(m_selectedItems.toList().at(0), beginDate_, endDate_);
+    historicalNAV nav = calculateNAV(m_selectedItems.at(0), beginDate_, endDate_);
 
     return new mainPerformanceModel(
         performanceRow::getRows(

@@ -80,14 +80,14 @@ void frmMainChart_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/)
 
     if (item_->checkState(0) == Qt::Unchecked)
     {
-        m_selectedItems.remove(key);
+        m_selectedItems.removeOne(key);
         mpiChartCurve *curve = m_cache.take(key);
         curve->detach();
         delete curve;
     }
     else
     {
-        m_selectedItems.insert(key);
+        m_selectedItems.append(key);
         getCurve(key, beginDate, endDate)->attach();
     }
 

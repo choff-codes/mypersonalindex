@@ -22,6 +22,10 @@ protected:
     QMap<int, QString> tableColumns();
 
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
+    historicalNAV calculateNAV(const treeItemKey &item_, int beginDate_, int endDate_);
+
+private:
+    QMap<treeItemKey, historicalNAV> m_cache;
 };
 
 

@@ -38,9 +38,7 @@ public:
 class executedTradeMap: public objectBase, public queriesBatch
 {
 public:
-    explicit executedTradeMap(int parent_):
-        objectBase(parent_)
-    {}
+    executedTradeMap() {}
 
     QMap<int, executedTrade>::const_iterator lowerBound(int date_) const { return m_trades.lowerBound(date_); }
     QMap<int, executedTrade>::const_iterator constBegin() const { return m_trades.constBegin(); }
@@ -58,7 +56,7 @@ public:
     bool operator==(const executedTradeMap &other_) const { return m_trades == other_.m_trades; }
     bool operator!=(const executedTradeMap &other_) const { return !(*this == other_); }
 
-    void insertBatch(const queries &dataSource_);
+    bool insertBatch(const queries &dataSource_);
 
     QVariant data(int column_, bool newRow_);
 

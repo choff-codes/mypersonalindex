@@ -89,7 +89,9 @@ void frmEditAA_State::validationError(const objectKeyBase &key_, const QString &
 
 void frmEditAA_State::add()
 {
-    assetAllocation aa(portfolio::getOpenIdentity(), m_portfolio.id());
+    assetAllocation aa;
+    aa.setNewIdentity();
+    aa.setParent(m_portfolio.id());
     m_portfolio.assetAllocations().insert(aa.id(), aa);
     m_model->insert(new assetAllocation(aa));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));

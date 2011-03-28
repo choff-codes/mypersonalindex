@@ -28,7 +28,6 @@ void mpiFile_State::newFile()
 
     portfolios.clear();
     prices.clear();
-    portfolioIdentities.clear();
     setCurrentFile("", true);
 }
 
@@ -84,7 +83,15 @@ bool mpiFile_State::saveFile(const QString &filePath_)
 #endif
     file.beginTransaction();
 
-    portfolioIdentities = portfolio::save(portfolios, file);
+    bool ok = false;
+    QMap<int, portfolio> savedPortfolios = portfolio::save(portfolios, file, &ok);
+    if (!ok)
+    {
+        file.rollback();
+        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error saving to %1!").arg(filePath_));
+        return false;
+    }
+    portfolios = savedPortfolios;
     file.commit();
 
 #ifdef CLOCKTIME
@@ -92,7 +99,12 @@ bool mpiFile_State::saveFile(const QString &filePath_)
 #endif
     file.beginTransaction();
 
-    prices.save(file);
+    if (!prices.save(file))
+    {
+        file.rollback();
+        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error saving to %1!").arg(filePath_));
+        return false;
+    }
 
     file.commit();
 #ifdef CLOCKTIME
@@ -165,7 +177,6 @@ void mpiFile_State::loadFile(const QString &filePath_, bool pricing_)
     if (pricing_)
         prices = priceFactory(file).getHistoricalPrices();
     portfolios = portfolioFactory(file).getPortfolios();
-    portfolioIdentities.clear();
 
     setCurrentFile(updatedFilePath_, true);
 }

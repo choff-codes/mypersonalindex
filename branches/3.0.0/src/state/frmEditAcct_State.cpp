@@ -88,7 +88,9 @@ void frmEditAcct_State::validationError(const objectKeyBase &key_, const QString
 
 void frmEditAcct_State::add()
 {
-    account acct(portfolio::getOpenIdentity(), m_portfolio.id());
+    account acct;
+    acct.setNewIdentity();
+    acct.setParent(m_portfolio.id());
     m_portfolio.accounts().insert(acct.id(), acct);
     m_model->insert(new account(acct));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));

@@ -114,10 +114,7 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
     updateRecentFileActions(filePath_);
 
     if (!newFile_)
-    {
-        m_currentPortfolio = m_file->portfolioIdentities.value(m_currentPortfolio, UNASSIGNED);
         return;
-    }
 
     refreshPortfolioPrices();
     refreshPortfolioCmb(UNASSIGNED);
@@ -196,7 +193,8 @@ void frmMain::recentFileSelected()
 
 void frmMain::addPortfolio()
 {
-    portfolio p(portfolio::getOpenIdentity());
+    portfolio p;
+    p.setNewIdentity();
     frmEdit f(p, this);
     f.exec();
     if (p == f.getPortfolio())

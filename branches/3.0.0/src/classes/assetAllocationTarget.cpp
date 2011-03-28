@@ -37,13 +37,13 @@ void assetAllocationTarget::updateAssetAllocationID(const QMap<int, int> &aaIDMa
             m_targets.insert(i.value(), m_targets.take(i.key()));
 }
 
-void assetAllocationTarget::insertBatch(const queries &dataSource_)
+bool assetAllocationTarget::insertBatch(const queries &dataSource_)
 {
     if (!this->hasParent())
-        return;
+        return false;
 
     m_position = m_targets.constBegin();
-    dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, m_targets.count(), this);
+    return dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, m_targets.count(), this);
 }
 
 QVariant assetAllocationTarget::data(int column_, bool newRow_)

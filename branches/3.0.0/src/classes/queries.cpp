@@ -243,15 +243,16 @@ queries::queries(const QString &databaseLocation_)
     m_database.open();
 }
 
-void queries::executeNonQuery(const QString &query_) const
+bool queries::executeNonQuery(const QString &query_) const
 {
-    QSqlQuery(query_, m_database);
+    QSqlQuery q(m_database);
+    return q.exec(query_);
 }
 
-void queries::bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch* const object_) const
+bool queries::bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch* const object_) const
 {
     if (tableName_.isEmpty() || columns_.isEmpty() || rowCount_ == 0)
-        return;
+        return true;
 
     QSqlQuery query(m_database);
     QStringList parameters;
@@ -268,20 +269,16 @@ void queries::bulkInsert(const QString &tableName_, const QStringList &columns_,
         for (int x = 0; x < columnCount; ++x)
             query.addBindValue(object_->data(x, x == 0 && i != 0));
 
-        query.exec();
+        if (!query.exec())
+            return false;
     }
+    return true;
 }
 
-int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const
+bool queries::insert(const QString &tableName_, const QMap<QString, QVariant> &values_) const
 {
     if (tableName_.isEmpty() || values_.isEmpty())
-        return id_;
-
-    if (id_ > UNASSIGNED)
-    {
-        update(tableName_, values_, id_);
-        return id_;
-    }
+        return true;
 
     QSqlQuery query(m_database);
     QStringList parameters, columns;
@@ -298,25 +295,7 @@ int queries::insert(const QString &tableName_, const QMap<QString, QVariant> &va
     foreach(const QVariant &value, values_)
         query.addBindValue(value);
 
-    query.exec();
-    return getIdentity();
-}
-
-void queries::update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const
-{
-    QSqlQuery query(m_database);
-    QStringList columns;
-    QString sql("UPDATE %1 SET %2 WHERE ID = %3");
-
-    foreach(const QString &column, values_.keys())
-        columns.append(QString("%1 = ?").arg(column));
-
-    query.prepare(sql.arg(tableName_, columns.join(","), QString::number(id_)));
-
-    foreach(const QVariant &value, values_)
-        query.addBindValue(value);
-
-    query.exec();
+    return query.exec();
 }
 
 QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_) const
@@ -328,16 +307,6 @@ QSqlQuery queries::select(const QString &tableName_, const QStringList &columns_
     resultSet.exec(sql.arg(columns_.join(","), tableName_));
 
     return resultSet;
-}
-
-int queries::getIdentity() const
-{
-    QSqlQuery query("SELECT last_insert_rowid()", m_database);
-
-    if (query.isActive() && query.first())
-        return query.value(0).toInt();
-
-    return UNASSIGNED;
 }
 
 int queries::getDatabaseVersion() const
@@ -355,17 +324,17 @@ bool queries::isValid() const
     return getDatabaseVersion() !=  UNASSIGNED;
 }
 
-void queries::deleteTable(const QString &table_) const
+bool queries::deleteTable(const QString &table_) const
 {
-    executeNonQuery(QString("DELETE FROM %1").arg(table_));
+    return executeNonQuery(QString("DELETE FROM %1").arg(table_));
 }
 
-void queries::deleteItem(const QString &table_, int id_) const
+bool queries::deleteItem(const QString &table_, int id_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table_, QString::number(id_)));
+    return executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table_, QString::number(id_)));
 }
 
-void queries::deleteItem(const QString &table_, int id_, int beginDate_) const
+bool queries::deleteItem(const QString &table_, int id_, int beginDate_) const
 {
-    executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table_, QString::number(id_), QString::number(beginDate_)));
+    return executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table_, QString::number(id_), QString::number(beginDate_)));
 }

@@ -18,8 +18,7 @@ public:
     int startDate;
     int endDate;
 
-    explicit tradeData(int id_, int parent_):
-        objectKeyData(QString(), id_, parent_),
+    explicit tradeData():
         action(trade::tradeAction_Purchase),
         value(0),
         priceType(trade::tradePriceType_CurrentClose),
@@ -33,8 +32,8 @@ public:
     {}
 };
 
-trade::trade(int id_, int parent_):
-    d(new tradeData(id_, parent_))
+trade::trade():
+    d(new tradeData())
 {}
 
 trade::trade(const trade &other_):
@@ -98,9 +97,10 @@ void trade::setStartDate(int startDate_) { d->startDate = startDate_; }
 int trade::endDate() const { return d->endDate; }
 void trade::setEndDate(int endDate_) { d->endDate = endDate_; }
 
-void trade::save(const queries &dataSource_)
+bool trade::save(const queries &dataSource_) const
 {
     QMap<QString, QVariant> values;
+    values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_ID), this->id());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_SecurityID), this->parent());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Description), this->description());
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_Type), (int)this->action());
@@ -114,24 +114,14 @@ void trade::save(const queries &dataSource_)
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_StartDate), functions::dateToNull(this->startDate()));
     values.insert(queries::portfolioSecurityTradeColumns.at(queries::portfolioSecurityTradeColumns_EndDate), functions::dateToNull(this->endDate()));
 
-    this->setID(dataSource_.insert(queries::table_PortfolioSecurityTrade, values, this->id()));
-}
-
-void trade::remove(const queries &dataSource_) const
-{
-    if (!this->hasIdentity())
-        return;
-
-    dataSource_.deleteItem(queries::table_PortfolioSecurityTrade, this->id());
+    return dataSource_.insert(queries::table_PortfolioSecurityTrade, values);
 }
 
 trade trade::load(const QSqlQuery &q_)
 {
-    trade t(
-           q_.value(queries::portfolioSecurityTradeViewColumns_ID).toInt(),
-           q_.value(queries::portfolioSecurityTradeViewColumns_SecurityID).toInt()
-    );
-
+    trade t;
+    t.setID(q_.value(queries::portfolioSecurityTradeViewColumns_ID).toInt());
+    t.setParent(q_.value(queries::portfolioSecurityTradeViewColumns_SecurityID).toInt());
     t.setAction((trade::tradeAction)q_.value(queries::portfolioSecurityTradeViewColumns_Type).toInt());
     t.setValue(q_.value(queries::portfolioSecurityTradeViewColumns_Value).toDouble());
     t.setDescription(q_.value(queries::portfolioSecurityTradeViewColumns_Description).toString());

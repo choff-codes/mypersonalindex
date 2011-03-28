@@ -33,7 +33,7 @@ public:
         tradePriceType_UserDefined
     };
 
-    trade(int id_ = UNASSIGNED, int parent_ = UNASSIGNED);
+    trade();
     trade(const trade &other_);
 
     ~trade();
@@ -73,8 +73,7 @@ public:
     int endDate() const;
     void setEndDate(int endDate_);
 
-    void save(const queries &dataSource_);
-    void remove(const queries &dataSource_) const;
+    bool save(const queries &dataSource_) const;
     static trade load(const QSqlQuery &q_);
 
     objectType type() const;

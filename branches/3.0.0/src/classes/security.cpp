@@ -24,22 +24,19 @@ public:
     executedTradeMap executedTrades;
     historicalPrices prices;
 
-    explicit securityData(int id_, int parent_, const QString &description_):
-        objectKeyData(description_, id_, parent_),
+    securityData():
         account(UNASSIGNED),
         expenseRatio(0),
         dividendReinvestment(false),
         dividendNAVAdjustment(true),
         cashAccount(false),
         includeInCalc(true),
-        hidden(false),
-        executedTrades(id_),
-        prices(historicalPrices(description_))
+        hidden(false)
     {}
 };
 
-security::security(int id_, int parent_, const QString &description_):
-    d(new securityData(id_, parent_, description_))
+security::security():
+    d(new securityData())
 {}
 
 security::security(const security &other_):
@@ -117,12 +114,13 @@ void security::setHistoricalPrices(const historicalPrices &prices_) { d->prices 
 int security::endDate() const { return cashAccount() ? tradeDateCalendar::endDate() : d->prices.endDate(historicalPrices::type_price); }
 int security::beginDate() const { return cashAccount() ? 0 : d->prices.beginDate(historicalPrices::type_price); }
 
-void security::save(const queries &dataSource_)
+bool security::save(const queries &dataSource_) const
 {
     if (!this->hasParent())
-        return;
+        return false;
 
     QMap<QString, QVariant> values;
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_ID), this->id());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_PortfolioID), this->parent());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Symbol), this->description());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Account), functions::intToNull(this->account()));
@@ -134,25 +132,15 @@ void security::save(const queries &dataSource_)
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Note), this->note());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Dividends), (int)this->dividendNAVAdjustment());
 
-    this->setID(dataSource_.insert(queries::table_PortfolioSecurity, values, this->id()));
-}
-
-void security::remove(const queries &dataSource_) const
-{
-    if (!this->hasIdentity())
-        return;
-
-    dataSource_.deleteItem(queries::table_PortfolioSecurity, this->id());
+    return dataSource_.insert(queries::table_PortfolioSecurity, values);
 }
 
 security security::load(const QSqlQuery &q_)
 {
-    security sec(
-        q_.value(queries::portfolioSecurityColumns_ID).toInt(),
-        q_.value(queries::portfolioSecurityColumns_PortfolioID).toInt(),
-        q_.value(queries::portfolioSecurityColumns_Symbol).toString()
-    );
-
+    security sec;
+    sec.setID(q_.value(queries::portfolioSecurityColumns_ID).toInt());
+    sec.setParent(q_.value(queries::portfolioSecurityColumns_PortfolioID).toInt());
+    sec.setDescription(q_.value(queries::portfolioSecurityColumns_Symbol).toString());
     if (!q_.value(queries::portfolioSecurityColumns_Account).isNull())
         sec.setAccount(q_.value(queries::portfolioSecurityColumns_Account).toInt());
     if (!q_.value(queries::portfolioSecurityColumns_Expense).isNull())
@@ -186,6 +174,15 @@ objectType security::type() const
 QString security::displayText() const
 {
     return description().isEmpty() ? "(New)" : functions::join(description(), functions::fitString(functions::removeNewLines(note()), 20), " | ");
+}
+
+void security::setID(int id_)
+{
+    objectKey::setID(id_);
+    d->executedTrades.parent = id_;
+    d->targets.parent = id_;
+    for(QMap<int, trade>::iterator i = d->trades.begin(); i != d->trades.end(); ++i)
+        i.value().setParent(id_);
 }
 
 void security::detach()

@@ -95,7 +95,11 @@ QList<baseRow*> acctRow::getRows(const QMap<int, account> &accounts_, int beginD
     // check if any securities have an unassigned value
     snapshot unassigned = calculator_.accountSnapshot(endDate_, UNASSIGNED);
     if (unassigned.count != 0)
-        returnList.append(getRow(account(UNASSIGNED, UNASSIGNED, "(Unassigned)"), beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+    {
+        account acct;
+        acct.setDescription("(Unassigned)");
+        returnList.append(getRow(acct, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+    }
 
     return returnList;
 }

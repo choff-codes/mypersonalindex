@@ -152,28 +152,26 @@ public:
 
     queries(const QString &databaseLocation_);
 
-    void bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch* const object_) const;
-    int insert(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
+    bool bulkInsert(const QString &tableName_, const QStringList &columns_, int rowCount_, queriesBatch* const object_) const;
+    bool insert(const QString &tableName_, const QMap<QString, QVariant> &values_) const;
     QSqlQuery select(const QString &tableName_, const QStringList &columns_) const;
 
     void beginTransaction() { m_database.transaction(); }
     void commit() { m_database.commit(); }
+    void rollback() { m_database.rollback(); }
 
-    int getIdentity() const;
     int getDatabaseVersion() const;
     QString getDatabaseLocation() const { return m_database.databaseName(); }
     bool isValid() const;
 
-    void deleteTable(const QString &table_) const;
-    void deleteItem(const QString &table_, int id_) const;
-    void deleteItem(const QString &table_, int id_, int beginDate_) const;
+    bool deleteTable(const QString &table_) const;
+    bool deleteItem(const QString &table_, int id_) const;
+    bool deleteItem(const QString &table_, int id_, int beginDate_) const;
 
-    void executeNonQuery(const QString &query_) const;
+    bool executeNonQuery(const QString &query_) const;
 
 private:
     QSqlDatabase m_database;
-
-    void update(const QString &tableName_, const QMap<QString, QVariant> &values_, int id_) const;
 };
 
 #endif // QUERIES_H

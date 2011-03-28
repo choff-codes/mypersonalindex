@@ -17,7 +17,7 @@ public:
         costBasisMethod_HIFO
     };
 
-    account(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString());
+    account();
     account(const account &other_);
 
     ~account();
@@ -43,8 +43,7 @@ public:
 
     QString validate() const;
 
-    void save(const queries &dataSource_);
-    void remove(const queries &dataSource_) const;
+    bool save(const queries &dataSource_) const;
     static account load(const QSqlQuery &q_);
 
     friend QDataStream& operator>>(QDataStream &stream_, account &acct_);

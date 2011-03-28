@@ -3,7 +3,7 @@
 
 #include <QSharedData>
 
-class portfolio;
+class portfolioData;
 class symbol;
 class objectKeyBase;
 class snapshot;
@@ -14,13 +14,12 @@ class calculatorNAV
 {
 public:
     calculatorNAV();
-    calculatorNAV(portfolio *portfolio_);
     calculatorNAV(const calculatorNAV &other_);
     ~calculatorNAV();
 
     calculatorNAV& operator=(const calculatorNAV &other_);
 
-    void setPortfolio(portfolio *portfolio_);
+    void setPortfolio(QExplicitlySharedDataPointer<portfolioData> portfolio_);
     void clearCache();
     void detach();
 

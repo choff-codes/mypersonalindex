@@ -16,7 +16,7 @@ class portfolioData;
 class portfolio: public objectKey
 {
 public:
-    portfolio(int id_ = UNASSIGNED, const QString &description_ = QString());
+    portfolio();
     portfolio(const portfolio &other_);
 
     ~portfolio();
@@ -30,8 +30,6 @@ public:
     static QMap<QString, int> symbols(const QMap<int, portfolio> &portfolios_);
     int endDate() const;
 
-    static int getOpenIdentity() { return --IDENTITY_COUNTER; }
-
     int startDate() const;
     void setStartDate(int startDate_);
 
@@ -42,16 +40,15 @@ public:
 
     objectType type() const;
     QString validate() const;
+    void setID(int id_);
 
-    void save(const queries &dataSource_);
-    static QMap<int, int> save(QMap<int, portfolio> &portfolios_, const queries &dataSource_);
-    void remove(const queries &dataSource_) const;
+    bool save(const queries &dataSource_);
+    static QMap<int, portfolio> save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, bool *ok_);
     static portfolio load(const QSqlQuery &q_);
 
     void detach();
 
 private:
-    static int IDENTITY_COUNTER;
     QExplicitlySharedDataPointer<portfolioData> d;
 
     objectKeyData* data() const;

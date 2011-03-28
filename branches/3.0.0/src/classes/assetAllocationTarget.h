@@ -35,7 +35,7 @@ public:
     friend QDataStream& operator<<(QDataStream &stream_, const assetAllocationTarget &target_);
     friend QDataStream& operator>>(QDataStream &stream_, assetAllocationTarget &target_);
 
-    void insertBatch(const queries &dataSource_);
+    bool insertBatch(const queries &dataSource_);
 
     QVariant data(int column_, bool newRow_);
 

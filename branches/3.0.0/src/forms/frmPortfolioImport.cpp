@@ -126,11 +126,11 @@ void frmPortfolioImport::accept()
 
         m_portfolio = importing;
         m_portfolio.detach();
-        m_portfolio.setID(portfolio::getOpenIdentity());
-        m_portfolio.setDescription(ui->descriptionTxt->text());
         m_portfolio.accounts().clear();
         m_portfolio.assetAllocations().clear();
         m_portfolio.securities().clear();
+        m_portfolio.setNewIdentity();
+        m_portfolio.setDescription(ui->descriptionTxt->text());
     }
 
     // based off the save method in portfolio.cpp, with slight tweaks
@@ -143,13 +143,13 @@ void frmPortfolioImport::accept()
         QTreeWidgetItem *item = acctItem->child(i);
         if (item->checkState(0) == Qt::Checked)
         {
-            int id = portfolio::getOpenIdentity();
             account acct = importing.accounts().value(item->type());
+            int oldID = acct.id();
             acct.detach();
-            acctIDMapping.insert(acct.id(), id);
-            acct.setID(id);
+            acct.setNewIdentity();
+            acctIDMapping.insert(oldID, acct.id());
             acct.setParent(m_portfolio.id());
-            m_portfolio.accounts().insert(id, acct);
+            m_portfolio.accounts().insert(acct.id(), acct);
         }
     }
 
@@ -161,13 +161,13 @@ void frmPortfolioImport::accept()
         QTreeWidgetItem *item = aaItem->child(i);
         if (item->checkState(0) == Qt::Checked)
         {
-            int id = portfolio::getOpenIdentity();
             assetAllocation aa = importing.assetAllocations().value(item->type());
+            int oldID = aa.id();
             aa.detach();
-            aaIDMapping.insert(aa.id(), id);
-            aa.setID(id);
+            aa.setNewIdentity();
+            aaIDMapping.insert(oldID, aa.id());
             aa.setParent(m_portfolio.id());
-            m_portfolio.assetAllocations().insert(id, aa);
+            m_portfolio.assetAllocations().insert(aa.id(), aa);
         }
     }
 
@@ -179,16 +179,15 @@ void frmPortfolioImport::accept()
         QTreeWidgetItem *item = secItem->child(i);
         if (item->checkState(0) == Qt::Checked)
         {
-            int id = portfolio::getOpenIdentity();
             security sec = importing.securities().value(item->type());
+            int oldID = sec.id();
             sec.detach();
-            secIDMapping.insert(sec.id(), id);
-            sec.setID(id);
-            sec.executedTrades().parent = id;
             sec.executedTrades().remove();
+            sec.trades().clear();
+            sec.setNewIdentity();
+            secIDMapping.insert(oldID, sec.id());
             sec.setParent(m_portfolio.id());
             sec.setAccount(acctIDMapping.value(sec.account(), UNASSIGNED));
-            sec.targets().parent = id;
             foreach(int aaID, sec.targets().keys())
             {
                 double value = sec.targets().value(aaID);
@@ -196,21 +195,20 @@ void frmPortfolioImport::accept()
                 if (aaIDMapping.contains(aaID))
                     sec.targets().insert(aaIDMapping.value(aaID), value);
             }
-            m_portfolio.securities().insert(id, sec);
+            m_portfolio.securities().insert(sec.id(), sec);
         }
     }
 
     for(int i = 0; i < secItem->childCount(); ++i)
     {
         QTreeWidgetItem *item = secItem->child(i);
+        QList<trade> trades = importing.securities().value(item->type()).trades().values();
         security sec = m_portfolio.securities().value(secIDMapping.value(item->type()));
 
-        QList<trade> trades = sec.trades().values();
-        sec.trades().clear();
         foreach(trade t, trades)
         {
             t.detach();
-            t.setID(portfolio::getOpenIdentity());
+            t.setNewIdentity();
             t.setParent(sec.id());
             t.setCashAccount(secIDMapping.value(t.cashAccount(), UNASSIGNED));
             sec.trades().insert(t.id(), t);

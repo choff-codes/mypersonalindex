@@ -21,10 +21,9 @@ public:
     int id;
     bool deleted;
 
-    explicit objectKeyData(const QString &description_ = QString(), int id_ = UNASSIGNED, int parent_ = UNASSIGNED):
-        objectBase(parent_),
-        description(description_),
-        id(id_),
+    objectKeyData():
+        objectBase(UNASSIGNED),
+        id(UNASSIGNED),
         deleted(false)
     {}
 
@@ -36,7 +35,7 @@ public:
             && this->description == other_.description
             && this->id == other_.id
             && this->deleted == other_.deleted;
-    }    
+    }
 };
 
 class objectKeyBase
@@ -70,13 +69,16 @@ public:
     virtual ~objectKey() {}
 
     void setDescription(const QString &description_) { data()->description = description_; }
-    void setID(int id_) { data()->id = id_; }
+    virtual void setID(int id_) { data()->id = id_; idChange(false); }
     void setParent(int parent_) { data()->parent = parent_; }
     void setDeleted(bool deleted_) { data()->deleted = deleted_; }
 
-    void clearIdentity() { setID(UNASSIGNED); }
+    void setNewIdentity() { idChange(true); }
 
     virtual void detach() = 0;
+
+private:
+    void idChange(bool newIdentity_);
 };
 
 

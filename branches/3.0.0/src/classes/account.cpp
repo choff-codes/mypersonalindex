@@ -11,8 +11,7 @@ public:
     account::costBasisMethod costBasis;
     bool hidden;
 
-    explicit accountData(int id_, int parent_, const QString &description_):
-        objectKeyData(description_, id_, parent_),
+    accountData():
         taxRate(0),
         taxDeferred(false),
         costBasis(account::costBasisMethod_FIFO),
@@ -20,8 +19,8 @@ public:
     {}
 };
 
-account::account(int id_, int parent_, const QString &description_):
-    d(new accountData(id_, parent_, description_))
+account::account():
+    d(new accountData())
 {}
 
 account::account(const account &other_):
@@ -60,12 +59,13 @@ void account::setCostBasis(costBasisMethod costBasis_) { d->costBasis = costBasi
 bool account::hidden() const { return d->hidden; }
 void account::setHidden(bool hidden_) { d->hidden = hidden_; }
 
-void account::save(const queries &dataSource_)
+bool account::save(const queries &dataSource_) const
 {
     if (!this->hasParent())
-        return;
+        return false;
 
     QMap<QString, QVariant> values;
+    values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_ID), this->id());
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_PortfolioID), this->parent());
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_Description), this->description());
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_TaxRate), this->taxRate());
@@ -73,25 +73,15 @@ void account::save(const queries &dataSource_)
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_CostBasis), (int)this->costBasis());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAccountColumns_Hide), (int)this->hidden());
 
-    this->setID(dataSource_.insert(queries::table_PortfolioAccount, values, this->id()));
-}
-
-void account::remove(const queries &dataSource_) const
-{
-    if (!this->hasIdentity())
-        return;
-
-    dataSource_.deleteItem(queries::table_PortfolioAccount, this->id());
+    return dataSource_.insert(queries::table_PortfolioAccount, values);
 }
 
 account account::load(const QSqlQuery &q_)
 {
-    account acct(
-        q_.value(queries::portfolioAccountColumns_ID).toInt(),
-        q_.value(queries::portfolioAccountColumns_PortfolioID).toInt(),
-        q_.value(queries::portfolioAccountColumns_Description).toString()
-    );
-
+    account acct;
+    acct.setID(q_.value(queries::portfolioAccountColumns_ID).toInt());
+    acct.setParent(q_.value(queries::portfolioAccountColumns_PortfolioID).toInt());
+    acct.setDescription(q_.value(queries::portfolioAccountColumns_Description).toString());
     acct.setTaxRate(q_.value(queries::portfolioAccountColumns_TaxRate).toDouble());
     acct.setTaxDeferred(q_.value(queries::portfolioAccountColumns_TaxDeferred).toBool());
     acct.setCostBasis((costBasisMethod)q_.value(queries::portfolioAccountColumns_CostBasis).toInt());

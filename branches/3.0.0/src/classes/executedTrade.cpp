@@ -70,11 +70,11 @@ QVariant executedTradeMap::data(int column_, bool newRow_)
     return QVariant();
 }
 
-void executedTradeMap::insertBatch(const queries &dataSource_)
+bool executedTradeMap::insertBatch(const queries &dataSource_)
 {
     if (!this->hasParent())
-        return;
+        return false;
 
     m_position = m_trades.constBegin();
-    dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, m_trades.count(), this);
+    return dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, m_trades.count(), this);
 }

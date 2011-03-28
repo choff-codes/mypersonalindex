@@ -12,8 +12,7 @@ public:
     double rebalanceBand;
     bool hidden;
 
-    explicit assetAllocationData(int id_, int parent_, const QString &description_):
-        objectKeyData(description_, id_, parent_),
+    assetAllocationData():
         target(0),
         threshold(assetAllocation::thresholdMethod_Portfolio),
         rebalanceBand(0),
@@ -21,8 +20,8 @@ public:
     {}
 };
 
-assetAllocation::assetAllocation(int id_, int parent_, const QString &description_):
-    d(new assetAllocationData(id_, parent_, description_))
+assetAllocation::assetAllocation():
+    d(new assetAllocationData())
 {}
 
 assetAllocation::assetAllocation(const assetAllocation &other_):
@@ -61,12 +60,13 @@ void assetAllocation::setThreshold(thresholdMethod threshold_) { d->threshold = 
 bool assetAllocation::hidden() const { return d->hidden; }
 void assetAllocation::setHidden(bool hidden_) { d->hidden = hidden_; }
 
-void assetAllocation::save(const queries &dataSource_)
+bool assetAllocation::save(const queries &dataSource_) const
 {
     if (!this->hasParent())
-        return;
+        return false;
 
     QMap<QString, QVariant> values;
+    values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_ID), this->id());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_PortfolioID), this->parent());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Description), this->description());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Target), this->target());
@@ -74,25 +74,15 @@ void assetAllocation::save(const queries &dataSource_)
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Threshold), (int)this->threshold());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_Hide), (int)this->hidden());
 
-    this->setID(dataSource_.insert(queries::table_PortfolioAA, values, this->id()));
-}
-
-void assetAllocation::remove(const queries &dataSource_) const
-{
-    if (!this->hasIdentity())
-        return;
-
-    dataSource_.deleteItem(queries::table_PortfolioAA, this->id());
+    return dataSource_.insert(queries::table_PortfolioAA, values);
 }
 
 assetAllocation assetAllocation::load(const QSqlQuery &q_)
 {
-    assetAllocation aa(
-        q_.value(queries::portfolioAAColumns_ID).toInt(),
-        q_.value(queries::portfolioAAColumns_PortfolioID).toInt(),
-        q_.value(queries::portfolioAAColumns_Description).toString()
-    );
-
+    assetAllocation aa;
+    aa.setID(q_.value(queries::portfolioAAColumns_ID).toInt());
+    aa.setParent(q_.value(queries::portfolioAAColumns_PortfolioID).toInt());
+    aa.setDescription(q_.value(queries::portfolioAAColumns_Description).toString());
     aa.setTarget(q_.value(queries::portfolioAAColumns_Target).toDouble());
     aa.setRebalanceBand(q_.value(queries::portfolioAAColumns_RebalanceBand).toDouble());
     aa.setThreshold((thresholdMethod)q_.value(queries::portfolioAAColumns_Threshold).toInt());

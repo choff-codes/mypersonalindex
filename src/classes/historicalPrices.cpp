@@ -36,14 +36,14 @@ public:
         };
     }
 
-    void insertBatch(const queries &dataSource_)
+    bool insertBatch(const queries &dataSource_)
     {
         if (symbol.isEmpty())
-            return;
+            return false;
 
         m_position = prices.constBegin();
         m_positionType = historicalPrices::type_price;
-        dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, prices.count() + dividends.count() + splits.count(), this);
+        return dataSource_.bulkInsert(queries::table_HistoricalPrice, queries::historicalPriceColumns, prices.count() + dividends.count() + splits.count(), this);
     }
 
     QVariant data(int column_, bool newRow_)
@@ -154,9 +154,9 @@ void historicalPrices::insert(int date_, double value_, type type_)
     d->insert(date_, value_, type_);
 }
 
-void historicalPrices::insertBatch(const queries &dataSource_)
+bool historicalPrices::insertBatch(const queries &dataSource_)
 {
-    d->insertBatch(dataSource_);
+    return d->insertBatch(dataSource_);
 }
 
 int historicalPrices::endDate(type type_) const
@@ -197,11 +197,14 @@ void historicalPrices::setSymbol(const QString &symbol_)
     d->symbol = symbol_;
 }
 
-void historicalPricesMap::save(const queries &dataSource_)
+bool historicalPricesMap::save(const queries &dataSource_)
 {
-    dataSource_.deleteTable(queries::table_HistoricalPrice);
+    if (!dataSource_.deleteTable(queries::table_HistoricalPrice))
+        return false;
     for(QHash<QString, historicalPrices>::iterator i = m_historicalPrices.begin(); i != m_historicalPrices.end(); i++)
-        i->insertBatch(dataSource_);
+        if (!i->insertBatch(dataSource_))
+            return false;
+    return true;
 }
 
 QHash<QString, historicalPrices> historicalPricesMap::getHistoricalPrices() const

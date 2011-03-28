@@ -45,4 +45,5 @@ HEADERS += $$PWD/queries.h \
     $$PWD/settingsFactory.h \
     $$PWD/assetAllocationTarget.h \
     $$PWD/symbol.h \
-    $$PWD/orderBy.h
+    $$PWD/orderBy.h \
+    $$PWD/portfolio_p.h

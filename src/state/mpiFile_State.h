@@ -18,9 +18,6 @@ public:
     // all portfolios in the current file
     QMap<int, portfolio> portfolios;
 
-    // maps new (negative) ids to their saved (positive) ids from the last save only
-    QMap<int, int> portfolioIdentities;
-
     // all prices in the current file
     historicalPricesMap prices;
 

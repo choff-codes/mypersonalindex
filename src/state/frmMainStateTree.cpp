@@ -135,7 +135,9 @@ historicalNAV frmMainStateTree::calculateNAV(const treeItemKey &item_, int begin
             return calc.changeOverTime(p.securities().value(item_.id), beginDate_, endDate_);
         case objectType_Symbol:
         {
-            symbol s(item_.symbol, item_.id == 1);
+            symbol s;
+            s.setDescription(item_.symbol);
+            s.setIncludeDividends(item_.id == 1);
             s.setHistoricalPrices(m_prices.value(s.description()));
             return calc.changeOverTime(s, beginDate_, endDate_);
         }

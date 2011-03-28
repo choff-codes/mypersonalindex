@@ -9,14 +9,13 @@ public:
     bool dividends;
     historicalPrices prices;
 
-    explicit symbolData(const QString &symbol_, bool dividends_):
-        objectKeyData(symbol_, UNASSIGNED, UNASSIGNED),
-        dividends(dividends_)
+    explicit symbolData():
+        dividends(false)
     {}
 };
 
-symbol::symbol(const QString &symbol_, bool dividends_):
-    d(new symbolData(symbol_, dividends_))
+symbol::symbol():
+    d(new symbolData())
 {}
 
 symbol::symbol(const symbol &other_):

@@ -38,7 +38,7 @@ public:
 
     void insert(int date_, double value_, type type_);
 
-    void insertBatch(const queries &dataSource_);
+    bool insertBatch(const queries &dataSource_);
 
 private:
     QExplicitlySharedDataPointer<historicalPricesData> d;
@@ -65,7 +65,7 @@ public:
     }
 
     void clear() { m_historicalPrices.clear(); }
-    void save(const queries &dataSource_);
+    bool save(const queries &dataSource_);
 
 private:
     QHash<QString, historicalPrices> m_historicalPrices;

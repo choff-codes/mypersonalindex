@@ -134,7 +134,9 @@ void frmEditSecurity_State::validationError(const objectKeyBase &key_, const QSt
 
 void frmEditSecurity_State::add()
 {
-    security s(portfolio::getOpenIdentity(), m_portfolio.id());
+    security s;
+    s.setNewIdentity();
+    s.setParent(m_portfolio.id());
     m_portfolio.securities().insert(s.id(), s);
     m_model->insert(new security(s));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));

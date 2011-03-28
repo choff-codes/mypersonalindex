@@ -44,7 +44,9 @@ void calculatorTrade::insertDividendReinvestmentPlaceholders(portfolio portfolio
     foreach(security s, portfolio_.securities())
         if (s.dividendReinvestment())
         {
-            trade t(DIVIDEND_REINVESTMENT_TRADE_ID, s.id());
+            trade t;
+            t.setID(DIVIDEND_REINVESTMENT_TRADE_ID);
+            t.setParent(s.id());
             t.setAction(trade::tradeAction_ReinvestDividendsAuto);
             s.trades().insert(DIVIDEND_REINVESTMENT_TRADE_ID, t);
         }

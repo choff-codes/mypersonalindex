@@ -180,7 +180,9 @@ void frmEditTrade_State::add()
     if (ui->filterCmb->currentIndex() == -1)
         return;
 
-    trade t(portfolio::getOpenIdentity(), ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt());
+    trade t;
+    t.setNewIdentity();
+    t.setParent(ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt());
     m_portfolio.securities()[t.parent()].trades().insert(t.id(), t);
     m_model->insert(new trade(t));
     ui->list->setCurrentIndex(m_model->index(m_model->rowCount(QModelIndex()) - 1));

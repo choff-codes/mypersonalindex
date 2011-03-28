@@ -15,7 +15,7 @@ public:
         thresholdMethod_AA
     };
 
-    assetAllocation(int id_ = UNASSIGNED, int parent_ = UNASSIGNED, const QString &description_ = QString());
+    assetAllocation();
     assetAllocation(const assetAllocation &other_);
 
     ~assetAllocation();
@@ -40,8 +40,7 @@ public:
     objectType type() const;
     QString validate() const;
 
-    void save(const queries &dataSource_);
-    void remove(const queries &dataSource_) const;
+    bool save(const queries &dataSource_) const;
     static assetAllocation load(const QSqlQuery &q_);
 
     friend QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_);

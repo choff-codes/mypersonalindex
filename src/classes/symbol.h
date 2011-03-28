@@ -12,8 +12,7 @@ class historicalPrices;
 class symbol: public objectKey
 {
 public:
-    // for now id is a security id which has the same symbol, may revise later
-    symbol(const QString &symbol_, bool dividends_);
+    symbol();
     symbol(const symbol &other_);
 
     ~symbol();

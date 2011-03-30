@@ -120,14 +120,11 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
 
     foreach(const security &sec, portfolio_.securities())
     {
-        if (!sec.includeInCalc() || sec.deleted())
+        if (!sec.includeInCalc())
             continue;
 
         foreach(const trade &t, sec.trades())
         {
-            if (t.deleted())
-                continue;
-
             if (t.action() == trade::tradeAction_ReinvestDividendsAuto) // get each dividend date greater than or equal to current date
             {
                 foreach(int date, calculateDividendReinvestmentDates(date_, sec.dividends()))

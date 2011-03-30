@@ -100,7 +100,7 @@ QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> &assetAllocation
 
     foreach(const assetAllocation &aa, assetAllocation_)
     {
-        if (aa.deleted() || aa.hidden())
+        if (aa.hidden())
             continue;
 
         returnList.append(getRow(aa, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));

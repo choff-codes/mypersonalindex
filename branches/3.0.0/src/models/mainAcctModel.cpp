@@ -86,7 +86,7 @@ QList<baseRow*> acctRow::getRows(const QMap<int, account> &accounts_, int beginD
 
     foreach(const account &acct, accounts_)
     {
-        if (acct.deleted() || acct.hidden())
+        if (acct.hidden())
             continue;
 
         returnList.append(getRow(acct, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));

@@ -130,7 +130,7 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
 
     foreach(const security &sec, securities_)
     {
-        if (sec.deleted() || sec.hidden())
+        if (sec.hidden())
             continue;
 
         QStringList aaDescription;

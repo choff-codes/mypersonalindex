@@ -126,7 +126,7 @@ void frmEditAA_State::remove()
             break;
         }
 
-    m_portfolio.assetAllocations()[m_currentItem->id()].setDeleted(true);
+    m_portfolio.assetAllocations().remove(m_currentItem->id());
     foreach(security s, m_portfolio.securities())
         s.targets().remove(m_currentItem->id());
     m_model->remove(m_currentItem);

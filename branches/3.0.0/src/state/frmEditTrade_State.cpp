@@ -61,9 +61,6 @@ void frmEditTrade_State::enter()
 
     foreach(const security &s, m_portfolio.securities())
     {
-        if (s.deleted())
-            continue;
-
         QString item = s.displayText();
         ui->filterCmb->addItem(item, s.id());
         ui->cashCmb->addItem(item, s.id());
@@ -157,13 +154,8 @@ void frmEditTrade_State::save()
 bool frmEditTrade_State::validate()
 {
     foreach(const security &s, m_portfolio.securities())
-    {
-        if (s.deleted())
-            continue;
-
         if (!validateMap(s.trades()))
             return false;
-    }
 
     return true;
 }
@@ -225,7 +217,7 @@ void frmEditTrade_State::remove()
     if (!m_currentItem)
         return;
 
-    m_portfolio.securities()[m_currentItem->parent()].trades()[m_currentItem->id()].setDeleted(true);
+    m_portfolio.securities()[m_currentItem->parent()].trades().remove(m_currentItem->id());
     m_model->remove(m_currentItem);
 }
 

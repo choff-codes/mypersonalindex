@@ -24,11 +24,8 @@ QList<objectKeyBase*> frmEditStateMap::sort(QList<objectKeyBase*> list_) const
 template <class T>
 bool frmEditStateMap::validateMap(const QMap<int, T> &map_)
 {
-    foreach(T item, map_)
+    foreach(const T &item, map_)
     {
-        if (item.deleted())
-            continue;
-
         QString error = item.validate();
         if (error.isEmpty())
             continue;
@@ -50,12 +47,7 @@ QList<objectKeyBase*> frmEditStateMap::mapToList(const QMap<int, T> &map_) const
 {
     QList<objectKeyBase*> list;
     foreach(const T &item, map_)
-    {
-        if (item.deleted())
-            continue;
-
         list.append(new T(item));
-    }
 
     return sort(list);
 }

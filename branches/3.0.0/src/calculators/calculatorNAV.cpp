@@ -111,12 +111,7 @@ snapshot calculatorNAV::portfolioSnapshot(int date_, int priorDate_)
     snapshot value(date_);
 
     foreach(const security &s, d->currentPortfolio->securities)
-    {
-        if (s.deleted())
-            continue;
-
         value.add(securitySnapshot(date_, s.id(), priorDate_));
-    }
 
     return value;
 }
@@ -126,13 +121,8 @@ snapshot calculatorNAV::assetAllocationSnapshot(int date_, int id_, int priorDat
     snapshot value(date_);
 
     foreach(const security &s, d->currentPortfolio->securities)
-    {
-        if (s.deleted())
-            continue;
-
         if (s.targets().contains(id_))
             value.add(securitySnapshot(date_, s.id(), priorDate_), s.targets().value(id_));
-    }
 
     return value;
 }
@@ -142,13 +132,8 @@ snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
     snapshot value(date_);
 
     foreach(const security &s, d->currentPortfolio->securities)
-    {
-        if (s.deleted())
-            continue;
-
         if (id_ == s.account())
             value.add(securitySnapshot(date_, s.id(), priorDate_));
-    }
 
     return value;
 }

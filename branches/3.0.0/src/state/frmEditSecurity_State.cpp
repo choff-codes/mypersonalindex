@@ -41,11 +41,8 @@ void frmEditSecurity_State::enter()
 {
     ui->aaCmb->clear();
     foreach(const assetAllocation &aa, m_portfolio.assetAllocations())
-    {
-        if (aa.deleted())
-            continue;
         ui->aaCmb->addItem(aa.displayText(), aa.id());
-    }
+
     ui->aaCmb->model()->sort(0);
     if (ui->aaCmb->count() != 0)
         ui->aaCmb->setCurrentIndex(0);
@@ -53,11 +50,8 @@ void frmEditSecurity_State::enter()
     ui->acctCmb->clear();
     ui->acctCmb->addItem("", UNASSIGNED);
     foreach(const account &acct, m_portfolio.accounts())
-    {
-        if (acct.deleted())
-            continue;
         ui->acctCmb->addItem(acct.displayText(), acct.id());
-    }
+
     ui->acctCmb->model()->sort(0);
 
     load(); // this could be modified by the AA and Acct tab, so reload the current item
@@ -171,7 +165,7 @@ void frmEditSecurity_State::remove()
     if (!m_currentItem)
         return;
 
-    m_portfolio.securities()[m_currentItem->id()].setDeleted(true);
+    m_portfolio.securities().remove(m_currentItem->id());
     m_model->remove(m_currentItem);
 }
 

@@ -74,40 +74,18 @@ bool portfolio::save(const queries &dataSource_)
         return false;
 
     // save asset allocation
-    QMap<int, assetAllocation> savedAA;
-    foreach(assetAllocation aa, assetAllocations())
-    {
-        if (aa.deleted())
-            continue;
-
+    foreach(const assetAllocation &aa, assetAllocations())
         if (!aa.save(dataSource_))
             return false;
-        savedAA.insert(aa.id(), aa);
-
-    }
-    assetAllocations() = savedAA;
 
     // save accounts
-    QMap<int, account> savedAcct;
-    foreach(account acct, accounts())
-    {
-        if (acct.deleted())
-            continue;
-
+    foreach(const account &acct, accounts())
         if (!acct.save(dataSource_))
             return false;
-        savedAcct.insert(acct.id(), acct);
-
-    }
-    accounts() = savedAcct;
 
     // save securities
-    QMap<int, security> savedSec;
-    foreach(security sec, securities())
+    foreach(const security &sec, securities())
     {
-        if (sec.deleted())
-            continue;
-
         if (!sec.save(dataSource_))
             return false;
         if (!sec.targets().insertBatch(dataSource_))
@@ -115,55 +93,25 @@ bool portfolio::save(const queries &dataSource_)
         if (!sec.executedTrades().insertBatch(dataSource_))
             return false;
 
-        QMap<int, trade> savedTrade;
-        foreach(trade t, sec.trades())
-        {
-            if (t.deleted())
-                continue;
-
+        foreach(const trade &t, sec.trades())
             if (!t.save(dataSource_))
                 return false;
-            savedTrade.insert(t.id(), t);
-        }
-        sec.trades() = savedTrade;
-
-        savedSec.insert(sec.id(), sec);
     }
-    securities() = savedSec;
 
     return true;
 }
 
-QMap<int, portfolio> portfolio::save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, bool *ok_)
+bool portfolio::save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_)
 {
-    QMap<int, portfolio> savedPortfolios;
-
     //truncate tables...
     if (!dataSource_.deleteTable(queries::table_Portfolio))
-    {
-        if (ok_)
-            *ok_ = false;
-        return savedPortfolios;
-    }
+        return false;
 
     foreach(portfolio p, portfolios_)
-    {
-        if (p.deleted())
-            continue;
-
         if (!p.save(dataSource_))
-        {
-            if (ok_)
-                *ok_ = false;
-            return savedPortfolios;
-        }
+            return false;
 
-        savedPortfolios.insert(p.id(), p);
-    }
-
-    if (ok_)
-        *ok_ = true;
-    return savedPortfolios;
+    return true;
 }
 
 void portfolio::detach()
@@ -190,7 +138,7 @@ QStringList portfolio::symbols() const
 {
     QStringList list;
     foreach(const security &s, securities())
-        if (!s.cashAccount() && !s.deleted())
+        if (!s.cashAccount())
             list.append(s.description());
 
     list.removeDuplicates();
@@ -201,12 +149,11 @@ QMap<QString, int> portfolio::symbols(const QMap<int, portfolio> &portfolios_)
 {
     QMap<QString, int> returnMap;
     foreach(const portfolio &p, portfolios_)
-        if (!p.deleted())
-            foreach(const QString &symbol, p.symbols())
-                if (returnMap.contains(symbol))
-                    returnMap[symbol] = qMin(returnMap.value(symbol), p.startDate());
-                else
-                    returnMap.insert(symbol, p.startDate());
+        foreach(const QString &symbol, p.symbols())
+            if (returnMap.contains(symbol))
+                returnMap[symbol] = qMin(returnMap.value(symbol), p.startDate());
+            else
+                returnMap.insert(symbol, p.startDate());
 
     return returnMap;
 }
@@ -242,7 +189,7 @@ int portfolio::endDate() const
 
     foreach(const security &s, securities())
     {
-        if (s.cashAccount() || s.deleted())
+        if (s.cashAccount())
             continue;
 
         nonCashAccount = true;

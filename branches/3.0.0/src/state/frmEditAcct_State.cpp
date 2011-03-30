@@ -125,7 +125,7 @@ void frmEditAcct_State::remove()
             break;
         }
 
-    m_portfolio.accounts()[m_currentItem->id()].setDeleted(true);
+    m_portfolio.accounts().remove(m_currentItem->id());
     foreach(security s, m_portfolio.securities())
         if (s.account() == m_currentItem->id())
             s.setAccount(UNASSIGNED);

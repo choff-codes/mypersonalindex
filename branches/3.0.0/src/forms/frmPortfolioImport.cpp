@@ -70,26 +70,13 @@ void frmPortfolioImport::indexChange(int index_)
     ui->tree->insertTopLevelItems(0, items);
 
     foreach(const account &acct, p.accounts())
-    {
-        if (acct.deleted())
-            continue;
         items.at(0)->addChild(createTreeItem(acct.id(), acct.displayText()));
-    }
 
     foreach(const assetAllocation &aa, p.assetAllocations())
-    {
-        if (aa.deleted())
-            continue;
         items.at(1)->addChild(createTreeItem(aa.id(), aa.displayText()));
-    }
 
     foreach(const security &sec, p.securities())
-    {
-        if (sec.deleted())
-            continue;
-
         items.at(2)->addChild(createTreeItem(sec.id(), sec.displayText()));
-    }
 
     foreach(QTreeWidgetItem* item, items)
     {

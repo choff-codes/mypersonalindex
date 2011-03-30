@@ -130,12 +130,7 @@ void frmMain::refreshPortfolioCmb(int id_)
     ui->portfolioDropDownCmb->blockSignals(true);
     ui->portfolioDropDownCmb->clear();
     foreach(const portfolio &p, m_file->portfolios)
-    {
-        if (p.deleted())
-            continue;
-
         ui->portfolioDropDownCmb->addItem(p.displayText(), p.id());
-    }
 
     int index = ui->portfolioDropDownCmb->findData(id_);
     if (index == -1 && ui->portfolioDropDownCmb->count() != 0)
@@ -227,7 +222,7 @@ void frmMain::deletePortfolio()
 
     setWindowModified(true);
     m_file->modified = true;
-    m_file->portfolios[m_currentPortfolio].setDeleted(true);
+    m_file->portfolios.remove(m_currentPortfolio);
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
@@ -256,18 +251,8 @@ void frmMain::editPortfolioToFile(const portfolio &portfolio_)
 void frmMain::refreshPortfolioPrices()
 {
     foreach(const portfolio &p, m_file->portfolios)
-    {
-        if (p.deleted())
-            continue;
-
         foreach(security s, p.securities())
-        {
-            if (s.deleted())
-                continue;
-
             s.setHistoricalPrices(m_file->prices.getHistoricalPrice(s.description()));
-        }
-    }
 }
 
 void frmMain::portfolioDropDownChange(int currentIndex_)

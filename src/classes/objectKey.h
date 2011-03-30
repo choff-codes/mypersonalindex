@@ -19,12 +19,10 @@ class objectKeyData: public objectBase, public QSharedData
 public:
     QString description;
     int id;
-    bool deleted;
 
     objectKeyData():
         objectBase(UNASSIGNED),
-        id(UNASSIGNED),
-        deleted(false)
+        id(UNASSIGNED)
     {}
 
     virtual ~objectKeyData() {}
@@ -33,8 +31,7 @@ public:
     {
         return this->objectBase::operator==(other_)
             && this->description == other_.description
-            && this->id == other_.id
-            && this->deleted == other_.deleted;
+            && this->id == other_.id;
     }
 };
 
@@ -48,8 +45,6 @@ public:
 
     int parent() const { return data()->parent; }
     bool hasParent() const { return data()->hasParent(); }
-
-    bool deleted() const { return data()->deleted; }
 
     QString description() const { return data()->description; }
     virtual QString displayText() const { return description().isEmpty() ? "(New)" : description(); }
@@ -71,7 +66,6 @@ public:
     void setDescription(const QString &description_) { data()->description = description_; }
     virtual void setID(int id_) { data()->id = id_; idChange(false); }
     void setParent(int parent_) { data()->parent = parent_; }
-    void setDeleted(bool deleted_) { data()->deleted = deleted_; }
 
     void setNewIdentity() { idChange(true); }
 

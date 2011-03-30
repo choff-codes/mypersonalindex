@@ -83,15 +83,13 @@ bool mpiFile_State::saveFile(const QString &filePath_)
 #endif
     file.beginTransaction();
 
-    bool ok = false;
-    QMap<int, portfolio> savedPortfolios = portfolio::save(portfolios, file, &ok);
-    if (!ok)
+    if (!portfolio::save(portfolios, file))
     {
         file.rollback();
         QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error saving to %1!").arg(filePath_));
         return false;
     }
-    portfolios = savedPortfolios;
+
     file.commit();
 
 #ifdef CLOCKTIME

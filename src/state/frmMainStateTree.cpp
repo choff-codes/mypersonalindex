@@ -53,27 +53,16 @@ void frmMainStateTree::populateTree(int portfolioID_)
     items.at(0)->addChild(createTreeItem(objectType_Portfolio, p.id(), p.id(), p.displayText()));
 
     foreach(const account &acct, p.accounts())
-    {
-        if (acct.deleted())
-            continue;
         items.at(1)->addChild(createTreeItem(objectType_Account, p.id(), acct.id(), acct.displayText()));
-    }
 
     foreach(const assetAllocation &aa, p.assetAllocations())
-    {
-        if (aa.deleted())
-            continue;
         items.at(2)->addChild(createTreeItem(objectType_AA, p.id(), aa.id(), aa.displayText()));
-    }
 
     QSet<QString> symbolsWithDividends;
     QSet<QString> symbolsWithoutDividends;
 
     foreach(const security &sec, p.securities())
     {
-        if (sec.deleted())
-            continue;
-
         items.at(3)->addChild(createTreeItem(objectType_Security, p.id(), sec.id(), sec.displayText()));
 
         if (sec.cashAccount())

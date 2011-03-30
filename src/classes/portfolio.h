@@ -43,7 +43,7 @@ public:
     void setID(int id_);
 
     bool save(const queries &dataSource_);
-    static QMap<int, portfolio> save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_, bool *ok_);
+    static bool save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_);
     static portfolio load(const QSqlQuery &q_);
 
     void detach();

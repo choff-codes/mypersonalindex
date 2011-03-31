@@ -8,17 +8,10 @@
 class assetAllocationTarget: public objectBase, public queriesBatch
 {
 public:
-    explicit assetAllocationTarget(int parent_ = UNASSIGNED):
-        objectBase(parent_)
-    {
-        // default to 100% unassigned
-        insert(UNASSIGNED, 1);
-    }
+    assetAllocationTarget() { insert(UNASSIGNED, 1); } // default to 100% unassigned
 
     void insert(int id_, double target_);
     void remove(int id_);
-
-    void updateAssetAllocationID(const QMap<int, int> &aaIDMapping_);
 
     bool contains(int id_) const { return m_targets.contains(id_); }
     double value(int id_) const { return m_targets.value(id_); }

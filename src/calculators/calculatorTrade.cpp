@@ -62,9 +62,9 @@ void calculatorTrade::clearExecutedTrades(portfolio portfolio_, int beginDate_, 
 {
     foreach(security s, portfolio_.securities())
         if (recalculateAll_)
-            s.executedTrades().remove();
+            s.executedTrades().clear();
         else
-            s.executedTrades().remove(beginDate_);
+            s.executedTrades().clear(beginDate_);
 }
 
 void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)

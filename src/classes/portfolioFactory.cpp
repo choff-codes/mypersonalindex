@@ -20,88 +20,90 @@ QMap<int, portfolio> portfolioFactory::getPortfolios()
     t.start();
 #endif
 
-    loadPortfolio();
-    loadPortfolioAA();
-    loadPortfolioAccount();
-    loadPortfolioSecurity();
-    loadPortfolioSecurityAA();
-    loadPortfolioSecurityTrades();
-    loadPortfolioSecurityTradesExecution();
+    QMap<int, portfolio> portfolios = loadPortfolio();
+    loadPortfolioAA(portfolios);
+    loadPortfolioAccount(portfolios);
+    loadPortfolioSecurity(portfolios);
+    loadPortfolioSecurityAA(portfolios);
+    loadPortfolioSecurityTrades(portfolios);
+    loadPortfolioSecurityTradesExecution(portfolios);
 
 #ifdef CLOCKTIME
     qDebug("Time elapsed: %d ms (portfolio)", t.elapsed());
 #endif
 
-    return m_portfolios;
+    return portfolios;
 }
 
-void portfolioFactory::loadPortfolio()
+QMap<int, portfolio> portfolioFactory::loadPortfolio()
 {
+    QMap<int, portfolio> portfolios;
     QSqlQuery q = m_dataSource.select(queries::table_Portfolio, queries::portfolioColumns);
     while(q.next())
     {
         portfolio p = portfolio::load(q);
-        m_portfolios.insert(p.id(), p);
+        portfolios.insert(p.id(), p);
     }
+    return portfolios;
 }
 
-void portfolioFactory::loadPortfolioAA()
+void portfolioFactory::loadPortfolioAA(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioAA, queries::portfolioAAColumns);
     while(q.next())
     {
         assetAllocation aa = assetAllocation::load(q);
-        m_portfolios[aa.parent()].assetAllocations().insert(aa.id(), aa);
+        portfolios_[aa.parent()].assetAllocations().insert(aa.id(), aa);
     }
 }
 
-void portfolioFactory::loadPortfolioAccount()
+void portfolioFactory::loadPortfolioAccount(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioAccount, queries::portfolioAccountColumns);
     while(q.next())
     {
         account acct = account::load(q);
-        m_portfolios[acct.parent()].accounts().insert(acct.id(), acct);
+        portfolios_[acct.parent()].accounts().insert(acct.id(), acct);
     }
 }
 
-void portfolioFactory::loadPortfolioSecurity()
+void portfolioFactory::loadPortfolioSecurity(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::table_PortfolioSecurity, queries::portfolioSecurityColumns);
     while(q.next())
     {
         security sec = security::load(q);
-        m_portfolios[sec.parent()].securities().insert(sec.id(), sec);
+        portfolios_[sec.parent()].securities().insert(sec.id(), sec);
     }
 }
 
-void portfolioFactory::loadPortfolioSecurityAA()
+void portfolioFactory::loadPortfolioSecurityAA(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityAA, queries::portfolioSecurityAAViewColumns);
     while(q.next())
-        m_portfolios[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
+        portfolios_[q.value(queries::portfolioSecurityAAViewColumns_PortfolioID).toInt()].securities()
             [q.value(queries::portfolioSecurityAAViewColumns_SecurityID).toInt()].targets().insert(
                 q.value(queries::portfolioSecurityAAViewColumns_AAID).toInt(),
                 q.value(queries::portfolioSecurityAAViewColumns_Percent).toDouble()
             );
 }
 
-void portfolioFactory::loadPortfolioSecurityTrades()
+void portfolioFactory::loadPortfolioSecurityTrades(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityTrade, queries::portfolioSecurityTradeViewColumns);
     while(q.next())
     {
         trade t = trade::load(q);
-        m_portfolios[q.value(queries::portfolioSecurityTradeViewColumns_PortfolioID).toInt()].securities()[t.parent()].trades().insert(t.id(), t);
+        portfolios_[q.value(queries::portfolioSecurityTradeViewColumns_PortfolioID).toInt()].securities()[t.parent()].trades().insert(t.id(), t);
     }
 }
 
-void portfolioFactory::loadPortfolioSecurityTradesExecution()
+void portfolioFactory::loadPortfolioSecurityTradesExecution(QMap<int, portfolio> &portfolios_)
 {
     QSqlQuery q = m_dataSource.select(queries::view_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionViewColumns);
 
     while(q.next())
-        m_portfolios[q.value(queries::portfolioSecurityTradeExecutionViewColumns_PortfolioID).toInt()]
+        portfolios_[q.value(queries::portfolioSecurityTradeExecutionViewColumns_PortfolioID).toInt()]
             .securities()[q.value(queries::portfolioSecurityTradeExecutionViewColumns_SecurityID).toInt()]
             .executedTrades().insert
             (

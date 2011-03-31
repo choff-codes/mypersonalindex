@@ -22,7 +22,7 @@ public:
             associatedTradeID(0)
     {}
 
-    explicit executedTrade(double shares_, double price_, double commission_, int associatedTradeID_):
+    executedTrade(double shares_, double price_, double commission_, int associatedTradeID_):
         shares(shares_),
         price(price_),
         commission(commission_),
@@ -48,10 +48,8 @@ public:
 
     void insert(int date_, const executedTrade &executedTrade_);
 
-    void updateAssociatedTradeID(const QMap<int, int> &tradeIDMapping_);
-
-    void remove();
-    void remove(int beginDate_);
+    void clear();
+    void clear(int beginDate_);
 
     bool operator==(const executedTradeMap &other_) const { return m_trades == other_.m_trades; }
     bool operator!=(const executedTradeMap &other_) const { return !(*this == other_); }
@@ -61,7 +59,7 @@ public:
     QVariant data(int column_, bool newRow_);
 
 private:
-   QMap<int, executedTrade> m_trades;
+   QMultiMap<int, executedTrade> m_trades;
    QMap<int, executedTrade>::const_iterator m_position;
 };
 

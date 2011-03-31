@@ -24,24 +24,17 @@ executedTrade executedTrade::load(const QSqlQuery &q_)
 
 void executedTradeMap::insert(int date_, const executedTrade &executedTrade_)
 {
-    m_trades.insertMulti(date_, executedTrade_);
+    m_trades.insert(date_, executedTrade_);
 }
 
-void executedTradeMap::updateAssociatedTradeID(const QMap<int, int> &tradeIDMapping_)
-{
-    for(QMap<int, executedTrade>::iterator i = m_trades.begin(); i != m_trades.end(); ++i)
-        if (tradeIDMapping_.contains(i.value().associatedTradeID))
-            i.value().associatedTradeID = tradeIDMapping_.value(i.value().associatedTradeID);
-}
-
-void executedTradeMap::remove(int beginDate_)
+void executedTradeMap::clear(int beginDate_)
 {
     QMap<int, executedTrade>::iterator i = m_trades.lowerBound(beginDate_);
     while (i != m_trades.end())
             i = m_trades.erase(i);
 }
 
-void executedTradeMap::remove()
+void executedTradeMap::clear()
 {
     m_trades.clear();
 }

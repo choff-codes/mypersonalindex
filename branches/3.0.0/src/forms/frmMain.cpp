@@ -54,7 +54,8 @@ frmMain::~frmMain()
 
     if (m_futureWatcherTrade)
     {
-        m_futureWatcherTrade->cancel();
+        // cancel trade calculations? not for now.
+        //m_futureWatcherTrade->cancel();
         m_futureWatcherTrade->waitForFinished();
         delete m_futureWatcherTrade;
     }

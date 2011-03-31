@@ -169,7 +169,7 @@ void frmPortfolioImport::accept()
             security sec = importing.securities().value(item->type());
             int oldID = sec.id();
             sec.detach();
-            sec.executedTrades().remove();
+            sec.executedTrades().clear();
             sec.trades().clear();
             sec.setNewIdentity();
             secIDMapping.insert(oldID, sec.id());

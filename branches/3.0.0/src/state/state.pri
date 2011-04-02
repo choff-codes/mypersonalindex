@@ -8,7 +8,7 @@ HEADERS += \
     $$PWD/frmEditAcct_State.h \
     $$PWD/frmEditTrade_State.h \
     $$PWD/frmEditSecurity_State.h \
-    $$PWD/mpiFile_State.h \
+    $$PWD/fileState.h \
     $$PWD/frmMainState.h \
     $$PWD/frmMainStateTable.h \
     $$PWD/frmMainAA_State.h \
@@ -19,7 +19,8 @@ HEADERS += \
     $$PWD/frmMainCorrelation_State.h \
     $$PWD/frmMainStatistic_State.h \
     $$PWD/frmMainChart_State.h \
-    $$PWD/frmMainStateTree.h
+    $$PWD/frmMainStateTree.h \
+    $$PWD/frmMainTrade_State.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
@@ -29,7 +30,7 @@ SOURCES += \
     $$PWD/frmEditAcct_State.cpp \
     $$PWD/frmEditTrade_State.cpp \
     $$PWD/frmEditSecurity_State.cpp \
-    $$PWD/mpiFile_State.cpp \
+    $$PWD/fileState.cpp \
     $$PWD/frmMainState.cpp \
     $$PWD/frmMainStateTable.cpp \
     $$PWD/frmMainAA_State.cpp \
@@ -40,4 +41,5 @@ SOURCES += \
     $$PWD/frmMainCorrelation_State.cpp \
     $$PWD/frmMainStatistic_State.cpp \
     $$PWD/frmMainChart_State.cpp \
-    $$PWD/frmMainStateTree.cpp
+    $$PWD/frmMainStateTree.cpp \
+    $$PWD/frmMainTrade_State.cpp

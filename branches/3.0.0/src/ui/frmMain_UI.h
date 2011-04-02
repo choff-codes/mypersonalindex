@@ -24,7 +24,6 @@ public:
     QAction *fileExit;
     QMenu *view;
     QActionGroup *viewGroup;
-    QAction *viewSummary;
     QAction *viewTrades;
     QAction *viewAccounts;
     QAction *viewAssetAllocation;

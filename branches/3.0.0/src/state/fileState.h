@@ -1,16 +1,16 @@
-#ifndef MPIFILE_STATE_H
-#define MPIFILE_STATE_H
+#ifndef FILESTATE_H
+#define FILESTATE_H
 
 #include <QObject>
 #include <QMap>
 #include <portfolio.h>
 #include "historicalPrices.h"
 
-class mpiFile_State : public QObject
+class fileState : public QObject
 {
     Q_OBJECT
 public:
-    explicit mpiFile_State(QWidget *parent_ = 0);
+    fileState(QWidget *parent_ = 0);
 
     // modified?
     bool modified;
@@ -48,4 +48,4 @@ private:
     void upgradeVersion300(queries file_);
 };
 
-#endif // MPIFILE_STATE_H
+#endif // FILESTATE_H

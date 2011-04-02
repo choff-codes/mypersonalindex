@@ -9,7 +9,7 @@
 template<class T>
 class QFutureWatcher;
 class frmMain_UI;
-class mpiFile_State;
+class fileState;
 class frmMainState;
 class frmMain : public QMainWindow
 {
@@ -36,12 +36,12 @@ private slots:
     void tabCorrelation() { switchToTab(tab_correlation); }
     void tabStatistic() { switchToTab(tab_statistic); }
     void tabChart() { switchToTab(tab_chart); }
+    void tabTrade() { switchToTab(tab_trade); }
     void fileChange(const QString &filePath_, bool newFile_);
     void importPortfolio();
 
 private:
     enum tab {
-        tab_summary,
         tab_trade,
         tab_account,
         tab_assetAllocation,
@@ -56,7 +56,7 @@ private:
     frmMain_UI *ui;
 
     // current file
-    mpiFile_State *m_file;
+    fileState *m_file;
 
     // track the currently selected portfolio
     int m_currentPortfolio;

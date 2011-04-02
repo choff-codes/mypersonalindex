@@ -1,4 +1,4 @@
-#include "mpiFile_State.h"
+#include "fileState.h"
 #include <QMessageBox>
 #include <QCoreApplication>
 #include <QFileDialog>
@@ -10,18 +10,18 @@
 #include <QTime>
 #endif
 
-mpiFile_State::mpiFile_State(QWidget *parent_) :
+fileState::fileState(QWidget *parent_) :
     QObject(parent_),
     modified(false)
 {
 }
 
-QWidget* mpiFile_State::parent() const
+QWidget* fileState::parent() const
 {
     return static_cast<QWidget*>(QObject::parent());
 }
 
-void mpiFile_State::newFile()
+void fileState::newFile()
 {
     if (!maybeSave())
         return;
@@ -31,7 +31,7 @@ void mpiFile_State::newFile()
     setCurrentFile("", true);
 }
 
-bool mpiFile_State::maybeSave()
+bool fileState::maybeSave()
 {
     if (!modified)
         return true;
@@ -48,7 +48,7 @@ bool mpiFile_State::maybeSave()
      return true;
 }
 
-bool mpiFile_State::save()
+bool fileState::save()
 {
     if (m_filePath.isEmpty())
         return saveAs();
@@ -56,7 +56,7 @@ bool mpiFile_State::save()
     return saveFile(m_filePath);
 }
 
-bool mpiFile_State::saveAs()
+bool fileState::saveAs()
 {
     QString fileName = QFileDialog::getSaveFileName(this->parent(), "Save As...", QString(), "My Personal Index File (*.mpi);;All Files (*)");
 
@@ -66,7 +66,7 @@ bool mpiFile_State::saveAs()
     return saveFile(fileName);
 }
 
-bool mpiFile_State::saveFile(const QString &filePath_)
+bool fileState::saveFile(const QString &filePath_)
 {
     if (!prepareFileForSave(filePath_))
         return false;
@@ -113,7 +113,7 @@ bool mpiFile_State::saveFile(const QString &filePath_)
     return true;
 }
 
-bool mpiFile_State::prepareFileForSave(const QString &filePath_)
+bool fileState::prepareFileForSave(const QString &filePath_)
 {
     if (m_filePath == filePath_)
         return true;
@@ -144,7 +144,7 @@ bool mpiFile_State::prepareFileForSave(const QString &filePath_)
     return true;
 }
 
-void mpiFile_State::open(const QString &filePath_, bool pricing_)
+void fileState::open(const QString &filePath_, bool pricing_)
 {
     if(!maybeSave())
         return;
@@ -152,7 +152,7 @@ void mpiFile_State::open(const QString &filePath_, bool pricing_)
     loadFile(filePath_, pricing_);
 }
 
-void mpiFile_State::open(bool pricing_)
+void fileState::open(bool pricing_)
 {
     if(!maybeSave())
         return;
@@ -164,7 +164,7 @@ void mpiFile_State::open(bool pricing_)
     loadFile(filePath, pricing_);
 }
 
-void mpiFile_State::loadFile(const QString &filePath_, bool pricing_)
+void fileState::loadFile(const QString &filePath_, bool pricing_)
 {
     // check if the file needs to be upgraded
     QString updatedFilePath_ = checkDatabaseVersion(filePath_);
@@ -179,14 +179,14 @@ void mpiFile_State::loadFile(const QString &filePath_, bool pricing_)
     setCurrentFile(updatedFilePath_, true);
 }
 
-void mpiFile_State::setCurrentFile(const QString &filePath_, bool newFile_)
+void fileState::setCurrentFile(const QString &filePath_, bool newFile_)
 {
     m_filePath = filePath_;
     modified = false;
     emit fileNameChange(filePath_, newFile_);
 }
 
-QString mpiFile_State::checkDatabaseVersion(const QString &filePath_)
+QString fileState::checkDatabaseVersion(const QString &filePath_)
 {
     queries file(filePath_);
     int version = file.getDatabaseVersion();
@@ -226,7 +226,7 @@ QString mpiFile_State::checkDatabaseVersion(const QString &filePath_)
     return file.getDatabaseLocation();
 }
 
-void mpiFile_State::upgradeVersion300(queries file_) {
+void fileState::upgradeVersion300(queries file_) {
     file_.beginTransaction();
     file_.executeNonQuery("DROP TABLE \"main\".\"Settings\"");
     file_.executeNonQuery("DROP TABLE \"main\".\"SettingsColumns\"");

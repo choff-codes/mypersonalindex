@@ -14,13 +14,14 @@
 #include "calculatorTrade.h"
 #include "security.h"
 #include "historicalNAV.h"
-#include "mpiFile_State.h"
+#include "fileState.h"
 #include "frmMainAA_State.h"
 #include "frmMainSecurity_State.h"
 #include "frmMainPerformance_State.h"
 #include "frmMainAcct_State.h"
 #include "frmMainCorrelation_State.h"
 #include "frmMainStatistic_State.h"
+#include "frmMainTrade_State.h"
 #include "frmMainChart_State.h"
 #include "frmPortfolioImport.h"
 
@@ -31,9 +32,9 @@
 frmMain::frmMain(QWidget *parent_):
     QMainWindow(parent_),
     ui(new frmMain_UI()),
-    m_file(new mpiFile_State(this)),
+    m_file(new fileState(this)),
     m_currentPortfolio(UNASSIGNED),
-    m_currentTab(tab_assetAllocation),
+    m_currentTab(tab_security),
     m_futureWatcherYahoo(0),
     m_futureWatcherTrade(0)
 {
@@ -87,6 +88,7 @@ void frmMain::connectSlots()
     connect(ui->viewCorrelations, SIGNAL(triggered()), this, SLOT(tabCorrelation()));
     connect(ui->viewStatistics, SIGNAL(triggered()), this, SLOT(tabStatistic()));
     connect(ui->viewCharts, SIGNAL(triggered()), this, SLOT(tabChart()));
+    connect(ui->viewTrades, SIGNAL(triggered()), this, SLOT(tabTrade()));
     connect(ui->portfolioImport, SIGNAL(triggered()), this, SLOT(importPortfolio()));
     connect(ui->portfolioImportFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
 }
@@ -409,6 +411,9 @@ void frmMain::switchToTab(tab tab_, bool force_)
         case tab_chart:
             m_tabs.insert(tab_chart, new frmMainChart_State(m_currentPortfolio, m_file->portfolios, m_file->prices.getHistoricalPrices(), this));
             break;
+        case tab_trade:
+            m_tabs.insert(tab_trade, new frmMainTrade_State(m_file->portfolios.value(m_currentPortfolio), this));
+            break;
     }
 
     ui->centralWidget->addWidget(m_tabs.value(tab_)->mainWidget());
@@ -422,7 +427,7 @@ void frmMain::importPortfolio()
 
     if (static_cast<QAction*>(sender()) == ui->portfolioImportFile)
     {
-        mpiFile_State file(this);
+        fileState file(this);
         file.open(false);
         if (file.path().isEmpty())
             return;

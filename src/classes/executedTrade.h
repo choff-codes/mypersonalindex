@@ -31,6 +31,8 @@ public:
 
     static executedTrade load(const QSqlQuery &q_);
 
+    QString displayText(int date_) const;
+
     bool operator==(const executedTrade &other_) const;
     bool operator!=(const executedTrade &other_) const { return !(*this == other_); }
 };

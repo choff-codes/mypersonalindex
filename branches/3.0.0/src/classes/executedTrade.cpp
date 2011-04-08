@@ -2,7 +2,9 @@
 #include <QSqlQuery>
 #include <QHash>
 #include <QVariant>
+#include <QDate>
 #include "queries.h"
+#include "functions.h"
 
 bool executedTrade::operator==(const executedTrade &other_) const
 {
@@ -10,6 +12,13 @@ bool executedTrade::operator==(const executedTrade &other_) const
             && this->price == other_.price
             && this->commission == other_.commission
             && this->associatedTradeID == other_.associatedTradeID;
+}
+
+QString executedTrade::displayText(int date_) const
+{
+    return QDate::fromJulianDay(date_).toString(Qt::SystemLocaleShortDate) + " - " + functions::doubleToLocalFormat(shares)
+            + " share" + (functions::isZero(shares - 1) ? "" : "s") + " @ " + functions::doubleToCurrency(price) +
+            (commission > 0 ? " with " + functions::doubleToCurrency(commission) + " commission" : "");
 }
 
 executedTrade executedTrade::load(const QSqlQuery &q_)

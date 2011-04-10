@@ -163,7 +163,6 @@ settings settings::load()
             "stat",
             qVariantFromValue(
                 QList<qint32>()
-                << 3
                 << 4
                 << 5
                 << 6
@@ -195,6 +194,7 @@ settings settings::load()
                 << 32
                 << 33
                 << 34
+                << 35
             )
         ).value<QList<qint32> >()
     );

@@ -151,9 +151,9 @@ QMap<QString, int> portfolio::symbols(const QMap<int, portfolio> &portfolios_)
     foreach(const portfolio &p, portfolios_)
         foreach(const QString &symbol, p.symbols())
             if (returnMap.contains(symbol))
-                returnMap[symbol] = qMin(returnMap.value(symbol), p.startDate());
+                returnMap[symbol] = qMin(returnMap.value(symbol), tradeDateCalendar::previousTradeDate(p.startDate()));
             else
-                returnMap.insert(symbol, p.startDate());
+                returnMap.insert(symbol, tradeDateCalendar::previousTradeDate(p.startDate()));
 
     return returnMap;
 }

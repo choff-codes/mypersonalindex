@@ -10,7 +10,8 @@ frmEditTrade_State::frmEditTrade_State(const portfolio &portfolio_, QWidget *par
     frmEditStateMap(portfolio_, parent_),
     ui(new frmEditTrade_UI),
     m_currentItem(0),
-    m_model(0)
+    m_model(0),
+    m_loading(false)
 {
     ui->setupUI(parent_);
 
@@ -28,6 +29,17 @@ frmEditTrade_State::frmEditTrade_State(const portfolio &portfolio_, QWidget *par
     connect(ui->freqCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeFrequencyChange(int)));
     connect(ui->actionCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(tradeActionChange(int)));
     connect(ui->priceChk, SIGNAL(toggled(bool)), this, SLOT(tradePriceChange(bool)));
+    connect(ui->actionCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(save()));
+    connect(ui->dateDateEdit, SIGNAL(dateChanged(QDate)), this, SLOT(save()));
+    connect(ui->startingChk, SIGNAL(clicked()), this, SLOT(save()));
+    connect(ui->startingDateEdit, SIGNAL(dateChanged(QDate)), this, SLOT(save()));
+    connect(ui->endingChk, SIGNAL(clicked()), this, SLOT(save()));
+    connect(ui->endingDateEdit, SIGNAL(dateChanged(QDate)), this, SLOT(save()));
+    connect(ui->freqCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(save()));
+    connect(ui->sharesSpinBox, SIGNAL(valueChanged(double)), this, SLOT(save()));
+    connect(ui->priceChk, SIGNAL(clicked()), this, SLOT(save()));
+    connect(ui->priceSpinBox, SIGNAL(valueChanged(double)), this, SLOT(save()));
+    connect(ui->priceCmb, SIGNAL(currentIndexChanged(int)), this, SLOT(save()));
 }
 
 frmEditTrade_State::~frmEditTrade_State()
@@ -133,7 +145,7 @@ void frmEditTrade_State::customContextMenuRequested(const QPoint&)
 
 void frmEditTrade_State::save()
 {
-    if (!m_currentItem)
+    if (!m_currentItem || m_loading)
         return;
 
     m_currentItem->setAction((trade::tradeAction)ui->actionCmb->itemData(ui->actionCmb->currentIndex()).toInt());
@@ -186,6 +198,7 @@ void frmEditTrade_State::load()
     if (!m_currentItem)
         return;
 
+    m_loading = true;
     ui->actionCmb->setCurrentIndex(ui->actionCmb->findData(m_currentItem->action()));
     ui->cashCmb->setCurrentIndex(ui->cashCmb->findData(m_currentItem->cashAccount()));
     ui->commissionSpinBox->setValue(m_currentItem->commission());
@@ -210,6 +223,7 @@ void frmEditTrade_State::load()
         ui->priceWidget->setCurrentWidget(ui->priceCmb);
         ui->priceCmb->setCurrentIndex(ui->priceCmb->findData(m_currentItem->priceType()));
     }
+    m_loading = false;
 }
 
 void frmEditTrade_State::remove()

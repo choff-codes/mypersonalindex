@@ -8,6 +8,8 @@ frmMainStatistic_State::frmMainStatistic_State(int portfolioID_, const QMap<int,
     frmMainStateTableWithTree(portfolioID_, portfolios_, settings_, prices_, parent_)
 {
     setupUI(true);
+    ui->toolbarReorder->setText("Add/Remove Statistics...");
+    ui->toolbarReorder->setIconText("Add/Remove Statistics...");
     connect(treeWidget(), SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
 }
 

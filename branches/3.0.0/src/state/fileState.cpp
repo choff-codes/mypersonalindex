@@ -241,7 +241,6 @@ void fileState::upgradeVersion300(queries file_) {
     file_.executeNonQuery("CREATE TABLE \"main\".\"Portfolio\" (\"ID\" INTEGER PRIMARY KEY  NOT NULL,\"Description\" VARCHAR,\"StartDate\" INTEGER)");
 
     file_.executeNonQuery("INSERT INTO \"main\".\"Portfolio\" SELECT \"ID\",\"Description\",\"StartDate\" FROM \"main\".\"Portfolios\"");
-    file_.executeNonQuery("DROP TABLE \"main\".\"Portfolios\"");
 
     file_.executeNonQuery("ALTER TABLE \"main\".\"AA\" RENAME TO \"PortfolioAA\"");
     file_.executeNonQuery("ALTER TABLE \"main\".\"Acct\" RENAME TO \"PortfolioAccount\"");
@@ -250,12 +249,16 @@ void fileState::upgradeVersion300(queries file_) {
     file_.executeNonQuery("ALTER TABLE \"main\".\"SecurityTrades\" RENAME TO \"PortfolioSecurityTrade\"");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioSecurity\" ADD COLUMN \"Note\" VARCHAR");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioSecurity\" ADD COLUMN \"Dividends\" INTEGER");
+    file_.executeNonQuery("UPDATE \"main\".\"PortfolioSecurity\" SET Dividends = 0");
+    file_.executeNonQuery("UPDATE \"main\".\"PortfolioSecurity\" SET Dividends = 1 WHERE \"main\".\"PortfolioSecurity\".PortfolioID IN (SELECT ID FROM \"main\".\"Portfolios\" WHERE Dividends = 1)");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioSecurityTrade\" ADD COLUMN \"Description\" VARCHAR");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioSecurityTrade\" ADD COLUMN \"PriceType\" INTEGER");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioAA\" ADD COLUMN \"Threshold\" INTEGER");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioAA\" ADD COLUMN \"RebalanceBand\" NUMERIC");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioAA\" ADD COLUMN \"Hide\" INTEGER");
     file_.executeNonQuery("ALTER TABLE \"main\".\"PortfolioAccount\" ADD COLUMN \"Hide\" INTEGER");
+
+    file_.executeNonQuery("DROP TABLE \"main\".\"Portfolios\"");
 
     file_.executeNonQuery("CREATE VIEW \"PortfolioSecurityTradeExecutionView\" AS SELECT e.*, s.PortfolioID FROM PortfolioSecurityTradeExecution e INNER JOIN PortfolioSecurity s ON e.SecurityID = s.ID");
     file_.executeNonQuery("CREATE VIEW \"PortfolioSecurityAAView\" AS SELECT aa.*, s.PortfolioID FROM PortfolioSecurityAA aa INNER JOIN PortfolioSecurity s ON aa.SecurityID = s.ID");
@@ -264,7 +267,7 @@ void fileState::upgradeVersion300(queries file_) {
     file_.executeNonQuery("CREATE TRIGGER \"PortfolioTrigger\" BEFORE DELETE ON Portfolio FOR EACH ROW BEGIN DELETE FROM PortfolioSecurity WHERE PortfolioID = old.ID; DELETE FROM PortfolioAA WHERE PortfolioID = old.ID; DELETE FROM PortfolioAccount WHERE PortfolioID = old.ID; END");
     file_.executeNonQuery("CREATE TRIGGER \"PortfolioSecurityTrigger\" BEFORE DELETE ON PortfolioSecurity FOR EACH ROW BEGIN DELETE FROM PortfolioSecurityAA WHERE SecurityID = old.ID; DELETE FROM PortfolioSecurityTrade WHERE SecurityID = old.ID; DELETE FROM PortfolioSecurityTradeExecution WHERE SecurityID = old.ID; END");
 
-    file_.executeNonQuery("UPDATE PortfolioAccount SET CostBasis = CostBasis - 1");
+    file_.executeNonQuery("UPDATE PortfolioAccount SET CostBasis = CostBasis - 1 WHERE CostBasis <> 0");
     file_.executeNonQuery("UPDATE PortfolioSecurityTrade SET PriceType = 1 WHERE Price IS NULL");
     file_.executeNonQuery("UPDATE PortfolioSecurityTrade SET PriceType = 2 WHERE Price IS NOT NULL");
 

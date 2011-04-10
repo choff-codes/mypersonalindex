@@ -65,9 +65,7 @@ void frmEditAA_State::save()
     if (!m_currentItem)
         return;
 
-    ui->descTxt->blockSignals(true);
     m_currentItem->setDescription(ui->descTxt->text());
-    ui->descTxt->blockSignals(false);
     m_currentItem->setRebalanceBand(ui->rebalanceBandSpinBox->value() / 100);
     m_currentItem->setTarget(ui->targetSpinBox->value() / 100);
     m_currentItem->setThreshold((assetAllocation::thresholdMethod)ui->thresholdCmb->itemData(ui->thresholdCmb->currentIndex()).toInt());
@@ -103,7 +101,9 @@ void frmEditAA_State::load()
     if (!m_currentItem)
         return;
 
+    ui->descTxt->blockSignals(true);
     ui->descTxt->setText(m_currentItem->description());
+    ui->descTxt->blockSignals(false);
     ui->rebalanceBandSpinBox->setValue(m_currentItem->rebalanceBand() * 100);
     ui->targetSpinBox->setValue(m_currentItem->target() * 100);
     ui->thresholdCmb->setCurrentIndex(ui->thresholdCmb->findData(m_currentItem->threshold()));

@@ -246,7 +246,7 @@ QVariant mainSecurityModel::headerData(int section_, Qt::Orientation orientation
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.totalValue - m_portfolioSnapshot.costBasis));
             break;
         case securityRow::row_GainP:
-            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV));
+            extra = QString("\n[%1]").arg(functions::doubleToPercentage(m_portfolioNAV - 1));
             break;
         case securityRow::row_TaxLiability:
             extra = QString("\n[%1]").arg(functions::doubleToCurrency(m_portfolioSnapshot.taxLiability));

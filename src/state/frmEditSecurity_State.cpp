@@ -142,7 +142,6 @@ void frmEditSecurity_State::load()
     if (!m_currentItem)
         return;
 
-    ui->layoutRight->setEnabled(true);
     ui->symbolTxt->blockSignals(true);
     ui->symbolTxt->setText(m_currentItem->description());
     ui->symbolTxt->blockSignals(false);

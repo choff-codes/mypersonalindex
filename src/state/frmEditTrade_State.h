@@ -33,6 +33,7 @@ private:
     frmEditTrade_UI *ui;
     trade *m_currentItem;
     objectKeyEditModel *m_model;
+    bool m_loading;
 
     void load();
     void save();

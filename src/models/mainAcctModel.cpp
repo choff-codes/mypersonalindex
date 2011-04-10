@@ -60,7 +60,7 @@ acctRow::acctRow(double nav_, const snapshot &snapshot_, const snapshot &portfol
     //    row_GainP,
     this->values.append(nav_ - 1);
     //    row_TaxRate,
-    this->values.append(account_.taxRate());
+    this->values.append(functions::isZero(account_.taxRate()) ? QVariant() : account_.taxRate());
     //    row_TaxLiability,
     this->values.append(snapshot_.taxLiability);
     //    row_Net,

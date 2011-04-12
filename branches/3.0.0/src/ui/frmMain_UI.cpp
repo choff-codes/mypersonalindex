@@ -23,14 +23,14 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 
     view = new QMenu("&View", menubar);
     viewGroup = new QActionGroup(mainWindow_);
-    viewTrades = new QAction("Trade Register", mainWindow_);
-    viewTrades->setShortcut(Qt::Key_F1);
     viewAccounts = new QAction("Accounts", mainWindow_);
-    viewAccounts->setShortcut(Qt::Key_F2);
+    viewAccounts->setShortcut(Qt::Key_F1);
     viewAssetAllocation = new QAction("Asset Allocation", mainWindow_);
-    viewAssetAllocation->setShortcut(Qt::Key_F3);
+    viewAssetAllocation->setShortcut(Qt::Key_F2);
     viewSecurities = new QAction("Securities", mainWindow_);
-    viewSecurities->setShortcut(Qt::Key_F4);
+    viewSecurities->setShortcut(Qt::Key_F3);
+    viewTrades = new QAction("Trade Register", mainWindow_);
+    viewTrades->setShortcut(Qt::Key_F4);
     viewStatistics = new QAction("Statistics", mainWindow_);
     viewStatistics->setShortcut(Qt::Key_F5);
     viewCharts = new QAction("Charting", mainWindow_);
@@ -76,10 +76,10 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     file->addSeparator();
     file->addAction(fileExit);
 
-    viewGroup->addAction(viewTrades);
     viewGroup->addAction(viewAccounts);
     viewGroup->addAction(viewAssetAllocation);
     viewGroup->addAction(viewSecurities);
+    viewGroup->addAction(viewTrades);
     viewGroup->addAction(viewStatistics);
     viewGroup->addAction(viewCharts);
     viewGroup->addAction(viewCorrelations);

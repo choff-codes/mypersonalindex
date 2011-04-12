@@ -24,6 +24,7 @@
 #include "frmMainTrade_State.h"
 #include "frmMainChart_State.h"
 #include "frmPortfolioImport.h"
+#include "frmPriceImport.h"
 
 #ifdef CLOCKTIME
 #include <QTime>
@@ -91,6 +92,7 @@ void frmMain::connectSlots()
     connect(ui->viewTrades, SIGNAL(triggered()), this, SLOT(tabTrade()));
     connect(ui->portfolioImport, SIGNAL(triggered()), this, SLOT(importPortfolio()));
     connect(ui->portfolioImportFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
+    connect(ui->priceImport, SIGNAL(triggered()), this, SLOT(importPrice()));
 }
 
 void frmMain::loadSettings()
@@ -445,4 +447,10 @@ void frmMain::importPortfolio()
         addPortfolioToFile(f.getPortfolio());
     else
         editPortfolioToFile(f.getPortfolio());
+}
+
+void frmMain::importPrice()
+{
+    frmPriceImport f(this);
+    f.exec();
 }

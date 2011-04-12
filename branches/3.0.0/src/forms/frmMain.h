@@ -39,6 +39,7 @@ private slots:
     void tabTrade() { switchToTab(tab_trade); }
     void fileChange(const QString &filePath_, bool newFile_);
     void importPortfolio();
+    void importPrice();
 
 private:
     enum tab {

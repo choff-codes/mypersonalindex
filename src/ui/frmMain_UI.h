@@ -24,10 +24,10 @@ public:
     QAction *fileExit;
     QMenu *view;
     QActionGroup *viewGroup;
-    QAction *viewTrades;
     QAction *viewAccounts;
     QAction *viewAssetAllocation;
     QAction *viewSecurities;
+    QAction *viewTrades;
     QAction *viewStatistics;
     QAction *viewCharts;
     QAction *viewCorrelations;

@@ -12,7 +12,7 @@ class frmPortfolioImport : public QDialog
     Q_OBJECT
 
 public:
-    explicit frmPortfolioImport(const portfolio &portfolio_, const QMap<int, portfolio> portfolios_, QWidget *parent_ = 0);
+    frmPortfolioImport(const portfolio &portfolio_, const QMap<int, portfolio> portfolios_, QWidget *parent_ = 0);
     ~frmPortfolioImport();
 
     portfolio getPortfolio() { return m_portfolio; }

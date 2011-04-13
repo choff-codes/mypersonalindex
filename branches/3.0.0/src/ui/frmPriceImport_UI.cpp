@@ -11,6 +11,7 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     groupBoxDelimiter = new QGroupBox("Delimiter", dialog_);
     delimiterLayout = new QVBoxLayout(groupBoxDelimiter);
     delimiterTab = new QRadioButton("Tab", groupBoxDelimiter);
+    delimiterTab->setChecked(true);
     delimiterComma = new QRadioButton("Comma", groupBoxDelimiter);
     delimiterPipe = new QRadioButton("Pipe", groupBoxDelimiter);
 
@@ -18,6 +19,8 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     delimiterOther = new QRadioButton("Other:", groupBoxDelimiter);
     delimiterOtherTxt = new QLineEdit(groupBoxDelimiter);
     delimiterOtherTxt->setMaxLength(3);
+    delimiterOtherTxt->setEnabled(false);
+    delimiterOtherTxt->setMaximumWidth(delimiterOtherTxt->fontMetrics().maxWidth() * 3);
     delimiterOtherLayout->addWidget(delimiterOther);
     delimiterOtherLayout->addWidget(delimiterOtherTxt);
 
@@ -31,6 +34,7 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     groupBoxDate = new QGroupBox("Date Format", dialog_);
     dateLayout = new QVBoxLayout(groupBoxDate);
     dateMMDDYYYY = new QRadioButton("MM/DD/YYYY", groupBoxDate);
+    dateMMDDYYYY->setChecked(true);
     dateYYYYMMDD = new QRadioButton("YYYY-MM-DD", groupBoxDate);
     dateDDMMYYYY = new QRadioButton("DD/MM/YYYY", groupBoxDate);
     dateDDMMMYYYY = new QRadioButton("DD-MMM-YYYY", groupBoxDate);
@@ -45,6 +49,19 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     groupBoxColumnOrder = new QGroupBox("Column Order", dialog_);
     columnOrderLayout = new QGridLayout(groupBoxColumnOrder);
     columnOrder = new QListWidget(groupBoxColumnOrder);
+    columnOrder->setMaximumHeight(columnOrder->fontMetrics().lineSpacing() * 8);
+    QListWidgetItem *column1 = new QListWidgetItem("Symbol", columnOrder);
+    column1->setData(Qt::UserRole, column_Symbol);
+    QListWidgetItem *column2 = new QListWidgetItem("Date", columnOrder);
+    column2->setData(Qt::UserRole, column_Date);
+    QListWidgetItem *column3 = new QListWidgetItem("Price Type", columnOrder);
+    column3->setData(Qt::UserRole, column_Type);
+    QListWidgetItem *column4 = new QListWidgetItem("Value", columnOrder);
+    column4->setData(Qt::UserRole, column_Value);
+    columnOrder->addItem(column1);
+    columnOrder->addItem(column2);
+    columnOrder->addItem(column3);
+    columnOrder->addItem(column4);
 
     columnOrderMoveLayout = new QVBoxLayout();
     columnOrderMoveUp = new QToolButton(groupBoxColumnOrder);
@@ -81,7 +98,8 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     layout->addWidget(groupBoxFile, 2, 0, 1, 3);
 
     importCancelBtn = new QDialogButtonBox(dialog_);
-    importCancelBtn->setStandardButtons(QDialogButtonBox::Cancel|QDialogButtonBox::Ok);
+    importCancelBtn->setStandardButtons(QDialogButtonBox::Cancel);
+    importCancelBtn->addButton("Import", QDialogButtonBox::AcceptRole);
 
     layout->addWidget(importCancelBtn, 3, 2, 1, 1);
 }

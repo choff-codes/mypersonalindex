@@ -12,6 +12,12 @@ public:
     frmPriceImport(QWidget *parent_ = 0);
     ~frmPriceImport();
 
+private slots:
+    void accept();
+    void moveDown();
+    void moveUp();
+    void browse();
+
 private:
     frmPriceImport_UI *ui;
 

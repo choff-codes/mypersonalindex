@@ -17,6 +17,13 @@
 class frmPriceImport_UI
 {
 public:
+    enum {
+        column_Symbol,
+        column_Date,
+        column_Type,
+        column_Value
+    };
+
     QGridLayout *layout;
     QGroupBox *groupBoxDelimiter;
     QVBoxLayout *delimiterLayout;

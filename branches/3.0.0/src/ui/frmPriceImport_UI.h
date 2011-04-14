@@ -17,7 +17,7 @@
 class frmPriceImport_UI
 {
 public:
-    enum {
+    enum column {
         column_Symbol,
         column_Date,
         column_Type,
@@ -35,10 +35,10 @@ public:
     QLineEdit *delimiterOtherTxt;
     QGroupBox *groupBoxDate;
     QVBoxLayout *dateLayout;
-    QRadioButton *dateMMDDYYYY;
+    QRadioButton *dateDMYYYY;
     QRadioButton *dateYYYYMMDD;
-    QRadioButton *dateDDMMYYYY;
-    QRadioButton *dateDDMMMYYYY;
+    QRadioButton *dateMDYYYY;
+    QRadioButton *dateMMDDYYYY;
     QGroupBox *groupBoxColumnOrder;
     QGridLayout *columnOrderLayout;
     QListWidget *columnOrder;

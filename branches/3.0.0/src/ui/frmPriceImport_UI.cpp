@@ -33,16 +33,16 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
 
     groupBoxDate = new QGroupBox("Date Format", dialog_);
     dateLayout = new QVBoxLayout(groupBoxDate);
-    dateMMDDYYYY = new QRadioButton("MM/DD/YYYY", groupBoxDate);
-    dateMMDDYYYY->setChecked(true);
-    dateYYYYMMDD = new QRadioButton("YYYY-MM-DD", groupBoxDate);
-    dateDDMMYYYY = new QRadioButton("DD/MM/YYYY", groupBoxDate);
-    dateDDMMMYYYY = new QRadioButton("DD-MMM-YYYY", groupBoxDate);
+    dateMDYYYY = new QRadioButton("M/d/yyyy", groupBoxDate);
+    dateMDYYYY->setChecked(true);
+    dateMMDDYYYY = new QRadioButton("MM/dd/yyyy", groupBoxDate);
+    dateDMYYYY = new QRadioButton("d/M/yyyy", groupBoxDate);
+    dateYYYYMMDD = new QRadioButton("yyyy-MM-dd", groupBoxDate);
 
+    dateLayout->addWidget(dateMDYYYY);
     dateLayout->addWidget(dateMMDDYYYY);
+    dateLayout->addWidget(dateDMYYYY);
     dateLayout->addWidget(dateYYYYMMDD);
-    dateLayout->addWidget(dateDDMMYYYY);
-    dateLayout->addWidget(dateDDMMMYYYY);
 
     layout->addWidget(groupBoxDate, 0, 1, 1, 1);
 

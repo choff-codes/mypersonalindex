@@ -54,7 +54,7 @@ public:
         m_historicalPrices(historicalPrices_)
     {}
 
-    QHash<QString, historicalPrices> getHistoricalPrices() const;
+    QHash<QString, historicalPrices> getHistoricalPrices() const { return m_historicalPrices; }
 
     historicalPrices getHistoricalPrice(const QString &symbol_)
     {

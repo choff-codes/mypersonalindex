@@ -451,6 +451,11 @@ void frmMain::importPortfolio()
 
 void frmMain::importPrice()
 {
-    frmPriceImport f(this);
-    f.exec();
+    frmPriceImport f(m_file->prices, this);
+    if (f.exec() != QDialog::Accepted)
+        return;
+
+    setWindowModified(true);
+    m_file->modified = true;
+    m_file->prices = f.getHistoricalPricesMap();
 }

@@ -206,8 +206,3 @@ bool historicalPricesMap::save(const queries &dataSource_)
             return false;
     return true;
 }
-
-QHash<QString, historicalPrices> historicalPricesMap::getHistoricalPrices() const
-{
-    return m_historicalPrices;
-}

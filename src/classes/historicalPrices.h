@@ -5,8 +5,6 @@
 #include <QHash>
 #include <QString>
 
-template <class T, class V>
-class QMap;
 class queries;
 class historicalPricesData;
 class historicalPrices

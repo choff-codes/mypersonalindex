@@ -2,7 +2,6 @@
 #include "snapshot.h"
 #include "portfolio.h"
 #include "security.h"
-#include "calculatorNAV.h"
 #include "assetAllocation.h"
 #include "functions.h"
 #include "executedTrade.h"
@@ -26,7 +25,7 @@ bool calculatorTrade::operator()(const portfolio &portfolio_)
     // clear out calculated trades from the begin date (or all trades if its the portfolio start date)
     clearExecutedTrades(portfolio_, beginDate, beginDate == portfolio_.startDate());
     // clear calculator cache
-    portfolio_.calculator().clearCache();
+    portfolio_.clearCache();
     // calculate
     calculate(portfolio_, beginDate);
 
@@ -39,9 +38,9 @@ bool calculatorTrade::operator()(const portfolio &portfolio_)
     return true;
 }
 
-void calculatorTrade::insertDividendReinvestmentPlaceholders(portfolio portfolio_)
+void calculatorTrade::insertDividendReinvestmentPlaceholders(const portfolio &portfolio_)
 {
-    foreach(security s, portfolio_.securities())
+    foreach(const security &s, portfolio_.securities())
         if (s.dividendReinvestment())
         {
             trade t;
@@ -52,22 +51,22 @@ void calculatorTrade::insertDividendReinvestmentPlaceholders(portfolio portfolio
         }
 }
 
-void calculatorTrade::removeDividendReinvestmentPlaceholders(portfolio portfolio_)
+void calculatorTrade::removeDividendReinvestmentPlaceholders(const portfolio &portfolio_)
 {
-    foreach(security s, portfolio_.securities())
+    foreach(const security &s, portfolio_.securities())
         s.trades().remove(DIVIDEND_REINVESTMENT_TRADE_ID);
 }
 
-void calculatorTrade::clearExecutedTrades(portfolio portfolio_, int beginDate_, bool recalculateAll_)
+void calculatorTrade::clearExecutedTrades(const portfolio &portfolio_, int beginDate_, bool recalculateAll_)
 {
-    foreach(security s, portfolio_.securities())
+    foreach(const security &s, portfolio_.securities())
         if (recalculateAll_)
             s.executedTrades().clear();
         else
             s.executedTrades().clear(beginDate_);
 }
 
-void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
+void calculatorTrade::calculate(const portfolio &portfolio_, int beginDate_)
 {
     tradeMapByDate trades = calculateTradeDates(portfolio_, beginDate_, beginDate_ == portfolio_.startDate());
 
@@ -87,8 +86,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
                 // insert executed trade
                 executedTrade e = calculateExecutedTrade(
                         date,
-                        portfolio_.calculator(),
-                        portfolio_.assetAllocations(),
+                        portfolio_,
                         s,
                         t
                     );
@@ -101,6 +99,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
                 // reverse trade
                 executedTrade reversal = calculateExecutedTradeReversal(
                         portfolio_.securities().value(t.cashAccount()),
+                        t.priceType(),
                         date,
                         e.shares,
                         e.price,
@@ -114,7 +113,7 @@ void calculatorTrade::calculate(portfolio portfolio_, int beginDate_)
 }
 
 // note this must have the portfolio object passed in so that the iterator pointers do not invalidate
-calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio portfolio_, int date_, bool recalculateAll_) const
+calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(const portfolio &portfolio_, int date_, bool recalculateAll_) const
 {
     tradeMapByDate calculatedTrades;
 
@@ -142,7 +141,7 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
 
             // compute dates
             QList<int> dates =
-                tradeDateCalendar::computeFrequencyTradeDates(
+                tradeDateCalendar::computeTradeDates(
                     t.date(),
                     qMax(
                         t.frequency() == tradeDateCalendar::frequency_Once ?
@@ -168,7 +167,7 @@ calculatorTrade::tradeMapByDate calculatorTrade::calculateTradeDates(portfolio p
     return calculatedTrades;
 }
 
-QList<int> calculatorTrade::calculateDividendReinvestmentDates(int date_, const QMap<int, double> dividends_) const
+QList<int> calculatorTrade::calculateDividendReinvestmentDates(int date_, const QMap<int, double> &dividends_) const
 {
     QList<int> dates;
     int endDate = tradeDateCalendar::endDate();
@@ -178,13 +177,13 @@ QList<int> calculatorTrade::calculateDividendReinvestmentDates(int date_, const 
     {
         int date = tradeDateCalendar::nextTradeDate(dividend.key());
         if (date <= endDate)
-            dates.append(tradeDateCalendar::nextTradeDate(dividend.key()));
+            dates.append(date);
     }
 
     return dates;
 }
 
-executedTrade calculatorTrade::calculateExecutedTrade(int date_, const calculatorNAV &calc_, const QMap<int, assetAllocation> &aa, const security &parent_, const trade &trade_) const
+executedTrade calculatorTrade::calculateExecutedTrade(int date_, const portfolio &portfolio_, const security &parent_, const trade &trade_) const
 {
     double purchasePrice = calculateTradePrice(
         trade_.action(),
@@ -198,8 +197,7 @@ executedTrade calculatorTrade::calculateExecutedTrade(int date_, const calculato
     double shares = calculateTradeShares(
         date_,
         purchasePrice,
-        calc_,
-        aa,
+        portfolio_,
         parent_,
         trade_
     );
@@ -215,11 +213,10 @@ double calculatorTrade::calculateTradePrice(trade::tradeAction type_, double pri
     return price_;
 }
 
-double calculatorTrade::calculateTradeShares(int date_, double price_, calculatorNAV calc_, const QMap<int, assetAllocation> &aa,
-    const security &parent_, const trade &trade_) const
+double calculatorTrade::calculateTradeShares(int date_, double price_, const portfolio &portfolio_, const security &parent_, const trade &trade_) const
 {
     if (functions::isZero(price_) &&
-        // these types are allowed a price of 0
+        // only these types are allowed a price of 0, the other type involve the price
         trade_.action() != trade::tradeAction_Purchase &&
         trade_.action() != trade::tradeAction_ReinvestDividends &&
         trade_.action() != trade::tradeAction_ReceiveInterest &&
@@ -242,18 +239,18 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
             return trade_.value() / price_ * -1;
         case trade::tradeAction_PurchasePercentOfSecurityValue:
         case trade::tradeAction_ReceiveInterestPercent:
-            return (calc_.securitySnapshot(date_, parent_.id()).totalValue * (trade_.value() / 100)) / price_;
+            return (portfolio_.securitySnapshot(date_, parent_.id()).totalValue * (trade_.value() / 100)) / price_;
         case trade::tradeAction_PurchasePercentOfPortfolioValue:
-            return (calc_.portfolioSnapshot(date_).totalValue * (trade_.value() / 100)) / price_;
+            return (portfolio_.portfolioSnapshot(date_).totalValue * (trade_.value() / 100)) / price_;
         case trade::tradeAction_ReinvestDividendsAuto:
-            return (calc_.securitySnapshot(date_, parent_.id()).shares * parent_.dividend(date_)) / price_;
+            return (portfolio_.securitySnapshot(date_, parent_.id()).shares * parent_.dividend(date_)) / price_;
         case trade::tradeAction_PurchasePercentOfAATarget:
         {
             double shares = 0;
             const assetAllocationTarget &targets = parent_.targets();
             for(QMap<int, double>::const_iterator i = targets.constBegin(); i != targets.constEnd(); ++i)
             {
-                double target = aa.value(i.key()).target();
+                double target = portfolio_.assetAllocations().value(i.key()).target();
                 if (functions::isZero(target))
                     continue;
 
@@ -262,9 +259,9 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
                     // less current security value = amount to purchase / sell.
                     // Divide by price to get shares.
                         (
-                                (calc_.portfolioSnapshot(date_).totalValue * (target * i.value() * trade_.value() / 100))
+                                (portfolio_.portfolioSnapshot(date_).totalValue * (target * i.value() * trade_.value() / 100))
                             -
-                                (calc_.securitySnapshot(date_, parent_.id()).totalValue)
+                                (portfolio_.securitySnapshot(date_, parent_.id()).totalValue)
                         )
                     /
                         price_;
@@ -276,7 +273,7 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, calculato
     return 0;
 }
 
-void calculatorTrade::insertExecutedTrade(security security_, int date_, const executedTrade &trade_)
+void calculatorTrade::insertExecutedTrade(const security &security_, int date_, const executedTrade &trade_)
 {
     if (functions::isZero(trade_.shares))
         return;
@@ -284,9 +281,13 @@ void calculatorTrade::insertExecutedTrade(security security_, int date_, const e
     security_.executedTrades().insert(date_, trade_);
 }
 
-executedTrade calculatorTrade::calculateExecutedTradeReversal(const security &security_, int date_, double shares_, double price_, int spawningID_) const
+executedTrade calculatorTrade::calculateExecutedTradeReversal(const security &security_, trade::tradePriceType priceType_, int date_, double shares_,
+    double price_, int spawningID_) const
 {
-    double price = security_.splitAdjustedPriorDayPrice(date_);
+    double reversalPrice =
+        priceType_ == trade::tradePriceType_CurrentClose ?
+            security_.price(date_) :
+            security_.splitAdjustedPriorDayPrice(date_);
 
-    return executedTrade(-1 * (shares_ * price_) / price, price, 0, spawningID_);
+    return executedTrade((-1 * shares_ * price_) / reversalPrice, reversalPrice, 0, spawningID_);
 }

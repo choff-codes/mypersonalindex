@@ -6,10 +6,8 @@
 #include "account.h"
 
 class historicalNAV;
-class calculatorNAV;
 class security;
-class assetAllocation;
-class account;
+class portfolio;
 class securityRow: public baseRow
 {
 public:
@@ -43,9 +41,8 @@ public:
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();
 
-    static QList<baseRow*> getRows(const QMap<int, security> &securities_, const QMap<int, assetAllocation> &assetAllocation_,
-        const QMap<int, account> &accounts_, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_);
+    static QList<baseRow*> getRows(const portfolio &portfolio_, int beginDate_, int endDate_, const snapshot &portfolioSnapshot_,
+        const QList<orderBy> &columnSort_);
 };
 
 class mainSecurityModel: public mpiViewModelBase

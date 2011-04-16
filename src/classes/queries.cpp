@@ -281,16 +281,13 @@ bool queries::insert(const QString &tableName_, const QMap<QString, QVariant> &v
         return true;
 
     QSqlQuery query(m_database);
-    QStringList parameters, columns;
+    QStringList parameters;
     QString sql("INSERT INTO %1(%2) VALUES (%3)");
 
-    foreach(const QString &column, values_.keys())
-    {
+    for(int i = 0; i < values_.count(); ++i)
         parameters.append("?");
-        columns.append(column);
-    }
 
-    query.prepare(sql.arg(tableName_, columns.join(","), parameters.join(",")));
+    query.prepare(sql.arg(tableName_, QStringList(values_.keys()).join(","), parameters.join(",")));
 
     foreach(const QVariant &value, values_)
         query.addBindValue(value);
@@ -321,20 +318,10 @@ int queries::getDatabaseVersion() const
 
 bool queries::isValid() const
 {
-    return getDatabaseVersion() !=  UNASSIGNED;
+    return getDatabaseVersion() != UNASSIGNED;
 }
 
 bool queries::deleteTable(const QString &table_) const
 {
     return executeNonQuery(QString("DELETE FROM %1").arg(table_));
-}
-
-bool queries::deleteItem(const QString &table_, int id_) const
-{
-    return executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2").arg(table_, QString::number(id_)));
-}
-
-bool queries::deleteItem(const QString &table_, int id_, int beginDate_) const
-{
-    return executeNonQuery(QString("DELETE FROM %1 WHERE ID = %2 AND Date >= %3").arg(table_, QString::number(id_), QString::number(beginDate_)));
 }

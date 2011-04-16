@@ -62,9 +62,6 @@ void assetAllocation::setHidden(bool hidden_) { d->hidden = hidden_; }
 
 bool assetAllocation::save(const queries &dataSource_) const
 {
-    if (!this->hasParent())
-        return false;
-
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_ID), this->id());
     values.insert(queries::portfolioAAColumns.at(queries::portfolioAAColumns_PortfolioID), this->parent());
@@ -124,12 +121,9 @@ QDataStream& operator>>(QDataStream &stream_, assetAllocation &aa_)
     stream_ >> aa_.d->description;
     stream_ >> aa_.d->rebalanceBand;
     stream_ >> aa_.d->target;
-
     int tmp;
     stream_ >> tmp;
     aa_.d->threshold = (assetAllocation::thresholdMethod)tmp;
-
     stream_ >> aa_.d->hidden;
-
     return stream_;
 }

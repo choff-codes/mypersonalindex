@@ -16,10 +16,7 @@ historicalPricesMap priceFactory::getHistoricalPrices()
 #endif
     QHash<QString, historicalPrices> returnMap;
 
-    QSqlQuery q = m_dataSource.select(
-        queries::table_HistoricalPrice,
-        queries::historicalPriceColumns
-    );
+    QSqlQuery q = m_dataSource.select(queries::table_HistoricalPrice, queries::historicalPriceColumns);
 
     while(q.next())
         returnMap[q.value(queries::historicalPriceColumns_Symbol).toString()].insert(

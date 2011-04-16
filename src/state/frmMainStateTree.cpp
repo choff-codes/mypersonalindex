@@ -9,6 +9,7 @@
 #include "historicalNAV.h"
 #include "calculatorNAV.h"
 #include "historicalPrices.h"
+#include "snapshot.h"
 
 bool treeItemKey::operator<(const treeItemKey &other_) const
 {
@@ -110,25 +111,24 @@ historicalNAV frmMainStateTree::calculateNAV(const treeItemKey &item_, int begin
         return historicalNAV();
 
     portfolio p = m_portfolios.value(item_.portfolioID);
-    calculatorNAV calc = p.calculator();
 
     switch(item_.type)
     {
         case objectType_Portfolio:
-            return calc.changeOverTime(p, beginDate_, endDate_);
+            return p.changeOverTime(p, beginDate_, endDate_);
         case objectType_Account:
-            return calc.changeOverTime(p.accounts().value(item_.id), beginDate_, endDate_);
+            return p.changeOverTime(p.accounts().value(item_.id), beginDate_, endDate_);
         case objectType_AA:
-            return calc.changeOverTime(p.assetAllocations().value(item_.id), beginDate_, endDate_);
+            return p.changeOverTime(p.assetAllocations().value(item_.id), beginDate_, endDate_);
         case objectType_Security:
-            return calc.changeOverTime(p.securities().value(item_.id), beginDate_, endDate_);
+            return p.changeOverTime(p.securities().value(item_.id), beginDate_, endDate_);
         case objectType_Symbol:
         {
             symbol s;
             s.setDescription(item_.symbol);
             s.setIncludeDividends(item_.id == 1);
             s.setHistoricalPrices(m_prices.value(s.description()));
-            return calc.changeOverTime(s, beginDate_, endDate_);
+            return p.changeOverTime(s, beginDate_, endDate_);
         }
         case objectType_Trade:
             break;

@@ -48,7 +48,6 @@ public:
     int count() const { return m_nav.count(); }
     bool isEmpty() const { return m_nav.isEmpty(); }
 
-    // must check IsEmpty first when calling
     int beginDate() const { return m_firstDate; }
     int endDate() const { return m_lastDate; }
 

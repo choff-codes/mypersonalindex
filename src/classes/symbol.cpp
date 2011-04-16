@@ -1,6 +1,5 @@
 #include "symbol.h"
 #include <QMap>
-#include "objectKey.h"
 #include "historicalPrices.h"
 
 class symbolData: public objectKeyData
@@ -9,7 +8,7 @@ public:
     bool dividends;
     historicalPrices prices;
 
-    explicit symbolData():
+    symbolData():
         dividends(false)
     {}
 };

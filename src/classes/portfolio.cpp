@@ -1,13 +1,33 @@
 #include "portfolio.h"
-#include "portfolio_p.h"
 #include <QMap>
 #include <QSqlQuery>
 #include <QVariant>
+#include <QDate>
 #include "queries.h"
 #include "tradeDateCalendar.h"
 #include "assetAllocationTarget.h"
+#include "calculatorNAV.h"
+#include "security.h"
+#include "assetAllocation.h"
+#include "account.h"
 #include "trade.h"
 #include "executedTrade.h"
+#include "snapshot.h"
+#include "historicalNAV.h"
+
+class portfolioData: public objectKeyData
+{
+public:
+    calculatorNAV calculator;
+    QMap<int, security> securities;
+    QMap<int, assetAllocation> assetAllocations;
+    QMap<int, account> accounts;
+    int startDate;
+
+    portfolioData():
+        startDate(QDate::currentDate().toJulianDay())
+    {}
+};
 
 portfolio::portfolio():
     d(new portfolioData())
@@ -43,13 +63,27 @@ bool portfolio::operator==(const portfolio &other_) const
 int portfolio::startDate() const { return d->startDate; }
 void portfolio::setStartDate(int startDate_) { d->startDate = startDate_; }
 
-calculatorNAV& portfolio::calculator() const { d->calculator.setPortfolio(d); return d->calculator; }
-
 QMap<int, security>& portfolio::securities() const { return d->securities; }
 
 QMap<int, assetAllocation>& portfolio::assetAllocations() const { return d->assetAllocations; }
 
 QMap<int, account>& portfolio::accounts() const { return d->accounts; }
+
+void portfolio::clearCache() const { d->calculator.clearCache(); }
+
+snapshotSecurity portfolio::securitySnapshot(int date_, int id_, int priorDate_) const { return d->calculator.securitySnapshot(this, date_, id_, priorDate_); }
+
+snapshot portfolio::portfolioSnapshot(int date_, int priorDate_) const { return d->calculator.portfolioSnapshot(this, date_, priorDate_); }
+
+snapshot portfolio::assetAllocationSnapshot(int date_, int id_, int priorDate_) const { return d->calculator.assetAllocationSnapshot(this, date_, id_, priorDate_); }
+
+snapshot portfolio::accountSnapshot(int date_, int id_, int priorDate_) const { return d->calculator.accountSnapshot(this, date_, id_, priorDate_); }
+
+snapshot portfolio::symbolSnapshot(int date_, const symbol &key_, int beginDate_) const { return d->calculator.symbolSnapshot(date_, key_, beginDate_); }
+
+double portfolio::nav(const objectKeyBase &key_, int beginDate_, int endDate_) const { return d->calculator.nav(this, key_, beginDate_, endDate_); }
+
+historicalNAV portfolio::changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_) const { return d->calculator.changeOverTime(this, key_, beginDate_, endDate_); }
 
 portfolio portfolio::load(const QSqlQuery &q_)
 {
@@ -61,7 +95,6 @@ portfolio portfolio::load(const QSqlQuery &q_)
     return p;
 }
 
-// make private?  this shouldn't be called directly
 bool portfolio::save(const queries &dataSource_)
 {
     // save portfolio
@@ -117,7 +150,7 @@ bool portfolio::save(const QMap<int, portfolio> &portfolios_, const queries &dat
 void portfolio::detach()
 {
     d.detach();
-    d->calculator.detach();
+    d->calculator.clearCache();
 
     for(QMap<int, account>::iterator i = accounts().begin(); i != accounts().end(); ++i)
         i.value().detach();

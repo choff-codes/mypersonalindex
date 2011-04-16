@@ -9,7 +9,6 @@ class functions
 {
 public:
     // database functions
-    static QVariant doubleToNull(double value_) { return value_ < 0 ? QVariant(QVariant::Double) : value_; }
     static QVariant intToNull(int value_) { return value_ < 0 ? QVariant(QVariant::Int) : value_; }
     static QVariant dateToNull(int value_) { return value_ == 0 ? QVariant(QVariant::Int) : value_; }
 

@@ -2,7 +2,8 @@
 #include <qmath.h>
 #include <qnumeric.h>
 #include "portfolio.h"
-#include "portfolio_p.h"
+#include "security.h"
+#include "account.h"
 #include "splits.h"
 #include "snapshot.h"
 #include "symbol.h"
@@ -12,64 +13,20 @@
 #include "executedTrade.h"
 #include "assetAllocationTarget.h"
 
-class calculatorNAVData: public QSharedData
-{
-public:
-    QExplicitlySharedDataPointer<portfolioData> currentPortfolio;
-    QHash<int, QHash<int, snapshotSecurity> > securitiesCache;
-
-    calculatorNAVData() {}
-};
-
-calculatorNAV::calculatorNAV():
-    d(new calculatorNAVData())
-{
-}
-
-calculatorNAV::calculatorNAV(const calculatorNAV &other_):
-    d(other_.d)
-{
-}
-
-calculatorNAV::~calculatorNAV()
-{
-}
-
-calculatorNAV& calculatorNAV::operator=(const calculatorNAV &other_)
-{
-    d = other_.d;
-    return *this;
-}
-
-void calculatorNAV::setPortfolio(QExplicitlySharedDataPointer<portfolioData> portfolio_)
-{
-    d->currentPortfolio = portfolio_;
-}
-
-void calculatorNAV::clearCache()
-{
-    d->securitiesCache.clear();
-}
-
-void calculatorNAV::detach()
-{
-    d.detach();
-}
-
-snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDate_)
+snapshotSecurity calculatorNAV::securitySnapshot(const portfolio *portfolio_, int date_, int id_, int priorDate_)
 {
     // check today's cache
-    snapshotSecurity value = d->securitiesCache.value(date_).value(id_);
+    snapshotSecurity value = m_securitiesCache.value(date_).value(id_);
     if (!value.isNull())
         return value;
 
     // check if it needs to be calculated
-    security s = d->currentPortfolio->securities.value(id_);
+    security s = portfolio_->securities().value(id_);
     if (!s.includeInCalc() || s.executedTrades().isEmpty())
         return snapshotSecurity(date_);
 
     // check if prior day is cached
-    value = d->securitiesCache.value(
+    value = m_securitiesCache.value(
                 priorDate_ == 0 ?
                     tradeDateCalendar::previousTradeDate(date_) :
                     priorDate_
@@ -99,41 +56,41 @@ snapshotSecurity calculatorNAV::securitySnapshot(int date_, int id_, int priorDa
     value.totalValue = value.shares * s.price(date_);
     value.expenseRatio = s.expenseRatio();
 
-    account acct = d->currentPortfolio->accounts.value(s.account());
+    account acct = portfolio_->accounts().value(s.account());
     value.setTaxLiability(acct.taxRate(), acct.taxDeferred());
 
-    d->securitiesCache[date_].insert(id_, value);
+    m_securitiesCache[date_].insert(id_, value);
     return value;
 }
 
-snapshot calculatorNAV::portfolioSnapshot(int date_, int priorDate_)
+snapshot calculatorNAV::portfolioSnapshot(const portfolio *portfolio_, int date_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio->securities)
-        value.add(securitySnapshot(date_, s.id(), priorDate_));
+    foreach(const security &s, portfolio_->securities())
+        value.add(securitySnapshot(portfolio_, date_, s.id(), priorDate_));
 
     return value;
 }
 
-snapshot calculatorNAV::assetAllocationSnapshot(int date_, int id_, int priorDate_)
+snapshot calculatorNAV::assetAllocationSnapshot(const portfolio *portfolio_, int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio->securities)
+    foreach(const security &s, portfolio_->securities())
         if (s.targets().contains(id_))
-            value.add(securitySnapshot(date_, s.id(), priorDate_), s.targets().value(id_));
+            value.add(securitySnapshot(portfolio_, date_, s.id(), priorDate_), s.targets().value(id_));
 
     return value;
 }
 
-snapshot calculatorNAV::accountSnapshot(int date_, int id_, int priorDate_)
+snapshot calculatorNAV::accountSnapshot(const portfolio *portfolio_, int date_, int id_, int priorDate_)
 {
     snapshot value(date_);
 
-    foreach(const security &s, d->currentPortfolio->securities)
+    foreach(const security &s, portfolio_->securities())
         if (id_ == s.account())
-            value.add(securitySnapshot(date_, s.id(), priorDate_));
+            value.add(securitySnapshot(portfolio_, date_, s.id(), priorDate_));
 
     return value;
 }
@@ -153,18 +110,18 @@ snapshot calculatorNAV::symbolSnapshot(int date_, const symbol &key_, int beginD
     return value;
 }
 
-snapshot calculatorNAV::snapshotByKey(int date_, const objectKeyBase &key_, int beginDate_, int priorDate_)
+snapshot calculatorNAV::snapshotByKey(const portfolio *portfolio_, int date_, const objectKeyBase &key_, int beginDate_, int priorDate_)
 {
     switch(key_.type())
     {
         case objectType_AA:
-            return assetAllocationSnapshot(date_, key_.id(), priorDate_);
+            return assetAllocationSnapshot(portfolio_, date_, key_.id(), priorDate_);
         case objectType_Account:
-            return accountSnapshot(date_, key_.id(), priorDate_);
+            return accountSnapshot(portfolio_, date_, key_.id(), priorDate_);
         case objectType_Portfolio:
-            return portfolioSnapshot(date_, priorDate_);
+            return portfolioSnapshot(portfolio_, date_, priorDate_);
         case objectType_Security:
-            return securitySnapshot(date_, key_.id(), priorDate_);
+            return securitySnapshot(portfolio_, date_, key_.id(), priorDate_);
         case objectType_Symbol:
             return symbolSnapshot(date_, static_cast<const symbol&>(key_), beginDate_);
         case objectType_Trade:
@@ -174,7 +131,7 @@ snapshot calculatorNAV::snapshotByKey(int date_, const objectKeyBase &key_, int 
     return snapshot(0);
 }
 
-int calculatorNAV::beginDateByKey(const objectKeyBase &key_)
+int calculatorNAV::beginDateByKey(const portfolio *portfolio_, const objectKeyBase &key_)
 {
     switch(key_.type())
     {
@@ -182,7 +139,7 @@ int calculatorNAV::beginDateByKey(const objectKeyBase &key_)
         case objectType_Account:
         case objectType_Portfolio:
         case objectType_Security:
-            return d->currentPortfolio->startDate;
+            return portfolio_->startDate();
         case objectType_Symbol:
             return static_cast<const symbol&>(key_).beginDate();
         case objectType_Trade:
@@ -210,17 +167,17 @@ int calculatorNAV::endDateByKey(const objectKeyBase &key_)
     return 0;
 }
 
-double calculatorNAV::nav(const objectKeyBase &key_, int beginDate_, int endDate_)
+double calculatorNAV::nav(const portfolio *portfolio_, const objectKeyBase &key_, int beginDate_, int endDate_)
 {
-    return changeOverTime(key_, beginDate_, endDate_).nav(endDate_);
+    return changeOverTime(portfolio_, key_, beginDate_, endDate_).nav(endDate_);
 }
 
-historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_)
+historicalNAV calculatorNAV::changeOverTime(const portfolio *portfolio_, const objectKeyBase &key_, int beginDate_, int endDate_)
 {
     double navValue = 1;
     historicalNAV navHistory;
 
-    beginDate_ = qMax(beginDateByKey(key_), beginDate_);
+    beginDate_ = qMax(beginDateByKey(portfolio_, key_), beginDate_);
     endDate_ = qMin(endDateByKey(key_), endDate_);
 
     tradeDateCalendar calendar(beginDate_);
@@ -228,7 +185,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
         return navHistory;
 
     beginDate_ = calendar.date();
-    snapshot priorSnapshot = snapshotByKey(beginDate_, key_, beginDate_, 0);
+    snapshot priorSnapshot = snapshotByKey(portfolio_, beginDate_, key_, beginDate_, 0);
     navHistory.insert(beginDate_, navValue, priorSnapshot.totalValue, priorSnapshot.dividendAmount); // baseline nav
 
     foreach(int date, ++calendar)
@@ -236,7 +193,7 @@ historicalNAV calculatorNAV::changeOverTime(const objectKeyBase &key_, int begin
         if (date > endDate_)
             break;
 
-        snapshot currentSnapshot = snapshotByKey(date, key_, beginDate_, priorSnapshot.date);
+        snapshot currentSnapshot = snapshotByKey(portfolio_, date, key_, beginDate_, priorSnapshot.date);
 
         navValue =
                     change(

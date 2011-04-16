@@ -32,9 +32,6 @@ double assetAllocationTarget::totalAssignedPercentage() const
 
 bool assetAllocationTarget::insertBatch(const queries &dataSource_)
 {
-    if (!this->hasParent())
-        return false;
-
     m_position = m_targets.constBegin();
     return dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, m_targets.count(), this);
 }

@@ -25,19 +25,18 @@ QMap<int, QString> frmMainAcct_State::tableColumns()
 
 mpiViewModelBase* frmMainAcct_State::createModel(int beginDate_, int endDate_)
 {
-    snapshot portfolioValue = m_portfolio.calculator().portfolioSnapshot(endDate_);
+    snapshot portfolioValue = m_portfolio.portfolioSnapshot(endDate_);
 
     return new mainAcctModel(
         acctRow::getRows(
-            m_portfolio.accounts(),
+            m_portfolio,
             beginDate_,
             endDate_,
-            m_portfolio.calculator(),
             portfolioValue,
             m_settings.viewableColumnsSorting(columnEnumValue())
         ),
         portfolioValue,
-        m_portfolio.calculator().nav(m_portfolio, beginDate_, endDate_),
+        m_portfolio.nav(m_portfolio, beginDate_, endDate_),
         m_settings.viewableColumns(columnEnumValue()),
         ui->table
     );

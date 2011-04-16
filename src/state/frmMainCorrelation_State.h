@@ -18,8 +18,8 @@ protected slots:
     void itemChecked(QTreeWidgetItem *item_, int column_);
 
 protected:
-    settings::columns columnEnumValue();
-    QMap<int, QString> tableColumns();
+    settings::columns columnEnumValue(); // unused
+    QMap<int, QString> tableColumns(); // unused
 
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
     historicalNAV calculateNAV(const treeItemKey &item_, int beginDate_, int endDate_);

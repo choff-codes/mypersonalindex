@@ -18,7 +18,7 @@ public:
     int startDate;
     int endDate;
 
-    explicit tradeData():
+    tradeData():
         action(trade::tradeAction_Purchase),
         value(0),
         priceType(trade::tradePriceType_CurrentClose),

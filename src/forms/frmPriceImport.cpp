@@ -4,6 +4,7 @@
 #include <QTextStream>
 #include <QDate>
 #include "frmPriceImport_UI.h"
+#include "tradeDateCalendar.h"
 
 frmPriceImport::frmPriceImport(const historicalPricesMap &pricesMap_, QWidget *parent_):
     QDialog(parent_),
@@ -154,6 +155,12 @@ bool frmPriceImport::validateRow(int row_, const QStringList line_, const QHash<
     {
         QMessageBox::critical(this, "Import", "Incorrect date format on row " + QString::number(row_) +
             ". Date is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Date)) + "\".");
+        return false;
+    }
+    if (!tradeDateCalendar::isTradeDate(date.toJulianDay()))
+    {
+        QMessageBox::critical(this, "Import", "Row " + QString::number(row_) +
+            " is not a valid US trade date. Date is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Date)) + "\".");
         return false;
     }
 

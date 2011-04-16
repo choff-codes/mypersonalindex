@@ -4,6 +4,7 @@
 #include "assetAllocation.h"
 #include "calculatorNAV.h"
 #include "historicalNAV.h"
+#include "portfolio.h"
 
 //enum {
 //    row_Description,
@@ -56,7 +57,7 @@ aaRow::aaRow(double nav_, const snapshot &snapshot_, const snapshot &portfolioSn
     //    row_Value,
     this->values.append(snapshot_.totalValue);
     //    row_ValueP,
-    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
+    this->values.append(functions::checkDivisor(portfolioSnapshot_.totalValue, snapshot_.totalValue));
     //    row_Gain,
     this->values.append(snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,
@@ -93,37 +94,37 @@ QMap<int, QString> aaRow::fieldNames()
     return names;
 }
 
-QList<baseRow*> aaRow::getRows(const QMap<int, assetAllocation> &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_)
+QList<baseRow*> aaRow::getRows(const portfolio &portfolio_, int beginDate_, int endDate_, const snapshot portfolioSnapshot_,
+    const QList<orderBy> &columnSort_)
 {
     QList<baseRow*> returnList;
 
-    foreach(const assetAllocation &aa, assetAllocation_)
+    foreach(const assetAllocation &aa, portfolio_.assetAllocations())
     {
         if (aa.hidden())
             continue;
 
-        returnList.append(getRow(aa, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+        returnList.append(getRow(aa, beginDate_, endDate_, portfolio_, portfolioSnapshot_, columnSort_));
     }
 
     // check if any securities have an unassigned value
-    snapshot unassigned = calculator_.assetAllocationSnapshot(endDate_, UNASSIGNED);
+    snapshot unassigned = portfolio_.assetAllocationSnapshot(endDate_, UNASSIGNED);
     if (unassigned.count != 0)
     {
         assetAllocation aa;
         aa.setDescription("(Unassigned)");
-        returnList.append(getRow(aa, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+        returnList.append(getRow(aa, beginDate_, endDate_, portfolio_, portfolioSnapshot_, columnSort_));
     }
 
     return returnList;
 }
 
-baseRow* aaRow::getRow(const assetAllocation &assetAllocation_, int beginDate_, int endDate_, calculatorNAV calculator_, const snapshot &portfolioSnapshot_,
+baseRow* aaRow::getRow(const assetAllocation &assetAllocation_, int beginDate_, int endDate_, const portfolio &portfolio_, const snapshot &portfolioSnapshot_,
     const QList<orderBy> &columnSort_)
 {
     return new aaRow(
-        calculator_.nav(assetAllocation_, beginDate_, endDate_),
-        calculator_.assetAllocationSnapshot(endDate_, assetAllocation_.id()), portfolioSnapshot_, assetAllocation_, columnSort_
+        portfolio_.nav(assetAllocation_, beginDate_, endDate_),
+        portfolio_.assetAllocationSnapshot(endDate_, assetAllocation_.id()), portfolioSnapshot_, assetAllocation_, columnSort_
     );
 }
 

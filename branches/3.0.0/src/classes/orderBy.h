@@ -12,7 +12,7 @@ public:
         order_descending
     };
 
-    qint32 column;
+    qint32 column; // using qint32 for QSettings
     order direction;
 
     orderBy():
@@ -20,7 +20,7 @@ public:
         direction(order_ascending)
     {}
 
-    explicit orderBy(int column_, order orderColumn_):
+    orderBy(int column_, order orderColumn_):
         column(column_),
         direction(orderColumn_)
     {}

@@ -14,10 +14,10 @@ public:
         parent(parent_)
     {}
 
+    virtual ~objectBase() {}
+
     bool operator==(const objectBase &other_) const { return this->parent == other_.parent; }
     bool operator!=(const objectBase &other_) const { return !(*this == other_); }
-
-    bool hasParent() const { return this->parent > UNASSIGNED; }
 };
 
 #endif // OBJECTBASE_H

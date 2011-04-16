@@ -14,14 +14,14 @@ public:
     double expenseRatio;
 
     snapshot(int date_):
-            date(date_),
-            count(0),
-            totalValue(0),
-            costBasis(0),
-            taxLiability(0),
-            dividendAmount(0),
-            dividendAmountNAV(0),
-            expenseRatio(0)
+        date(date_),
+        count(0),
+        totalValue(0),
+        costBasis(0),
+        taxLiability(0),
+        dividendAmount(0),
+        dividendAmountNAV(0),
+        expenseRatio(0)
     {}
 
     bool isNull() const { return date == 0; }
@@ -35,15 +35,15 @@ public:
     double shares;
 
     snapshotSecurity():
-            snapshot(0),
-            shares(0)
+        snapshot(0),
+        shares(0)
     {
         count = 1;
     }
 
     snapshotSecurity(int date_):
-            snapshot(date_),
-            shares(0)
+        snapshot(date_),
+        shares(0)
     {
         count = 1;
     }

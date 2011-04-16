@@ -26,7 +26,7 @@ public:
 
     tradeDateCalendar& operator++()
     {
-        m_date = checkTradeDate(++m_date, direction_ascending);
+        m_date = checkTradeDate(m_date + 1, direction_ascending);
         return *this;
     }
 
@@ -39,7 +39,9 @@ public:
 
     int date() { return m_date; }
 
-    static QList<int> computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_);
+    static bool isTradeDate(int date_) { return checkTradeDate(date_, direction_ascending) == date_; }
+
+    static QList<int> computeTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_);
 
     static int previousTradeDate(int date_) { return checkTradeDate(--date_, direction_descending); }
 

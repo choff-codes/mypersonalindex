@@ -116,15 +116,12 @@ int security::beginDate() const { return cashAccount() ? 0 : d->prices.beginDate
 
 bool security::save(const queries &dataSource_) const
 {
-    if (!this->hasParent())
-        return false;
-
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_ID), this->id());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_PortfolioID), this->parent());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Symbol), this->description());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Account), functions::intToNull(this->account()));
-    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Expense), functions::doubleToNull(this->expenseRatio()));
+    values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_Expense), this->expenseRatio());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_DivReinvest), (int)this->dividendReinvestment());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_CashAccount), (int)this->cashAccount());
     values.insert(queries::portfolioSecurityColumns.at(queries::portfolioSecurityColumns_IncludeInCalc), (int)this->includeInCalc());
@@ -143,8 +140,7 @@ security security::load(const QSqlQuery &q_)
     sec.setDescription(q_.value(queries::portfolioSecurityColumns_Symbol).toString());
     if (!q_.value(queries::portfolioSecurityColumns_Account).isNull())
         sec.setAccount(q_.value(queries::portfolioSecurityColumns_Account).toInt());
-    if (!q_.value(queries::portfolioSecurityColumns_Expense).isNull())
-        sec.setExpenseRatio(q_.value(queries::portfolioSecurityColumns_Expense).toDouble());
+    sec.setExpenseRatio(q_.value(queries::portfolioSecurityColumns_Expense).toDouble());
     sec.setDividendReinvestment(q_.value(queries::portfolioSecurityColumns_DivReinvest).toBool());
     sec.setCashAccount(q_.value(queries::portfolioSecurityColumns_CashAccount).toBool());
     sec.setIncludeInCalc(q_.value(queries::portfolioSecurityColumns_IncludeInCalc).toBool());

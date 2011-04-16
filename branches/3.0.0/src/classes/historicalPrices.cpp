@@ -201,8 +201,10 @@ bool historicalPricesMap::save(const queries &dataSource_)
 {
     if (!dataSource_.deleteTable(queries::table_HistoricalPrice))
         return false;
+
     for(QHash<QString, historicalPrices>::iterator i = m_historicalPrices.begin(); i != m_historicalPrices.end(); i++)
         if (!i->insertBatch(dataSource_))
             return false;
+
     return true;
 }

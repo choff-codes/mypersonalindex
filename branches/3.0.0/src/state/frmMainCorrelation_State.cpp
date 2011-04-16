@@ -18,7 +18,8 @@ frmMainCorrelation_State::~frmMainCorrelation_State()
 
 settings::columns frmMainCorrelation_State::columnEnumValue()
 {
-    return settings::columns_Dummy;
+    // just picked a random columns, this is hidden and never used
+    return settings::columns_Performance;
 }
 
 QMap<int, QString> frmMainCorrelation_State::tableColumns()

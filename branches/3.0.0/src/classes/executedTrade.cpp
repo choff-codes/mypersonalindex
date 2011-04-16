@@ -16,7 +16,8 @@ bool executedTrade::operator==(const executedTrade &other_) const
 
 QString executedTrade::displayText(int date_) const
 {
-    return QDate::fromJulianDay(date_).toString(Qt::SystemLocaleShortDate) + " - " + functions::doubleToLocalFormat(shares)
+    return QDate::fromJulianDay(date_).toString(Qt::SystemLocaleShortDate) + " - " +
+            (functions::massage(shares) < 0 ? "sell " : "buy ") + functions::doubleToLocalFormat(qAbs(shares), 4)
             + " share" + (functions::isZero(shares - 1) ? "" : "s") + " @ " + functions::doubleToCurrency(price) +
             (commission > 0 ? " with " + functions::doubleToCurrency(commission) + " commission" : "");
 }
@@ -74,9 +75,6 @@ QVariant executedTradeMap::data(int column_, bool newRow_)
 
 bool executedTradeMap::insertBatch(const queries &dataSource_)
 {
-    if (!this->hasParent())
-        return false;
-
     m_position = m_trades.constBegin();
     return dataSource_.bulkInsert(queries::table_PortfolioSecurityTradeExecution, queries::portfolioSecurityTradeExecutionColumns, m_trades.count(), this);
 }

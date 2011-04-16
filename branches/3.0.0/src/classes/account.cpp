@@ -61,9 +61,6 @@ void account::setHidden(bool hidden_) { d->hidden = hidden_; }
 
 bool account::save(const queries &dataSource_) const
 {
-    if (!this->hasParent())
-        return false;
-
     QMap<QString, QVariant> values;
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_ID), this->id());
     values.insert(queries::portfolioAccountColumns.at(queries::portfolioAccountColumns_PortfolioID), this->parent());

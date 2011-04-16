@@ -7,7 +7,7 @@
 #include "snapshot.h"
 
 class historicalNAV;
-class calculatorNAV;
+class portfolio;
 class account;
 class acctRow: public baseRow
 {
@@ -33,12 +33,12 @@ public:
     QVariant columnType(int column_) const { return columnsType.at(column_); }
     static QMap<int, QString> fieldNames();
 
-    static QList<baseRow*> getRows(const QMap<int, account> &accounts_, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_);
+    static QList<baseRow*> getRows(const portfolio &portfolio_, int beginDate_, int endDate_, const snapshot &portfolioSnapshot_,
+        const QList<orderBy> &columnSort_);
 
 private:
-    static baseRow* getRow(const account &account, int beginDate_, int endDate_, calculatorNAV calculator_,
-        const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_);
+    static baseRow* getRow(const account &account, int beginDate_, int endDate_, const portfolio &portfolio_, const snapshot &portfolioSnapshot_,
+        const QList<orderBy> &columnSort_);
 };
 
 

@@ -1,6 +1,6 @@
 #include "tradeDateCalendar.h"
 
-QList<int> tradeDateCalendar::computeFrequencyTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_)
+QList<int> tradeDateCalendar::computeTradeDates(int date_, int minimumDate_, int maximumDate_, frequency frequency_)
 {
     switch (frequency_)
     {

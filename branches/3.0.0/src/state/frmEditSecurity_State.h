@@ -11,8 +11,9 @@ class objectKeyEditModel;
 class frmEditSecurity_State : public frmEditStateMap
 {
     Q_OBJECT
+
 public:
-    explicit frmEditSecurity_State(const portfolio &portfolio_, QWidget *parent_ = 0);
+    frmEditSecurity_State(const portfolio &portfolio_, QWidget *parent_ = 0);
     ~frmEditSecurity_State();
 
     void enter();

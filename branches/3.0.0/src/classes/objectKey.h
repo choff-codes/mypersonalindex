@@ -41,10 +41,7 @@ public:
     virtual ~objectKeyBase() {}
 
     int id() const { return data()->id; }
-    bool hasIdentity() const { return id() > UNASSIGNED; }
-
     int parent() const { return data()->parent; }
-    bool hasParent() const { return data()->hasParent(); }
 
     QString description() const { return data()->description; }
     virtual QString displayText() const { return description().isEmpty() ? "(New)" : description(); }

@@ -1,5 +1,6 @@
 #include "mainSecurityModel.h"
 #include <QColor>
+#include "portfolio.h"
 #include "security.h"
 #include "assetAllocation.h"
 #include "snapshot.h"
@@ -122,13 +123,12 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     this->values.append((int)security_.dividendNAVAdjustment());
 }
 
-QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, const QMap<int, assetAllocation> &assetAllocation_,
-    const QMap<int, account> &accounts_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_)
+QList<baseRow*> securityRow::getRows(const portfolio &portfolio_, int beginDate_, int endDate_, const snapshot &portfolioSnapshot_,
+    const QList<orderBy> &columnSort_)
 {
     QList<baseRow*> returnList;
 
-    foreach(const security &sec, securities_)
+    foreach(const security &sec, portfolio_.securities())
     {
         if (sec.hidden())
             continue;
@@ -136,17 +136,17 @@ QList<baseRow*> securityRow::getRows(const QMap<int, security> &securities_, con
         QStringList aaDescription;
         for(QMap<int, double>::const_iterator i = sec.targets().constBegin(); i != sec.targets().constEnd(); ++i)
             aaDescription.prepend(
-                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : assetAllocation_.value(i.key()).displayText(), functions::doubleToPercentage(i.value()))
+                QString("%1 - %2").arg(i.key() == UNASSIGNED ? "(Unassigned)" : portfolio_.assetAllocations().value(i.key()).displayText(), functions::doubleToPercentage(i.value()))
             );
 
         returnList.append(
             new securityRow(
-                calculator_.nav(sec, beginDate_, endDate_),
-                calculator_.securitySnapshot(endDate_, sec.id()),
-                accounts_.value(sec.account()).costBasis(),
+                portfolio_.nav(sec, beginDate_, endDate_),
+                portfolio_.securitySnapshot(endDate_, sec.id()),
+                portfolio_.accounts().value(sec.account()).costBasis(),
                 portfolioSnapshot_,
                 sec,
-                sec.account() == UNASSIGNED ? QString() : accounts_.value(sec.account()).displayText(),
+                sec.account() == UNASSIGNED ? QString() : portfolio_.accounts().value(sec.account()).displayText(),
                 aaDescription.join(", "),
                 columnSort_
             )

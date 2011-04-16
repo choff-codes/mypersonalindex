@@ -7,7 +7,7 @@ class frmEditPortfolio_UI;
 class frmEditPortfolio_State : public frmEditState
 {
 public:
-    explicit frmEditPortfolio_State(const portfolio &portfolio_, QWidget *parent_ = 0);
+    frmEditPortfolio_State(const portfolio &portfolio_, QWidget *parent_ = 0);
     ~frmEditPortfolio_State();
 
     void enter() {} // no-op

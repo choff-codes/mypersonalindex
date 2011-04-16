@@ -6,12 +6,14 @@
 template <class T, class V>
 class QMap;
 class QSqlQuery;
-class QStringList;
 class queries;
-class calculatorNAV;
 class security;
 class assetAllocation;
+class symbol;
 class account;
+class snapshot;
+class snapshotSecurity;
+class historicalNAV;
 class portfolioData;
 class portfolio: public objectKey
 {
@@ -33,7 +35,6 @@ public:
     int startDate() const;
     void setStartDate(int startDate_);
 
-    calculatorNAV& calculator() const;
     QMap<int, security>& securities() const;
     QMap<int, assetAllocation>& assetAllocations() const;
     QMap<int, account>& accounts() const;
@@ -42,9 +43,19 @@ public:
     QString validate() const;
     void setID(int id_);
 
-    bool save(const queries &dataSource_);
     static bool save(const QMap<int, portfolio> &portfolios_, const queries &dataSource_);
     static portfolio load(const QSqlQuery &q_);
+
+    void clearCache() const;
+
+    snapshotSecurity securitySnapshot(int date_, int id_, int priorDate_ = 0) const;
+    snapshot portfolioSnapshot(int date_, int priorDate_ = 0) const;
+    snapshot assetAllocationSnapshot(int date_, int id_, int priorDate_ = 0) const;
+    snapshot accountSnapshot(int date_, int id_, int priorDate_ = 0) const;
+    snapshot symbolSnapshot(int date_, const symbol &key_, int beginDate_) const;
+
+    double nav(const objectKeyBase &key_, int beginDate_, int endDate_) const;
+    historicalNAV changeOverTime(const objectKeyBase &key_, int beginDate_, int endDate_) const;
 
     void detach();
 
@@ -52,6 +63,7 @@ private:
     QExplicitlySharedDataPointer<portfolioData> d;
 
     objectKeyData* data() const;
+    bool save(const queries &dataSource_);
 };
 
 #endif // PORTFOLIO_H

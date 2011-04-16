@@ -7,8 +7,8 @@
 template <class T, class V>
 class QMap;
 class QString;
-class symbolData;
 class historicalPrices;
+class symbolData;
 class symbol: public objectKey
 {
 public:

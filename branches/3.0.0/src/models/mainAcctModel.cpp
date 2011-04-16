@@ -3,7 +3,7 @@
 #include <QColor>
 #include "functions.h"
 #include "account.h"
-#include "calculatorNAV.h"
+#include "portfolio.h"
 #include "historicalNAV.h"
 
 //enum {
@@ -79,37 +79,37 @@ QMap<int, QString> acctRow::fieldNames()
     return names;
 }
 
-QList<baseRow*> acctRow::getRows(const QMap<int, account> &accounts_, int beginDate_, int endDate_, calculatorNAV calculator_,
-    const snapshot &portfolioSnapshot_, const QList<orderBy> &columnSort_)
+QList<baseRow*> acctRow::getRows(const portfolio &portfolio_, int beginDate_, int endDate_, const snapshot &portfolioSnapshot_,
+    const QList<orderBy> &columnSort_)
 {
     QList<baseRow*> returnList;
 
-    foreach(const account &acct, accounts_)
+    foreach(const account &acct, portfolio_.accounts())
     {
         if (acct.hidden())
             continue;
 
-        returnList.append(getRow(acct, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+        returnList.append(getRow(acct, beginDate_, endDate_, portfolio_, portfolioSnapshot_, columnSort_));
     }
 
     // check if any securities have an unassigned value
-    snapshot unassigned = calculator_.accountSnapshot(endDate_, UNASSIGNED);
+    snapshot unassigned = portfolio_.accountSnapshot(endDate_, UNASSIGNED);
     if (unassigned.count != 0)
     {
         account acct;
         acct.setDescription("(Unassigned)");
-        returnList.append(getRow(acct, beginDate_, endDate_, calculator_, portfolioSnapshot_, columnSort_));
+        returnList.append(getRow(acct, beginDate_, endDate_, portfolio_, portfolioSnapshot_, columnSort_));
     }
 
     return returnList;
 }
 
-baseRow* acctRow::getRow(const account &account_, int beginDate_, int endDate_, calculatorNAV calculator_, const snapshot &portfolioSnapshot_,
+baseRow* acctRow::getRow(const account &account_, int beginDate_, int endDate_, const portfolio &portfolio_, const snapshot &portfolioSnapshot_,
     const QList<orderBy> &columnSort_)
 {
     return new acctRow(
-        calculator_.nav(account_, beginDate_, endDate_),
-        calculator_.accountSnapshot(endDate_, account_.id()), portfolioSnapshot_, account_, columnSort_
+        portfolio_.nav(account_, beginDate_, endDate_),
+        portfolio_.accountSnapshot(endDate_, account_.id()), portfolioSnapshot_, account_, columnSort_
     );
 }
 

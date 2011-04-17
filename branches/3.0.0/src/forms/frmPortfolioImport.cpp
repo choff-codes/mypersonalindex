@@ -121,8 +121,6 @@ void frmPortfolioImport::accept()
         m_portfolio.setDescription(ui->descriptionTxt->text());
     }
 
-    // based off the save method in portfolio.cpp, with slight tweaks
-
     QMap<int, int> acctIDMapping;
 
     QTreeWidgetItem *acctItem = ui->tree->topLevelItem(0);

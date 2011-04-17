@@ -30,7 +30,7 @@
 #include <QTime>
 #endif
 
-frmMain::frmMain(QWidget *parent_):
+frmMain::frmMain(const QString &filePath_, QWidget *parent_):
     QMainWindow(parent_),
     ui(new frmMain_UI()),
     m_file(new fileState(this)),
@@ -42,7 +42,10 @@ frmMain::frmMain(QWidget *parent_):
     ui->setupUI(this);
     connectSlots();
     loadSettings();
-    m_file->newFile();
+    if (filePath_.isEmpty())
+        m_file->newFile();
+    else
+        m_file->open(filePath_);
 }
 
 frmMain::~frmMain()
@@ -125,11 +128,6 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
     refreshPortfolioCmb(UNASSIGNED);
 }
 
-void frmMain::setCurrentPortfolio(const portfolio &portfolio_)
-{
-    m_currentPortfolio = portfolio_.id();
-}
-
 void frmMain::refreshPortfolioCmb(int id_)
 {
     ui->portfolioDropDownCmb->blockSignals(true);
@@ -201,7 +199,7 @@ void frmMain::addPortfolio()
         return;
 
     m_file->identities = f.getIdentities();
-    addPortfolioToFile(f.getPortfolio());
+    portfolioAdded(f.getPortfolio());
 }
 
 void frmMain::editPortfolio()
@@ -215,7 +213,7 @@ void frmMain::editPortfolio()
         return;
 
     m_file->identities = f.getIdentities();
-    editPortfolioToFile(f.getPortfolio());
+    portfolioModified(f.getPortfolio());
 }
 
 void frmMain::deletePortfolio()
@@ -233,7 +231,7 @@ void frmMain::deletePortfolio()
     ui->portfolioDropDownCmb->removeItem(ui->portfolioDropDownCmb->currentIndex());
 }
 
-void frmMain::addPortfolioToFile(const portfolio &portfolio_)
+void frmMain::portfolioAdded(const portfolio &portfolio_)
 {
     setWindowModified(true);
     m_file->modified = true;
@@ -244,15 +242,14 @@ void frmMain::addPortfolioToFile(const portfolio &portfolio_)
     recalculateTrades(portfolio_);
 }
 
-void frmMain::editPortfolioToFile(const portfolio &portfolio_)
+void frmMain::portfolioModified(const portfolio &portfolio_)
 {
     setWindowModified(true);
     m_file->modified = true;
     m_file->portfolios[m_currentPortfolio] = portfolio_;
     refreshPortfolioPrices();
-
     ui->portfolioDropDownCmb->setItemText(ui->portfolioDropDownCmb->currentIndex(), portfolio_.displayText());
-    recalculateTrades(portfolio_, 0);
+    recalculateTrades(portfolio_);
 }
 
 void frmMain::refreshPortfolioPrices()
@@ -268,14 +265,14 @@ void frmMain::portfolioDropDownChange(int currentIndex_)
     ui->portfolioDelete->setDisabled(currentIndex_ == -1);
     ui->portfolioEdit->setDisabled(currentIndex_ == -1);
     ui->portfolioDropDownCmb->setDisabled(ui->portfolioDropDownCmb->count() == 0);
-    setCurrentPortfolio(currentIndex_ == -1 ? portfolio() : m_file->portfolios.value(ui->portfolioDropDownCmb->itemData(currentIndex_).toInt()));
+    m_currentPortfolio = currentIndex_ == -1 ? -1 : ui->portfolioDropDownCmb->itemData(currentIndex_).toInt();
     switchToTab(m_currentTab, true);
 }
 
 void frmMain::about()
 {
     QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString::number(APP_VERSION / 100.0) + "</h2>"
-        "<p>Copyright &copy; 2010"
+        "<p>Copyright &copy; 2011"
         "<p>By Matthew Wikler"
         "<p>Create personal indexes and perform analysis to make better investing decisions."
         "<br><a href='http://code.google.com/p/mypersonalindex/'>http://code.google.com/p/mypersonalindex/</a></p>");
@@ -289,12 +286,12 @@ void frmMain::importYahoo()
         return;
     }
 
-    QList<historicalPrices> prices;
-    QMap<QString, updatePricesOptions> options;
     QMap<QString, int> symbols = portfolio::symbols(m_file->portfolios);
     if (symbols.isEmpty())
         return;
 
+    QList<historicalPrices> prices;
+    QMap<QString, updatePricesOptions> options;
     for(QMap<QString, int>::const_iterator i = symbols.constBegin(); i != symbols.constEnd(); ++i)
     {
         prices.append(m_file->prices.getHistoricalPrice(i.key()));
@@ -348,10 +345,6 @@ void frmMain::recalculateTradesFinished()
     m_futureWatcherTrade = 0;
     hideProgressBar();
     clearTabs();
-
-    if (m_currentPortfolio != UNASSIGNED)
-        setCurrentPortfolio(m_file->portfolios.value(m_currentPortfolio));
-
     switchToTab(m_currentTab, true);
 }
 
@@ -446,9 +439,9 @@ void frmMain::importPortfolio()
         return;
 
     if (f.getPortfolio().id() != m_file->portfolios.value(m_currentPortfolio).id())
-        addPortfolioToFile(f.getPortfolio());
+        portfolioAdded(f.getPortfolio());
     else
-        editPortfolioToFile(f.getPortfolio());
+        portfolioModified(f.getPortfolio());
 }
 
 void frmMain::importPrice()

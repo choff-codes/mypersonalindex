@@ -72,7 +72,8 @@ void frmPriceImport::accept()
     QHash<int, int> columns = selectedColumnOrder();
 
     int row = -1;
-    while (!in.atEnd()) {
+    while (!in.atEnd())
+    {
         ++row;
         QStringList line = in.readLine().split(delimiter);
 

@@ -7,8 +7,8 @@
 #include "objectKeyEditModel.h"
 #include "securityAAModel.h"
 
-frmEditSecurity_State::frmEditSecurity_State(const portfolio &portfolio_, QWidget *parent_):
-    frmEditStateMap(portfolio_, parent_),
+frmEditSecurity_State::frmEditSecurity_State(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent_):
+    frmEditStateMap(portfolio_, identities_, parent_),
     ui(new frmEditSecurity_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.securities())))
@@ -129,7 +129,7 @@ void frmEditSecurity_State::validationError(const objectKeyBase &key_, const QSt
 void frmEditSecurity_State::add()
 {
     security s;
-    s.setNewIdentity();
+    s.setID(m_identities.nextIdentity(objectType_Security));
     s.setParent(m_portfolio.id());
     m_portfolio.securities().insert(s.id(), s);
     m_model->insert(new security(s));

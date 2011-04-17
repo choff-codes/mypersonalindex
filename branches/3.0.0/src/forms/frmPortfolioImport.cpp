@@ -8,11 +8,12 @@
 #include "trade.h"
 #include "executedTrade.h"
 
-frmPortfolioImport::frmPortfolioImport(const portfolio &portfolio_, const QMap<int, portfolio> portfolios_, QWidget *parent_) :
+frmPortfolioImport::frmPortfolioImport(const portfolio &portfolio_, const QMap<int, portfolio> portfolios_, const fileStateIdentity &identities_, QWidget *parent_) :
     QDialog(parent_),
     ui(new frmPortfolioImport_UI()),
     m_portfolio(portfolio_),
-    m_portfolios(portfolios_)
+    m_portfolios(portfolios_),
+    m_identities(identities_)
 {
     ui->setupUI(this);
 
@@ -116,7 +117,7 @@ void frmPortfolioImport::accept()
         m_portfolio.accounts().clear();
         m_portfolio.assetAllocations().clear();
         m_portfolio.securities().clear();
-        m_portfolio.setNewIdentity();
+        m_portfolio.setID(m_identities.nextIdentity(objectType_Portfolio));
         m_portfolio.setDescription(ui->descriptionTxt->text());
     }
 
@@ -133,7 +134,7 @@ void frmPortfolioImport::accept()
             account acct = importing.accounts().value(item->type());
             int oldID = acct.id();
             acct.detach();
-            acct.setNewIdentity();
+            acct.setID(m_identities.nextIdentity(objectType_Account));
             acctIDMapping.insert(oldID, acct.id());
             acct.setParent(m_portfolio.id());
             m_portfolio.accounts().insert(acct.id(), acct);
@@ -151,7 +152,7 @@ void frmPortfolioImport::accept()
             assetAllocation aa = importing.assetAllocations().value(item->type());
             int oldID = aa.id();
             aa.detach();
-            aa.setNewIdentity();
+            aa.setID(m_identities.nextIdentity(objectType_AA));
             aaIDMapping.insert(oldID, aa.id());
             aa.setParent(m_portfolio.id());
             m_portfolio.assetAllocations().insert(aa.id(), aa);
@@ -171,7 +172,7 @@ void frmPortfolioImport::accept()
             sec.detach();
             sec.executedTrades().clear();
             sec.trades().clear();
-            sec.setNewIdentity();
+            sec.setID(m_identities.nextIdentity(objectType_Security));
             secIDMapping.insert(oldID, sec.id());
             sec.setParent(m_portfolio.id());
             sec.setAccount(acctIDMapping.value(sec.account(), UNASSIGNED));
@@ -195,7 +196,7 @@ void frmPortfolioImport::accept()
         foreach(trade t, trades)
         {
             t.detach();
-            t.setNewIdentity();
+            t.setID(m_identities.nextIdentity(objectType_Trade));
             t.setParent(sec.id());
             t.setCashAccount(secIDMapping.value(t.cashAccount(), UNASSIGNED));
             sec.trades().insert(t.id(), t);

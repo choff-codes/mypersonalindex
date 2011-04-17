@@ -2,8 +2,8 @@
 #include <QMessageBox>
 #include "frmEditPortfolio_UI.h"
 
-frmEditPortfolio_State::frmEditPortfolio_State(const portfolio &portfolio_, QWidget *parent_):
-    frmEditState(portfolio_, parent_),
+frmEditPortfolio_State::frmEditPortfolio_State(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent_):
+    frmEditState(portfolio_, identities_, parent_),
     ui(new frmEditPortfolio_UI())
 {
     ui->setupUI(parent_);

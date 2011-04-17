@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "portfolio.h"
+#include "fileStateIdentity.h"
 
 class QDataStream;
 class frmEditState : public QObject
@@ -10,9 +11,10 @@ class frmEditState : public QObject
     Q_OBJECT
 
 public:
-    frmEditState(const portfolio &portfolio_, QObject *parent_):
+    frmEditState(const portfolio &portfolio_, const fileStateIdentity &identities_, QObject *parent_):
         QObject(parent_),
-        m_portfolio(portfolio_)
+        m_portfolio(portfolio_),
+        m_identities(identities_)
     {}
 
     virtual ~frmEditState() {}
@@ -30,6 +32,7 @@ protected slots:
 
 protected:
     portfolio m_portfolio;
+    fileStateIdentity m_identities;
     static const int m_magicNumber;
 
     virtual QString mimeType() const = 0;

@@ -6,8 +6,8 @@
 #include "functions.h"
 #include "objectKeyEditModel.h"
 
-frmEditTrade_State::frmEditTrade_State(const portfolio &portfolio_, QWidget *parent_):
-    frmEditStateMap(portfolio_, parent_),
+frmEditTrade_State::frmEditTrade_State(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent_):
+    frmEditStateMap(portfolio_, identities_, parent_),
     ui(new frmEditTrade_UI),
     m_currentItem(0),
     m_model(0),
@@ -185,7 +185,7 @@ void frmEditTrade_State::add()
         return;
 
     trade t;
-    t.setNewIdentity();
+    t.setID(m_identities.nextIdentity(objectType_Trade));
     t.setParent(ui->filterCmb->itemData(ui->filterCmb->currentIndex()).toInt());
     m_portfolio.securities()[t.parent()].trades().insert(t.id(), t);
     m_model->insert(new trade(t));

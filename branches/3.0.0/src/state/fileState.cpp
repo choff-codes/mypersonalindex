@@ -28,6 +28,7 @@ void fileState::newFile()
 
     portfolios.clear();
     prices.clear();
+    identities = fileStateIdentity();
     setCurrentFile("", true);
 }
 
@@ -172,9 +173,13 @@ void fileState::loadFile(const QString &filePath_, bool pricing_)
         return;
 
     queries file(updatedFilePath_);
+
     if (pricing_)
         prices = priceFactory(file).getHistoricalPrices();
-    portfolios = portfolioFactory(file).getPortfolios();
+    else
+        prices.clear();
+
+    portfolios = portfolioFactory(file).getPortfolios(identities);
 
     setCurrentFile(updatedFilePath_, true);
 }

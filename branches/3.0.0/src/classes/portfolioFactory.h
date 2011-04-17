@@ -5,6 +5,7 @@
 #include "portfolio.h"
 #include "queries.h"
 
+class fileStateIdentity;
 class portfolioFactory
 {
 public:
@@ -12,18 +13,18 @@ public:
         m_dataSource(dataSource_)
     {}
 
-    QMap<int, portfolio> getPortfolios();
+    QMap<int, portfolio> getPortfolios(const fileStateIdentity &identities_);
 
 private:
     queries m_dataSource;
 
-    QMap<int, portfolio> loadPortfolio();
-    void loadPortfolioSecurity(QMap<int, portfolio> &portfolios_);
+    int loadPortfolio(QMap<int, portfolio> &portfolios_);
+    int loadPortfolioSecurity(QMap<int, portfolio> &portfolios);
     void loadPortfolioSecurityAA(QMap<int, portfolio> &portfolios_);
-    void loadPortfolioSecurityTrades(QMap<int, portfolio> &portfolios_);
+    int loadPortfolioSecurityTrades(QMap<int, portfolio> &portfolios_);
     void loadPortfolioSecurityTradesExecution(QMap<int, portfolio> &portfolios_);
-    void loadPortfolioAA(QMap<int, portfolio> &portfolios_);
-    void loadPortfolioAccount(QMap<int, portfolio> &portfolios_);
+    int loadPortfolioAA(QMap<int, portfolio> &portfolios_);
+    int loadPortfolioAccount(QMap<int, portfolio> &portfolios_);
 };
 
 #endif // PORTFOLIOFACTORY_H

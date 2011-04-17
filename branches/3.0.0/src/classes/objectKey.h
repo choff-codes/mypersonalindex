@@ -61,15 +61,10 @@ public:
     virtual ~objectKey() {}
 
     void setDescription(const QString &description_) { data()->description = description_; }
-    virtual void setID(int id_) { data()->id = id_; idChange(false); }
+    virtual void setID(int id_) { data()->id = id_; }
     void setParent(int parent_) { data()->parent = parent_; }
 
-    void setNewIdentity() { idChange(true); }
-
     virtual void detach() = 0;
-
-private:
-    void idChange(bool newIdentity_);
 };
 
 

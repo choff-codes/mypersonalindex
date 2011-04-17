@@ -6,8 +6,8 @@
 #include "assetAllocationTarget.h"
 #include "objectKeyEditModel.h"
 
-frmEditAA_State::frmEditAA_State(const portfolio &portfolio_, QWidget *parent_):
-    frmEditStateMap(portfolio_, parent_),
+frmEditAA_State::frmEditAA_State(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent_):
+    frmEditStateMap(portfolio_, identities_, parent_),
     ui(new frmEditAA_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.assetAllocations())))
@@ -88,7 +88,7 @@ void frmEditAA_State::validationError(const objectKeyBase &key_, const QString &
 void frmEditAA_State::add()
 {
     assetAllocation aa;
-    aa.setNewIdentity();
+    aa.setID(m_identities.nextIdentity(objectType_AA));
     aa.setParent(m_portfolio.id());
     m_portfolio.assetAllocations().insert(aa.id(), aa);
     m_model->insert(new assetAllocation(aa));

@@ -5,8 +5,8 @@
 #include "security.h"
 #include "objectKeyEditModel.h"
 
-frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, QWidget *parent_):
-    frmEditStateMap(portfolio_, parent_),
+frmEditAcct_State::frmEditAcct_State(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent_):
+    frmEditStateMap(portfolio_, identities_, parent_),
     ui(new frmEditAcct_UI),
     m_currentItem(0),
     m_model(new objectKeyEditModel(mapToList(portfolio_.accounts())))
@@ -87,7 +87,7 @@ void frmEditAcct_State::validationError(const objectKeyBase &key_, const QString
 void frmEditAcct_State::add()
 {
     account acct;
-    acct.setNewIdentity();
+    acct.setID(m_identities.nextIdentity(objectType_Account));
     acct.setParent(m_portfolio.id());
     m_portfolio.accounts().insert(acct.id(), acct);
     m_model->insert(new account(acct));

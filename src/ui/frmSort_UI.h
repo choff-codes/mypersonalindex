@@ -17,21 +17,11 @@ public:
     QVBoxLayout *layout;
     QGroupBox *groupBox;
     QVBoxLayout *groupLayout;
-    QComboBox *sort1Cmb;
-    QGridLayout *sort1Layout;
-    QButtonGroup *group1;
-    QRadioButton *group1SortAscRadio;
-    QRadioButton *group1SortDescRadio;
-    QGridLayout *sort2Layout;
-    QComboBox *sort2Cmb;
-    QButtonGroup *group2;
-    QRadioButton *group2SortAscRadio;
-    QRadioButton *group2SortDescRadio;
-    QGridLayout *sort3Layout;
-    QComboBox *sort3Cmb;
-    QButtonGroup *group3;
-    QRadioButton *group3SortAscRadio;
-    QRadioButton *group3SortDescRadio;
+    QList<QComboBox*> sortCmb;
+    QList<QButtonGroup*> sortButtonGroup;
+    QList<QRadioButton*> sortAscRadio;
+    QList<QRadioButton*> sortDescRadio;
+    QList<QGridLayout*> sortLayout;
     QDialogButtonBox *okCancelBtn;
 
     void setupUI(QDialog *dialog_);

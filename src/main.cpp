@@ -10,7 +10,12 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationName("mypersonalindex");
     QSettings::setDefaultFormat(QSettings::IniFormat);
 
-    frmMain form;
+    QString filePath;
+    QStringList arguments = QCoreApplication::arguments();
+    if (arguments.size() > 1)
+        filePath = arguments.at(1);
+
+    frmMain form(filePath);
     form.show();
 
     return app.exec();

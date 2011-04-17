@@ -16,7 +16,7 @@ class frmMain : public QMainWindow
     Q_OBJECT
 
 public:
-    frmMain(QWidget *parent_ = 0);
+    frmMain(const QString &filePath_, QWidget *parent_ = 0);
     ~frmMain();
 
 private slots:
@@ -83,15 +83,14 @@ private:
     void saveSettings();
 
     void updateRecentFileActions(const QString &newFilePath_);
-    void setCurrentPortfolio(const portfolio &portfolio_);
     void refreshPortfolioCmb(int id_ = -1);
     void refreshPortfolioPrices();
     void showProgressBar(const QString &description_, int steps_);
     void hideProgressBar();
     void switchToTab(tab tab_, bool force_ = false);
     void clearTabs();
-    void addPortfolioToFile(const portfolio &portfolio_);
-    void editPortfolioToFile(const portfolio &portfolio_);
+    void portfolioAdded(const portfolio &portfolio_);
+    void portfolioModified(const portfolio &portfolio_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);

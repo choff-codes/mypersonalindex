@@ -7,22 +7,25 @@
 #include "frmEditPortfolio_State.h"
 
 
-frmEdit::frmEdit(portfolio portfolio_, QWidget *parent):
+frmEdit::frmEdit(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent):
     QDialog(parent),
     ui(new frmEdit_UI),
     m_portfolioToReturn(portfolio_),
     m_portfolio(portfolio_),
+    m_identitiesToReturn(identities_),
+    m_identities(identities_),
     m_currentTab(tab_portfolio)
 {
     m_portfolio.detach();
+    m_identities.detach();
 
     ui->setupUI(this);
 
-    m_tabs.insert(tab_portfolio, new frmEditPortfolio_State(m_portfolio, ui->portfolioTab));
-    m_tabs.insert(tab_account, new frmEditAcct_State(m_portfolio, ui->acctTab));
-    m_tabs.insert(tab_assetAllocation, new frmEditAA_State(m_portfolio, ui->aaTab));
-    m_tabs.insert(tab_security, new frmEditSecurity_State(m_portfolio, ui->securityTab));
-    m_tabs.insert(tab_trade, new frmEditTrade_State(m_portfolio, ui->tradeTab));
+    m_tabs.insert(tab_portfolio, new frmEditPortfolio_State(m_portfolio, m_identities, ui->portfolioTab));
+    m_tabs.insert(tab_account, new frmEditAcct_State(m_portfolio, m_identities, ui->acctTab));
+    m_tabs.insert(tab_assetAllocation, new frmEditAA_State(m_portfolio, m_identities, ui->aaTab));
+    m_tabs.insert(tab_security, new frmEditSecurity_State(m_portfolio, m_identities, ui->securityTab));
+    m_tabs.insert(tab_trade, new frmEditTrade_State(m_portfolio, m_identities, ui->tradeTab));
 
     connectSlots();
     m_tabs.value(tab_portfolio)->enter();
@@ -44,12 +47,13 @@ void frmEdit::connectSlots()
 
 void frmEdit::accept()
 {
-    m_tabs.value(m_currentTab)->save();;
+    m_tabs.value(m_currentTab)->save();
 
     if (!validate())
         return;
 
     m_portfolioToReturn = m_portfolio;
+    m_identitiesToReturn = m_identities;
     QDialog::accept();
 }
 
@@ -62,6 +66,8 @@ void frmEdit::apply()
 
     m_portfolioToReturn = m_portfolio;
     m_portfolioToReturn.detach();
+    m_identitiesToReturn = m_identities;
+    m_identitiesToReturn.detach();
 }
 
 void frmEdit::tabChange(int currentIndex_)

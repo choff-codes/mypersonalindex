@@ -1,10 +1,10 @@
 #ifndef FILESTATE_H
 #define FILESTATE_H
 
-#include <QObject>
 #include <QMap>
 #include <portfolio.h>
 #include "historicalPrices.h"
+#include "fileStateIdentity.h"
 
 class fileState : public QObject
 {
@@ -17,6 +17,9 @@ public:
 
     // all portfolios in the current file
     QMap<int, portfolio> portfolios;
+
+    // track new identities
+    fileStateIdentity identities;
 
     // all prices in the current file
     historicalPricesMap prices;

@@ -194,12 +194,13 @@ void frmMain::recentFileSelected()
 void frmMain::addPortfolio()
 {
     portfolio p;
-    p.setNewIdentity();
-    frmEdit f(p, this);
+    p.setID(m_file->identities.nextIdentity(objectType_Portfolio));
+    frmEdit f(p, m_file->identities, this);
     f.exec();
     if (p == f.getPortfolio())
         return;
 
+    m_file->identities = f.getIdentities();
     addPortfolioToFile(f.getPortfolio());
 }
 
@@ -208,11 +209,12 @@ void frmMain::editPortfolio()
     if (m_currentPortfolio == UNASSIGNED)
         return;
 
-    frmEdit f(m_file->portfolios.value(m_currentPortfolio), this);
+    frmEdit f(m_file->portfolios.value(m_currentPortfolio), m_file->identities, this);
     f.exec();
     if (m_file->portfolios.value(m_currentPortfolio) == f.getPortfolio())
         return;
 
+    m_file->identities = f.getIdentities();
     editPortfolioToFile(f.getPortfolio());
 }
 
@@ -439,7 +441,7 @@ void frmMain::importPortfolio()
     else
         portfolios = m_file->portfolios;
 
-    frmPortfolioImport f(m_currentPortfolio == UNASSIGNED ? portfolio() : m_file->portfolios.value(m_currentPortfolio), portfolios, this);
+    frmPortfolioImport f(m_currentPortfolio == UNASSIGNED ? portfolio() : m_file->portfolios.value(m_currentPortfolio), portfolios, m_file->identities, this);
     if (f.exec() != QDialog::Accepted)
         return;
 

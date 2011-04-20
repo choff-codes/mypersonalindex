@@ -24,7 +24,7 @@ const QStringList acctRow::columns = QStringList()
                                      << "Cost Basis"
                                      << "Total Value"
                                      << "% of Portfolio"
-                                     << "Change In Value"
+                                     << "Gain/Loss"
                                      << "Return"
                                      << "Tax Rate"
                                      << "Tax Liability"

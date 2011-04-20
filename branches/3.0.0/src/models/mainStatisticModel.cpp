@@ -59,7 +59,7 @@ const QStringList statisticRow::columns = QStringList()
                                           << "Date"
                                           << "Days Invested"
                                           << "Total Dividends"
-                                          << "Change In Value"
+                                          << "Gain/Loss"
                                           << "Hourly Return"
                                           << "Max % Down"
                                           << "Max % Down Day"

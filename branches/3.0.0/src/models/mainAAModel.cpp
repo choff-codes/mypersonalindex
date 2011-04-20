@@ -25,7 +25,7 @@ const QStringList aaRow::columns = QStringList()
                                    << "Cost Basis"
                                    << "Total Value"
                                    << "% of Portfolio"
-                                   << "Change In Value"
+                                   << "Gain/Loss"
                                    << "Return"
                                    << "Target"
                                    << "Variance"

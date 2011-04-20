@@ -57,6 +57,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     priceDownload = new QAction("Update Prices From Internet", mainWindow_);
     priceDownload->setShortcut(Qt::CTRL + Qt::Key_U);
     priceImport = new QAction("Manually Import Price Information...", mainWindow_);
+    priceClear = new QAction("Clear All Price Information...", mainWindow_);
 
     help = new QMenu("&Help", menubar);
     helpAbout = new QAction("About", mainWindow_);
@@ -96,6 +97,8 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 
     price->addAction(priceDownload);
     price->addAction(priceImport);
+    price->addSeparator();
+    price->addAction(priceClear);
 
     help->addAction(helpAbout);
 

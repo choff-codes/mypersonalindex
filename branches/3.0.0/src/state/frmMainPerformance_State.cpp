@@ -49,11 +49,9 @@ mpiViewModelBase* frmMainPerformance_State::createModel(int beginDate_, int endD
     if (m_selectedItems.isEmpty())
         return new mainPerformanceModel(QList<baseRow*>(), m_settings.viewableColumns(columnEnumValue()), ui->table);
 
-    historicalNAV nav = calculateNAV(m_selectedItems.at(0), beginDate_, endDate_);
-
     return new mainPerformanceModel(
         performanceRow::getRows(
-            nav,
+            calculateNAV(m_selectedItems.at(0), beginDate_, endDate_),
             m_settings.viewableColumnsSorting(columnEnumValue())
         ),
         m_settings.viewableColumns(columnEnumValue()),

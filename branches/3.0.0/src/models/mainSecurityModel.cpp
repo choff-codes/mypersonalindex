@@ -43,8 +43,8 @@ const QStringList securityRow::columns = QStringList()
                                          << "Cost Basis"
                                          << "Total Value"
                                          << "% of\nPortfolio"
-                                         << "Gain/Loss"
-                                         << "% Gain/Loss"
+                                         << "Change In Value"
+                                         << "Return"
                                          << "Account"
                                          << "Asset Allocation"
                                          << "Tax Liability"
@@ -91,7 +91,6 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     this->values.append(snapshot_.shares);
     //    row_Avg,
     // cash should always be computed as average
-    //s.cashAccount() ? account::costBasisMethod_AVG : portfolio_.accounts().value(s.account()).costBasis(),
     this->values.append(
         functions::isZero(snapshot_.shares) ?
             QVariant() :
@@ -104,7 +103,7 @@ securityRow::securityRow(double nav_, const snapshotSecurity &snapshot_, account
     //    row_Value,
     this->values.append(snapshot_.totalValue);
     //    row_ValueP,
-    this->values.append(functions::isZero(portfolioSnapshot_.totalValue) ? QVariant() : snapshot_.totalValue / portfolioSnapshot_.totalValue);
+    this->values.append(functions::checkDivisor(portfolioSnapshot_.totalValue, snapshot_.totalValue));
     //    row_Gain,
     this->values.append(snapshot_.totalValue - snapshot_.costBasis);
     //    row_GainP,

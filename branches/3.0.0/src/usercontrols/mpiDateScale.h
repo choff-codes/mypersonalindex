@@ -7,11 +7,7 @@
 class mpiDateScale: public QwtScaleDraw
 {
 public:
-
-    QwtText label(double v_) const
-    {
-        return QDate::fromJulianDay((int)v_).toString(Qt::SystemLocaleShortDate);
-    }
+    QwtText label(double v_) const { return QDate::fromJulianDay((int)v_).toString(Qt::SystemLocaleShortDate); }
 };
 
 #endif // MPIDATESCALE_H

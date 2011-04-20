@@ -9,7 +9,6 @@ class statisticRow: public baseRow
 {
 public:
     enum {
-        row_PortfolioID,
         row_ObjectType,
         row_ID,
         row_Description,
@@ -50,17 +49,16 @@ public:
     static const QStringList columns;
     static const QVariantList columnsType;
 
-    statisticRow(int portfolioID_, int type_, int id_, const QString description_);
-    statisticRow(int portfolioID_, int type_, int id_, const QString description_,
-        const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_);
+    statisticRow(int type_, int id_, const QString description_);
+    statisticRow(int type_, int id_, const QString description_, const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_);
 
     bool operator==(const statisticRow &other_) const;
     bool operator!=(const statisticRow &other_) const { return !(*this == other_); }
     QVariant columnType(int column) const { return columnsType.at(column); }
     static QMap<int, QString> fieldNames();
 
-    double indexReturn(const statistic &statistic_, double divisor_);
-    double cumulativeNormalDistribution(const statistic &statistic_);
+    static double indexReturn(const statistic &statistic_, double divisor_);
+    static double cumulativeNormalDistribution(const statistic &statistic_);
 };
 
 class mainStatisticModel: public mpiViewModelBase

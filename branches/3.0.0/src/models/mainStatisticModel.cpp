@@ -8,7 +8,6 @@
 #include "statistic.h"
 
 //enum {
-//    row_PortfolioID,
 //    row_ObjectType,
 //    row_ID,
 //    row_Description,
@@ -49,36 +48,35 @@
 //};
 
 const QStringList statisticRow::columns = QStringList()
-                                          << "PortfolioID"
                                           << "Type"
                                           << "ID"
                                           << "Description"
                                           << "Beginning Value"
                                           << "Cost Basis"
-                                          << "Current Value"
+                                          << "Total Value"
                                           << "Daily Return"
                                           << "Daily Standard Deviation"
                                           << "Date"
                                           << "Days Invested"
                                           << "Total Dividends"
-                                          << "Gain Loss"
+                                          << "Change In Value"
                                           << "Hourly Return"
                                           << "Max % Down"
                                           << "Max % Down Day"
                                           << "Max % Up"
                                           << "Max % Up Day"
-                                          << "Maximum Index Value"
-                                          << "Maximum Index Value Day"
+                                          << "Maximum Return"
+                                          << "Maximum Return Day"
                                           << "Maximum Total Value"
                                           << "Maximum Total Value Day"
-                                          << "Minimum Index Value"
-                                          << "Minimum Index Value Day"
+                                          << "Minimum Return"
+                                          << "Minimum Return Day"
                                           << "Minimum Total Value"
                                           << "Minimum Total Value Day"
                                           << "Monthly Return"
                                           << "Monthly Standard Deviation"
-                                          << "Net Change"
-                                          << "Overall Return"
+                                          << "Change In Value"
+                                          << "Return"
                                           << "Probability Of Yearly Gain"
                                           << "Probability Of Yearly Loss"
                                           << "Tax Liability"
@@ -87,7 +85,6 @@ const QStringList statisticRow::columns = QStringList()
                                           << "Weighted Expense Ratio";
 
 const QVariantList statisticRow::columnsType = QVariantList()
-                                               << QVariant(QVariant::Int)
                                                << QVariant(QVariant::Int)
                                                << QVariant(QVariant::Int)
                                                << QVariant(QVariant::String)
@@ -124,11 +121,9 @@ const QVariantList statisticRow::columnsType = QVariantList()
                                                << QVariant(QVariant::Double)
                                                << QVariant(QVariant::Double);
 
-statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString description_):
+statisticRow::statisticRow(int type_, int id_, const QString description_):
     baseRow(QList<orderBy>())
 {
-    //    row_PortfolioID,
-    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
@@ -137,13 +132,10 @@ statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString d
     values.append(description_);
 }
 
-statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString description_,
-    const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_):
+statisticRow::statisticRow(int type_, int id_, const QString description_, const historicalNAV &historicalNav_, const QList<orderBy> &columnSort_):
     baseRow(columnSort_)
 {
     statistic info(historicalNav_);
-    //    row_PortfolioID,
-    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
@@ -219,8 +211,7 @@ statisticRow::statisticRow(int portfolioID_, int type_, int id_, const QString d
 
 bool statisticRow::operator==(const statisticRow &other_) const
 {
-    return values.at(row_PortfolioID).toInt() == other_.values.at(row_PortfolioID).toInt()
-        && values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
+    return values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
         && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt()
         && values.at(row_Description).toString() == other_.values.at(row_Description).toString();
 }
@@ -232,7 +223,6 @@ QMap<int, QString> statisticRow::fieldNames()
     for (int i = 0; i < columns.count(); ++i)
         names[i] = functions::removeNewLines(columns.at(i));
 
-    names.remove(row_PortfolioID);
     names.remove(row_ObjectType);
     names.remove(row_ID);
     names.remove(row_Description);
@@ -357,7 +347,7 @@ void mainStatisticModel::add(statisticRow *row_)
     m_rows.append(row_);
     endInsertColumns();
 
-    sortColumns();
+    sortRows();
     emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }
 

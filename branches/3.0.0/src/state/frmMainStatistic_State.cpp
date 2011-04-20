@@ -39,13 +39,13 @@ void frmMainStatistic_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/
     if (item_->checkState(0) == Qt::Unchecked)
     {
         m_selectedItems.removeOne(key);
-        static_cast<mainStatisticModel*>(ui->table->model())->remove(statisticRow(key.portfolioID, key.type, key.id, key.displayText));
+        static_cast<mainStatisticModel*>(ui->table->model())->remove(statisticRow(key.type, key.id, key.displayText));
         return;
     }
 
     m_selectedItems.append(key);
     static_cast<mainStatisticModel*>(ui->table->model())->add(
-        new statisticRow(key.portfolioID, key.type, key.id, key.displayText, calculateNAV(key, beginDate, endDate), m_settings.viewableColumnsSorting(columnEnumValue()))
+        new statisticRow(key.type, key.id, key.displayText, calculateNAV(key, beginDate, endDate), m_settings.viewableColumnsSorting(columnEnumValue()))
     );
 }
 
@@ -56,10 +56,9 @@ mpiViewModelBase* frmMainStatistic_State::createModel(int beginDate_, int endDat
 
     QList<baseRow*> rows;
     foreach(const treeItemKey &item, m_selectedItems)
-    {
-        statisticRow *row = new statisticRow(item.portfolioID, item.type, item.id, item.displayText, calculateNAV(item, beginDate_, endDate_), m_settings.viewableColumnsSorting(columnEnumValue()));
-        rows.append(row);
-    }
+        rows.append (
+            new statisticRow(item.type, item.id, item.displayText, calculateNAV(item, beginDate_, endDate_), m_settings.viewableColumnsSorting(columnEnumValue()))
+        );
 
     return new mainStatisticModel(rows, m_settings.viewableColumns(columnEnumValue()), ui->table);
 }

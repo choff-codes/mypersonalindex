@@ -22,22 +22,41 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     groupBox = new QGroupBox("Security", widgetRight);
     layoutForm = new QFormLayout(groupBox);
 
-    symbol = new QLabel("&Symbol:", groupBox);
+    QString symbolTool = "The symbol of the security.";
+    QString notesTool = "Personal notes about thse security.";
+    QString accountTool = "The account you purchased the security.";
+    QString expenseTool = "Expense ratio of a mutual fund, ETF, etc.";
+    QString cashTool = "If this is a cash security (money market, CD, etc.) check this. The price will be fixed at $1.";
+    QString reinvestTool = "Purchase additional shares with each dividend distributed by the security.";
+    QString navTool = "Does a dividend decrease the price of the security? For example, GE decreases by the value of the\ndividend on ex-date so this should be checked. Some fixed income funds may need to uncheck this.";
+    QString includeTool = "Easily exclude the security from the portfolio without deleting it.";
+    QString hideTool = "Do not display on the security view.";
+
+
+    symbol = new QLabel("Symbol:", groupBox);
+    symbol->setToolTip(symbolTool);
     symbolTxt = new QLineEdit(groupBox);
+    symbolTxt->setToolTip(symbolTool);
     layoutForm->setWidget(0, QFormLayout::LabelRole, symbol);
     layoutForm->setWidget(0, QFormLayout::FieldRole, symbolTxt);
-    notes = new QLabel("&Notes:", groupBox);
+    notes = new QLabel("Notes:", groupBox);
+    notes->setToolTip(notesTool);
     notesTxt = new QTextEdit(groupBox);
+    notesTxt->setToolTip(notesTool);
     notesTxt->setAcceptRichText(false);
     layoutForm->setWidget(1, QFormLayout::LabelRole, notes);
     layoutForm->setWidget(1, QFormLayout::FieldRole, notesTxt);
-    acct = new QLabel("&Account:", groupBox);
+    acct = new QLabel("Account:", groupBox);
+    acct->setToolTip(accountTool);
     acctCmb = new QComboBox(groupBox);
+    acctCmb->setToolTip(accountTool);
     layoutForm->setWidget(2, QFormLayout::LabelRole, acct);
     layoutForm->setWidget(2, QFormLayout::FieldRole, acctCmb);
-    expense = new QLabel("&Expense:", groupBox);
+    expense = new QLabel("Expense:", groupBox);
+    expense->setToolTip(expenseTool);
     expenseLayout = new QHBoxLayout();
     expenseSpinBox = new QDoubleSpinBox(groupBox);
+    expenseSpinBox->setToolTip(expenseTool);
     expenseSpinBox->setMinimum(0);
     expenseSpinBox->setSingleStep(0.01);
     expenseSpinBox->setValue(0);
@@ -45,28 +64,33 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     expenseSpinBox->setSuffix("%");
 
     expenseBtnClear = new QToolButton(groupBox);
-    expenseBtnClear->setText("&Clear");
+    expenseBtnClear->setText("Clear");
     expenseLayout->addWidget(expenseSpinBox, 1);
     expenseLayout->addWidget(expenseBtnClear);
     layoutForm->setWidget(3, QFormLayout::LabelRole, expense);
     layoutForm->setLayout(3, QFormLayout::FieldRole, expenseLayout);
-    cashChk = new QCheckBox("Cash Acc&ount", groupBox);
+    cashChk = new QCheckBox("Cash Equivalent", groupBox);
+    cashChk->setToolTip(cashTool);
     layoutForm->setWidget(4, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(4, QFormLayout::FieldRole, cashChk);
-    dividendReinvestmentChk = new QCheckBox("&Reinvest Dividends", groupBox);
+    dividendReinvestmentChk = new QCheckBox("Reinvest Dividends", groupBox);
+    dividendReinvestmentChk->setToolTip(reinvestTool);
     layoutForm->setWidget(5, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(5, QFormLayout::FieldRole, dividendReinvestmentChk);
-    dividendNAVAdjustmentChk = new QCheckBox("&Adjust NAV for Dividends", groupBox);
+    dividendNAVAdjustmentChk = new QCheckBox("Adjust NAV for Dividends", groupBox);
+    dividendNAVAdjustmentChk->setToolTip(navTool);
     layoutForm->setWidget(6, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(6, QFormLayout::FieldRole, dividendNAVAdjustmentChk);
-    includeChk = new QCheckBox("Incl&ude in Calculations", groupBox);
+    includeChk = new QCheckBox("Include in Calculations", groupBox);
+    includeChk->setToolTip(includeTool);
     layoutForm->setWidget(7, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(7, QFormLayout::FieldRole, includeChk);
-    hideChk = new QCheckBox("Hide in Port&folio", groupBox);
+    hideChk = new QCheckBox("Hide in Portfolio", groupBox);
+    hideChk->setToolTip(hideTool);
     layoutForm->setWidget(8, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(8, QFormLayout::FieldRole, hideChk);
 
-    aaGroupBox = new QGroupBox("Asset Allocation", widgetRight);
+    aaGroupBox = new QGroupBox("Asset Allocation (Double click on % to edit)", widgetRight);
     aaLayout = new QVBoxLayout(aaGroupBox);
     aa = new QTableView(aaGroupBox);
     aa->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -77,11 +101,13 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
 
     aaLayoutBottom = new QGridLayout();
     aaCmb = new QComboBox(aaGroupBox);
-    aaAddBtn = new QPushButton("A&dd Asset Class", aaGroupBox);
-    aaDeleteBtn = new QPushButton("De&lete Asset Class", aaGroupBox);
-    aaLayoutBottom->addWidget(aaCmb, 0, 0, 1, 2);
-    aaLayoutBottom->addWidget(aaAddBtn, 1, 0);
-    aaLayoutBottom->addWidget(aaDeleteBtn, 1, 1);
+    aaAddBtn = new QPushButton("Add Asset Class", aaGroupBox);
+    aaDeleteBtn = new QPushButton("Remove Selected", aaGroupBox);
+    aaLayoutBottom->addWidget(aaCmb, 0, 0);
+    aaLayoutBottom->addWidget(aaAddBtn, 0, 1);
+    aaLayoutBottom->addWidget(aaDeleteBtn, 1, 0, 1, 2);
+    aaLayoutBottom->setColumnStretch(0, 2);
+
     aaLayout->addWidget(aa);
     aaLayout->addLayout(aaLayoutBottom, 1);
 

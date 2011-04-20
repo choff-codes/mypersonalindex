@@ -17,8 +17,8 @@ const QStringList performanceRow::columns = QStringList()
                                             << "Date"
                                             << "Total Value"
                                             << "Dividends"
-                                            << "% Change"
-                                            << "% Gain";
+                                            << "Change"
+                                            << "Return";
 
 const QVariantList performanceRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)

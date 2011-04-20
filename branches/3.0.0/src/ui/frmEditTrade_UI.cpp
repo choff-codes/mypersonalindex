@@ -28,8 +28,20 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     groupBox = new QGroupBox("Trade", widgetBottom);
     layoutForm = new QFormLayout(groupBox);
 
-    action = new QLabel("&Action:", groupBox);
+    QString actionTool = "The intent of the trade.";
+    QString priceTool = "Enter the price of the trade by checking \"Price\", otherwise you can use a downloaded\nprice from the market close or the prior date close (open price)";
+    QString commissionTool = "Fee paid for this trade.";
+    QString cashTool = "An opposite trade will be booked to this security automatically.";
+    QString notesTool = "Personal notes about the trade.";
+    QString freqTool = "Is this a one time trade? If not you can set up a recurring trade.";
+    QString dateTool = "The dates which this trade occurs.";
+    QString startDateTool = "When to begin for recurring trades.";
+    QString endDateTool = "When to end for recurring trades.";
+
+    action = new QLabel("Action:", groupBox);
+    action->setToolTip(actionTool);
     actionCmb = new QComboBox(groupBox);
+    actionCmb->setToolTip(actionTool);
 
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_Purchase), trade::tradeAction_Purchase);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchaseFixedAmount), trade::tradeAction_PurchaseFixedAmount);
@@ -44,7 +56,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
 
     layoutForm->setWidget(0, QFormLayout::LabelRole, action);
     layoutForm->setWidget(0, QFormLayout::FieldRole, actionCmb);
-    shares = new QLabel("&Shares:", groupBox);
+    shares = new QLabel("Shares:", groupBox);
     sharesSpinBox = new QDoubleSpinBox(groupBox);
     sharesSpinBox->setDecimals(4);
     sharesSpinBox->setMinimum(0);
@@ -53,9 +65,11 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     sharesSpinBox->setValue(0);
     layoutForm->setWidget(1, QFormLayout::LabelRole, shares);
     layoutForm->setWidget(1, QFormLayout::FieldRole, sharesSpinBox);
-    priceChk = new QCheckBox("&Price:", groupBox);
+    priceChk = new QCheckBox("Price:", groupBox);
+    priceChk->setToolTip(priceTool);
     priceWidget = new QStackedWidget(groupBox);
     priceSpinBox = new QDoubleSpinBox(groupBox);
+    priceSpinBox->setToolTip(priceTool);
     priceSpinBox->setDecimals(4);
     priceSpinBox->setMinimum(0);
     priceSpinBox->setSingleStep(1);
@@ -68,8 +82,10 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     priceWidget->addWidget(priceSpinBox);
     layoutForm->setWidget(2, QFormLayout::LabelRole, priceChk);
     layoutForm->setWidget(2, QFormLayout::FieldRole, priceWidget);
-    commission = new QLabel("&Commission:", groupBox);
+    commission = new QLabel("Commission:", groupBox);
+    commission->setToolTip(commissionTool);
     commissionSpinBox = new QDoubleSpinBox(groupBox);
+    commissionSpinBox->setToolTip(commissionTool);
     commissionSpinBox->setDecimals(2);
     commissionSpinBox->setMinimum(0);
     commissionSpinBox->setSingleStep(1);
@@ -77,12 +93,16 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     commissionSpinBox->setValue(0);
     layoutForm->setWidget(3, QFormLayout::LabelRole, commission);
     layoutForm->setWidget(3, QFormLayout::FieldRole, commissionSpinBox);
-    cash = new QLabel("T&o/From Cash:", groupBox);
+    cash = new QLabel("To/From Cash:", groupBox);
+    cash->setToolTip(cashTool);
     cashCmb = new QComboBox(groupBox);
+    cashCmb->setToolTip(cashTool);
     layoutForm->setWidget(4, QFormLayout::LabelRole, cash);
     layoutForm->setWidget(4, QFormLayout::FieldRole, cashCmb);
-    note = new QLabel("&Notes:", groupBox);
+    note = new QLabel("Notes:", groupBox);
+    note->setToolTip(notesTool);
     noteTxt = new QTextEdit(groupBox);
+    noteTxt->setToolTip(notesTool);
     noteTxt->setAcceptRichText(false);
     layoutForm->setWidget(5, QFormLayout::LabelRole, note);
     layoutForm->setWidget(5, QFormLayout::FieldRole, noteTxt);
@@ -90,8 +110,10 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     groupBoxDate = new QGroupBox("Date", widgetBottom);
     dateLayout = new QFormLayout(groupBoxDate);
 
-    freq = new QLabel("&Frequency:", groupBoxDate);
+    freq = new QLabel("Frequency:", groupBoxDate);
+    freq->setToolTip(freqTool);
     freqCmb = new QComboBox(groupBoxDate);
+    freqCmb->setToolTip(freqTool);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Once), tradeDateCalendar::frequency_Once);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Daily), tradeDateCalendar::frequency_Daily);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Weekly), tradeDateCalendar::frequency_Weekly);
@@ -100,17 +122,23 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
 
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);
     dateLayout->setWidget(0, QFormLayout::FieldRole, freqCmb);
-    date = new QLabel("&Date:", groupBoxDate);
+    date = new QLabel("Date:", groupBoxDate);
+    date->setToolTip(dateTool);
     dateDateEdit = new mpiDateEdit(groupBoxDate);
+    dateDateEdit->setToolTip(dateTool);
     dateLayout->setWidget(1, QFormLayout::LabelRole, date);
     dateLayout->setWidget(1, QFormLayout::FieldRole, dateDateEdit);
-    startingChk = new QCheckBox("St&arting:", groupBoxDate);
+    startingChk = new QCheckBox("Starting:", groupBoxDate);
+    startingChk->setToolTip(startDateTool);
     startingDateEdit = new mpiDateEdit(groupBoxDate);
+    startingDateEdit->setToolTip(startDateTool);
     startingDateEdit->setEnabled(false);
     dateLayout->setWidget(2, QFormLayout::LabelRole, startingChk);
     dateLayout->setWidget(2, QFormLayout::FieldRole, startingDateEdit);
-    endingChk = new QCheckBox("&Ending:", groupBoxDate);
+    endingChk = new QCheckBox("Ending:", groupBoxDate);
+    endingChk->setToolTip(endDateTool);
     endingDateEdit = new mpiDateEdit(groupBoxDate);
+    endingDateEdit->setToolTip(endDateTool);
     endingDateEdit->setEnabled(false);
     dateLayout->setWidget(3, QFormLayout::LabelRole, endingChk);
     dateLayout->setWidget(3, QFormLayout::FieldRole, endingDateEdit);

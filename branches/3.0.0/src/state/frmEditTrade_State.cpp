@@ -56,10 +56,13 @@ QList<objectKeyBase*> frmEditTrade_State::sort(QList<objectKeyBase*> list_) cons
 
 bool frmEditTrade_State::tradeSort(const objectKeyBase* const row1_, const objectKeyBase* const row2_)
 {
-    if (static_cast<const trade*>(row1_)->frequency() == static_cast<const trade*>(row2_)->frequency())
-        return static_cast<const trade*>(row1_)->date() < static_cast<const trade*>(row2_)->date();
+    const trade* t1 = static_cast<const trade*>(row1_);
+    const trade* t2 = static_cast<const trade*>(row2_);
 
-    return static_cast<const trade*>(row1_)->frequency() < static_cast<const trade*>(row2_)->frequency();
+    if (t1->frequency() == t2->frequency())
+        return t1->date() < t2->date();
+
+    return t1->frequency() < t2->frequency();
 }
 
 void frmEditTrade_State::enter()
@@ -122,7 +125,7 @@ void frmEditTrade_State::securityFilterChange(int index_)
     }
 
     QAbstractItemModel *model = m_model;
-    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities()[securityID].trades()));
+    m_model = new objectKeyEditModel(mapToList(m_portfolio.securities().value(securityID).trades()));
     ui->list->setModel(m_model);
     delete model;
 

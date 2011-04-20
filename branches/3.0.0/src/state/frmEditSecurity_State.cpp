@@ -143,7 +143,7 @@ void frmEditSecurity_State::load()
         return;
 
     ui->symbolTxt->blockSignals(true);
-    ui->symbolTxt->setText(m_currentItem->description());
+    ui->symbolTxt->setText(m_currentItem->description().toUpper());
     ui->symbolTxt->blockSignals(false);
     ui->acctCmb->setCurrentIndex(ui->acctCmb->findData(m_currentItem->account()));
     ui->expenseSpinBox->setValue(m_currentItem->expenseRatio() * 100);

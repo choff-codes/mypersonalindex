@@ -107,7 +107,7 @@ QTreeWidgetItem* frmMainStateTree::createTreeItem(objectType type_, int portfoli
 
 historicalNAV frmMainStateTree::calculateNAV(const treeItemKey &item_, int beginDate_, int endDate_)
 {
-    if (!item_.id == UNASSIGNED)
+    if (item_.id == UNASSIGNED)
         return historicalNAV();
 
     portfolio p = m_portfolios.value(item_.portfolioID);

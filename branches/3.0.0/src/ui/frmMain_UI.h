@@ -41,6 +41,7 @@ public:
     QMenu *price;
     QAction *priceDownload;
     QAction *priceImport;
+    QAction *priceClear;
     QMenu *help;
     QAction *helpAbout;
     QMenuBar *menubar;

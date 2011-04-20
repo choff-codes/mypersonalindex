@@ -39,7 +39,7 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
     if (item_->checkState(0) == Qt::Unchecked)
     {
         m_selectedItems.removeOne(key);
-        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow(key.portfolioID, key.type, key.id, key.displayText));
+        static_cast<mainCorrelationModel*>(ui->table->model())->remove(correlationRow(key.type, key.id, key.displayText));
         return;
     }
 
@@ -52,13 +52,13 @@ void frmMainCorrelation_State::itemChecked(QTreeWidgetItem *item_, int /*column_
             continue;
 
         double correlation = calculatorCorrelation::correlation(nav, calculateNAV(item, beginDate, endDate));
-        correlations.insert(correlationRow(item.portfolioID, item.type, item.id, item.displayText), correlation);
+        correlations.insert(correlationRow(item.type, item.id, item.displayText), correlation);
     }
 
     m_selectedItems.append(key);
     static_cast<mainCorrelationModel*>(ui->table->model())->add(
-        new correlationRow(key.portfolioID, key.type, key.id, key.displayText, correlations),
-        correlationRow(key.portfolioID, key.type, key.id, key.displayText)
+        new correlationRow(key.type, key.id, key.displayText, correlations),
+        correlationRow(key.type, key.id, key.displayText)
     );
 }
 
@@ -73,7 +73,7 @@ mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endD
 
     foreach(const treeItemKey &item, m_selectedItems)
     {
-        correlationRow *row = new correlationRow(item.portfolioID, item.type, item.id, item.displayText, QMap<correlationRow, double>());
+        correlationRow *row = new correlationRow(item.type, item.id, item.displayText, QMap<correlationRow, double>());
         rows.append(row);
         rowsMap.insert(item, row);
     }
@@ -87,8 +87,8 @@ mpiViewModelBase* frmMainCorrelation_State::createModel(int beginDate_, int endD
             treeItemKey item2 = m_selectedItems.at(x);
 
             double correlation = calculatorCorrelation::correlation(calculateNAV(item1, beginDate_, endDate_), calculateNAV(item2, beginDate_, endDate_));
-            rowsMap[item1]->correlationValues.insert(correlationRow(item2.portfolioID, item2.type, item2.id, item2.displayText), correlation);
-            rowsMap[item2]->correlationValues.insert(correlationRow(item1.portfolioID, item1.type, item1.id, item1.displayText), correlation);
+            rowsMap[item1]->correlationValues.insert(correlationRow(item2.type, item2.id, item2.displayText), correlation);
+            rowsMap[item2]->correlationValues.insert(correlationRow(item1.type, item1.id, item1.displayText), correlation);
         }
     }
 

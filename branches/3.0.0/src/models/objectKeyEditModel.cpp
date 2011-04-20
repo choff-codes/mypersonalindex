@@ -23,17 +23,15 @@ void objectKeyEditModel::insert(objectKeyBase* const key_)
     endInsertRows();
 }
 
-void objectKeyEditModel::remove(const objectKeyBase* const key_) {
+void objectKeyEditModel::remove(const objectKeyBase* const key_)
+{
     QModelIndex index = find(key_);
     if (!index.isValid())
         return;
 
     int row = index.row();
     beginRemoveRows(QModelIndex(), row, row);
-
-    objectKeyBase* toRemove = m_items.takeAt(row);
-    delete toRemove;
-
+    delete m_items.takeAt(row);
     endRemoveRows();
 }
 

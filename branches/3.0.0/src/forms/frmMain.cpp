@@ -96,6 +96,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioImport, SIGNAL(triggered()), this, SLOT(importPortfolio()));
     connect(ui->portfolioImportFile, SIGNAL(triggered()), this, SLOT(importPortfolio()));
     connect(ui->priceImport, SIGNAL(triggered()), this, SLOT(importPrice()));
+    connect(ui->priceClear, SIGNAL(triggered()), this, SLOT(clearPrice()));
 }
 
 void frmMain::loadSettings()
@@ -252,11 +253,24 @@ void frmMain::portfolioModified(const portfolio &portfolio_)
     recalculateTrades(portfolio_);
 }
 
+void frmMain::priceModified(int beginDate_)
+{
+    setWindowModified(true);
+    m_file->modified = true;
+    refreshPortfolioPrices();
+    recalculateTrades(m_file->portfolios.values(), beginDate_);
+}
+
 void frmMain::refreshPortfolioPrices()
 {
     foreach(const portfolio &p, m_file->portfolios)
         foreach(security s, p.securities())
+        {
+            if (s.cashAccount())
+                continue;
+
             s.setHistoricalPrices(m_file->prices.getHistoricalPrice(s.description()));
+        }
 }
 
 void frmMain::portfolioDropDownChange(int currentIndex_)
@@ -321,9 +335,7 @@ void frmMain::importYahooFinished()
     if (earliestUpdate > tradeDateCalendar::endDate())
         return;
 
-    setWindowModified(true);
-    m_file->modified = true;
-    recalculateTrades(m_file->portfolios.values(), earliestUpdate);
+    priceModified(earliestUpdate);
 }
 
 void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)
@@ -450,7 +462,19 @@ void frmMain::importPrice()
     if (f.exec() != QDialog::Accepted)
         return;
 
-    setWindowModified(true);
-    m_file->modified = true;
     m_file->prices = f.getHistoricalPricesMap();
+    priceModified();
+}
+
+void frmMain::clearPrice()
+{
+    if (m_file->prices.isEmpty())
+        return;
+
+    if (QMessageBox::question(this, QCoreApplication::applicationName(), "Are you sure you want to clear all download and imported price data?",
+        QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
+        return;
+
+    m_file->prices.clear();
+    priceModified();
 }

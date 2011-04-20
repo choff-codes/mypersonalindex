@@ -15,7 +15,7 @@ public:
         insertRows(0, m_items.count());
     }
 
-    ~objectKeyEditModel() { qDeleteAll(m_items); }
+    virtual ~objectKeyEditModel() { qDeleteAll(m_items); }
 
     int rowCount(const QModelIndex&) const { return m_items.count(); }
     QVariant data(const QModelIndex &index_, int role_) const;

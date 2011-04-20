@@ -43,7 +43,7 @@ const QStringList securityRow::columns = QStringList()
                                          << "Cost Basis"
                                          << "Total Value"
                                          << "% of\nPortfolio"
-                                         << "Change In Value"
+                                         << "Gain/Loss"
                                          << "Return"
                                          << "Account"
                                          << "Asset Allocation"

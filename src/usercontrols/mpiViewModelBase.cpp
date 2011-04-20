@@ -26,7 +26,7 @@ void mpiViewModelBase::setColumnSort(const QList<orderBy> &columnSort_)
 {
     foreach(baseRow *row, m_rows)
         row->columnSort = columnSort_;
-    sortColumns();
+    sortRows();
     emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }
 

@@ -1,7 +1,6 @@
 #ifndef MPITABLEVIEW_H
 #define MPITABLEVIEW_H
 
-#include <QObject>
 #include <QTableView>
 
 class mpiTableView : public QTableView

@@ -65,6 +65,8 @@ public:
     void clear() { m_historicalPrices.clear(); }
     bool save(const queries &dataSource_);
 
+    bool isEmpty() const { return m_historicalPrices.isEmpty(); }
+
 private:
     QHash<QString, historicalPrices> m_historicalPrices;
 };

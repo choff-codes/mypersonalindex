@@ -1,9 +1,7 @@
 #ifndef MPICHART_H
 #define MPICHART_H
 
-#include <QObject>
 #include "qwt_plot.h"
-
 
 class mpiChart : public QwtPlot
 {

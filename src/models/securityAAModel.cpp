@@ -6,9 +6,6 @@ Qt::ItemFlags securityAAModel::flags(const QModelIndex &index_) const
     if (!index_.isValid())
         return QAbstractTableModel::flags(index_);
 
-    if (index_.row() >= m_keys.count())
-        return QAbstractTableModel::flags(index_);
-
     if (m_keys.at(index_.row()) == UNASSIGNED)
         return QAbstractTableModel::flags(index_);
 
@@ -18,9 +15,6 @@ Qt::ItemFlags securityAAModel::flags(const QModelIndex &index_) const
 QVariant securityAAModel::data(const QModelIndex &index_, int role_) const
 {
     if (!index_.isValid())
-        return QVariant();
-
-    if (index_.row() >= m_keys.count())
         return QVariant();
 
     if (role_ == Qt::DisplayRole)
@@ -40,27 +34,25 @@ QVariant securityAAModel::data(const QModelIndex &index_, int role_) const
 
 bool securityAAModel::setData(const QModelIndex &index_, const QVariant &value_, int role_)
 {
-    if (index_.isValid() && index_.column() == 1 && role_ == Qt::EditRole)
-    {
-        m_target.insert(m_keys.at(index_.row()), value_.toDouble() / 100);
-        if (m_target.contains(UNASSIGNED) && m_keys.at(0) != UNASSIGNED)
-        {
-            insertUnassigned();
-            return true;
-        }
-        if (!m_target.contains(UNASSIGNED) && m_keys.at(0) == UNASSIGNED)
-        {
-            removeUnassigned();
-            return true;
-        }
-        if (m_keys.at(0) == UNASSIGNED)
-        {
-            emit dataChanged(index(0,0), index(0, 0));
-        }
-        return true;
+    if (!index_.isValid() || index_.column() != 1 || role_ != Qt::EditRole)
+        return false;
 
+    m_target.insert(m_keys.at(index_.row()), value_.toDouble() / 100);
+    if (m_target.contains(UNASSIGNED) && m_keys.at(0) != UNASSIGNED)
+    {
+        insertUnassigned();
+        return true;
     }
-    return false;
+    if (!m_target.contains(UNASSIGNED) && m_keys.at(0) == UNASSIGNED)
+    {
+        removeUnassigned();
+        return true;
+    }
+    if (m_keys.at(0) == UNASSIGNED)
+    {
+        emit dataChanged(index(0,0), index(0, 0));
+    }
+    return true;
 }
 
 void securityAAModel::addNew(int id_)

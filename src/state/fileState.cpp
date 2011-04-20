@@ -13,8 +13,7 @@
 fileState::fileState(QWidget *parent_) :
     QObject(parent_),
     modified(false)
-{
-}
+{}
 
 QWidget* fileState::parent() const
 {
@@ -179,6 +178,7 @@ void fileState::loadFile(const QString &filePath_, bool pricing_)
     else
         prices.clear();
 
+    identities = fileStateIdentity();
     portfolios = portfolioFactory(file).getPortfolios(identities);
 
     setCurrentFile(updatedFilePath_, true);

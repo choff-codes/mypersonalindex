@@ -40,6 +40,7 @@ private slots:
     void fileChange(const QString &filePath_, bool newFile_);
     void importPortfolio();
     void importPrice();
+    void clearPrice();
 
 private:
     enum tab {
@@ -91,9 +92,10 @@ private:
     void clearTabs();
     void portfolioAdded(const portfolio &portfolio_);
     void portfolioModified(const portfolio &portfolio_);
+    void priceModified(int beginDate_ = 0);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
-    void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_);
+    void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_ = 0);
 };
 
 #endif // FRMMAIN_H

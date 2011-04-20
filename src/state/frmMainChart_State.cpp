@@ -124,13 +124,16 @@ mpiChartCurve* frmMainChart_State::getCurve(const treeItemKey &item_, int beginD
         c->curve()->setTitle(item_.displayText);
 
         historicalNAV nav = calculateNAV(item_, beginDate, endDate_);
-        tradeDateCalendar calendar(nav.beginDate());
-        foreach(int date, calendar)
+        if (nav.beginDate() != nav.endDate())
         {
-            if (date > nav.endDate())
-                break;
+            tradeDateCalendar calendar(nav.beginDate());
+            foreach(int date, calendar)
+            {
+                if (date > nav.endDate())
+                    break;
 
-            c->append(date, nav.value(date).nav - 1);
+                c->append(date, nav.value(date).nav - 1);
+            }
         }
         m_cache.insert(item_, c);
     }

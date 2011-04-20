@@ -30,7 +30,7 @@ public:
         m_viewableColumns(viewableColumns_),
         m_verticalColumns(verticalColumns_)
     {
-        sortColumns();
+        sortRows();
         insertRows(0, rowCount(QModelIndex()));
     }
 
@@ -46,7 +46,7 @@ protected:
     QList<int> m_viewableColumns;
     bool m_verticalColumns;
 
-    void sortColumns() { qStableSort(m_rows.begin(), m_rows.end(), baseRow::baseRowSort); }
+    void sortRows() { qStableSort(m_rows.begin(), m_rows.end(), baseRow::baseRowSort); }
 };
 
 #endif // MPIVIEWMODELBASE_H

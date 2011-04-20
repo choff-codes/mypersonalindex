@@ -3,7 +3,7 @@
 mpiDateEdit::mpiDateEdit(QWidget *parent_):
     QDateEdit(parent_)
 {
-    const QFontMetrics &fm = this->fontMetrics();
+    QFontMetrics fm = this->fontMetrics();
     setMinimumWidth(fm.width('X') * 16);
     setDate(QDate::currentDate());
     setCalendarPopup(true);

@@ -9,7 +9,6 @@ const QList<orderBy> correlationRow::correlationOrder = QList<orderBy>()
                                                         << orderBy(correlationRow::row_Description, orderBy::order_ascending);
 
 //enum {
-//    row_PortfolioID,
 //    row_ObjectType,
 //    row_ID,
 //    row_Description
@@ -18,28 +17,23 @@ const QList<orderBy> correlationRow::correlationOrder = QList<orderBy>()
 const QVariantList correlationRow::columnsType = QVariantList()
                                                  << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::Int)
-                                                 << QVariant(QVariant::Int)
                                                  << QVariant(QVariant::String);
 
-correlationRow::correlationRow(int portfolioID_, int type_, int id_, const QString &description_):
+correlationRow::correlationRow(int type_, int id_, const QString &description_):
     baseRow(correlationOrder)
 {
-    //    row_PortfolioID,
-    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
     values.append(id_);
     //    row_Description
-     values.append(description_);
+    values.append(description_);
 }
 
-correlationRow::correlationRow(int portfolioID_, int type_, int id_, const QString &description_, const QMap<correlationRow, double> correlationValues_):
+correlationRow::correlationRow(int type_, int id_, const QString &description_, const QMap<correlationRow, double> &correlationValues_):
     baseRow(correlationOrder),
     correlationValues(correlationValues_)
 {
-    //    row_PortfolioID,
-    values.append(portfolioID_);
     //    row_ObjectType,
     values.append(type_);
     //    row_ID,
@@ -50,8 +44,7 @@ correlationRow::correlationRow(int portfolioID_, int type_, int id_, const QStri
 
 bool correlationRow::operator==(const correlationRow &other_) const
 {
-    return values.at(row_PortfolioID).toInt() == other_.values.at(row_PortfolioID).toInt()
-        && values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
+    return values.at(row_ObjectType).toInt() == other_.values.at(row_ObjectType).toInt()
         && values.at(row_ID).toInt() == other_.values.at(row_ID).toInt()
         && values.at(row_Description).toString() == other_.values.at(row_Description).toString();
 }
@@ -77,6 +70,9 @@ QVariant mainCorrelationModel::data(const QModelIndex &index_, int role_) const
     if (!index_.isValid())
         return QVariant();
 
+    if (role_ == Qt::ForegroundRole)
+        return QColor(Qt::black);
+
     if (role_ != Qt::DisplayRole && role_ != Qt::BackgroundRole)
         return QVariant();
 
@@ -87,13 +83,16 @@ QVariant mainCorrelationModel::data(const QModelIndex &index_, int role_) const
     if(role_ == Qt::DisplayRole)
         return functions::doubleToPercentage(value);
 
-    // Qt::BackgroundRole
-    QColor c = QPalette().color(QPalette::ToolTipBase);
+    //Qt::BackgroundRole
+
+    value *= 200;
 
     if (value < 0)
-        return c.lighter(100 + (150 * value));
+        return QColor(255 + value, 255, 255 + value);
     else
-        return c.darker(100 + (150 * value));
+        return QColor(255, 255 - value, 255 - value);
+
+    return QVariant();
 }
 
 QVariant mainCorrelationModel::headerData(int section_, Qt::Orientation /* not used */, int role_) const
@@ -109,8 +108,8 @@ void mainCorrelationModel::add(correlationRow *row_, const correlationRow &key_)
 {
     beginInsertRows(QModelIndex(), m_rows.count(), m_rows.count());
     // add correlation to every other row, which is calculated and passed in with the row_ object
-    foreach(baseRow *row, m_rows)
-        static_cast<correlationRow*>(row)->correlationValues.insert(key_, row_->correlationValues.value(*static_cast<correlationRow*>(row)));
+    foreach(baseRow *existingRow, m_rows)
+        static_cast<correlationRow*>(existingRow)->correlationValues.insert(key_, row_->correlationValues.value(*static_cast<correlationRow*>(existingRow)));
     m_rows.append(row_);
     endInsertRows();
 
@@ -119,7 +118,7 @@ void mainCorrelationModel::add(correlationRow *row_, const correlationRow &key_)
     m_viewableColumns.append(0);
     endInsertColumns();
 
-    sortColumns();
+    sortRows();
     emit dataChanged(index(0, 0), index(rowCount(QModelIndex()) - 1, columnCount(QModelIndex()) - 1));
 }
 

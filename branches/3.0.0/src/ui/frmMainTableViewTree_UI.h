@@ -4,6 +4,7 @@
 #include <QTreeWidget>
 #include <QVBoxLayout>
 #include <QComboBox>
+#include <QPushButton>
 #include "frmMainTableView_UI.h"
 
 class frmMainTableViewTree_UI: public frmMainTableView_UI
@@ -13,6 +14,7 @@ public:
     QVBoxLayout *treeLayout;
     QComboBox *treeCmb;
     QTreeWidget *tree;
+    QPushButton *treeClearBtn;
 
     virtual ~frmMainTableViewTree_UI() {}
 

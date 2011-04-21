@@ -44,6 +44,7 @@ frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfol
     connect(ui->toolbarExport, SIGNAL(triggered()), ui->chart, SLOT(exportChart()));
     connect(ui->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
     connect(ui->treeCmb, SIGNAL(currentIndexChanged(int)), SLOT(portfolioChange(int)));
+    connect(ui->treeClearBtn, SIGNAL(clicked()), this, SLOT(clearTree()));
 
     resetChart(beginDate, endDate);
 }
@@ -67,6 +68,19 @@ QWidget* frmMainChart_State::mainWidget()
 QTreeWidget* frmMainChart_State::treeWidget()
 {
     return ui->tree;
+}
+
+void frmMainChart_State::clearTree()
+{
+    for(int i = 0; i < ui->tree->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem *item = ui->tree->topLevelItem(i);
+        for(int x = 0; x < item->childCount(); ++x)
+            if (item->checkState(0) == Qt::Checked)
+                item->setCheckState(0, Qt::Unchecked);
+    }
+    m_selectedItems.clear();
+    refreshTab();
 }
 
 void frmMainChart_State::itemChecked(QTreeWidgetItem *item_, int /*column_*/)

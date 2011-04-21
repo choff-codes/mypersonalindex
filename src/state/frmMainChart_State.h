@@ -26,6 +26,7 @@ protected slots:
     void itemChecked(QTreeWidgetItem *item_, int column_);
     void portfolioChange(int index_);
     void refreshTab();
+    void clearTree();
 
 private:
     static const QStringList m_colors;

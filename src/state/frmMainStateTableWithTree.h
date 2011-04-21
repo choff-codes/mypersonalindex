@@ -19,6 +19,7 @@ public:
 
 protected slots:
     void portfolioChange(int index_);
+    void clearTree();
 
 protected:
     virtual void setupUI(bool hasRowLabels_ = false);

@@ -7,26 +7,9 @@
 
 void frmMainChart_UI::setupUI(QWidget *parent_)
 {
-    widget = new QWidget(parent_);
-
-    layout = new QVBoxLayout(widget);
-    layout->setSpacing(0);
-    layout->setMargin(1);
-
-    frmMainToolbar_UI::setupUI(QMap<int, QString>(), widget);
-
-    chartSplitter = new QSplitter(widget);
-
-    treeWidget = new QWidget(widget);
-    treeLayout = new QVBoxLayout(treeWidget);
-    treeLayout->setMargin(0);
-    treeCmb = new QComboBox(widget);
-    tree = new QTreeWidget(widget);
-    tree->header()->setVisible(false);
-    treeLayout->addWidget(treeCmb);
-    treeLayout->addWidget(tree);
-    chartSplitter->insertWidget(0, treeWidget);
-    chartSplitter->setStretchFactor(0, 1);
+    frmMainTableViewTree_UI::setupUI(QMap<int, QString>(), false, parent_);
+    delete frmMainTableViewTree_UI::tableCopy;
+    delete frmMainTableViewTree_UI::table;
 
     chart = new mpiChart(widget);
     chart->setAxisScaleDraw(QwtPlot::xBottom, new mpiDateScale());
@@ -67,9 +50,6 @@ void frmMainChart_UI::setupUI(QWidget *parent_)
     chartGridLines->setPen(QPen(Qt::DotLine));
     chartGridLines->attach(chart);
 
-    chartSplitter->addWidget(chart);
-    chartSplitter->setStretchFactor(1, 3);
-
-    layout->addWidget(toolbar);
-    layout->addWidget(chartSplitter);
+    tableSplitter->addWidget(chart);
+    tableSplitter->setStretchFactor(1, 2);
 }

@@ -36,7 +36,7 @@ private:
 
     snapshot snapshotByKey(const portfolio *portfolio_, int date_, const objectKeyBase &key_, int beginDate_, int priorDate_);
     int beginDateByKey(const portfolio *portfolio_, const objectKeyBase &key_);
-    int endDateByKey(const objectKeyBase &key_);
+    int endDateByKey(const portfolio *portfolio_, const objectKeyBase &key_);
 
     static double change(double beginValue_, double endValue_, double activity_, double dividends_, double beginNAV_);
 };

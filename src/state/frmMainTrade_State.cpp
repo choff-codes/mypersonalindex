@@ -6,7 +6,7 @@
 #include "mainTradeModel.h"
 
 frmMainTrade_State::frmMainTrade_State(const portfolio &portfolio_, QWidget *parent_):
-    frmMainState(portfolio_, parent_),
+    frmMainStateToolbar(portfolio_, parent_),
     ui(new frmMainTreeView_UI())
 {
     ui->setupUI(static_cast<QWidget*>(this->parent()));
@@ -17,6 +17,12 @@ frmMainTrade_State::frmMainTrade_State(const portfolio &portfolio_, QWidget *par
     connect(ui->toolbarDateBeginEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
     connect(ui->toolbarDateEndEdit, SIGNAL(dateChanged(QDate)), this, SLOT(refreshTab()));
     connect(ui->toolbarExport, SIGNAL(triggered()), this, SLOT(exportTree()));
+    connect(ui->toolbar3M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar6M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarYTD, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar1Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar5Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarMax, SIGNAL(triggered()), this, SLOT(dateClicked()));
 
     refreshTab();
 }
@@ -29,6 +35,11 @@ frmMainTrade_State::~frmMainTrade_State()
 QWidget* frmMainTrade_State::mainWidget()
 {
     return ui->widget;
+}
+
+frmMainToolbar_UI* frmMainTrade_State::toolbarUI()
+{
+    return ui;
 }
 
 void frmMainTrade_State::refreshTab()

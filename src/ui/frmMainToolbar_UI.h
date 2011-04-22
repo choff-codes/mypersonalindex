@@ -11,6 +11,12 @@ class frmMainToolbar_UI
 {
 public:
     QToolBar *toolbar;
+    QAction *toolbar3M;
+    QAction *toolbar6M;
+    QAction *toolbarYTD;
+    QAction *toolbar1Y;
+    QAction *toolbar5Y;
+    QAction *toolbarMax;
     QLabel *toolbarDateBegin;
     mpiDateEdit *toolbarDateBeginEdit;
     QLabel *toolbarDateEnd;

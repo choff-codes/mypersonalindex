@@ -1,11 +1,11 @@
 #ifndef FRMMAINTRADE_STATE_H
 #define FRMMAINTRADE_STATE_H
 
-#include "frmMainState.h"
+#include "frmMainStateToolbar.h"
 
 class QAbstractItemModel;
 class frmMainTreeView_UI;
-class frmMainTrade_State : public frmMainState
+class frmMainTrade_State : public frmMainStateToolbar
 {
     Q_OBJECT
 
@@ -24,6 +24,7 @@ private:
     frmMainTreeView_UI *ui;
 
     QAbstractItemModel* createModel(int beginDate_, int endDate_);
+    frmMainToolbar_UI* toolbarUI();
 };
 
 #endif // FRMMAINTRADE_STATE_H

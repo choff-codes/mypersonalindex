@@ -22,7 +22,7 @@ const QStringList frmMainChart_State::m_colors = QStringList() << "mediumorchid"
 
 
 frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfolio> &portfolios_, const QHash<QString, historicalPrices> &prices_, QWidget *parent_):
-    frmMainState(portfolios_.value(portfolioID_), parent_),
+    frmMainStateToolbar(portfolios_.value(portfolioID_), parent_),
     frmMainStateTree(portfolios_, prices_),
     ui(new frmMainChart_UI()),
     m_counter(0)
@@ -45,6 +45,12 @@ frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfol
     connect(ui->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
     connect(ui->treeCmb, SIGNAL(currentIndexChanged(int)), SLOT(portfolioChange(int)));
     connect(ui->treeClearBtn, SIGNAL(clicked()), this, SLOT(clearTree()));
+    connect(ui->toolbar3M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar6M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarYTD, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar1Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar5Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarMax, SIGNAL(triggered()), this, SLOT(dateClicked()));
 
     resetChart(beginDate, endDate);
 }
@@ -68,6 +74,11 @@ QWidget* frmMainChart_State::mainWidget()
 QTreeWidget* frmMainChart_State::treeWidget()
 {
     return ui->tree;
+}
+
+frmMainToolbar_UI* frmMainChart_State::toolbarUI()
+{
+    return ui;
 }
 
 void frmMainChart_State::clearTree()

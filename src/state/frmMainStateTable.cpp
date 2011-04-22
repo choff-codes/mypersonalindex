@@ -10,7 +10,7 @@
 #endif
 
 frmMainStateTable::frmMainStateTable(const portfolio &portfolio_, const settings &settings_, QWidget *parent_):
-    frmMainState(portfolio_, parent_),
+    frmMainStateToolbar(portfolio_, parent_),
     m_settings(settings_)
 {
 }
@@ -23,6 +23,11 @@ QWidget* frmMainStateTable::mainWidget()
 frmMainTableView_UI* frmMainStateTable::createUI()
 {
     return new frmMainTableView_UI();
+}
+
+frmMainToolbar_UI* frmMainStateTable::toolbarUI()
+{
+    return ui;
 }
 
 void frmMainStateTable::setupUI(bool hasRowLabels_)
@@ -40,6 +45,12 @@ void frmMainStateTable::setupUI(bool hasRowLabels_)
     connect(ui->toolbarReorder, SIGNAL(triggered()), this, SLOT(modifyColumns()));
     connect(ui->toolbarExport, SIGNAL(triggered()), ui->table, SLOT(exportTable()));
     connect(ui->tableCopy, SIGNAL(activated()), ui->table, SLOT(copyTable()));
+    connect(ui->toolbar3M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar6M, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarYTD, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar1Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbar5Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
+    connect(ui->toolbarMax, SIGNAL(triggered()), this, SLOT(dateClicked()));
 
     refreshTab();
 }

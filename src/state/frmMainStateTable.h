@@ -1,13 +1,13 @@
 #ifndef FRMMAINSTATETABLE_H
 #define FRMMAINSTATETABLE_H
 
-#include "frmMainState.h"
+#include "frmMainStateToolbar.h"
 #include "settings.h"
 
 class QComboBox;
 class mpiViewModelBase;
 class frmMainTableView_UI;
-class frmMainStateTable : public frmMainState
+class frmMainStateTable : public frmMainStateToolbar
 {
     Q_OBJECT
 
@@ -34,6 +34,9 @@ protected:
     virtual mpiViewModelBase* createModel(int beginDate_, int endDate_) = 0;
 
     void setSortDropDown();
+
+private:
+    frmMainToolbar_UI* toolbarUI();
 };
 
 #endif // FRMMAINSTATETABLE_H

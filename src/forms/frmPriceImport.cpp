@@ -83,11 +83,11 @@ void frmPriceImport::accept()
         if (!validateRow(row, line, columns, dateFormat))
             return;
 
-        QString symbol = line.at(columns.value(frmPriceImport_UI::column_Symbol));
-        QDate date = QDate::fromString(line.at(columns.value(frmPriceImport_UI::column_Date)), dateFormat);
-        double value = line.at(columns.value(frmPriceImport_UI::column_Value)).toDouble();
+        QString symbol = line.at(columns.value(column_Symbol));
+        QDate date = QDate::fromString(line.at(columns.value(column_Date)), dateFormat);
+        double value = line.at(columns.value(column_Value)).toDouble();
 
-        QString type = line.at(columns.value(frmPriceImport_UI::column_Type));
+        QString type = line.at(columns.value(column_Type));
         historicalPrices::type priceType =
             type == "Price" ?
                 historicalPrices::type_price :
@@ -145,41 +145,41 @@ bool frmPriceImport::validateRow(int row_, const QStringList line_, const QHash<
         return false;
     }
 
-    if (line_.at(columns_.value(frmPriceImport_UI::column_Symbol)).isEmpty())
+    if (line_.at(columns_.value(column_Symbol)).isEmpty())
     {
         QMessageBox::critical(this, "Import", "No symbol specified on row " + QString::number(row_) + ".");
         return false;
     }
 
-    QDate date = QDate::fromString(line_.at(columns_.value(frmPriceImport_UI::column_Date)), dateFormat_);
+    QDate date = QDate::fromString(line_.at(columns_.value(column_Date)), dateFormat_);
     if (!date.isValid())
     {
         QMessageBox::critical(this, "Import", "Incorrect date format on row " + QString::number(row_) +
-            ". Date is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Date)) + "\".");
+            ". Date is \"" + line_.at(columns_.value(column_Date)) + "\".");
         return false;
     }
     if (!tradeDateCalendar::isTradeDate(date.toJulianDay()))
     {
         QMessageBox::critical(this, "Import", "Row " + QString::number(row_) +
-            " is not a valid US trade date. Date is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Date)) + "\".");
+            " is not a valid US trade date. Date is \"" + line_.at(columns_.value(column_Date)) + "\".");
         return false;
     }
 
-    QString type = line_.at(columns_.value(frmPriceImport_UI::column_Type));
+    QString type = line_.at(columns_.value(column_Type));
     if (type != "Price" && type != "Dividend" && type != "Split")
     {
         QMessageBox::critical(this, "Import", "Incorrect price type on row " + QString::number(row_) +
-            ". Price type is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Type)) + "\", but valid choices" +
+            ". Price type is \"" + line_.at(columns_.value(column_Type)) + "\", but valid choices" +
             " are only Price, Dividend, or Split.");
         return false;
     }
 
     bool ok;
-    line_.at(columns_.value(frmPriceImport_UI::column_Value)).toDouble(&ok);
+    line_.at(columns_.value(column_Value)).toDouble(&ok);
     if (!ok)
     {
         QMessageBox::critical(this, "Import", "Incorrect value on row " + QString::number(row_) +
-            ". Value is \"" + line_.at(columns_.value(frmPriceImport_UI::column_Value)) + "\", but could not be" +
+            ". Value is \"" + line_.at(columns_.value(column_Value)) + "\", but could not be" +
             " converted to a number.");
         return false;
     }

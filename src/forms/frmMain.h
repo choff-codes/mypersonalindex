@@ -19,40 +19,35 @@ public:
     frmMain(const QString &filePath_, QWidget *parent_ = 0);
     ~frmMain();
 
+    enum view {
+        view_trade,
+        view_account,
+        view_assetAllocation,
+        view_security,
+        view_statistic,
+        view_chart,
+        view_correlation,
+        view_performance
+    };
+
 private slots:
     void about();
     void recentFileSelected();
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();
-    void portfolioDropDownChange(int currentIndex_);
-    void importYahoo();
-    void importYahooFinished();
+    void portfolioTabChange(int currentIndex_);
+    void downloadPrices();
+    void downloadPricesFinished();
     void recalculateTradesFinished();
-    void tabAA() { switchToTab(tab_assetAllocation); }
-    void tabAccount() { switchToTab(tab_account); }
-    void tabSecurity() { switchToTab(tab_security); }
-    void tabPerformance() { switchToTab(tab_performance); }
-    void tabCorrelation() { switchToTab(tab_correlation); }
-    void tabStatistic() { switchToTab(tab_statistic); }
-    void tabChart() { switchToTab(tab_chart); }
-    void tabTrade() { switchToTab(tab_trade); }
+    void viewChange();
+    void viewChange(int currentIndex_);
     void fileChange(const QString &filePath_, bool newFile_);
     void importPortfolio();
     void importPrice();
     void clearPrice();
 
 private:
-    enum tab {
-        tab_trade,
-        tab_account,
-        tab_assetAllocation,
-        tab_security,
-        tab_statistic,
-        tab_chart,
-        tab_correlation,
-        tab_performance
-    };
 
     // ui pointers (to delete on destory)
     frmMain_UI *ui;
@@ -64,8 +59,8 @@ private:
     int m_currentPortfolio;
 
     // track the currently selected tab
-    QMap<int, frmMainState*> m_tabs;
-    tab m_currentTab;
+    QMap<int, frmMainState*> m_views;
+    view m_currentView;
 
     // settings saved to INI
     settings m_settings;
@@ -84,12 +79,12 @@ private:
     void saveSettings();
 
     void updateRecentFileActions(const QString &newFilePath_);
-    void refreshPortfolioCmb(int id_ = -1);
+    void refreshPortfolioTabs(int id_ = -1);
     void refreshPortfolioPrices();
-    void showProgressBar(const QString &description_, int steps_);
+    void showProgressBar(int steps_);
     void hideProgressBar();
-    void switchToTab(tab tab_, bool force_ = false);
-    void clearTabs();
+    void switchToView(view view_, bool force_ = false);
+    void clearViews();
     void portfolioAdded(const portfolio &portfolio_);
     void portfolioModified(const portfolio &portfolio_);
     void priceModified(int beginDate_ = 0);

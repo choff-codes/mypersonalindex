@@ -73,11 +73,17 @@ void frmPortfolioImport::indexChange(int index_)
     foreach(const account &acct, p.accounts())
         items.at(0)->addChild(createTreeItem(acct.id(), acct.displayText()));
 
+    items.at(0)->sortChildren(0, Qt::AscendingOrder);
+
     foreach(const assetAllocation &aa, p.assetAllocations())
         items.at(1)->addChild(createTreeItem(aa.id(), aa.displayText()));
 
+    items.at(1)->sortChildren(0, Qt::AscendingOrder);
+
     foreach(const security &sec, p.securities())
         items.at(2)->addChild(createTreeItem(sec.id(), sec.displayText()));
+
+    items.at(2)->sortChildren(0, Qt::AscendingOrder);
 
     foreach(QTreeWidgetItem* item, items)
     {

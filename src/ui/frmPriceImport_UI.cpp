@@ -1,5 +1,6 @@
 #include "frmPriceImport_UI.h"
 #include <QDialog>
+#include "frmPriceImport.h"
 
 void frmPriceImport_UI::setupUI(QDialog *dialog_)
 {
@@ -51,13 +52,13 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     columnOrder = new QListWidget(groupBoxColumnOrder);
     columnOrder->setMaximumHeight(columnOrder->fontMetrics().lineSpacing() * 8);
     QListWidgetItem *column1 = new QListWidgetItem("Symbol", columnOrder);
-    column1->setData(Qt::UserRole, column_Symbol);
+    column1->setData(Qt::UserRole, frmPriceImport::column_Symbol);
     QListWidgetItem *column2 = new QListWidgetItem("Date", columnOrder);
-    column2->setData(Qt::UserRole, column_Date);
+    column2->setData(Qt::UserRole, frmPriceImport::column_Date);
     QListWidgetItem *column3 = new QListWidgetItem("Price Type", columnOrder);
-    column3->setData(Qt::UserRole, column_Type);
+    column3->setData(Qt::UserRole, frmPriceImport::column_Type);
     QListWidgetItem *column4 = new QListWidgetItem("Value", columnOrder);
-    column4->setData(Qt::UserRole, column_Value);
+    column4->setData(Qt::UserRole, frmPriceImport::column_Value);
     columnOrder->addItem(column1);
     columnOrder->addItem(column2);
     columnOrder->addItem(column3);

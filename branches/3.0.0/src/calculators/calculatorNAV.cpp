@@ -149,15 +149,16 @@ int calculatorNAV::beginDateByKey(const portfolio *portfolio_, const objectKeyBa
     return 0;
 }
 
-int calculatorNAV::endDateByKey(const objectKeyBase &key_)
+int calculatorNAV::endDateByKey(const portfolio *portfolio_, const objectKeyBase &key_)
 {
     switch(key_.type())
     {
         case objectType_AA:
         case objectType_Account:
         case objectType_Portfolio:
+            return portfolio_->endDate();
         case objectType_Security:
-            return tradeDateCalendar::endDate();
+            return static_cast<const security&>(key_).endDate();
         case objectType_Symbol:
             return static_cast<const symbol&>(key_).endDate();
         case objectType_Trade:
@@ -178,7 +179,7 @@ historicalNAV calculatorNAV::changeOverTime(const portfolio *portfolio_, const o
     historicalNAV navHistory;
 
     beginDate_ = qMax(beginDateByKey(portfolio_, key_), beginDate_);
-    endDate_ = qMin(endDateByKey(key_), endDate_);
+    endDate_ = qMin(endDateByKey(portfolio_, key_), endDate_);
 
     tradeDateCalendar calendar(beginDate_);
     if (beginDate_ > endDate_ || calendar.date() > endDate_)

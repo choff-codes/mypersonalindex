@@ -21,7 +21,8 @@ HEADERS += \
     $$PWD/frmMainChart_State.h \
     $$PWD/frmMainStateTree.h \
     $$PWD/frmMainTrade_State.h \
-    $$PWD/fileStateIdentity.h
+    $$PWD/fileStateIdentity.h \
+    $$PWD/frmMainStateToolbar.h
 
 SOURCES += \
     $$PWD/frmEditState.cpp \
@@ -44,4 +45,5 @@ SOURCES += \
     $$PWD/frmMainChart_State.cpp \
     $$PWD/frmMainStateTree.cpp \
     $$PWD/frmMainTrade_State.cpp \
-    $$PWD/fileStateIdentity.cpp
+    $$PWD/fileStateIdentity.cpp \
+    $$PWD/frmMainStateToolbar.cpp

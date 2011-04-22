@@ -1,7 +1,7 @@
 #ifndef FRMMAINCHART_STATE_H
 #define FRMMAINCHART_STATE_H
 
-#include "frmMainState.h"
+#include "frmMainStateToolbar.h"
 #include "frmMainStateTree.h"
 #include <QTreeWidgetItem>
 #include "historicalPrices.h"
@@ -10,7 +10,7 @@
 class QwtPlotCurve;
 class frmMainChart_UI;
 class historicalPrices;
-class frmMainChart_State: public frmMainState, public frmMainStateTree
+class frmMainChart_State: public frmMainStateToolbar, public frmMainStateTree
 {
     Q_OBJECT
 
@@ -36,6 +36,7 @@ private:
 
     mpiChartCurve* getCurve(const treeItemKey &item_, int beginDate, int endDate_);
     void resetChart(int beginDate_, int endDate_);
+    frmMainToolbar_UI* toolbarUI();
 };
 
 #endif // FRMMAINCHART_STATE_H

@@ -4,6 +4,13 @@ void frmMainToolbar_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget 
 {
     toolbar = new QToolBar(parent_);
 
+    toolbar3M = new QAction("3M", toolbar);
+    toolbar6M = new QAction("6M", toolbar);
+    toolbarYTD = new QAction("YTD", toolbar);
+    toolbar1Y = new QAction("1Y", toolbar);
+    toolbar5Y = new QAction("5Y", toolbar);
+    toolbarMax = new QAction("Max", toolbar);
+
     toolbarDateBegin = new QLabel(" Begin Date: ", toolbar);
     toolbarDateBeginEdit = new mpiDateEdit(toolbar);
     toolbarDateEnd = new QLabel(" End Date: ", toolbar);
@@ -22,6 +29,13 @@ void frmMainToolbar_UI::setupUI(const QMap<int, QString> &columnNames_, QWidget 
     toolbarExport = new QAction("Export...", toolbar);
     toolbarExport->setIconText("Export...");
 
+    toolbar->addAction(toolbar3M);
+    toolbar->addAction(toolbar6M);
+    toolbar->addAction(toolbarYTD);
+    toolbar->addAction(toolbar1Y);
+    toolbar->addAction(toolbar5Y);
+    toolbar->addAction(toolbarMax);
+    toolbar->addSeparator();
     toolbar->addWidget(toolbarDateBegin);
     toolbar->addWidget(toolbarDateBeginEdit);
     toolbar->addWidget(toolbarDateEnd);

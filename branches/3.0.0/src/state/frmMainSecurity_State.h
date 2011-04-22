@@ -16,7 +16,6 @@ private:
     QComboBox* sortDropDown();
     QMap<int, QString> tableColumns();
 
-    void refreshTab();
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
 };
 

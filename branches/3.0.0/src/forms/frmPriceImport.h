@@ -11,6 +11,13 @@ class frmPriceImport : public QDialog
     Q_OBJECT
 
 public:
+    enum column {
+        column_Symbol,
+        column_Date,
+        column_Type,
+        column_Value
+    };
+
     frmPriceImport(const historicalPricesMap &pricesMap_, QWidget *parent_ = 0);
     ~frmPriceImport();
 

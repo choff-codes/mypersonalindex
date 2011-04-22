@@ -6,19 +6,19 @@
 
 const QStringList frmMainChart_State::m_colors = QStringList() << "mediumorchid" << "tomato" << "darkslategray"  << "mediumaquamarine"
     << "goldenrod" << "lightseagreen" << "olivedrab" << "darkred" << "plum" << "violet" << "lightsalmon" << "seagreen"
-    << "gainsboro" << "darkviolet" << "orchid" << "deeppink" << "beige" << "darkgoldenrod" << "lightgrey" << "mediumslateblue"
-    << "steelblue" << "maroon" << "darkolivegreen" << "gray" << "salmon" << "palegoldenrod" << "darkkhaki" << "thistle"
-    << "cyan" << "slategray" << "deepskyblue" << "darkslateblue"  << "burlywood" << "lightslategray" << "green"
-    << "crimson" << "yellowgreen" << "khaki" << "lightcoral" << "chartreuse" << "darkseagreen" << "yellow" << "saddlebrown"
-    << "darkorange" << "indianred" << "purple"  << "darkgray" << "firebrick" << "lime" << "blueviolet" << "lightskyblue"
-    << "mediumseagreen" << "lawngreen" << "darkmagenta" << "mediumpurple" << "hotpink" << "mediumvioletred" << "aquamarine"
-    << "coral" << "antiquewhite" << "peachpuff" << "orange" << "azure" << "lightgreen" << "pink" << "sandybrown"
-    << "dodgerblue" << "orangered" << "royalblue" << "lightcyan" << "fuscia" << "olive" << "sienna" << "limegreen"
-    << "blue" << "cadetblue" << "palevioletred" << "darkgreen" << "darksalmon" << "palegreen"  << "black" << "lightpink"
-    << "gold" << "cornflowerblue" << "darkblue" << "fuchsia" << "linen" << "silver" << "lightsteelblue" << "tan"
-    << "rosybrown" << "oldlace" << "chocolate" << "midnightblue" << "greenyellow" << "brown" << "navy" << "turquoise"
-    << "darkcyan" << "powderblue" << "mediumturquoise" << "skyblue" << "magenta" << "peru" << "bisque" << "indigo"
-    << "lightblue" << "forestgreen" << "red";
+    << "darkviolet" << "orchid" << "deeppink" << "darkgoldenrod" << "mediumslateblue" << "steelblue" << "maroon"
+    << "darkolivegreen" << "gray" << "salmon" << "palegoldenrod" << "darkkhaki" << "thistle" << "cyan" << "slategray"
+    << "deepskyblue" << "darkslateblue"  << "burlywood" << "lightslategray" << "green" << "crimson" << "yellowgreen"
+    << "khaki" << "lightcoral" << "chartreuse" << "darkseagreen" << "yellow" << "saddlebrown" << "darkorange" << "indianred"
+    << "purple"  << "darkgray" << "firebrick" << "lime" << "blueviolet" << "lightskyblue" << "mediumseagreen" << "lawngreen"
+    << "darkmagenta" << "mediumpurple" << "hotpink" << "mediumvioletred" << "aquamarine" << "coral" << "antiquewhite"
+    << "peachpuff" << "orange" << "azure" << "lightgreen" << "pink" << "sandybrown" << "dodgerblue" << "orangered"
+    << "royalblue" << "lightcyan" << "fuscia" << "olive" << "sienna" << "limegreen" << "blue" << "cadetblue"
+    << "palevioletred" << "darkgreen" << "darksalmon" << "palegreen"  << "black" << "lightpink" << "gold"
+    << "cornflowerblue" << "darkblue" << "fuchsia" << "linen" << "silver" << "lightsteelblue" << "tan" << "rosybrown"
+    << "oldlace" << "chocolate" << "midnightblue" << "greenyellow" << "brown" << "navy" << "turquoise" << "darkcyan"
+    << "powderblue" << "mediumturquoise" << "skyblue" << "magenta" << "peru" << "bisque" << "indigo" << "lightblue"
+    << "forestgreen" << "red";
 
 
 frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfolio> &portfolios_, const QHash<QString, historicalPrices> &prices_, QWidget *parent_):

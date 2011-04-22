@@ -9,8 +9,11 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QHBoxLayout>
+#include <QVBoxLayout>
 #include <QStackedWidget>
 #include <QProgressBar>
+#include <QTabBar>
+#include <QToolButton>
 
 class frmMain_UI
 {
@@ -45,13 +48,19 @@ public:
     QMenu *help;
     QAction *helpAbout;
     QMenuBar *menubar;
-    QStackedWidget *cornerWidget;
-    QProgressBar *progressBar;
-    QWidget *portfolioDropDownWidget;
-    QHBoxLayout *portfolioDropDownLayout;
-    QLabel *portfolioDropDown;
-    QComboBox *portfolioDropDownCmb;
-    QStackedWidget *centralWidget;
+    QWidget *centralWidget;
+    QVBoxLayout *layout;
+    QHBoxLayout *layoutTop;
+    QComboBox *portfolioTabsViewCmb;
+    QTabBar *portfolioTabs;
+    QToolButton *portfolioTabsEdit;
+    QToolButton *portfolioTabsDelete;
+    QToolButton *portfolioTabsAdd;
+    QFrame *portfolioTabsSep;
+    QStackedWidget *progressWidget;
+    QToolButton *progressUpdateBtn;
+    QProgressBar *progressUpdateBar;
+    QStackedWidget *viewWidget;
 
     void setupUI(QMainWindow *mainWindow_);
 };

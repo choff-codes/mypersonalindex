@@ -1,5 +1,6 @@
 #include "frmMain_UI.h"
 #include <QMainWindow>
+#include "frmMain.h"
 
 void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 {    
@@ -25,20 +26,28 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     viewGroup = new QActionGroup(mainWindow_);
     viewAccounts = new QAction("Accounts", mainWindow_);
     viewAccounts->setShortcut(Qt::Key_F1);
+    viewAccounts->setData(frmMain::view_account);
     viewAssetAllocation = new QAction("Asset Allocation", mainWindow_);
     viewAssetAllocation->setShortcut(Qt::Key_F2);
+    viewAssetAllocation->setData(frmMain::view_assetAllocation);
     viewSecurities = new QAction("Securities", mainWindow_);
     viewSecurities->setShortcut(Qt::Key_F3);
+    viewSecurities->setData(frmMain::view_security);
     viewTrades = new QAction("Trade Register", mainWindow_);
     viewTrades->setShortcut(Qt::Key_F4);
+    viewTrades->setData(frmMain::view_trade);
     viewStatistics = new QAction("Statistics", mainWindow_);
     viewStatistics->setShortcut(Qt::Key_F5);
+    viewStatistics->setData(frmMain::view_statistic);
     viewCharts = new QAction("Charting", mainWindow_);
     viewCharts->setShortcut(Qt::Key_F6);
+    viewCharts->setData(frmMain::view_chart);
     viewCorrelations = new QAction("Correlations", mainWindow_);
     viewCorrelations->setShortcut(Qt::Key_F7);
+    viewCorrelations->setData(frmMain::view_correlation);
     viewPerformance = new QAction("Performance", mainWindow_);
     viewPerformance->setShortcut(Qt::Key_F8);
+    viewPerformance->setData(frmMain::view_performance);
 
     portfolio = new QMenu("&Portfolio", menubar);
     portfolioAdd = new QAction("Add New...", mainWindow_);
@@ -102,27 +111,66 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 
     help->addAction(helpAbout);
 
-    cornerWidget = new QStackedWidget(menubar);
-
-    portfolioDropDownWidget = new QWidget(menubar);
-    portfolioDropDownLayout = new QHBoxLayout(portfolioDropDownWidget);
-    portfolioDropDownLayout->setMargin(0);
-
-    portfolioDropDown = new QLabel("Portfolio: ", portfolioDropDownWidget);
-    portfolioDropDownCmb = new QComboBox(portfolioDropDownWidget);
-    portfolioDropDownCmb->setFixedHeight(menubar->sizeHint().height());
-    portfolioDropDownCmb->setMinimumContentsLength(20);
-    portfolioDropDownCmb->setDisabled(true);
-
-    portfolioDropDownLayout->addWidget(portfolioDropDown);
-    portfolioDropDownLayout->addWidget(portfolioDropDownCmb);
-    cornerWidget->addWidget(portfolioDropDownWidget);
-
-    progressBar = new QProgressBar(portfolioDropDownWidget);
-    cornerWidget->addWidget(progressBar);
-
-    menubar->setCornerWidget(cornerWidget);
-
-    centralWidget = new QStackedWidget(mainWindow_);
+    centralWidget = new QWidget(mainWindow_);
     mainWindow_->setCentralWidget(centralWidget);
+
+    layout = new QVBoxLayout(centralWidget);
+    layout->setMargin(0);
+    layout->setSpacing(0);
+    layoutTop = new QHBoxLayout();
+    layoutTop->setMargin(0);
+    layoutTop->setSpacing(0);
+
+    portfolioTabsViewCmb = new QComboBox(centralWidget);
+    portfolioTabsViewCmb->addItem("Accounts", frmMain::view_account);
+    portfolioTabsViewCmb->addItem("Asset Allocation", frmMain::view_assetAllocation);
+    portfolioTabsViewCmb->addItem("Securities", frmMain::view_security);
+    portfolioTabsViewCmb->addItem("Trade Register", frmMain::view_trade);
+    portfolioTabsViewCmb->addItem("Statistics", frmMain::view_statistic);
+    portfolioTabsViewCmb->addItem("Charting", frmMain::view_chart);
+    portfolioTabsViewCmb->addItem("Correlations", frmMain::view_correlation);
+    portfolioTabsViewCmb->addItem("Performance", frmMain::view_performance);
+
+    portfolioTabs = new QTabBar(centralWidget);
+    portfolioTabs->setExpanding(false);
+    portfolioTabs->setDrawBase(false);
+
+    portfolioTabsEdit = new QToolButton(centralWidget);
+    portfolioTabsEdit->setIcon(QIcon(":/icons/edit.png"));
+    portfolioTabsEdit->setAutoRaise(true);
+    portfolioTabsEdit->setToolTip("Edit Portfolio");
+    portfolioTabsDelete = new QToolButton(centralWidget);
+    portfolioTabsDelete->setIcon(QIcon(":/icons/delete.png"));
+    portfolioTabsDelete->setAutoRaise(true);
+    portfolioTabsDelete->setToolTip("Delete Portfolio");
+    portfolioTabsAdd = new QToolButton(centralWidget);
+    portfolioTabsAdd->setIcon(QIcon(":/icons/add.png"));
+    portfolioTabsAdd->setAutoRaise(true);
+    portfolioTabsAdd->setToolTip("Add Portfolio");
+    portfolioTabsSep = new QFrame(centralWidget);
+    portfolioTabsSep->setFrameStyle(QFrame::VLine | QFrame::Sunken);
+
+    progressWidget = new QStackedWidget(centralWidget);
+    progressUpdateBtn = new QToolButton(progressWidget);
+    progressUpdateBtn->setText("Update Prices");
+    progressUpdateBtn->setIcon(QIcon(":/icons/refresh.png"));
+    progressUpdateBtn->setToolButtonStyle(Qt::ToolButtonTextBesideIcon);
+    progressUpdateBtn->setAutoRaise(true);
+    progressUpdateBar = new QProgressBar(progressWidget);
+    progressUpdateBar->setTextVisible(false);
+    progressWidget->addWidget(progressUpdateBtn);
+    progressWidget->addWidget(progressUpdateBar);
+
+    layoutTop->addWidget(portfolioTabsViewCmb);
+    layoutTop->addWidget(portfolioTabs, 5);
+    layoutTop->addWidget(portfolioTabsEdit);
+    layoutTop->addWidget(portfolioTabsDelete);
+    layoutTop->addWidget(portfolioTabsAdd);
+    layoutTop->addWidget(portfolioTabsSep);
+    layoutTop->addWidget(progressWidget);
+
+    viewWidget = new QStackedWidget(centralWidget);
+
+    layout->addLayout(layoutTop);
+    layout->addWidget(viewWidget, 5);
 }

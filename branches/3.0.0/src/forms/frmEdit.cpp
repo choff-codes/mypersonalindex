@@ -7,7 +7,7 @@
 #include "frmEditPortfolio_State.h"
 
 
-frmEdit::frmEdit(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent):
+frmEdit::frmEdit(const portfolio &portfolio_, const fileStateIdentity &identities_, bool new_, QWidget *parent):
     QDialog(parent),
     ui(new frmEdit_UI),
     m_portfolioToReturn(portfolio_),
@@ -20,6 +20,8 @@ frmEdit::frmEdit(const portfolio &portfolio_, const fileStateIdentity &identitie
     m_identities.detach();
 
     ui->setupUI(this);
+    if (new_)
+        this->setWindowTitle("Add Portfolio");
 
     m_tabs.insert(tab_portfolio, new frmEditPortfolio_State(m_portfolio, m_identities, ui->portfolioTab));
     m_tabs.insert(tab_account, new frmEditAcct_State(m_portfolio, m_identities, ui->acctTab));

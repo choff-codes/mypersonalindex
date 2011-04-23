@@ -120,9 +120,9 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
 {
     setWindowModified(false);
     if (filePath_.isEmpty())
-        setWindowTitle(QString("untitled.mpi[*] - %1").arg(QCoreApplication::applicationName()));
+        setWindowTitle(QString("untitled.mpi[*] - MyPersonalIndex"));
     else
-        setWindowTitle(QString("%1[*] - %2").arg(QFileInfo(filePath_).fileName(), QCoreApplication::applicationName()));
+        setWindowTitle(QString("%1[*] - MyPersonalIndex").arg(QFileInfo(filePath_).fileName()));
 
     updateRecentFileActions(filePath_);
 
@@ -167,7 +167,7 @@ void frmMain::closeEvent(QCloseEvent *event_)
         QPushButton *cancelButton = msgBox.addButton("Exit Now Without Save", QMessageBox::RejectRole);
         msgBox.setDefaultButton(waitButton);
 
-        msgBox.setWindowTitle(QCoreApplication::applicationName());
+        msgBox.setWindowTitle("MyPersonalIndex");
         msgBox.setText("An update is currently in progress. You must wait for it to finish if you want to save. The progress bar will not update during this time, please be patient.");
 
         msgBox.exec();
@@ -229,7 +229,7 @@ void frmMain::addPortfolio()
 {
     portfolio p;
     p.setID(m_file->identities.nextIdentity(objectType_Portfolio));
-    frmEdit f(p, m_file->identities, this);
+    frmEdit f(p, m_file->identities, true, this);
     f.exec();
     if (p == f.getPortfolio())
         return;
@@ -243,7 +243,7 @@ void frmMain::editPortfolio()
     if (m_currentPortfolio == UNASSIGNED)
         return;
 
-    frmEdit f(m_file->portfolios.value(m_currentPortfolio), m_file->identities, this);
+    frmEdit f(m_file->portfolios.value(m_currentPortfolio), m_file->identities, false, this);
     f.exec();
     if (m_file->portfolios.value(m_currentPortfolio) == f.getPortfolio())
         return;
@@ -257,7 +257,7 @@ void frmMain::deletePortfolio()
     if (m_currentPortfolio == UNASSIGNED)
         return;
 
-    if (QMessageBox::question(this, QCoreApplication::applicationName(), QString("Are you sure you want to delete portfolio %1?")
+    if (QMessageBox::question(this, "MyPersonalIndex", QString("Are you sure you want to delete portfolio %1?")
         .arg(m_file->portfolios.value(m_currentPortfolio).displayText()), QMessageBox::Yes | QMessageBox::No) != QMessageBox::Yes)
         return;
 
@@ -339,7 +339,7 @@ void frmMain::nextPortfolio()
 
 void frmMain::about()
 {
-    QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString::number(APP_VERSION / 100.0) + "</h2>"
+    QMessageBox::about(this, "About MyPersonalIndex", "<h2>MyPersonalIndex " + QString::number(APP_VERSION / 100.0) + "</h2>"
         "<p>Copyright &copy; 2011"
         "<p>By Matthew Wikler"
         "<p>Create personal indexes and perform analysis to make better investing decisions."
@@ -350,7 +350,7 @@ void frmMain::downloadPrices()
 {
     if (!updatePrices::isInternetConnection())
     {
-        QMessageBox::critical(this, QCoreApplication::applicationName(), "Cannot contact Yahoo! Finance, please check your internet connection.");
+        QMessageBox::critical(this, "MyPersonalIndex", "Cannot contact Yahoo! Finance, please check your internet connection.");
         return;
     }
 
@@ -548,7 +548,7 @@ void frmMain::clearPrice()
     if (m_file->prices.isEmpty())
         return;
 
-    if (QMessageBox::question(this, QCoreApplication::applicationName(), "Are you sure you want to clear all download and imported price data?",
+    if (QMessageBox::question(this, "MyPersonalIndex", "Are you sure you want to clear all download and imported price data?",
         QMessageBox::Yes | QMessageBox::No) == QMessageBox::No)
         return;
 

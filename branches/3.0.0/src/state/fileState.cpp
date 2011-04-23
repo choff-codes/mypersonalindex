@@ -36,7 +36,7 @@ bool fileState::maybeSave()
     if (!modified)
         return true;
 
-    QMessageBox::StandardButton ret = QMessageBox::warning(this->parent(), QCoreApplication::applicationName(), "The file has been modified.\n\n"
+    QMessageBox::StandardButton ret = QMessageBox::warning(this->parent(), "MyPersonalIndex", "The file has been modified.\n\n"
         "Do you want to save your changes?", QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
 
     if (ret == QMessageBox::Save)
@@ -74,7 +74,7 @@ bool fileState::saveFile(const QString &filePath_)
     queries file(filePath_);
     if (!file.isValid())
     {
-        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
+        QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return false;
     }
 #ifdef CLOCKTIME
@@ -86,7 +86,7 @@ bool fileState::saveFile(const QString &filePath_)
     if (!portfolio::save(portfolios, file))
     {
         file.rollback();
-        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error saving to %1!").arg(filePath_));
+        QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("Error saving to %1!").arg(filePath_));
         return false;
     }
 
@@ -100,7 +100,7 @@ bool fileState::saveFile(const QString &filePath_)
     if (!prices.save(file))
     {
         file.rollback();
-        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error saving to %1!").arg(filePath_));
+        QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("Error saving to %1!").arg(filePath_));
         return false;
     }
 
@@ -119,7 +119,7 @@ bool fileState::prepareFileForSave(const QString &filePath_)
         return true;
 
     if (QFile::exists(filePath_) && !QFile::remove(filePath_)) {
-        QMessageBox::warning(this->parent(), QCoreApplication::applicationName(), QString("Could not overwrite the existing file %1!").arg(filePath_));
+        QMessageBox::warning(this->parent(), "MyPersonalIndex", QString("Could not overwrite the existing file %1!").arg(filePath_));
         return false;
     }
 
@@ -127,7 +127,7 @@ bool fileState::prepareFileForSave(const QString &filePath_)
     {
         if (!QFile::copy("MPI.sqlite", filePath_))
         {
-            QMessageBox::warning(this->parent(), QCoreApplication::applicationName(), QString("Could not save to %1!").arg(filePath_));
+            QMessageBox::warning(this->parent(), "MyPersonalIndex", QString("Could not save to %1!").arg(filePath_));
             return false;
         }
     }
@@ -135,7 +135,7 @@ bool fileState::prepareFileForSave(const QString &filePath_)
     {
         if (!QFile::copy(m_filePath, filePath_))
         {
-            QMessageBox::warning(this->parent(), QCoreApplication::applicationName(),
+            QMessageBox::warning(this->parent(), "MyPersonalIndex",
                 QString("Could not save to %1 OR the original file was deleted at %2!").arg(filePath_, m_filePath));
             return false;
         }
@@ -196,13 +196,13 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
     queries file(filePath_);
     int version = file.getDatabaseVersion();
     if (version == UNASSIGNED) {
-        QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("%1 is not a valid My Personal Index file!").arg(filePath_));
+        QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return QString();
     }
     if (version == APP_VERSION)
         return file.getDatabaseLocation();
 
-    QMessageBox::information(this->parent(), QCoreApplication::applicationName(), QString("%1 is an older version, you will be asked to save the file in the new format.").arg(filePath_));
+    QMessageBox::information(this->parent(), "MyPersonalIndex", QString("%1 is an older version, you will be asked to save the file in the new format.").arg(filePath_));
     QString fileName = QFileDialog::getSaveFileName(this->parent(), "Save As...", QString(), "My Personal Index File (*.mpi);;All Files (*)");
 
     if (fileName.isEmpty())
@@ -212,7 +212,7 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
     {
         if (!QFile::copy(filePath_, fileName))
         {
-            QMessageBox::warning(this->parent(), QCoreApplication::applicationName(),
+            QMessageBox::warning(this->parent(), "MyPersonalIndex",
                 QString("Could not save to %1 OR the original file was deleted at %2!").arg(fileName, filePath_));
             return QString();
         }
@@ -223,7 +223,7 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
     {
         upgradeVersion300(file);
         if (file.getDatabaseVersion() != 310) {
-            QMessageBox::critical(this->parent(), QCoreApplication::applicationName(), QString("Error upgrading %1!").arg(filePath_));
+            QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("Error upgrading %1!").arg(filePath_));
             return QString();
         }
     }

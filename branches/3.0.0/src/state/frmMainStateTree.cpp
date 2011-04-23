@@ -31,6 +31,7 @@ void frmMainStateTree::populateTree(int portfolioID_)
 {
     portfolio p = m_portfolios.value(portfolioID_);
     QTreeWidget *tree = treeWidget();
+    bool first = tree->topLevelItemCount() == 0;
     tree->clear();
     tree->blockSignals(true);
 
@@ -51,6 +52,9 @@ void frmMainStateTree::populateTree(int portfolioID_)
 
     tree->insertTopLevelItems(0, items);
 
+    // when this is first created, add the portfolio checked by default
+    if (first)
+        m_selectedItems.append(treeItemKey(objectType_Portfolio, p.id(), p.id(), p.displayText()));
     items.at(0)->addChild(createTreeItem(objectType_Portfolio, p.id(), p.id(), p.displayText()));
 
     foreach(const account &acct, p.accounts())

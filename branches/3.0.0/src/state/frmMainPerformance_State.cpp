@@ -10,14 +10,28 @@ frmMainPerformance_State::frmMainPerformance_State(int portfolioID_, const QMap<
     setupUI();
     static_cast<frmMainTableViewTree_UI*>(ui)->treeClearBtn->setVisible(false);
     connect(treeWidget(), SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*,int)));
+    refreshTab();
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(objectType /*type_*/, int /*portfolioID_*/, int id_, const QString &description_, const QString &itemData_)
+QTreeWidgetItem* frmMainPerformance_State::createTreeItem(objectType type_, int portfolioID_, int id_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(QStringList() << description_, id_);
     if (!itemData_.isEmpty())
          item->setData(0, Qt::UserRole, itemData_);
+
     return item;
+}
+
+void frmMainPerformance_State::populateTree(int portfolioID_)
+{
+    frmMainStateTree::populateTree(portfolioID_);
+    for (int i = 0; i < treeWidget()->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem *item = treeWidget()->topLevelItem(i);
+        for (int x = 0; x < item->childCount(); ++x)
+            if (m_selectedItems.contains(createKeyFromTreeItem(item->child(x))))
+                item->child(x)->setSelected(true);
+    }
 }
 
 frmMainPerformance_State::~frmMainPerformance_State()

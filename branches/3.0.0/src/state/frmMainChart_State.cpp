@@ -52,7 +52,7 @@ frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfol
     connect(ui->toolbar5Y, SIGNAL(triggered()), this, SLOT(dateClicked()));
     connect(ui->toolbarMax, SIGNAL(triggered()), this, SLOT(dateClicked()));
 
-    resetChart(beginDate, endDate);
+    refreshTab();
 }
 
 frmMainChart_State::~frmMainChart_State()

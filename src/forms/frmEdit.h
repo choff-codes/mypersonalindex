@@ -13,7 +13,7 @@ class frmEdit : public QDialog
     Q_OBJECT
 
 public:
-    frmEdit(const portfolio &portfolio_, const fileStateIdentity &identities_, QWidget *parent = 0);
+    frmEdit(const portfolio &portfolio_, const fileStateIdentity &identities_, bool new_, QWidget *parent = 0);
     ~frmEdit();
 
     portfolio getPortfolio() { return m_portfolioToReturn; }

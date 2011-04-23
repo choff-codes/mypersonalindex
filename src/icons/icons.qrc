@@ -1,15 +1,9 @@
 <RCC>
     <qresource prefix="/icons">
-        <file>about.png</file>
         <file>add.png</file>
-        <file>chart.png</file>
         <file>delete.png</file>
         <file>edit.png</file>
         <file>MPI.ico</file>
-        <file>options.png</file>
         <file>refresh.png</file>
-        <file>report.png</file>
-        <file>table.png</file>
-        <file>import.png</file>
     </qresource>
 </RCC>

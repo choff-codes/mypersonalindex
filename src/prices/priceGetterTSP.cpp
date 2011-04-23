@@ -14,12 +14,12 @@
 bool priceGetterTSP::isValidSymbol(const QString &symbol_) const
 {
     return
-        symbol_ == "G Fund" ||
-        symbol_ == "F Fund" ||
-        symbol_ == "C Fund" ||
-        symbol_ == "S Fund" ||
-        symbol_ == "I Fund" ||
-        symbol_ == "L Income" ||
+        symbol_ == "G FUND" ||
+        symbol_ == "F FUND" ||
+        symbol_ == "C FUND" ||
+        symbol_ == "S FUND" ||
+        symbol_ == "I FUND" ||
+        symbol_ == "L INCOME" ||
         symbol_ == "L 2010" ||
         symbol_ == "L 2020" ||
         symbol_ == "L 2030" ||

@@ -33,10 +33,12 @@ public:
 };
 
 trade::trade():
+    objectKey(),
     d(new tradeData())
 {}
 
 trade::trade(const trade &other_):
+    objectKey(),
     d(other_.d)
 {}
 

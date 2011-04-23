@@ -30,11 +30,13 @@ public:
 };
 
 portfolio::portfolio():
+    objectKey(),
     d(new portfolioData())
 {
 }
 
 portfolio::portfolio(const portfolio &other_):
+    objectKey(),
     d(other_.d)
 {
 }

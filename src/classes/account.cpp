@@ -20,10 +20,12 @@ public:
 };
 
 account::account():
+    objectKey(),
     d(new accountData())
 {}
 
 account::account(const account &other_):
+    objectKey(),
     d(other_.d)
 {}
 

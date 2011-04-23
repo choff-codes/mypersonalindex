@@ -12,7 +12,7 @@ frmMainPerformance_State::frmMainPerformance_State(int portfolioID_, const QMap<
     connect(treeWidget(), SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*,int)));
 }
 
-QTreeWidgetItem* frmMainPerformance_State::createTreeItem(objectType type_, int portfolioID_, int id_, const QString &description_, const QString &itemData_)
+QTreeWidgetItem* frmMainPerformance_State::createTreeItem(objectType /*type_*/, int /*portfolioID_*/, int id_, const QString &description_, const QString &itemData_)
 {
     QTreeWidgetItem *item = new QTreeWidgetItem(QStringList() << description_, id_);
     if (!itemData_.isEmpty())

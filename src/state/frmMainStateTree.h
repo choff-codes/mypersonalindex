@@ -52,7 +52,7 @@ protected:
     virtual QTreeWidgetItem* createTreeItem(objectType type_, int portfolioID_, int id_, const QString &description_, const QString &itemData_ = QString());
     treeItemKey createKeyFromTreeItem(QTreeWidgetItem *item_);
 
-    void populateTree(int portfolioID_);
+    virtual void populateTree(int portfolioID_);
     virtual historicalNAV calculateNAV(const treeItemKey &item_, int beginDate_, int endDate_);
 };
 

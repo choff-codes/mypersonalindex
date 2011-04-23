@@ -11,6 +11,7 @@ frmMainStatistic_State::frmMainStatistic_State(int portfolioID_, const QMap<int,
     ui->toolbarReorder->setText("Add/Remove Statistics...");
     ui->toolbarReorder->setIconText("Add/Remove Statistics...");
     connect(treeWidget(), SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
+    refreshTab();
 }
 
 frmMainStatistic_State::~frmMainStatistic_State()

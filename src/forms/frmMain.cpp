@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QFileInfo>
 #include <QFutureWatcher>
+#include <QPushButton>
 #include "frmEdit.h"
 #include "settingsFactory.h"
 #include "updatePrices.h"
@@ -36,7 +37,7 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
     m_file(new fileState(this)),
     m_currentPortfolio(UNASSIGNED),
     m_currentView(view_security),
-    m_futureWatcherYahoo(0),
+    m_futureWatcherPriceDownloader(0),
     m_futureWatcherTrade(0)
 {
     ui->setupUI(this);
@@ -50,18 +51,15 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
 
 frmMain::~frmMain()
 {
-    if (m_futureWatcherYahoo)
+    if (m_futureWatcherPriceDownloader)
     {
-        m_futureWatcherYahoo->cancel();
-        m_futureWatcherYahoo->waitForFinished();
-        delete m_futureWatcherYahoo;
+        m_futureWatcherPriceDownloader->cancel();
+        delete m_futureWatcherPriceDownloader;
     }
 
     if (m_futureWatcherTrade)
     {
-        // cancel trade calculations? not for now.
-        //m_futureWatcherTrade->cancel();
-        m_futureWatcherTrade->waitForFinished();
+        m_futureWatcherTrade->cancel();
         delete m_futureWatcherTrade;
     }
 
@@ -80,6 +78,7 @@ void frmMain::connectSlots()
     connect(ui->fileNew, SIGNAL(triggered()), m_file, SLOT(newFile()));
     connect(ui->fileExit, SIGNAL(triggered()), this, SLOT(close()));
     connect(m_file, SIGNAL(fileNameChange(QString,bool)), this, SLOT(fileChange(QString,bool)));
+    connect(ui->portfolioSwitch, SIGNAL(triggered()), this, SLOT(nextPortfolio()));
     connect(ui->portfolioAdd, SIGNAL(triggered()), this, SLOT(addPortfolio()));
     connect(ui->portfolioTabsAdd, SIGNAL(clicked()), this, SLOT(addPortfolio()));
     connect(ui->portfolioEdit, SIGNAL(triggered()), this, SLOT(editPortfolio()));
@@ -161,6 +160,30 @@ void frmMain::refreshPortfolioTabs(int id_)
 
 void frmMain::closeEvent(QCloseEvent *event_)
 {
+    if (m_futureWatcherPriceDownloader || m_futureWatcherTrade)
+    {
+        QMessageBox msgBox(this);
+        QPushButton *waitButton = msgBox.addButton("Wait", QMessageBox::AcceptRole);
+        QPushButton *cancelButton = msgBox.addButton("Exit Now Without Save", QMessageBox::RejectRole);
+        msgBox.setDefaultButton(waitButton);
+
+        msgBox.setWindowTitle(QCoreApplication::applicationName());
+        msgBox.setText("An update is currently in progress. You must wait for it to finish if you want to save. The progress bar will not update during this time, please be patient.");
+
+        msgBox.exec();
+        if (msgBox.clickedButton() == cancelButton)
+        {
+            event_->accept();
+            saveSettings();
+            return;
+        }
+
+        if (m_futureWatcherPriceDownloader)
+            m_futureWatcherPriceDownloader->waitForFinished();
+        if (m_futureWatcherTrade)
+            m_futureWatcherTrade->waitForFinished();
+    }
+
     if (!m_file->maybeSave())
     {
         event_->ignore();
@@ -301,6 +324,19 @@ void frmMain::portfolioTabChange(int currentIndex_)
     switchToView(m_currentView, true);
 }
 
+void frmMain::nextPortfolio()
+{
+    if (ui->portfolioTabs->count() == 0)
+        return;
+
+    int id = ui->portfolioTabs->currentIndex();
+    if (id == ui->portfolioTabs->count() - 1)
+        id = 0;
+    else
+        ++id;
+    ui->portfolioTabs->setCurrentIndex(id);
+}
+
 void frmMain::about()
 {
     QMessageBox::about(this, "About My Personal Index", "<h2>My Personal Index " + QString::number(APP_VERSION / 100.0) + "</h2>"
@@ -322,6 +358,8 @@ void frmMain::downloadPrices()
     if (symbols.isEmpty())
         return;
 
+    disableForUpdate(true);
+
     QList<historicalPrices> prices;
     QMap<QString, updatePricesOptions> options;
     for(QMap<QString, int>::const_iterator i = symbols.constBegin(); i != symbols.constEnd(); ++i)
@@ -332,10 +370,10 @@ void frmMain::downloadPrices()
 
     showProgressBar(prices.count());
 
-    m_futureWatcherYahoo = new QFutureWatcher<int>();
-    connect(m_futureWatcherYahoo, SIGNAL(finished()), this, SLOT(downloadPricesFinished()));
-    connect(m_futureWatcherYahoo, SIGNAL(progressValueChanged(int)), ui->progressUpdateBar, SLOT(setValue(int)));
-    m_futureWatcherYahoo->setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
+    m_futureWatcherPriceDownloader = new QFutureWatcher<int>();
+    connect(m_futureWatcherPriceDownloader, SIGNAL(finished()), this, SLOT(downloadPricesFinished()));
+    connect(m_futureWatcherPriceDownloader, SIGNAL(progressValueChanged(int)), ui->progressUpdateBar, SLOT(setValue(int)));
+    m_futureWatcherPriceDownloader->setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
 }
 
 void frmMain::downloadPricesFinished()
@@ -343,15 +381,18 @@ void frmMain::downloadPricesFinished()
     hideProgressBar();
 
     int earliestUpdate = tradeDateCalendar::endDate() + 1;
-    foreach(int result, m_futureWatcherYahoo->future())
+    foreach(int result, m_futureWatcherPriceDownloader->future())
         if (result != -1)
             earliestUpdate = qMin(earliestUpdate, result);
 
-    delete m_futureWatcherYahoo;
-    m_futureWatcherYahoo = 0;
+    delete m_futureWatcherPriceDownloader;
+    m_futureWatcherPriceDownloader = 0;
 
     if (earliestUpdate > tradeDateCalendar::endDate())
+    {
+        disableForUpdate(false);
         return;
+    }
 
     priceModified(earliestUpdate);
 }
@@ -363,6 +404,7 @@ void frmMain::recalculateTrades(const portfolio &portfolio_, int beginDate_)
 
 void frmMain::recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_)
 {
+    disableForUpdate(true);
     showProgressBar(portfolios_.count());
     m_futureWatcherTrade = new QFutureWatcher<void>();
     connect(m_futureWatcherTrade, SIGNAL(finished()), this, SLOT(recalculateTradesFinished()));
@@ -374,6 +416,7 @@ void frmMain::recalculateTradesFinished()
     delete m_futureWatcherTrade;
     m_futureWatcherTrade = 0;
     hideProgressBar();
+    disableForUpdate(false);
     clearViews();
     switchToView(m_currentView, true);
 }
@@ -511,4 +554,15 @@ void frmMain::clearPrice()
 
     m_file->prices.clear();
     priceModified();
+}
+
+void frmMain::disableForUpdate(bool disable_)
+{
+    ui->menubar->setDisabled(disable_);
+    ui->viewWidget->setDisabled(disable_);
+    ui->portfolioTabs->setDisabled(disable_);
+    ui->portfolioTabsAdd->setDisabled(disable_);
+    ui->portfolioTabsEdit->setDisabled(disable_);
+    ui->portfolioTabsDelete->setDisabled(disable_);
+    ui->portfolioTabsViewCmb->setDisabled(disable_);
 }

@@ -2,7 +2,6 @@
 #define FRMMAIN_UI_H
 
 #include <QMainWindow>
-#include <QActionGroup>
 #include <QAction>
 #include <QMenu>
 #include <QMenuBar>
@@ -26,7 +25,6 @@ public:
     QAction *fileSaveAs;
     QAction *fileExit;
     QMenu *view;
-    QActionGroup *viewGroup;
     QAction *viewAccounts;
     QAction *viewAssetAllocation;
     QAction *viewSecurities;
@@ -36,6 +34,7 @@ public:
     QAction *viewCorrelations;
     QAction *viewPerformance;
     QMenu *portfolio;
+    QAction *portfolioSwitch;
     QAction *portfolioAdd;
     QAction *portfolioEdit;
     QAction *portfolioDelete;

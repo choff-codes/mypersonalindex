@@ -24,6 +24,8 @@ protected:
     mpiViewModelBase* createModel(int beginDate_, int endDate_);
     QTreeWidgetItem* createTreeItem(objectType type_, int portfolioID_, int id_, const QString &description_, const QString &itemData_ = QString());
 
+private:
+    void populateTree(int portfolioID_);
 };
 
 #endif // FRMMAINPERFORMANCE_STATE_H

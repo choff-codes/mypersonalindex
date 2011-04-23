@@ -10,6 +10,7 @@ frmMainCorrelation_State::frmMainCorrelation_State(int portfolioID_, const QMap<
 {
     setupUI(true);
     connect(treeWidget(), SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
+    refreshTab();
 }
 
 frmMainCorrelation_State::~frmMainCorrelation_State()

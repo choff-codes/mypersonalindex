@@ -37,6 +37,7 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void portfolioTabChange(int currentIndex_);
+    void nextPortfolio();
     void downloadPrices();
     void downloadPricesFinished();
     void recalculateTradesFinished();
@@ -70,7 +71,7 @@ private:
     // but it causes a seg fault when the application is closed;
     // as memeber variables they can be deleted cleanly before
     // the application closes
-    QFutureWatcher<int> *m_futureWatcherYahoo;
+    QFutureWatcher<int> *m_futureWatcherPriceDownloader;
     QFutureWatcher<void> *m_futureWatcherTrade;
 
     void connectSlots();
@@ -88,6 +89,7 @@ private:
     void portfolioAdded(const portfolio &portfolio_);
     void portfolioModified(const portfolio &portfolio_);
     void priceModified(int beginDate_ = 0);
+    void disableForUpdate(bool disable_);
 
     void recalculateTrades(const portfolio &portfolio_, int beginDate_ = 0);
     void recalculateTrades(const QList<portfolio> &portfolios_, int beginDate_ = 0);

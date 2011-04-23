@@ -14,10 +14,12 @@ public:
 };
 
 symbol::symbol():
+    objectKey(),
     d(new symbolData())
 {}
 
 symbol::symbol(const symbol &other_):
+    objectKey(),
     d(other_.d)
 {}
 

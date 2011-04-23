@@ -36,10 +36,12 @@ public:
 };
 
 security::security():
+    objectKey(),
     d(new securityData())
 {}
 
 security::security(const security &other_):
+    objectKey(),
     d(other_.d)
 {}
 

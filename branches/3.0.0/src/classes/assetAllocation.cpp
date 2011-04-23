@@ -21,10 +21,12 @@ public:
 };
 
 assetAllocation::assetAllocation():
+    objectKey(),
     d(new assetAllocationData())
 {}
 
 assetAllocation::assetAllocation(const assetAllocation &other_):
+    objectKey(),
     d(other_.d)
 {}
 

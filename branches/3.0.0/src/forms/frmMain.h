@@ -4,13 +4,13 @@
 #include <QMainWindow>
 #include <QMap>
 #include "settings.h"
-#include <portfolio.h>
 
 template<class T>
 class QFutureWatcher;
 class frmMain_UI;
 class fileState;
 class frmMainState;
+class portfolio;
 class frmMain : public QMainWindow
 {
     Q_OBJECT

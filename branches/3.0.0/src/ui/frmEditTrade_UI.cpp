@@ -11,8 +11,8 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     list->setEnabled(false);
     filter = new QLabel("Choose Security:", parent_);
     filterCmb = new QComboBox(parent_);
-    addBtn = new QPushButton("Add", parent_);
-    deleteBtn = new QPushButton("Delete", parent_);
+    addBtn = new QPushButton("Add Trade", parent_);
+    deleteBtn = new QPushButton("Delete Trade", parent_);
 
     layoutTop->addWidget(list, 0, 0, 1, 5);
     layoutTop->addWidget(filter, 1, 0, 1, 1);

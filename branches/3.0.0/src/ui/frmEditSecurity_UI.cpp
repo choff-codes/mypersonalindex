@@ -77,7 +77,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     dividendReinvestmentChk->setToolTip(reinvestTool);
     layoutForm->setWidget(5, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(5, QFormLayout::FieldRole, dividendReinvestmentChk);
-    dividendNAVAdjustmentChk = new QCheckBox("Adjust NAV for Dividends", groupBox);
+    dividendNAVAdjustmentChk = new QCheckBox("Add Dividend To Return", groupBox);
     dividendNAVAdjustmentChk->setToolTip(navTool);
     layoutForm->setWidget(6, QFormLayout::LabelRole, new QLabel(groupBox));
     layoutForm->setWidget(6, QFormLayout::FieldRole, dividendNAVAdjustmentChk);

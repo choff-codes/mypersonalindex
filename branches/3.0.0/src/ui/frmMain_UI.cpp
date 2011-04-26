@@ -50,7 +50,11 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
 
     portfolio = new QMenu("&Portfolio", menubar);
     portfolioSwitch = new QAction("Switch To Next Portfolio", mainWindow_);
+#ifdef Q_WS_MAC
+    portfolioSwitch->setShortcut(Qt::ALT + Qt::Key_Tab);
+#else
     portfolioSwitch->setShortcut(Qt::CTRL + Qt::Key_Tab);
+#endif
     portfolioAdd = new QAction("Add New...", mainWindow_);
     portfolioAdd->setShortcut(QKeySequence::AddTab);
     portfolioEdit = new QAction("Edit...", mainWindow_);

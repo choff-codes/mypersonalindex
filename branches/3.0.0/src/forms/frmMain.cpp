@@ -46,7 +46,11 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
     if (filePath_.isEmpty())
         m_file->newFile();
     else
+    {
         m_file->open(filePath_);
+        if (m_file->path().isEmpty())
+            m_file->newFile();
+    }
 }
 
 frmMain::~frmMain()

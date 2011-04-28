@@ -13,7 +13,12 @@
 fileState::fileState(QWidget *parent_) :
     QObject(parent_),
     modified(false)
-{}
+{
+    DATABASE_LOCATION = QCoreApplication::applicationDirPath();
+    if (!DATABASE_LOCATION.isEmpty() && DATABASE_LOCATION.at(DATABASE_LOCATION.length() - 1) != '/')
+        DATABASE_LOCATION.append("/");
+    DATABASE_LOCATION.append("MPI.sqlite");
+}
 
 QWidget* fileState::parent() const
 {
@@ -109,6 +114,7 @@ bool fileState::saveFile(const QString &filePath_)
     qDebug("Time elapsed (save prices): %d ms", t.elapsed());
 #endif
 
+    file.close();
     setCurrentFile(filePath_, false);
     return true;
 }
@@ -125,7 +131,7 @@ bool fileState::prepareFileForSave(const QString &filePath_)
 
     if (m_filePath.isEmpty()) // new file
     {
-        if (!QFile::copy("MPI.sqlite", filePath_))
+        if (!QFile::copy(DATABASE_LOCATION, filePath_))
         {
             QMessageBox::warning(this->parent(), "MyPersonalIndex", QString("Could not save to %1!").arg(filePath_));
             return false;
@@ -181,6 +187,8 @@ void fileState::loadFile(const QString &filePath_, bool pricing_)
     identities = fileStateIdentity();
     portfolios = portfolioFactory(file).getPortfolios(identities);
 
+    file.close();
+
     setCurrentFile(updatedFilePath_, true);
 }
 
@@ -216,6 +224,7 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
                 QString("Could not save to %1 OR the original file was deleted at %2!").arg(fileName, filePath_));
             return QString();
         }
+        file.close();
         file = queries(fileName);
     }
 
@@ -228,7 +237,9 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
         }
     }
 
-    return file.getDatabaseLocation();
+    QString path = file.getDatabaseLocation();
+    file.close();
+    return path;
 }
 
 void fileState::upgradeVersion300(queries file_) {

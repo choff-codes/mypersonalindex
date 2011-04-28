@@ -243,6 +243,11 @@ queries::queries(const QString &databaseLocation_)
     m_database.open();
 }
 
+void queries::close()
+{
+    m_database.close();
+}
+
 bool queries::executeNonQuery(const QString &query_) const
 {
     QSqlQuery q(m_database);

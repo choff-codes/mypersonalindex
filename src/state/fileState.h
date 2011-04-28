@@ -41,6 +41,9 @@ private:
     // the current file path (empty is a new file)
     QString m_filePath;
 
+    // the path of the sqlite file
+    QString DATABASE_LOCATION;
+
     void loadFile(const QString &filePath_, bool pricing_);
     void setCurrentFile(const QString &filePath_, bool newFile_);
     bool saveFile(const QString &filePath_);

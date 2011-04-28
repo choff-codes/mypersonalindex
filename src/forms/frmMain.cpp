@@ -172,7 +172,7 @@ void frmMain::closeEvent(QCloseEvent *event_)
         msgBox.setDefaultButton(waitButton);
 
         msgBox.setWindowTitle("MyPersonalIndex");
-        msgBox.setText("An update is currently in progress. You must wait for it to finish if you want to save. The progress bar will not update during this time, please be patient.");
+        msgBox.setText("An update is currently in progress. You must wait for it to finish if you want to save.");
 
         msgBox.exec();
         if (msgBox.clickedButton() == cancelButton)
@@ -182,10 +182,8 @@ void frmMain::closeEvent(QCloseEvent *event_)
             return;
         }
 
-        if (m_futureWatcherPriceDownloader)
-            m_futureWatcherPriceDownloader->waitForFinished();
-        if (m_futureWatcherTrade)
-            m_futureWatcherTrade->waitForFinished();
+        event_->ignore();
+        return;
     }
 
     if (!m_file->maybeSave())

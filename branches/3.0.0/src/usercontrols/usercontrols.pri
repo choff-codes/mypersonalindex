@@ -6,10 +6,12 @@ HEADERS += $$PWD/mpiViewDelegates.h \
     $$PWD/mpiDateEdit.h \
     $$PWD/mpiTableView.h \
     $$PWD/mpiChart.h \
-    $$PWD/mpiChartCurve.h
+    $$PWD/mpiChartCurve.h \
+    $$PWD/mpiPlotZoomer.h
 SOURCES += $$PWD/mpiViewDelegates.cpp \
     $$PWD/mpiViewModelBase.cpp \
     $$PWD/mpiDateEdit.cpp \
     $$PWD/mpiTableView.cpp \
     $$PWD/mpiChart.cpp \
-    $$PWD/mpiChartCurve.cpp
+    $$PWD/mpiChartCurve.cpp \
+    $$PWD/mpiPlotZoomer.cpp

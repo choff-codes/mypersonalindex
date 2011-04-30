@@ -331,17 +331,23 @@ void frmMain::portfolioTabChange(int currentIndex_)
 
 void frmMain::portfolioTabMoved(int from_, int to_)
 {
+    // reset identities to get all new ones
+    m_file->identities.resetIdentity(objectType_Portfolio);
+
+    portfolio current = m_file->portfolios.value(m_currentPortfolio);
     QList<portfolio> portfolios = m_file->portfolios.values();
     portfolios.move(from_, to_);
 
     QMap<int, portfolio> newPortfolioMap;
     for(int i = 0; i < portfolios.count(); ++i)
     {
-       portfolio p = portfolios.at(i);
-       p.setID(i);
-       newPortfolioMap.insert(i, p);
+        portfolio p = portfolios.at(i);
+        p.setID(m_file->identities.nextIdentity(objectType_Portfolio));
+        newPortfolioMap.insert(p.id(), p);
+        ui->portfolioTabs->setTabData(i, p.id());
     }
 
+    m_currentPortfolio = current.id();
     m_file->portfolios = newPortfolioMap;
     setWindowModified(true);
     m_file->modified = true;

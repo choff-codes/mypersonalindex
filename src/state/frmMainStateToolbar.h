@@ -3,6 +3,7 @@
 
 #include "frmMainState.h"
 
+class QDate;
 class frmMainToolbar_UI;
 class frmMainStateToolbar : public frmMainState
 {
@@ -21,6 +22,9 @@ protected:
 
 protected slots:
     void dateClicked();
+
+private:
+    static QDate previousTradeDate(const QDate &date_);
 };
 
 #endif // FRMSTATETOOLBAR_H

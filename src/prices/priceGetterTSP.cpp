@@ -45,6 +45,8 @@ int priceGetterTSP::getPrices(const QString &symbol_, historicalPrices priceHist
     foreach(const QByteArray &s, lines)
     {
         QList<QByteArray> line = s.split(','); // csv
+        if (line.count() != 3)
+            continue;
 
         int date = QDate::fromString(line.at(1), "MM/dd/yyyy").toJulianDay();
         if (priceHistory_.contains(date, historicalPrices::type_price))
@@ -80,7 +82,8 @@ QList<QByteArray> priceGetterTSP::downloadFile(const QString &symbol_, int begin
     QDate beginQDate = QDate::fromJulianDay(beginDate_);
     QDate endQDate = QDate::fromJulianDay(endDate_);
 
-    params.addQueryItem("fund",symbol_);
+    QString properCaseSymbol = symbol_.left(3).append(symbol_.right(symbol_.length() - 3).toLower());
+    params.addQueryItem("fund", properCaseSymbol);
     params.addQueryItem("frommonth", QString::number(beginQDate.month()));
     params.addQueryItem("fromday", QString::number(beginQDate.day()));
     params.addQueryItem("fromyear", QString::number(beginQDate.year()));

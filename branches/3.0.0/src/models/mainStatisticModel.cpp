@@ -196,9 +196,9 @@ statisticRow::statisticRow(int type_, int id_, const QString description_, const
     values.append((info.endNAV / info.beginNAV) - 1);
     //    row_ProbabilityOfYearlyGain,
     double distribution = cumulativeNormalDistribution(info);
-    values.append(distribution);
+    values.append((isnan(distribution) || isinf(distribution)) ? 0 : distribution);
     //    row_ProbabilityOfYearlyLoss,
-    values.append(info.days <= 0 ? 0 : 1 - distribution);
+    values.append(info.days < 2 || (isnan(distribution) || isinf(distribution)) ? 0 : 1 - distribution);
     //    row_TaxLiability,
     values.append(info.taxLiability);
     //    row_YearlyReturn,

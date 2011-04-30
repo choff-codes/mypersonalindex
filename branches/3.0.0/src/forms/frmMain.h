@@ -37,6 +37,7 @@ private slots:
     void editPortfolio();
     void deletePortfolio();
     void portfolioTabChange(int currentIndex_);
+    void portfolioTabMoved(int from_, int to_);
     void nextPortfolio();
     void downloadPrices();
     void downloadPricesFinished();

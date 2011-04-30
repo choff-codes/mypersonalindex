@@ -90,6 +90,7 @@ void frmMain::connectSlots()
     connect(ui->portfolioDelete, SIGNAL(triggered()), this, SLOT(deletePortfolio()));
     connect(ui->portfolioTabsDelete, SIGNAL(clicked()), this, SLOT(deletePortfolio()));
     connect(ui->portfolioTabs, SIGNAL(currentChanged(int)), this, SLOT(portfolioTabChange(int)));
+    connect(ui->portfolioTabs, SIGNAL(tabMoved(int,int)), this, SLOT(portfolioTabMoved(int,int)));
     connect(ui->priceDownload, SIGNAL(triggered()), this, SLOT(downloadPrices()));
     connect(ui->progressUpdateBtn, SIGNAL(clicked()), this, SLOT(downloadPrices()));
     connect(ui->viewAssetAllocation, SIGNAL(triggered()), this, SLOT(viewChange()));
@@ -324,6 +325,22 @@ void frmMain::portfolioTabChange(int currentIndex_)
     ui->portfolioTabsEdit->setHidden(currentIndex_ == -1);
     ui->portfolioTabsViewCmb->setHidden(currentIndex_ == -1);
     switchToView(m_currentView, true);
+}
+
+void frmMain::portfolioTabMoved(int from_, int to_)
+{
+    QMap<int, portfolio> newPortfolioMap;
+    QList<portfolio> portfolios = m_file->portfolios.values();
+    portfolios.move(from_, to_);
+    for(int i = 0; i < portfolios.count(); ++i)
+    {
+       portfolio p = portfolios.at(i);
+       p.setID(i);
+       newPortfolioMap.insert(i, p);
+    }
+    m_file->portfolios = newPortfolioMap;
+    setWindowModified(true);
+    m_file->modified = true;
 }
 
 void frmMain::nextPortfolio()

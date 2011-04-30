@@ -140,6 +140,7 @@ void frmMain_UI::setupUI(QMainWindow *mainWindow_)
     portfolioTabs = new QTabBar(centralWidget);
     portfolioTabs->setExpanding(false);
     portfolioTabs->setDrawBase(false);
+    portfolioTabs->setMovable(true);
 
     portfolioTabsEdit = new QToolButton(centralWidget);
     portfolioTabsEdit->setIcon(QIcon(":/icons/edit.png"));

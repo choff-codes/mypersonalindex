@@ -101,7 +101,7 @@ void frmEditSecurity_State::save()
     if (!m_currentItem)
         return;
 
-    m_currentItem->setDescription(ui->symbolTxt->text());
+    m_currentItem->setDescription(ui->symbolTxt->text().toUpper());
     m_currentItem->setAccount(ui->acctCmb->itemData(ui->acctCmb->currentIndex()).toInt());
     m_currentItem->setExpenseRatio(ui->expenseSpinBox->value() / 100);
     m_currentItem->setCashAccount(ui->cashChk->isChecked());
@@ -143,7 +143,7 @@ void frmEditSecurity_State::load()
         return;
 
     ui->symbolTxt->blockSignals(true);
-    ui->symbolTxt->setText(m_currentItem->description().toUpper());
+    ui->symbolTxt->setText(m_currentItem->description());
     ui->symbolTxt->blockSignals(false);
     ui->acctCmb->setCurrentIndex(ui->acctCmb->findData(m_currentItem->account()));
     ui->expenseSpinBox->setValue(m_currentItem->expenseRatio() * 100);

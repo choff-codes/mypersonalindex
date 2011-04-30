@@ -22,7 +22,7 @@ void frmEditSecurity_UI::setupUI(QWidget *parent_)
     groupBox = new QGroupBox("Security", widgetRight);
     layoutForm = new QFormLayout(groupBox);
 
-    QString symbolTool = "The symbol of the security. By default, data will download from Yahoo! Finance.\n\nThe following special symbols will download from TSP:\nF FUND\nC FUND\nS FUND\nI FUND\nL INCOME\nL 2010\nL 2020\nL 2030\nL 2040\nL 2050";
+    QString symbolTool = "The symbol of the security. By default, data will download from Yahoo! Finance.\n\nThe following special symbols will download from TSP:\nG FUND\nF FUND\nC FUND\nS FUND\nI FUND\nL INCOME\nL 2010\nL 2020\nL 2030\nL 2040\nL 2050";
     QString notesTool = "Personal notes about thse security.";
     QString accountTool = "The account you purchased the security.";
     QString expenseTool = "Expense ratio of a mutual fund, ETF, etc.";

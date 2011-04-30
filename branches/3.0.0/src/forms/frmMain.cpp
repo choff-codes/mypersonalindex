@@ -35,7 +35,7 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
     QMainWindow(parent_),
     ui(new frmMain_UI()),
     m_file(new fileState(this)),
-    m_currentPortfolio(UNASSIGNED),
+    m_currentPortfolio(-1),
     m_currentView(view_security),
     m_futureWatcherPriceDownloader(0),
     m_futureWatcherTrade(0)
@@ -135,7 +135,7 @@ void frmMain::fileChange(const QString &filePath_, bool newFile_)
         return;
 
     refreshPortfolioPrices();
-    refreshPortfolioTabs(UNASSIGNED);
+    refreshPortfolioTabs(-1);
 }
 
 void frmMain::refreshPortfolioTabs(int id_)
@@ -174,8 +174,8 @@ void frmMain::closeEvent(QCloseEvent *event_)
 
         msgBox.setWindowTitle("MyPersonalIndex");
         msgBox.setText("An update is currently in progress. You must wait for it to finish if you want to save.");
-
         msgBox.exec();
+
         if (msgBox.clickedButton() == cancelButton)
         {
             event_->accept();
@@ -243,7 +243,7 @@ void frmMain::addPortfolio()
 
 void frmMain::editPortfolio()
 {
-    if (m_currentPortfolio == UNASSIGNED)
+    if (m_currentPortfolio == -1)
         return;
 
     frmEdit f(m_file->portfolios.value(m_currentPortfolio), m_file->identities, false, this);
@@ -257,7 +257,7 @@ void frmMain::editPortfolio()
 
 void frmMain::deletePortfolio()
 {
-    if (m_currentPortfolio == UNASSIGNED)
+    if (m_currentPortfolio == -1)
         return;
 
     if (QMessageBox::question(this, "MyPersonalIndex", QString("Are you sure you want to delete portfolio %1?")
@@ -276,11 +276,13 @@ void frmMain::portfolioAdded(const portfolio &portfolio_)
     m_file->modified = true;
     m_file->portfolios.insert(portfolio_.id(), portfolio_);
     refreshPortfolioPrices();
+
     ui->portfolioTabs->blockSignals(true);
     int tabId = ui->portfolioTabs->addTab(portfolio_.displayText());
     ui->portfolioTabs->setTabData(tabId, portfolio_.id());
     ui->portfolioTabs->setCurrentIndex(tabId);
     ui->portfolioTabs->blockSignals(false);
+
     portfolioTabChange(tabId);
     recalculateTrades(portfolio_);
 }
@@ -329,15 +331,17 @@ void frmMain::portfolioTabChange(int currentIndex_)
 
 void frmMain::portfolioTabMoved(int from_, int to_)
 {
-    QMap<int, portfolio> newPortfolioMap;
     QList<portfolio> portfolios = m_file->portfolios.values();
     portfolios.move(from_, to_);
+
+    QMap<int, portfolio> newPortfolioMap;
     for(int i = 0; i < portfolios.count(); ++i)
     {
        portfolio p = portfolios.at(i);
        p.setID(i);
        newPortfolioMap.insert(i, p);
     }
+
     m_file->portfolios = newPortfolioMap;
     setWindowModified(true);
     m_file->modified = true;
@@ -479,7 +483,7 @@ void frmMain::clearViews()
 
 void frmMain::switchToView(view view_, bool force_)
 {
-    if ((!force_ && m_currentView == view_) || m_currentPortfolio == UNASSIGNED )
+    if ((!force_ && m_currentView == view_) || m_currentPortfolio == -1 )
         return;
 
     ui->portfolioTabsViewCmb->blockSignals(true);
@@ -542,7 +546,7 @@ void frmMain::importPortfolio()
     else
         portfolios = m_file->portfolios;
 
-    frmPortfolioImport f(m_currentPortfolio == UNASSIGNED ? portfolio() : m_file->portfolios.value(m_currentPortfolio), portfolios, m_file->identities, this);
+    frmPortfolioImport f(m_currentPortfolio == -1 ? portfolio() : m_file->portfolios.value(m_currentPortfolio), portfolios, m_file->identities, this);
     if (f.exec() != QDialog::Accepted)
         return;
 

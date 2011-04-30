@@ -16,7 +16,7 @@ void frmMainChart_UI::setupUI(QWidget *parent_)
     chart->setAxisScaleDraw(QwtPlot::yLeft, new mpiPercentScale());
     chart->plotLayout()->setCanvasMargin(20);
     chart->plotLayout()->setMargin(20);
-    chartZoomer = new QwtPlotZoomer(chart->canvas(), false);
+    chartZoomer = new mpiPlotZoomer(chart->canvas());
     chartLegend = new QwtLegend(chart);
     chart->insertLegend(chartLegend, QwtPlot::RightLegend);
 

@@ -33,12 +33,13 @@ double assetAllocationTarget::totalAssignedPercentage() const
 bool assetAllocationTarget::insertBatch(const queries &dataSource_)
 {
     m_position = m_targets.constBegin();
-    return dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, m_targets.count(), this);
+    int rowCount = m_targets.contains(UNASSIGNED) ? m_targets.count() - 1 : m_targets.count();
+    return dataSource_.bulkInsert(queries::table_PortfolioSecurityAA, queries::portfolioSecurityAAColumns, rowCount, this);
 }
 
 QVariant assetAllocationTarget::data(int column_, bool newRow_)
 {
-    if (newRow_)
+    if (newRow_ || m_position.key() == UNASSIGNED)
         ++m_position;
 
     switch(column_)

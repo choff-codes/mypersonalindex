@@ -28,6 +28,12 @@ void fileStateIdentity::setStartingIdentity(objectType type_, int id_) const
 {
     d->identities[type_] = id_;
 }
+
+void fileStateIdentity::resetIdentity(objectType type_)
+{
+    d->identities.remove(type_);
+}
+
 int fileStateIdentity::nextIdentity(objectType type_)  const
 {
     return ++d->identities[type_];

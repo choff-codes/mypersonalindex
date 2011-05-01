@@ -30,7 +30,7 @@ void mpiTableView::exportTable()
     for(int i = 0; i < model()->rowCount(); ++i)
         rows.append(i);
 
-    filePath = QFileDialog::getSaveFileName(parentWidget(), "Export to...", QDir::homePath(),
+    filePath = QFileDialog::getSaveFileName(0, "Export to...", QDir::homePath(),
         "Tab Delimited File (*.txt);;Comma Delimited File (*.csv);;Pipe Delimited File (*.txt)", &fileType);
 
     if (filePath.isEmpty())

@@ -20,10 +20,11 @@ public:
         tradeAction_ReinvestDividends,
         tradeAction_ReceiveInterest,
         tradeAction_ReceiveInterestPercent,
-        tradeAction_PurchasePercentOfSecurityValue,
+        tradeAction_PurchasePercentOfSecurityShares,
         tradeAction_PurchasePercentOfPortfolioValue,
         tradeAction_PurchasePercentOfAATarget,
-        tradeAction_ReinvestDividendsAuto
+        tradeAction_ReinvestDividendsAuto,
+        tradeAction_SellPercentOfSecurityShares
     };
 
     // order matters, calculatorTrade.h depends on tradePriceType_CurrentClose and tradePriceType_PreviousClose being 0 and 1

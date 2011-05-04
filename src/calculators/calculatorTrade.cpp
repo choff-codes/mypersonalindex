@@ -237,9 +237,12 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, const por
             return trade_.value() / price_;
         case trade::tradeAction_SellFixedAmount:
             return trade_.value() / price_ * -1;
-        case trade::tradeAction_PurchasePercentOfSecurityValue:
         case trade::tradeAction_ReceiveInterestPercent:
             return (portfolio_.securitySnapshot(date_, parent_.id()).totalValue * (trade_.value() / 100)) / price_;
+        case trade::tradeAction_PurchasePercentOfSecurityShares:
+            return portfolio_.securitySnapshot(date_, parent_.id()).shares * (trade_.value() / 100);
+        case trade::tradeAction_SellPercentOfSecurityShares:
+            return portfolio_.securitySnapshot(date_, parent_.id()).shares * (trade_.value() / 100) * -1;
         case trade::tradeAction_PurchasePercentOfPortfolioValue:
             return (portfolio_.portfolioSnapshot(date_).totalValue * (trade_.value() / 100)) / price_;
         case trade::tradeAction_ReinvestDividendsAuto:

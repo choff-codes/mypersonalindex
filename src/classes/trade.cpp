@@ -149,9 +149,9 @@ QString trade::tradeTypeToString(tradeAction type_)
     switch (type_)
     {
         case tradeAction_Purchase:
-            return "Purchase";
+            return "Purchase shares";
         case tradeAction_Sell:
-            return "Sell";
+            return "Sell shares";
         case tradeAction_ReinvestDividends:
             return "Reinvest dividends";
         case tradeAction_ReceiveInterest:
@@ -162,12 +162,14 @@ QString trade::tradeTypeToString(tradeAction type_)
             return "Purchase fixed amount";
         case tradeAction_SellFixedAmount:
             return "Sell fixed amount";
-        case tradeAction_PurchasePercentOfSecurityValue:
-            return "Purchase % of security value";
+        case tradeAction_PurchasePercentOfSecurityShares:
+            return "Purchase % of shares";
+        case tradeAction_SellPercentOfSecurityShares:
+            return "Sell % of shares";
         case tradeAction_PurchasePercentOfPortfolioValue:
             return "Purchase % of portfolio value";
         case tradeAction_PurchasePercentOfAATarget:
-            return "Purchase % of asset allocation target";
+            return "Purchase % of asset class target";
         case tradeAction_ReinvestDividendsAuto:
             break;
     }
@@ -207,7 +209,8 @@ QString trade::valueToString(tradeAction type_, double value_)
             return QString("of %1" ).arg(functions::doubleToCurrency(value_));
         case tradeAction_PurchasePercentOfPortfolioValue:
         case tradeAction_PurchasePercentOfAATarget:
-        case tradeAction_PurchasePercentOfSecurityValue:
+        case tradeAction_PurchasePercentOfSecurityShares:
+        case tradeAction_SellPercentOfSecurityShares:
         case tradeAction_ReceiveInterestPercent:
             return QString("totaling %1").arg(functions::doubleToPercentage(value_ / 100));
         case tradeAction_ReinvestDividendsAuto:
@@ -263,7 +266,8 @@ QString trade::validate() const
                 return "The dollar amount cannot be negative!";
             case tradeAction_PurchasePercentOfPortfolioValue:
             case tradeAction_PurchasePercentOfAATarget:
-            case tradeAction_PurchasePercentOfSecurityValue:
+            case tradeAction_PurchasePercentOfSecurityShares:
+            case tradeAction_SellPercentOfSecurityShares:
             case tradeAction_ReceiveInterestPercent:
                 return "The percentage cannot be negative!";
             default:

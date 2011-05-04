@@ -308,8 +308,9 @@ void frmEditTrade_State::tradeActionChange(int index_)
         case trade::tradeAction_SellFixedAmount:
             ui->shares->setText("Amount ($):");
             break;
-        case trade::tradeAction_PurchasePercentOfSecurityValue:
-            ui->shares->setText("% of Value:");
+        case trade::tradeAction_PurchasePercentOfSecurityShares:
+        case trade::tradeAction_SellPercentOfSecurityShares:
+            ui->shares->setText("% of Shares:");
             break;
         case trade::tradeAction_ReceiveInterestPercent:
             ui->shares->setText("Rate (%):");

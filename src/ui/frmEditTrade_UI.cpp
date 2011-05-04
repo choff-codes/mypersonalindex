@@ -50,7 +50,8 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReinvestDividends), trade::tradeAction_ReinvestDividends);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReceiveInterest), trade::tradeAction_ReceiveInterest);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_ReceiveInterestPercent), trade::tradeAction_ReceiveInterestPercent);
-    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfSecurityValue), trade::tradeAction_PurchasePercentOfSecurityValue);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfSecurityShares), trade::tradeAction_PurchasePercentOfSecurityShares);
+    actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_SellPercentOfSecurityShares), trade::tradeAction_SellPercentOfSecurityShares);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfPortfolioValue), trade::tradeAction_PurchasePercentOfPortfolioValue);
     actionCmb->addItem(trade::tradeTypeToString(trade::tradeAction_PurchasePercentOfAATarget), trade::tradeAction_PurchasePercentOfAATarget);
 

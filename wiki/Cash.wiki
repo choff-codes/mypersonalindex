@@ -1,5 +1,4 @@
 #summary Add a cash position to a portfolio.
-#labels Featured
 
 = Cash Position =
 

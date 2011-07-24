@@ -1,5 +1,4 @@
 #summary Introduction tutorial to create a new, dynamic portfolio.
-#labels Featured
 
 = Tutorial =
 

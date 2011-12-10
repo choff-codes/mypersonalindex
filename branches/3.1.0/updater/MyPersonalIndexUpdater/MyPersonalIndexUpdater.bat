@@ -1,0 +1,1 @@
+start /d "%cd%\Files\" MyPersonalIndexUpdater.exe

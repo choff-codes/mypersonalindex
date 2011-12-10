@@ -217,6 +217,15 @@ void frmMain::updateRecentFileActions(const QString &newFilePath_)
     int counter = 1;
     foreach(QAction *action, ui->fileRecent->actions())
         action->setShortcut(QString("Ctrl+%1").arg(QString::number(counter++)));
+
+    if (m_settings.recentFiles().size() == 0)
+    {
+        ui->fileRecent->addAction("Empty")->setEnabled(false);
+        return;
+    }
+
+    ui->fileRecent->addSeparator();
+    connect(ui->fileRecent->addAction("Clear Recent"), SIGNAL(triggered()), this, SLOT(clearRecentFiles()));
 }
 
 void frmMain::recentFileSelected()
@@ -226,6 +235,12 @@ void frmMain::recentFileSelected()
         return;
 
     m_file->open(action->text());
+}
+
+void frmMain::clearRecentFiles()
+{
+    m_settings.clearRecentFiles();
+    updateRecentFileActions(QString());
 }
 
 void frmMain::addPortfolio()

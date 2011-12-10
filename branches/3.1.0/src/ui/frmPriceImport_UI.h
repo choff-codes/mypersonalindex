@@ -39,6 +39,7 @@ public:
     QToolButton *columnOrderMoveUp;
     QToolButton *columnOrderMoveDown;
     QCheckBox *columnOrderHeaderChk;
+    QCheckBox *columnOrderDateIgnore;
     QLabel *description;
     QGroupBox *groupBoxFile;
     QHBoxLayout *fileLayout;

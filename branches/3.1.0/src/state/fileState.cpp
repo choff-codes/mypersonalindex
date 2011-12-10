@@ -172,6 +172,12 @@ void fileState::open(bool pricing_)
 
 void fileState::loadFile(const QString &filePath_, bool pricing_)
 {
+    if (!QFile::exists(filePath_))
+    {
+        QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("%1 does not exist!").arg(filePath_));
+        return;
+    }
+
     // check if the file needs to be upgraded
     QString updatedFilePath_ = checkDatabaseVersion(filePath_);
     if (updatedFilePath_.isEmpty())
@@ -207,7 +213,11 @@ QString fileState::checkDatabaseVersion(const QString &filePath_)
         QMessageBox::critical(this->parent(), "MyPersonalIndex", QString("%1 is not a valid My Personal Index file!").arg(filePath_));
         return QString();
     }
+
     if (version == APP_VERSION)
+        return file.getDatabaseLocation();
+
+    if (version == 310)
         return file.getDatabaseLocation();
 
     QMessageBox::information(this->parent(), "MyPersonalIndex", QString("%1 is an older version, you will be asked to save the file in the new format.").arg(filePath_));

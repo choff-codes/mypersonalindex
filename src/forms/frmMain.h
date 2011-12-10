@@ -33,6 +33,7 @@ public:
 private slots:
     void about();
     void recentFileSelected();
+    void clearRecentFiles();
     void addPortfolio();
     void editPortfolio();
     void deletePortfolio();

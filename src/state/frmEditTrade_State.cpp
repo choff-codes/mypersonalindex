@@ -205,13 +205,16 @@ void frmEditTrade_State::load()
     ui->actionCmb->setCurrentIndex(ui->actionCmb->findData(m_currentItem->action()));
     ui->cashCmb->setCurrentIndex(ui->cashCmb->findData(m_currentItem->cashAccount()));
     ui->commissionSpinBox->setValue(m_currentItem->commission());
+
+    // frequency must come before date, since the change triggers a setDate
+    ui->freqCmb->setCurrentIndex(ui->freqCmb->findData(m_currentItem->frequency()));
+
     ui->dateDateEdit->setDate(m_currentItem->date() != 0 ? QDate::fromJulianDay(m_currentItem->date()) : QDate::currentDate());
     ui->startingChk->setChecked(m_currentItem->startDate() != 0);
     ui->startingDateEdit->setDate(m_currentItem->startDate() != 0 ? QDate::fromJulianDay(m_currentItem->startDate()) : QDate::currentDate());
     ui->endingChk->setChecked(m_currentItem->endDate() != 0);
     ui->endingDateEdit->setDate(m_currentItem->endDate() != 0 ? QDate::fromJulianDay(m_currentItem->endDate()) : QDate::currentDate());
     ui->noteTxt->setPlainText(m_currentItem->description());
-    ui->freqCmb->setCurrentIndex(ui->freqCmb->findData(m_currentItem->frequency()));
     ui->sharesSpinBox->setValue(m_currentItem->value());
     if (m_currentItem->priceType() == trade::tradePriceType_UserDefined)
     {

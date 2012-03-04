@@ -27,6 +27,7 @@ protected slots:
     void portfolioChange(int index_);
     void refreshTab();
     void clearTree();
+    void addAllPortfolios();
 
 private:
     static const QStringList m_colors;

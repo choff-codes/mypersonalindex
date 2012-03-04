@@ -14,6 +14,8 @@ QList<int> tradeDateCalendar::computeTradeDates(int date_, int minimumDate_, int
             return computeFrequencyTradeMonthly(date_, minimumDate_, maximumDate_);
         case frequency_Yearly:
             return computeFrequencyTradeYearly(date_, minimumDate_, maximumDate_);
+        case frequency_Quarterly:
+            return computeFrequencyTradeQuarterly(minimumDate_, maximumDate_);
         default:
             return QList<int>();
     }
@@ -123,6 +125,37 @@ QList<int> tradeDateCalendar::computeFrequencyTradeYearly(int date_, int minimum
 
         tradeDates.append(date_);
         yearDayCounter = yearDayCounter.addYears(1);
+    }
+
+    return tradeDates;
+}
+
+QList<int> tradeDateCalendar::computeFrequencyTradeQuarterly(int minimumDate_, int maximumDate_)
+{
+    QList<int> tradeDates;
+
+    int year = QDate::fromJulianDay(minimumDate_).year();
+
+    forever
+    {
+        QList<QDate> dates = QList<QDate>()
+                             << QDate(year, 3, 31)
+                             << QDate(year, 6, 30)
+                             << QDate(year, 9, 30)
+                             << QDate(year, 12, 31);
+
+        foreach(const QDate &date, dates)
+        {
+            int checkedDate_ = checkTradeDate(date.toJulianDay(), direction_ascending);
+            if (checkedDate_ > maximumDate_)
+                return tradeDates;
+
+            if (checkedDate_ < minimumDate_)
+                continue;
+
+            tradeDates.append(checkedDate_);
+        }
+        ++year;
     }
 
     return tradeDates;

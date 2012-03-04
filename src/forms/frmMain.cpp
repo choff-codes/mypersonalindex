@@ -1,5 +1,6 @@
 #include "frmMain.h"
 #include "frmMain_UI.h"
+#include <QApplication>
 #include <QCoreApplication>
 #include <QtConcurrentMap>
 #include <QFutureWatcher>
@@ -36,9 +37,7 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
     ui(new frmMain_UI()),
     m_file(new fileState(this)),
     m_currentPortfolio(-1),
-    m_currentView(view_security),
-    m_futureWatcherPriceDownloader(0),
-    m_futureWatcherTrade(0)
+    m_currentView(view_security)
 {
     ui->setupUI(this);
     connectSlots();
@@ -55,18 +54,6 @@ frmMain::frmMain(const QString &filePath_, QWidget *parent_):
 
 frmMain::~frmMain()
 {
-    if (m_futureWatcherPriceDownloader)
-    {
-        m_futureWatcherPriceDownloader->cancel();
-        delete m_futureWatcherPriceDownloader;
-    }
-
-    if (m_futureWatcherTrade)
-    {
-        m_futureWatcherTrade->cancel();
-        delete m_futureWatcherTrade;
-    }
-
     qDeleteAll(m_views);
 
     delete ui;
@@ -165,7 +152,7 @@ void frmMain::refreshPortfolioTabs(int id_)
 
 void frmMain::closeEvent(QCloseEvent *event_)
 {
-    if (m_futureWatcherPriceDownloader || m_futureWatcherTrade)
+    if (ui->progressUpdateBar->isVisible())
     {
         QMessageBox msgBox(this);
         QPushButton *waitButton = msgBox.addButton("Wait", QMessageBox::AcceptRole);
@@ -180,6 +167,7 @@ void frmMain::closeEvent(QCloseEvent *event_)
         {
             event_->accept();
             saveSettings();
+            QApplication::exit();
             return;
         }
 
@@ -195,6 +183,7 @@ void frmMain::closeEvent(QCloseEvent *event_)
 
     event_->accept();
     saveSettings();
+    QApplication::exit();
 }
 
 void frmMain::saveSettings()
@@ -403,34 +392,22 @@ void frmMain::downloadPrices()
         return;
 
     disableForUpdate(true);
+    showProgressBar(symbols.count());
 
-    QList<historicalPrices> prices;
-    QMap<QString, updatePricesOptions> options;
+    updatePrices u;
+    QList<int> results;
     for(QMap<QString, int>::const_iterator i = symbols.constBegin(); i != symbols.constEnd(); ++i)
     {
-        prices.append(m_file->prices.getHistoricalPrice(i.key()));
-        options.insert(i.key(), updatePricesOptions(i.value(), tradeDateCalendar::endDate(), m_settings.splits()));
+        results.append(u.get(m_file->prices.getHistoricalPrice(i.key()), i.value(), tradeDateCalendar::endDate()));
+        ui->progressUpdateBar->setValue(ui->progressUpdateBar->value() + 1);
     }
 
-    showProgressBar(prices.count());
-
-    m_futureWatcherPriceDownloader = new QFutureWatcher<int>();
-    connect(m_futureWatcherPriceDownloader, SIGNAL(finished()), this, SLOT(downloadPricesFinished()));
-    connect(m_futureWatcherPriceDownloader, SIGNAL(progressValueChanged(int)), ui->progressUpdateBar, SLOT(setValue(int)));
-    m_futureWatcherPriceDownloader->setFuture(QtConcurrent::mapped(prices, updatePrices(options)));
-}
-
-void frmMain::downloadPricesFinished()
-{
     hideProgressBar();
 
     int earliestUpdate = tradeDateCalendar::endDate() + 1;
-    foreach(int result, m_futureWatcherPriceDownloader->future())
+    foreach(int result, results)
         if (result != -1)
             earliestUpdate = qMin(earliestUpdate, result);
-
-    delete m_futureWatcherPriceDownloader;
-    m_futureWatcherPriceDownloader = 0;
 
     if (earliestUpdate > tradeDateCalendar::endDate())
     {
@@ -450,15 +427,13 @@ void frmMain::recalculateTrades(const QList<portfolio> &portfolios_, int beginDa
 {
     disableForUpdate(true);
     showProgressBar(portfolios_.count());
-    m_futureWatcherTrade = new QFutureWatcher<void>();
-    connect(m_futureWatcherTrade, SIGNAL(finished()), this, SLOT(recalculateTradesFinished()));
-    m_futureWatcherTrade->setFuture(QtConcurrent::mapped(portfolios_, calculatorTrade(beginDate_)));
-}
+    calculatorTrade c(beginDate_);
+    foreach(portfolio p, portfolios_)
+    {
+        c.calculate(p);
+        ui->progressUpdateBar->setValue(ui->progressUpdateBar->value() + 1);
+    }
 
-void frmMain::recalculateTradesFinished()
-{
-    delete m_futureWatcherTrade;
-    m_futureWatcherTrade = 0;
     hideProgressBar();
     disableForUpdate(false);
     clearViews();

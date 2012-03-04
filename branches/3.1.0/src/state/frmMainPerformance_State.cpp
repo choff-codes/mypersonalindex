@@ -8,6 +8,7 @@ frmMainPerformance_State::frmMainPerformance_State(int portfolioID_, const QMap<
     frmMainStateTableWithTree(portfolioID_, portfolios_, settings_, prices_, parent_)
 {
     setupUI();
+    static_cast<frmMainTableViewTree_UI*>(ui)->treeAllPortfolios->setVisible(false);
     static_cast<frmMainTableViewTree_UI*>(ui)->treeClearBtn->setVisible(false);
     connect(treeWidget(), SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*,int)));
     refreshTab();

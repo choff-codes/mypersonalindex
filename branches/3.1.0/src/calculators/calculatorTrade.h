@@ -14,9 +14,7 @@ public:
         m_beginDate(beginDate_)
     {}
 
-    typedef bool result_type;
-
-    result_type operator()(const portfolio &portfolio_);
+    void calculate(const portfolio &portfolio_);
 
 private:
     typedef QList<trade> tradeList;

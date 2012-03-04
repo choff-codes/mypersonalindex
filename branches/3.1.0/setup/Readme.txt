@@ -4,7 +4,7 @@ Welcome to the portable version of My Personal Index!
 
 1. qt v4.5+ (libqt4-sql-sqlite, libqt4-sql, libqt4-network, libqt4-gui, libqt4-core)
 
-2. qwt v5.2 (libqwt5-qt4)
+2. qwt v6 (libqwt6-qt4)
 
 These packages can be found in your distribution's package mangement system. If not, the source
 can be found from the following sites:

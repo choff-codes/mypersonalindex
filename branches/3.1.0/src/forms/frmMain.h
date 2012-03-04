@@ -41,8 +41,6 @@ private slots:
     void portfolioTabMoved(int from_, int to_);
     void nextPortfolio();
     void downloadPrices();
-    void downloadPricesFinished();
-    void recalculateTradesFinished();
     void viewChange();
     void viewChange(int currentIndex_);
     void fileChange(const QString &filePath_, bool newFile_);
@@ -67,14 +65,6 @@ private:
 
     // settings saved to INI
     settings m_settings;
-
-    // threaded operation watchers
-    // Note: it is possible to have these be local variables,
-    // but it causes a seg fault when the application is closed;
-    // as memeber variables they can be deleted cleanly before
-    // the application closes
-    QFutureWatcher<int> *m_futureWatcherPriceDownloader;
-    QFutureWatcher<void> *m_futureWatcherTrade;
 
     void connectSlots();
     void closeEvent(QCloseEvent *event_);

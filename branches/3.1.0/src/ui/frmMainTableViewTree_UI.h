@@ -14,6 +14,7 @@ public:
     QVBoxLayout *treeLayout;
     QComboBox *treeCmb;
     QTreeWidget *tree;
+    QPushButton *treeAllPortfolios;
     QPushButton *treeClearBtn;
 
     virtual ~frmMainTableViewTree_UI() {}

@@ -294,6 +294,9 @@ void frmEditTrade_State::tradeFrequencyChange(int index_)
             ui->dateDateEdit->setCalendarPopup(false);
             ui->dateDateEdit->setDate(QDate(2009, 1, 1));
             break;
+        case tradeDateCalendar::frequency_Quarterly:
+            ui->dateDateEdit->setDisabled(true);
+            break;
     }
 }
 

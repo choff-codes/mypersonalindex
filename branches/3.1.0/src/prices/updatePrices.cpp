@@ -3,8 +3,7 @@
 #include "priceGetterTSP.h"
 #include "priceGetterYahoo.h"
 
-updatePrices::updatePrices(const QMap<QString, updatePricesOptions> &options_):
-    m_options(options_)
+updatePrices::updatePrices()
 {
     // for now, insert the price getters in a best-guess order, going forward
     // these should be plugins with a user-defined ordered
@@ -12,59 +11,57 @@ updatePrices::updatePrices(const QMap<QString, updatePricesOptions> &options_):
     m_priceGetters.append(QSharedPointer<priceGetter>(new priceGetterYahoo()));
 }
 
-int updatePrices::operator()(const historicalPrices &prices_)
+int updatePrices::get(const historicalPrices &prices_, int beginDate_, int endDate_, bool splits_)
 {
-    updatePricesOptions options = m_options.value(prices_.symbol());
-
-    if (options.beginDate > options.endDate) // begin date is after end date, nothing to do
-        return options.endDate + 1;
+    if (beginDate_ > endDate_) // begin date is after end date, nothing to do
+        return endDate_ + 1;
 
     foreach(const QSharedPointer<priceGetter> &getter, m_priceGetters)
     {
         if (!getter->isValidSymbol(prices_.symbol()))
             continue;
 
-        int result = options.endDate + 1; // track earliest date for trades recalc
+        int result = endDate_ + 1; // track earliest date for trades recalc
 
-        if (prices_.beginDate(historicalPrices::type_price) > options.beginDate || prices_.endDate(historicalPrices::type_price) < options.endDate)
+        if (prices_.beginDate(historicalPrices::type_price) > beginDate_ || prices_.endDate(historicalPrices::type_price) < endDate_)
             result = getter->getPrices(
                         prices_.symbol(),
                         prices_,
-                        computeBeginDate(prices_, historicalPrices::type_price, options.beginDate),
-                        options.endDate
+                        computeBeginDate(prices_, historicalPrices::type_price, beginDate_),
+                        endDate_
                     );
 
         if (result == -1) // symbol does not exist, try again
             continue;
 
-        if (prices_.beginDate(historicalPrices::type_dividend) > options.beginDate || prices_.endDate(historicalPrices::type_dividend) < options.endDate)
+        if (prices_.beginDate(historicalPrices::type_dividend) > beginDate_ || prices_.endDate(historicalPrices::type_dividend) < endDate_)
             result =
                 qMin(
                         result,
                         getter->getDividends(
                             prices_.symbol(),
                             prices_,
-                            computeBeginDate(prices_, historicalPrices::type_dividend, options.beginDate),
-                            options.endDate
+                            computeBeginDate(prices_, historicalPrices::type_dividend, beginDate_),
+                            endDate_
                         )
                     );
 
-        if (options.splits)
+        if (splits_)
             result =
                 qMin(
                         result,
                         getter->getSplits(
                             prices_.symbol(),
                             prices_,
-                            options.beginDate,
-                            options.endDate
+                            beginDate_,
+                            endDate_
                         )
                     );
 
         return result;
     }
 
-    return options.endDate + 1;
+    return endDate_ + 1;
 }
 
 int updatePrices::computeBeginDate(const historicalPrices &prices_, historicalPrices::type type_, int beginDate_)

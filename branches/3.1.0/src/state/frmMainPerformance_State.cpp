@@ -1,3 +1,4 @@
+#include <QHeaderView>
 #include "frmMainPerformance_State.h"
 #include "mainPerformanceModel.h"
 #include "frmMainTableViewTree_UI.h"
@@ -8,6 +9,8 @@ frmMainPerformance_State::frmMainPerformance_State(int portfolioID_, const QMap<
     frmMainStateTableWithTree(portfolioID_, portfolios_, settings_, prices_, parent_)
 {
     setupUI();
+    ui->table->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->table->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     static_cast<frmMainTableViewTree_UI*>(ui)->treeAllPortfolios->setVisible(false);
     static_cast<frmMainTableViewTree_UI*>(ui)->treeClearBtn->setVisible(false);
     connect(treeWidget(), SIGNAL(itemClicked(QTreeWidgetItem*,int)), this, SLOT(itemClicked(QTreeWidgetItem*,int)));

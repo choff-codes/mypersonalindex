@@ -132,7 +132,7 @@ void mainCorrelationModel::remove(const correlationRow &key_)
             break;
         }
 
-    if (x == -1)
+    if (x == -1 || x >= m_rows.count() || m_viewableColumns.isEmpty())
         return;
 
     // remove row and column at the same time to prevent out of index exceptions

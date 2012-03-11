@@ -2,7 +2,7 @@
 #include <QDate>
 #include "functions.h"
 
-QwtText mpiPlotZoomer::trackerText(const QwtDoublePoint &pos_) const
+QwtText mpiPlotZoomer::trackerTextF(const QPointF &pos_) const
 {
     QwtText text(
         QString("%1: %2").arg(

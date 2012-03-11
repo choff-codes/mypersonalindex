@@ -17,7 +17,8 @@ public:
         frequency_Daily,
         frequency_Weekly,
         frequency_Monthly,
-        frequency_Yearly
+        frequency_Yearly,
+        frequency_Quarterly
     };
 
     tradeDateCalendar(int date_, direction direction_ = direction_ascending):
@@ -104,6 +105,7 @@ private:
     static QList<int> computeFrequencyTradeWeekly(int date_, int minimumDate_, int maximumDate_);
     static QList<int> computeFrequencyTradeMonthly(int date_, int minimumDate_, int maximumDate_);
     static QList<int> computeFrequencyTradeYearly(int date_, int minimumDate_, int maximumDate_);
+    static QList<int> computeFrequencyTradeQuarterly(int minimumDate_, int maximumDate_);
 };
 
 #endif // TRADEDATECALENDAR_H

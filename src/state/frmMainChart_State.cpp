@@ -44,6 +44,7 @@ frmMainChart_State::frmMainChart_State(int portfolioID_, const QMap<int, portfol
     connect(ui->toolbarExport, SIGNAL(triggered()), ui->chart, SLOT(exportChart()));
     connect(ui->tree, SIGNAL(itemChanged(QTreeWidgetItem*,int)), this, SLOT(itemChecked(QTreeWidgetItem*,int)));
     connect(ui->treeCmb, SIGNAL(currentIndexChanged(int)), SLOT(portfolioChange(int)));
+    connect(ui->treeAllPortfolios, SIGNAL(clicked()), this, SLOT(addAllPortfolios()));
     connect(ui->treeClearBtn, SIGNAL(clicked()), this, SLOT(clearTree()));
     connect(ui->toolbar3M, SIGNAL(triggered()), this, SLOT(dateClicked()));
     connect(ui->toolbar6M, SIGNAL(triggered()), this, SLOT(dateClicked()));
@@ -83,14 +84,30 @@ frmMainToolbar_UI* frmMainChart_State::toolbarUI()
 
 void frmMainChart_State::clearTree()
 {
-    for(int i = 0; i < ui->tree->topLevelItemCount(); ++i)
+    treeWidget()->blockSignals(true);
+    for(int i = 0; i < treeWidget()->topLevelItemCount(); ++i)
     {
-        QTreeWidgetItem *item = ui->tree->topLevelItem(i);
+        QTreeWidgetItem *item = treeWidget()->topLevelItem(i);
         for(int x = 0; x < item->childCount(); ++x)
-            if (item->checkState(0) == Qt::Checked)
-                item->setCheckState(0, Qt::Unchecked);
+            if (item->child(x)->checkState(0) == Qt::Checked)
+                item->child(x)->setCheckState(0, Qt::Unchecked);
     }
     m_selectedItems.clear();
+    treeWidget()->blockSignals(false);
+    refreshTab();
+}
+
+void frmMainChart_State::addAllPortfolios()
+{
+    QTreeWidgetItem *item = treeWidget()->topLevelItem(0);
+    item->setCheckState(0, Qt::Checked);
+    item->child(0)->setCheckState(0, Qt::Checked);
+    foreach(portfolio p, m_portfolios)
+    {
+        treeItemKey t(objectType_Portfolio, p.id(), p.id(), p.displayText());
+        if (!m_selectedItems.contains(t))
+            m_selectedItems.append(t);
+    }
     refreshTab();
 }
 

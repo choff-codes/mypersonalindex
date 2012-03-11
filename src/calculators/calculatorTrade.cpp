@@ -11,7 +11,7 @@
 #include <QTime>
 #endif
 
-bool calculatorTrade::operator()(const portfolio &portfolio_)
+void calculatorTrade::calculate(const portfolio &portfolio_)
 {
 #ifdef CLOCKTIME
     QTime t;
@@ -34,8 +34,6 @@ bool calculatorTrade::operator()(const portfolio &portfolio_)
 #ifdef CLOCKTIME
     qDebug("Time elapsed (trades): %d ms", t.elapsed());
 #endif
-
-    return true;
 }
 
 void calculatorTrade::insertDividendReinvestmentPlaceholders(const portfolio &portfolio_)

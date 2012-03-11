@@ -119,6 +119,7 @@ void frmEditTrade_UI::setupUI(QWidget *parent_)
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Daily), tradeDateCalendar::frequency_Daily);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Weekly), tradeDateCalendar::frequency_Weekly);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Monthly), tradeDateCalendar::frequency_Monthly);
+    freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Quarterly), tradeDateCalendar::frequency_Quarterly);
     freqCmb->addItem(trade::frequencyToString(tradeDateCalendar::frequency_Yearly), tradeDateCalendar::frequency_Yearly);
 
     dateLayout->setWidget(0, QFormLayout::LabelRole, freq);

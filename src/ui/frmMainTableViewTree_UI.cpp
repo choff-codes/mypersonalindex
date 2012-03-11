@@ -11,9 +11,11 @@ void frmMainTableViewTree_UI::setupUI(const QMap<int, QString> &columnNames_, bo
     treeCmb = new QComboBox(widget);
     tree = new QTreeWidget(widget);
     tree->header()->setVisible(false);
+    treeAllPortfolios = new QPushButton("All Portfolios", widget);
     treeClearBtn = new QPushButton("Reset", widget);
     treeLayout->addWidget(treeCmb);
     treeLayout->addWidget(tree);
+    treeLayout->addWidget(treeAllPortfolios);
     treeLayout->addWidget(treeClearBtn);
     tableSplitter->insertWidget(0, treeWidget);
     tableSplitter->setStretchFactor(0, 1);

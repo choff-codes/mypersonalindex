@@ -1,7 +1,7 @@
 [Setup]
 AppId={{5B21E6C6-04C8-4131-8556-08CC6CCE1DE0}
 AppName=MyPersonalIndex
-AppVerName=MyPersonalIndex 3.1.0
+AppVerName=MyPersonalIndex 3.2.0
 AppPublisher=Matthew Wikler
 AppPublisherURL=http://code.google.com/p/mypersonalindex/
 AppSupportURL=http://code.google.com/p/mypersonalindex/
@@ -26,15 +26,15 @@ Name: desktopicon; Description: {cm:CreateDesktopIcon}; Flags: unchecked
 Name: mpifileassoc; Description: "{cm:AssocFileExtension,MyPersonalIndex,.mpi}"
 
 [Files]
-Source: ..\mypersonalindex-build-desktop\release\mypersonalindex.exe; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\libgcc_s_dw2-1.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\mingwm10.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\QtCore4.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\QtGui4.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\QtNetwork4.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\QtSql4.dll; DestDir: {app}; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\sqldrivers\qsqlite4.dll; DestDir: {app}\sqldrivers; Flags: ignoreversion
-Source: ..\mypersonalindex-build-desktop\release\qwt5.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\mypersonalindex.exe; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\libgcc_s_dw2-1.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\mingwm10.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\QtCore4.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\QtGui4.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\QtNetwork4.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\QtSql4.dll; DestDir: {app}; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\sqldrivers\qsqlite4.dll; DestDir: {app}\sqldrivers; Flags: ignoreversion
+Source: ..\mypersonalindex-build-desktop-release\release\qwt.dll; DestDir: {app}; Flags: ignoreversion
 Source: ..\database\MPI.sqlite; DestDir: {app}; Flags: ignoreversion
 Source: License.txt; DestDir: {app}; Flags: ignoreversion
 

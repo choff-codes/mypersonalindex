@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/icons">
+        <file>add.png</file>
+        <file>delete.png</file>
+        <file>edit.png</file>
+        <file>MPI.ico</file>
+        <file>refresh.png</file>
+    </qresource>
+</RCC>

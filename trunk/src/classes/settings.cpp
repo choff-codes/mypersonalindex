@@ -262,3 +262,8 @@ void settings::setRecentFile(const QString &filePath_)
         d->recentFiles.removeLast();
     d->recentFiles.prepend(filePath_);
 }
+
+void settings::clearRecentFiles()
+{
+    d->recentFiles.clear();
+}

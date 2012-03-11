@@ -190,6 +190,8 @@ QString trade::frequencyToString(tradeDateCalendar::frequency freq_)
             return "Monthly";
         case tradeDateCalendar::frequency_Yearly:
             return "Yearly";
+        case tradeDateCalendar::frequency_Quarterly:
+            return "Quarterly";
     }
     return "";
 }
@@ -233,6 +235,8 @@ QString trade::dateToString(tradeDateCalendar::frequency freq_, int date_)
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd") : "";
         case tradeDateCalendar::frequency_Yearly:
             return date_ != 0 ? QDate::fromJulianDay(date_).toString("dd MMM") : "";
+        case tradeDateCalendar::frequency_Quarterly:
+        return "quarter ends";
     }
     return "";
 }

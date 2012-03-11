@@ -50,7 +50,7 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     groupBoxColumnOrder = new QGroupBox("Column Order", dialog_);
     columnOrderLayout = new QGridLayout(groupBoxColumnOrder);
     columnOrder = new QListWidget(groupBoxColumnOrder);
-    columnOrder->setMaximumHeight(columnOrder->fontMetrics().lineSpacing() * 8);
+    columnOrder->setMaximumHeight(columnOrder->fontMetrics().lineSpacing() * 6);
     QListWidgetItem *column1 = new QListWidgetItem("Symbol", columnOrder);
     column1->setData(Qt::UserRole, frmPriceImport::column_Symbol);
     QListWidgetItem *column2 = new QListWidgetItem("Date", columnOrder);
@@ -73,11 +73,13 @@ void frmPriceImport_UI::setupUI(QDialog *dialog_)
     columnOrderMoveLayout->addWidget(columnOrderMoveUp);
     columnOrderMoveLayout->addWidget(columnOrderMoveDown);
 
-    columnOrderHeaderChk = new QCheckBox("Header Row", groupBoxColumnOrder);
+    columnOrderHeaderChk = new QCheckBox("Header row in file", groupBoxColumnOrder);
+    columnOrderDateIgnore = new QCheckBox("Discard rows with invalid dates", groupBoxColumnOrder);
 
     columnOrderLayout->addWidget(columnOrder, 0, 0, 1, 1);
     columnOrderLayout->addLayout(columnOrderMoveLayout, 0, 1, 1, 1);
     columnOrderLayout->addWidget(columnOrderHeaderChk, 1, 0, 1, 2);
+    columnOrderLayout->addWidget(columnOrderDateIgnore, 2, 0, 1, 2);
 
     layout->addWidget(groupBoxColumnOrder, 0, 2, 1, 1);
 

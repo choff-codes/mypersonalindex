@@ -7,14 +7,14 @@ include(usercontrols/usercontrols.pri)
 include(prices/prices.pri)
 include(calculators/calculators.pri)
 
-VERSION = 310
+VERSION = 320
 DEFINES += APP_VERSION="$$VERSION"
 
 win32{
     INCLUDEPATH += shared/qwt
 
-    CONFIG(debug, debug|release): LIBS += ../src/shared/qwt/lib/libqwtd5.a
-        else: LIBS += ../src/shared/qwt/lib/libqwt5.a
+    CONFIG(debug, debug|release): LIBS += ../src/shared/qwt/lib/libqwtd.a
+        else: LIBS += ../src/shared/qwt/lib/libqwt.a
 }
 
 unix:!macx{

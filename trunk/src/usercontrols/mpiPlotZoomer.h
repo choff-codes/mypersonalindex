@@ -12,7 +12,7 @@ public:
         setTrackerMode(AlwaysOn);
     }
 
-    virtual QwtText trackerText(const QwtDoublePoint &pos_) const;
+    virtual QwtText trackerTextF(const QPointF &pos_) const;
 };
 
 #endif // MPIPLOTZOOMER_H

@@ -49,6 +49,7 @@ public:
 
     QStringList recentFiles();
     void setRecentFile(const QString &filePath_);
+    void clearRecentFiles();
 
     void save();
     static settings load();

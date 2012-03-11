@@ -87,18 +87,21 @@ void frmPriceImport::accept()
         QDate date = QDate::fromString(line.at(columns.value(column_Date)), dateFormat);
         double value = line.at(columns.value(column_Value)).toDouble();
 
-        QString type = line.at(columns.value(column_Type));
+        if (!tradeDateCalendar::isTradeDate(date.toJulianDay()))
+            continue;
+
+        QString type = line.at(columns.value(column_Type)).toUpper();
         historicalPrices::type priceType =
-            type == "Price" ?
+            type == "PRICE" ?
                 historicalPrices::type_price :
-                type == "Dividend" ?
+                type == "DIVIDEND" ?
                     historicalPrices::type_dividend :
                     historicalPrices::type_split;
 
         newPricesMap.getHistoricalPrice(symbol).insert(date.toJulianDay(), value, priceType);
     }
 
-    if (row == -1 || (row == 0 && header)) // nothing imported
+    if (row == -1 || (row == 0 && header) || newPricesMap.isEmpty()) // nothing imported
     {
         QDialog::reject();
         return;
@@ -158,15 +161,15 @@ bool frmPriceImport::validateRow(int row_, const QStringList line_, const QHash<
             ". Date is \"" + line_.at(columns_.value(column_Date)) + "\".");
         return false;
     }
-    if (!tradeDateCalendar::isTradeDate(date.toJulianDay()))
+    if (!ui->columnOrderDateIgnore->isChecked() && !tradeDateCalendar::isTradeDate(date.toJulianDay()))
     {
         QMessageBox::critical(this, "Import", "Row " + QString::number(row_) +
             " is not a valid US trade date. Date is \"" + line_.at(columns_.value(column_Date)) + "\".");
         return false;
     }
 
-    QString type = line_.at(columns_.value(column_Type));
-    if (type != "Price" && type != "Dividend" && type != "Split")
+    QString type = line_.at(columns_.value(column_Type)).toUpper();
+    if (type != "PRICE" && type != "DIVIDEND" && type != "SPLIT")
     {
         QMessageBox::critical(this, "Import", "Incorrect price type on row " + QString::number(row_) +
             ". Price type is \"" + line_.at(columns_.value(column_Type)) + "\", but valid choices" +

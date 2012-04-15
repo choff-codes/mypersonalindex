@@ -244,7 +244,9 @@ double calculatorTrade::calculateTradeShares(int date_, double price_, const por
         case trade::tradeAction_PurchasePercentOfPortfolioValue:
             return (portfolio_.portfolioSnapshot(date_).totalValue * (trade_.value() / 100)) / price_;
         case trade::tradeAction_ReinvestDividendsAuto:
-            return (portfolio_.securitySnapshot(date_, parent_.id()).shares * parent_.dividend(date_)) / price_;
+            // use the shares from 2 days ago for dividend reinvestment
+            // for example, if the date is 3/14, the ex-date was 3/13, then use 3/12 as the shades on "record" for the diivdend
+            return (portfolio_.securitySnapshot(tradeDateCalendar::previousTradeDate(date_), parent_.id()).shares * parent_.dividend(date_)) / price_;
         case trade::tradeAction_PurchasePercentOfAATarget:
         {
             double shares = 0;
